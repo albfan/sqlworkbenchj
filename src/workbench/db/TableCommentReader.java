@@ -75,18 +75,20 @@ public class TableCommentReader
 		String result = null;
 		if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 		{
-			if (commentStatement.contains(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER))
-			{
-				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
-			}
-			else
-			{
-        result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConnection));
-				result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
-        result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
-				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
-				result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getCatalog()));
-			}
+      String fqn = table.getFullyQualifiedName(dbConnection);
+
+      result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, fqn);
+      result = StringUtil.replace(result, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqn);
+
+      // only call getObjectExpression() if necessary to avoid unnecessary calls to retrieve the current schema or catalog
+      if (result.contains(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER))
+      {
+        result = StringUtil.replace(result, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConnection));
+      }
+
+      result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
+      result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
+      result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getCatalog()));
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
 			result += ";";
 		}
