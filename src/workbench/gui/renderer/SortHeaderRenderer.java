@@ -139,9 +139,11 @@ public class SortHeaderRenderer
 
 		int javaType = Types.OTHER;
 
+    String label = text;
+
     if (showBoldHeader)
     {
-      text = "<b>" + text + "</b>";
+      label = "<b>" + text + "</b>";
     }
 
 		if (table instanceof WbTable)
@@ -157,7 +159,7 @@ public class SortHeaderRenderer
 
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
 
-			if (model != null && (underlinePK || showDatatype))
+			if (model != null)
 			{
 				int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
 				if (realCol >= 0)
@@ -175,19 +177,19 @@ public class SortHeaderRenderer
 
             if (underlinePK && colId.isPkColumn())
             {
-              text = "<u>" + text + "</u>";
+              label = "<u>" + label + "</u>";
             }
 
             if (showDatatype && type != null)
             {
-              text += "<br>" + type;
+              label += "<br>" + type;
             }
 					}
 				}
 			}
 		}
 
-    display.setText("<html>" + text + "</html>");
+    display.setText("<html>" + label + "</html>");
 
 		if (sorted)
 		{
