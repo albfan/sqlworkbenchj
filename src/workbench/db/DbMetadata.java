@@ -1148,7 +1148,7 @@ public class DbMetadata
 	{
 		if (name == null) return false;
 		name = name.trim();
-		if (name.isEmpty()) return false;
+		if (name.length() < 2) return false;
 
 		if (name.startsWith(quoteCharacter)) return true;
 

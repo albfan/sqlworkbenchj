@@ -1033,6 +1033,7 @@ public class StringUtil
 	 *
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
+   * @see SqlUtil#removeObjectQuotes(java.lang.String) 
 	 */
 	public static String trimQuotes(String input)
 	{
@@ -1040,6 +1041,8 @@ public class StringUtil
 
 		String result = input.trim();
 		int len = result.length();
+
+    if (len < 2) return input;
 
 		char firstChar = result.charAt(0);
 		char lastChar = result.charAt(len - 1);

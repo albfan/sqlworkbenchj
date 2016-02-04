@@ -248,13 +248,12 @@ public class SqlUtil
 
 	/**
 	 * Removes quote characters from the start and the end of a string.
-	 * <br/>
-	 * For performance reasons the input is not trimmed and is not tested (unlike StringUtil.trimQuotes)
 	 *
 	 * It does take the idiotic MySQL backticks and SQL Server's imbecile [..] quoting into account.
 	 *
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
+   *
 	 * @see workbench.util.StringUtil#trimQuotes(java.lang.String)
 	 */
 	public static String removeObjectQuotes(String input)
@@ -2012,8 +2011,11 @@ public class SqlUtil
 	 */
 	public static boolean objectNamesAreEqual(String one, String other)
 	{
-		if (one == null && other == null) return true;
-		if (one == null || other == null) return false;
+    boolean firstEmpty = StringUtil.isEmptyString(one);
+    boolean secondEmpty = StringUtil.isEmptyString(other);
+    
+		if (firstEmpty && secondEmpty) return true;
+		if (firstEmpty || secondEmpty) return false;
 
 		boolean firstQuoted = isQuotedIdentifier(one);
 		boolean secondQuoted = isQuotedIdentifier(other);
