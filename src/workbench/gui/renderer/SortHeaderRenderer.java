@@ -213,8 +213,10 @@ public class SortHeaderRenderer
 		{
 			StringBuilder tip = new StringBuilder(text.length() + 20);
 			tip.append("<html><code>");
+      if (showBoldHeader) tip.append("<b>");
 			tip.append(text);
-			tip.append("<br>");
+      if (showBoldHeader) tip.append("</b>");
+			tip.append("</code><br>");
 			tip.append(type);
 			if (StringUtil.isNonBlank(remarks))
 			{
@@ -225,12 +227,15 @@ public class SortHeaderRenderer
 
 			if (showFullTypeInfo)
 			{
-				tip.append("<br>");
+				tip.append("<br><tt>");
 				tip.append(table.getColumnClass(col).getName());
 				tip.append("<br>");
-				tip.append(javaType + "/" + javaTypeName);
+				tip.append(javaType);
+        tip.append('/');
+        tip.append(javaTypeName);
+        tip.append("</tt>");
 			}
-			tip.append("</code></html>");
+			tip.append("</html>");
 			display.setToolTipText(tip.toString());
 		}
 		return display;
