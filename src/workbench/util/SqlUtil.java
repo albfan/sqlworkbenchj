@@ -261,6 +261,7 @@ public class SqlUtil
 	{
 		if (input == null) return input;
 
+    input = input.trim();
 		int len = input.length();
 		if (len < 2) return input;
 
@@ -281,6 +282,7 @@ public class SqlUtil
 	{
 		if (input == null) return false;
 
+    input = input.trim();
 		int len = input.length();
     if (len < 2) return false;
 

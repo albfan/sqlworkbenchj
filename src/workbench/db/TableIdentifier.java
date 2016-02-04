@@ -735,8 +735,8 @@ public class TableIdentifier
 		}
 		else
 		{
-			schemaWasQuoted = SqlUtil.isQuotedIdentifier(aSchema.trim());
-			schema = SqlUtil.removeObjectQuotes(aSchema).trim();
+			schemaWasQuoted = SqlUtil.isQuotedIdentifier(aSchema);
+			schema = SqlUtil.removeObjectQuotes(aSchema);
 		}
 	}
 
@@ -763,8 +763,8 @@ public class TableIdentifier
 		}
 		else
 		{
-			catalogWasQuoted = SqlUtil.isQuotedIdentifier(aCatalog.trim());
-			catalog = SqlUtil.removeObjectQuotes(aCatalog).trim();
+			catalogWasQuoted = SqlUtil.isQuotedIdentifier(aCatalog);
+			catalog = SqlUtil.removeObjectQuotes(aCatalog);
 		}
 	}
 

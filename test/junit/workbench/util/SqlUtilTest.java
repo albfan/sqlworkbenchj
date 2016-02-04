@@ -76,7 +76,7 @@ public class SqlUtilTest
     assertFalse(SqlUtil.isQuotedIdentifier("\""));
     assertFalse(SqlUtil.isQuotedIdentifier("["));
     assertFalse(SqlUtil.isQuotedIdentifier("]"));
-    assertTrue(SqlUtil.isQuotedIdentifier("\"x\""));
+    assertTrue(SqlUtil.isQuotedIdentifier(" \"Bla\"   "));
     assertFalse(SqlUtil.isQuotedIdentifier("          "));
   }
 
