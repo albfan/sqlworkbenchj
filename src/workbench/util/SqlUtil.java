@@ -282,6 +282,7 @@ public class SqlUtil
 		if (input == null) return false;
 
 		int len = input.length();
+    if (len < 2) return false;
 
 		char firstChar = input.charAt(0);
 		char lastChar = input.charAt(len - 1);
