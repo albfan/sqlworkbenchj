@@ -59,6 +59,27 @@ public class SqlUtilTest
 		super("SqlUtilTest");
 	}
 
+  @Test
+  public void testIsQuotedIdentifier()
+  {
+    assertFalse(SqlUtil.isQuotedIdentifier(""));
+    assertFalse(SqlUtil.isQuotedIdentifier(null));
+    assertFalse(SqlUtil.isQuotedIdentifier("x"));
+    assertFalse(SqlUtil.isQuotedIdentifier("xy"));
+    assertFalse(SqlUtil.isQuotedIdentifier("foo"));
+    assertTrue(SqlUtil.isQuotedIdentifier("\"foo\""));
+    assertFalse(SqlUtil.isQuotedIdentifier("foo\""));
+    assertFalse(SqlUtil.isQuotedIdentifier("[x"));
+    assertTrue(SqlUtil.isQuotedIdentifier("[x]"));
+    assertTrue(SqlUtil.isQuotedIdentifier("`x`"));
+    assertFalse(SqlUtil.isQuotedIdentifier("`"));
+    assertFalse(SqlUtil.isQuotedIdentifier("\""));
+    assertFalse(SqlUtil.isQuotedIdentifier("["));
+    assertFalse(SqlUtil.isQuotedIdentifier("]"));
+    assertTrue(SqlUtil.isQuotedIdentifier("\"x\""));
+    assertFalse(SqlUtil.isQuotedIdentifier("          "));
+  }
+
 	@Test
 	public void testGetErrorOffset()
 	{
