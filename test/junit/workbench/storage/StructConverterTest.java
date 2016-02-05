@@ -90,7 +90,7 @@ public class StructConverterTest
 			}
 		};
 
-		String display = StructConverter.getInstance().getStructDisplay(data);
+		String display = StructConverter.getInstance().getStructDisplay(data, false);
 		String nestedExpected = "NESTED_TYPE(42, 'Test', DATE '"  + dateValue + "')";
 		String expected = "SOME_TYPE('Arthur', 'Dent', TIMESTAMP '" + timestampValue + "', TIME '" + timeValue + "', " + nestedExpected + ")";
 		assertEquals(expected, display);

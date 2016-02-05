@@ -80,12 +80,14 @@ public class RowDataReader
 	private boolean adjustArrayDisplay;
 	private boolean showArrayType;
 	private boolean fixStupidMySQLZeroDate;
+  private boolean isOracle;
 	protected ResultInfo resultInfo;
 
 	RowDataReader(ResultInfo info, WbConnection conn)
 	{
 		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 		converter = getConverterInstance(conn);
+    isOracle = conn == null ? false : conn.getMetadata().isOracle();
 		resultInfo = info;
 		longVarcharAsClob = info.treatLongVarcharAsClob();
 		useGetBytesForBlobs = info.useGetBytesForBlobs();
@@ -238,14 +240,14 @@ public class RowDataReader
 					// this is mainly here for Oracle nested tables and VARRAYS, but should basically work
 					// for other arrays as well.
 					Object o = rs.getObject(i+1);
-					value = ArrayConverter.getArrayDisplay(o, resultInfo.getDbmsTypeName(i), showArrayType);
+					value = ArrayConverter.getArrayDisplay(o, resultInfo.getDbmsTypeName(i), showArrayType, isOracle);
 				}
 				else if (type == java.sql.Types.STRUCT)
 				{
 					Object o = rs.getObject(i+1);
 					if (o instanceof Struct)
 					{
-						value = StructConverter.getInstance().getStructDisplay((Struct)o);
+						value = StructConverter.getInstance().getStructDisplay((Struct)o, isOracle);
 					}
 					else
 					{

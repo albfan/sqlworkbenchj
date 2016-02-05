@@ -65,10 +65,9 @@ public class OracleStatementHook
 	implements StatementHook
 {
 
-	private static final String wbSelectMarker = "select /* sqlwb_statistics */";
-
 	private static final String retrieveStats =
-			wbSelectMarker + " a.name, coalesce(s.value,0) as value, s.statistic# \n" +
+			"-- SQL Workbench \n " +
+      "select a.name, coalesce(s.value,0) as value, s.statistic# \n" +
 			"from v$sesstat s \n" +
 			"  join v$statname a on a.statistic# = s.statistic# \n" +
 			"where sid = userenv('SID') \n" +
@@ -457,11 +456,12 @@ public class OracleStatementHook
 			stmt = con.createStatementForQuery();
 			if (searchSQL)
 			{
-				String findSql
-					= wbSelectMarker + " sql.sql_id, sql.child_number \n" +
-						"from v$sql sql \n" +
-						"where sql_text like '" + getIDPrefix() + "%' \n" +
-						"order by last_active_time desc";
+				String findSql =
+          "-- SQL Workbench \n " +
+          "select sql.sql_id, sql.child_number \n" +
+          "from v$sql sql \n" +
+          "where sql_text like '" + getIDPrefix() + "%' \n" +
+          "order by last_active_time desc";
 
 				LogMgr.logDebug("OracleStatementHook.retrieveRealExecutionPlan()", "SQL to find last explained statement: \n" + findSql);
 				rs = stmt.executeQuery(findSql);

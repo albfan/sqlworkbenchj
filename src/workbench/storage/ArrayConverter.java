@@ -34,10 +34,23 @@ import java.sql.Struct;
  */
 public class ArrayConverter
 {
-	public static String getArrayDisplay(Object value, String dbmsType, boolean showType)
+  private static final char[] DEFAULT_ARG_CHARACTERS = new char[]{'[',']'};
+  private static final char[] ORACLE_ARG_CHARACTERS = new char[]{'(',')'};
+
+	public static String getArrayDisplay(Object value, String dbmsType, boolean showType, boolean isOracle)
 		throws SQLException
 	{
 		if (value == null) return null;
+
+    char[] parentheses;
+    if (isOracle)
+    {
+      parentheses = ORACLE_ARG_CHARACTERS;
+    }
+    else
+    {
+      parentheses = DEFAULT_ARG_CHARACTERS;
+    }
 
 		Object[] elements = null;
 		String prefix = "";
@@ -61,7 +74,7 @@ public class ArrayConverter
 			{
 				sb.append(prefix);
 			}
-			sb.append('[');
+			sb.append(parentheses[0]);
 			StructConverter conv = StructConverter.getInstance();
 
 			for (int x=0; x < len; x++)
@@ -73,14 +86,14 @@ public class ArrayConverter
 				}
 				else if (elements[x] instanceof Struct)
 				{
-					sb.append(conv.getStructDisplay((Struct)elements[x]));
+					sb.append(conv.getStructDisplay((Struct)elements[x], isOracle));
 				}
 				else
 				{
 					conv.appendValue(sb, elements[x]);
 				}
 			}
-			sb.append(']');
+			sb.append(parentheses[1]);
 			return sb.toString();
 		}
 		return value.toString();

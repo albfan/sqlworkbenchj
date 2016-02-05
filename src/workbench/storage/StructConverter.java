@@ -23,6 +23,8 @@
  */
 package workbench.storage;
 
+import java.lang.reflect.Method;
+import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.sql.Time;
@@ -31,6 +33,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
@@ -57,9 +61,9 @@ public class StructConverter
 		return InstanceHolder.INSTANCE;
 	}
 
-	protected static class InstanceHolder
+	private static class InstanceHolder
 	{
-		protected static final StructConverter INSTANCE = new StructConverter();
+		private static final StructConverter INSTANCE = new StructConverter();
 	}
 
 	private final SimpleDateFormat timestampFormatter;
@@ -98,7 +102,7 @@ public class StructConverter
 	 * @return a String representation of the data
 	 * @throws SQLException
 	 */
-	public String getStructDisplay(Struct data)
+	public String getStructDisplay(Struct data, boolean isOracle)
 		throws SQLException
 	{
 		if (data == null) return null;
@@ -125,8 +129,12 @@ public class StructConverter
 			{
 				if (a instanceof Struct)
 				{
-					buffer.append(getStructDisplay((Struct)a));
+					buffer.append(getStructDisplay((Struct)a, isOracle));
 				}
+        else if (a instanceof java.sql.Array)
+        {
+          buffer.append(getArrayDisplay(a, isOracle));
+        }
 				else
 				{
 					appendValue(buffer, a);
@@ -182,4 +190,47 @@ public class StructConverter
 			buffer.append(a.toString());
 		}
 	}
+
+
+  private String getArrayDisplay(Object data, boolean isOracle)
+    throws SQLException
+  {
+    String name = getOracleTypeName(data);
+
+    if (name == null && data instanceof Array)
+    {
+      try
+      {
+        return ((Array)data).getBaseTypeName();
+      }
+      catch (Throwable th)
+      {
+        name = "ARRAY";
+      }
+    }
+    return ArrayConverter.getArrayDisplay(data, name, true, isOracle);
+  }
+
+  private String getOracleTypeName(Object data)
+  {
+    if (data.getClass().getName().equals("oracle.sql.ARRAY") == false) return null;
+
+    try
+    {
+			Method getName = data.getClass().getMethod("getSQLTypeName", (Class[])null);
+			getName.setAccessible(true);
+
+      Object name = getName.invoke(data, (Object[])null);
+      if (name != null)
+      {
+        return name.toString();
+      }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("StructConverter.getOracleArrayType()", "Could not get data type name", th);
+    }
+    return null;
+  }
+
 }
