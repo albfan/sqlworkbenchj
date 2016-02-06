@@ -3718,7 +3718,7 @@ public class Settings
 
   public PasswordTrimType getPassworTrimType()
   {
-    String type = getProperty(PROPERTY_TRIM_PWD, PasswordTrimType.always.name());
+    String type = getProperty(PROPERTY_TRIM_PWD, PasswordTrimType.never.name());
     try
     {
       return PasswordTrimType.valueOf(type);
