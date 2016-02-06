@@ -77,6 +77,7 @@ public class DisconnectInfo
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(p, BorderLayout.CENTER);
 		setUndecorated(true);
+    getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		pack();
 		WbSwingUtilities.center(this, parent);
 	}

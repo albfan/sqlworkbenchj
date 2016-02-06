@@ -327,6 +327,7 @@ SELECT 42 FROM dual;</programlisting>
 			<title>WbExport or WbCopy using a lot of memory</title>
       <indexterm><primary>Microsoft SQL Server</primary><secondary>WbExport memory problem</secondary></indexterm>
       <indexterm><primary>Microsoft SQL Server</primary><secondary>WbCopy memory problem</secondary></indexterm>
+      <indexterm><primary>Memory problems</primary><secondary>WbCopy or WbExport using a lot of memory with SQL Server</secondary></indexterm>
       <para>
         The jTDS driver and the Microsoft JDBC driver read the complete result set into memory
         before returning it to the calling application. This means that when retrieving
@@ -377,10 +378,11 @@ SELECT 42 FROM dual;</programlisting>
     <indexterm><primary>DB2</primary><secondary>Problems</secondary></indexterm>
 
 		<section id="db2-date-before">
-			<title>Dates before 1940-01-01 are not displayed</title>
+			<title>Date values are not displayed</title>
+      <indexterm><primary>DB2</primary><secondary>DATE values not displayed</secondary></indexterm>
 			<para>
-        If date values before 1940-01-01 are not displayed in the results at all, you have to
-        add the parameter <literal>;date format=iso</literal> to your JDBC connection url. Note the
+        If date values are not displayed (show up as blank or null) in the results, you have to
+        add the parameter <literal>;date format=iso</literal> to your JDBC connection URL. Note the
         blank between <literal>date</literal> and <literal>format</literal>.
 			</para>
 			<para>
@@ -390,6 +392,7 @@ SELECT 42 FROM dual;</programlisting>
 
 		<section id="db2-connection-closed">
 			<title>"Connection closed" errors</title>
+      <indexterm><primary>DB2</primary><secondary>Connection closed</secondary></indexterm>
 			<para>
 				When using the DB2 JDBC drivers it is important that the <literal>charsets.jar</literal>
 				is part of the used JDK (or JRE). Apparently the DB2 JDBC driver needs this library in
@@ -490,6 +493,7 @@ SELECT 42 FROM dual;</programlisting>
 			<title>WbExport or WbCopy using a lot of memory</title>
       <indexterm><primary>PostgreSQL</primary><secondary>WbExport memory problem</secondary></indexterm>
       <indexterm><primary>PostgreSQL</primary><secondary>WbCopy memory problem</secondary></indexterm>
+      <indexterm><primary>Memory problems</primary><secondary>WbCopy or WbExport using a lot of memory with PostgreSQL</secondary></indexterm>
       <para>
         The PostgreSQL JDBC driver defaults to buffer the results obtained from the database
         in memory before returning them to the application. This means that when retrieving
@@ -507,7 +511,7 @@ SELECT 42 FROM dual;</programlisting>
         rows from the backend.
       </para>
       <para>
-        More details can be found in the driver's manual:  <ulink url="http://jdbc.postgresql.org/documentation/83/query.html#query-with-cursor"/>
+        More details can be found in the driver's manual:  <ulink url="http://jdbc.postgresql.org/documentation/94/query.html#query-with-cursor"/>
       </para>
     </section>
 	</section>
@@ -520,7 +524,6 @@ SELECT 42 FROM dual;</programlisting>
       <para>
         The jConnect driver seems to have a problem with <literal>nvarchar</literal> columns. The data type is not reported properly by the driver,
         so the display of the table structure in the DbExplorer will be wrong for those columns.
-
       </para>
     </section>
   </section>

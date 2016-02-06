@@ -206,16 +206,20 @@
 
       <section id="launcher-memory-parameter">
         <title>Defining the memory for the application</title>
+        <indexterm><primary>Memory problems</primary><secondary>Increasing the memory available for the application</secondary></indexterm>
+        <para>
+          The memory that is available to the Java runtime is defined through the parameter <literal>vm.heapsize.preferred</literal>
+          in the <literal>INI</literal> file. The unit is bytes. To start &wb-productname; with 12GB of available memory (which is only possible
+          on a 64bit system!) add the following line to the <literal>INI</literal> file:
+        </para>
+        <programlisting>vm.heapsize.preferred=12000</programlisting>
+        <para>
+          You can verify the available memory in the about dialog: <menuchoice>
+            <guimenu>Help</guimenu>
+            <guimenuitem>About</guimenuitem>
+          </menuchoice>
+        </para>
       </section>
-      <para>
-        The memory that is available to the Java runtime is defined through the parameter <literal>vm.heapsize.preferred</literal>
-        in the <literal>INI</literal> file. The unit is bytes. To start &wb-productname; with 12GB of available memory (which is only possible
-        on a 64bit system!) add the following line to the <literal>INI</literal> file:
-      </para>
-      <programlisting>vm.heapsize.preferred=12000</programlisting>
-      <para>
-        You can verify the available memory in the about dialog: <menuchoice><guimenu>Help</guimenu><guimenuitem>About</guimenuitem></menuchoice>
-      </para>
     </section>
   </section>
 

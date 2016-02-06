@@ -69,7 +69,6 @@ import workbench.gui.tools.ObjectSourceSearchPanel;
 
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
-import workbench.sql.OutputPrinter;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 
@@ -485,14 +484,10 @@ public final class WbManager
 	private void createCloseMessageWindow(JFrame parent)
 	{
 		if (parent == null) return;
-		ActionListener abort = new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent evt)
-			{
-				doShutdown(0);
-			}
-		};
+		ActionListener abort = (ActionEvent evt) ->
+    {
+      doShutdown(0);
+    };
 
 		this.closeMessage = new DisconnectInfo(parent, abort, "MsgAbortImmediately");
 		WbSwingUtilities.center(this.closeMessage, parent);
@@ -520,19 +515,15 @@ public final class WbManager
 	 */
 	private void disconnected()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (closeMessage != null)
-				{
-					closeMessage.setVisible(false);
-					closeMessage.dispose();
-					closeMessage = null;
-				}
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      if (closeMessage != null)
+      {
+        closeMessage.setVisible(false);
+        closeMessage.dispose();
+        closeMessage = null;
+      }
+    });
 		doShutdown(0);
 	}
 
@@ -955,8 +946,8 @@ public final class WbManager
         LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error parsing variable definition: " + var, e);
       }
     }
-
   }
+
 	public void startApplication()
 	{
 		// batchMode flag is set by readParameters()
@@ -971,7 +962,7 @@ public final class WbManager
 			boolean doWarmup = Settings.getInstance().getBoolProperty("workbench.gui.warmup", false);
 			if (!doWarmup)
 			{
-				// if the connection dialog is not show, pre-load the profiles
+				// if the connection dialog is not shown, pre-load the profiles
 				doWarmup = !Settings.getInstance().getShowConnectDialogOnStartup();
 			}
 
@@ -1027,7 +1018,7 @@ public final class WbManager
 
 	public void runGui()
 	{
-		this.initUI();
+		initUI();
 
 		boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 		boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
@@ -1100,16 +1091,7 @@ public final class WbManager
 				// runner.isSuccess() will also be false for the next step
 			}
 
-			OutputPrinter printer = new OutputPrinter()
-			{
-				@Override
-				public void printMessage(String message)
-				{
-					System.out.println(message);
-				}
-			};
-
-			runner.setTraceOutput(printer);
+			runner.setTraceOutput(System.out::println);
 
 			try
 			{

@@ -482,14 +482,7 @@ public class MultiSelectComboBox<T extends Object>
 	{
 		if (closing) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				closeAndFire();
-			}
-		});
+		EventQueue.invokeLater(this::closeAndFire);
 	}
 
 	@Override

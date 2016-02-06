@@ -28,13 +28,17 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
+
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+
 import workbench.gui.WbSwingUtilities;
+
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -70,6 +74,7 @@ public class FeedbackWindow
 		connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		p.add(connectLabel, BorderLayout.CENTER);
 		setUndecorated(true);
+    getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(p, BorderLayout.CENTER);
@@ -78,16 +83,12 @@ public class FeedbackWindow
 
 	public void showAndStart(final Runnable task)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				WbThread t = new WbThread(task, "FeedbackWindow");
-				t.start();
-				setVisible(true);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      WbThread t = new WbThread(task, "FeedbackWindow");
+      t.start();
+      setVisible(true);
+    });
 	}
 
 	public String getMessage()
@@ -110,17 +111,13 @@ public class FeedbackWindow
 
 	public void forceRepaint()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				doLayout();
-				invalidate();
-				validate();
-				repaint();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      doLayout();
+      invalidate();
+      validate();
+      repaint();
+    });
 	}
 
 }

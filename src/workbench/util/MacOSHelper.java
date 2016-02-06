@@ -27,10 +27,12 @@ import java.awt.EventQueue;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
 import workbench.WbManager;
-import workbench.gui.actions.OptionsDialogAction;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.actions.OptionsDialogAction;
 
 /**
  * This class - if running on Mac OS - will install an ApplicationListener
@@ -137,15 +139,11 @@ public class MacOSHelper
 				}
 				else
 				{
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
-							WbManager.getInstance().exitWorkbench(false);
-						}
-					});
+					EventQueue.invokeLater(() ->
+          {
+            LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
+            WbManager.getInstance().exitWorkbench(false);
+          });
 				}
 			}
 			else if ("handleAbout".equals(methodName))

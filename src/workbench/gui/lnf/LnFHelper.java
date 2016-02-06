@@ -42,6 +42,7 @@ import workbench.util.CollectionUtil;
 import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 
+
 /**
  * Initialize some gui elements during startup.
  *
@@ -233,6 +234,11 @@ public class LnFHelper
 				// Remove the extra icons for read only text fields and
 				// the "search bar" in the main menu for the Substance Look & Feel
 				System.setProperty("substancelaf.noExtraElements", "");
+
+        if (className.startsWith("org.jb2011.lnf.beautyeye"))
+        {
+          UIManager.put("RootPane.setupButtonVisible", false);
+        }
 
 				LnFLoader loader = new LnFLoader(def);
 				LookAndFeel lnf = loader.getLookAndFeel();
