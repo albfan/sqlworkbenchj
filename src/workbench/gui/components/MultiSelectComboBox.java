@@ -72,6 +72,7 @@ public class MultiSelectComboBox<T extends Object>
 	private static final String PROP_KEY = "userObject";
 	private static final String ALL_ITEMS_SELECTED_DISPLAY = "*";
 	private static final EmptyBorder emptyBorder = new EmptyBorder(1,0,1,0);
+  
 	/** holds the index inside this combobox's items which represents the summary display. */
 	private int summaryIndex;
 
@@ -81,7 +82,7 @@ public class MultiSelectComboBox<T extends Object>
 	/** holds the index inside this combobox's items which the "select none" item. */
 	private int selectNoneIndex;
 
-	/** the value of the last index containing "custom" items (i.e. no real values). */
+	/** the value of the last index containing "custom" items. (i.e. no real values). */
 	private int lastCustomIndex;
 
 	/** the offset that needs to be subtracted from this combobox items index to get the index inside our own list of checkboxes. */

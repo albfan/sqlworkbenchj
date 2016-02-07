@@ -36,7 +36,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.resource.ResourceMgr;
 
 /**
- * A model dialog displaying a message and allowing for a callback action.
+ * A modal dialog displaying a message and allowing for a callback action.
  *
  * @author Thomas Kellerer
  */

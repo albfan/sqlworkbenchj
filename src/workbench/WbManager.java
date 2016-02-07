@@ -959,12 +959,11 @@ public final class WbManager
 		else
 		{
 			initRegistry();
+      
 			boolean doWarmup = Settings.getInstance().getBoolProperty("workbench.gui.warmup", false);
-			if (!doWarmup)
-			{
-				// if the connection dialog is not shown, pre-load the profiles
-				doWarmup = !Settings.getInstance().getShowConnectDialogOnStartup();
-			}
+
+      // if the connection dialog is not shown, pre-load the profiles
+			doWarmup = doWarmup || (Settings.getInstance().getShowConnectDialogOnStartup() == false);
 
 			if (doWarmup)
 			{
@@ -975,6 +974,7 @@ public final class WbManager
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
 
+      // make sure runGui() is called on the AWT Thread
 			EventQueue.invokeLater(this::runGui);
 		}
 	}
