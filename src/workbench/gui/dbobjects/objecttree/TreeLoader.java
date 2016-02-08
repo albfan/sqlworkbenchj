@@ -262,24 +262,38 @@ public class TreeLoader
 
     if (connection == null) return;
 
-    if (connection.getDbSettings().supportsCatalogs())
+    try
     {
-      loaded = loadCatalogs(root);
-    }
+      if (connection.getDbSettings().supportsCatalogs())
+      {
+        loaded = loadCatalogs(root);
+      }
 
-    if (!loaded && connection.getDbSettings().supportsSchemas())
-    {
-      loaded = loadSchemas(root);
-    }
+      if (!loaded && connection.getDbSettings().supportsSchemas())
+      {
+        loaded = loadSchemas(root);
+      }
 
-    if (!loaded)
+      if (!loaded)
+      {
+        addTypeNodes(root);
+        root.setChildrenLoaded(true);
+        model.nodeStructureChanged(root);
+      }
+    }
+    finally
     {
-      addTypeNodes(root);
-      root.setChildrenLoaded(true);
-      model.nodeStructureChanged(root);
+      endTransaction();
     }
   }
 
+  private void endTransaction()
+  {
+    if (connection.getDbSettings().selectStartsTransaction())
+    {
+      connection.rollbackSilently();
+    }
+  }
 
   public boolean loadSchemas(ObjectTreeNode parentNode)
     throws SQLException
@@ -435,9 +449,16 @@ public class TreeLoader
     if (schemaNode == null) return;
     if (!schemaNode.isSchemaNode()) return;
 
-    schemaNode.removeAllChildren();
-    addTypeNodes(schemaNode);
-    loadNodeObjects(schemaNode);
+    try
+    {
+      schemaNode.removeAllChildren();
+      addTypeNodes(schemaNode);
+      loadNodeObjects(schemaNode);
+    }
+    finally
+    {
+      endTransaction();
+    }
   }
 
   public void loadNodeObjects(ObjectTreeNode node)
@@ -815,7 +836,7 @@ public class TreeLoader
     indexNode.setChildrenLoaded(true);
   }
 
-  public void loadDependencies(DbObject dbo, ObjectTreeNode depNode)
+  private void loadDependencies(DbObject dbo, ObjectTreeNode depNode)
   {
     if (depNode == null) return;
     if (dbo == null || dependencyLoader == null)
@@ -844,7 +865,7 @@ public class TreeLoader
     depNode.setChildrenLoaded(true);
   }
 
-  public void loadTableColumns(DbObject dbo, ObjectTreeNode columnsNode)
+  private void loadTableColumns(DbObject dbo, ObjectTreeNode columnsNode)
     throws SQLException
   {
     if (columnsNode == null) return;
@@ -877,7 +898,7 @@ public class TreeLoader
     columnsNode.setChildrenLoaded(true);
   }
 
-  public void loadForeignKeys(DbObject dbo, ObjectTreeNode fkNode, boolean showIncoming)
+  private void loadForeignKeys(DbObject dbo, ObjectTreeNode fkNode, boolean showIncoming)
     throws SQLException
   {
     if (fkNode == null) return;
@@ -1064,8 +1085,9 @@ public class TreeLoader
     }
     finally
     {
-      this.connection.setBusy(false);
+      connection.setBusy(false);
       levelChanger.restoreIsolationLevel(connection);
+      endTransaction();
     }
   }
 }

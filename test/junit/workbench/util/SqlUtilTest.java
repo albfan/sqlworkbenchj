@@ -42,8 +42,6 @@ import workbench.sql.lexer.SQLToken;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assume.*;
 import static org.junit.Assert.*;
 
 /**
@@ -565,6 +563,10 @@ public class SqlUtilTest
 		assertEquals("t1.z", cols.get(2));
 		assertEquals("t2.col1 as tcol", cols.get(3));
 
+		cols = SqlUtil.getSelectColumns("select \"Foo-Bar\", count(*) from bla", false, null);
+		assertEquals(2, cols.size());
+		assertEquals("\"Foo-Bar\"", cols.get(0));
+		assertEquals("count(*)", cols.get(1));
 	}
 
 
@@ -587,6 +589,17 @@ public class SqlUtilTest
 		col = SqlUtil.stripColumnAlias(expression);
 		assertEquals("to_char(dt, 'YYYY')", col);
 
+		expression = "\"Foo-Bar\"";
+		col = SqlUtil.stripColumnAlias(expression);
+		assertEquals("\"Foo-Bar\"", col);
+
+		expression = "\"Foo-Bar\" as foo";
+		col = SqlUtil.stripColumnAlias(expression);
+		assertEquals("\"Foo-Bar\"", col);
+
+		expression = "\"Foo-Bar\" foo";
+		col = SqlUtil.stripColumnAlias(expression);
+		assertEquals("\"Foo-Bar\"", col);
 	}
 
 	@Test
@@ -629,26 +642,6 @@ public class SqlUtilTest
 		sql = "\\i some_file.sql";
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("\\i", verb);
-	}
-
-	@Test
-	public void testDataTypeNames()
-		throws Exception
-	{
-		assumeThat(System.getProperty("java.version"), is("1.7"));
-
-		Field[] fields = java.sql.Types.class.getDeclaredFields();
-		boolean missing = false;
-		for (Field field : fields)
-		{
-			int type = field.getInt(null);
-			if (SqlUtil.getTypeName(type).equals("UNKNOWN"))
-			{
-				System.out.println("Type " + field.getName() + " not included in getTypeName()!");
-				missing = true;
-			}
-		}
-		assertFalse("Not all types mapped!", missing);
 	}
 
 	@Test

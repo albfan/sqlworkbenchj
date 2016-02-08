@@ -1126,9 +1126,30 @@ public class DbSettings
 			boolean included = getBoolProperty("retrieve.create.table.comments_included", false);
 			return !included;
 		}
-		boolean defaultFlag = Settings.getInstance().getBoolProperty("workbench.db.generate.tablesource.generate..comments", true);
+		boolean defaultFlag = Settings.getInstance().getBoolProperty("workbench.db.generate.tablesource.generate.comments", true);
 		return getBoolProperty("generate.tablesource.include.comments", defaultFlag);
 	}
+
+
+	public boolean getUseInlineColumnComments()
+	{
+		return getBoolProperty("column.comment.inline", false);
+	}
+
+  public String getInlineCommentKeyword()
+  {
+    return getProperty("column.comment.inline.keyword", "COMMENT");
+  }
+
+  public boolean getUseInlineTableComments()
+  {
+    return getBoolProperty("table.comment.inline", false);
+  }
+
+  public String getInlineTableCommentKeyword()
+  {
+    return getProperty("table.comment.inline.keyword", null);
+  }
 
 	/**
 	 * Returns true if the table grants should be generated for the table source.
@@ -1466,11 +1487,6 @@ public class DbSettings
 			sql = Settings.getInstance().getProperty("workbench.db.sql.alter." + getKeyValue(type) + ".add.pk", null);
 		}
 		return sql;
-	}
-
-	public boolean useInlineColumnComments()
-	{
-		return getBoolProperty("colcommentinline", false);
 	}
 
 	/**

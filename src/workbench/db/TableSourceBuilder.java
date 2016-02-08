@@ -250,7 +250,7 @@ public class TableSourceBuilder
 
 	protected void appendTableComments(StringBuilder result, TableIdentifier table, List<ColumnIdentifier> columns, String lineEnding)
 	{
-		appendComments(result, dbConnection, table, columns, lineEnding, !dbConnection.getDbSettings().useInlineColumnComments());
+		appendComments(result, dbConnection, table, columns, lineEnding, !dbConnection.getDbSettings().getUseInlineColumnComments());
 	}
 
 	public static void appendComments(StringBuilder result, WbConnection connection, TableDefinition table)
@@ -263,12 +263,16 @@ public class TableSourceBuilder
 		if (connection.getDbSettings().getGenerateTableComments())
 		{
 			TableCommentReader commentReader = new TableCommentReader();
-			String tableComment = commentReader.getTableCommentSql(connection, table);
-			if (StringUtil.isNonBlank(tableComment))
-			{
-				result.append(lineEnding);
-				result.append(tableComment);
-			}
+
+      if (connection.getDbSettings().getUseInlineTableComments() == false)
+      {
+        String tableComment = commentReader.getTableCommentSql(connection, table);
+        if (StringUtil.isNonBlank(tableComment))
+        {
+          result.append(lineEnding);
+          result.append(tableComment);
+        }
+      }
 
 			if (generateColumnComments)
 			{
@@ -405,6 +409,18 @@ public class TableSourceBuilder
 			result.append(options);
 			result.append('\n');
 		}
+
+    if (dbConnection.getDbSettings().getUseInlineTableComments()
+        && dbConnection.getDbSettings().getInlineTableCommentKeyword() != null
+        && StringUtil.isNonEmpty(table.getComment()))
+    {
+      result.append('\n');
+      result.append(dbConnection.getDbSettings().getInlineTableCommentKeyword());
+      result.append(" '");
+      result.append(SqlUtil.escapeQuotes(table.getComment()));
+      result.append('\'');
+    }
+
 		StringUtil.trimTrailingWhitespace(result);
 		result.append(";\n");
 		// end of CREATE TABLE
@@ -645,7 +661,7 @@ public class TableSourceBuilder
 	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
 	{
 		DbMetadata meta = dbConnection.getMetadata();
-		boolean inlineColumnComments = dbConnection.getDbSettings().useInlineColumnComments();
+		boolean inlineColumnComments = dbConnection.getDbSettings().getUseInlineColumnComments();
 
 		StringBuilder result = new StringBuilder(50);
 
@@ -657,7 +673,9 @@ public class TableSourceBuilder
 
 		if (inlineColumnComments && StringUtil.isNonBlank(column.getComment()))
 		{
-			result.append(" COMMENT '");
+      String keyword = " " + dbConnection.getDbSettings().getInlineCommentKeyword() + " ";
+      result.append(keyword);
+			result.append('\'');
 			result.append(SqlUtil.escapeQuotes(column.getComment()));
 			result.append('\'');
 		}

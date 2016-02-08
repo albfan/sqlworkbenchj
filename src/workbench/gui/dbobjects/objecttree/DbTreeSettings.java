@@ -117,4 +117,10 @@ public class DbTreeSettings
   {
     return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + ".tablelist.naturalsort", true);
   }
+
+  public static boolean useAutocommit(String dbid)
+  {
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "." + dbid + ".autocommit", false);
+  }
+
 }

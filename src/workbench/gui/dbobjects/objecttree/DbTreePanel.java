@@ -292,6 +292,11 @@ public class DbTreePanel
     try
     {
       connection = mgr.getConnection(profile, cid);
+      if (DbTreeSettings.useAutocommit(connection.getDbId()))
+      {
+        LogMgr.logDebug("DbTreePanel.doConnect()", "Setting connection " + cid + " to auto commit");
+        connection.setAutoCommit(true);
+      }
       JdbcUtils.initDbExplorerConnection(connection);
       tree.setConnection(connection);
 
@@ -525,6 +530,23 @@ public class DbTreePanel
     return def;
   }
 
+  private TableIdentifier getTableParent(ObjectTreeNode node)
+  {
+    if (node == null) return null;
+
+    while (node != null)
+    {
+      if (node == null) return null;
+      DbObject dbo = node.getDbObject();
+      if (dbo instanceof TableIdentifier)
+      {
+        return (TableIdentifier)dbo;
+      }
+      node = node.getParent();
+    }
+    return null;
+  }
+
   @Override
   public TableIdentifier getObjectTable()
   {
@@ -535,11 +557,8 @@ public class DbTreePanel
       ObjectTreeNode node = getSelectedNode();
       if (node == null) return null;
 
-      DbObject dbo = node.getDbObject();
-      if (dbo instanceof TableIdentifier)
-      {
-        return (TableIdentifier)dbo;
-      }
+      TableIdentifier tbl = getTableParent(node);
+      if (tbl != null) return tbl;
     }
 
     // Multiple objects are selected. Returning the "object table"

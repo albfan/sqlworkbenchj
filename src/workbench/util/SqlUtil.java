@@ -23,6 +23,7 @@
  */
 package workbench.util;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,9 +78,9 @@ public class SqlUtil
    */
 	public static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z][\\w\\$]*");
 
-	private static class JoinKeywordsHolder
+  private static class JoinKeywordsHolder
 	{
-		protected static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
+		private static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
 				CollectionUtil.caseInsensitiveSet(
 					"JOIN", "INNER JOIN", "NATURAL JOIN", "LEFT JOIN", "LEFT OUTER JOIN", "RIGHT JOIN",
 					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN", "OUTER APPLY", "CROSS APPLY")
@@ -108,12 +109,12 @@ public class SqlUtil
 
 	private static class ModifyingVerbsHolder
 	{
-		protected final static Set<String> DML_VERB = Collections.unmodifiableSet(CollectionUtil.caseInsensitiveSet("update", "delete"));
+		private final static Set<String> DML_VERB = Collections.unmodifiableSet(CollectionUtil.caseInsensitiveSet("update", "delete"));
 	}
 
 	private static class TypesWithoutNamesHolder
 	{
-		protected final static Set<String> TYPES =
+		private final static Set<String> TYPES =
 			Collections.unmodifiableSet(CollectionUtil.treeSet("MATERIALIZED VIEW LOG", "SNAPSHOT LOG", "PFILE", "SPFILE", "SYSTEM"));
 	}
 
@@ -126,6 +127,16 @@ public class SqlUtil
 	{
 		return KnownTypesHolder.KNOWN_TYPES;
 	}
+
+  private static final class SqlTypeFieldsHolder
+  {
+    private static final Field[] SQL_TYPES = java.sql.Types.class.getDeclaredFields();
+  }
+
+  private static Field[] getSqlTypeFields()
+  {
+    return SqlTypeFieldsHolder.SQL_TYPES;
+  }
 
 	public static String escapeQuotes(String value)
 	{
@@ -1003,11 +1014,51 @@ public class SqlUtil
 
 	public static String stripColumnAlias(String expression)
 	{
-		if (expression == null) return null;
+		if (StringUtil.isEmptyString(expression)) return null;
 
-		List elements = StringUtil.stringToList(expression, " ", true, true, true);
+    int length = expression.length();
+    StringBuilder result = new StringBuilder(length);
 
-		return (String)elements.get(0);
+    char quoteStart = 0;
+    boolean inQuotes = false;
+    int bracketCount = 0;
+
+    for (int i=0; i < length; i++)
+    {
+      char c = expression.charAt(i);
+
+      if (Character.isWhitespace(c) && !inQuotes && bracketCount == 0) break;
+
+      if (inQuotes)
+      {
+        if (c == quoteStart || (quoteStart == '[' && c == ']'))
+        {
+          inQuotes = false;
+        }
+      }
+      else
+      {
+        if (c == '"' || c == '`' || c == '[')
+        {
+          quoteStart = c;
+          inQuotes = true;
+        }
+      }
+
+      if (!inQuotes)
+      {
+        if (c == '(')
+        {
+          bracketCount ++;
+        }
+        if (c == ')')
+        {
+          bracketCount--;
+        }
+      }
+      result.append(c);
+    }
+    return result.toString();
 	}
 
 	public static List<Alias> getTables(String sql, boolean includeAlias, WbConnection conn)
@@ -1347,120 +1398,19 @@ public class SqlUtil
    */
 	public static String getTypeName(int sqlType)
 	{
-		switch (sqlType)
-		{
-			case Types.ARRAY:
-				return "ARRAY";
-
-			case Types.BIGINT:
-				return "BIGINT";
-
-			case Types.BINARY:
-				return "BINARY";
-
-			case Types.BIT:
-				return "BIT";
-
-			case Types.BLOB:
-				return "BLOB";
-
-			case Types.BOOLEAN:
-				return "BOOLEAN";
-
-			case Types.CHAR:
-				return "CHAR";
-
-			case Types.CLOB:
-				return "CLOB";
-
-			case Types.DATALINK:
-				return "DATALINK";
-
-			case Types.DATE:
-				return "DATE";
-
-			case Types.DECIMAL:
-				return "DECIMAL";
-
-			case Types.DISTINCT:
-				return "DISTINCT";
-
-			case Types.DOUBLE:
-				return "DOUBLE";
-
-			case Types.FLOAT:
-				return "FLOAT";
-
-			case Types.INTEGER:
-				return "INTEGER";
-
-			case Types.JAVA_OBJECT:
-				return "JAVA_OBJECT";
-
-			case Types.LONGVARBINARY:
-				return "LONGVARBINARY";
-
-			case Types.LONGVARCHAR:
-				return "LONGVARCHAR";
-
-			case Types.NULL:
-				return "NULL";
-
-			case Types.NUMERIC:
-				return "NUMERIC";
-
-			case Types.OTHER:
-				return "OTHER";
-
-			case Types.REAL:
-				return "REAL";
-
-			case Types.REF:
-				return "REF";
-
-			case Types.SMALLINT:
-				return "SMALLINT";
-
-			case Types.STRUCT:
-				return "STRUCT";
-
-			case Types.TIME:
-				return "TIME";
-
-			case Types.TIMESTAMP:
-				return "TIMESTAMP";
-
-			case Types.TINYINT:
-				return "TINYINT";
-
-			case Types.VARBINARY:
-				return "VARBINARY";
-
-			case Types.VARCHAR:
-				return "VARCHAR";
-
-			case Types.NCLOB:
-				return "NCLOB";
-
-			case Types.SQLXML:
-				return "SQLXML";
-
-			case Types.NCHAR:
-				return "NCHAR";
-
-			case Types.NVARCHAR:
-				return "NVARCHAR";
-
-			case Types.LONGNVARCHAR:
-				return "LONGNVARCHAR";
-
-			case Types.ROWID:
-				return "ROWID";
-
-			default:
-				return "OTHER";
-		}
-	}
+    try
+    {
+      for (Field field : getSqlTypeFields())
+      {
+        int type = field.getInt(null);
+        if (type == sqlType) return field.getName();
+      }
+    }
+    catch (Throwable th)
+    {
+    }
+    return "OTHER";
+  }
 
 	/**
 	 * Construct the SQL display name for the given SQL datatype.
@@ -2013,7 +1963,7 @@ public class SqlUtil
 	{
     boolean firstEmpty = StringUtil.isEmptyString(one);
     boolean secondEmpty = StringUtil.isEmptyString(other);
-    
+
 		if (firstEmpty && secondEmpty) return true;
 		if (firstEmpty || secondEmpty) return false;
 

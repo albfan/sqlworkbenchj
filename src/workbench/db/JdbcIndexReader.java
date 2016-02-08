@@ -496,7 +496,7 @@ public class JdbcIndexReader
 			sql = TemplateHandler.replacePlaceholder(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type, true);
 		}
 
-		String expr = indexDefinition.getExpression();
+		String expr = indexDefinition.getExpression(conn);
 		if (indexDefinition.isNonStandardExpression()) // currently only Firebird
 		{
 			sql = StringUtil.replace(sql, "(" + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + ")", expr);

@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.interfaces.ObjectDropper;
@@ -120,7 +121,14 @@ public class GenericObjectDropper
 	@Override
 	public void setObjects(List<? extends DbObject> toDrop)
 	{
-		this.objects = toDrop;
+    if (toDrop == null)
+    {
+      objects = null;
+    }
+		else
+    {
+      objects = new ArrayList<>(toDrop);
+    }
 	}
 
 	@Override
@@ -184,9 +192,15 @@ public class GenericObjectDropper
 		StringBuilder sql = new StringBuilder(120);
 		String ddl = this.connection.getDbSettings().getDropDDL(type, cascade);
 
-		if (objectTable != null)
+    TableIdentifier table = objectTable;
+    if (table == null && toDrop.getOwnerObject() instanceof TableIdentifier)
+    {
+      table = (TableIdentifier)toDrop.getOwnerObject();
+    }
+
+		if (table != null)
 		{
-			ddl = TemplateHandler.replaceTablePlaceholder(ddl, objectTable, connection, true);
+			ddl = TemplateHandler.replaceTablePlaceholder(ddl, table, connection, true);
 		}
 		ddl = ddl.replace("%name%", name);
 		sql.append(ddl);

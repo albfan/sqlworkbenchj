@@ -61,6 +61,15 @@ public interface DbObject
 	 */
 	String getObjectName(WbConnection conn);
 
+  /**
+   * Return the "owner" object of this object.
+   *
+   * For columns or indexes this would the table
+   *
+   * @return the owning object or null if there is none
+   */
+  default DbObject getOwnerObject() { return null; }
+
 	/**
 	 * Get a fully qualified name of the object.
 	 * The name might not be fully qualified if it is not necessary for the current

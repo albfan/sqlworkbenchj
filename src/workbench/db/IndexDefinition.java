@@ -321,6 +321,12 @@ public class IndexDefinition
 		return this.indexType;
 	}
 
+  @Override
+  public DbObject getOwnerObject()
+  {
+    return getBaseTable();
+  }
+
 	public TableIdentifier getBaseTable()
 	{
 		return baseTable;
@@ -350,6 +356,11 @@ public class IndexDefinition
 	}
 
 	public String getExpression()
+  {
+    return getExpression(null);
+  }
+
+	public String getExpression(WbConnection conn)
 	{
 		if (indexExpression != null)
 		{
@@ -360,7 +371,7 @@ public class IndexDefinition
 		for (int i=0; i < this.columns.size(); i++)
 		{
 			if (i > 0) result.append(", ");
-			result.append(columns.get(i).getExpression());
+			result.append(columns.get(i).getExpression(conn));
 		}
 		return result.toString();
 	}

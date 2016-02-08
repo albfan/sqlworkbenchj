@@ -44,7 +44,7 @@ public class TableDefinitionTest
 	public void testToString()
 	{
 		TableIdentifier tbl = new TableIdentifier("PERSON");
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(3);
+		List<ColumnIdentifier> cols = new ArrayList<>(3);
 		cols.add(new ColumnIdentifier("ID", Types.INTEGER));
 		ColumnIdentifier firstname = new ColumnIdentifier("FIRSTNAME", Types.VARCHAR);
 		firstname.setColumnSize(50);
