@@ -371,7 +371,7 @@ public class IndexDefinition
 		for (int i=0; i < this.columns.size(); i++)
 		{
 			if (i > 0) result.append(", ");
-			result.append(columns.get(i).getExpression(conn));
+			result.append(columns.get(i).getExpression());
 		}
 		return result.toString();
 	}

@@ -825,6 +825,7 @@ public class JdbcIndexReader
 
 		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
     boolean checkTable = metaData.getDbSettings().checkIndexTable();
+    boolean quoteColumns = metaData.getDbSettings().quoteIndexColumnNames();
 
     Set<String> ignoredIndexes = CollectionUtil.caseInsensitiveSet();
 
@@ -859,6 +860,10 @@ public class JdbcIndexReader
       }
 
 			String colName = useColumnNames ? idxRs.getString("COLUMN_NAME") : idxRs.getString(9);
+      if (quoteColumns)
+      {
+        colName = metaData.quoteObjectname(colName);
+      }
 
       if (ignoreZeroOrdinalPos && ordinal < 1)
       {

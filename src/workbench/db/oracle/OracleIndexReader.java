@@ -473,7 +473,6 @@ public class OracleIndexReader
 					// List is zero-based, the column positions are 1-based
 					IndexColumn col = indexCols.get(position - 1);
 					col.setColumn(SqlUtil.removeObjectQuotes(exp));
-          col.setIsExpression(true);
 				}
 
 				String type = def.getIndexType();

@@ -26,8 +26,8 @@ package workbench.db;
 import java.io.Serializable;
 import java.util.Comparator;
 
-
 import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.util.StringUtil;
 
 /**
@@ -42,8 +42,6 @@ public class IndexColumn
 	private String column;
 	private String direction;
   private int sequence;
-
-  private boolean isExpression;
 
   public IndexColumn(String col, int colSequence)
   {
@@ -83,33 +81,15 @@ public class IndexColumn
 		return this.direction;
 	}
 
-  public void setIsExpression(boolean flag)
-  {
-    isExpression = flag;
-  }
-
 	public String getExpression()
-  {
-    return getExpression(null);
-  }
-
-	public String getExpression(WbConnection conn)
 	{
-    String colName = column;
-
-    if (isExpression == false)
-    {
-      QuoteHandler quoter = conn == null ? QuoteHandler.STANDARD_HANDLER : conn.getMetadata();
-      quoter.quoteObjectname(column);
-    }
-
 		if (StringUtil.isEmptyString(direction))
 		{
-			return colName;
+			return column;
 		}
 		else
 		{
-			return colName + " " + getDirection();
+			return column + " " + getDirection();
 		}
 	}
 

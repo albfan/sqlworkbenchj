@@ -2131,4 +2131,9 @@ public class DbSettings
   {
     return getIntProperty("varchar.max.length", 32762);
   }
+
+  public boolean quoteIndexColumnNames()
+  {
+    return getBoolProperty("index.columns.quote", false);
+  }
 }
