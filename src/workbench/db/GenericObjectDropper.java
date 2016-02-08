@@ -35,6 +35,7 @@ import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.storage.RowActionMonitor;
 
+import workbench.util.ObjectUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -186,23 +187,25 @@ public class GenericObjectDropper
 		String drop = toDrop.getDropStatement(connection, cascade);
 		if (drop != null) return drop;
 
-		String name = toDrop.getObjectNameForDrop(this.connection);
 		String type = toDrop.getObjectType();
 
 		StringBuilder sql = new StringBuilder(120);
 		String ddl = this.connection.getDbSettings().getDropDDL(type, cascade);
 
-    TableIdentifier table = objectTable;
-    if (table == null && toDrop.getOwnerObject() instanceof TableIdentifier)
+    DbObject table = ObjectUtil.coalesce(objectTable, toDrop.getOwnerObject());
+
+    ddl = TemplateHandler.replaceTablePlaceholder(ddl, table, connection, true);
+
+    if (ddl.contains(MetaDataSqlManager.FQ_NAME_PLACEHOLDER))
     {
-      table = (TableIdentifier)toDrop.getOwnerObject();
+      ddl = ddl.replace(MetaDataSqlManager.FQ_NAME_PLACEHOLDER, toDrop.getFullyQualifiedName(connection));
     }
 
-		if (table != null)
-		{
-			ddl = TemplateHandler.replaceTablePlaceholder(ddl, table, connection, true);
-		}
-		ddl = ddl.replace("%name%", name);
+    if (ddl.contains(MetaDataSqlManager.NAME_PLACEHOLDER))
+    {
+      ddl = ddl.replace(MetaDataSqlManager.NAME_PLACEHOLDER, toDrop.getObjectNameForDrop(this.connection));
+    }
+
 		sql.append(ddl);
 
     if (!StringUtil.endsWith(sql, ';'))

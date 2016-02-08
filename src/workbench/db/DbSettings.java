@@ -2134,6 +2134,6 @@ public class DbSettings
 
   public boolean quoteIndexColumnNames()
   {
-    return getBoolProperty("index.columns.quote", false);
+    return getBoolProperty("index.columns.quote", true);
   }
 }

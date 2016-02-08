@@ -193,7 +193,8 @@ public class JdbcIndexReader
 					{
 						LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Invalid column sequence '" + sequence + "' for key column " + tbl.getTableName() + "." + colName + " received!");
 					}
-					cols.add(new IndexColumn(colName, sequence));
+
+          cols.add(new IndexColumn(quoteIndexColumn(colName), sequence));
 				}
 			}
 			catch (Exception e)
@@ -234,6 +235,16 @@ public class JdbcIndexReader
 
 		return pk;
 	}
+
+  protected String quoteIndexColumn(String colName)
+  {
+    if (colName == null) return null;
+    if (metaData.getDbSettings().quoteIndexColumnNames())
+    {
+      colName = metaData.quoteObjectname(colName);
+    }
+    return colName;
+  }
 
 	protected Boolean isStatusEnabled(String status)
 	{
@@ -825,7 +836,6 @@ public class JdbcIndexReader
 
 		boolean useColumnNames = metaData.getDbSettings().useColumnNameForMetadata();
     boolean checkTable = metaData.getDbSettings().checkIndexTable();
-    boolean quoteColumns = metaData.getDbSettings().quoteIndexColumnNames();
 
     Set<String> ignoredIndexes = CollectionUtil.caseInsensitiveSet();
 
@@ -860,10 +870,6 @@ public class JdbcIndexReader
       }
 
 			String colName = useColumnNames ? idxRs.getString("COLUMN_NAME") : idxRs.getString(9);
-      if (quoteColumns)
-      {
-        colName = metaData.quoteObjectname(colName);
-      }
 
       if (ignoreZeroOrdinalPos && ordinal < 1)
       {
@@ -921,7 +927,7 @@ public class JdbcIndexReader
 					}
 				}
 			}
-			def.addColumn(colName, dir);
+      def.addColumn(quoteIndexColumn(colName), dir);
 			processIndexResultRow(idxRs, def, tbl);
 		}
 

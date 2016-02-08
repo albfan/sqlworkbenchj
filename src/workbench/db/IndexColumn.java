@@ -89,7 +89,7 @@ public class IndexColumn
 		}
 		else
 		{
-			return column + " " + getDirection();
+			return column+ " " + getDirection();
 		}
 	}
 
@@ -118,14 +118,7 @@ public class IndexColumn
 
 	public static Comparator<IndexColumn> getSequenceSorter()
 	{
-		return new Comparator<IndexColumn>()
-		{
-			@Override
-			public int compare(IndexColumn o1, IndexColumn o2)
-			{
-				return o1.sequence - o2.sequence;
-			}
-		};
+		return (IndexColumn o1, IndexColumn o2) -> o1.sequence - o2.sequence;
 	}
 
 	@Override

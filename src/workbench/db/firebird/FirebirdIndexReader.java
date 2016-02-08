@@ -148,6 +148,13 @@ public class FirebirdIndexReader
 		}
 	}
 
+  @Override
+  protected String quoteIndexColumn(String colName)
+  {
+    if (colName.startsWith("COMPUTED")) return colName;
+    return super.quoteIndexColumn(colName);
+  }
+
 	@Override
 	protected void processIndexResultRow(ResultSet rs, IndexDefinition index, TableIdentifier tbl)
 		throws SQLException

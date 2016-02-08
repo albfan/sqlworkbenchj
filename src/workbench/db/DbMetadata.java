@@ -1250,27 +1250,24 @@ public class DbMetadata
 		if (isQuoted(name)) return false;
 
     // avoid using a regex for this simple case
-		boolean needQuote = name.indexOf(' ') > -1;
+		if (name.indexOf(' ') > -1) return true;
 
-		needQuote = !isLegalIdentifier(name);
+		if (!isLegalIdentifier(name)) return true;
 
-    if (!needQuote && !this.storesMixedCaseIdentifiers())
+    if (!this.storesMixedCaseIdentifiers())
     {
       if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
       {
-        needQuote = true;
+        return true;
       }
-      else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
+
+      if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
       {
-        needQuote = true;
+        return true;
       }
     }
 
-    if (!needQuote)
-		{
-			needQuote = isReservedWord(name);
-		}
-		return needQuote;
+    return isReservedWord(name);
 	}
 
 	/**
