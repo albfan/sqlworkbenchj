@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
+  <release build="-1" date="2016-01-31">
+    <entry dev-build="1" type="fix">With SQL Server, tt was not possible to drop indexes from within the DbTree </entry>
+    <entry dev-build="1" type="fix">Passwords are no longer trimmed</entry>
+  </release>
   <release build="119" date="2016-01-31">
     <entry dev-build="8" type="enh">It's now possible to display the column's data type in the header of the result table</entry>
     <entry dev-build="8" type="enh">When importing all files from a directory, WbImport now provided pre-defined variables with the filename</entry>
