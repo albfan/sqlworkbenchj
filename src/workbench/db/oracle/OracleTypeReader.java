@@ -38,7 +38,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
-import workbench.db.JdbcUtils;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 
@@ -64,33 +63,38 @@ public class OracleTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
-
-    // for some strange reason the Oracle 12 driver does not return TYPES any more
-		// the previous drivers would include object types only if explicitely requested
-    boolean typesIncluded = !JdbcUtils.hasMiniumDriverVersion(con, "12.0");
-
-		if (typesIncluded && (requestedTypes != null || !DbMetadata.typeIncluded("TYPE", requestedTypes)))
+		if (DbMetadata.typeIncluded("TYPE", requestedTypes))
 		{
-			updateTypes(result);
-			return false;
-		}
+			int returnCount = updateTypes(result);
 
-		List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
-		for (OracleObjectType type : types)
-		{
-			int row = result.addRow();
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
-			result.getRow(row).setUserObject(type);
-		}
-		return types.size() > 0;
+      // some driver versions return types, some don't
+      // to avoid displaying types twice, we check if types were returned.
+      // this means that if the driver does return types but there are no types
+      // in the database running this statement is an overhead. But I can't find
+      // a reliable way to check if the driver returns them or not
+      if (returnCount == 0)
+      {
+        List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
+        for (OracleObjectType type : types)
+        {
+          int row = result.addRow();
+          result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
+          result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+          result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
+          result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+          result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
+          result.getRow(row).setUserObject(type);
+        }
+        return types.size() > 0;
+      }
+    }
+
+		return false;
 	}
 
-	private void updateTypes(DataStore result)
+	private int updateTypes(DataStore result)
 	{
+    int count = 0;
 		for (int row=0; row < result.getRowCount(); row ++)
 		{
 			String type = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
@@ -100,8 +104,10 @@ public class OracleTypeReader
 				String name = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 				OracleObjectType object = new OracleObjectType(schema, name);
 				result.getRow(row).setUserObject(object);
+        count ++;
 			}
 		}
+    return count;
 	}
 
 	public List<OracleObjectType> getTypes(WbConnection con, String schema, String name)
