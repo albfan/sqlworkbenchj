@@ -268,10 +268,11 @@ public class TextRowDataConverter
   {
     if (quoteAlways) return true;
     if (value == null) return false;
+    if (quoteCharacter == null) return false;
 
     boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
-    boolean hasQuoteChar = this.quoteCharacter != null;
-    return hasQuoteChar && containsDelimiter;
+    boolean containsLineFeed = lineEnding != null && value.indexOf(this.lineEnding) > -1;
+    return containsDelimiter || containsLineFeed;
   }
 
 	public void setLineEnding(String ending)

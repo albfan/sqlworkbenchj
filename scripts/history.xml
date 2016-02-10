@@ -2,7 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-01-31">
-    <entry dev-build="1" type="fix">With SQL Server, tt was not possible to drop indexes from within the DbTree </entry>
+    <entry dev-build="1" type="fix">When exporting to text files, values containing the line delimiter were not automatically quoted</entry>
+    <entry dev-build="1" type="fix">With SQL Server, tt was not possible to drop indexes from within the DbTree</entry>
     <entry dev-build="1" type="fix">Passwords are no longer trimmed</entry>
   </release>
   <release build="119" date="2016-01-31">

@@ -23,7 +23,6 @@
  */
 package workbench.util;
 
-import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.List;
 
