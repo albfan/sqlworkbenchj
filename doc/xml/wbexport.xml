@@ -796,17 +796,14 @@
 								Defines how quote characters that appear in the actual data are written to the output file.
 							</para>
 							<para>
-								If no quote character has been defined using the -quoteChar switch,
-								this option is ignored.
+								If no quote character has been with the -quoteChar switch, this option is ignored.
 							</para>
 							<para>
-								If <literal>escape</literal> is specified a quote character (defined through
-								-quoteChar) that is embedded in the exported (character) data is written as
-								e.g. <literal>here is a \" quote character</literal>.
+								If <literal>escape</literal> is specified, a quote character that is embedded in the exported data is written as
+								<literal>here is a \" quote character</literal>.
 							</para>
 							<para>
-								If <literal>duplicate</literal> is specified, a quote character (defined through
-								-quoteChar) that is embedded in the exported (character) data is written as
+								If <literal>duplicate</literal> is specified, a quote character that is embedded in the exported data is written as
 								two quotes e.g. <literal>here is a "" quote character</literal>.
 							</para>
               <para>
@@ -821,7 +818,7 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								If quoting is enabled (via <literal>-quoteChar</literal>,
+								If quoting is enabled (via <literal>-quoteChar</literal>),
 								then character data will normally only be quoted
 								if the delimiter is found inside the actual value that is
 								written to the output file. If <literal>-quoteAlways=true</literal> is
@@ -833,7 +830,7 @@
 							</para>
               <para>
                 NULL values will not be quoted even if this parameter is set to true. This
-                is usefull to distinguish between NULL values and empty strings.
+                is useful to distinguish between NULL values and empty strings.
               </para>
 
 						</entry>
@@ -855,7 +852,7 @@
               according to the <link linkend="options-decimal-digits">global formatting settings</link>
               </para>
               <para>
-                Specifying a value of 0 (zero) results in exporting as many digits as avialable.
+                Specifying a value of 0 (zero) results in exporting as many digits as available.
               </para>
 						</entry>
 					</row>

@@ -25,8 +25,10 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -132,7 +134,7 @@ public class CsvLineParserTest
 		assertNull(result.get(3));
 
 		parser = new CsvLineParser(';', '\'');
-		String line = "2;'ab''c'';d''ef'";
+		String line = "'2';'ab''c'';d''ef'";
 		parser.setQuoteEscaping(QuoteEscapeType.duplicate);
 		parser.setLine(line);
 		result = getParserElements(parser);
@@ -253,7 +255,7 @@ public class CsvLineParserTest
 
 	private List<String> getParserElements(CsvLineParser parser)
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		while (parser.hasNext())
 		{
 			result.add(parser.getNext());

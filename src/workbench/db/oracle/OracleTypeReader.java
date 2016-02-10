@@ -67,7 +67,7 @@ public class OracleTypeReader
 		{
 			int returnCount = updateTypes(result);
 
-      // some driver versions return types, some don't
+      // Some driver versions return types, some don't.
       // to avoid displaying types twice, we check if types were returned.
       // this means that if the driver does return types but there are no types
       // in the database running this statement is an overhead. But I can't find

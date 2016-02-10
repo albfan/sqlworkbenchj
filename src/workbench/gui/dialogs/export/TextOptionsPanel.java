@@ -52,9 +52,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FoldingPanel;
 import workbench.gui.components.WbComboBox;
 import workbench.gui.dialogs.QuoteEscapeSelector;
-import workbench.gui.dialogs.QuoteSettingVerifier;
-import workbench.util.CharacterEscapeType;
 
+import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.QuoteEscapeType;
@@ -73,9 +72,6 @@ public class TextOptionsPanel
 		super();
 		initComponents();
 		populateEscapeRange((WbComboBox)escapeRange);
-
-		// The constructor will setup the necessary actions
-		new QuoteSettingVerifier((QuoteEscapeSelector)escapeSelect, quoteAlways);
 
 		StringBuilder formatList = new StringBuilder(20);
 		boolean first = true;

@@ -35,7 +35,6 @@ import workbench.resource.Settings;
 import workbench.db.importer.TextImportOptions;
 
 import workbench.gui.dialogs.QuoteEscapeSelector;
-import workbench.gui.dialogs.QuoteSettingVerifier;
 
 import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
@@ -53,8 +52,7 @@ public class TextOptionsPanel
 	{
 		super();
 		initComponents();
-		// The verifier will register itself with the two checkboxes
-		new QuoteSettingVerifier((QuoteEscapeSelector)escapeSelect, quoteAlways);
+    
 		Font font = decimalCharTextField.getFont();
 		if (font != null)
 		{

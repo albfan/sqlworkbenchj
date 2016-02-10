@@ -1461,6 +1461,16 @@ public class DbMetadata
 		return SqlUtil.removeObjectQuotes(StringUtil.replace(pattern, "*", "%"));
 	}
 
+  private Set<String> getExtenderTypes()
+  {
+    Set<String> types = CollectionUtil.caseInsensitiveSet();
+    for (ObjectListExtender extender : extenders)
+    {
+      types.addAll(extender.supportedTypes());
+    }
+    return types;
+  }
+
   /**
    * Remove any type from the array that is not a native object type as reported by the JDBC driver
    *
@@ -1473,10 +1483,14 @@ public class DbMetadata
 		if (types == null || types.length == 0) return types;
 
 		List<String> typesToUse = new ArrayList<>(types.length);
+    Set<String> extenderTypes = getExtenderTypes();
 
 		Collection<String> nativeTypes = retrieveTableTypes();
 		for (String type : types)
 		{
+      // don't include types from registered ObjectListExtenders
+      if (extenderTypes.contains(type)) continue;
+
 			if (nativeTypes.contains(type))
 			{
 				typesToUse.add(type);
