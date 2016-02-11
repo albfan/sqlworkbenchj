@@ -27,6 +27,7 @@
   <xsl:param name="quoteAllNames">true</xsl:param>
   <xsl:param name="commitAfterEachTable">true</xsl:param>
   <xsl:param name="prefixIndexNames">false</xsl:param>
+  <xsl:param name="unrestrictedVarchar">false</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -48,6 +49,7 @@ Supported parameters:
 * quoteAllNames        - if true all identifiers are quoted using double quotes (current value: <xsl:value-of select="$quoteAllNames"/>)
 * commitAfterEachTable - if false, write only one commit at the end (current value: <xsl:value-of select="$commitAfterEachTable"/>)
 * prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
+* unrestrictedVarchar  - use VARCHAR type without length restriction (current value: <xsl:value-of select="$unrestrictedVarchar"/>)
     </xsl:message>
 
     <xsl:apply-templates select="/schema-report/sequence-def">
@@ -130,9 +132,16 @@ Supported parameters:
               <xsl:value-of select="'bytea'"/>
             </xsl:when>
             <xsl:when test="java-sql-type-name = 'VARCHAR'">
-              <xsl:value-of select="'varchar('"/>
-              <xsl:value-of select="dbms-data-size"/>
-              <xsl:value-of select="')'"/>
+              <xsl:choose>
+                <xsl:when test="$unrestrictedVarchar = 'true'">
+                  <xsl:value-of select="'varchar'"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="'varchar('"/>
+                  <xsl:value-of select="dbms-data-size"/>
+                  <xsl:value-of select="')'"/>
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="dbms-data-type"/>
@@ -152,10 +161,10 @@ Supported parameters:
             <xsl:when test="$datatype = 'boolean' and default-value = '1'">
               <xsl:value-of select="'true'"/>
             </xsl:when>
-            <xsl:when test="$default-value = 'sysdate' or $default-value = 'SYSDATE'">
+            <xsl:when test="default-value = 'sysdate' or default-value = 'SYSDATE'">
               <xsl:value-of select="'current_date'"/>
             </xsl:when>
-            <xsl:when test="$default-value = 'systimestamp' or $default-value = 'SYSTIMESTAMP' or $default-value = 'now()'">
+            <xsl:when test="default-value = 'systimestamp' or default-value = 'SYSTIMESTAMP' or default-value = 'now()'">
               <xsl:value-of select="'current_timestamp'"/>
             </xsl:when>
             <xsl:otherwise>
@@ -578,11 +587,15 @@ Supported parameters:
       <xsl:when test="$type-id = 91">
         <xsl:text>date</xsl:text>
       </xsl:when>
-      <xsl:when test="$type-id = 1">
-        <xsl:text>char(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
-      </xsl:when>
-      <xsl:when test="$type-id = -15"> <!-- NCHAR -->
-        <xsl:text>char(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+      <xsl:when test="$type-id = 1 or $type-id = -15">
+        <xsl:choose>
+          <xsl:when test="$unrestrictedVarchar = 'true'">
+            <xsl:text>char</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>char(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:when>
       <xsl:when test="$type-id = 4">
         <xsl:text>integer</xsl:text>
@@ -625,12 +638,19 @@ Supported parameters:
         </xsl:if>
       </xsl:when>
       <xsl:when test="$type-id = 12 or $type-id = -9"> <!-- -9 is NVARCHAR -->
-        <xsl:if test="$precision &lt;= 10485760">
-          <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
-        </xsl:if>
-        <xsl:if test="$precision &gt; 10485760">
-          <xsl:text>text</xsl:text>
-        </xsl:if>
+        <xsl:choose>
+          <xsl:when test="$unrestrictedVarchar = 'true'">
+            <xsl:text>varchar</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:if test="$precision &lt;= 10485760">
+              <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+            </xsl:if>
+            <xsl:if test="$precision &gt; 10485760">
+              <xsl:text>text</xsl:text>
+            </xsl:if>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:when>
       <xsl:otherwise>
           <xsl:value-of select="$dbms-type"/>
