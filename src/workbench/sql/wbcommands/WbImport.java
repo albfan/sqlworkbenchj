@@ -179,7 +179,7 @@ public class WbImport
 		cmdLine.addArgument(WbExport.ARG_QUOTE_ALWAYS);
 		cmdLine.addArgument(WbExport.ARG_NULL_STRING);
 		cmdLine.addArgument(ARG_INSERT_START);
-		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);

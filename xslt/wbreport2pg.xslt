@@ -152,6 +152,12 @@ Supported parameters:
             <xsl:when test="$datatype = 'boolean' and default-value = '1'">
               <xsl:value-of select="'true'"/>
             </xsl:when>
+            <xsl:when test="$default-value = 'sysdate' or $default-value = 'SYSDATE'">
+              <xsl:value-of select="'current_date'"/>
+            </xsl:when>
+            <xsl:when test="$default-value = 'systimestamp' or $default-value = 'SYSTIMESTAMP' or $default-value = 'now()'">
+              <xsl:value-of select="'current_timestamp'"/>
+            </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="default-value"/>
             </xsl:otherwise>
