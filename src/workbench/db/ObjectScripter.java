@@ -206,79 +206,46 @@ public class ObjectScripter
 			this.dbConnection.setBusy(true);
 			this.cancel = false;
 
-			if (!cancel && sequenceType != null)
-      {
-        appendObjectType(sequenceType);
-        typesToGenerate.remove(sequenceType);
-      }
-
-			if (!cancel) this.appendObjectType(TYPE_ENUM);
-      typesToGenerate.remove(TYPE_ENUM);
-
-			if (!cancel) this.appendObjectType(TYPE_TYPE);
-      typesToGenerate.remove(TYPE_TYPE);
-
-			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
-			typesToGenerate.remove(TYPE_DOMAIN);
-
-			if (!cancel) this.appendObjectType(TYPE_TABLE);
-      typesToGenerate.remove(TYPE_TABLE);
+      generateIfNeeded(sequenceType);
+      generateIfNeeded(TYPE_ENUM);
+      generateIfNeeded(TYPE_TYPE);
+      generateIfNeeded(TYPE_DOMAIN);
+      generateIfNeeded(TYPE_TABLE);
 
       for (String type : additionalTableTypes)
       {
         if (cancel) break;
-        appendObjectType(type);
-        typesToGenerate.remove(type);
+        generateIfNeeded(type);
       }
 
-			if (!cancel) this.appendForeignKeys();
+			if (!cancel)
+      {
+        this.appendForeignKeys();
+      }
 
-			if (!cancel) this.appendObjectType(TYPE_VIEW);
-      typesToGenerate.remove(TYPE_VIEW);
+      generateIfNeeded(TYPE_VIEW);
 
       for (String type : additionalViewTypes)
       {
         if (cancel) break;
-        this.appendObjectType(type);
-        typesToGenerate.remove(type);
+        generateIfNeeded(type);
       }
 
-			if (!cancel && synonymType != null)
-      {
-        appendObjectType(synonymType);
-        typesToGenerate.remove(synonymType);
-      }
-
-			if (!cancel) this.appendObjectType(TYPE_MVIEW);
-      typesToGenerate.remove(TYPE_MVIEW);
-
-			if (!cancel) this.appendObjectType(TYPE_INSERT);
-      typesToGenerate.remove(TYPE_INSERT);
-
-			if (!cancel) this.appendObjectType(TYPE_UPDATE);
-      typesToGenerate.remove(TYPE_UPDATE);
-
-			if (!cancel) this.appendObjectType(TYPE_SELECT);
-      typesToGenerate.remove(TYPE_SELECT);
-
-			if (!cancel) this.appendObjectType(TYPE_FUNC);
-      typesToGenerate.remove(TYPE_FUNC);
-
-			if (!cancel) this.appendObjectType(TYPE_PROC);
-      typesToGenerate.remove(TYPE_PROC);
-
-			if (!cancel) this.appendObjectType(TYPE_PACKAGE);
-      typesToGenerate.remove(TYPE_PACKAGE);
-
-			if (!cancel) this.appendObjectType(TYPE_TRG);
-      typesToGenerate.remove(TYPE_TRG);
-
-			if (!cancel) this.appendObjectType(TYPE_RULE);
-      typesToGenerate.remove(TYPE_RULE);
+      generateIfNeeded(synonymType);
+      generateIfNeeded(TYPE_MVIEW);
+      generateIfNeeded(TYPE_INSERT);
+      generateIfNeeded(TYPE_UPDATE);
+      generateIfNeeded(TYPE_SELECT);
+      generateIfNeeded(TYPE_FUNC);
+      generateIfNeeded(TYPE_PROC);
+      generateIfNeeded(TYPE_PACKAGE);
+      generateIfNeeded(TYPE_TRG);
+      generateIfNeeded(TYPE_RULE);
 
       // everything else
       for (String type : typesToGenerate)
       {
+        if (cancel) break;
         this.appendObjectType(type);
       }
 		}
@@ -297,6 +264,18 @@ public class ObjectScripter
       output.append(delim.getScriptText());
 		}
 	}
+
+  private void generateIfNeeded(String type)
+  {
+    if (type == null) return;
+    if (cancel) return;
+
+    if (typesToGenerate.contains(type))
+    {
+      appendObjectType(type);
+      typesToGenerate.remove(type);
+    }
+  }
 
   private DelimiterDefinition getDelimiter()
   {
