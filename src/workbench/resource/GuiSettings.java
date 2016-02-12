@@ -100,6 +100,7 @@ public class GuiSettings
 	public static final String PROP_LOCAL_OBJECT_CACHE_DIR = PROP_LOCAL_OBJECT_CACHE + ".cachedir";
 
 	public static final String PROP_USE_CURRENT_LINE_FOR_CURRENT_STMT = "workbench.gui.sql.current.line.statement";
+	public static final String PROP_SHOW_SCRIPT_PROGRESS = "workbench.gui.sql.script.statement.feedback";
 
 	public static final String PROP_COPY_TEXT_DISPLAY_DLG = "workbench.gui.copy.text.displayoptions";
 
@@ -110,6 +111,16 @@ public class GuiSettings
   public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
   public static final String PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS = "workbench.gui.global.search.save.colwidths";
 
+
+  public static boolean showScriptProgress()
+  {
+    return Settings.getInstance().getBoolProperty(PROP_SHOW_SCRIPT_PROGRESS, true);
+  }
+
+  public static void setShowScriptProgress(boolean flag)
+  {
+    Settings.getInstance().setProperty(PROP_SHOW_SCRIPT_PROGRESS, flag);
+  }
 
 	public static boolean showApplyDDLHint()
 	{

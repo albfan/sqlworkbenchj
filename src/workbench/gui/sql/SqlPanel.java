@@ -3219,6 +3219,8 @@ public class SqlPanel
 			int endIndex = count;
 			int failuresIgnored = 0;
 
+      boolean showScriptProgress = count > 1 && GuiSettings.showScriptProgress();
+
 			if (count == 0)
 			{
 				this.appendToLog(ResourceMgr.getString("ErrNoCommand"));
@@ -3426,24 +3428,30 @@ public class SqlPanel
         {
           showResultMessage(statementResult);
           StringBuilder logmsg = new StringBuilder(100);
+
           String timing = statementResult.getTimingMessage();
-          if (timing != null)
+          if (timing != null && showScriptProgress)
           {
-            logmsg.append('\n');
             logmsg.append(timing);
+            logmsg.append('\n');
           }
 
-          logmsg.append('\n');
-          if (count > 1)
+          if (showScriptProgress)
           {
             logmsg.append(currentMsg);
+            logmsg.append('\n');
           }
+
           if (count > 1 && GuiSettings.showScriptStmtFinishTime())
           {
             logmsg.append(" (" + StringUtil.getCurrentTimestamp() + ")\n");
           }
-          logmsg.append("\n");
-          this.appendToLog(logmsg.toString());
+
+          if (logmsg.length() > 0)
+          {
+            logmsg.append('\n');
+            this.appendToLog(logmsg.toString());
+          }
         }
         else if (statementResult.hasWarning())
         {
@@ -3580,9 +3588,9 @@ public class SqlPanel
 				{
 					finish += " (" + StringUtil.getCurrentTimestamp() + ")";
 				}
-				this.appendToLog(finish + "\n");
+				this.appendToLog("\n" + finish);
 				String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
-				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + duration + "\n";
+				String s = "\n" + ResourceMgr.getString("MsgScriptExecTime") + " " + duration;
 				this.appendToLog(s);
 			}
 			else if (GuiSettings.showScriptFinishTime())
