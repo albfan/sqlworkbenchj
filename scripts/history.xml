@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-01-31">
+    <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now show correctly</entry>
+    <entry dev-build="1" type="fix">When using "Create DDL script" in the DbExplorer, the source for materialized views was generated twice</entry>
     <entry dev-build="1" type="fix">With certain Oracle driver versions, TYPEs where displayed twice in the DbExplorer or the DbTree</entry>
     <entry dev-build="1" type="fix">When exporting to text files, values containing the line delimiter were not quoted properly</entry>
     <entry dev-build="1" type="fix">With SQL Server, tt was not possible to drop indexes from within the DbTree</entry>

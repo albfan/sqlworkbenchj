@@ -91,11 +91,17 @@ public class PostgresIndexReader
 		StringBuilder sql = new StringBuilder(50 + count * 20);
 		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
 		{
-			sql.append("SELECT indexdef, indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+			sql.append(
+        "SELECT indexdef, indexname, tablespace, obj_description(indexname::regclass, 'pg_class') \n" +
+        "FROM pg_indexes \n" +
+        "WHERE (schemaname, indexname) IN (");
 		}
 		else
 		{
-			sql.append("SELECT indexdef, indexname, null::text as tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+			sql.append(
+        "SELECT indexdef, indexname, null::text as tablespace, null::text as remarks \n" +
+        "FROM pg_indexes \n" +
+        "WHERE (schemaname, indexname) IN (");
 		}
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -157,6 +163,11 @@ public class PostgresIndexReader
 					}
 					source.append(';');
 					source.append(nl);
+          String remarks = rs.getString(4);
+          if (StringUtil.isNonBlank(remarks))
+          {
+            source.append("COMMENT ON INDEX " + SqlUtil.quoteObjectname(idxName) + " IS '" + SqlUtil.escapeQuotes(remarks) + "'");
+          }
 				}
 				con.releaseSavepoint(sp);
 			}
@@ -235,7 +246,10 @@ public class PostgresIndexReader
 		int count = indexDefs.size();
 
 		StringBuilder sql = new StringBuilder(50 + count * 20);
-		sql.append("SELECT indexname, tablespace FROM pg_indexes WHERE (schemaname, indexname) IN (");
+		sql.append(
+      "SELECT indexname, tablespace, obj_description(indexname::regclass, 'pg_class') as remarks \n" +
+      "FROM pg_indexes \n" +
+      "WHERE (schemaname, indexname) IN (");
 
 		int indexCount = 0;
 		for (IndexDefinition index : indexDefs)
@@ -269,12 +283,14 @@ public class PostgresIndexReader
 			{
 				String idxName = rs.getString(1);
 				String tblSpace = rs.getString(2);
+        String remarks = rs.getString(3);
+        IndexDefinition idx = findIndexByName(indexDefs, idxName);
 				if (StringUtil.isNonEmpty(tblSpace))
 				{
-					IndexDefinition idx = findIndexByName(indexDefs, idxName);
 					idx.setTablespace(tblSpace);
 				}
-			}
+        idx.setComment(remarks);
+      }
 			con.releaseSavepoint(sp);
 		}
 		catch (Exception e)
@@ -319,11 +335,17 @@ public class PostgresIndexReader
 		StringBuilder sql = new StringBuilder(100);
 		if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
 		{
-			sql.append("SELECT indexdef, tablespace FROM pg_indexes WHERE indexname = ? and schemaname = ? ");
+			sql.append(
+        "SELECT indexdef, tablespace, obj_description(indexname::regclass, 'pg_class') \n" +
+        "FROM pg_indexes \n" +
+        "WHERE indexname = ? and schemaname = ? ");
 		}
 		else
 		{
-			sql.append("SELECT indexdef, null::text as tablespace FROM pg_indexes WHERE indexname = ? and schemaname = ? ");
+			sql.append(
+        "SELECT indexdef, null::text as tablespace, null::text as remarks \n" +
+        "FROM pg_indexes \n" +
+        "WHERE indexname = ? and schemaname = ? ");
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -343,7 +365,14 @@ public class PostgresIndexReader
 			{
 				result = rs.getString(1);
 				String tblSpace = rs.getString(2);
+        String remarks = rs.getString(3);
 				indexDefinition.setTablespace(tblSpace);
+        indexDefinition.setComment(result);
+
+        if (StringUtil.isNonBlank(remarks))
+        {
+          result += "\nCOMMENT ON INDEX " + SqlUtil.quoteObjectname(indexDefinition.getName()) + " IS '" + SqlUtil.escapeQuotes(remarks) + "';\n";
+        }
 			}
 			con.releaseSavepoint(sp);
 		}
@@ -358,5 +387,11 @@ public class PostgresIndexReader
 		}
 		return result;
 	}
+
+  @Override
+  public boolean supportsIndexComments()
+  {
+    return true;
+  }
 
 }

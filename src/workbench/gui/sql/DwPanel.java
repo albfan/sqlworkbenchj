@@ -197,6 +197,7 @@ public class DwPanel
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SHOW_RESULT_SQL);
     dataTable.setShowDataTypeInHeader(GuiSettings.showDatatypeInTableHeader());
+    dataTable.setShowRemarksInHeder(GuiSettings.showRemarksInTableHeader());
 		initColors();
 	}
 
@@ -1132,6 +1133,7 @@ public class DwPanel
 			setStatusMessage(ResourceMgr.getString("MsgRetrievingColComments"));
 			ResultColumnMetaData meta = new ResultColumnMetaData(ds);
 			meta.retrieveColumnRemarks(ds.getResultInfo(), tableDef);
+      dataTable.adjustColumns();
 		}
 		catch (Exception e)
 		{

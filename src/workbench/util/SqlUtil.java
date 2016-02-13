@@ -363,6 +363,40 @@ public class SqlUtil
     return StringUtil.equalStringIgnoreCase(name1, name2);
   }
 
+
+	/**
+	 * Compare two object names for equality.
+	 *
+	 * If at least one of them is a quoted identified, comparison is done case-sensitive.
+	 *
+	 * If both are non-quoted, comparison is case insensitive.
+	 *
+	 * This does not take into account non-standard DBMS that support unquoted case-sensitive identifiers.
+	 *
+	 * @param one     the first object name
+	 * @param other   the second object name
+	 * @return true if both names are identical considering quoted identifiers
+	 *
+	 * @see #isQuotedIdentifier(java.lang.String)
+	 */
+	public static boolean objectNamesAreEqual(String one, String other)
+	{
+    boolean firstEmpty = StringUtil.isEmptyString(one);
+    boolean secondEmpty = StringUtil.isEmptyString(other);
+
+		if (firstEmpty && secondEmpty) return true;
+		if (firstEmpty || secondEmpty) return false;
+
+		boolean firstQuoted = isQuotedIdentifier(one);
+		boolean secondQuoted = isQuotedIdentifier(other);
+
+		if (firstQuoted || secondQuoted)
+		{
+			return removeObjectQuotes(one).equals(removeObjectQuotes(other));
+		}
+		return removeObjectQuotes(one).equalsIgnoreCase(removeObjectQuotes(other));
+	}
+
 	/**
 	 * Escapes any underscore in the passed name with the escape character defined by the connection.
 	 *
@@ -1941,40 +1975,6 @@ public class SqlUtil
 			}
 		}
 		return null;
-	}
-
-
-	/**
-	 * Compare two object names for equality.
-	 *
-	 * If at least one of them is a quoted identified, comparison is done case-sensitive.
-	 *
-	 * If both are non-quoted, comparison is case insensitive.
-	 *
-	 * This does not take into account non-standard DBMS that support unquoted case-sensitive identifiers.
-	 *
-	 * @param one     the first object name
-	 * @param other   the second object name
-	 * @return true if both names are identical considering quoted identifiers
-	 *
-	 * @see #isQuotedIdentifier(java.lang.String)
-	 */
-	public static boolean objectNamesAreEqual(String one, String other)
-	{
-    boolean firstEmpty = StringUtil.isEmptyString(one);
-    boolean secondEmpty = StringUtil.isEmptyString(other);
-
-		if (firstEmpty && secondEmpty) return true;
-		if (firstEmpty || secondEmpty) return false;
-
-		boolean firstQuoted = isQuotedIdentifier(one);
-		boolean secondQuoted = isQuotedIdentifier(other);
-
-		if (firstQuoted || secondQuoted)
-		{
-			return removeObjectQuotes(one).equals(removeObjectQuotes(other));
-		}
-		return removeObjectQuotes(one).equalsIgnoreCase(removeObjectQuotes(other));
 	}
 
 	public static String getBaseTypeName(String dbmsType)

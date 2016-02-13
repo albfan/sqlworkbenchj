@@ -63,6 +63,7 @@ public class IndexReporter
 	public static final String TAG_INDEX_COLUMN_LIST = "column-list";
 	public static final String TAG_INDEX_COLUMN_NAME = "column";
 	public static final String TAG_INDEX_OPTION = "index-option";
+	public static final String TAG_INDEX_COMMENT = "comment";
 
 	private List<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
@@ -112,6 +113,11 @@ public class IndexReporter
 			}
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_PK, index.isPrimaryKeyIndex());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_TYPE, index.getIndexType());
+      if (StringUtil.isNonBlank(index.getComment()))
+      {
+    		tagWriter.appendTag(result, defIndent, TAG_INDEX_COMMENT, index.getComment(), true);
+      }
+
 			List<IndexColumn> columns = index.getColumns();
 			if (columns.size() > 0)
 			{

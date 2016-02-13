@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -455,11 +456,25 @@ public class IndexDefinition
 		return reader.getIndexSource(baseTable, this);
 	}
 
-	public static IndexDefinition findIndex(List<IndexDefinition> indexList, String indexName, String indexSchema)
+  public boolean isNameEqual(String schema, String indexName)
+  {
+    if (indexName == null) return false;
+    if (SqlUtil.objectNamesAreEqual(this.getName(), indexName))
+    {
+      if (getSchema() != null && schema != null)
+      {
+        return SqlUtil.objectNamesAreEqual(getSchema(), schema);
+      }
+      return true;
+    }
+    return false;
+  }
+
+	public static IndexDefinition findIndex(Collection<IndexDefinition> indexList, String indexName, String indexSchema)
 	{
 		for (IndexDefinition idx : indexList)
 		{
-			if (idx.getObjectName().equals(indexName) && (indexSchema == null || indexSchema.equals(idx.getSchema())))
+			if (idx.isNameEqual(indexSchema, indexName))
 			{
 				return idx;
 			}
@@ -490,18 +505,14 @@ public class IndexDefinition
 
 	public static Comparator<IndexDefinition> getNameSorter()
 	{
-		Comparator<IndexDefinition> comp = new Comparator<IndexDefinition>()
-		{
-			@Override
-			public int compare(IndexDefinition o1, IndexDefinition o2)
-			{
-				if (o1 == null) return 1;
-				if (o2 == null) return -1;
-				String name1 = o1.getName();
-				String name2 = o2.getName();
-				return StringUtil.compareStrings(name1, name2, true);
-			}
-		};
+		Comparator<IndexDefinition> comp = (IndexDefinition o1, IndexDefinition o2) ->
+    {
+      if (o1 == null) return 1;
+      if (o2 == null) return -1;
+      String name1 = o1.getName();
+      String name2 = o2.getName();
+      return StringUtil.compareStrings(name1, name2, true);
+    };
 		return comp;
 	}
 

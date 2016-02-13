@@ -644,22 +644,22 @@ public class ResultInfo
 		return findColumn(name, QuoteHandler.STANDARD_HANDLER);
 	}
 
-	public int findColumn(String name, QuoteHandler handler)
-	{
-		if (name == null) return -1;
+  public int findColumn(String name, QuoteHandler handler)
+  {
+    if (name == null) return -1;
 
-		String plain = handler.removeQuotes(name);
+    String plain = handler.removeQuotes(name);
 
-		for (int i = 0; i < this.columns.length; i++)
-		{
-			String col = handler.removeQuotes(columns[i].getColumnName());
-			if (plain.equalsIgnoreCase(col))
-			{
-				return i;
-			}
-			}
-		return -1;
-	}
+    for (int i = 0; i < this.columns.length; i++)
+    {
+      String col = handler.removeQuotes(columns[i].getColumnName());
+      if (plain.equalsIgnoreCase(col))
+      {
+        return i;
+      }
+    }
+    return -1;
+  }
 
 	public boolean isUserDefinedPK()
 	{

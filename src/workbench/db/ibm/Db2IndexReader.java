@@ -22,7 +22,11 @@ package workbench.db.ibm;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -31,9 +35,11 @@ import workbench.db.DbMetadata;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -48,6 +54,107 @@ public class Db2IndexReader
 	{
 		super(meta);
 	}
+
+  @Override
+  public void processIndexList(Collection<IndexDefinition> indexList)
+  {
+    if (JdbcUtils.hasMinimumServerVersion(metaData.getSqlConnection(), "10.5"))
+    {
+      readExpressionIndex(indexList);
+    }
+  }
+
+  private void readExpressionIndex(Collection<IndexDefinition> indexList)
+  {
+    String sql =
+    "select indschema, indname, colname, text \n" +
+    "from syscat.indexcoluse \n" +
+    "where text is not null \n " +
+    "  and (";
+
+    int counter = 0;
+    for (IndexDefinition idx : indexList)
+    {
+      if (mightHaveExpression(idx))
+      {
+        if (counter > 0) sql += " or\n        ";
+        sql += " (indschema, indname) = (";
+        sql += "'" + idx.getSchema() + "', '" + idx.getName() + "')";
+        counter++;
+      }
+    }
+
+    sql += ")\n" +
+      "order by indschema, indname, colseq \n" +
+      "for read only ";
+
+    if (counter == 0) return;
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("Db2IndexReader.readExpressionIndex()", "Retrieving index expressions using:\n" + sql);
+    }
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = metaData.getWbConnection().createStatementForQuery();
+      rs = stmt.executeQuery(sql);
+      while (rs.next())
+      {
+        String schema = rs.getString(1);
+        String idxName = rs.getString(2);
+        String colname = rs.getString(3);
+        String expression = rs.getString(4);
+
+        IndexDefinition idx = IndexDefinition.findIndex(indexList, idxName, schema);
+        updateIndexColumn(idx, colname, expression);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("Db2IndexReader.readExpressionIndex()", "Could not read expression index definition using:\n" + sql, ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
+
+  private boolean mightHaveExpression(IndexDefinition index)
+  {
+    String regex = metaData.getDbSettings().getProperty("expression_index.colname.pattern", null);
+    if (regex == null) return true;
+    try
+    {
+      Pattern p = Pattern.compile(regex);
+      for (IndexColumn col : index.getColumns())
+      {
+        Matcher m = p.matcher(col.getColumn());
+        if (m.matches()) return true;
+      }
+      return false;
+    }
+    catch (Exception ex)
+    {
+      return true;
+    }
+  }
+
+  private void updateIndexColumn(IndexDefinition idx, String colName, String expression)
+  {
+    if (idx == null) return;
+    if (StringUtil.isEmptyString(colName)) return;
+    if (StringUtil.isBlank(expression)) return;
+    for (IndexColumn col : idx.getColumns())
+    {
+      if (col.getColumn().equalsIgnoreCase(colName))
+      {
+        col.setColumn(SqlUtil.removeObjectQuotes(expression));
+      }
+    }
+  }
 
 	@Override
 	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
@@ -75,12 +182,13 @@ public class Db2IndexReader
 	private void readIndexOptions(TableIdentifier table, IndexDefinition index)
 	{
 		String sql =
-			"select colcount, unique_colcount \n" +
+			"select colcount, unique_colcount, remarks \n" +
 			"from syscat.indexes \n" +
 			"where indschema = ? \n" +
 			"  and indname = ? \n" +
 			"  and tabname = ? \n"  +
-			"  and tabschema = ? ";
+			"  and tabschema = ? \n" +
+      "for read only";
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -104,7 +212,7 @@ public class Db2IndexReader
 			{
 				int colCount = rs.getInt(1);
 				int uniqueCols = rs.getInt(2);
-				if (uniqueCols < colCount)
+				if (uniqueCols > -1 && uniqueCols < colCount)
 				{
 					List<IndexColumn> cols = index.getColumns();
 					String includedCols = "";
@@ -120,6 +228,7 @@ public class Db2IndexReader
 					index.getSourceOptions().addConfigSetting(KEY_INCLUDED_COLS, includedCols);
 					index.getSourceOptions().setInitialized();
 				}
+        index.setComment(rs.getString(3));
 			}
 		}
 		catch (Exception ex)

@@ -38,6 +38,7 @@ import javax.swing.table.TableColumnModel;
 
 import workbench.resource.GuiSettings;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.renderer.SortHeaderRenderer;
 import workbench.gui.renderer.WbRenderer;
 
@@ -74,27 +75,28 @@ public class ColumnWidthOptimizer
 		{
 			this.optimizeColWidth(i, minWidth, maxWidth, respectColName);
 		}
-	}
-
-	public void optimizeColWidth(int aColumn)
-	{
-		this.optimizeColWidth(aColumn, 0, -1, false);
+    WbSwingUtilities.repaintLater(table);
+    WbSwingUtilities.repaintLater(table.getTableHeader());
 	}
 
 	public void optimizeColWidth(int aColumn, boolean respectColName)
 	{
 		this.optimizeColWidth(aColumn, GuiSettings.getMinColumnWidth(), GuiSettings.getMaxColumnWidth(), respectColName);
+    WbSwingUtilities.repaintLater(table);
+    WbSwingUtilities.repaintLater(table.getTableHeader());
 	}
 
-	public void optimizeColWidth(int col, int minWidth, int maxWidth, boolean respectColumnName)
+	private void optimizeColWidth(int col, int minWidth, int maxWidth, boolean respectColumnName)
 	{
 		int width = calculateOptimalColumnWidth(col, minWidth, maxWidth, respectColumnName, null);
-		if (width > 0)
-		{
-			TableColumnModel colMod = this.table.getColumnModel();
-			TableColumn column = colMod.getColumn(col);
-			column.setPreferredWidth(width);
-		}
+    WbSwingUtilities.invoke(() -> {
+      if (width > 0)
+      {
+        TableColumnModel colMod = this.table.getColumnModel();
+        TableColumn column = colMod.getColumn(col);
+        column.setPreferredWidth(width);
+      }
+    });
 	}
 
 	public int calculateOptimalColumnWidth(int col, int minWidth, int maxWidth, boolean respectColumnName, FontMetrics fontInfo)
@@ -233,7 +235,10 @@ public class ColumnWidthOptimizer
 
 		int headerWidth = hfm.stringWidth(colName) + addHeaderSpace;
 
-    if (table.getShowDataTypeInHeader() && table.getDataStoreTableModel() != null)
+    boolean dataTypeVisible = table.getHeaderRenderer() == null ? false : table.getHeaderRenderer().getShowDataType();
+    boolean remarksVisible = table.getHeaderRenderer() == null ? false : table.getHeaderRenderer().getShowRemarks();
+
+    if (dataTypeVisible && table.getDataStoreTableModel() != null)
     {
       String typeName = table.getDataStoreTableModel().getDbmsType(col);
       if (typeName != null)
@@ -242,6 +247,20 @@ public class ColumnWidthOptimizer
         if (typeWidth > headerWidth)
         {
           headerWidth = typeWidth;
+        }
+      }
+    }
+
+    if (remarksVisible && table.getDataStoreTableModel() != null)
+    {
+      String remarks = table.getDataStoreTableModel().getColumnRemarks(col);
+      if (StringUtil.isNonBlank(remarks))
+      {
+        String word = StringUtil.getFirstWord(remarks);
+        int commentWidth = hfm.stringWidth(word) + addHeaderSpace;
+        if (commentWidth > headerWidth)
+        {
+          headerWidth = commentWidth;
         }
       }
     }

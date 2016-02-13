@@ -391,16 +391,12 @@ public class ReportTable
 
 	public List<ReportColumn> getColumnsSorted()
 	{
-		Comparator<ReportColumn> comp = new Comparator<ReportColumn>()
-		{
-			@Override
-			public int compare(ReportColumn o1, ReportColumn o2)
-			{
-				int pos1 = o1.getColumn().getPosition();
-				int pos2 = o2.getColumn().getPosition();
-				return pos1 - pos2;
-			}
-		};
+		Comparator<ReportColumn> comp = (ReportColumn o1, ReportColumn o2) ->
+    {
+      int pos1 = o1.getColumn().getPosition();
+      int pos2 = o2.getColumn().getPosition();
+      return pos1 - pos2;
+    };
 		List<ReportColumn> result = new ArrayList<>(columns.size());
 		result.addAll(columns);
 		Collections.sort(result, comp);

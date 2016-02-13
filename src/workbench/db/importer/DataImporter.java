@@ -1865,6 +1865,7 @@ public class DataImporter
         // whether we have to send another one
         useBatch = false;
         messages.appendMessageKey("ErrImportNoBatchMode");
+        messages.appendNewLine();
       }
     }
   }
@@ -2218,16 +2219,23 @@ public class DataImporter
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
 
+      if (this.insertedRows > -1 || this.updatedRows > -1)
+      {
+        this.messages.appendNewLine();
+      }
+
 			if (this.insertedRows > -1)
 			{
 				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));
 				this.messages.appendNewLine();
 			}
-			if (this.updatedRows > -1)
+
+      if (this.updatedRows > -1)
 			{
 				this.messages.append(this.updatedRows + " " + ResourceMgr.getString("MsgCopyNumRowsUpdated"));
 			}
-			if (this.badWriter != null && badWriter.getRows() > 0)
+
+      if (this.badWriter != null && badWriter.getRows() > 0)
 			{
 				this.messages.appendNewLine();
 				this.messages.append(this.badWriter.getMessage());

@@ -1705,10 +1705,10 @@ public class WbImportTest
 		String msg = result.getMessages().toString();
 		assertEquals("Import failed: " + msg, result.isSuccess(), true);
 		String[] lines = msg.split(StringUtil.REGEX_CRLF);
-		assertEquals(3, lines.length);
+		assertEquals(4, lines.length);
 		assertTrue(lines[0].endsWith("into table JUNIT_TEST"));
-		assertEquals("2 row(s) inserted", lines[1]);
-		assertEquals("0 row(s) updated", lines[2]);
+		assertEquals("2 row(s) inserted", lines[2]);
+		assertEquals("0 row(s) updated", lines[3]);
 
     try (Statement stmt = this.connection.createStatementForQuery();
          ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test"))
@@ -2641,15 +2641,15 @@ public class WbImportTest
 			String msg = result.getMessages().toString();
 			assertEquals("Import failed: " + msg, result.isSuccess(), true);
 			String[] lines = msg.split(StringUtil.REGEX_CRLF);
-			assertTrue(lines.length == 6);
+			assertEquals(8, lines.length);
 
 			assertTrue(lines[0].endsWith("into table A"));
-			assertEquals("15 row(s) inserted", lines[1]);
-			assertEquals("0 row(s) updated", lines[2]);
+			assertEquals("15 row(s) inserted", lines[2]);
+			assertEquals("0 row(s) updated", lines[3]);
 
-			assertTrue(lines[3].endsWith("into table B"));
-			assertEquals("15 row(s) inserted", lines[4]);
-			assertEquals("0 row(s) updated", lines[5]);
+			assertTrue(lines[4].endsWith("into table B"));
+			assertEquals("15 row(s) inserted", lines[6]);
+			assertEquals("0 row(s) updated", lines[7]);
 
       int rowCount = TestUtil.getNumberValue(connection, "select count(*) from a");
 			assertEquals("Wrong number of rows for table a", 15, rowCount);

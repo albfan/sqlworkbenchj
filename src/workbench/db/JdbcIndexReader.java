@@ -46,8 +46,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import static workbench.db.IndexReader.*;
-
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
  * to get the index information.
@@ -61,6 +59,10 @@ public class JdbcIndexReader
 	protected String pkIndexNameColumn;
 	protected String pkStatusColumn;
 	protected String partitionedFlagColumn;
+
+  private static final String COL_NAME_REMARKS = "REMARKS";
+  private static final String COL_NAME_STATUS = "STATUS";
+  private static final String COL_NAME_TABLESPACE = "TABLESPACE";
 
 	public JdbcIndexReader(DbMetadata meta)
 	{
@@ -82,6 +84,11 @@ public class JdbcIndexReader
 	}
 
 	public boolean supportsIndexStatus()
+	{
+		return false;
+	}
+
+	public boolean supportsIndexComments()
 	{
 		return false;
 	}
@@ -536,6 +543,16 @@ public class JdbcIndexReader
 		}
 		idx.append(";\n");
 
+    CommentSqlManager mgr = new CommentSqlManager(metaData.getDbId());
+    String commentTemplate = mgr.getCommentSqlTemplate("INDEX", null);
+    if (StringUtil.isNonBlank(indexDefinition.getComment()) && commentTemplate != null)
+    {
+      commentTemplate = StringUtil.replace(commentTemplate, MetaDataSqlManager.FQ_INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
+      commentTemplate = StringUtil.replace(commentTemplate, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectName());
+			commentTemplate = commentTemplate.replace(CommentSqlManager.COMMENT_PLACEHOLDER, indexDefinition.getComment());
+			idx.append(commentTemplate);
+			idx.append(";\n");
+    }
 		return idx;
 	}
 
@@ -628,14 +645,21 @@ public class JdbcIndexReader
 
 		if (this.supportsTableSpaces())
 		{
-			columnList.add("TABLESPACE");
+			columnList.add(COL_NAME_TABLESPACE);
 			typeList.add(Types.VARCHAR);
 			sizeList.add(15);
 		}
 
 		if (this.supportsIndexStatus())
 		{
-			columnList.add("STATUS");
+			columnList.add(COL_NAME_STATUS);
+			typeList.add(Types.VARCHAR);
+			sizeList.add(15);
+		}
+
+		if (this.supportsIndexComments())
+		{
+			columnList.add(COL_NAME_REMARKS);
 			typeList.add(Types.VARCHAR);
 			sizeList.add(15);
 		}
@@ -689,6 +713,11 @@ public class JdbcIndexReader
 	{
 		DataStore idxData = createIndexListDataStore(includeTableName);
 		int offset = includeTableName ? 2 : 0;
+
+    int statusIndex = idxData.getColumnIndex(COL_NAME_STATUS);
+    int tableSpaceIndex = idxData.getColumnIndex(COL_NAME_TABLESPACE);
+    int remarksIndex = idxData.getColumnIndex(COL_NAME_REMARKS);
+
 		for (IndexDefinition idx : indexes)
 		{
 			int row = idxData.addRow();
@@ -702,13 +731,18 @@ public class JdbcIndexReader
 			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
 			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx.getExpression());
 			idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
-			if (this.supportsTableSpaces())
+
+			if (tableSpaceIndex > -1)
 			{
-				idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_TBL_SPACE, idx.getTablespace());
+				idxData.setValue(row, tableSpaceIndex, idx.getTablespace());
 			}
-			if (this.supportsIndexStatus())
+			if (statusIndex > -1)
 			{
-				idxData.setValue(row, offset + COLUMN_IDX_TABLE_INDEXLIST_IDX_STATUS, idx.getStatus());
+				idxData.setValue(row, statusIndex, idx.getStatus());
+			}
+			if (remarksIndex > -1)
+			{
+				idxData.setValue(row, remarksIndex, idx.getComment());
 			}
 			idxData.getRow(row).setUserObject(idx);
 		}
@@ -838,6 +872,11 @@ public class JdbcIndexReader
     boolean checkTable = metaData.getDbSettings().checkIndexTable();
 
     Set<String> ignoredIndexes = CollectionUtil.caseInsensitiveSet();
+
+    if (idxRs != null && Settings.getInstance().getDebugMetadataSql())
+    {
+      SqlUtil.dumpResultSetInfo("DatabaseMetaData.processIndexResult()", idxRs.getMetaData());
+    }
 
 		while (idxRs != null && idxRs.next())
 		{

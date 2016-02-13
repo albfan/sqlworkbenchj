@@ -247,7 +247,6 @@ public class WbTable
 	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
 	private boolean readOnly;
-  private boolean showDatatypeInHeader;
 	protected FontZoomer zoomer;
 
 	private RendererSetup rendererSetup;
@@ -417,15 +416,14 @@ public class WbTable
 		configureEnterKeyAction(a);
 	}
 
-  public boolean getShowDataTypeInHeader()
-  {
-    return showDatatypeInHeader;
-  }
-
   public void setShowDataTypeInHeader(boolean flag)
   {
-    showDatatypeInHeader = flag;
-    sortRenderer.setShowDatatype(showDatatypeInHeader);
+    if (sortRenderer != null) sortRenderer.setShowDatatype(flag);
+  }
+
+  public void setShowRemarksInHeder(boolean flag)
+  {
+    if (sortRenderer != null) sortRenderer.setShowRemarks(flag);
   }
 
 	public SortHeaderRenderer getHeaderRenderer()

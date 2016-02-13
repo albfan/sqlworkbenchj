@@ -90,7 +90,7 @@ public class Db2TestUtil
 			String dbname = getProperty("wbjunit.db2.testdb", "tkdb");
 			String username = getProperty("wbjunit.db2.user", "thomas");
 			String pwd = getProperty("wbjunit.db2.password", "welcome");
-			String port = getProperty("wbjunit.db2.port", "50001");
+			String port = getProperty("wbjunit.db2.port", "50000");
 			String host = getProperty("wbjunit.db2.host", "db2wbtest");
 
 			ArgumentParser parser = new AppArguments();
