@@ -568,19 +568,6 @@
         <exclude name="*.jar"/>
         <exclude name="*.png"/>
       </zipfileset>
-
-      <!--
-      <zipfileset dir="../libs" prefix="libs">
-        <include name="**/*.*"/>
-        <exclude name="junit/cobertura/*.*"/>
-        <exclude name="junit/jemmy.jar"/>
-        <exclude name="junit/db2jcc4.jar"/>
-        <exclude name="junit/ojdbc6-11.2.0.1.0.jar"/>
-        <exclude name="junit/jaybird-full-2.1.6-java6.jar"/>
-        <exclude name="junit/sqljdbc4.jar"/>
-      </zipfileset>
-      -->
-
     </zip>
   </target>
 
@@ -649,11 +636,44 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
-  <target name="mac-package" depends="init,publish">
+  <target name="jarbundler" depends="init">
+    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../libs/jarbundler/jarbundler-2.5.0.jar"/>
+
+    <property name="bundledir" value="${distdir}/mac"/>
+    <delete dir="${bundledir}" failonerror="false"/>
+    <mkdir dir="${bundledir}"/>
+
+    <jarbundler
+        dir="${bundledir}"
+        name="SQLWorkbenchJ"
+        mainclass="workbench.WbStarter"
+        stubfile="../libs/jarbundler/universalJavaApplicationStub"
+        useJavaXKey="true"
+        signature="sqwb"
+        verbose="true"
+        vmoptions="-Xmx1024m -Xdock:name=SQLWorkbench/J"
+        jvmversion="1.8+"
+        icon="Workbench.icns"
+        version="${build.number}"
+        copyright="Thomas Kellerer, 2002-2016"
+        bundleid="net.sqlworkbench">
+
+      <jarfileset dir="${distdir}">
+        <include name="${jarfile}"/>
+      </jarfileset>
+
+      <javaproperty name="apple.awt.showGrowBox" value="true"/>
+      <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+      <javaproperty name="apple.awt.antialiasing" value="true"/>
+      <javaproperty name="apple.awt.textantialiasing" value="true"/>
+    </jarbundler>
+  </target>
+
+  <target name="bundleapp" depends="init">
 
     <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
 
-    <property name="bundledir" value="${distdir}/mac7"/>
+    <property name="bundledir" value="${distdir}/mac"/>
     <delete dir="${bundledir}" failonerror="false"/>
     <mkdir dir="${bundledir}"/>
 
@@ -665,19 +685,24 @@
                shortversion="${build.number}"
                signature="sqwb"
                applicationCategory="public.app-category.developer-tools"
-               copyright="Thomas Kellerer"
+               copyright="Thomas Kellerer 2002-2016"
                mainclassname="workbench.WbStarter">
 
       <classpath dir="${distdir}">
         <include name="${jarfile}"/>
       </classpath>
 
+      <option value="-Dapple.awt.antialiasing=true"/>
+      <option value="-Dapple.awt.textantialiasing=true"/>
       <option value="-Dapple.laf.useScreenMenuBar=true"/>
-      <option value="-Dcom.apple.mrj.application.growbox.intrudes=false"/>
       <option value="-Dapple.awt.showGrowBoxtrue=true"/>
-      <option value="-Xmx512m"/>
+      <option value="-Xmx1024m"/>
       <option value="-Xdock:name=SQLWorkbench/J"/>
     </bundleapp>
+
+  </target>
+
+  <target name="mac-package" depends="init,publish,bundleapp">
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava8.tgz">
       <tarfileset dir="${bundledir}">
