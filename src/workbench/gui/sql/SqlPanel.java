@@ -313,6 +313,7 @@ public class SqlPanel
 	protected ShowObjectInfoAction showObjectInfoAction;
 	protected JoinCompletionAction joinCompletion;
 	protected CopyCurrentStatementAction copyStatementAction;
+  protected IgnoreErrorsAction ignoreErrors;
 
 	protected WbMenu copyAsSQLMenu;
 	protected WbMenu copySelectedMenu;
@@ -601,16 +602,14 @@ public class SqlPanel
 		toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
 
-		Iterator<WbAction> itr = toolbarActions.iterator();
-		while (itr.hasNext())
+		for (WbAction action : toolbarActions)
 		{
-			WbAction a = itr.next();
-			boolean toolbarSep = a.getCreateToolbarSeparator();
+			boolean toolbarSep = action.getCreateToolbarSeparator();
 			if (toolbarSep)
 			{
 				toolbar.addSeparator();
 			}
-			a.addToToolbar(toolbar);
+			action.addToToolbar(toolbar);
 		}
 		toolbar.addSeparator();
 		connectionInfo = new ConnectionInfo(toolbar.getBackground());
@@ -986,9 +985,9 @@ public class SqlPanel
 		this.commitAction.setCreateToolbarSeparator(true);
 		this.toolbarActions.add(this.commitAction);
 		this.toolbarActions.add(this.rollbackAction);
-		IgnoreErrorsAction ignore = new IgnoreErrorsAction();
-		ignore.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(ignore);
+    ignoreErrors = new IgnoreErrorsAction();
+    ignoreErrors.setCreateToolbarSeparator(true);
+		this.toolbarActions.add(ignoreErrors);
 		this.appendResultsAction = new AppendResultsAction(this);
 		this.appendResultsAction.setEnabled(false);
 		appendResultsAction.setCreateToolbarSeparator(true);
@@ -1028,7 +1027,7 @@ public class SqlPanel
     config.addSeparator();
 		new HighlightCurrentStatement().addToMenu(config);
 		new HighlightErrorLineAction().addToMenu(config);
-		ignore.addToMenu(config);
+		ignoreErrors.addToMenu(config);
     new ConsolidateLogAction().addToMenu(config);
 
     config.addSeparator();
