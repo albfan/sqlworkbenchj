@@ -269,24 +269,20 @@ public class IniProfileStorage
 
     // This comparator sorts the "name" attribute at the first place inside the keys for one profile
     // This is just for convenience, so that it's easier to read the properties file
-    Comparator<String> comp = new Comparator<String>()
+    Comparator<String> comp = (String o1, String o2) ->
     {
-      @Override
-      public int compare(String o1, String o2)
+      int pos1 = o1.indexOf('.', o1.indexOf('.') + 1);
+      int pos2 = o2.indexOf('.', o2.indexOf('.') + 1);
+
+      String base1 = o1.substring(0, pos1);
+      String base2 = o2.substring(0, pos2);
+
+      if (base1.equals(base2))
       {
-        int pos1 = o1.indexOf('.', o1.indexOf('.') + 1);
-        int pos2 = o2.indexOf('.', o2.indexOf('.') + 1);
-
-        String base1 = o1.substring(0, pos1);
-        String base2 = o2.substring(0, pos2);
-
-        if (base1.equals(base2))
-        {
-          if (o1.endsWith(PROP_NAME) && !o2.endsWith(PROP_NAME)) return -1;
-          if (!o1.endsWith(PROP_NAME) && o2.endsWith(PROP_NAME)) return 1;
-        }
-        return o1.compareTo(o2);
+        if (o1.endsWith(PROP_NAME) && !o2.endsWith(PROP_NAME)) return -1;
+        if (!o1.endsWith(PROP_NAME) && o2.endsWith(PROP_NAME)) return 1;
       }
+      return o1.compareTo(o2);
     };
 
     props.setSortComparator(comp);

@@ -28,7 +28,6 @@ import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -205,7 +204,7 @@ public class ConnectionProfile
 
   public void setTagList(String list)
   {
-    List<String> tagList = StringUtil.stringToList(list, ",", true, true, false, false);
+    Set<String> tagList = CollectionUtil.caseInsensitiveSet(StringUtil.stringToList(list, ",", true, true, false, false));
     changed = !tags.equals(tagList);
     tags.clear();
     tags.addAll(tagList);
@@ -1033,10 +1032,7 @@ public class ConnectionProfile
 		result.setPromptForUsername(this.promptForUsername);
 		result.setStoreCacheLocally(this.storeCacheLocally);
 		result.setMacroFilename(this.macroFileName);
-    if (this.tags != null)
-    {
-      result.tags.addAll(this.tags);
-    }
+    result.tags.addAll(tags);
 		result.lastSettingsKey = this.lastSettingsKey;
 		result.temporaryUsername = null;
 		if (connectionProperties != null)
@@ -1056,17 +1052,13 @@ public class ConnectionProfile
 
 	public static Comparator<ConnectionProfile> getNameComparator()
 	{
-		return new Comparator<ConnectionProfile>()
-		{
-			@Override
-			public int compare(ConnectionProfile o1, ConnectionProfile o2)
-			{
-				if (o1 == null && o2 == null) return 0;
-				if (o1 == null) return -1;
-				if (o2 == null) return 1;
-				return StringUtil.compareStrings(o1.name, o2.name, true);
-			}
-		};
+		return (ConnectionProfile o1, ConnectionProfile o2) ->
+    {
+      if (o1 == null && o2 == null) return 0;
+      if (o1 == null) return -1;
+      if (o2 == null) return 1;
+      return StringUtil.compareStrings(o1.name, o2.name, true);
+    };
 	}
 
 	public boolean getIgnoreDropErrors()

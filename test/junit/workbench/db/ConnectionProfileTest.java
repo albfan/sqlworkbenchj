@@ -27,10 +27,13 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import workbench.WbTestCase;
 
 import workbench.sql.DelimiterDefinition;
+
+import workbench.util.CollectionUtil;
 
 import org.junit.Test;
 
@@ -75,6 +78,7 @@ public class ConnectionProfileTest
 		old.setHideWarnings(true);
 		old.setRemoveComments(true);
 		old.setPromptForUsername(true);
+    old.setTagList("pg,ora");
 		ObjectNameFilter filter = new ObjectNameFilter();
 		filter.addExpression("^pg_toast.*");
 		filter.resetModified();
@@ -100,6 +104,9 @@ public class ConnectionProfileTest
 		assertEquals(42, copy.getIdleTime());
 		assertEquals(filter, copy.getCatalogFilter());
 		assertEquals(Integer.valueOf(42), copy.getConnectionTimeout());
+
+    Set<String> tags = CollectionUtil.caseInsensitiveSet("ORA","pg");
+    assertEquals(tags, copy.getTags());
 
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
