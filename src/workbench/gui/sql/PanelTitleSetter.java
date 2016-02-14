@@ -39,62 +39,62 @@ import workbench.util.NumberStringCache;
  */
 public class PanelTitleSetter
 {
-	public static void updateTitle(MainPanel client)
-	{
-		JPanel p = (JPanel)client;
-		Container parent = p.getParent();
-		if (parent instanceof JTabbedPane)
-		{
-			JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(p);
-			if (index > -1)
-			{
-				client.setTabTitle(tab, index);
-			}
-		}
-	}
+  public static void updateTitle(MainPanel client)
+  {
+    JPanel p = (JPanel)client;
+    Container parent = p.getParent();
+    if (parent instanceof JTabbedPane)
+    {
+      JTabbedPane tab = (JTabbedPane)parent;
+      int index = tab.indexOfComponent(p);
+      if (index > -1)
+      {
+        client.setTabTitle(tab, index);
+      }
+    }
+  }
 
-	public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
-	{
-		if (index < 0) return;
+  public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
+  {
+    if (index < 0) return;
 
-		String title = plainTitle;
-		if (panel.isLocked())
-		{
-			title = "<html><i>" + title + "</i> ";
-			if (GuiSettings.getShowTabIndex())
-			{
-				if (index < 9)
-				{
-					title += "<u>";
-				}
-				title += NumberStringCache.getNumberString (index+1);
-				if (index < 9)
-				{
-					title += "</u>";
-				}
-			}
-			title += "</html>";
-			tab.setTitleAt(index, title);
-		}
-		else
-		{
-			if (GuiSettings.getShowTabIndex())
-			{
-				 title += " " + NumberStringCache.getNumberString(index+1);
-			}
-			tab.setTitleAt(index, title);
+    String title = plainTitle;
+    if (panel.isLocked())
+    {
+      title = "<html><i>" + title + "</i> ";
+      if (GuiSettings.getShowTabIndex())
+      {
+        if (index < 9)
+        {
+          title += "<u>";
+        }
+        title += NumberStringCache.getNumberString(index + 1);
+        if (index < 9)
+        {
+          title += "</u>";
+        }
+      }
+      title += "</html>";
+      tab.setTitleAt(index, title);
+    }
+    else
+    {
+      if (GuiSettings.getShowTabIndex())
+      {
+        title += " " + NumberStringCache.getNumberString(index + 1);
+      }
+      tab.setTitleAt(index, title);
 
-			if (index < 9 && GuiSettings.getShowTabIndex())
-			{
-				char c = NumberStringCache.getNumberString(index+1).charAt(0);
-				int pos = plainTitle.length() + 1;
-				tab.setMnemonicAt(index, c);
-				// The Mnemonic index has to be set explicitely otherwise
-				// the display would be wrong if the tab title contains
-				// the mnemonic character
-				tab.setDisplayedMnemonicIndexAt(index, pos);
-			}
-		}
-	}
+      if (index < 9 && GuiSettings.getShowTabIndex())
+      {
+        char c = NumberStringCache.getNumberString(index + 1).charAt(0);
+        int pos = plainTitle.length() + 1;
+        tab.setMnemonicAt(index, c);
+        // The Mnemonic index has to be set explicitely otherwise
+        // the display would be wrong if the tab title contains
+        // the mnemonic character
+        tab.setDisplayedMnemonicIndexAt(index, pos);
+      }
+    }
+  }
 }

@@ -36,6 +36,7 @@ import workbench.gui.sql.SqlHistoryEntry;
 import workbench.gui.sql.SqlPanel;
 
 import workbench.util.FixedSizeList;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -60,7 +61,8 @@ public class TabHistoryManager
     {
       SqlPanel sql = (SqlPanel)panel;
       List<SqlHistoryEntry> entries = sql.getHistory().getEntries();
-      ClosedTabInfo info = new ClosedTabInfo(panel.getTabTitle(), entries, index);
+      String title = panel.getTabTitle();
+      ClosedTabInfo info = new ClosedTabInfo(title, entries, index);
       recentTabs.add(info);
       LogMgr.logDebug("TabHistoryManager.addToTabHistory()", "Recent tab added: " + info.toString());
     }
@@ -70,14 +72,19 @@ public class TabHistoryManager
   {
     historyMenu.removeAll();
 
-		for (ClosedTabInfo info : recentTabs)
+    for (ClosedTabInfo info : recentTabs)
     {
-      JMenuItem item = new JMenuItem(info.getTabName() + " (" + info.getTabIndex() + ")");
+      String name = info.getTabName();
+      if (GuiSettings.getShowTabIndex())
+      {
+        name += " " + NumberStringCache.getNumberString(info.getTabIndex() + 1);
+      }
+      JMenuItem item = new JMenuItem(name);
       item.putClientProperty("tab-info", info);
       item.addActionListener(this);
       historyMenu.add(item);
-		}
-		historyMenu.setEnabled(recentTabs.size() > 0);
+    }
+    historyMenu.setEnabled(recentTabs.size() > 0);
   }
 
   @Override
@@ -87,18 +94,19 @@ public class TabHistoryManager
 
     Object source = e.getSource();
     if ( !(source instanceof JMenuItem)) return;
-    JMenuItem item = (JMenuItem)source;
 
+    JMenuItem item = (JMenuItem)source;
     ClosedTabInfo tabInfo = (ClosedTabInfo)item.getClientProperty("tab-info");
+    if (tabInfo == null) return;
 
     SqlPanel newTab = client.restoreTab(tabInfo.getTabIndex());
     if (newTab != null)
     {
+      recentTabs.remove(tabInfo);
       newTab.getHistory().replaceHistory(tabInfo.getHistory());
       newTab.setTabName(tabInfo.getTabName());
+      client.updateTabHistoryMenu();
     }
-    recentTabs.remove(tabInfo);
-    client.updateTabHistoryMenu();
   }
 
 }
