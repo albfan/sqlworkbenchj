@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
+ * Implements a stack with a fixed size.
+ *
  * @author Thomas Kellerer
  */
 public class FixedSizeList<T>

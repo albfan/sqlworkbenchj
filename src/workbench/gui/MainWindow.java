@@ -157,6 +157,7 @@ import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
+import workbench.gui.tabhistory.TabHistoryManager;
 
 import workbench.sql.macros.MacroManager;
 
@@ -250,6 +251,8 @@ public class MainWindow
   private DbTreePanel treePanel;
   private boolean shouldShowTree;
 
+  private final TabHistoryManager closedTabHistory;
+
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
 	 * e.g. the Macro Popup window
@@ -259,6 +262,8 @@ public class MainWindow
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
+
+    closedTabHistory  = new TabHistoryManager(this);
 
 		// Control the brushed metal look for MacOS, this must be set as soon as possible on the
 		// root pane in order to have an effect
@@ -2321,21 +2326,31 @@ public class MainWindow
 	}
 
 	public JMenu getRecentWorkspaceMenu(int panelIndex)
+  {
+    return getSubMenuItem(ResourceMgr.MNU_TXT_WORKSPACE, "recent-workspace", panelIndex);
+  }
+
+	private JMenu getSubMenuItem(String mainMenu, String itemName, int panelIndex)
 	{
-		JMenu main = this.getMenu(ResourceMgr.MNU_TXT_WORKSPACE, panelIndex);
+		JMenu main = this.getMenu(mainMenu, panelIndex);
 		if (main == null) return null;
 		int count = main.getItemCount();
 		for (int i=0; i < count; i ++)
 		{
 			JMenuItem item = main.getItem(i);
 			if (item == null) continue;
-			if ("recent-workspace".equals(item.getName()))
+			if (itemName.equals(item.getName()))
 			{
 				return (JMenu)item;
 			}
 		}
 		return null;
 	}
+
+  private JMenu getTabHistoryMenu(int panelIndex)
+  {
+		return this.getSubMenuItem(ResourceMgr.MNU_TXT_TOOLS, ResourceMgr.MNU_TXT_TAB_HISTORY, panelIndex);
+  }
 
 	public JMenu getMacroMenu(int panelIndex)
 	{
@@ -2362,6 +2377,15 @@ public class MainWindow
 		}
 		return null;
 	}
+
+  public void updateTabHistoryMenu()
+  {
+		for (int i=0; i < getTabCount(); i++)
+		{
+      JMenu menu = getTabHistoryMenu(i);
+			closedTabHistory.updateMenu(menu);
+		}
+  }
 
 	protected void updateRecentWorkspaces()
 	{
@@ -2615,7 +2639,7 @@ public class MainWindow
 					}
 					if (p.canClosePanel(true))
 					{
-						removeTab(index, false);
+						removeTab(index, false, true);
 					}
 					else
 					{
@@ -2664,7 +2688,7 @@ public class MainWindow
 				// I'm not using removeCurrentTab() as that will also
 				// update the GUI and immediately check for a new
 				// connection which is not necessary when removing all tabs.
-				removeTab(keep, false);
+				removeTab(keep, false, false);
 			}
 
 			// Reset the first panel, now we have a "clean" workspace
@@ -2795,28 +2819,31 @@ public class MainWindow
 	 */
 	public JMenu buildToolsMenu()
 	{
-		JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TOOLS));
-		result.setName(ResourceMgr.MNU_TXT_TOOLS);
+    JMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TOOLS));
+    result.setName(ResourceMgr.MNU_TXT_TOOLS);
 
-		result.add(this.dbExplorerAction);
-		result.add(this.newDbExplorerPanel);
-		result.add(this.newDbExplorerWindow);
+    result.add(this.dbExplorerAction);
+    result.add(this.newDbExplorerPanel);
+    result.add(this.newDbExplorerWindow);
     if (showDbTree != null)
     {
       result.add(this.showDbTree);
     }
-		result.addSeparator();
+    result.addSeparator();
 
-		result.add(new DataPumperAction(this));
-		result.add(new ObjectSearchAction(this));
+    result.add(new DataPumperAction(this));
+    result.add(new ObjectSearchAction(this));
 
-		result.addSeparator();
-		result.add(new BookmarksAction(this));
+    result.addSeparator();
+    result.add(new BookmarksAction(this));
     result.add(new SearchAllEditorsAction(this));
+    JMenu history = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_TAB_HISTORY));
+    history.setName(ResourceMgr.MNU_TXT_TAB_HISTORY);
+    result.add(history);
 
-		result.addSeparator();
-		new OptionsDialogAction().addToMenu(result);
-		new ConfigureShortcutsAction().addToMenu(result);
+    result.addSeparator();
+    new OptionsDialogAction().addToMenu(result);
+    new ConfigureShortcutsAction().addToMenu(result);
 
 		return result;
 	}
@@ -3178,6 +3205,21 @@ public class MainWindow
 		}
 	}
 
+  public SqlPanel restoreTab(int oldIndex)
+  {
+		try
+		{
+			setIgnoreTabChange(true);
+			MainPanel p = addTabAtIndex(true, true, true, oldIndex);
+			currentTabChanged();
+			return (SqlPanel)p;
+		}
+		finally
+		{
+			setIgnoreTabChange(false);
+		}
+  }
+
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
 		final SqlPanel sql = new SqlPanel(getMacroClientId());
@@ -3506,7 +3548,7 @@ public class MainWindow
 		{
 			tabHistory.restoreLastTab();
 		}
-		removeTab(index, true);
+		removeTab(index, true, true);
 	}
 
 	/**
@@ -3515,7 +3557,7 @@ public class MainWindow
 	 * as well.
 	 * If a single connection for all tabs is used, the connection is <b>not</b> closed.
 	 */
-	protected void removeTab(int index, boolean updateGUI)
+	protected void removeTab(int index, boolean updateGUI, boolean addToHistory)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
@@ -3524,6 +3566,11 @@ public class MainWindow
 
 		boolean inProgress = this.isConnectInProgress();
 		if (!inProgress) this.setConnectIsInProgress();
+
+    if (addToHistory)
+    {
+      closedTabHistory.addToTabHistory(panel, index);
+    }
 
 		try
 		{
@@ -3578,6 +3625,7 @@ public class MainWindow
 		{
 			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
+    updateTabHistoryMenu();
 	}
 
 	private void disposeMenu(JMenuBar menuBar)

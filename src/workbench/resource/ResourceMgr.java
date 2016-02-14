@@ -69,6 +69,7 @@ public class ResourceMgr
 
 	public static final String MNU_TXT_VIEW = "MnuTxtView";
 	public static final String MNU_TXT_TOOLS = "MnuTxtTools";
+	public static final String MNU_TXT_TAB_HISTORY = "MnuTxtTabHistory";
 	public static final String MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
 

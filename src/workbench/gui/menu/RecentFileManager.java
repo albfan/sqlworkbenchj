@@ -139,7 +139,6 @@ public class RecentFileManager
 
 		props = new ListItemProperty(MACROS_PROP_NAME);
 		props.storeItems(getRecentMacroFiles());
-
 	}
 
 	@Override

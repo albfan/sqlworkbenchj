@@ -1385,4 +1385,9 @@ public class GuiSettings
   {
     return Settings.getInstance().getBoolProperty("workbench.gui.install.focusmgr", true);
   }
+
+  public static int getTabHistorySize()
+  {
+    return Settings.getInstance().getIntProperty("workbench.gui.recenttabs.size", 25);
+  }
 }

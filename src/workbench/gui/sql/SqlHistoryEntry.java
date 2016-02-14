@@ -128,14 +128,10 @@ public class SqlHistoryEntry
       }
       if (centerLine)
       {
-        EventQueue.invokeLater(new Runnable()
+        EventQueue.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            int line = editor.getCaretLine();
-            editor.centerLine(line);
-          }
+          int line = editor.getCaretLine();
+          editor.centerLine(line);
         });
       }
 		}

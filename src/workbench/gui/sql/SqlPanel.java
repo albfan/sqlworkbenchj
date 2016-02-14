@@ -1496,7 +1496,7 @@ public class SqlPanel
 		handler.saveToWorkspace(w, index);
 	}
 
-	SqlHistory getHistory()
+	public SqlHistory getHistory()
 	{
 		return sqlHistory;
 	}
@@ -1517,7 +1517,7 @@ public class SqlPanel
 	}
 
 	/**
-	 * Implementation of the ResultReceiver interface
+	 * Implementation of the ResultReceiver interface.
 	 */
 	@Override
 	public String getTitle()

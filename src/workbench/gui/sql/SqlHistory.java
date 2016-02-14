@@ -55,7 +55,7 @@ public class SqlHistory
 {
 	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
 
-	final private List<SqlHistoryEntry> history;
+	private final List<SqlHistoryEntry> history;
 	private int currentEntry;
 	private int maxSize;
 	private boolean changed;
@@ -100,6 +100,13 @@ public class SqlHistory
 	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }
 	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
 	public WbAction getClearHistoryAction() { return this.clearAction; }
+
+  public synchronized void replaceHistory(List<SqlHistoryEntry> newHistory)
+  {
+    clear();
+    history.addAll(newHistory);
+    showLastStatement();
+  }
 
 	public synchronized void addContent(EditorPanel edit)
 	{
@@ -293,6 +300,11 @@ public class SqlHistory
 			LogMgr.logError("SqlHistory.writeToStream()", "Could not write history!", e);
 		}
 	}
+
+  public List<SqlHistoryEntry> getEntries()
+  {
+    return new ArrayList<>(history);
+  }
 
 	public boolean isChanged()
 	{
