@@ -1668,7 +1668,7 @@ public class DbMetadata
 		// because some JDBC driver versions do retrieve this information automatically some don't
 		SequenceReader seqReader = getSequenceReader();
 		if (seqReader != null && typeIncluded(seqReader.getSequenceTypeName(), types) &&
-				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
+				dbSettings.getBoolProperty("retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
 			List<SequenceDefinition> sequences = seqReader.getSequences(catalogPattern, schemaPattern, namePattern);
@@ -1685,7 +1685,7 @@ public class DbMetadata
 			}
 		}
 
-		boolean retrieveSyns = (synReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
+		boolean retrieveSyns = (synReader != null && dbSettings.getBoolProperty("retrieve_synonyms", false));
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
 			List<TableIdentifier> syns = synReader.getSynonymList(dbConnection, catalogPattern, schemaPattern, namePattern);

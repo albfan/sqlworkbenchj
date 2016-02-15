@@ -363,17 +363,13 @@ public class TableDefinitionPanel
 
 			try
 			{
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						tableDefinition.reset();
-						reloadAction.setEnabled(false);
-						String msg = " " + ResourceMgr.getString("TxtRetrieveTableDef") + " " + currentTable.getTableName();
-						tableNameLabel.setText(msg);
-					}
-				});
+				WbSwingUtilities.invoke(() ->
+        {
+          tableDefinition.reset();
+          reloadAction.setEnabled(false);
+          String msg = " " + ResourceMgr.getString("TxtRetrieveTableDef") + " " + currentTable.getTableName();
+          tableNameLabel.setText(msg);
+        });
 
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = null;
@@ -411,14 +407,10 @@ public class TableDefinitionPanel
 
 				alterButton.setVisible(dbConnection.getDbSettings().columnCommentAllowed(currentTable.getType()));
 
-				WbSwingUtilities.invoke(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						applyTableModel(model);
-					}
-				});
+				WbSwingUtilities.invoke(() ->
+        {
+          applyTableModel(model);
+        });
 				alterColumnsAction.setSourceTable(dbConnection, currentTable);
 				alterColumnsAction.setEnabled(false);
 				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null && DbExplorerSettings.allowAlterInDbExplorer();

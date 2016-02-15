@@ -28,15 +28,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListEnhancer;
@@ -50,37 +47,15 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * An ObjectListExtender to read OBJECT TYPEs
- * does not return a value in the TABLE_TYPE column
+ * An ObjectListExtender to read OBJECT TYPEs.
  *
  * @author Thomas Kellerer
  */
 public class DB2TypeReader
 	implements ObjectListExtender, ObjectListEnhancer
 {
-	private final Map<String, Integer> typeNameMap = new HashMap<>(10);
-
 	public DB2TypeReader()
 	{
-		typeNameMap.put("VARCHAR", Types.VARCHAR);
-		typeNameMap.put("CHAR", Types.CHAR);
-		typeNameMap.put("SMALLINT", Types.SMALLINT);
-		typeNameMap.put("BIGINT", Types.BIGINT);
-		typeNameMap.put("INTEGER", Types.INTEGER);
-		typeNameMap.put("DECIMAL", Types.DECIMAL);
-		typeNameMap.put("DOUBLE", Types.DOUBLE);
-		typeNameMap.put("CHARACTER", Types.CHAR);
-		typeNameMap.put("LONG VARCHAR", Types.LONGVARCHAR);
-		typeNameMap.put("BLOB", Types.BLOB);
-		typeNameMap.put("CLOB", Types.CLOB);
-		typeNameMap.put("DATE", Types.DATE);
-		typeNameMap.put("TIME", Types.TIME);
-		typeNameMap.put("BOOLEAN", Types.BOOLEAN);
-		typeNameMap.put("XML", Types.SQLXML);
-		typeNameMap.put("VARBINARY", Types.VARBINARY);
-		typeNameMap.put("REAL", Types.REAL);
-		typeNameMap.put("ARRAY", Types.ARRAY);
-		typeNameMap.put("BINARY", Types.BINARY);
 	}
 
 	@Override
@@ -162,7 +137,7 @@ public class DB2TypeReader
 
 		Statement stmt = null;
 		ResultSet rs = null;
-		DataTypeResolver resolver = con.getMetadata().getDataTypeResolver();
+    Db2DataTypeMapper mapper = new Db2DataTypeMapper();
 
 		try
 		{
@@ -184,8 +159,8 @@ public class DB2TypeReader
 
 				if (object.getMetaType() != DB2ObjectType.MetaType.structured)
 				{
-					int jdbcType = db2TypeToJDBC(baseType);
-					object.setBaseType(resolver.getSqlTypeDisplay(baseType, jdbcType, len, scale));
+					int jdbcType = mapper.getJDBCTypeName(baseType);
+          object.setBaseType(mapper.getDisplayType(baseType, jdbcType, len, scale));
 					object.setArrayLength(arrayLength);
 				}
 				result.add(object);
@@ -372,17 +347,18 @@ public class DB2TypeReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("DB2TypeReader.getAttributes()", "Using SQL: " + sql);
+			LogMgr.logInfo("DB2TypeReader.getAttributes()", "Retrieving type attributes using:\n" + sql);
 		}
 
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<ColumnIdentifier> result = new ArrayList<>(type.getNumberOfAttributes());
+
 		try
 		{
 			stmt = con.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
-			DataTypeResolver resolver = con.getMetadata().getDataTypeResolver();
+      Db2DataTypeMapper mapper = new Db2DataTypeMapper();
 
 			while (rs.next())
 			{
@@ -390,23 +366,19 @@ public class DB2TypeReader
 				String dataType = rs.getString(2);
 				int length = rs.getInt(3);
 				int scale = rs.getInt(4);
-				int jdbcType = db2TypeToJDBC(dataType);
+
+        int jdbcType = mapper.getJDBCTypeName(dataType);
 				ColumnIdentifier col = new ColumnIdentifier(colname, jdbcType);
 
-				if (SqlUtil.isCharacterTypeWithLength(jdbcType))
-				{
-					col.setDbmsType(resolver.getSqlTypeDisplay(dataType, jdbcType, length, 0));
-				}
-				else
-				{
-					col.setDbmsType(resolver.getSqlTypeDisplay(dataType, jdbcType, length, scale));
-				}
+        String dbmsType = mapper.getDisplayType(dataType, jdbcType, length, scale);
+        col.setDbmsType(dbmsType);
+
 				result.add(col);
 			}
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DB2TypeReader.getAttributes()", "Error retrieving attributes", e);
+			LogMgr.logError("DB2TypeReader.getAttributes()", "Error retrieving attributes using:\n" + sql, e);
 		}
 		finally
 		{
@@ -414,17 +386,5 @@ public class DB2TypeReader
 		}
 		return result;
 	}
-
-	private int db2TypeToJDBC(String typeName)
-	{
-		if (typeName == null) return Types.OTHER;
-		Integer type = typeNameMap.get(typeName);
-		if (type == null)
-		{
-			return Types.OTHER;
-		}
-		return type.intValue();
-	}
-
 
 }
