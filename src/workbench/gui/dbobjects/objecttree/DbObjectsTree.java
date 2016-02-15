@@ -504,9 +504,16 @@ public class DbObjectsTree
   {
     WbConnection conn = loader.getConnection();
     if (conn == null || conn.isBusy()) return;
-    String schema = conn.getCurrentSchema();
-    final ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
-    expandNode(node);
+    try
+    {
+      String schema = conn.getCurrentSchema();
+      final ObjectTreeNode node = getTreeModel().findNodeByType(schema, TreeLoader.TYPE_SCHEMA);
+      expandNode(node);
+    }
+    finally
+    {
+      loader.endTransaction();
+    }
   }
 
   private void loadNodeObjects(ObjectTreeNode schemaNode)
@@ -622,13 +629,6 @@ public class DbObjectsTree
   {
     clear();
     loader = null;
-  }
-
-  private String getDbId()
-  {
-    if (loader == null) return "";
-    if (loader.getConnection() == null) return "";
-    return loader.getConnection().getDbId();
   }
 
   private DbObjectTreeModel getTreeModel()

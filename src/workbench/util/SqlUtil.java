@@ -1141,15 +1141,17 @@ public class SqlUtil
 	}
 
 	/**
-	 *	Replaces all white space characters with a single space (But not inside
-	 *	string literals) and removes -- style and Java style comments
-	 *	@param aSql The sql script to "clean out"
-	 *  @param keepNewlines if true, newline characters (\n) are kept
-	 *  @param keepComments if true, comments (single line, block comments) are kept
-	 *  @param checkNonStandardComments check for non-standard MySQL single line comments
-	 *  @param removeSemicolon if true, a trailing semicolon will be removed
-	 *	@return String
-	 */
+	 * Replaces all white space characters with a single space and removes single line and multi line comments.
+   * 
+   * Whitespace is not removed inside string literals.
+   *
+	 * @param aSql                     The sql script to "clean out"
+   * @param keepNewlines             if true, newline characters (\n) are kept
+   * @param keepComments             if true, comments (single line, block comments) are kept
+   * @param checkNonStandardComments check for non-standard MySQL single line comments
+   * @param removeSemicolon          if true, a trailing semicolon will be removed
+   * @return String
+ 	 */
 	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
 	{
 		if (aSql == null) return null;

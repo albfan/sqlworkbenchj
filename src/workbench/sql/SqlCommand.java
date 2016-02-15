@@ -763,14 +763,11 @@ public class SqlCommand
 	 * Remove comments from the SQL if the current connection profile has the
 	 * corresponding option defined.
 	 *
-	 * Additionally the DB specific settings is checked whether the DBMS supports
-	 * comments inside SQL statements.
-	 *
 	 * @param originalSql
 	 * @return the sql with comments removed if necessary.
 	 *
 	 * @see workbench.db.ConnectionProfile#getRemoveComments()
-	 * @see workbench.db.DbSettings#supportsCommentInSql()
+   * 
 	 * @see workbench.db.DbSettings#removeNewLinesInSQL()
 	 */
 	protected String getSqlToExecute(String originalSql)
@@ -782,7 +779,7 @@ public class SqlCommand
 
 			if (!removeComments && !removeNewLines ) return originalSql;
 
-			return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments);
+			return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments, currentConnection.getMetadata().isMySql(), false);
 		}
 		catch (Exception ex)
 		{

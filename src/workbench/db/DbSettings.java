@@ -74,17 +74,8 @@ public class DbSettings
 	private static final String NOT_THERE = "$wb$_not_there_$wb$";
 
 	private final String dbId;
-	private boolean caseSensitive;
-	private boolean useJdbcCommit;
-	private boolean ddlNeedsCommit;
-
-	private boolean reportsRealSizeAsDisplaySize;
-
-	private boolean allowsMultipleGetUpdateCounts = true;
-	private boolean supportsCommentInSql = true;
-
-	private Set<String> updatingCommands;
-	private Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
+	private final Set<String> updatingCommands = CollectionUtil.caseInsensitiveSet();
+	private final Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
 
 	private final String prefix;
 	private final String prefixMajorVersion;
@@ -111,11 +102,7 @@ public class DbSettings
 
 		Settings settings = Settings.getInstance();
 
-		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false);
-		this.useJdbcCommit = settings.getBoolProperty(prefix + "usejdbccommit", false);
-		this.ddlNeedsCommit = settings.getBoolProperty(prefix + "ddlneedscommit", false);
-		this.supportsCommentInSql = settings.getBoolProperty(prefix + "sql.embeddedcomments", true);
-
+    // migrate pre build 117 setting
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		if (CollectionUtil.isNonEmpty(quote))
 		{
@@ -126,9 +113,9 @@ public class DbSettings
 			}
 			settings.removeProperty("workbench.db.neverquote");
 		}
-		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
-		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
+
 		readNoUpdateCountVerbs();
+    readUpdatingCommands();
 	}
 
 	public final String getDbId()
@@ -138,7 +125,7 @@ public class DbSettings
 
 	public boolean supportsCommentInSql()
 	{
-		return this.supportsCommentInSql;
+		return getBoolProperty("sql.embeddedcomments", true);
 	}
 
 	public String getProperty(String prop, String defaultValue)
@@ -179,17 +166,6 @@ public class DbSettings
 	public boolean isUpdatingCommand(String verb)
 	{
 		if (StringUtil.isEmptyString(verb)) return false;
-		if (this.updatingCommands == null)
-		{
-			this.updatingCommands = CollectionUtil.caseInsensitiveSet();
-
-			String l = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
-			List<String> commands = StringUtil.stringToList(l, ",", true, true);
-			updatingCommands.addAll(commands);
-			l = Settings.getInstance().getProperty(prefix + "updatingcommands", null);
-			commands = StringUtil.stringToList(l, ",", true, true);
-			updatingCommands.addAll(commands);
-		}
 		return updatingCommands.contains(verb);
 	}
 
@@ -289,12 +265,12 @@ public class DbSettings
 
 	public boolean allowsMultipleGetUpdateCounts()
 	{
-		return this.allowsMultipleGetUpdateCounts;
+		return getBoolProperty(prefix + "multipleupdatecounts", true);
 	}
 
 	public boolean reportsRealSizeAsDisplaySize()
 	{
-		return this.reportsRealSizeAsDisplaySize;
+		return getBoolProperty(prefix + "charsize.usedisplaysize", false);
 	}
 
 	public int getMaxWarnings()
@@ -325,14 +301,13 @@ public class DbSettings
 	}
 
 	/**
-	 * Returns true if the DBMS supports transactional DDL and thus
-	 * needs a COMMIT after any DDL statement.
+	 * Returns true if the DBMS supports transactional DDL and thus needs a COMMIT after any DDL statement.
 	 * <br/>
 	 * The related property is: <tt>workbench.db.[dbid].ddlneedscommit</tt>
 	 */
 	public boolean ddlNeedsCommit()
 	{
-		return ddlNeedsCommit;
+		return getBoolProperty("ddlneedscommit", false);
 	}
 
 	/**
@@ -372,15 +347,17 @@ public class DbSettings
 	}
 
 	/**
-	 * Some JDBC driver to not allow to run a SQL statement that contains COMMIT or ROLLBACK
+	 * Some JDBC driver do not allow to run a SQL statement that contains COMMIT or ROLLBACK
 	 * as a String. They required to use Connection.commit() or Conneciton.rollback() instead.
 	 * <br/>
+   *
 	 * The related property is: workbench.db.[dbid].usejdbccommit
+   *
 	 * @see TransactionEndCommand#execute(java.lang.String)
 	 */
 	public boolean useJdbcCommit()
 	{
-		return useJdbcCommit;
+		return getBoolProperty("usejdbccommit", false);
 	}
 
 	/**
@@ -393,7 +370,7 @@ public class DbSettings
 	 */
 	public boolean isStringComparisonCaseSensitive()
 	{
-		return this.caseSensitive;
+		return getBoolProperty("casesensitive", false);
 	}
 
 	public boolean getDefaultBeforeNull()
@@ -963,7 +940,7 @@ public class DbSettings
 
   public boolean canDropInTransaction(String type)
   {
-    if (this.ddlNeedsCommit)
+    if (ddlNeedsCommit())
     {
       return getBoolProperty("drop." + type + ".in.transaction", true);
     }
@@ -1870,6 +1847,14 @@ public class DbSettings
 	{
 		return Collections.unmodifiableSet(noUpdateCountVerbs);
 	}
+
+  private void readUpdatingCommands()
+  {
+    String global = Settings.getInstance().getProperty("workbench.db.updatingcommands", null);
+    updatingCommands.addAll(StringUtil.stringToList(global, ",", true, true));
+    String dbCommands = Settings.getInstance().getProperty(prefix + "updatingcommands", null);
+    updatingCommands.addAll(StringUtil.stringToList(dbCommands, ",", true, true));
+  }
 
 	private void readNoUpdateCountVerbs()
 	{

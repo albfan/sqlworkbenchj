@@ -117,7 +117,13 @@ public class WbConnection
 
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
+   *
 	 * This will also initialize a {@link DbMetadata} instance.
+   *
+   * The {@link #removeComments} property is initialized from the connection profile
+   * and the configuration for the current DBMS 
+   *
+   * @see DbSettings#supportsCommentInSql
 	 */
 	public WbConnection(String anId, Connection aConn, ConnectionProfile aProfile)
 		throws SQLException
@@ -126,14 +132,13 @@ public class WbConnection
 		setSqlConnection(aConn);
 		setProfile(aProfile);
 
-		// removeComments and removeNewLines are properties
-		// that are needed each time a SQL statement is executed
-		// To speed up SQL parsing, the value for those properties are
-		// "cached" here
+		// removeComments and removeNewLines are properties that are needed each time a SQL statement is executed
+		// To speed up SQL parsing, the value for those properties are "cached" here
 		if (profile != null)
 		{
 			removeComments = profile.getRemoveComments();
 		}
+
 		if (metaData != null)
 		{
 			DbSettings db = metaData.getDbSettings();
@@ -738,7 +743,7 @@ public class WbConnection
 	public void rollbackSilently()
 	{
     if (getAutoCommit()) return;
-    
+
 		try
 		{
 			rollback();

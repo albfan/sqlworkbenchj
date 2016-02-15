@@ -157,7 +157,7 @@ import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
-import workbench.gui.tabhistory.TabHistoryManager;
+import workbench.gui.tabhistory.ClosedTabManager;
 
 import workbench.sql.macros.MacroManager;
 
@@ -251,7 +251,7 @@ public class MainWindow
   private DbTreePanel treePanel;
   private boolean shouldShowTree;
 
-  private final TabHistoryManager closedTabHistory;
+  private final ClosedTabManager closedTabHistory;
 
 	/**
 	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
@@ -263,7 +263,7 @@ public class MainWindow
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 
-    closedTabHistory  = new TabHistoryManager(this);
+    closedTabHistory  = new ClosedTabManager(this);
 
 		// Control the brushed metal look for MacOS, this must be set as soon as possible on the
 		// root pane in order to have an effect
@@ -1895,6 +1895,7 @@ public class MainWindow
       }
       finally
       {
+        updateTabHistoryMenu();
         checkReloadWkspAction();
         setIgnoreTabChange(false);
         FileUtil.closeQuietely(w);

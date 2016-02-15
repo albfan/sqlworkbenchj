@@ -20,6 +20,7 @@
  */
 package workbench.gui.tabhistory;
 
+import java.io.File;
 import java.util.List;
 
 import workbench.gui.sql.SqlHistoryEntry;
@@ -33,12 +34,30 @@ public class ClosedTabInfo
   private final String tabName;
   private final List<SqlHistoryEntry> sqlHistory;
   private final int tabIndex;
+  private File externalFile;
+  private String fileEncoding;
 
   public ClosedTabInfo(String name, List<SqlHistoryEntry> history, int index)
   {
     this.tabName = name;
     this.sqlHistory = history;
     this.tabIndex = index;
+  }
+
+  public void setExternalFile(File file, String encoding)
+  {
+    externalFile = file;
+    fileEncoding = encoding;
+  }
+
+  public String getFileEncoding()
+  {
+    return fileEncoding;
+  }
+  
+  public File getExternalFile()
+  {
+    return externalFile;
   }
 
   public int getTabIndex()
@@ -62,4 +81,8 @@ public class ClosedTabInfo
     return "ClosedTabInfo[index: " + tabIndex + ", title: \"" + tabName + "\", history size: " + sqlHistory.size() + "]";
   }
 
+  public void clear()
+  {
+    sqlHistory.clear();
+  }
 }

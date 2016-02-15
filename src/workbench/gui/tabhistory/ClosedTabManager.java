@@ -42,13 +42,13 @@ import workbench.util.NumberStringCache;
  *
  * @author Thomas Kellerer
  */
-public class TabHistoryManager
+public class ClosedTabManager
   implements ActionListener
 {
   private final FixedSizeList<ClosedTabInfo> recentTabs;
   private final MainWindow client;
 
-  public TabHistoryManager(MainWindow window)
+  public ClosedTabManager(MainWindow window)
   {
     recentTabs = new FixedSizeList(GuiSettings.getTabHistorySize());
     recentTabs.setAllowDuplicates(true);
@@ -63,6 +63,7 @@ public class TabHistoryManager
       List<SqlHistoryEntry> entries = sql.getHistory().getEntries();
       String title = panel.getTabTitle();
       ClosedTabInfo info = new ClosedTabInfo(title, entries, index);
+      info.setExternalFile(sql.getEditor().getCurrentFile(), sql.getEditor().getCurrentFileEncoding());
       recentTabs.add(info);
       LogMgr.logDebug("TabHistoryManager.addToTabHistory()", "Recent tab added: " + info.toString());
     }
@@ -106,7 +107,30 @@ public class TabHistoryManager
       newTab.getHistory().replaceHistory(tabInfo.getHistory());
       newTab.setTabName(tabInfo.getTabName());
       client.updateTabHistoryMenu();
+      if (tabInfo.getExternalFile() != null)
+      {
+        newTab.getEditor().readFile(tabInfo.getExternalFile(), tabInfo.getFileEncoding());
+      }
+      tabInfo.clear();
     }
   }
 
+  public void clear()
+  {
+    for (ClosedTabInfo info : recentTabs)
+    {
+      info.clear();
+    }
+    recentTabs.clear();
+  }
+
+  public void reset(JMenu historyMenu)
+  {
+    clear();
+    if (historyMenu != null)
+    {
+      historyMenu.removeAll();
+      historyMenu.setEnabled(false);
+    }
+  }
 }

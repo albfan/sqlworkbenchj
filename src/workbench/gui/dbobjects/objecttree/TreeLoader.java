@@ -287,10 +287,11 @@ public class TreeLoader
     }
   }
 
-  private void endTransaction()
+  public void endTransaction()
   {
     if (connection.getDbSettings().selectStartsTransaction())
     {
+      LogMgr.logTrace("TreeLoader.endTransaction()", "Ending DbTree transaction using rollback on connection: " + connection.getId());
       connection.rollbackSilently();
     }
   }
