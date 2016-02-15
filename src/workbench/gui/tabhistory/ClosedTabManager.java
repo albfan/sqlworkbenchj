@@ -109,7 +109,15 @@ public class ClosedTabManager
       client.updateTabHistoryMenu();
       if (tabInfo.getExternalFile() != null)
       {
-        newTab.getEditor().readFile(tabInfo.getExternalFile(), tabInfo.getFileEncoding());
+        if (tabInfo.getExternalFile().exists())
+        {
+          newTab.getEditor().readFile(tabInfo.getExternalFile(), tabInfo.getFileEncoding());
+        }
+        else
+        {
+          LogMgr.logWarning("ClosedTabManager.actionPerformed()",
+            "The tab \"" + tabInfo.getTabName() + "\" referenced the no longer existing file: " + tabInfo.getExternalFile().getAbsolutePath());
+        }
       }
       tabInfo.clear();
     }
