@@ -22,20 +22,13 @@ package workbench.db.ibm;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
-import workbench.db.DbObject;
-import workbench.db.ObjectListExtender;
+import workbench.db.ObjectListAppender;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -43,19 +36,22 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
+ * An ObjectListAppender for DB2/LUW to read temporary tables.
+ *
+ * The DB2 JDBC driver does not return created global temporary tables. This ObjectListAppender retrieves them
+ * from syscat.tables and adds them to the regular list of tables.
  *
  * @author Thomas Kellerer
  */
 public class DB2TempTableReader
-  implements ObjectListExtender
+  implements ObjectListAppender
 {
-  public static final String TABLE_TYPE = "TEMPORARY TABLE";
+  private static final String TABLE_TYPE = "GLOBAL TEMPORARY";
 
   @Override
   public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
   {
     if (!DbMetadata.typeIncluded("TABLE", requestedTypes)) return false;
-    if (!DbMetadata.typeIncluded(TABLE_TYPE, requestedTypes)) return false;
 
     String sql =
       "select tabschema, \n" +
@@ -64,18 +60,31 @@ public class DB2TempTableReader
       "from syscat.tables \n" +
       "where type = 'G' ";
 
-    String escape = " escape '" + con.getMetadata().getSearchStringEscape() + "'";
     int schemaIndex = 0;
     int tableIndex = 0;
     if (schema != null)
     {
-      sql += "\n  and tabschema like ? " + escape;
+      if (schema.indexOf('%') > -1)
+      {
+        sql += "\n  and tabschema like ? ";
+      }
+      else
+      {
+        sql += "\n  and tabschema = ? ";
+      }
       schemaIndex = 1;
     }
 
     if (objects != null)
     {
-      sql += "\n  and tabname like ? " + escape;
+      if (objects.indexOf('%') > -1)
+      {
+        sql += "\n  and tabname like ? ";
+      }
+      else
+      {
+        sql += "\n  and tabname = ? ";
+      }
       tableIndex = schemaIndex + 1;
     }
 
@@ -88,6 +97,8 @@ public class DB2TempTableReader
 
     PreparedStatement stmt = null;
     ResultSet rs = null;
+    int count = 0;
+
     try
     {
       stmt = con.getSqlConnection().prepareStatement(sql);
@@ -110,7 +121,16 @@ public class DB2TempTableReader
         result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, tabSchema);
         result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, tabName);
         result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, remarks);
-        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, TABLE_TYPE);
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, "TABLE");
+
+        TableIdentifier tbl = new TableIdentifier(null, tabSchema, tabName, false);
+        tbl.setType("TABLE");
+        tbl.setNeverAdjustCase(true);
+        tbl.setComment(remarks);
+        tbl.getSourceOptions().setTypeModifier(TABLE_TYPE);
+        tbl.getSourceOptions().setInitialized();
+        result.getRow(row).setUserObject(tbl);
+        count ++;
       }
     }
     catch (Exception ex)
@@ -122,88 +142,7 @@ public class DB2TempTableReader
       SqlUtil.closeAll(rs, stmt);
     }
 
-    return false;
-  }
-
-  @Override
-  public List<String> supportedTypes()
-  {
-    return Collections.singletonList(TABLE_TYPE);
-  }
-
-  @Override
-  public boolean isDerivedType()
-  {
-    return false;
-  }
-
-  @Override
-  public boolean handlesType(String type)
-  {
-    return TABLE_TYPE.equalsIgnoreCase(type);
-  }
-
-  @Override
-  public boolean handlesType(String[] types)
-  {
-    if (types == null) return true;
-    for (String type : types)
-    {
-      if (type.equalsIgnoreCase(TABLE_TYPE)) return true;
-    }
-    return false;
-  }
-
-  @Override
-  public DataStore getObjectDetails(WbConnection con, DbObject object)
-  {
-    try
-    {
-      return con.getMetadata().getObjectDetails((TableIdentifier)object);
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logError("Db2TempTablereader.getObjectDetails()", "Could not retrieve object details", ex);
-      return null;
-    }
-  }
-
-  @Override
-  public TableIdentifier getObjectDefinition(WbConnection con, DbObject name)
-  {
-    if (name instanceof TableIdentifier)
-    {
-      return (TableIdentifier)name;
-    }
-    return null;
-  }
-
-  @Override
-  public String getObjectSource(WbConnection con, DbObject object)
-  {
-    TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-    List<ColumnIdentifier> columns = getColumns(con, object);
-    return builder.getTableSource((TableIdentifier)object, columns);
-  }
-
-  @Override
-  public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)
-  {
-    try
-    {
-      return con.getMetadata().getTableColumns((TableIdentifier)object);
-    }
-    catch (SQLException ex)
-    {
-      LogMgr.logError("Db2TempTablereader.getColumns()", "Could not retrieve columns", ex);
-      return null;
-    }
-  }
-
-  @Override
-  public boolean hasColumns()
-  {
-    return true;
+    return count > 0;
   }
 
 }

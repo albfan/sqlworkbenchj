@@ -41,7 +41,7 @@ public class ObjectSourceOptions
 
 	private final String KEY_TYPE_MODIFIER = "typMod";
 	private final String KEY_INLINE_OPTION = "inlineSql";
-	private final String KEY_TABLE_OPTION = "tbleOpt";
+	private final String KEY_TABLE_OPTION = "tableOption";
 	private final String KEY_ADDITIONAL_SQL = "addSql";
 
 	private final Map<String, String> options = new HashMap<>();

@@ -53,6 +53,7 @@ import workbench.db.h2database.H2DomainReader;
 import workbench.db.hana.HanaSequenceReader;
 import workbench.db.hana.HanaTableDefinitionReader;
 import workbench.db.hsqldb.HsqlTypeReader;
+import workbench.db.ibm.DB2TempTableReader;
 import workbench.db.ibm.DB2TypeReader;
 import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.ibm.Db2iObjectListEnhancer;
@@ -144,6 +145,7 @@ public class DbMetadata
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
 	private List<ObjectListExtender> extenders = new ArrayList<>();
+  private List<ObjectListAppender> appenders = new ArrayList<>();
 
 	private DbmsOutput oraOutput;
 
@@ -312,6 +314,7 @@ public class DbMetadata
 			if (getDbId().equals(DBID_DB2_LUW))
 			{
 				extenders.add(new DB2TypeReader());
+        appenders.add(new DB2TempTableReader());
 			}
 
       if (getDbId().equals(DBID_DB2_ISERIES))
@@ -1701,6 +1704,11 @@ public class DbMetadata
 			}
 		}
 
+    for (ObjectListAppender appender : appenders)
+    {
+      appender.extendObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
+    }
+
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(types))
@@ -2531,6 +2539,11 @@ public class DbMetadata
 
 	public TableIdentifier buildTableIdentifierFromDs(DataStore ds, int row)
 	{
+    Object uo = ds.getRow(row).getUserObject();
+    if (uo instanceof TableIdentifier)
+    {
+      return (TableIdentifier)uo;
+    }
 		String t = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_NAME);
 		String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);
 		String c = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_CATALOG);

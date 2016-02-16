@@ -2326,6 +2326,11 @@ public class TableListPanel
 	private TableIdentifier createTableIdentifier(int row)
 	{
 		DataStore ds = this.tableList.getDataStore();
+    Object uo = ds.getRow(row).getUserObject();
+    if (uo instanceof TableIdentifier)
+    {
+      return (TableIdentifier)uo;
+    }
 		String name = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 		String schema = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
 		String catalog = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
