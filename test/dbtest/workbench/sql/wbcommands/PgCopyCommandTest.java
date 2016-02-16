@@ -20,17 +20,23 @@
  */
 package workbench.sql.wbcommands;
 
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Before;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.WbConnection;
 import workbench.db.postgres.PostgresTestUtil;
-import static workbench.db.postgres.PostgresTestUtil.dropAllObjects;
-import static workbench.db.postgres.PostgresTestUtil.getPostgresConnection;
+
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.parser.ParserType;
+import workbench.sql.parser.ScriptParser;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+import static workbench.db.postgres.PostgresTestUtil.*;
 
 /**
  *
@@ -72,16 +78,32 @@ public class PgCopyCommandTest
       "commit;");
 
     String copy =
-      "copy person from stdin with (format csv, delimiter ',');\n" +
+      "copy person (id, firstname, lastname) from stdin with (format csv, delimiter ',');\n" +
       "1,Arthur,Dent\n" +
       "2,Ford,Prefect\n" +
-      "\\.";
+      "\\.\n" +
+      "commit;";
 
-    TestUtil.executeScript(conn, copy);
-    conn.commit();
+    // this tests the parser to strip the ending \. from the command
+    ScriptParser parser = new ScriptParser(ParserType.Postgres);
+    parser.setScript(copy);
+    String parsedSql = parser.getCommand(0);
+
+    assertEquals("commit", parser.getCommand(1));
+    
+    // PgCopyCommand needs a StatementRunner reference
+    // so run this statement through one
+    StatementRunner runner = new StatementRunner();
+    runner.setConnection(conn);
+    runner.runStatement(parsedSql);
+    StatementRunnerResult result = runner.getResult();
+    assertTrue(result.isSuccess());
 
     int count = TestUtil.getNumberValue(conn, "select count(*) from person");
     assertEquals(2,count);
+
+    String name = (String)TestUtil.getSingleQueryValue(conn, "select firstname from person where id = 1");
+    assertEquals("Arthur", name);
   }
 
 }
