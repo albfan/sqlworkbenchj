@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -600,10 +599,8 @@ public class DbDriver
 	 * @param url the JDBC url (needed to identify the DBMS)
 	 * @param id the internal connection id
 	 * @param user the user for the connection
-	 * @throws UnknownHostException
 	 */
 	private void setAppInfo(Properties props, String url, String id, String user)
-		throws UnknownHostException
 	{
 		if (!doSetAppName()) return;
 
@@ -618,7 +615,7 @@ public class DbDriver
 			prgName += " (" + id + ")";
 		}
 
-		if (url.startsWith("jdbc:oracle:thin"))
+    if (url.startsWith("jdbc:oracle:thin"))
 		{
 			appNameProperty = "v$session.program";
 			if (id != null && !props.containsKey("v$session.terminal")) props.put("v$session.terminal", StringUtil.getMaxSubstring(id, 30));
@@ -629,43 +626,49 @@ public class DbDriver
 			user = System.getProperty("user.name",null);
 			if (user != null && !props.containsKey("v$session.osuser")) props.put("v$session.osuser", user);
 		}
-		else if (url.startsWith("jdbc:inetdae"))
+
+    if (url.startsWith("jdbc:inetdae"))
 		{
 			appNameProperty = "appname";
 		}
-		else if (url.startsWith("jdbc:jtds"))
+
+    if (url.startsWith("jdbc:jtds"))
 		{
 			appNameProperty = "APPNAME";
 		}
-		else if (url.startsWith("jdbc:microsoft:sqlserver"))
+
+    if (url.startsWith("jdbc:microsoft:sqlserver"))
 		{
 			// Old MS SQL Server driver
 			appNameProperty = "ProgramName";
 		}
-		else if (url.startsWith("jdbc:sqlserver:"))
+
+    if (url.startsWith("jdbc:sqlserver:"))
 		{
 			// New SQL Server 2005 JDBC driver
 			appNameProperty = "applicationName";
 			if (!props.containsKey("workstationID"))
 			{
-				InetAddress localhost = InetAddress.getLocalHost();
-				String localName = (localhost != null ? localhost.getHostName() : null);
+        String localName = getLocalHostname();
 				if (localName != null)
 				{
 					props.put("workstationID", localName);
 				}
 			}
 		}
-		else if (url.startsWith("jdbc:db2:"))
+
+    if (url.startsWith("jdbc:db2:"))
 		{
       props.put("clientApplicationInformation", id);
       appNameProperty = "clientProgramName";
 		}
-		else if (url.startsWith("jdbc:firebirdsql:"))
+
+    if (url.startsWith("jdbc:firebirdsql:"))
 		{
 			System.setProperty("org.firebirdsql.jdbc.processName", StringUtil.getMaxSubstring(prgName, 250));
 		}
-		else if (url.startsWith("jdbc:sybase:tds"))
+
+    if (url.startsWith("jdbc:sybase:tds"))
 		{
 			appNameProperty = "APPLICATIONNAME";
 		}
@@ -674,8 +677,26 @@ public class DbDriver
 		{
 			props.put(appNameProperty, prgName);
 		}
-
 	}
+
+  private String getLocalHostname()
+  {
+    try
+    {
+      InetAddress localhost = InetAddress.getLocalHost();
+      String localName = localhost.getHostName();
+      if (localName == null)
+      {
+        localName = localhost.getHostAddress();
+      }
+      return localName;
+    }
+    catch (Throwable th)
+    {
+      return null;
+    }
+  }
+
 	/**
 	 *	This is a "simplified version of the connect() method
 	 *  for issuing a "shutdown command" to Cloudscape

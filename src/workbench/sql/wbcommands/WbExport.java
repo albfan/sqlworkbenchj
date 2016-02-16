@@ -1102,7 +1102,11 @@ public class WbExport
 
 	private void addMessages(StatementRunnerResult result)
 	{
-		result.addMessage(this.exporter.getErrors());
+    CharSequence errors = this.exporter.getErrors();
+    if (StringUtil.isNonEmpty(errors))
+    {
+      result.addMessage(errors);
+    }
 
 		if (exporter.hasWarning())
 		{

@@ -3482,9 +3482,8 @@ public class SqlPanel
           // make sure the error messages are visible
           showLogPanel();
 
-					// error messages should always be shown in the log
-					// panel, even if compressLog is enabled (if it is not enabled
-					// the messages have been appended to the log already)
+					// error messages should always be shown in the log panel, even if compressLog is enabled
+          // if it is not enabled the messages have been appended to the log already
 					if (logWasCompressed)
           {
             appendToLog(statementResult.getMessages().toString());

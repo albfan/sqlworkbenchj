@@ -106,10 +106,11 @@ public class BackupOptions
     backupMacros = new JCheckBox();
     backupProfiles = new JCheckBox();
     backupDrivers = new JCheckBox();
-    jLabel1 = new JLabel();
-    jLabel2 = new JLabel();
-    backupCount = new JTextField();
+    jPanel1 = new JPanel();
     backupDirPicker = new WbFilePicker();
+    backupCount = new JTextField();
+    jLabel2 = new JLabel();
+    jLabel1 = new JLabel();
 
     setLayout(new GridBagLayout());
 
@@ -120,8 +121,8 @@ public class BackupOptions
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     add(createWkspBackup, gridBagConstraints);
 
     backupSettingsFile.setText(ResourceMgr.getString("LblBckSettings")); // NOI18N
@@ -132,8 +133,8 @@ public class BackupOptions
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupSettingsFile, gridBagConstraints);
 
@@ -145,8 +146,8 @@ public class BackupOptions
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupMacros, gridBagConstraints);
 
@@ -158,8 +159,8 @@ public class BackupOptions
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 0, 3, 0);
     add(backupProfiles, gridBagConstraints);
 
@@ -171,30 +172,23 @@ public class BackupOptions
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 0, 3, 0);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     add(backupDrivers, gridBagConstraints);
 
-    jLabel1.setLabelFor(backupCount);
-    jLabel1.setText(ResourceMgr.getString("LblMaxWkspBck")); // NOI18N
-    jLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 0, 1, 7);
-    add(jLabel1, gridBagConstraints);
+    jPanel1.setLayout(new GridBagLayout());
 
-    jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
-    jLabel2.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
+    backupDirPicker.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
+    backupDirPicker.setSelectDirectoryOnly(true);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(6, 0, 4, 5);
-    add(jLabel2, gridBagConstraints);
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(6, 13, 5, 11);
+    jPanel1.add(backupDirPicker, gridBagConstraints);
 
     backupCount.setColumns(3);
     backupCount.setHorizontalAlignment(JTextField.TRAILING);
@@ -202,24 +196,40 @@ public class BackupOptions
     backupCount.setMinimumSize(new Dimension(30, 20));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 13, 1, 0);
-    add(backupCount, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(0, 13, 1, 0);
+    jPanel1.add(backupCount, gridBagConstraints);
 
-    backupDirPicker.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
-    backupDirPicker.setSelectDirectoryOnly(true);
+    jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
+    jLabel2.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 0, 4, 5);
+    jPanel1.add(jLabel2, gridBagConstraints);
+
+    jLabel1.setLabelFor(backupCount);
+    jLabel1.setText(ResourceMgr.getString("LblMaxWkspBck")); // NOI18N
+    jLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 0, 1, 7);
+    jPanel1.add(jLabel1, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 13, 5, 11);
-    add(backupDirPicker, gridBagConstraints);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
+    add(jPanel1, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -247,6 +257,7 @@ public class BackupOptions
   private JCheckBox createWkspBackup;
   private JLabel jLabel1;
   private JLabel jLabel2;
+  private JPanel jPanel1;
   // End of variables declaration//GEN-END:variables
 
 }
