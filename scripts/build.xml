@@ -636,39 +636,6 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
-  <target name="jarbundler" depends="init">
-    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../libs/jarbundler/jarbundler-2.5.0.jar"/>
-
-    <property name="bundledir" value="${distdir}/mac"/>
-    <delete dir="${bundledir}" failonerror="false"/>
-    <mkdir dir="${bundledir}"/>
-
-    <jarbundler
-        dir="${bundledir}"
-        name="SQLWorkbenchJ"
-        mainclass="workbench.WbStarter"
-        stubfile="../libs/jarbundler/universalJavaApplicationStub"
-        useJavaXKey="true"
-        signature="sqwb"
-        verbose="true"
-        vmoptions="-Xmx1024m -Xdock:name=SQLWorkbench/J"
-        jvmversion="1.8+"
-        icon="Workbench.icns"
-        version="${build.number}"
-        copyright="Thomas Kellerer, 2002-2016"
-        bundleid="net.sqlworkbench">
-
-      <jarfileset dir="${distdir}">
-        <include name="${jarfile}"/>
-      </jarfileset>
-
-      <javaproperty name="apple.awt.showGrowBox" value="true"/>
-      <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
-      <javaproperty name="apple.awt.antialiasing" value="true"/>
-      <javaproperty name="apple.awt.textantialiasing" value="true"/>
-    </jarbundler>
-  </target>
-
   <target name="bundleapp" depends="init">
 
     <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
