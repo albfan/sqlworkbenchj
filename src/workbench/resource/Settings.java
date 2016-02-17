@@ -322,9 +322,9 @@ public class Settings
 			}
 		}
 
-		FileAttributeChanger changer = new FileAttributeChanger();
 		if (cfd.isHidden() && PlatformHelper.isWindows())
 		{
+      FileAttributeChanger changer = new FileAttributeChanger();
 			// For some reason the settings are not properly saved under Windows 7 if the config directory is hidden
 			LogMgr.logDebug("Settings.initialize()", "Removing hidden attribute of the configuration directory");
 			changer.removeHidden(cfd);
