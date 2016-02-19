@@ -215,9 +215,9 @@ public class WbExport
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("filenameColumn");
 		cmdLine.addArgument(ARG_BLOB_TYPE, BlobMode.getTypes());
-		cmdLine.addArgument(ARG_CLOB_AS_FILE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CLOB_AS_FILE, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_CONTINUE_ON_ERROR, ArgumentType.BoolArgument);
-		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument(ARG_TABLEWHERE);
 		cmdLine.addArgument(ARG_RETRIEVE_COLUMN_INFO, ArgumentType.BoolArgument);
