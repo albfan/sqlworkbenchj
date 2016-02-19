@@ -3429,14 +3429,14 @@ public class SqlPanel
           StringBuilder logmsg = new StringBuilder(100);
 
           String timing = statementResult.getTimingMessage();
-          if (timing != null && showScriptProgress)
-          {
-            logmsg.append(timing);
-            logmsg.append('\n');
-          }
 
           if (showScriptProgress)
           {
+            if (timing != null)
+            {
+              logmsg.append(timing);
+              logmsg.append('\n');
+            }
             logmsg.append(currentMsg);
             logmsg.append('\n');
           }
@@ -3579,6 +3579,8 @@ public class SqlPanel
 				this.showLogPanel();
 			}
 
+      String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
+
 			if (count > 1)
 			{
 				String finish = ResourceMgr.getString("TxtScriptFinished");
@@ -3587,13 +3589,18 @@ public class SqlPanel
 					finish += " (" + StringUtil.getCurrentTimestamp() + ")";
 				}
 				this.appendToLog("\n" + finish);
-				String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
-				String s = "\n" + ResourceMgr.getString("MsgScriptExecTime") + " " + duration;
-				this.appendToLog(s);
+				this.appendToLog("\n" + ResourceMgr.getString("MsgScriptExecTime") + " " + duration);
 			}
-			else if (GuiSettings.showScriptFinishTime())
+			else
 			{
-				this.appendToLog("(" + StringUtil.getCurrentTimestamp() + ")\n");
+        if (!showScriptProgress)
+        {
+          this.appendToLog("\n" + ResourceMgr.getString("MsgExecTime") + " " + duration + "\n");
+        }
+        if (GuiSettings.showScriptFinishTime())
+        {
+          this.appendToLog("(" + StringUtil.getCurrentTimestamp() + ")\n");
+        }
 			}
 
 			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight() && !editorWasModified;
