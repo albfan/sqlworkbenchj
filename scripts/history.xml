@@ -4,6 +4,7 @@
   <release build="-1" date="2016-02-14">
     <entry dev-build="1" type="enh">It's now possible to restore recently closed editor tabs</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now show correctly</entry>
+    <entry dev-build="1" type="fix">The DDL for sequence in Oracle did not reflect the values for CYCLE and ORDER</entry>
     <entry dev-build="1" type="fix">Running PL/SQL in Oracle did not work if the option "Remove comments" was enabled in the connection profile</entry>
     <entry dev-build="1" type="fix">When using "Create DDL script" in the DbExplorer, the source for materialized views was generated twice</entry>
     <entry dev-build="1" type="fix">With certain Oracle driver versions, TYPEs where displayed twice in the DbExplorer or the DbTree</entry>
