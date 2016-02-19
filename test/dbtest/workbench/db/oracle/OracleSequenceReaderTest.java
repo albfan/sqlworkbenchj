@@ -62,8 +62,11 @@ public class OracleSequenceReaderTest
 		if (con == null) return;
 
 		TestUtil.executeScript(con,
-			"CREATE SEQUENCE seq_one;"  +
-			"CREATE SEQUENCE seq_two MINVALUE 33 increment by 12 CACHE 42;");
+			"CREATE SEQUENCE seq_one;\n"  +
+			"CREATE SEQUENCE seq_two MINVALUE 33 increment by 12 CACHE 42;\n" +
+			"CREATE SEQUENCE seq_three MINVALUE 2 maxvalue 42 cycle;\n" +
+			"CREATE SEQUENCE seq_four MINVALUE 2 nocycle cache 12 order;"
+    );
 	}
 
 	@AfterClass
@@ -74,7 +77,7 @@ public class OracleSequenceReaderTest
 	}
 
 	@Test
-	public void testGetSynonymList()
+	public void testGetSequenceDefinition()
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
@@ -86,36 +89,63 @@ public class OracleSequenceReaderTest
 		assertTrue(types.contains("SEQUENCE"));
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "SEQUENCE"});
 		assertNotNull(objects);
-		assertEquals(2, objects.size());
-		assertEquals("SEQUENCE", objects.get(0).getObjectType());
-		assertEquals("SEQUENCE", objects.get(1).getObjectType());
+		assertEquals(4, objects.size());
 
 		SequenceDefinition one = reader.getSequenceDefinition(null, "WBJUNIT", "SEQ_ONE");
 		assertNotNull(one);
 		String sql = one.getSource(con).toString().trim();
-		String expected = "CREATE SEQUENCE SEQ_ONE\n" +
-             "       INCREMENT BY 1\n" +
-             "       NOMINVALUE\n" +
-             "       NOMAXVALUE\n" +
-             "       CACHE 20\n" +
-             "       NOCYCLE\n" +
-             "       NOORDER;";
-//		System.out.println(sql + "\n------------\n" + expected + "\n------------");
+		String expected =
+      "CREATE SEQUENCE SEQ_ONE\n" +
+      "       INCREMENT BY 1\n" +
+      "       NOMINVALUE\n" +
+      "       NOMAXVALUE\n" +
+      "       CACHE 20\n" +
+      "       NOCYCLE\n" +
+      "       NOORDER;";
+//		System.out.println("--------- expected:\n" + expected + "\n--------- got:\n" + sql);
 		assertEquals(expected, sql);
 
 		SequenceDefinition two = reader.getSequenceDefinition(null, "WBJUNIT", "SEQ_TWO");
 		assertNotNull(two);
 		sql = two.getSource(con).toString().trim();
-		expected = "CREATE SEQUENCE SEQ_TWO\n" +
-             "       INCREMENT BY 12\n" +
-             "       MINVALUE 33\n" +
-             "       NOMAXVALUE\n" +
-             "       CACHE 42\n" +
-             "       NOCYCLE\n" +
-             "       NOORDER;";
-//		System.out.println(sql + "\n------------\n" + expected + "\n------------");
+		expected =
+      "CREATE SEQUENCE SEQ_TWO\n" +
+      "       INCREMENT BY 12\n" +
+      "       MINVALUE 33\n" +
+      "       NOMAXVALUE\n" +
+      "       CACHE 42\n" +
+      "       NOCYCLE\n" +
+      "       NOORDER;";
+//		System.out.println("--------- expected:\n" + expected + "\n--------- got:\n" + sql);
 		assertEquals(expected, sql);
 
+		SequenceDefinition three = reader.getSequenceDefinition(null, "WBJUNIT", "SEQ_THREE");
+		assertNotNull(three);
+		sql = three.getSource(con).toString().trim();
+		expected =
+      "CREATE SEQUENCE SEQ_THREE\n" +
+      "       INCREMENT BY 1\n" +
+      "       MINVALUE 2\n" +
+      "       MAXVALUE 42\n" +
+      "       CACHE 20\n" +
+      "       CYCLE\n" +
+      "       NOORDER;";
+//		System.out.println("--------- expected:\n" + expected + "\n--------- got:\n" + sql);
+		assertEquals(expected, sql);
+
+		SequenceDefinition four = reader.getSequenceDefinition(null, "WBJUNIT", "SEQ_FOUR");
+		assertNotNull(four);
+		sql = four.getSource(con).toString().trim();
+		expected =
+      "CREATE SEQUENCE SEQ_FOUR\n" +
+      "       INCREMENT BY 1\n" +
+      "       MINVALUE 2\n" +
+      "       NOMAXVALUE\n" +
+      "       CACHE 12\n" +
+      "       NOCYCLE\n" +
+      "       ORDER;";
+//		System.out.println("--------- expected:\n" + expected + "\n--------- got:\n" + sql);
+		assertEquals(expected, sql);
 	}
 
 }

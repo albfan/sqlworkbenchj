@@ -269,10 +269,10 @@ public class OracleSequenceReader
 			result.append(nl).append("       NOCACHE");
 		}
 		result.append(nl).append("       ");
-		result.append(Boolean.getBoolean(cycle) ? "CYCLE" : "NOCYCLE");
+		result.append(Boolean.valueOf(cycle) ? "CYCLE" : "NOCYCLE");
 
 		result.append(nl).append("       ");
-		result.append(Boolean.getBoolean(order) ? "ORDER" : "NOORDER");
+		result.append(Boolean.valueOf(order) ? "ORDER" : "NOORDER");
 
 		result.append(';');
 		result.append(nl);
