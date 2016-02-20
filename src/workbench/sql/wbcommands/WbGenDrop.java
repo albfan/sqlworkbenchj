@@ -57,7 +57,6 @@ public class WbGenDrop
 {
 	public static final String VERB = "WbGenerateDrop";
 
-	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_DIR = "outputDir";
 	public static final String PARAM_INCLUDE_CREATE = "includeCreate";
 	public static final String PARAM_DROP_FK_ONLY = "onlyForeignkeys";
@@ -71,7 +70,7 @@ public class WbGenDrop
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_DIR, ArgumentType.DirName);
 		cmdLine.addArgument(CommonArgs.ARG_OUTPUT_FILE, ArgumentType.Filename);
-		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_CREATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DROP_FK_ONLY, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_SORT_BY_TYPE, ArgumentType.BoolArgument);
@@ -97,12 +96,12 @@ public class WbGenDrop
 			return result;
 		}
 
-		SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(PARAM_TABLES), currentConnection);
+		SourceTableArgument tableArg = new SourceTableArgument(cmdLine.getValue(CommonArgs.ARG_TABLES), currentConnection);
 		List<TableIdentifier> tables = tableArg.getTables();
 
 		if (tables.isEmpty())
 		{
-			result.addErrorMessageByKey("ErrExportNoTablesFound", cmdLine.getValue(PARAM_TABLES));
+			result.addErrorMessageByKey("ErrExportNoTablesFound", cmdLine.getValue(CommonArgs.ARG_TABLES));
 			return result;
 		}
 

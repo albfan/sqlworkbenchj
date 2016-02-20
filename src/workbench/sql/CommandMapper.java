@@ -68,6 +68,7 @@ import workbench.sql.wbcommands.WbGenDelete;
 import workbench.sql.wbcommands.WbGenDrop;
 import workbench.sql.wbcommands.WbGenImpTable;
 import workbench.sql.wbcommands.WbGenInsert;
+import workbench.sql.wbcommands.WbGenerateFKScript;
 import workbench.sql.wbcommands.WbGenerateScript;
 import workbench.sql.wbcommands.WbGrepData;
 import workbench.sql.wbcommands.WbGrepSource;
@@ -200,6 +201,7 @@ public class CommandMapper
     cmdDispatch.put(WbSetProp.SET_DB_CONFIG_VERB, set);
 		addCommand(new WbGenDrop());
 		addCommand(new WbGenerateScript());
+		addCommand(new WbGenerateFKScript());
 		addCommand(new WbGenDelete());
 		addCommand(new WbGenInsert());
     addCommand(new WbGenImpTable());

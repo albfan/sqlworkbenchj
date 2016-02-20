@@ -68,7 +68,6 @@ public class WbSchemaReport
 	public static final String ARG_INCLUDE_SEQUENCES = "includeSequences";
 	public static final String ARG_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String ARG_INCLUDE_VIEWS = "includeViews";
-	public static final String ARG_TABLE_NAMES = "tables";
 	public static final String ARG_OBJECT_NAMES = "objects";
 	public static final String ARG_OBJECT_TYPE_NAMES = "objectTypeNames";
 	public static final String ARG_FULL_SOURCE = "writeFullSource";
@@ -85,7 +84,7 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
-		cmdLine.addDeprecatedArgument(ARG_TABLE_NAMES, ArgumentType.StringArgument);
+		cmdLine.addDeprecatedArgument(CommonArgs.ARG_TABLES, ArgumentType.StringArgument);
 		cmdLine.addArgument(ARG_OBJECT_NAMES, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_EXCLUDE_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addDeprecatedArgument(ARG_EXCLUDE_TABLES, ArgumentType.StringArgument);
@@ -144,7 +143,7 @@ public class WbSchemaReport
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(cmdLine.getListValue(CommonArgs.ARG_TYPES));
 
-		String tableNames = this.cmdLine.getValue(ARG_OBJECT_NAMES, this.cmdLine.getValue(ARG_TABLE_NAMES));
+		String tableNames = this.cmdLine.getValue(ARG_OBJECT_NAMES, this.cmdLine.getValue(CommonArgs.ARG_TABLES));
 		String exclude = cmdLine.getValue(ARG_EXCLUDE_OBJECTS, cmdLine.getValue(ARG_EXCLUDE_TABLES));
 		String schemaNames = cmdLine.getValue(CommonArgs.ARG_SCHEMAS);
 		List<String> typeFilter = cmdLine.getList(ARG_OBJECT_TYPE_NAMES);

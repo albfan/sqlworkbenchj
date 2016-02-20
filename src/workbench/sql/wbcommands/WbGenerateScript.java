@@ -68,6 +68,8 @@ public class WbGenerateScript
 	public static final String VERB = "WbGenerateScript";
 	public static final String SHORT_VERB = "WbGenScript";
 	public static final String ARG_EXCLUDE = "exclude";
+	public static final String ARG_INCLUDE_FK = "includeForeignkeys";
+  public static final String ARG_USE_SEPARATOR = "useSeparator";
 
 	private ObjectScripter scripter;
 
@@ -84,7 +86,8 @@ public class WbGenerateScript
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_PROCS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_TRIGGERS, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_GRANTS, ArgumentType.BoolArgument);
-		cmdLine.addArgument("useSeparator", ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_USE_SEPARATOR, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -173,9 +176,10 @@ public class WbGenerateScript
 		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
 		scripter = new ObjectScripter(objects, currentConnection);
-		scripter.setUseSeparator(cmdLine.getBoolean("useSeparator", DbExplorerSettings.getGenerateScriptSeparator()));
+		scripter.setUseSeparator(cmdLine.getBoolean(ARG_USE_SEPARATOR, DbExplorerSettings.getGenerateScriptSeparator()));
 		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
 		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, true));
+    scripter.setIncludeForeignKeys(cmdLine.getBoolean(ARG_INCLUDE_FK, true));
 
 		if (this.rowMonitor != null)
 		{

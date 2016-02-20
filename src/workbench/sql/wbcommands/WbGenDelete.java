@@ -37,7 +37,6 @@ import workbench.db.DeleteScriptGenerator;
 import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.importer.TableDependencySorter;
 
 import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;

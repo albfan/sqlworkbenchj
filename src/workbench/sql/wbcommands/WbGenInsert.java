@@ -55,7 +55,6 @@ public class WbGenInsert
 {
 	public static final String VERB = "WbGenerateInsert";
 
-	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_FULL_INSERT = "fullInsert";
 
 	private TableDependencySorter tableSorter;
@@ -65,7 +64,7 @@ public class WbGenInsert
 		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_FULL_INSERT, ArgumentType.BoolArgument);
 	}
 
@@ -89,7 +88,7 @@ public class WbGenInsert
 			return result;
 		}
 
-		String names = cmdLine.getValue(PARAM_TABLES);
+		String names = cmdLine.getValue(CommonArgs.ARG_TABLES);
 		boolean fullInsert = cmdLine.getBoolean(PARAM_FULL_INSERT, false);
 		SourceTableArgument tableArgs = new SourceTableArgument(names, currentConnection);
 

@@ -1925,6 +1925,26 @@ WHERE id=42;</programlisting>
 								</para>
 							</entry>
 						</row>
+            <row>
+              <entry>-encoding</entry>
+              <entry>
+                <para>The encoding to be used when writing the output file.
+                </para>
+              </entry>
+            </row>
+						<row>
+							<entry>-includeForeignKeys</entry>
+							<entry>
+								<para>
+                  By default <literal>WbGenerateScript</literal> will add all foreign key constraints of the
+                  processed tables to the end of the generated script. If this parameter is set to <literal>false</literal>
+                  no foreign key constraints will be generated.
+								</para>
+                <para>
+                  The foreign keys can be generated in a separate step using the <literal>WbGenerateFKScript</literal> command.
+                </para>
+							</entry>
+						</row>
 						<row>
 							<entry>-includeTriggers</entry>
 							<entry>
@@ -1972,8 +1992,68 @@ WHERE id=42;</programlisting>
 			</informaltable>
     </para>
   </section>
+  <section id="command-gen-fk-script">
+    <title>Generate SQL script for foreign key constraints - WbGenerateFKScript</title>
+    <para>
+      <literal>WbGenerateFKScript</literal> re-creates the foreign key constraints for the specified tables.
+    </para>
+    <para>
+      The command supports the following parameters.
 
-<section id="command-gen-imptable">
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-tables</entry>
+							<entry>
+								<para>
+                  The tables for which the foreign key constraints should be generated. This parameter accepts
+                  wildcards, e.g. <literal>-tables=*</literal>. To specify tables from multiple schemas, use
+                  <literal>-tables=order_mgmt.*, customer_mgmt.*</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-exclude</entry>
+							<entry>
+								<para>
+									A comma separated list of tables names to be excluded from the generated script.
+                  The parameter supports wildcards <literal>-exclude=foo*,bar*</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-file</entry>
+							<entry>
+								<para>
+                  Defines the output file into which all statements are written. If this is not specified, the
+                  generated SQL statements are shown in the message area.
+                  file.
+								</para>
+							</entry>
+						</row>
+            <row>
+							<entry>-encoding</entry>
+							<entry>
+								<para>The encoding to be used when writing the output file.
+								</para>
+							</entry>
+            </row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+  </section>
+
+  <section id="command-gen-imptable">
     <title>Generate a table definition from an import file - WbGenerateImpTable</title>
     <para>
       <literal>WbGenerateImpTable</literal> analyzes an import file and generates a suitable <literal>CREATE TABLE</literal>

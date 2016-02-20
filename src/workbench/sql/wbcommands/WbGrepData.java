@@ -66,7 +66,6 @@ public class WbGrepData
 	implements TableSearchConsumer
 {
 	public static final String VERB = "WbGrepData";
-	public static final String ARG_TABLES = "tables";
 	public static final String ARG_EXPRESSION = "searchValue";
 	public static final String ARG_EXCLUDE_LOBS = "excludeLobs";
 	public static final String ARG_RETRIEVE_CLOBS = "retrieveCLOB";
@@ -90,7 +89,7 @@ public class WbGrepData
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_TABLES, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addDeprecatedArgument(ARG_EXCLUDE_LOBS, ArgumentType.BoolArgument);
@@ -128,7 +127,7 @@ public class WbGrepData
 		String searchValue = cmdLine.getValue(ARG_EXPRESSION);
 		boolean needSearchValue = true;
 
-		String tableNames = cmdLine.getValue(ARG_TABLES);
+		String tableNames = cmdLine.getValue(CommonArgs.ARG_TABLES);
 		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
 

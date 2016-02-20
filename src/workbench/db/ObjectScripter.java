@@ -76,6 +76,7 @@ public class ObjectScripter
 	private boolean useSeparator;
 	private boolean includeDrop;
 	private boolean includeGrants = true;
+  private boolean includeForeignKeys = true;
 	private Collection<String> typesWithoutSeparator;
 	private String sequenceType;
 	private String synonymType = TYPE_SYNONYM;
@@ -155,6 +156,11 @@ public class ObjectScripter
 		return dbConnection;
 	}
 
+  public void setIncludeForeignKeys(boolean flag)
+  {
+    includeForeignKeys = flag;
+  }
+
 	public void setIncludeGrants(boolean flag)
 	{
 		this.includeGrants = flag;
@@ -218,9 +224,9 @@ public class ObjectScripter
         generateIfNeeded(type);
       }
 
-			if (!cancel)
+			if (!cancel && includeForeignKeys)
       {
-        this.appendForeignKeys();
+        this.generateForeignKeys();
       }
 
       generateIfNeeded(TYPE_VIEW);
@@ -302,9 +308,8 @@ public class ObjectScripter
     return dbo.getObjectType().equalsIgnoreCase(TYPE_TABLE) || additionalTableTypes.contains(dbo.getObjectType());
   }
 
-	private void appendForeignKeys()
+	public void generateForeignKeys()
 	{
-
     List<DbObject> toProcess = objectList.stream().filter(dbo -> isTable(dbo)).collect(Collectors.toList());
 
     if (toProcess.isEmpty()) return;
