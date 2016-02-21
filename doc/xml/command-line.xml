@@ -112,7 +112,7 @@
         the file can contain unicode sequences (e.g. <literal>\u00fc</literal>. Values
         spanning multiple lines are not supported. When reading a file during startup
         the default encoding is used. If you need to read the file in a specific encoding
-        please use the <link linkend="command-vardef"><literal>WbVarDef</literal></link>
+        please use the <link linkend="wb-define-var"><literal>WbVarDef</literal></link>
         command with the <literal>-file</literal> and <literal>-encoding</literal> parameter.
       </para>
       <programlisting>#Define some values

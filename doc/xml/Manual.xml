@@ -44,11 +44,16 @@
 	<!ENTITY connect-descriptor SYSTEM "connect-descriptor.xml">
 	<!ENTITY plain-profiles SYSTEM "plain-profiles.xml">
 	<!ENTITY workspaces SYSTEM "workspaces.xml">
+	<!ENTITY script-generation SYSTEM "script-generation.xml">
+	<!ENTITY wb-info-commands SYSTEM "wb-info-commands.xml">
+	<!ENTITY wb-grep-commands SYSTEM "wb-grep-commands.xml">
+	<!ENTITY wb-macro-commands SYSTEM "wb-macro-commands.xml">
+	<!ENTITY wb-var-commands SYSTEM "wb-var-commands.xml">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>
 <article lang="en">
-  <title>&wb-productname; User's Manual</title>
+<title>&wb-productname; User's Manual</title>
 &information;
 &license;
 &release-history;
@@ -72,6 +77,11 @@
 &wbimport;
 &wbcopy;
 &comparedb;
+&wb-grep-commands;
+&script-generation;
+&wb-info-commands;
+&wb-macro-commands;
+&wb-var-commands;
 &wb-commands;
 &data-pumper;
 &dbexplorer;

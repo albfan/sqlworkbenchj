@@ -1,4 +1,5 @@
 <section id="using-variables" xreflabel="Variable substitution">
+
     <indexterm><primary>Variables</primary><secondary>definition</secondary></indexterm>
     <title>Variable substitution in SQL statements</title>
 
@@ -7,8 +8,9 @@
 
       <para>
         You can define variables within &wb-productname; that can be referenced in your
-				SQL statements. This is done through the internal command <literal>WbVarDef</literal>.
+				SQL statements. This is done through the internal command <link linkend="wb-define-var"><literal>WbVarDef</literal></link>.
       </para>
+
       <para>
 				<literal>WbVarDef myvar=42</literal> defines a variable with the name <literal>myvar</literal> and the value
         <literal>42</literal>. If the variable does not exist, it will be created. If it exists
@@ -60,6 +62,7 @@ another_variable=24</programlisting>
   </section>
 
   <section id="vardef-select">
+    <indexterm><primary>Variables</primary><secondary>define through SQL query</secondary></indexterm>
     <title>Populate a variable from a SELECT statement</title>
     <para>
       A variable can also be defined as the result of a <literal>SELECT</literal> statement. This indicated
@@ -83,6 +86,7 @@ another_variable=24</programlisting>
   </section>
 
   <section id="vardef-read-content">
+    <indexterm><primary>Variables</primary><secondary>load from file</secondary></indexterm>
     <title>Populate a variable from a file</title>
     <para>
       A variable can also be defined by reading the content of a file (this is different from
@@ -114,6 +118,7 @@ $[my_select];</programlisting>
   </section>
 
   <section id="edit-variable">
+    <indexterm><primary>Variables</primary><secondary>editing</secondary></indexterm>
     <title>Editing variables</title>
     <para>
       To view a list of currently defined variables execute the command <literal>WbVarList</literal>.
@@ -127,6 +132,7 @@ $[my_select];</programlisting>
   </section>
 
   <section id="access-variable">
+    <indexterm><primary>Variables</primary><secondary>using</secondary></indexterm>
     <title>Using variables in SQL statements</title>
     <para>
       The defined variables can be used by enclosing them in special characters inside the SQL
@@ -150,7 +156,7 @@ $[my_select];</programlisting>
 
     <important>
       <para>
-        Variables will be replaced in string literals (e.g. <literal>'$[foo]'</literal>)
+        Variables will be replaced inside string literals (e.g. <literal>'$[foo]'</literal>)
         and comments (e.g. <literal>-- $[foo]</literal> or <literal>/* $[foo] */</literal>)
       </para>
     </important>
@@ -173,6 +179,7 @@ workbench.sql.parameter.suffix=#</programlisting>
   </section>
 
   <section id="prompt-variable">
+    <indexterm><primary>Variables</primary><secondary>prompting</secondary></indexterm>
     <title>Prompting for values during execution</title>
 
     <para>

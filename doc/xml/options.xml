@@ -486,6 +486,7 @@
 
   <section id="bookmark-options">
     <title>Bookmark options</title>
+
 		<simplesect id="options-wbresult-bookmark">
 			<title>Also use @WbResult for bookmarks</title><blockquote>
 			<para>

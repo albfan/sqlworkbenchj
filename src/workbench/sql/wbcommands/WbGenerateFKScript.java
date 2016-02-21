@@ -54,8 +54,8 @@ public class WbGenerateFKScript
 	implements ScriptGenerationMonitor
 {
 	public static final String VERB = "WbGenerateFKScript";
-
   private ObjectScripter scripter;
+
   public WbGenerateFKScript()
   {
     super();
@@ -77,17 +77,16 @@ public class WbGenerateFKScript
 
 		String tableNames = cmdLine.getValue(CommonArgs.ARG_TABLES);
 		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
-		List<TableIdentifier> tables = null;
 
 		if (StringUtil.isBlank(tableNames))
 		{
 			tableNames = "%";
 		}
 
-		String[] types = SourceTableArgument.parseTypes(cmdLine.getValue(CommonArgs.ARG_TYPES), currentConnection) ;
+		String[] types = currentConnection.getMetadata().getTableTypesArray();
 		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, null, types, currentConnection);
 
-		tables = parser.getTables();
+		List<TableIdentifier> tables = parser.getTables();
 
 		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 
@@ -125,9 +124,10 @@ public class WbGenerateFKScript
 
 		result.setSuccess();
 
-		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
+
 		if (output != null)
 		{
+      String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
 			Writer writer = null;
 			try
 			{

@@ -2,7 +2,7 @@
 	<title>DBMS specific features</title>
 
   <section id="dbms-specific-postgres">
-     <title>PostgreSQL specific features</title>
+    <title>PostgreSQL specific features</title>
 
      <section id="postgres-open-trans">
        <indexterm><primary>PostgreSQL</primary><secondary>check for pending transactions</secondary></indexterm>
@@ -307,6 +307,48 @@ workbench.db.postgresql.sql.usesavepoint=true
         </informaltable>
        </para>
      </section>
+
+    <section id="command-dbms-output" xreflabel="ENABLEOUT">
+      <title>Using Oracle's DBMS_OUTPUT package</title>
+      <indexterm><primary>Oracle</primary><secondary>dbms_output</secondary></indexterm>
+
+      <para>
+        To turn on support for Oracle's <literal>DBMS_OUTPUT</literal> package you have to use the
+        (&wb-productname; specific) command <literal>ENABLEOUT</literal>. As an alternative you can
+        also use the SQL*Plus command <literal>set serveroutput on</literal>.
+      </para>
+      <para>
+        After running <literal>ENABLEOUT</literal> the <literal>DBMS_OUTPUT</literal> package is enabled,
+        and any message written with <literal>dbms_output.put_line()</literal> is displayed in the message
+        panel after executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
+      </para>
+      <para>
+        You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the
+        desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
+        <literal>ENABLEOUT 32000;</literal>
+      </para>
+
+      <note><para>
+        Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
+        the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
+        package is enabled.
+        In order to be able to display these columns, support for <literal>DBMS_OUTPUT</literal> has
+        to be switched off.
+      </para></note>
+
+      <para>
+        To disable the <literal>DBMS_OUTPUT</literal> package again, use the (&wb-productname; specific)
+        command <literal>DISABLEOUT</literal>. This is equivalent to calling
+        <literal>dbms_output.disable()</literal> procedure or using <literal>set serveroutput off</literal>
+      </para>
+
+      <para>
+        <literal>ENABLEOUT</literal> and <literal>DISABLEOUT</literal> support an additional parameter <literal>quiet</literal>
+        to suppress the feedback message that the support for <literal>DBMS_OUTPUT</literal> has been enabled or disabled.
+        <literal>set serveroutput off</literal> never gives a feedback message.
+      </para>
+
+    </section>
 
      <section id="oracle-source-dbms-metadata">
        <indexterm><primary>Oracle</primary><secondary>DBMS_METADATA</secondary></indexterm>

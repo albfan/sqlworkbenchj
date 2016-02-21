@@ -19,7 +19,7 @@ commit;
       included in the bookmark list. This is enabled in the <link linkend="option-result-name">options panel for the editor</link>.
     </para>
     <para>
-      The names of procedures and functions can also be used as bookmarks if enabled in the <link linkend="">bookmark options</link>
+      The names of procedures and functions can also be used as bookmarks if enabled in the <link linkend="bookmark-options">bookmark options</link>
     </para>
   </section>
 

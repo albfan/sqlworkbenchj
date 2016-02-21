@@ -705,7 +705,7 @@ FROM geo_table
 
       <para>
         The character representation that is used is based on the default formatting
-        options from the <link linkend="">Options Window</link>. This means that e.g.
+        options from the <link linkend="options">Options Window</link>. This means that e.g.
         a DATE column will be compared according to the standard formatting options
         before the comparison is done.
       </para>

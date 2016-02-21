@@ -749,7 +749,7 @@
   <section id="connection-profile-quickfilter">
     <title>Using the quick filter</title>
     <para>
-      The behaviour of the quick filter depends on whether <link linkend="">tags</link> are defined or not.
+      The behaviour of the quick filter depends on whether <link linkend="profile-tags">tags</link> are defined or not.
     </para>
     <para>
       If no tags are defined at all, the quick filter will only search in the profile name. The search
