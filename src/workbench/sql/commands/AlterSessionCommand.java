@@ -31,6 +31,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.DbMetadata;
+import workbench.db.oracle.OracleUtils;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -42,7 +43,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
- * A wrapper for Orcle's AlterSessionCommand
+ * A wrapper for Orcle's ALTER SESSION command
  *
  * @author Thomas Kellerer
  */
@@ -50,6 +51,12 @@ public class AlterSessionCommand
 	extends SqlCommand
 {
 	public static final String VERB = "ALTER SESSION";
+
+  private enum ChangeType
+  {
+    schema,
+    container
+  };
 
 	@Override
 	public String getVerb()
@@ -65,6 +72,8 @@ public class AlterSessionCommand
 		result.setSuccess();
 
 		String oldSchema = null;
+    String oldContainer = null;
+
 		SQLLexer lexer = SQLLexerFactory.createLexer(currentConnection, sql);
 
 		DbMetadata meta = currentConnection.getMetadata();
@@ -78,59 +87,64 @@ public class AlterSessionCommand
 			// check for known statements
 			token = lexer.getNextToken(false, false);
 			String parm = (token == null ? null : token.getContents());
+
 			if ("CURRENT_SCHEMA".equalsIgnoreCase(parm))
 			{
 				oldSchema = meta.getCurrentSchema();
 			}
-			else if ("TIME_ZONE".equalsIgnoreCase(parm) && meta.isOracle())
-			{
-				// this should be the = sign, skip it
-				token = lexer.getNextToken(false, false);
 
-				// this is the parameter for the new timezone
-				token = lexer.getNextToken(false, false);
-				if (token != null)
-				{
-					if (changeOracleTimeZone(result, token.getContents()))
-					{
-						return result;
-					}
-				}
-			}
+      if ("CONTAINER".equalsIgnoreCase(parm) && currentConnection.hasMultipleOracleContainers())
+      {
+        oldContainer = OracleUtils.getCurrentContainer(currentConnection);
+      }
+
+      if ("TIME_ZONE".equalsIgnoreCase(parm))
+      {
+        // this should be the = sign, skip it
+        token = lexer.getNextToken(false, false);
+
+        // this is the parameter for the new timezone
+        token = lexer.getNextToken(false, false);
+        if (token != null)
+        {
+          if (changeOracleTimeZone(result, token.getContents()))
+          {
+            return result;
+          }
+        }
+      }
 		}
 
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
 			this.currentStatement.executeUpdate(sql);
-			if (oldSchema == null)
-			{
-				// A "regular" ALTER SESSION was executed that does not change the
-				// current schema (user)
-				appendSuccessMessage(result);
-			}
-			else
+
+      if (oldSchema != null)
 			{
 				meta.clearCachedSchemaInformation();
 
 				// if the current schema is changed, a schemaChanged should be fired
 				String schema = meta.getCurrentSchema();
-				if (!oldSchema.equalsIgnoreCase(schema))
-				{
-					boolean busy = currentConnection.isBusy();
-					try
-					{
-						// schemaChanged will trigger an update of the ConnectionInfo display
-						// but that only retrieves the current schema if the connection isn't busy
-						currentConnection.setBusy(false);
-						currentConnection.schemaChanged(oldSchema, schema);
-					}
-					finally
-					{
-						currentConnection.setBusy(busy);
-					}
+        if (StringUtil.compareStrings(oldSchema, schema, true) != 0)
+        {
+          notifyConnection(ChangeType.schema, oldSchema, schema);
 					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", schema));
 				}
+			}
+      else if (oldContainer != null)
+      {
+        String newContainer = OracleUtils.getCurrentContainer(currentConnection);
+        if (StringUtil.compareStrings(oldContainer, newContainer, true) != 0)
+        {
+          notifyConnection(ChangeType.container, oldContainer, newContainer);
+          result.addMessage(ResourceMgr.getFormattedString("MsgContainerChanged", newContainer));
+        }
+      }
+			else
+			{
+				// A "regular" ALTER SESSION was executed that does not change the current schema or container
+				appendSuccessMessage(result);
 			}
 
 			result.setSuccess();
@@ -143,6 +157,30 @@ public class AlterSessionCommand
 
 		return result;
 	}
+
+  private void notifyConnection(ChangeType type, String oldValue, String newValue)
+  {
+    boolean busy = currentConnection.isBusy();
+    try
+    {
+      // schemaChanged or containerChanged will trigger an update of the ConnectionInfo display
+      // but that only retrieves the current schema if the connection isn't busy
+      currentConnection.setBusy(false);
+      switch (type)
+      {
+        case schema:
+          currentConnection.schemaChanged(oldValue, newValue);
+          break;
+        case container:
+          currentConnection.containerChanged(oldValue, newValue);
+          break;
+      }
+    }
+    finally
+    {
+      currentConnection.setBusy(busy);
+    }
+  }
 
 	private boolean changeOracleTimeZone(StatementRunnerResult result, String tz)
 	{

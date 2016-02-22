@@ -47,6 +47,7 @@ import workbench.resource.Settings;
 
 import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
+import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleWarningsClearer;
 
 import workbench.sql.DelimiterDefinition;
@@ -96,6 +97,7 @@ public class WbConnection
 	private final List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
 
 	private OracleWarningsClearer oracleWarningsClearer;
+  private boolean hasOracleContainers;
 
 	private boolean busy;
 	private KeepAliveDaemon keepAlive;
@@ -121,7 +123,7 @@ public class WbConnection
 	 * This will also initialize a {@link DbMetadata} instance.
    *
    * The {@link #removeComments} property is initialized from the connection profile
-   * and the configuration for the current DBMS 
+   * and the configuration for the current DBMS
    *
    * @see DbSettings#supportsCommentInSql
 	 */
@@ -178,6 +180,11 @@ public class WbConnection
 	{
 		return sessionProps.get(key);
 	}
+
+  public boolean hasMultipleOracleContainers()
+  {
+    return hasOracleContainers;
+  }
 
 	public DelimiterDefinition getAlternateDelimiter()
 	{
@@ -575,14 +582,16 @@ public class WbConnection
 	{
 		this.sqlConnection = aConn;
 		this.metaData = new DbMetadata(this);
-		if (this.metaData.isOracle() && !JdbcUtils.hasMiniumDriverVersion(this.getSqlConnection(), "10.0"))
+
+		if (this.metaData.isOracle())
 		{
-			this.oracleWarningsClearer = new OracleWarningsClearer();
+      if (!JdbcUtils.hasMiniumDriverVersion(this.getSqlConnection(), "10.0"))
+      {
+        oracleWarningsClearer = new OracleWarningsClearer();
+      }
+      hasOracleContainers = OracleUtils.hasMultipleContainers(this);
 		}
-		else
-		{
-			this.oracleWarningsClearer = null;
-		}
+
 		this.currentCatalog = metaData.getCurrentCatalog();
 	}
 
@@ -1195,16 +1204,7 @@ public class WbConnection
 				hasUser = true;
 			}
 
-			String catalog = isBusy ? currentCatalog : metaData.getCurrentCatalog();
-			if (StringUtil.isNonBlank(catalog))
-			{
-				String catName = metaData.getCatalogTerm();
-				if (hasUser) buff.append(", ");
-				buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
-				buff.append('=');
-				buff.append(catalog);
-				hasCatalog = true;
-			}
+      hasCatalog = appendCatalog(buff, hasUser, isBusy);
 
 			String schema = useDisplaySchema ? getDisplaySchema() : null;
 			if (schema == null && !isBusy)
@@ -1242,6 +1242,39 @@ public class WbConnection
 		}
 		return displayString;
 	}
+
+  private boolean appendCatalog(StringBuilder buff, boolean hasUser, boolean isBusy)
+  {
+    if (metaData.isOracle())
+    {
+      return appendOracleContainer(buff, hasUser, isBusy);
+    }
+    String catalog = isBusy ? currentCatalog : metaData.getCurrentCatalog();
+    if (StringUtil.isBlank(catalog)) return false;
+
+    String catName = metaData.getCatalogTerm();
+    if (hasUser) buff.append(", ");
+    buff.append(catName == null ? "Catalog" : StringUtil.capitalize(catName));
+    buff.append('=');
+    buff.append(catalog);
+    return true;
+  }
+
+  private boolean appendOracleContainer(StringBuilder buff, boolean hasUser, boolean isBusy)
+  {
+    if (!OracleUtils.showContainerInfo()) return false;
+    if (!hasOracleContainers) return false;
+    if (isBusy) return false;
+    if (!JdbcUtils.hasMinimumServerVersion(this, "12.1")) return false;
+
+    String container = OracleUtils.getCurrentContainer(this);
+    if (StringUtil.isBlank(container)) return false;
+
+    if (hasUser) buff.append(", ");
+    buff.append("Container=");
+    buff.append(container);
+    return true;
+  }
 
 	public String getJDBCVersion()
 	{
@@ -1453,6 +1486,14 @@ public class WbConnection
 			this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
 		}
 	}
+
+  public void containerChanged(String oldContainer, String newContainer)
+  {
+    if (metaData.isOracle())
+    {
+      fireConnectionStateChanged(PROP_CATALOG, oldContainer, newContainer);
+    }
+  }
 
 	public void schemaChanged(String oldSchema, String newSchema)
 	{

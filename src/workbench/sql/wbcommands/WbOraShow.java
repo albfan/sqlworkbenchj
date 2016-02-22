@@ -229,6 +229,7 @@ public class WbOraShow
 
     StatementRunnerResult result = new StatementRunnerResult("SHOW " + attribute);
     DataStore ds = SqlUtil.getResult(currentConnection, query);
+    ds.setResultName(displayName);
     result.addDataStore(ds);
 
     return result;

@@ -1341,13 +1341,45 @@ public class Settings
 		this.setFont(PROPERTY_STANDARD_FONT, f);
 	}
 
+  /**
+   * Return a user-configured scale factor for default fonts.
+   *
+   * @return -1 if nothing was configured (or an invalid value was used),
+   *         the scale factor to be used otherwise
+   *
+   * @see #getScaleFonts()
+   *
+   */
+  public float getScaleFactor()
+  {
+    String scaleFactor = Settings.getInstance().getProperty("workbench.gui.desktop.scalefonts.factor", null);
+    if (scaleFactor == null) return -1;
+
+    float factor = -1;
+    try
+    {
+      factor = Float.parseFloat(scaleFactor);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("Setting.getScaleFactor()", "Invalid font scale factor specified: " + scaleFactor, th);
+    }
+    return factor;
+  }
+
 	/**
 	 * Returns true if the fonts should be scaled based on the DPI settings
 	 * of the system.
 	 *
+   * If the user configured a scale factor (getScaleFactor() > 0), this method will return true.
+   *
+   * @see #getScaleFactor()
 	 */
 	public boolean getScaleFonts()
 	{
+    // always scale if the user configured a scale factor
+    if (getScaleFactor() > 0) return true;
+
 		int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
 		// 120 DPI is the "125% scale" setting in Windows
 		// anything bigger than that indicates we should also scale the fonts.

@@ -184,17 +184,19 @@ public class LnFHelper
 		LogMgr.logInfo("LnFHelper.scaleDefaultFonts()", "Scaling default fonts by: " + scaler.getScaleFactor());
 
 		UIDefaults def = UIManager.getDefaults();
+
+    // when the user configures a scale factor, don't check the menu fonts
+    boolean checkJavaFonts = Settings.getInstance().getScaleFactor() < 0;
+
 		for (String property : fontProperties)
 		{
-			if (!noScale.contains(property))
-			{
-				Font base = def.getFont(property);
-				if (base != null)
-				{
-					Font scaled = scaler.scaleFont(base);
-					def.put(property, scaled);
-				}
-			}
+      if (checkJavaFonts && noScale.contains(property)) continue;
+      Font base = def.getFont(property);
+      if (base != null)
+      {
+        Font scaled = scaler.scaleFont(base);
+        def.put(property, scaled);
+      }
 		}
 	}
 

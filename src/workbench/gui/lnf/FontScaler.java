@@ -31,9 +31,13 @@ import workbench.resource.Settings;
 
 /**
  * A class to scale fonts according to the DPI settings of the Desktop.
- * The reference (i.e. a scale of 1.0) is assumed to be 96 DPI
+ *
+ * The reference (i.e. a scale of 1.0) is assumed to be 96 DPI.
+ *
+ * If the user configured a customized scale factor 
  *
  * @author Thomas Kellerer
+ * @see Settings#getScaleFactor()
  */
 public class FontScaler
 {
@@ -46,16 +50,27 @@ public class FontScaler
 	{
 		dpi = Toolkit.getDefaultToolkit().getScreenResolution();
 		defaultDPI = Settings.getInstance().getIntProperty("workbench.gui.desktop.defaultdpi", 96);
-		if (dpi == defaultDPI)
-		{
-			scaleFont = false;
-			scaleFactor = 1.0f;
-		}
-		else
-		{
-			scaleFont = true;
-			scaleFactor = ((float)dpi / (float)defaultDPI);
-		}
+
+    float factor = Settings.getInstance().getScaleFactor();
+    if (factor > 0)
+    {
+      // manually configured scale factor
+      scaleFont = true;
+      scaleFactor = factor;
+    }
+    else
+    {
+      if (dpi == defaultDPI)
+      {
+        scaleFont = false;
+        scaleFactor = 1.0f;
+      }
+      else
+      {
+        scaleFont = true;
+        scaleFactor = ((float)dpi / (float)defaultDPI);
+      }
+    }
 	}
 
 	public void logSettings()

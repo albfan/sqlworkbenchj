@@ -46,7 +46,7 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class OracleUtils
+  public class OracleUtils
 {
 	public static final String PROP_KEY_TBLSPACE = "oracle_default_tablespace";
 	public static final String KEYWORD_EDITIONABLE = "EDITIONABLE";
@@ -160,6 +160,47 @@ public class OracleUtils
 		return "true".equals(value);
 	}
 
+  public static boolean hasMultipleContainers(WbConnection conn)
+  {
+    if (JdbcUtils.hasMinimumServerVersion(conn, "12.1") == false) return false;
+
+    int cdbCount = 0;
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = conn.createStatementForQuery();
+      rs = stmt.executeQuery("select count(*) from v$pdbs");
+      if (rs.next())
+      {
+        cdbCount = rs.getInt(1);
+      }
+    }
+    catch (Exception ex)
+    {
+      // ignore
+      cdbCount = 0;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return cdbCount > 0;
+  }
+
+  public static String getCurrentContainer(WbConnection conn)
+  {
+    String sql =
+      "-- SQL Workbench \n" +
+      "select sys_context('userenv', 'CON_NAME') from dual";
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("WbOraShow.getCurrentContainer()", "Retrieving current container name using:\n" + sql);
+    }
+
+    return getSingleResult(sql, conn);
+  }
 
 	public static String getDefaultTablespace(WbConnection conn)
 	{
@@ -172,36 +213,46 @@ public class OracleUtils
 	{
 		if (conn.getSessionProperty(PROP_KEY_TBLSPACE) != null) return;
 
-		Statement stmt = null;
-		ResultSet rs = null;
 		String sql =
       "-- SQL Workbench \n" +
       "select default_tablespace \n" +
       "from user_users";
 
-		try
+		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			stmt = conn.createStatementForQuery();
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("OracleUtils.readDefaultTableSpace()", "Retrieving default tablespace using:\n" + sql);
-			}
+			LogMgr.logDebug("WbOraShow.readDefaultTableSpace()", "Retrieving default tablespace using:\n" + sql);
+		}
 
-			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-				conn.setSessionProperty(PROP_KEY_TBLSPACE, rs.getString(1));
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("OracleUtils.readDefaultTableSpace()", "Error retrieving table options using:\n" + sql, e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+    String tableSpace = getSingleResult(sql, conn);
+    conn.setSessionProperty(PROP_KEY_TBLSPACE, tableSpace);
 	}
+
+  private static String getSingleResult(String query, WbConnection conn)
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
+    String result = null;
+
+    try
+    {
+      stmt = conn.createStatementForQuery();
+      rs = stmt.executeQuery(query);
+      if (rs.next())
+      {
+        result = rs.getString(1);
+      }
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("OracleUtils.getSingleResult()", "Error running query:\n" + query, e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+
+    return result;
+  }
 
   public static String getCacheHint()
   {
@@ -333,4 +384,9 @@ public class OracleUtils
 	{
 		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.name(), flag);
 	}
+
+  public static boolean showContainerInfo()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.db.oracle.conninfo.include.container", false);
+  }
 }
