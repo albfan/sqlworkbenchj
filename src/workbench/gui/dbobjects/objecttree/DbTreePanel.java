@@ -90,6 +90,7 @@ import workbench.gui.dbobjects.DbObjectList;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
@@ -292,11 +293,18 @@ public class DbTreePanel
     try
     {
       connection = mgr.getConnection(profile, cid);
+      CharSequence warnings = SqlUtil.getWarnings(connection, null);
+      if (StringUtil.isNonEmpty(warnings))
+      {
+        LogMgr.logWarning("DbTree.doConnect()", "Received warnings from connection: " + warnings);
+      }
+
       if (DbTreeSettings.useAutocommit(connection.getDbId()))
       {
         LogMgr.logDebug("DbTreePanel.doConnect()", "Setting connection " + cid + " to auto commit");
         connection.setAutoCommit(true);
       }
+
       JdbcUtils.initDbExplorerConnection(connection);
       tree.setConnection(connection);
 
