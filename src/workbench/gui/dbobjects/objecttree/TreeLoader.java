@@ -23,7 +23,6 @@ package workbench.gui.dbobjects.objecttree;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -928,15 +927,7 @@ public class TreeLoader
       connection.getObjectCache().addReferencedTables(tbl, fklist);
     }
 
-
-    Collections.sort(fklist, new Comparator<DependencyNode>()
-    {
-      @Override
-      public int compare(DependencyNode o1, DependencyNode o2)
-      {
-        return o1.getTable().compareTo(o2.getTable());
-      }
-    });
+    Collections.sort(fklist, (DependencyNode o1, DependencyNode o2) -> o1.getTable().compareTo(o2.getTable()));
 
     for (DependencyNode fk : fklist)
     {
