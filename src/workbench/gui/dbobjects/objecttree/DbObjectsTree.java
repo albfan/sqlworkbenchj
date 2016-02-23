@@ -542,17 +542,13 @@ public class DbObjectsTree
       // we can't call findNodeByType() right after calling expandNode()
       // because loading of the schemas is done in a background thread.
       // therefor we need to register a "post load" event
-      Runnable r = new Runnable()
+      Runnable r = () ->
       {
-        @Override
-        public void run()
+        String schema = loader.getConnection().getCurrentSchema();
+        ObjectTreeNode schemaNode = getTreeModel().findNodeByType(catNode, schema, TreeLoader.TYPE_SCHEMA);
+        if (schemaNode != null)
         {
-          String schema = loader.getConnection().getCurrentSchema();
-          ObjectTreeNode schemaNode = getTreeModel().findNodeByType(catNode, schema, TreeLoader.TYPE_SCHEMA);
-          if (schemaNode != null)
-          {
-            expandNode(schemaNode);
-          }
+          expandNode(schemaNode);
         }
       };
       afterLoadProcess.put(catNode, r);
