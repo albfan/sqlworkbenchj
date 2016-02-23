@@ -20,9 +20,11 @@
  */
 package workbench.db.dependency;
 
+import workbench.db.DbMetadata;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.firebird.FirebirdDependencyReader;
+import workbench.db.hana.HanaDependencyReader;
 import workbench.db.hsqldb.HsqlDependencyReader;
 import workbench.db.mssql.SqlServerDependencyReader;
 import workbench.db.mssql.SqlServerUtil;
@@ -64,6 +66,11 @@ public class DependencyReaderFactory
       return new HsqlDependencyReader();
     }
 
+    if (connection.getDbId().equals(DbMetadata.DBID_HANA))
+    {
+      return new HanaDependencyReader();
+    }
+    
     return null;
   }
 }

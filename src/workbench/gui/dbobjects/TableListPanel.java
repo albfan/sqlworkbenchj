@@ -695,6 +695,7 @@ public class TableListPanel
         int index = displayTab.getSelectedIndex();
         ignoreStateChanged = true;
         displayTab.removeAll();
+        currentRetrievalPanel = -1;
 
         addBaseObjectPanels();
         if (includeDataPanel) addDataPanel();
@@ -710,8 +711,20 @@ public class TableListPanel
         importedKeys.reset();
         projections.reset();
 
-        if (!includeDataPanel) tableData.reset();
-        restoreIndex(index);
+        if (!includeDataPanel)
+        {
+          tableData.reset();
+          shouldRetrieveTableData = false;
+        }
+
+        if (displayTab.getTabCount() != count)
+        {
+          displayTab.setSelectedIndex(0);
+        }
+        else
+        {
+          restoreIndex(index);
+        }
       }
       finally
       {
@@ -1851,15 +1864,9 @@ public class TableListPanel
 		if (isBusy())
 		{
 			LogMgr.logWarning("TableListPanel.startRetrieveCurrentPanel()", "Start retrieve called while connection was busy");
-		}
-		else
-		{
-			startRetrieveThread();
-		}
-	}
+      return;
+    }
 
-	protected void startRetrieveThread()
-	{
 		panelRetrieveThread = new WbThread("TableListPanel RetrievePanel")
 		{
 			@Override
@@ -1911,28 +1918,11 @@ public class TableListPanel
       {
         levelChanger.changeIsolationLevel(dbConnection);
       }
-			synchronized (this.connectionLock)
-			{
-				switch (index)
-				{
-					// Index 0 to 2 are always the same, so this can be dealt with here
-					case 0:
-						if (this.shouldRetrieveTable) this.retrieveTableDefinition();
-						break;
-					case 1:
-						if (this.shouldRetrieveTableSource) this.retrieveTableSource();
-						break;
-					case 2:
-						if (this.shouldRetrieveTableData)
-						{
-							this.tableData.showData(!this.shiftDown);
-							this.shouldRetrieveTableData = false;
-						}
-						break;
-					default:
-						retrievePanel();
-				}
-			}
+
+      synchronized (this.connectionLock)
+      {
+        retrieveSelectedPanel();
+      }
 		}
 		catch (Throwable ex)
 		{
@@ -1948,10 +1938,23 @@ public class TableListPanel
 		}
 	}
 
-	private void retrievePanel()
+	private void retrieveSelectedPanel()
 		throws SQLException
 	{
 		Component panel = displayTab.getSelectedComponent();
+    if (panel == this.tableDefinition && shouldRetrieveTable)
+    {
+      retrieveTableDefinition();
+    }
+    if (panel == tableSource && shouldRetrieveTableSource)
+    {
+      retrieveTableSource();
+    }
+    if (panel == tableData && shouldRetrieveTableData)
+    {
+      this.tableData.showData(!this.shiftDown);
+      this.shouldRetrieveTableData = false;
+    }
 		if (panel == this.indexPanel && shouldRetrieveIndexes)
 		{
 			retrieveIndexes();
