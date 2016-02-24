@@ -101,7 +101,7 @@ class ObjectCache
     {
       typeList = new ArrayList<>();
       typeList.addAll(conn.getMetadata().getTableTypes());
-      typeList.addAll(conn.getMetadata().getViewTypes());
+      typeList.addAll(conn.getDbSettings().getViewTypes());
       if (conn.getMetadata().supportsMaterializedViews())
       {
         typeList.add(conn.getMetadata().getMViewTypeName());
@@ -173,13 +173,13 @@ class ObjectCache
 
 	private boolean isSchemaCached(String schema)
 	{
-		return (schemasInCache.contains(schema == null ? NULL_SCHEMA : schema));
+		return (schemasInCache.contains(StringUtil.coalesce(schema,NULL_SCHEMA)));
 	}
 
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, List<String> types)
+	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, Collection<String> types)
 	{
 		List<String> searchPath = getSearchPath(dbConnection, schema);
 		LogMgr.logDebug("ObjectCache.getTables()", "Getting tables using schema: " + schema + ", filter: " + types + ", search path: " + searchPath);
@@ -324,7 +324,7 @@ class ObjectCache
 		return procs;
 	}
 
-	private Set<TableIdentifier> filterTablesByType(WbConnection conn, List<String> schemas, List<String> requestedTypes)
+	private Set<TableIdentifier> filterTablesByType(WbConnection conn, List<String> schemas, Collection<String> requestedTypes)
 	{
 		SortedSet<TableIdentifier> result = new TreeSet<>(new TableNameSorter());
 		String currentSchema = null;

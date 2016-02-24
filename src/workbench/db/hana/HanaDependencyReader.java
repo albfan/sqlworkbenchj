@@ -46,14 +46,18 @@ import workbench.util.SqlUtil;
 public class HanaDependencyReader
   implements DependencyReader
 {
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence", "procedure", "function", "trigger");
 
-  // dependency_type = 5 seems to be a foreign keys
+  // dependency_type is documented as:
+  // 0: NORMAL (default)
+  // 1: EXTERNAL_DIRECT (direct dependency between dependent object and base object)
+  // 2: EXTERNAL_INDIRECT (indirect dependency between dependent object und base object)
+  // 5: REFERENTIAL_DIRECT (foreign key dependency between tables)
   private final String searchUsedBy =
     "select dependent_schema_name, dependent_object_name, dependent_object_type  \n" +
     "from sys.object_dependencies\n" +
     "where dependent_object_name not like '\\_SYS\\_TRIGGER\\_%' escape '\\' \n" +
-    "  and dependency_type <> 5 \n" +
+    "  and dependency_type in (0,1) \n" +
     "  and base_schema_name = ? \n" +
     "  and base_object_name = ?";
 
@@ -61,7 +65,7 @@ public class HanaDependencyReader
     "select base_schema_name, base_object_name, base_object_type \n" +
     "from sys.object_dependencies\n" +
     "where base_object_name not like '\\_SYS\\_TRIGGER\\_%' escape '\\' \n" +
-    "  and dependency_type <> 5 \n" +
+    "  and dependency_type in (0,1) \n" +
     "  and dependent_schema_name = ? \n" +
     "  and dependent_object_name = ? ";
 
@@ -95,6 +99,8 @@ public class HanaDependencyReader
 			LogMgr.logDebug("HanaDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + debugSql);
 		}
 
+    boolean isTable = connection.getMetadata().isTableType(base.getObjectType());
+
     try
     {
       pstmt = connection.getSqlConnection().prepareStatement(sql);
@@ -107,6 +113,9 @@ public class HanaDependencyReader
         String schema = rs.getString(1);
         String name = rs.getString(2);
         String type = rs.getString(3);
+
+        // don't add triggers for tables, they will be shown seperately in the GUI
+        if (isTable && "TRIGGER".equalsIgnoreCase(type)) continue;
 
         DbObject dbo = null;
         if (type.equals("PROCEDURE"))

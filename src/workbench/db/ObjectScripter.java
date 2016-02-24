@@ -109,7 +109,7 @@ public class ObjectScripter
     }
 
     additionalTableTypes.addAll(dbConnection.getMetadata().getTableTypes());
-    additionalViewTypes.addAll(dbConnection.getMetadata().getViewTypes());
+    additionalViewTypes.addAll(dbConnection.getDbSettings().getViewTypes());
 
     additionalViewTypes.remove(TYPE_VIEW);
     additionalTableTypes.remove(TYPE_TABLE);

@@ -141,7 +141,7 @@ public class DefaultViewReader
 		{
       // apprently only the SELECT statement was returned by the DBMS
       // re-construct a valid CREATE VIEW statement
-			result.append(builder.generateCreateObject(DropType.none, viewTable, null));
+			result.append(builder.generateCreateObject(dropType, viewTable, null));
 
 			if (connection.getDbSettings().generateColumnListInViews())
 			{

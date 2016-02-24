@@ -23,6 +23,7 @@
  */
 package workbench.db.objectcache;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -147,7 +148,7 @@ public class DbObjectCache
 		return objectCache.getTables(dbConnection, schema, null);
 	}
 
-	public Set<TableIdentifier> getTables(String schema, List<String> type)
+	public Set<TableIdentifier> getTables(String schema, Collection<String> type)
 	{
 		return objectCache.getTables(dbConnection, schema, type);
 	}

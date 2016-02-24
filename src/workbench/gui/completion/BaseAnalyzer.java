@@ -26,6 +26,7 @@ package workbench.gui.completion;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -551,7 +552,7 @@ public abstract class BaseAnalyzer
 	protected void retrieveViews()
 	{
 		DbObjectCache cache = this.dbConnection.getObjectCache();
-		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, dbConnection.getMetadata().getViewTypes());
+		Set<TableIdentifier> tables = cache.getTables(schemaForTableList, dbConnection.getDbSettings().getViewTypes());
 		if (schemaForTableList == null || cache.getSearchPath(schemaForTableList).size() > 1)
 		{
 			this.title = ResourceMgr.getString("LblCompletionListTables");
@@ -635,7 +636,7 @@ public abstract class BaseAnalyzer
 		return (elements == null ? false : (elements.size() > 0));
 	}
 
-	protected void setTableTypeFilter(List<String> filter)
+	protected void setTableTypeFilter(Collection<String> filter)
 	{
 		this.typeFilter = new ArrayList<>(filter);
 	}

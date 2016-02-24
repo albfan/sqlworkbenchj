@@ -168,7 +168,6 @@ public class DbMetadata
   private String mviewTypeName;
 
 	private Set<String> tableTypesList;
-  private Set<String> viewTypesList;
 	private String[] tableTypesArray;
 	private String[] selectableTypes;
 	private Set<String> schemasToIgnore;
@@ -453,15 +452,14 @@ public class DbMetadata
 		tableTypesList = CollectionUtil.caseInsensitiveSet();
 		tableTypesList.addAll(ttypes);
 
-    initViewTypes();
+    // make sure synonyms are not treated as tables
+    tableTypesList.remove(SynonymReader.SYN_TYPE_NAME);
 
 		tableTypesArray = StringUtil.toArray(tableTypesList, true);
 
-		// The selectableTypes array will be used
-		// to fill the completion cache. In that case
-		// we do not want system tables included (which
-		// is done for the objectsWithData as that
-		// drives the "Data" tab in the DbExplorer)
+		// The selectableTypes array will be used to fill the completion cache.
+    // In that case we do not want system tables included
+    // (which is done for the objectsWithData as that drives the "Data" tab in the DbExplorer)
 		Set<String> types = getObjectsWithData();
 
 		if (!dbSettings.includeSystemTablesInSelectable())
@@ -638,7 +636,7 @@ public class DbMetadata
 	public String[] getTablesAndViewTypes()
 	{
 		List<String> types = new ArrayList<>(tableTypesList);
-		types.addAll(viewTypesList);
+		types.addAll(getDbSettings().getViewTypes());
 		return types.toArray(EMPTY_STRING_ARRAY);
 	}
 
@@ -646,11 +644,6 @@ public class DbMetadata
 	{
 		return Arrays.copyOf(selectableTypes, selectableTypes.length);
 	}
-
-  public List<String> getViewTypes()
-  {
-    return new ArrayList<>(viewTypesList);
-  }
 
 	public List<String> getTableTypes()
 	{
@@ -2804,18 +2797,6 @@ public class DbMetadata
 		return result;
 	}
 
-  private void initViewTypes()
-  {
-		Collection<String> vtypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".viewtypes", false, null);
-		if (!vtypes.isEmpty())
-		{
-			LogMgr.logInfo("DbMetadata.<init>", "Using configured view types: " + vtypes);
-		}
-		viewTypesList = CollectionUtil.caseInsensitiveSet();
-		viewTypesList.addAll(vtypes);
-    viewTypesList.add("VIEW");
-  }
-
 	private boolean isIndexType(String type)
 	{
 		if (type == null) return false;
@@ -2956,8 +2937,7 @@ public class DbMetadata
 
   public boolean isViewType(String type)
   {
-    if (type == null) return false;
-    return viewTypesList.contains(type);
+    return getDbSettings().isViewType(type);
   }
 
 	public boolean isTableType(String type)

@@ -21,7 +21,8 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.oracle;
+package workbench.db.hana;
+
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +33,6 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.JdbcUtils;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -43,7 +43,7 @@ import workbench.util.SqlUtil;
  *
  * @author  Thomas Kellerer
  */
-public class OracleSynonymReader
+public class HanaSynonymReader
 	implements SynonymReader
 {
 
@@ -51,7 +51,7 @@ public class OracleSynonymReader
 	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
-		// Nothing to do. The Oracle driver already returns the SYNONYMs in the getTables() call
+		// Nothing to do. The HANA driver already returns the SYNONYMs in the getTables() call
 		return Collections.emptyList();
 	}
 
@@ -62,39 +62,24 @@ public class OracleSynonymReader
 	}
 
 	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonym)
 		throws SQLException
 	{
-		boolean readComments = OracleUtils.getRemarksReporting(con);
-
 		String sql =
       "-- SQL Workbench \n" +
-      "SELECT s.synonym_name, s.table_owner, s.table_name, s.db_link, o.object_type, s.owner";
+      "SELECT object_schema, object_name, object_type \n" +
+      "FROM sys.synonyms \n" +
+      "WHERE schema_name = ? \n" +
+      "  AND synonym_name = ? ";
 
-		if (readComments)
+		if (schema == null)
 		{
-			// the scalar sub-select seems to be way faster than an outer join
-			sql += ", (select tc.comments from all_tab_comments tc where tc.table_name = o.object_name AND tc.owner = o.owner) as comments ";
-		}
-
-		// the outer join to all_objects is necessary to also see synonyms that point to no longer existing tables
-		sql +=
-			"\nFROM all_synonyms s \n" +
-			"  LEFT JOIN all_objects o ON s.table_name = o.object_name AND s.table_owner = o.owner  \n";
-
-		sql +=
-			"WHERE ((s.synonym_name = ? AND s.owner = ?)  \n" +
-			"    OR (s.synonym_name = ? AND s.owner = 'PUBLIC'))  \n" +
-			"ORDER BY decode(s.owner, 'PUBLIC',9,1)";
-
-		if (owner == null)
-		{
-			owner = con.getCurrentUser();
+			schema = con.getCurrentSchema();
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("OracleSynonymReader.getSynonymTable()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, synonym, owner, synonym));
+			LogMgr.logInfo("HanaSynonymReader.getSynonymTable()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schema, synonym));
 		}
 
 		PreparedStatement stmt = null;
@@ -104,25 +89,17 @@ public class OracleSynonymReader
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, synonym);
-			stmt.setString(2, owner);
-			stmt.setString(3, synonym);
+			stmt.setString(1, schema);
+			stmt.setString(2, synonym);
 
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
-				String towner = rs.getString(2);
-				String table = rs.getString(3);
-				String dblink = rs.getString(4);
-				String type = rs.getString(5);
-				if (dblink != null) table = table + "@" + dblink;
-				result = new TableIdentifier(null, towner, table);
+				String targetSchema = rs.getString(1);
+				String targetTable = rs.getString(2);
+        String type = rs.getString(3);
+				result = new TableIdentifier(null, targetSchema, targetTable);
 				result.setType(type);
-				if (readComments)
-				{
-					String comment = rs.getString(6);
-					result.setComment(comment);
-				}
 			}
 		}
 		finally
@@ -137,33 +114,15 @@ public class OracleSynonymReader
 	public String getSynonymSource(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
-    if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.synonym))
-    {
-      try
-      {
-        return DbmsMetadata.getDDL(con, "SYNONYM", synonym, owner);
-      }
-      catch (SQLException sql)
-      {
-        // logging already done
-      }
-    }
-
-		TableIdentifier id = getSynonymTable(con, catalog, owner, synonym);
+		TableIdentifier targetTable = getSynonymTable(con, catalog, owner, synonym);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-    if (supportsReplace(con))
-    {
-      result.append("CREATE OR REPLACE SYNONYM ");
-    }
-		else
-    {
-      result.append("CREATE SYNONYM ");
-    }
-    TableIdentifier syn = new TableIdentifier(owner, synonym);
+    result.append("CREATE SYNONYM ");
+
+    TableIdentifier syn = new TableIdentifier(catalog, owner, synonym);
 		result.append(syn.getTableExpression(con));
 		result.append(nl + "   FOR ");
-		result.append(id.getTableExpression(con));
+		result.append(targetTable.getTableExpression(con));
 		result.append(';');
 		result.append(nl);
 		return result.toString();
@@ -172,8 +131,7 @@ public class OracleSynonymReader
   @Override
   public boolean supportsReplace(WbConnection con)
   {
-    return JdbcUtils.hasMinimumServerVersion(con, "10.0");
+    return false;
   }
-
 
 }

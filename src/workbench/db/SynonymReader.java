@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.db.derby.DerbySynonymReader;
+import workbench.db.hana.HanaSynonymReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ibm.InformixSynonymReader;
 import workbench.db.ingres.IngresSynonymReader;
@@ -85,6 +86,10 @@ public interface SynonymReader
 			{
 				return new IngresSynonymReader();
 			}
+      if (conn.getDbId().equals(DbMetadata.DBID_HANA))
+      {
+        return new HanaSynonymReader();
+      }
 			return null;
 		}
 	}

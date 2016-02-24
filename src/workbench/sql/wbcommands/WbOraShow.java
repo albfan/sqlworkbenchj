@@ -228,8 +228,8 @@ public class WbOraShow
     String query = "select sys_context('userenv', '" + attribute.toUpperCase()+ "') as " + displayName + " from dual";
 
     StatementRunnerResult result = new StatementRunnerResult("SHOW " + attribute);
-    DataStore ds = SqlUtil.getResult(currentConnection, query);
-    ds.setResultName(displayName);
+    DataStore ds = SqlUtil.getResult(currentConnection, query, false);
+    ds.setResultName(displayName.toUpperCase());
     result.addDataStore(ds);
 
     return result;

@@ -259,7 +259,7 @@ public class TableDefinitionPanel
 
 		alterButton.showMessageOnEnable("MsgApplyDDLHint");
 		alterButton.setIcon(null);
-		alterButton.setUseDefaultMargin(true);
+		alterButton.setUseDefaultMargin(false);
 		toolbar.add(alterButton, cc);
 
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);

@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -83,7 +84,7 @@ public class DbObjectNodeRenderer
     setLeafIcon(IconMgr.getInstance().getLabelIcon("bullet_black"));
 	}
 
-  public void setViewTypes(List<String> types)
+  public void setViewTypes(Collection<String> types)
   {
     if (CollectionUtil.isEmpty(types)) return;
     for (String type : viewTypes)

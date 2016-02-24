@@ -162,7 +162,8 @@ public class DerbySynonymReader
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
-		result.append(synonym);
+    TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
+		result.append(syn.getTableExpression(con));
 		result.append(nl);
 		result.append("   FOR ");
 		result.append(id.getTableExpression());

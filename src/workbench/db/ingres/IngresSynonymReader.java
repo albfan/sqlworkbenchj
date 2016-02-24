@@ -64,7 +64,7 @@ public class IngresSynonymReader
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
+		List<TableIdentifier> result = new ArrayList<>();
 
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_owner, synonym_name FROM iisynonyms ");

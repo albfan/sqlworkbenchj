@@ -155,7 +155,7 @@ public class CollectionUtil
 	/**
 	 * Remove the given element from the array.
 	 *
-	 * The check is done using String.equals() so it's case sensitive.
+	 * The check is done using String.equalsIgnoreCase() so it's case in-sensitive.
 	 *
 	 * @param array   the array
 	 * @param remove  the element to remove
@@ -169,7 +169,7 @@ public class CollectionUtil
 		List<String> elements = new ArrayList<>(array.length);
 		for (String s : array)
 		{
-			if (s.equals(remove)) continue;
+			if (s.equalsIgnoreCase(remove)) continue;
 			elements.add(s);
 		}
 		return elements.toArray(new String[0]);

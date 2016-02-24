@@ -263,7 +263,7 @@ public class DbExplorerPanel
 
     if (schemaSelector.isVisible())
     {
-      readSchemas(false);
+      startRetrieveSchemas(false);
     }
     else if (catalogSelector.isVisible())
     {
@@ -402,14 +402,46 @@ public class DbExplorerPanel
 		return "WbExp-" + NumberStringCache.getNumberString(this.internalId);
 	}
 
-	private void readSchemas(boolean checkWorkspace)
-	{
-		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null)
-		{
-			this.schemaRetrievePending = true;
-			return;
-		}
+  private void startRetrieveSchemas(boolean checkWorkspace)
+  {
+    if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null)
+    {
+      this.schemaRetrievePending = true;
+      return;
+    }
 
+    if (this.connectionInitPending)
+    {
+      this.initConnection();
+    }
+
+    WbThread schemaRetrieval = new WbThread("DbExplorer schema retrieval")
+    {
+      @Override
+      public void run()
+      {
+        retrieveAndShowSchemas(checkWorkspace);
+      }
+    };
+    schemaRetrieval.start();
+  }
+
+	private void retrieveAndShowSchemas(final boolean checkWorkspace)
+  {
+    final List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter());
+
+    WbSwingUtilities.invoke(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _showSchemas(schemas, checkWorkspace);
+      }
+    });
+  }
+
+	private void _showSchemas(List<String> schemas, boolean checkWorkspace)
+	{
 		String schemaToSelect = null;
 		try
 		{
@@ -417,7 +449,6 @@ public class DbExplorerPanel
 
 			setBusy(true);
 
-			List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter());
 			String currentSchema = null;
 			boolean workspaceSchema = false;
 			if (checkWorkspace && this.dbConnection.getProfile().getStoreExplorerSchema())
@@ -592,8 +623,9 @@ public class DbExplorerPanel
 
 	private void readSchemaLabel()
 	{
-		String schemaName = this.dbConnection.getMetadata().getSchemaTerm();
-		this.schemaLabel.setText(StringUtil.capitalize(schemaName));
+		String schemaTerm = dbConnection.getMetadata().getSchemaTerm();
+		schemaLabel.setText(StringUtil.capitalize(schemaTerm));
+    reloadSchemasAction.setTooltip(ResourceMgr.getFormattedString("TxtReloadSchemas", schemaTerm));
 	}
 
 	@Override
@@ -612,9 +644,6 @@ public class DbExplorerPanel
 			this.connectionInitPending = false;
 			return;
 		}
-
-		WbSwingUtilities.showWaitCursorOnWindow(this);
-		reloadSchemasAction.setTooltip(ResourceMgr.getFormattedString("TxtReloadSchemas", dbConnection.getMetadata().getSchemaTerm()));
 
 		try
 		{
@@ -644,29 +673,15 @@ public class DbExplorerPanel
 
 			this.connectionInfo.setConnection(aConnection);
 
-			// Try to avoid concurrent execution on the
-			// same connection object
+			// Avoid concurrent execution on the same connection object
 			if (!isConnectionBusy())
 			{
-				WbThread t = new WbThread("DbExplorerInit")
-				{
-					@Override
-					public void run()
-					{
-						initConnection();
-
-						if (isVisible())
-						{
-							readSchemas(true);
-							if (retrievePending)
-							{
-								// if we are visible start the retrieve immediately
-								retrieve();
-							}
-						}
-					}
-				};
-				t.start();
+        initConnection();
+        if (isVisible() && retrievePending)
+        {
+          // if we are visible start the retrieve immediately in a background thread
+          retrieve();
+        }
 			}
 		}
 		catch (Throwable th)
@@ -674,10 +689,6 @@ public class DbExplorerPanel
 			this.retrievePending = true;
 			this.schemaRetrievePending = true;
 			LogMgr.logError("DbExplorerPanel.setConnection()", "Error during connection init", th);
-		}
-		finally
-		{
-			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
 	}
 
@@ -744,17 +755,19 @@ public class DbExplorerPanel
 		super.setVisible(flag);
 		if (!wasVisible && flag)
 		{
-			if (schemaRetrievePending)
+      if (retrievePending)
+      {
+        // retrievePending will be true, if the connection has
+        // been set already, the DbExplorer should be retrieved automatically
+        // and the panel was not visible when the connection was provided
+        // retrieve() will automatically retrieve the schemas if necessary
+        EventQueue.invokeLater(this::retrieve);
+      }
+      else if (schemaRetrievePending)
 			{
-				this.readSchemas(true);
+        startRetrieveSchemas(true);
 			}
-			if (retrievePending)
-			{
-				// retrievePending will be true, if the connection has
-				// been set already, the DbExplorer should be retrieved automatically
-				// and the panel was not visible when the connection was provided
-				EventQueue.invokeLater(this::retrieve);
-			}
+
 			if (currentFocus != null)
 			{
 				WbSwingUtilities.requestFocus(currentFocus);
@@ -875,13 +888,9 @@ public class DbExplorerPanel
 			this.initConnection();
 		}
 
-		if (this.schemaRetrievePending)
-		{
-			this.readSchemas(true);
-		}
+    final Component c = this;
 
-		final String schema = (String)schemaSelector.getSelectedItem();
-		final Component c = this;
+    WbSwingUtilities.showWaitCursorOnWindow(this);
 
 		Thread t = new WbThread("SchemaChange")
 		{
@@ -890,7 +899,15 @@ public class DbExplorerPanel
 			{
 				try
 				{
-					setBusy(true);
+          setBusy(true);
+
+          if (schemaRetrievePending)
+          {
+            retrieveAndShowSchemas(true);
+          }
+
+          String schema = (String)schemaSelector.getSelectedItem();
+
 					WbSwingUtilities.showWaitCursorOnWindow(c);
 					tables.setCatalogAndSchema(getSelectedCatalog(), schema, true);
 					procs.setCatalogAndSchema(getSelectedCatalog(), schema, true);
@@ -1142,18 +1159,15 @@ public class DbExplorerPanel
 	{
 		if (!this.isVisible()) return;
 
-		if (this.connectionInitPending)
-		{
-			this.initConnection();
-		}
-		if (this.schemaRetrievePending)
-		{
-			this.readSchemas(true);
-		}
-		if (this.retrievePending)
+    if (this.retrievePending)
 		{
 			retrieve();
 		}
+    else if (this.schemaRetrievePending)
+    {
+      startRetrieveSchemas(true);
+    }
+
 	}
 
 	@Override

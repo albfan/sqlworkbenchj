@@ -194,9 +194,9 @@ public class HanaSequenceReader
 		StringBuilder result = new StringBuilder(100);
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-    result.append(def.getSchema());
+    result.append(SqlUtil.quoteObjectname(def.getSchema()));
     result.append('.');
-		result.append(def.getSequenceName());
+		result.append(SqlUtil.quoteObjectname(def.getSequenceName()));
 
 		Number start = (Number)def.getSequenceProperty(PROP_START_VALUE);
 		result.append(nl);
