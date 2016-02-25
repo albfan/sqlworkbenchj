@@ -2,10 +2,12 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-02-21">
-    <entry dev-build="1" type="enh">For SAP dependency for tables, view and sequences are now shown in the DbExplorer and DbTree</entry>
+    <entry dev-build="1" type="enh">For SAP HANA the source for synonyms are now shown</entry>
+    <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new statement is available to generate the DDL for only the foreign key constraints.</entry>
     <entry dev-build="1" type="enh">It's now possible to restore recently closed editor tabs</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now show correctly</entry>
+    <entry dev-build="1" type="fix">The display for LVARCHAR and DATE columns was not always correct for Informix</entry>
     <entry dev-build="1" type="fix">Warnings that were reported by the JDBC driver after establishing the connection were sometimes shown in the generated DDL in the DbTree</entry>
     <entry dev-build="1" type="fix">The DDL for sequences in Oracle did not reflect the values for CYCLE and ORDER</entry>
     <entry dev-build="1" type="fix">Running PL/SQL in Oracle did not work if the option "Remove comments" was enabled in the connection profile</entry>
