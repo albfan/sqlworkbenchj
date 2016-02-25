@@ -388,6 +388,11 @@ public class SqlPanel
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
 
+    if (GuiSettings.getShowTextSelectionSummary())
+    {
+      statusBar.addTextSelectionDisplay(editor);
+    }
+
 		// The name of the component is used for the Jemmy GUI Tests
 		editor.setName("sqleditor" + internalId);
 
@@ -443,7 +448,7 @@ public class SqlPanel
 		}
 
 		tabName = ResourceMgr.getDefaultTabLabel();
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON, GuiSettings.PROP_SHOW_TEXT_SELECTION_INFO);
 		editor.setMacroExpansionEnabled(true, macroClientId);
 		editor.setBracketCompletionEnabled(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
@@ -4328,6 +4333,11 @@ public class SqlPanel
 		if (this.execListener != null) execListener.clear();
 		this.execListener = null;
 
+    if (statusBar != null)
+    {
+      statusBar.removeTextSelectionDisplay(editor);
+    }
+
 		if (this.editor != null) this.editor.dispose();
 		this.editor = null;
 
@@ -4395,6 +4405,17 @@ public class SqlPanel
     else if (evt.getSource() == this.currentData && prop.equals("updateTable"))
     {
       this.checkResultSetActions();
+    }
+    else if (GuiSettings.PROP_SHOW_TEXT_SELECTION_INFO.equals(prop))
+    {
+      if (GuiSettings.getShowTextSelectionSummary())
+      {
+        statusBar.addTextSelectionDisplay(editor);
+      }
+      else
+      {
+        statusBar.removeTextSelectionDisplay(editor);
+      }
     }
     else if (GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON.equals(prop))
     {

@@ -33,10 +33,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
 
+import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.sql.EditorPanel;
 
 import workbench.util.StringUtil;
 import workbench.util.WbNumberFormatter;
@@ -47,6 +49,7 @@ import workbench.util.WbNumberFormatter;
  */
 public class SelectionDisplay
 	extends JLabel
+  implements TextSelectionListener
 {
 	private JTable table;
 	private Border activeBorder = new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3));
@@ -56,22 +59,8 @@ public class SelectionDisplay
 
 	public SelectionDisplay()
 	{
-		rowListener = new ListSelectionListener()
-		{
-			@Override
-			public void valueChanged(ListSelectionEvent e)
-			{
-				rowSelectionChanged(e);
-			}
-		};
-		columnListener = new ListSelectionListener()
-		{
-			@Override
-			public void valueChanged(ListSelectionEvent e)
-			{
-				columnSelectionChanged(e);
-			}
-		};
+		rowListener = this::rowSelectionChanged;
+		columnListener = this::columnSelectionChanged;
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		formatter = Settings.getInstance().createDefaultDecimalFormatter(2);
 	}
@@ -116,6 +105,36 @@ public class SelectionDisplay
 		}
 	}
 
+  public void setTextClient(EditorPanel editor)
+  {
+    if (editor != null)
+    {
+      editor.addSelectionListener(this);
+    }
+  }
+
+  public void removeTextClient(EditorPanel editor)
+  {
+    if (editor != null)
+    {
+      editor.removeSelectionListener(this);
+    }
+  }
+
+  @Override
+  public void selectionChanged(int start, int end)
+  {
+    int length = end - start;
+    if (length > 1)
+    {
+      this.setText(length + " characters selected");
+    }
+    else
+    {
+      setText("");
+    }
+  }
+
 	protected void columnSelectionChanged(ListSelectionEvent e)
 	{
 		showSelection();
@@ -139,7 +158,6 @@ public class SelectionDisplay
 			setBorder(activeBorder);
 		}
 	}
-
 
 	protected void showSelection()
 	{

@@ -213,6 +213,26 @@ public class DwStatusBar
 		}
 	}
 
+  private void initSelectionDisplay()
+  {
+    if (this.selectionDisplay == null)
+    {
+      this.selectionDisplay = new SelectionDisplay();
+      this.infoPanel.add(this.selectionDisplay, 0);
+    }
+  }
+  public void addTextSelectionDisplay(EditorPanel editor)
+  {
+    initSelectionDisplay();
+    this.selectionDisplay.setTextClient(editor);
+  }
+
+  public void removeTextSelectionDisplay(EditorPanel editor)
+  {
+		if (this.selectionDisplay == null) return;
+    this.selectionDisplay.removeTextClient(editor);
+  }
+
 	public void removeSelectionIndicator(JTable client)
 	{
 		if (this.selectionDisplay == null) return;
@@ -221,12 +241,8 @@ public class DwStatusBar
 
 	public void showSelectionIndicator(JTable client)
 	{
-		if (this.selectionDisplay == null)
-		{
-			this.selectionDisplay = new SelectionDisplay();
-		}
+    initSelectionDisplay();
 		this.selectionDisplay.setClient(client);
-		this.infoPanel.add(this.selectionDisplay, 0);
 	}
 
 	public void setReadyMsg(String aMsg)

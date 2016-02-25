@@ -2523,6 +2523,8 @@ public class JEditTextArea
 
 	public final void addSelectionListener(TextSelectionListener l)
 	{
+    // prevent multiple registration of the same listener
+    removeSelectionListener(l);
 		listeners.add(TextSelectionListener.class, l);
 	}
 
@@ -2533,6 +2535,8 @@ public class JEditTextArea
 
 	public final void addTextChangeListener(TextChangeListener l)
 	{
+    // prevent multiple registration of the same listener
+    removeTextChangeListener(l);
 		listeners.add(TextChangeListener.class, l);
 	}
 

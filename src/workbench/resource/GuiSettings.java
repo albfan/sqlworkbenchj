@@ -112,6 +112,7 @@ public class GuiSettings
   public static final String PROP_PLAIN_EDITOR_WRAP = "workbench.editor.plain.wordwrap";
   public static final String PROP_GLOBAL_SEARCH_SAVE_COLWIDTHS = "workbench.gui.global.search.save.colwidths";
 
+  public static final String PROP_SHOW_TEXT_SELECTION_INFO = "workbench.gui.text.selection.summary";
 
   public static boolean showScriptProgress()
   {
@@ -983,14 +984,24 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.edit.warn.discard.changes", false);
 	}
 
+	public static boolean getShowTextSelectionSummary()
+	{
+		return Settings.getInstance().getBoolProperty(PROP_SHOW_TEXT_SELECTION_INFO, true);
+	}
+
+	public static void setShowTextSelectionSummary(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROP_SHOW_TEXT_SELECTION_INFO, flag);
+	}
+
 	public static boolean getShowSelectionSummary()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.selection.summar", true);
+		return Settings.getInstance().getBoolProperty("workbench.gui.data.selection.summary", true);
 	}
 
 	public static void setShowSelectionSummary(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.selection.summar", flag);
+		Settings.getInstance().setProperty("workbench.gui.data.selection.summary", flag);
 	}
 
 	public static boolean getForceRedraw()
