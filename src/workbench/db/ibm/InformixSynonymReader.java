@@ -110,6 +110,7 @@ public class InformixSynonymReader
 				if (table != null)
 				{
 					result = new TableIdentifier(null, owner, table);
+          result.setNeverAdjustCase(true);
 				}
 			}
 		}

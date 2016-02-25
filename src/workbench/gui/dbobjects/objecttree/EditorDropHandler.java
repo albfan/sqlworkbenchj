@@ -65,7 +65,7 @@ public class EditorDropHandler
     int editorPos = editor.xyToOffset((int)location.getX() - editor.getPainter().getGutterWidth(), (int)location.getY());
     int index = parser.getCommandIndexAtCursorPos(editorPos);
 
-    String sql = sql = parser.getCommand(index, false);
+    String sql = parser.getCommand(index, false);
 
     // handle the case where a single table is dragged
     // into an "empty" area of the editor. In that case

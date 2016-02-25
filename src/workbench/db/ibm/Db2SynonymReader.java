@@ -126,6 +126,7 @@ public class Db2SynonymReader
 				if (table != null)
 				{
 					result = new TableIdentifier(null, owner, table);
+          result.setNeverAdjustCase(true);
 				}
 			}
 		}

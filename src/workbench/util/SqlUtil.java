@@ -102,7 +102,9 @@ public class SqlUtil
 			"DATABASE", "DATABASE LINK", "PFILE", "SPFILE", "SYSTEM"));
 	}
 
-	public static Set<String> getDMLVerbs()
+  private static final Set<String> CHAR_TYPES_WITHOUT_LENGTH = CollectionUtil.caseInsensitiveSet("text", "tinytext", "mediumtext", "longtext");
+
+  public static Set<String> getDMLVerbs()
 	{
 		return ModifyingVerbsHolder.DML_VERB;
 	}
@@ -1142,7 +1144,7 @@ public class SqlUtil
 
 	/**
 	 * Replaces all white space characters with a single space and removes single line and multi line comments.
-   * 
+   *
    * Whitespace is not removed inside string literals.
    *
 	 * @param aSql                     The sql script to "clean out"
@@ -1465,8 +1467,7 @@ public class SqlUtil
 			case Types.NVARCHAR:
 			case Types.NCHAR:
 				// Postgres' text datatype and MySQL's XXXtext types do not have a size parameter
-				Set<String> plainTypes = CollectionUtil.caseInsensitiveSet("text", "tinytext", "mediumtext", "longtext");
-				if (plainTypes.contains(typeName)) return typeName;
+				if (CHAR_TYPES_WITHOUT_LENGTH.contains(typeName)) return typeName;
 
 				if (size > 0 && typeName.indexOf('(') == -1)
 				{

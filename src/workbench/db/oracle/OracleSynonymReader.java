@@ -117,6 +117,7 @@ public class OracleSynonymReader
 				String type = rs.getString(5);
 				if (dblink != null) table = table + "@" + dblink;
 				result = new TableIdentifier(null, towner, table);
+        result.setNeverAdjustCase(true);
 				result.setType(type);
 				if (readComments)
 				{

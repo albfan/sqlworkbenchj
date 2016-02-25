@@ -25,6 +25,7 @@ import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -35,7 +36,14 @@ public class FormatterUtil
 
 	public static String getIdentifier(String input)
 	{
+    if (StringUtil.isEmptyString(input)) return input;
 		if (SqlUtil.isQuotedIdentifier(input)) return input;
+
+    // maybe a multi-part identifier where just one part is quoted
+    if (input.indexOf('"') > -1) return input;
+    // take care of SQL Server's stupid brackets
+    if (input.indexOf('[') > -1) return input;
+
 		return adjustCase(input, Settings.getInstance().getFormatterIdentifierCase());
 	}
 
