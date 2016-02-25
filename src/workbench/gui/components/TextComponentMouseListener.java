@@ -32,6 +32,7 @@ import java.util.List;
 
 import javax.swing.InputMap;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -118,6 +119,17 @@ public class TextComponentMouseListener
 	}
 
 
+  public void addActionAtStart(WbAction action, boolean withSeparator)
+  {
+    if (popup != null)
+    {
+      popup.add(action.getMenuItem(), 0);
+      if (withSeparator)
+      {
+        popup.add(new JPopupMenu.Separator(), 1);
+      }
+    }
+  }
 	/**
 	 * Add an action to the popup menu. The action's shortcut will
 	 * also be added to the underlying text component's input map

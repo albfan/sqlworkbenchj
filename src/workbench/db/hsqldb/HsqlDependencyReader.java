@@ -123,6 +123,7 @@ public class HsqlDependencyReader
         String name = rs.getString(3);
         String type = rs.getString(4);
         TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+        tbl.setNeverAdjustCase(true);
         tbl.setType(type);
         result.add(tbl);
       }

@@ -68,6 +68,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
@@ -669,7 +670,7 @@ public class DbTreePanel
     List<ObjectTreeNode> result = new ArrayList<>(count);
     if (count == 0) return result;
 
-    Set<String> nodeTypesWithTables = CollectionUtil.caseInsensitiveSet(TreeLoader.TYPE_TABLE, TreeLoader.TYPE_VIEW);
+    DbMetadata meta = tree.getConnection().getMetadata();
     TreePath[] paths = tree.getSelectionPaths();
 
     for (TreePath path : paths)
@@ -679,7 +680,7 @@ public class DbTreePanel
         ObjectTreeNode node = (ObjectTreeNode)path.getLastPathComponent();
         if (node != null)
         {
-          if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(node.getType()) && nodeTypesWithTables.contains(node.getName()))
+          if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(node.getType()) && meta.isViewOrTable(node.getName()))
           {
             result.addAll(getTableNodes(node));
           }
@@ -697,12 +698,12 @@ public class DbTreePanel
   private List<ObjectTreeNode> getSchemaTableNodes(ObjectTreeNode schemaNode)
   {
     List<ObjectTreeNode> result = new ArrayList<>();
-    Set<String> nodeTypesWithTables = CollectionUtil.caseInsensitiveSet(TreeLoader.TYPE_TABLE, TreeLoader.TYPE_VIEW);
     int count = schemaNode.getChildCount();
+    DbMetadata meta = tree.getConnection().getMetadata();
     for (int i=0;  i < count; i++)
     {
       ObjectTreeNode child = schemaNode.getChildAt(i);
-      if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(child.getType()) && nodeTypesWithTables.contains(child.getName()))
+      if (TreeLoader.TYPE_DBO_TYPE_NODE.equalsIgnoreCase(child.getType()) && meta.isViewOrTable(child.getName()))
       {
         result.addAll(getTableNodes(child));
       }

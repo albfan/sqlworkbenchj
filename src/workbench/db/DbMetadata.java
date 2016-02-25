@@ -121,6 +121,7 @@ public class DbMetadata
 	public static final String DBID_OPENEDGE = "openedge";
 	public static final String DBID_HANA = "hdb";
 	public static final String DBID_CUBRID = "cubrid";
+	public static final String DBID_INFORMIX = "informix_dynamic_server";
 
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private final String[] EMPTY_STRING_ARRAY = new String[]{};
@@ -326,10 +327,6 @@ public class DbMetadata
 			this.objectListEnhancer = new MySQLTableCommentReader();
 			this.isMySql = true;
 		}
-		else if (productLower.contains("cloudscape"))
-		{
-			this.isApacheDerby = true;
-		}
 		else if (productLower.contains("derby"))
 		{
 			this.isApacheDerby = true;
@@ -360,9 +357,11 @@ public class DbMetadata
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
 		}
-		else if (productLower.contains("informix"))
+		else if (productLower.contains("informix") || Settings.getInstance().getInformixProductNames().contains(productName))
 		{
-			this.dataTypeResolver = new InformixDataTypeResolver();
+      // use the same DBID regardless of the product name reported by the server
+      dbId = DBID_INFORMIX;
+			dataTypeResolver = new InformixDataTypeResolver();
 		}
 		else if (productLower.equals("vertica database"))
 		{
@@ -734,6 +733,7 @@ public class DbMetadata
 	{
 		Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
 		objectsWithData.addAll(retrieveTableTypes());
+    objectsWithData.addAll(getDbSettings().getViewTypes());
 
 		String keyPrefix = "workbench.db.objecttype.selectable.";
 		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
@@ -747,10 +747,9 @@ public class DbMetadata
 
 		if (objectsWithData.isEmpty())
 		{
-			// make sure we have at some basic information in here
+			// make sure we have some basic information in here
 			objectsWithData.add("table");
 			objectsWithData.add("view");
-			objectsWithData.add("synonym");
 			objectsWithData.add("system view");
 			objectsWithData.add("system table");
 		}

@@ -78,6 +78,8 @@ public class ObjectScripterUI
 		editor = EditorPanel.createSqlEditor();
     OpenFileAction openFile = editor.getOpenFileAction();
     editor.removePopupMenuItem(openFile);
+    editor.showFormatSql();
+    editor.setAllowReformatOnReadonly(true);
     openFile.setEnabled(false);
 		CreateSnippetAction create = new CreateSnippetAction(this.editor);
 		editor.addPopupMenuItem(create, true);

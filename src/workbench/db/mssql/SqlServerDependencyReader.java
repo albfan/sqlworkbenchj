@@ -217,6 +217,7 @@ public class SqlServerDependencyReader
         else
         {
           TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+          tbl.setNeverAdjustCase(true);
           tbl.setType(type);
           dbo = tbl;
         }

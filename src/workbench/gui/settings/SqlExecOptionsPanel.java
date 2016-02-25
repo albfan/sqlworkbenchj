@@ -107,6 +107,7 @@ public class SqlExecOptionsPanel
     jumpToError.setSelected(GuiSettings.jumpToError());
     showStmtEndTime.setSelected(GuiSettings.showScriptStmtFinishTime());
     showScriptEndTime.setSelected(GuiSettings.showScriptFinishTime());
+    showScriptProgress.setSelected(GuiSettings.showScriptProgress());
     ErrorPromptType type = GuiSettings.getErrorPromptType();
     promptType.setSelectedIndex(promptTypeToIndex(type));
     setTypeTooltip();
@@ -143,6 +144,7 @@ public class SqlExecOptionsPanel
     GuiSettings.setJumpToError(jumpToError.isSelected());
     GuiSettings.setShowScriptFinishTime(showScriptEndTime.isSelected());
     GuiSettings.setShowScriptStmtFinishTime(showStmtEndTime.isSelected());
+    GuiSettings.setShowScriptProgress(showScriptProgress.isSelected());
 	}
 
   private void setTypeTooltip()
@@ -205,6 +207,7 @@ public class SqlExecOptionsPanel
     jumpToError = new JCheckBox();
     showStmtEndTime = new JCheckBox();
     showScriptEndTime = new JCheckBox();
+    showScriptProgress = new JCheckBox();
     jPanel3 = new JPanel();
     alternateDelimiter = new JTextField();
     cbxDbName = new JComboBox();
@@ -250,7 +253,7 @@ public class SqlExecOptionsPanel
     allowEditDuringExec.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.insets = new Insets(7, 15, 0, 0);
     jPanel2.add(allowEditDuringExec, gridBagConstraints);
@@ -338,6 +341,16 @@ public class SqlExecOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 0, 0, 0);
     jPanel2.add(showScriptEndTime, gridBagConstraints);
+
+    showScriptProgress.setText(ResourceMgr.getString("LblShowScriptProgress")); // NOI18N
+    showScriptProgress.setToolTipText(ResourceMgr.getString("d_LblShowScriptProgress")); // NOI18N
+    showScriptProgress.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(7, 15, 0, 0);
+    jPanel2.add(showScriptProgress, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -454,6 +467,7 @@ public class SqlExecOptionsPanel
   private JCheckBox keepHilite;
   private JComboBox promptType;
   private JCheckBox showScriptEndTime;
+  private JCheckBox showScriptProgress;
   private JCheckBox showStmtEndTime;
   private JCheckBox useCurrentLineStmt;
   // End of variables declaration//GEN-END:variables

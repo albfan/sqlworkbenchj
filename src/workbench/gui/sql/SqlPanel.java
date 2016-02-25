@@ -3426,31 +3426,35 @@ public class SqlPanel
         if (!logWasCompressed)
         {
           showResultMessage(statementResult);
-          StringBuilder logmsg = new StringBuilder(100);
-
-          String timing = statementResult.getTimingMessage();
+          StringBuilder logmsg = new StringBuilder(50);
 
           if (showScriptProgress)
           {
+            String timing = statementResult.getTimingMessage();
             if (timing != null)
             {
-              logmsg.append(timing);
               logmsg.append('\n');
+              logmsg.append(timing);
             }
-            logmsg.append(currentMsg);
             logmsg.append('\n');
+            logmsg.append(currentMsg);
           }
 
           if (count > 1 && GuiSettings.showScriptStmtFinishTime())
           {
-            logmsg.append(" (" + StringUtil.getCurrentTimestamp() + ")\n");
+            logmsg.append(" (" + StringUtil.getCurrentTimestamp() + ")");
+          }
+
+          if (showScriptProgress)
+          {
+            logmsg.append('\n');
           }
 
           if (logmsg.length() > 0)
           {
-            logmsg.append('\n');
-            this.appendToLog(logmsg.toString());
+            appendToLog(logmsg.toString());
           }
+          appendToLog("\n");
         }
         else if (statementResult.hasWarning())
         {
@@ -3590,6 +3594,10 @@ public class SqlPanel
 				}
 				this.appendToLog("\n" + finish);
 				this.appendToLog("\n" + ResourceMgr.getString("MsgScriptExecTime") + " " + duration);
+        if (!showScriptProgress)
+        {
+          this.appendToLog("\n" + ResourceMgr.getFormattedString("MsgTotalStatementsExecuted", executedCount));
+        }
 			}
 			else
 			{
@@ -3819,7 +3827,6 @@ public class SqlPanel
 			if (!MemoryWatcher.isMemoryLow(true))
 			{
 				result.appendMessages(this);
-				this.appendToLog("\n");
 			}
 			else
 			{

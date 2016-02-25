@@ -151,13 +151,19 @@ public class StatementRunnerResult
 		return showRowCount;
 	}
 
+	public String getFormattedDuration()
+	{
+		if (executionTime == -1) return null;
+		return timingFormatter.formatDuration(executionTime, (executionTime < DurationFormatter.ONE_MINUTE));
+	}
+
 	public String getTimingMessage()
 	{
 		if (executionTime == -1) return null;
 		StringBuilder msg = new StringBuilder(100);
 		msg.append(ResourceMgr.getString("MsgExecTime"));
 		msg.append(' ');
-		msg.append(timingFormatter.formatDuration(executionTime, (executionTime < DurationFormatter.ONE_MINUTE)));
+		msg.append(getFormattedDuration());
 		return msg.toString();
 	}
 

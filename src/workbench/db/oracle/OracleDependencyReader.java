@@ -189,6 +189,7 @@ public class OracleDependencyReader
         {
           TableIdentifier tbl = new TableIdentifier(null, owner, name);
           tbl.setType(type);
+          tbl.setNeverAdjustCase(true);
           dbo = tbl;
         }
         if (!DbObjectComparator.namesAreEqual(base, dbo))

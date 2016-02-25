@@ -3719,6 +3719,13 @@ public class Settings
     }
 	}
 
+  public Set<String> getInformixProductNames()
+  {
+    String defaultList = getProperty("workbench.db.informix.productnames.default", null);
+    List<String> propKeys = getListProperty("workbench.db.informix.productnames", false, defaultList);
+    return CollectionUtil.caseInsensitiveSet(propKeys);
+  }
+
 	public Map<String, String> getDbIdMapping()
 	{
 		Map<String, String> mapping = new LinkedHashMap<>();

@@ -136,7 +136,8 @@ public class HanaDependencyReader
         }
         else
         {
-          TableIdentifier tbl = new TableIdentifier(null, schema, name);
+          TableIdentifier tbl = new TableIdentifier(null, schema, name, false);
+          tbl.setNeverAdjustCase(true);
           tbl.setType(type);
           dbo = tbl;
         }

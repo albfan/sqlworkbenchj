@@ -23,6 +23,7 @@
  */
 package workbench.db;
 
+import workbench.db.hana.HanaViewReader;
 import workbench.db.mssql.SqlServerViewReader;
 import workbench.db.mysql.MySQLViewReader;
 import workbench.db.oracle.OracleViewReader;
@@ -52,6 +53,10 @@ public class ViewReaderFactory
 		{
 			return new SqlServerViewReader(con);
 		}
+    if (con.getDbId().equals(DbMetadata.DBID_HANA))
+    {
+      return new HanaViewReader(con);
+    }
 		return new DefaultViewReader(con);
 	}
 }

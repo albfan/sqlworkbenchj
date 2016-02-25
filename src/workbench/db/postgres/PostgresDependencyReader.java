@@ -196,6 +196,7 @@ public class PostgresDependencyReader
         else
         {
           TableIdentifier tbl = new TableIdentifier(null, schema, name);
+          tbl.setNeverAdjustCase(true);
           tbl.setComment(remarks);
           tbl.setType(type);
           result.add(tbl);

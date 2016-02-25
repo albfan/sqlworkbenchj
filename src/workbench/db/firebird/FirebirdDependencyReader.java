@@ -112,6 +112,7 @@ public class FirebirdDependencyReader
         String name = rs.getString(1);
         String type = rs.getString(2);
         TableIdentifier tbl = new TableIdentifier(name);
+        tbl.setNeverAdjustCase(true);
         tbl.setType(type);
         result.add(tbl);
       }

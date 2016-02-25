@@ -35,15 +35,17 @@ import workbench.interfaces.TextContainer;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ClearMessagesAction;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.editor.SearchAndReplace;
+import workbench.interfaces.ResultLogger;
 
 /**
  * @author Thomas Kellerer
  */
 public class LogArea
 	extends JTextArea
-	implements PropertyChangeListener, TextContainer
+	implements PropertyChangeListener, TextContainer, ResultLogger
 {
 	private TextComponentMouseListener contextMenu;
   private int maxLines = Integer.MAX_VALUE;
@@ -60,8 +62,10 @@ public class LogArea
 
 		initColors();
 
-		contextMenu = new TextComponentMouseListener();
+		contextMenu = new TextComponentMouseListener(this);
 		addMouseListener(contextMenu);
+
+    contextMenu.addActionAtStart(new ClearMessagesAction(this), true);
 
     if (owner != null)
     {
@@ -74,6 +78,24 @@ public class LogArea
 
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_FG_COLOR, Settings.PROPERTY_EDITOR_BG_COLOR);
 	}
+
+  @Override
+  public void clearLog()
+  {
+    setText("");
+  }
+
+  @Override
+  public void appendToLog(String msg)
+  {
+    append(msg);
+  }
+
+  @Override
+  public void showLogMessage(String msg)
+  {
+    setText(msg);
+  }
 
   @Override
   public void setSelectedText(String text)
