@@ -26,6 +26,8 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.List;
 
+import workbench.resource.Settings;
+
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.hana.HanaSynonymReader;
 import workbench.db.ibm.Db2SynonymReader;
@@ -43,18 +45,37 @@ public interface SynonymReader
 {
 	String SYN_TYPE_NAME = "SYNONYM";
 
-  boolean supportsReplace(WbConnection con);
-
-	String getSynonymTypeName();
-
-	String getSynonymSource(WbConnection con, String catalog, String schema, String aSynonym)
-			throws SQLException;
-
 	TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String aSynonym)
 			throws SQLException;
 
 	List<TableIdentifier> getSynonymList(WbConnection con, String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException;
+
+  default String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
+			throws SQLException
+  {
+    TableIdentifier targetTable = getSynonymTable(con, catalog, schema, synonym);
+		StringBuilder result = new StringBuilder(200);
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		result.append("CREATE SYNONYM ");
+		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
+		result.append(syn.getTableExpression(con));
+		result.append(nl + "   FOR ");
+		result.append(targetTable.getTableExpression(con));
+		result.append(';');
+		result.append(nl);
+		return result.toString();
+  }
+
+  default String getSynonymTypeName()
+  {
+    return SYN_TYPE_NAME;
+  }
+
+  default boolean supportsReplace(WbConnection con)
+  {
+    return false;
+  }
 
 	class Factory
 	{

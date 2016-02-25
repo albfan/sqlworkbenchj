@@ -29,6 +29,7 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
+import workbench.db.DropType;
 import workbench.db.SynonymDDLHandler;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
@@ -39,8 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.DropType;
 
 /**
  *
@@ -96,7 +95,7 @@ public class OracleSynonymReaderTest
 		assertEquals("PERSON", table.getTableName());
 		String sql = reader.getSynonymSource(con, null, syn.getSchema(), syn.getTableName());
 //		System.out.println(sql);
-		String expected = "CREATE OR REPLACE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
+		String expected = "CREATE OR REPLACE SYNONYM S_PERSON\n   FOR PERSON;";
 		assertEquals(expected, sql.trim());
 
 		TestUtil.executeScript(con, "drop table person purge;");

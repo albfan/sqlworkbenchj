@@ -143,17 +143,17 @@ public class Db2SynonymReader
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
-		StringBuilder result = new StringBuilder(200);
+		StringBuilder result = new StringBuilder(00);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE OR REPLACE ALIAS ");
 		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
-		result.append(nl).append("   FOR ");
+		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);
 
 		return result.toString();
-	}
+}
 
   @Override
   public boolean supportsReplace(WbConnection con)

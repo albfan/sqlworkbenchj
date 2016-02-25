@@ -25,14 +25,16 @@ package workbench.db.derby;
 
 import java.util.List;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -85,7 +87,7 @@ public class DerbySynonymReaderTest
 
 		String source = synonym.getSource(con).toString();
 		String expected =
-				"CREATE SYNONYM FOOBAR\n" +
+				"CREATE SYNONYM APP.FOOBAR\n" +
 				"   FOR APP.FOO;";
 		assertEquals(expected, source.trim());
 	}

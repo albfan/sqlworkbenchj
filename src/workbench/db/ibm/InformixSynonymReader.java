@@ -61,12 +61,6 @@ public class InformixSynonymReader
 	}
 
 	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
-	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
@@ -126,29 +120,5 @@ public class InformixSynonymReader
 
 		return result;
 	}
-
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String synonymSchema, String synonymName)
-		throws SQLException
-	{
-		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
-		StringBuilder result = new StringBuilder(200);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE SYNONYM ");
-		TableIdentifier syn = new TableIdentifier(catalog, synonymSchema, synonymName);
-		result.append(syn.getTableExpression(con));
-		result.append(nl).append("   FOR ");
-		result.append(id.getTableExpression(con));
-		result.append(';');
-		result.append(nl);
-		return result.toString();
-	}
-
-  @Override
-  public boolean supportsReplace(WbConnection con)
-  {
-    return false;
-  }
-
 
 }

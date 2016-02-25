@@ -60,12 +60,6 @@ public class SqlServerSynonymReader
 		this.meta = dbMeta;
 	}
 
-	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
 	public static boolean supportsSynonyms(WbConnection con)
 	{
 		return SqlServerUtil.isSqlServer2005(con);
@@ -188,31 +182,5 @@ public class SqlServerSynonymReader
 		TableIdentifier tbl = meta.findObject(result);
 		return tbl;
 	}
-
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
-		throws SQLException
-	{
-		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
-		if (id == null) return "";
-
-		StringBuilder result = new StringBuilder(200);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE SYNONYM ");
-		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
-		result.append(syn.getTableExpression(con));
-		result.append(nl).append("   FOR ");
-		result.append(id.getTableExpression(con));
-		result.append(';');
-		result.append(nl);
-
-		return result.toString();
-	}
-
-  @Override
-  public boolean supportsReplace(WbConnection con)
-  {
-    return false;
-  }
 
 }

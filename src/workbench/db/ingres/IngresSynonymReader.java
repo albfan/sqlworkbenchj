@@ -50,12 +50,6 @@ public class IngresSynonymReader
 	{
 	}
 
-	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
@@ -148,27 +142,6 @@ public class IngresSynonymReader
 
 		return result;
 	}
-
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
-		throws SQLException
-	{
-		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
-		StringBuilder result = new StringBuilder(200);
-		result.append("CREATE SYNONYM ");
-		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
-		result.append(syn.getTableExpression(con));
-		result.append("\n   FOR ");
-		result.append(id.getTableExpression(con));
-		result.append(";\n");
-		return result.toString();
-	}
-
-  @Override
-  public boolean supportsReplace(WbConnection con)
-  {
-    return false;
-  }
 
 }
 

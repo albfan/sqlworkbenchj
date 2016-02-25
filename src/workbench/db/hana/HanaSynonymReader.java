@@ -56,12 +56,6 @@ public class HanaSynonymReader
 	}
 
 	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
-	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonym)
 		throws SQLException
 	{
@@ -110,29 +104,5 @@ public class HanaSynonymReader
 
 		return result;
 	}
-
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String owner, String synonym)
-		throws SQLException
-	{
-		TableIdentifier targetTable = getSynonymTable(con, catalog, owner, synonym);
-		StringBuilder result = new StringBuilder(200);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-    result.append("CREATE SYNONYM ");
-
-    TableIdentifier syn = new TableIdentifier(catalog, owner, synonym);
-		result.append(syn.getTableExpression(con));
-		result.append(nl + "   FOR ");
-		result.append(targetTable.getTableExpression(con));
-		result.append(';');
-		result.append(nl);
-		return result.toString();
-	}
-
-  @Override
-  public boolean supportsReplace(WbConnection con)
-  {
-    return false;
-  }
 
 }

@@ -52,12 +52,6 @@ public class DerbySynonymReader
 	}
 
 	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
-	@Override
 	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
 		throws SQLException
 	{
@@ -152,25 +146,6 @@ public class DerbySynonymReader
 		}
 
 		return result;
-	}
-
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
-		throws SQLException
-	{
-		TableIdentifier id = getSynonymTable(con, catalog, schema, synonym);
-		StringBuilder result = new StringBuilder(200);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE SYNONYM ");
-    TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
-		result.append(syn.getTableExpression(con));
-		result.append(nl);
-		result.append("   FOR ");
-		result.append(id.getTableExpression());
-		result.append(';');
-		result.append(nl);
-
-		return result.toString();
 	}
 
   @Override

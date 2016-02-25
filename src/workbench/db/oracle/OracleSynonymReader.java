@@ -56,12 +56,6 @@ public class OracleSynonymReader
 	}
 
 	@Override
-	public String getSynonymTypeName()
-	{
-		return SYN_TYPE_NAME;
-	}
-
-	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
 		throws SQLException
 	{
