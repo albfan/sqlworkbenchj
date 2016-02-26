@@ -29,10 +29,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.db.DbMetadata;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -51,9 +51,12 @@ public class SqlServerSynonymReader
 	private DbMetadata meta;
 
 	private final String baseSql =
-		"SELECT sc.name as schema_name, syn.name as synonym_name, syn.base_object_name \n" +
-    " FROM sys.synonyms syn with (nolock) \n " +
-		"   JOIN sys.schemas sc with (nolock) ON syn.schema_id = sc.schema_id  ";
+		"SELECT db_name(), \n" +
+    "       sc.name as schema_name, \n" +
+    "       syn.name as synonym_name, \n" +
+    "       syn.base_object_name \n" +
+    "FROM sys.synonyms syn with (nolock) \n" +
+    "  JOIN sys.schemas sc with (nolock) ON syn.schema_id = sc.schema_id \n";
 
 	public SqlServerSynonymReader(DbMetadata dbMeta)
 	{
@@ -79,7 +82,7 @@ public class SqlServerSynonymReader
 
 		if (StringUtil.isNonBlank(schemaPattern))
 		{
-			sql.append(" where sc.name = ?");
+			sql.append("WHERE sc.name = ?");
 			whereAdded = true;
 			schemaIndex = 1;
 		}
@@ -92,7 +95,7 @@ public class SqlServerSynonymReader
 			}
 			else
 			{
-				sql.append(" WHERE ");
+				sql.append("WHERE ");
 			}
 			if (namePattern.indexOf('%') > -1)
 			{
@@ -111,7 +114,7 @@ public class SqlServerSynonymReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL:\n" + SqlUtil.replaceParameters(sql, schemaPattern, namePattern));
+			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schemaPattern, namePattern));
 		}
 
 		PreparedStatement stmt = null;
@@ -123,13 +126,16 @@ public class SqlServerSynonymReader
 			if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
 
 			rs = stmt.executeQuery();
+
 			while (rs.next())
 			{
-				String schema = rs.getString(1);
-				String syn = rs.getString(2);
-				if (!rs.wasNull())
+        String synCat = rs.getString(1);
+				String synSchema = rs.getString(2);
+				String synName = rs.getString(3);
+
+				if (synName != null)
 				{
-					TableIdentifier tbl = new TableIdentifier(schema, syn);
+					TableIdentifier tbl = new TableIdentifier(synCat, synSchema, synName, false);
 					tbl.setType(SYN_TYPE_NAME);
 					tbl.setNeverAdjustCase(true);
 					result.add(tbl);
@@ -148,38 +154,47 @@ public class SqlServerSynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
 		throws SQLException
 	{
-		String sql = baseSql + " where syn.name = ? and sc.name = ?";
+		String sql = baseSql +
+      "WHERE syn.name = ? \n" +
+      "  AND sc.name = ?";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + sql);
+			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" + sql);
 		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
+
 		stmt.setString(1, synonymName);
 		stmt.setString(2, schema);
+
 		ResultSet rs = stmt.executeQuery();
-		String table = null;
 		TableIdentifier result = null;
-		try
-		{
-			if (rs.next())
-			{
-				table = rs.getString(3);
-				if (table != null)
-				{
-					result = new TableIdentifier(meta.removeQuotes(table));
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs,stmt);
-		}
+
+    try
+    {
+      if (rs.next())
+      {
+        String targetCat = rs.getString(1);
+        String targetSchema = rs.getString(2);
+        String targetTable = rs.getString(4);
+
+        if (targetTable != null)
+        {
+          result = new TableIdentifier(targetCat, targetSchema, meta.removeQuotes(targetTable), false);
+          result.setNeverAdjustCase(false);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 		if (result == null) return null;
 
 		result.setSchema(schema);
 		TableIdentifier tbl = meta.findObject(result);
+
 		return tbl;
 	}
 

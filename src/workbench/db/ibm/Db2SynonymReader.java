@@ -125,7 +125,7 @@ public class Db2SynonymReader
 				table = rs.getString(2);
 				if (table != null)
 				{
-					result = new TableIdentifier(null, owner, table);
+					result = new TableIdentifier(null, owner, table, false);
           result.setNeverAdjustCase(true);
 				}
 			}

@@ -92,7 +92,7 @@ public class HanaSynonymReader
 				String targetSchema = rs.getString(1);
 				String targetTable = rs.getString(2);
         String type = rs.getString(3);
-				result = new TableIdentifier(null, targetSchema, targetTable);
+				result = new TableIdentifier(null, targetSchema, targetTable, false);
         result.setNeverAdjustCase(true);
 				result.setType(type);
 			}

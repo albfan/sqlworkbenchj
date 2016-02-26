@@ -56,11 +56,12 @@ public class DerbySynonymReader
 		throws SQLException
 	{
 		List<TableIdentifier> result = new ArrayList<>();
-		String sql = "SELECT s.schemaname, a.alias \n" +
-             " FROM sys.sysaliases a, sys.sysschemas s \n" +
-             " WHERE a.schemaid = s.schemaid \n" +
-			       "  AND a.aliastype = 'S' \n" +
-			       "  AND s.schemaname = ? \n";
+		String sql =
+      "SELECT s.schemaname, a.alias \n" +
+      "FROM sys.sysaliases a \n" +
+      "  JOIN sys.sysschemas s ON a.schemaid = s.schemaid \n" +
+			"WHERE a.aliastype = 'S'\n" +
+			"  AND s.schemaname = ? \n";
 
 		if (StringUtil.isNonBlank(namePattern))
 		{
@@ -87,7 +88,7 @@ public class DerbySynonymReader
 				String alias = rs.getString(2);
 				if (!rs.wasNull())
 				{
-					TableIdentifier tbl = new TableIdentifier(schema, alias);
+					TableIdentifier tbl = new TableIdentifier(null, schema, alias, false);
 					tbl.setType(SYN_TYPE_NAME);
 					tbl.setNeverAdjustCase(true);
 					result.add(tbl);
