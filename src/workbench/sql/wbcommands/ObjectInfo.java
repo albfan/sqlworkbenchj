@@ -77,9 +77,25 @@ import workbench.util.StringUtil;
  */
 public class ObjectInfo
 {
+  private boolean showSynonymTarget;
+  private boolean showSynonymBeforeTableInfo;
+
 	public ObjectInfo()
 	{
+    showSynonymTarget = GuiSettings.showSynonymTargetInDbExplorer();
+    showSynonymBeforeTableInfo = WbManager.getInstance().isConsoleMode();
 	}
+
+  public void setShowSynonymTarget(boolean flag)
+  {
+    this.showSynonymTarget = flag;
+  }
+
+  public void setShowSynonymBeforeTableInfo(boolean flag)
+  {
+    this.showSynonymBeforeTableInfo = flag;
+  }
+
 
 	/**
 	 * Tries to find the definition of the object identified by the given name.
@@ -113,78 +129,23 @@ public class ObjectInfo
 		TableIdentifier toDescribe = findObject(connection, dbObject);
 
 		DbSettings dbs = connection.getDbSettings();
-		TableIdentifier synonymTarget = null;
 		DataStore synonymInfo = null;
+    TableIdentifier synonym = null;
+    CharSequence synonymSource = null;
 
-		if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()))
-		{
-			try
-			{
-				synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
-				if (synonymTarget != null)
-				{
-					synonymInfo = getPlainSynonymInfo(connection, toDescribe);
-					String name = toDescribe.getFullyQualifiedName(connection);
-					synonymInfo.setResultName(name + " (" + toDescribe.getObjectType() + ")");
-				}
-				if (!WbManager.getInstance().isGUIMode() || GuiSettings.showSynonymTargetInDbExplorer())
-				{
-					toDescribe = synonymTarget;
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving synonym table", e);
-			}
-		}
+    if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()) && showSynonymTarget)
+    {
+      synonymInfo = getPlainSynonymInfo(connection, toDescribe);
+      synonymSource = toDescribe.getSource(connection);
+      synonymInfo.setResultName(toDescribe.getFullyQualifiedName(connection) + " (" + toDescribe.getObjectType() + ")");
+      synonym = toDescribe;
+      toDescribe = connection.getMetadata().getSynonymTable(toDescribe);
+    }
 
-		if (toDescribe != null && connection.getMetadata().isSequenceType(toDescribe.getType()))
-		{
-			try
-			{
-				SequenceReader seqReader = connection.getMetadata().getSequenceReader();
-				if (seqReader != null)
-				{
-					String schema = toDescribe.getSchema();
-					String name = toDescribe.getObjectName();
-					String catalog = toDescribe.getCatalog();
-					SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
-					if (seq != null)
-					{
-						DataStore ds = seq.getRawDefinition();
-						ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
-						result.addDataStore(ds);
-
-						if (includeSource)
-						{
-							CharSequence source = seq.getSource();
-							if (source == null)
-							{
-								// source was not build by the reader during initial retrieval
-								source = seq.getSource(connection);
-							}
-
-							if (source != null)
-							{
-								String src = source.toString();
-								result.addMessage("--------[ BEGIN " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
-								result.addMessage(src);
-								result.addMessage("--------[ END " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + "   ]--------");
-								if (StringUtil.isBlank(result.getSourceCommand()))
-								{
-									result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
-								}
-							}
-						}
-						return result;
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving sequences", e);
-			}
-		}
+    if (readSequence(connection, result, toDescribe, includeSource))
+    {
+      return result;
+    }
 
 		if (toDescribe == null)
 		{
@@ -215,7 +176,7 @@ public class ObjectInfo
 
 		if (toDescribe == null)
 		{
-			// No table, view, procedure, trigger or something similar found
+			// No synonym, table, view or procedure found
 			String msg = ResourceMgr.getFormattedString("ErrTableOrViewNotFound", objectName);
 			result.addErrorMessage(msg);
 			return result;
@@ -223,46 +184,52 @@ public class ObjectInfo
 
 		DataStore details = null;
 		TableDefinition def = null;
-		if (connection.getMetadata().objectTypeCanContainData(toDescribe.getType()))
-		{
-			def = getTableDefinition(connection, toDescribe);
-			details = new TableColumnsDatastore(def);
-		}
-		else
-		{
-			DataStore ds = connection.getMetadata().getObjectDetails(toDescribe);
-			if (ds != null && ds.getRowCount() > 0)
-			{
-				details = ds;
-			}
-		}
+
+    if (connection.getMetadata().isViewOrTable(toDescribe.getType()))
+    {
+      // this puts the table definition into the completion cache, getObjectDetails would not do that
+      def = getTableDefinition(connection, toDescribe);
+      details = new TableColumnsDatastore(def);
+    }
+    else if (dbs.isSynonymType(toDescribe.getType()))
+    {
+      details = getPlainSynonymInfo(connection, toDescribe);
+    }
+    else
+    {
+      DataStore ds = connection.getMetadata().getObjectDetails(toDescribe);
+      if (ds != null && ds.getRowCount() > 0)
+      {
+        details = ds;
+      }
+    }
+
 		boolean isExtended = connection.getMetadata().isExtendedObject(toDescribe);
 
 		CharSequence source = null;
 		String displayName = "";
 
-		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
+		if (dbs.isViewType(toDescribe.getType()))
 		{
-			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, DropType.none);
-			displayName = synonymTarget.getTableExpression(connection);
-		}
-		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
-		{
-			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(def, DropType.none, false);
-			displayName = showSchema ? def.getTable().getTableExpression() : def.getTable().getTableExpression(connection);
+			if (includeSource) source = connection.getMetadata().getViewReader().getExtendedViewSource(toDescribe, DropType.none);
+			displayName = showSchema ? toDescribe.getTableExpression() : toDescribe.getTableExpression(connection);
 		}
 		else if (isExtended)
 		{
 			source = connection.getMetadata().getObjectSource(toDescribe);
 			displayName = toDescribe.getObjectName() + " (" + toDescribe.getObjectType() + ")";
 		}
-		else if (toDescribe != null)
+    else if (dbs.isSynonymType(toDescribe.getType()))
+    {
+      source = toDescribe.getSource(connection);
+    }
+		else
 		{
 			displayName = toDescribe.getTableExpression(connection);
 		}
 
 		// in console/batch mode the synonym information should be displayed before the actual table information
-		if (!WbManager.getInstance().isGUIMode() && synonymInfo != null)
+		if (showSynonymBeforeTableInfo && synonymInfo != null)
 		{
 			result.addDataStore(synonymInfo);
 		}
@@ -280,10 +247,17 @@ public class ObjectInfo
 		}
 
 		// in GUI mode the synonym information should be displayed after the actual table information
-		if (WbManager.getInstance().isGUIMode() && synonymInfo != null)
+		if (!showSynonymBeforeTableInfo && synonymInfo != null)
 		{
 			result.addDataStore(synonymInfo);
 		}
+
+    if (synonymSource != null && synonym != null)
+    {
+      result.addMessage("\n--------[ BEGIN " + StringUtil.capitalize(synonym.getObjectType()) + ": " +  synonym.getObjectExpression(connection) + " ]--------");
+      result.addMessage(synonymSource.toString().trim());
+      result.addMessage("--------[ END " + StringUtil.capitalize(toDescribe.getObjectType()) + ": " +  synonym.getObjectExpression(connection) + "   ]--------");
+    }
 
 		if (source != null)
 		{
@@ -294,54 +268,61 @@ public class ObjectInfo
 			result.setSuccess();
 		}
 
-		if (toDescribe != null && connection.getMetadata().isTableType(toDescribe.getType()) && includeDependencies)
-		{
-			try
-			{
-				IndexReader idxReader = connection.getMetadata().getIndexReader();
-				DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
-				if (index != null && index.getRowCount() > 0)
-				{
-					index.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
-					result.addDataStore(index);
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving index info for " + toDescribe, e);
-			}
-
-			try
-			{
-				TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
-				DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
-				if (triggers != null && triggers.getRowCount() > 0)
-				{
-					triggers.setResultName(displayName +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
-					result.addDataStore(triggers);
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving triggers for " + toDescribe, e);
-			}
-
-			if (connection.getDbSettings().objectInfoWithFK())
-			{
-				try
-				{
-          retrieveForeignKeys(connection, displayName, toDescribe, result);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving foreign keys for " + toDescribe, e);
-				}
-			}
-		}
+    if (includeDependencies)
+    {
+      appendTableDependencies(connection, toDescribe, result, displayName);
+    }
 
 		result.setExecutionDuration(System.currentTimeMillis() - start);
 		return result;
 	}
+
+  private void appendTableDependencies(WbConnection connection, TableIdentifier toDescribe, StatementRunnerResult result, String displayName)
+  {
+    if (toDescribe == null || connection.getMetadata().isTableType(toDescribe.getType()) == false) return;
+
+    try
+    {
+      IndexReader idxReader = connection.getMetadata().getIndexReader();
+      DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
+      if (index != null && index.getRowCount() > 0)
+      {
+        index.setResultName(displayName + " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
+        result.addDataStore(index);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("ObjectInfo.appendTableDependencies()", "Error retrieving index info for " + toDescribe, e);
+    }
+
+    try
+    {
+      TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
+      DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
+      if (triggers != null && triggers.getRowCount() > 0)
+      {
+        triggers.setResultName(displayName + " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
+        result.addDataStore(triggers);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("ObjectInfo.appendTableDependencies()", "Error retrieving triggers for " + toDescribe, e);
+    }
+
+    if (connection.getDbSettings().objectInfoWithFK())
+    {
+      try
+      {
+        retrieveForeignKeys(connection, displayName, toDescribe, result);
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("ObjectInfo.appendTableDependencies()", "Error retrieving foreign keys for " + toDescribe, e);
+      }
+    }
+  }
 
   private void retrieveForeignKeys(WbConnection connection, String displayName, TableIdentifier toDescribe, StatementRunnerResult result)
     throws SQLException
@@ -540,4 +521,56 @@ public class ObjectInfo
 		ds.resetStatus();
 		return ds;
 	}
+
+  private boolean readSequence(WbConnection connection, StatementRunnerResult result, TableIdentifier toDescribe, boolean includeSource)
+  {
+    if (toDescribe == null) return false;
+    if (!connection.getMetadata().isSequenceType(toDescribe.getType())) return false;
+
+    try
+    {
+      SequenceReader seqReader = connection.getMetadata().getSequenceReader();
+      if (seqReader != null)
+      {
+        String schema = toDescribe.getSchema();
+        String name = toDescribe.getObjectName();
+        String catalog = toDescribe.getCatalog();
+        SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
+        if (seq != null)
+        {
+          DataStore ds = seq.getRawDefinition();
+          ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
+          result.addDataStore(ds);
+
+          if (includeSource)
+          {
+            CharSequence source = seq.getSource();
+            if (source == null)
+            {
+              // source was not build by the reader during initial retrieval
+              source = seq.getSource(connection);
+            }
+
+            if (source != null)
+            {
+              String src = source.toString();
+              result.addMessage("--------[ BEGIN " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
+              result.addMessage(src);
+              result.addMessage("--------[ END " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + "   ]--------");
+              if (StringUtil.isBlank(result.getSourceCommand()))
+              {
+                result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
+              }
+            }
+          }
+          return true;
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving sequences", e);
+    }
+    return false;
+  }
 }
