@@ -148,6 +148,12 @@ public class ProfileTree
 		model.addTreeModelListener(this);
 	}
 
+  @Override
+  public ProfileListModel getModel()
+  {
+    return profileModel;
+  }
+
 	@Override
 	public boolean isPathEditable(TreePath path)
 	{
@@ -493,24 +499,24 @@ public class ProfileTree
   {
     if (nodes == null || nodes.length < 1) return;
     if (newParent == null) return;
-    
+
     profileModel.copyProfilesToGroup(nodes, newParent);
   }
 
-	public void handleDroppedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent, int action)
+	public void handleDroppedNodes(DefaultMutableTreeNode[] droppedNodes, DefaultMutableTreeNode newParent, int action)
 	{
-		if (nodes == null || nodes.length < 1) return;
+		if (droppedNodes == null || droppedNodes.length < 1) return;
 		if (newParent == null) return;
 
 		if (action == DnDConstants.ACTION_MOVE)
 		{
-			profileModel.moveProfilesToGroup(nodes, newParent);
+			profileModel.moveProfilesToGroup(droppedNodes, newParent);
 		}
 		else if (action == DnDConstants.ACTION_COPY)
 		{
-			profileModel.copyProfilesToGroup(nodes, newParent);
+			profileModel.copyProfilesToGroup(droppedNodes, newParent);
 		}
-		selectNode(nodes[0]);
+		selectNode(droppedNodes[0]);
 	}
 
 	@Override

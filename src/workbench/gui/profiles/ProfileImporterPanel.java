@@ -185,6 +185,7 @@ public class ProfileImporterPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 0);
     sourcePanel.add(sourceInfoPanel, gridBagConstraints);
 
+    sourceProfiles.setName("sourceProfiles"); // NOI18N
     jScrollPane3.setViewportView(sourceProfiles);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -227,6 +228,7 @@ public class ProfileImporterPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 0);
     currentPanel.add(currentInfopanel, gridBagConstraints);
 
+    currentProfiles.setName("currentProfiles"); // NOI18N
     jScrollPane4.setViewportView(currentProfiles);
 
     gridBagConstraints = new java.awt.GridBagConstraints();

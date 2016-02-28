@@ -23,6 +23,7 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -45,10 +46,11 @@ import javax.swing.tree.TreePath;
 
 import workbench.log.LogMgr;
 
-
+import workbench.db.ConnectionProfile;
 
 /**
- * Handle drag and drop in the profile Tree
+ * Handle drag and drop in the profile Tree.
+ *
  * @author Thomas Kellerer
  */
 class ProfileTreeDragHandler
@@ -71,29 +73,41 @@ class ProfileTreeDragHandler
 		if (!profileTree.onlyProfilesSelected()) return;
 
     TreePath[] draggedProfiles = profileTree.getSelectionPaths();
-		TransferableProfileNode transferable = new TransferableProfileNode(draggedProfiles);
-		dragSource.startDrag(dge, DragSource.DefaultMoveNoDrop, transferable, this);
+		ProfileTreeTransferable transferable = new ProfileTreeTransferable(draggedProfiles, profileTree.getName());
+    int action = dge.getDragAction();
+    Cursor c = null;
+    switch (action)
+    {
+      case DnDConstants.ACTION_MOVE:
+        c = DragSource.DefaultMoveDrop;
+        break;
+      case DnDConstants.ACTION_COPY_OR_MOVE:
+        c = DragSource.DefaultMoveDrop;
+        break;
+      default:
+        c = DragSource.DefaultCopyDrop;
+        break;
+    }
+		dragSource.startDrag(dge, c, transferable, this);
 		setCurrentDropTargetItem(null);
 	}
 
 	private void handleDragSourceEvent(DragSourceDragEvent dsde)
 	{
 		int action = dsde.getDropAction();
-		if (action == DnDConstants.ACTION_COPY)
-		{
-			dsde.getDragSourceContext().setCursor(DragSource.DefaultCopyDrop);
-		}
-		else
-		{
-			if (action == DnDConstants.ACTION_MOVE)
-			{
-				dsde.getDragSourceContext().setCursor(DragSource.DefaultMoveDrop);
-			}
-			else
-			{
-				dsde.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
-			}
-		}
+
+    if (action == DnDConstants.ACTION_COPY)
+    {
+      dsde.getDragSourceContext().setCursor(DragSource.DefaultCopyDrop);
+    }
+    else if (action == DnDConstants.ACTION_MOVE)
+    {
+      dsde.getDragSourceContext().setCursor(DragSource.DefaultMoveDrop);
+    }
+    else
+    {
+      dsde.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
+    }
 	}
 
 	@Override
@@ -128,28 +142,30 @@ class ProfileTreeDragHandler
 
 	private void handleDragTargetEvent(DropTargetDragEvent dtde)
 	{
-		Point p = dtde.getLocation();
-		profileTree.autoscroll(p);
+		Point dropLocation = dtde.getLocation();
+		profileTree.autoscroll(dropLocation);
 
-		TreePath path = profileTree.getClosestPathForLocation(p.x, p.y);
-
-		if (path == null)
-		{
+    TransferableProfileNode transferNode = getTransferNode(dtde.getTransferable());
+    TreePath path = profileTree.getClosestPathForLocation(dropLocation.x, dropLocation.y);
+    if (path == null || transferNode == null)
+    {
 			dtde.rejectDrag();
 			setCurrentDropTargetItem(null);
 			return;
-		}
+    }
 
 		TreeNode node = (TreeNode)path.getLastPathComponent();
-    if (dtde.getSource() != profileTree && dtde.getDropAction() != DnDConstants.ACTION_COPY)
-    {
-      dtde.rejectDrag();
-      setCurrentDropTargetItem(null);
-    }
-    else if (node.getAllowsChildren())
+    if (node.getAllowsChildren())
 		{
-			dtde.acceptDrag(dtde.getDropAction());
-			setCurrentDropTargetItem(node);
+      if (isSameTree(transferNode))
+      {
+        dtde.acceptDrag(dtde.getDropAction());
+      }
+      else
+      {
+        dtde.acceptDrag(DnDConstants.ACTION_COPY);
+      }
+      setCurrentDropTargetItem(node);
 		}
 		else
 		{
@@ -196,8 +212,9 @@ class ProfileTreeDragHandler
 		TreePath parentpath = profileTree.getClosestPathForLocation(pt.x, pt.y);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
 
-    Transferable transferable = dtde.getTransferable();
-    if (!parent.getAllowsChildren() || !transferable.isDataFlavorSupported(TransferableProfileNode.PROFILE_FLAVOR))
+    TransferableProfileNode transferNode = getTransferNode(dtde.getTransferable());
+    
+    if (!parent.getAllowsChildren() || transferNode == null)
 		{
 			dtde.rejectDrop();
 			dtde.dropComplete(false);
@@ -206,24 +223,35 @@ class ProfileTreeDragHandler
 
 		try
 		{
-      TreePath[] paths = (TreePath[])transferable.getTransferData(TransferableProfileNode.PROFILE_FLAVOR);
+      TreePath[] paths = transferNode.getPath();
 
       if (paths != null)
       {
         DefaultMutableTreeNode[] nodes = new DefaultMutableTreeNode[paths.length];
         for (int i = 0; i < paths.length; i++)
         {
-          nodes[i] = (DefaultMutableTreeNode)paths[i].getLastPathComponent();
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)paths[i].getLastPathComponent();
+          ConnectionProfile profile = (ConnectionProfile)node.getUserObject();
+          DefaultMutableTreeNode realNode = profileTree.getModel().findProfileNode(profile);
+          if (realNode == null)
+          {
+            // should only happen when dragging between two trees
+            nodes[i] = node;
+          }
+          else
+          {
+            nodes[i] = realNode;
+          }
         }
-        dtde.acceptDrop(dtde.getDropAction());
-        if (dtde.getSource() == profileTree)
+
+        int action = dtde.getDropAction();
+        if (isSameTree(transferNode) == false)
         {
-          profileTree.handleDroppedNodes(nodes, parent, dtde.getDropAction());
+          action = DnDConstants.ACTION_COPY;
         }
-        else
-        {
-          profileTree.handleCopiedNodes(nodes, parent);
-        }
+
+        dtde.acceptDrop(action);
+        profileTree.handleDroppedNodes(nodes, parent, dtde.getDropAction());
         dtde.dropComplete(true);
       }
 		}
@@ -238,5 +266,26 @@ class ProfileTreeDragHandler
 			setCurrentDropTargetItem(null);
 		}
 	}
+
+  private TransferableProfileNode getTransferNode(Transferable transferable)
+  {
+    if (transferable == null) return null;
+    if (!transferable.isDataFlavorSupported(ProfileTreeTransferable.PROFILE_FLAVOR)) return null;
+
+    try
+    {
+      return (TransferableProfileNode)transferable.getTransferData(ProfileTreeTransferable.PROFILE_FLAVOR);
+    }
+    catch (Exception ex)
+    {
+      return null;
+    }
+  }
+
+  private boolean isSameTree(TransferableProfileNode transferNode)
+  {
+    if (transferNode == null) return false;
+    return transferNode.getSourceTreeName().equals(profileTree.getName());
+  }
 
 }

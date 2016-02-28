@@ -94,6 +94,13 @@ class ProfileListModel
 		return newPath;
 	}
 
+  public DefaultMutableTreeNode findProfileNode(ConnectionProfile profile)
+  {
+		TreePath path = getPath(profile);
+    if (path == null) return null;
+    return (DefaultMutableTreeNode)path.getLastPathComponent();
+  }
+
 	public DefaultMutableTreeNode findGroupNode(String group)
 	{
 		if (this.rootNode == null) return null;
@@ -424,7 +431,6 @@ class ProfileListModel
 		moveProfilesToGroup(nodes, target);
 	}
 
-
 	public void moveProfilesToGroup(DefaultMutableTreeNode[] profileNodes, DefaultMutableTreeNode groupNode)
 	{
 		if (profileNodes == null) return;
@@ -479,7 +485,7 @@ class ProfileListModel
   {
     return new ProfileListModel(new ArrayList<>());
   }
-  
+
   public static ProfileListModel getDummyModel()
   {
     List<ConnectionProfile> profiles = new ArrayList<>();

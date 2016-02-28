@@ -71,6 +71,9 @@
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
             <Component class="workbench.gui.profiles.ProfileTree" name="sourceProfiles">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="sourceProfiles" noResource="true"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
@@ -119,6 +122,9 @@
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
             <Component class="workbench.gui.profiles.ProfileTree" name="currentProfiles">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="currentProfiles" noResource="true"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
