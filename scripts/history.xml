@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-02-21">
+    <entry dev-build="1" type="enh">It's now possible to associate variables with the connection profile and the workspace</entry>
     <entry dev-build="1" type="enh">For SAP HANA the source for synonyms are now shown</entry>
     <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new statement is available to generate the DDL for only the foreign key constraints.</entry>
