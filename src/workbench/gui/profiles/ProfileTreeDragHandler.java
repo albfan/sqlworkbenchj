@@ -24,6 +24,7 @@
 package workbench.gui.profiles;
 
 import java.awt.Point;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -44,6 +45,8 @@ import javax.swing.tree.TreePath;
 
 import workbench.log.LogMgr;
 
+
+
 /**
  * Handle drag and drop in the profile Tree
  * @author Thomas Kellerer
@@ -53,7 +56,6 @@ class ProfileTreeDragHandler
 {
 	private DragSource dragSource;
 	private ProfileTree profileTree;
-	private TreePath[] draggedProfiles;
 
 	ProfileTreeDragHandler(ProfileTree tree, int actions)
 	{
@@ -68,18 +70,11 @@ class ProfileTreeDragHandler
 	{
 		if (!profileTree.onlyProfilesSelected()) return;
 
-		// For some reason the TreePaths stored in the TransferableProfileNode
-		// are losing their UserObjects, so I'm storing them as a variable
-		// as well (as all Drag&Drop processing is done in this class anyway,
-		// that should not do any harm.
-		draggedProfiles = profileTree.getSelectionPaths();
+    TreePath[] draggedProfiles = profileTree.getSelectionPaths();
 		TransferableProfileNode transferable = new TransferableProfileNode(draggedProfiles);
-
 		dragSource.startDrag(dge, DragSource.DefaultMoveNoDrop, transferable, this);
 		setCurrentDropTargetItem(null);
 	}
-
-	// ------------ DragSourceListener ---------------------
 
 	private void handleDragSourceEvent(DragSourceDragEvent dsde)
 	{
@@ -131,7 +126,6 @@ class ProfileTreeDragHandler
 		setCurrentDropTargetItem(null);
 	}
 
-	// ----------- DropTargetListener implementation -----------------
 	private void handleDragTargetEvent(DropTargetDragEvent dtde)
 	{
 		Point p = dtde.getLocation();
@@ -147,7 +141,12 @@ class ProfileTreeDragHandler
 		}
 
 		TreeNode node = (TreeNode)path.getLastPathComponent();
-		if (node.getAllowsChildren())
+    if (dtde.getSource() != profileTree && dtde.getDropAction() != DnDConstants.ACTION_COPY)
+    {
+      dtde.rejectDrag();
+      setCurrentDropTargetItem(null);
+    }
+    else if (node.getAllowsChildren())
 		{
 			dtde.acceptDrag(dtde.getDropAction());
 			setCurrentDropTargetItem(node);
@@ -197,7 +196,8 @@ class ProfileTreeDragHandler
 		TreePath parentpath = profileTree.getClosestPathForLocation(pt.x, pt.y);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
 
-		if (!parent.getAllowsChildren() || draggedProfiles == null)
+    Transferable transferable = dtde.getTransferable();
+    if (!parent.getAllowsChildren() || !transferable.isDataFlavorSupported(TransferableProfileNode.PROFILE_FLAVOR))
 		{
 			dtde.rejectDrop();
 			dtde.dropComplete(false);
@@ -206,14 +206,26 @@ class ProfileTreeDragHandler
 
 		try
 		{
-			DefaultMutableTreeNode[] nodes = new DefaultMutableTreeNode[draggedProfiles.length];
-			for (int i = 0; i < draggedProfiles.length; i++)
-			{
-				nodes[i] = (DefaultMutableTreeNode)draggedProfiles[i].getLastPathComponent();
-			}
-			dtde.acceptDrop(dtde.getDropAction());
-			profileTree.handleDroppedNodes(nodes, parent, dtde.getDropAction());
-			dtde.dropComplete(true);
+      TreePath[] paths = (TreePath[])transferable.getTransferData(TransferableProfileNode.PROFILE_FLAVOR);
+
+      if (paths != null)
+      {
+        DefaultMutableTreeNode[] nodes = new DefaultMutableTreeNode[paths.length];
+        for (int i = 0; i < paths.length; i++)
+        {
+          nodes[i] = (DefaultMutableTreeNode)paths[i].getLastPathComponent();
+        }
+        dtde.acceptDrop(dtde.getDropAction());
+        if (dtde.getSource() == profileTree)
+        {
+          profileTree.handleDroppedNodes(nodes, parent, dtde.getDropAction());
+        }
+        else
+        {
+          profileTree.handleCopiedNodes(nodes, parent);
+        }
+        dtde.dropComplete(true);
+      }
 		}
 		catch (Exception e)
 		{
@@ -223,7 +235,6 @@ class ProfileTreeDragHandler
 		}
 		finally
 		{
-			draggedProfiles = null;
 			setCurrentDropTargetItem(null);
 		}
 	}

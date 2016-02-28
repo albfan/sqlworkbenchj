@@ -1335,7 +1335,7 @@ public class BatchRunner
 			{
 				profile.setReadOnly(readOnly);
 				// Reset the changed flag to make sure the "modified" profile is not saved
-				profile.reset();
+				profile.resetChangedFlags();
 			}
 		}
 

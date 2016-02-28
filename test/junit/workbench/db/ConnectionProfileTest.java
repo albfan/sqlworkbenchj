@@ -140,7 +140,7 @@ public class ConnectionProfileTest
 		profile.setAutocommit(false);
 		profile.setConfirmUpdates(true);
 		profile.setDriverName("Postgres");
-		profile.reset();
+		profile.resetChangedFlags();
 
 		Properties props = new Properties();
 		props.setProperty("remarksReporting", "true");
@@ -166,98 +166,98 @@ public class ConnectionProfileTest
 		assertTrue(profile.isChanged());
 
 		profile.setHideWarnings(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setHideWarnings(true);
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		// Changing to a new URL has to be reflected
 		profile.setUrl("jdbc:postgres:local;someProp=myValue");
 		assertTrue(profile.isChanged());
 
 		profile.setInputPassword("welcome");
 		profile.setStorePassword(true);
-		profile.reset();
+		profile.resetChangedFlags();
 
 		// check if changing the password sets the changed flag
 		profile.setInputPassword("secret");
 		assertTrue(profile.isChanged());
 
 		profile.setStorePassword(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setInputPassword("welcome");
 		// password are not saved, changing the password should not mark the profile
 		// as changed
 		assertFalse(profile.isChanged());
 
 		profile.setEmptyStringIsNull(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setEmptyStringIsNull(true);
 		assertTrue(profile.isChanged());
 		profile.setEmptyStringIsNull(true);
 		assertTrue(profile.isChanged());
 
 		profile.setUseSeparateConnectionPerTab(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setUseSeparateConnectionPerTab(true);
 		assertTrue(profile.isChanged());
 		profile.setUseSeparateConnectionPerTab(true);
 		assertTrue(profile.isChanged());
 
 		profile.setStoreExplorerSchema(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setStoreExplorerSchema(true);
 		assertTrue(profile.isChanged());
 		profile.setStoreExplorerSchema(true);
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setDriverName("Postgres 8.3");
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setName("NewName");
 		assertTrue(profile.isChanged());
 
 		profile.setTrimCharData(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setTrimCharData(true);
 		assertTrue(profile.isChanged());
 
 		profile.setIgnoreDropErrors(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setIgnoreDropErrors(true);
 		assertTrue(profile.isChanged());
 
 		profile.setRollbackBeforeDisconnect(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setRollbackBeforeDisconnect(true);
 		assertTrue(profile.isChanged());
 
 		profile.setReadOnly(false);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setReadOnly(true);
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		DelimiterDefinition def = new DelimiterDefinition("GO");
 		profile.setAlternateDelimiter(def);
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setInfoDisplayColor(Color.MAGENTA);
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setWorkspaceFile("Arthur.wksp");
 		assertTrue(profile.isChanged());
 
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setDefaultFetchSize(4242);
 		assertTrue(profile.isChanged());
 
 		profile.setConnectionTimeout(1);
-		profile.reset();
+		profile.resetChangedFlags();
 		profile.setConnectionTimeout(42);
 		assertTrue(profile.isChanged());
 	}

@@ -3661,20 +3661,8 @@ public class Settings
 			// versioned backups are something different than renaming the existing file
 			// renameExistingFile will be true if an out of memory error occurred at some point.
 			// If that happened FileVersioning might not work properly (because the JVM acts strange once an OOME occurred)
-			// So both things are done.
-			int maxVersions = getMaxBackupFiles();
-			String dir = getBackupDir();
-			String sep = getFileVersionDelimiter();
-			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
-			try
-			{
-				File bck = version.createBackup(configfile);
-				LogMgr.logInfo("Settings.saveSettings()", "Created new version of global settings file: " + bck.getAbsolutePath()+ " (" + bck.length() + " bytes)");
-			}
-			catch (IOException e)
-			{
-				LogMgr.logWarning("Settings.saveSettings()", "Error when creating backup file!", e);
-			}
+			// So both things are needed.
+      createBackup(configfile);
 		}
 
 		File cfd = configfile.getParentFile();
@@ -3768,4 +3756,22 @@ public class Settings
       return PasswordTrimType.always;
     }
   }
+
+	public static void createBackup(WbFile f)
+	{
+		int maxVersions = getInstance().getMaxBackupFiles();
+		String dir = getInstance().getBackupDir();
+		String sep = getInstance().getFileVersionDelimiter();
+		FileVersioner version = new FileVersioner(maxVersions, dir, sep);
+		try
+		{
+			File bck = version.createBackup(f);
+      LogMgr.logInfo("Settings.createBackup()", "Created " + bck.getAbsolutePath() + " as a backup of: " + f.getFullPath());
+		}
+		catch (IOException e)
+		{
+			LogMgr.logWarning("Settings.createBackup()", "Error when creating backup for: " + f.getAbsolutePath(), e);
+		}
+	}
+
 }

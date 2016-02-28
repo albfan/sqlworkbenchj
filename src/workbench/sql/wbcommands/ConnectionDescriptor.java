@@ -172,7 +172,7 @@ public class ConnectionDescriptor
 		result.setUsername(user);
 		result.setRollbackBeforeDisconnect(true);
 		result.setReadOnly(false);
-		result.reset();
+		result.resetChangedFlags();
 		return result;
 	}
 

@@ -73,8 +73,8 @@ public class ProfileConverter
 
     System.out.println("Converting " + in.getFullPath() + " to " + out.getFullPath());
 
-    List<ConnectionProfile> profiles = reader.readProfiles(in.getFullPath());
-    writer.saveProfiles(profiles, out.getFullPath());
+    List<ConnectionProfile> profiles = reader.readProfiles(in);
+    writer.saveProfiles(profiles, out);
   }
 
 }

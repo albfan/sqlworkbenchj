@@ -101,19 +101,17 @@ public class IniProfileStorage
   private static final String XML_PREFIX = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?><!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">";
 
   @Override
-  public List<ConnectionProfile> readProfiles(String filename)
+  public List<ConnectionProfile> readProfiles(WbFile inifile)
   {
-    LogMgr.logInfo("IniProfileStorage.readProfiles()", "Loading connection profiles from " + filename);
+    LogMgr.logInfo("IniProfileStorage.readProfiles()", "Loading connection profiles from " + inifile);
     WbProperties props = new WbProperties(1);
     BufferedReader reader = null;
     List<ConnectionProfile> profiles = new ArrayList<>(25);
 
-    WbFile inifile = new WbFile(filename);
-
     try
     {
       File fileDir = inifile.getCanonicalFile().getParentFile();
-      reader = new BufferedReader(new FileReader(filename));
+      reader = new BufferedReader(new FileReader(inifile));
       props.loadFromReader(reader);
       Set<String> keys = getProfileKeys(props);
       for (String key : keys)
@@ -127,7 +125,7 @@ public class IniProfileStorage
     }
     catch (Exception ex)
     {
-      LogMgr.logError("IniProfileStorage.readProfiles()", "Could not read profiles from: " + filename, ex);
+      LogMgr.logError("IniProfileStorage.readProfiles()", "Could not read profiles from: " + inifile, ex);
     }
     finally
     {
@@ -268,7 +266,7 @@ public class IniProfileStorage
   }
 
   @Override
-  public void saveProfiles(List<ConnectionProfile> profiles, String filename)
+  public void saveProfiles(List<ConnectionProfile> profiles, WbFile filename)
   {
     LogMgr.logDebug("IniProfileStorage.saveProfiles()", "Saving profiles to: " + filename);
     WbProperties props = new WbProperties(2);
@@ -301,7 +299,7 @@ public class IniProfileStorage
 
     try
     {
-      props.saveToFile(new WbFile(filename));
+      props.saveToFile(filename);
     }
     catch (IOException ex)
     {

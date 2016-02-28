@@ -1646,7 +1646,7 @@ public class DataImporter
 			// Key columns might have been externally defined if
 			// a single table import is run which is not possible
 			// when using a multi-table import. So the keyColumns
-			// should only be reset if a multi-table import is running!
+			// should only be resetChangedFlags if a multi-table import is running!
 			if (this.multiTable)
 			{
 				this.keyColumns = null;

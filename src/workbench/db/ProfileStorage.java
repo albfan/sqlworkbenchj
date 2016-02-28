@@ -30,14 +30,13 @@ import workbench.util.WbFile;
  */
 public interface ProfileStorage
 {
-  List<ConnectionProfile> readProfiles(String filename);
-  void saveProfiles(List<ConnectionProfile> profiles, String filename);
+  List<ConnectionProfile> readProfiles(WbFile file);
+  void saveProfiles(List<ConnectionProfile> profiles, WbFile file);
 
   public static class Factory
   {
-    public static ProfileStorage getStorageHandler(String filename)
+    public static ProfileStorage getStorageHandler(WbFile storage)
     {
-      WbFile storage = new WbFile(filename);
       ProfileStorage reader = null;
       String extension = storage.getExtension();
       if (IniProfileStorage.EXTENSION.equalsIgnoreCase(extension))

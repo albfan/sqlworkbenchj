@@ -100,6 +100,7 @@ import workbench.gui.actions.FileReconnectAction;
 import workbench.gui.actions.FileSaveProfiles;
 import workbench.gui.actions.HelpConnectionInfoAction;
 import workbench.gui.actions.HelpContactAction;
+import workbench.gui.actions.ImportProfilesAction;
 import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.LoadMacrosAction;
 import workbench.gui.actions.LoadWorkspaceAction;
@@ -780,6 +781,7 @@ public class MainWindow
 		final JMenu filemenu = menus.get(ResourceMgr.MNU_TXT_FILE);
 		filemenu.addSeparator();
 		filemenu.add(new ManageDriversAction());
+    filemenu.add(new ImportProfilesAction());
 		filemenu.addSeparator();
 
 		action = new FileExitAction();
@@ -1938,7 +1940,7 @@ public class MainWindow
     Properties variables = currentProfile.getConnectionVariables();
     if (CollectionUtil.isNonEmpty(variables))
     {
-      LogMgr.logDebug("MainWindow.applyProfileVariables()", "Applying " + variables.size() + " variables defined in the connection profile");
+      LogMgr.logInfo("MainWindow.applyProfileVariables()", "Applying variables defined in the connection profile: " + variables);
       VariablePool.getInstance().readFromProperties(variables);
     }
   }
@@ -1949,7 +1951,7 @@ public class MainWindow
     WbProperties variables = currentWorkspace.getVariables();
     if (CollectionUtil.isNonEmpty(variables))
     {
-      LogMgr.logDebug("MainWindow.applyWorkspaceVariables()", "Applying " + variables.size() + " variables defined in the workspace");
+      LogMgr.logInfo("MainWindow.applyWorkspaceVariables()", "Applying variables defined in the workspace: " + variables);
       VariablePool.getInstance().readFromProperties(variables);
     }
   }

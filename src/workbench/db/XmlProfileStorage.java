@@ -27,6 +27,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 
+import workbench.util.WbFile;
 import workbench.util.WbPersistence;
 
 /**
@@ -39,18 +40,18 @@ public class XmlProfileStorage
   public static final String DEFAULT_FILE_NAME = "WbProfiles.xml";
 
   @Override
-  public List<ConnectionProfile> readProfiles(String filename)
+  public List<ConnectionProfile> readProfiles(WbFile storage)
   {
     Object result = null;
     try
     {
-      LogMgr.logInfo("XmlProfileStorage.readProfiles()", "Loading connection profiles from " + filename);
-      WbPersistence reader = new WbPersistence(filename);
+      LogMgr.logInfo("XmlProfileStorage.readProfiles()", "Loading connection profiles from " + storage);
+      WbPersistence reader = new WbPersistence(storage.getFullPath());
       result = reader.readObject();
     }
     catch (Exception e)
     {
-      LogMgr.logError("XmlProfileStorage.readProfiles()", "Error when reading connection profiles from " + filename, e);
+      LogMgr.logError("XmlProfileStorage.readProfiles()", "Error when reading connection profiles from " + storage, e);
       result = null;
     }
 
@@ -75,16 +76,16 @@ public class XmlProfileStorage
   }
 
   @Override
-  public void saveProfiles(List<ConnectionProfile> profiles, String filename)
+  public void saveProfiles(List<ConnectionProfile> profiles, WbFile storage)
   {
-    WbPersistence writer = new WbPersistence(filename);
+    WbPersistence writer = new WbPersistence(storage.getFullPath());
     try
     {
       writer.writeObject(profiles);
     }
     catch (IOException e)
     {
-      LogMgr.logError("XmlProfileStorage.saveProfiles()", "Error saving profiles to: " + filename, e);
+      LogMgr.logError("XmlProfileStorage.saveProfiles()", "Error saving profiles to: " + storage, e);
     }
   }
 

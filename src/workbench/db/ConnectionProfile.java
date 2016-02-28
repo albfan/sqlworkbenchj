@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
@@ -57,7 +58,7 @@ import workbench.util.WbProperties;
  *	@author Thomas Kellerer
  */
 public class ConnectionProfile
-	implements PropertyChangeListener
+  implements PropertyChangeListener, Serializable
 {
 	public static final String PROPERTY_PROFILE_GROUP = "profileGroup";
 	private static final String CRYPT_PREFIX = "@*@";
@@ -131,7 +132,7 @@ public class ConnectionProfile
 		setUsername(userName);
 		setPassword(pwd);
 		setName(profileName);
-		reset();
+		resetChangedFlags();
 	}
 
 	public static ConnectionProfile createEmptyProfile()
@@ -733,10 +734,11 @@ public class ConnectionProfile
 
 	/**
 	 * Reset the changed and new flags.
+   *
 	 * @see #isNew()
 	 * @see #isChanged()
 	 */
-	public final void reset()
+	public final void resetChangedFlags()
 	{
 		this.changed = false;
 		this.groupChanged = false;

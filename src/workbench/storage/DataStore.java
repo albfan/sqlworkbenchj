@@ -798,8 +798,8 @@ public class DataStore
 	 * Restore the original column values for all columns that are marked as not modifieable and have been modified.
 	 *
 	 * Because checking the update table might have been initiated by actually editing
-	 * a column value, we need to reset that value if the column(s) in question
-	 * isn't actually updateable.
+ a column value, we need to resetChangedFlags that value if the column(s) in question
+ isn't actually updateable.
 	 *
 	 */
 	private void restoreModifiedNotUpdateableColumns()
@@ -1429,7 +1429,7 @@ public class DataStore
 				// as we silently want to use the data that has been retrieved so far
 				// the Exception should not be passed to the caller
 				LogMgr.logInfo("DataStore.initData()", "Retrieve cancelled");
-				// do not reset the cancelRetrieve flag, because this is checked
+				// do not resetChangedFlags the cancelRetrieve flag, because this is checked
 				// by the caller!
 			}
 			else
@@ -1913,7 +1913,7 @@ public class DataStore
 
 			if (!aConnection.getAutoCommit())
 			{
-				// in case of an exception we have to reset the dmlSent flag for
+				// in case of an exception we have to resetChangedFlags the dmlSent flag for
 				// all modified rows otherwise the next attempt to save the changes
 				// will not re-send them (but as the transaction has been rolled back,
 				// they are not stored in the database)

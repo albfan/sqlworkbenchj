@@ -828,7 +828,7 @@ public class TableListPanel
 		try
 		{
 			tableData.storeColumnOrder();
-			// reset() sets and clears the ignoreStateChanged flag as well!
+			// resetChangedFlags() sets and clears the ignoreStateChanged flag as well!
 			this.reset();
 			this.ignoreStateChanged = true;
 			this.dbConnection = null;
@@ -1184,8 +1184,8 @@ public class TableListPanel
 
 			reset();
 
-			// do not call setBusy() before reset() because
-			// reset will do nothing if the panel is busy
+			// do not call setBusy() before resetChangedFlags() because
+			// resetChangedFlags will do nothing if the panel is busy
 			setBusy(true);
 
 			String[] types = getSelectedTypes();

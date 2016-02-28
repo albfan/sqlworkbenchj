@@ -458,7 +458,7 @@ public class ProfileSelectionPanel
 	private void buildTree()
 	{
 		this.dummyAdded = false;
-		this.model = new ProfileListModel();
+		this.model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
 		if (model.getSize() < 1)
 		{
 			this.model.addEmptyProfile();

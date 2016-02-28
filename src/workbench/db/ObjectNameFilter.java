@@ -23,6 +23,7 @@
  */
 package workbench.db;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ObjectNameFilter
+  implements Serializable
 {
   public static final String PARAM_CURRENT_USER = "${current_user}";
   public static final String PARAM_CURRENT_SCHEMA = "${current_schema}";

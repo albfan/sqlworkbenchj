@@ -52,10 +52,8 @@ import workbench.db.shutdown.DbShutdownHook;
 
 import workbench.gui.profiles.ProfileKey;
 
-import workbench.util.CaseInsensitiveComparator;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
-import workbench.util.FileVersioner;
 import workbench.util.PropertiesCopier;
 import workbench.util.VersionNumber;
 import workbench.util.WbFile;
@@ -71,22 +69,22 @@ public class ConnectionMgr
 {
 	private final Map<String, WbConnection> activeConnections = Collections.synchronizedMap(new HashMap<>());
 
-	private List<ConnectionProfile> profiles;
+  private final ProfileManager profileMgr;
 	private List<DbDriver> drivers;
-	private boolean profilesChanged;
+
 	private boolean readTemplates = true;
 	private boolean templatesImported;
+
 	private List<PropertyChangeListener> driverChangeListener;
+
 	private final static ConnectionMgr instance = new ConnectionMgr();
 
 	private final Object driverLock = new Object();
-	private final Object profileLock = new Object();
-
-	private String currentFilename;
 
 	private ConnectionMgr()
 	{
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
+    profileMgr = new ProfileManager(Settings.getInstance().getProfileStorage());
+    Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
 
 		// make sure the inputPassword is not stored, only the password property should be stored
 		// because that might be encrypted
@@ -115,7 +113,7 @@ public class ConnectionMgr
 	public WbConnection getConnection(ProfileKey def, String anId)
 		throws ClassNotFoundException, SQLException, Exception
 	{
-		ConnectionProfile prof = this.getProfile(def);
+		ConnectionProfile prof = getProfile(def);
 		if (prof == null) return null;
 
 		return this.getConnection(prof, anId);
@@ -137,6 +135,11 @@ public class ConnectionMgr
 	{
 		return this.activeConnections.size();
 	}
+
+  public String getProfilesPath()
+  {
+    return profileMgr.getProfilesPath();
+  }
 
 	/**
 	 * Create a new connection to the database.
@@ -223,6 +226,7 @@ public class ConnectionMgr
 		}
 
 		copyPropsToSystem(profile);
+
 		int oldTimeout = DriverManager.getLoginTimeout();
 		Connection sql = null;
 		try
@@ -284,18 +288,6 @@ public class ConnectionMgr
 			PropertiesCopier copier = new PropertiesCopier();
 			copier.removeFromSystem(profile.getConnectionProperties());
 		}
-	}
-
-	public boolean isNameUsed(String aName)
-	{
-		for (DbDriver db : drivers)
-		{
-			if (db.getName().equals(aName))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public DbDriver findDriverByName(String drvClassName, String driverName)
@@ -464,49 +456,6 @@ public class ConnectionMgr
 		}
 	}
 
-	public static ConnectionProfile findProfile(List<ConnectionProfile> list, ProfileKey key)
-	{
-		if (key == null) return null;
-		if (list == null) return null;
-
-		String name = key.getName();
-		String group = key.getGroup();
-
-		ConnectionProfile firstMatch = null;
-		for (ConnectionProfile prof : list)
-		{
-			if (name.equalsIgnoreCase(prof.getName().trim()))
-			{
-				if (firstMatch == null) firstMatch = prof;
-				if (group == null)
-				{
-					return prof;
-				}
-				else if (group.equalsIgnoreCase(prof.getGroup().trim()))
-				{
-					return prof;
-				}
-			}
-		}
-		return firstMatch;
-	}
-
-	/**
-	 * Find a connection profile identified by the given key.
-	 *
-	 * @param key the key of the profile
-	 * @return a connection profile with that name or null if none was found.
-	 */
-	public ConnectionProfile getProfile(ProfileKey key)
-	{
-		synchronized (profileLock)
-		{
-			if (key == null) return null;
-			if (this.profiles == null) this.readProfiles();
-			return findProfile(profiles, key);
-		}
-	}
-
 	public void addDriverChangeListener(PropertyChangeListener l)
 	{
 		if (this.driverChangeListener == null) this.driverChangeListener = new ArrayList<>();
@@ -526,16 +475,10 @@ public class ConnectionMgr
 	 */
 	public List<String> getProfileKeys()
 	{
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			if (profiles == null) readProfiles();
-			List<String> result = new ArrayList(profiles.size());
-			for (ConnectionProfile profile : profiles)
-			{
-				result.add(profile.getKey().toString());
-			}
-			Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
-			return result;
+      profileMgr.ensureLoaded();
+      return profileMgr.getProfileKeys();
 		}
 	}
 
@@ -548,13 +491,10 @@ public class ConnectionMgr
 	{
 		LogMgr.logTrace("ConnectionMgr.getProfiles()", "getProfiles() called at " + System.currentTimeMillis() + " from " + Thread.currentThread().getName());
 
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			if (this.profiles == null)
-			{
-				this.readProfiles();
-			}
-			return Collections.unmodifiableList(this.profiles);
+      profileMgr.ensureLoaded();
+			return profileMgr.getProfiles();
 		}
 	}
 
@@ -564,12 +504,11 @@ public class ConnectionMgr
 	 */
 	public void reloadProfiles()
 	{
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			this.readProfiles();
+			profileMgr.load();
 		}
 	}
-
 
 	/**
 	 * Disconnects all connections.
@@ -719,22 +658,6 @@ public class ConnectionMgr
 		return false;
 	}
 
-	private void createBackup(WbFile f)
-	{
-		int maxVersions = Settings.getInstance().getMaxBackupFiles();
-		String dir = Settings.getInstance().getBackupDir();
-		String sep = Settings.getInstance().getFileVersionDelimiter();
-		FileVersioner version = new FileVersioner(maxVersions, dir, sep);
-		try
-		{
-			version.createBackup(f);
-		}
-		catch (IOException e)
-		{
-			LogMgr.logWarning("ConnectionMgr.createBackup()", "Error when creating backup for: " + f.getAbsolutePath(), e);
-		}
-	}
-
 	/**
 	 * Saves the driver definitions to an external file.
 	 *
@@ -748,7 +671,7 @@ public class ConnectionMgr
 		if (Settings.getInstance().getCreateDriverBackup())
 		{
 			WbFile f = new WbFile(Settings.getInstance().getDriverConfigFilename());
-			createBackup(f);
+			Settings.createBackup(f);
 		}
 
 		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
@@ -824,13 +747,25 @@ public class ConnectionMgr
 			List<DbDriver> templates = getDriverTemplates();
 			for (DbDriver drv : templates)
 			{
-				if (!this.isNameUsed(drv.getName()))
+				if (!this.isDriverNameUsed(drv.getName()))
 				{
 					this.drivers.add(drv);
 				}
 			}
 		}
 		this.templatesImported = true;
+	}
+
+	private boolean isDriverNameUsed(String aName)
+	{
+		for (DbDriver db : drivers)
+		{
+			if (db.getName().equals(aName))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public List<DbDriver> getDriverTemplates()
@@ -867,126 +802,32 @@ public class ConnectionMgr
 		return this.getClass().getResourceAsStream("DriverTemplates.xml");
 	}
 
-	/**
-	 * Remove all defined connection profiles.
-	 * This does not make sure that all connections are closed!
-	 * This method is used in Unit tests to setup a new set of profiles.
-	 */
-	public void clearProfiles()
-	{
-		synchronized (profileLock)
-		{
-			if (profiles != null)
-			{
-				profiles.clear();
-			}
-		}
-	}
-
-	/**
-	 * Retrieves the connection profiles from an XML file.
-	 *
-	 * @see WbPersistence#readObject()
-	 * @see workbench.resource.Settings#getProfileStorage()
-	 */
-	private void readProfiles()
-	{
-		synchronized (profileLock)
-		{
-      ProfileStorage reader = getStorageHandler();
-      String fname = getFileName();
-      WbFile f = new WbFile(fname);
-
-      if (f.exists())
-      {
-        long start = System.currentTimeMillis();
-        LogMgr.logTrace("ConnectionMgr.readProfiles()", "readProfiles() called at " + start + " from " + Thread.currentThread().getName());
-
-        profiles = reader.readProfiles(fname);
-
-        long end = System.currentTimeMillis();
-        long duration = end - start;
-        LogMgr.logDebug("ConnectionMgr.readProfiles()", profiles.size() + " profiles loaded in " + duration + "ms");
-      }
-      else
-      {
-        LogMgr.logDebug("ConnectionMgr.readProfiles", fname + " not found. Creating new one.");
-      }
-
-      if (profiles == null)
-      {
-        // first time start, or empty config dir
-        profiles = new ArrayList<>();
-      }
-
-      resetProfiles();
+  public ConnectionProfile getProfile(ProfileKey key)
+  {
+    synchronized (profileMgr)
+    {
+      profileMgr.ensureLoaded();
+      return profileMgr.getProfile(key);
     }
-	}
-
-	/**
-	 * Reset the changed status on the profiles.
-	 *
-	 * Called after saving the profiles.
-	 */
-	private void resetProfiles()
-	{
-		if (this.profiles != null)
-		{
-			for (ConnectionProfile profile : this.profiles)
-			{
-				profile.reset();
-			}
-			this.profilesChanged = false;
-		}
-	}
-
-  public String getProfilesPath()
-  {
-    WbFile f = new WbFile(getFileName());
-    return f.getFullPath();
-  }
-
-	private String getFileName()
-	{
-		if (currentFilename == null)
-		{
-			currentFilename = Settings.getInstance().getProfileStorage();
-		}
-		return currentFilename;
-	}
-
-  private ProfileStorage getStorageHandler()
-  {
-    return ProfileStorage.Factory.getStorageHandler(getFileName());
   }
 
 	/**
-	 * Save the connectioin profiles to an external file.
+	 * Save the connection profiles.
 	 *
-	 * This will also reset the changed flag for any modified or new
-	 * profiles. The name of the file defaults to <tt>WbProfiles.xml</tt>, but
+	 * This will also resetChangedFlags the changed flag for any modified or new
+ profiles. The name of the file defaults to <tt>WbProfiles.xml</tt>, but
 	 * can be defined in the configuration properties.
 	 *
-	 * @see workbench.resource.Settings#getProfileStorage()
-   * @see #getFileName()
-	 * @see WbPersistence#writeObject(Object)
+   * @see ProfileManager#save()
 	 */
 	public void saveProfiles()
 	{
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			if (this.profiles != null)
-			{
-        String filename = getFileName();
-				if (Settings.getInstance().getCreateProfileBackup())
-				{
-					WbFile f = new WbFile(filename);
-					createBackup(f);
-				}
-        ProfileStorage handler = getStorageHandler();
-        handler.saveProfiles(profiles, filename);
-        resetProfiles();
-			}
+      if (profileMgr.isLoaded())
+      {
+        profileMgr.save();
+      }
 		}
 	}
 
@@ -995,70 +836,52 @@ public class ConnectionMgr
 	 * (Or if a profile has been deleted or added)
 	 *
 	 * @return true if at least one profile has been changed, deleted or added
+   *
+   * @see ProfileManager#profilesAreModified()
 	 */
 	public boolean profilesAreModified()
 	{
-		if (this.profilesChanged) return true;
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			if (this.profiles == null) return false;
-			for (ConnectionProfile profile : this.profiles)
-			{
-				if (profile.isChanged())
-				{
-					return true;
-				}
-			}
-			return false;
+      profileMgr.ensureLoaded();
+			return profileMgr.profilesAreModified();
 		}
 	}
 
 	public void applyProfiles(List<ConnectionProfile> newProfiles)
 	{
-		if (newProfiles == null) return;
-
-		synchronized (profileLock)
+		synchronized (profileMgr)
 		{
-			this.profilesChanged = (profiles.size() != newProfiles.size());
-
-			this.profiles.clear();
-			for (ConnectionProfile profile : newProfiles)
-			{
-				this.profiles.add(profile.createStatefulCopy());
-			}
+      profileMgr.ensureLoaded();
+      profileMgr.applyProfiles(newProfiles);
 		}
 	}
 
-	public void addProfile(ConnectionProfile aProfile)
-	{
-		synchronized (profileLock)
-		{
+  public void removeProfile(ConnectionProfile profile)
+  {
+    synchronized (profileMgr)
+    {
+      profileMgr.ensureLoaded();
+      profileMgr.removeProfile(profile);
+    }
+  }
 
-			if (this.profiles == null)
-			{
-				this.readProfiles();
-			}
+  public void addProfile(ConnectionProfile profile)
+  {
+    synchronized (profileMgr)
+    {
+      profileMgr.ensureLoaded();
+      profileMgr.addProfile(profile);
+    }
+  }
 
-			this.profiles.remove(aProfile);
-			this.profiles.add(aProfile);
-			this.profilesChanged = true;
-		}
-	}
-
-	public void removeProfile(ConnectionProfile aProfile)
-	{
-		synchronized (profileLock)
-		{
-			if (this.profiles == null) return;
-
-			this.profiles.remove(aProfile);
-			// deleting a new profile should not change the status to changed
-			if (!aProfile.isNew())
-			{
-				this.profilesChanged = true;
-			}
-		}
-	}
+  public void clearProfiles()
+  {
+    synchronized (profileMgr)
+    {
+      profileMgr.reset(Settings.getInstance().getProfileStorage());
+    }
+  }
 
 	/**
 	 * When the property {@link Settings#PROPERTY_PROFILE_STORAGE} is changed

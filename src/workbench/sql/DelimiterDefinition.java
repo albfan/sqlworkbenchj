@@ -23,6 +23,7 @@
  */
 package workbench.sql;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DelimiterDefinition
+  implements Serializable
 {
 	/**
 	 * The default delimiter for ANSI SQL: a semicolon

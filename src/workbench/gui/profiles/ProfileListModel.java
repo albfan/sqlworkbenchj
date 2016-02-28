@@ -39,6 +39,7 @@ import javax.swing.tree.TreePath;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ProfileGroupMap;
+import workbench.db.ProfileManager;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
@@ -55,12 +56,11 @@ class ProfileListModel
 	private final List<ConnectionProfile> profiles = new ArrayList<>();;
 	private final List<ConnectionProfile> filtered = new ArrayList<>();
 
-	ProfileListModel()
+	ProfileListModel(List<ConnectionProfile> sourceProfiles)
 	{
 		super(null, true);
 
-		List<ConnectionProfile> current = ConnectionMgr.getInstance().getProfiles();
-		for (ConnectionProfile prof : current)
+		for (ConnectionProfile prof : sourceProfiles)
 		{
 			profiles.add(prof.createStatefulCopy());
 		}
@@ -272,7 +272,7 @@ class ProfileListModel
 	public TreePath getPath(ProfileKey def)
 	{
 		if (def == null) return null;
-		ConnectionProfile prof = ConnectionMgr.findProfile(profiles, def);
+		ConnectionProfile prof = ProfileManager.findProfile(profiles, def);
 		if (prof != null)
 		{
 			return getPath(prof);
@@ -361,7 +361,7 @@ class ProfileListModel
 	{
 		for (ConnectionProfile profile : profiles)
 		{
-			profile.reset();
+			profile.resetChangedFlags();
 		}
 	}
 
@@ -475,4 +475,33 @@ class ProfileListModel
 		}
 	}
 
+  public static ProfileListModel emptyModel()
+  {
+    return new ProfileListModel(new ArrayList<>());
+  }
+  
+  public static ProfileListModel getDummyModel()
+  {
+    List<ConnectionProfile> profiles = new ArrayList<>();
+    ConnectionProfile one = new ConnectionProfile();
+    one.setName("Admin");
+    one.setGroup("Postgres");
+    profiles.add(one);
+
+    ConnectionProfile two = new ConnectionProfile();
+    two.setName("Arthur");
+    two.setGroup("Postgres");
+    profiles.add(two);
+
+    ConnectionProfile three = new ConnectionProfile();
+    three.setName("Zaphod");
+    three.setGroup("Oracle");
+    profiles.add(three);
+
+    ConnectionProfile four = new ConnectionProfile();
+    four.setName("Tricia");
+    four.setGroup("Oracle");
+    profiles.add(four);
+    return new ProfileListModel(profiles);
+  }
 }

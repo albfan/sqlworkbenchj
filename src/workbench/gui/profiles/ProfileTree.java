@@ -63,8 +63,9 @@ import workbench.gui.menu.CutCopyPastePopup;
 import workbench.util.StringUtil;
 
 /**
- * A Tree to display connection profiles
- * It supports drag & drop from profiles into different groups
+ * A tree to display connection profiles and profile groups.
+ *
+ * It supports drag & drop from profiles into different groups.
  *
  * @author Thomas Kellerer
  */
@@ -85,7 +86,7 @@ public class ProfileTree
 
 	public ProfileTree()
 	{
-		super();
+		super(ProfileListModel.getDummyModel());
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
@@ -98,24 +99,24 @@ public class ProfileTree
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 
-		this.popup = new CutCopyPastePopup(this);
+    this.popup = new CutCopyPastePopup(this);
 
-		WbAction a = popup.getPasteAction();
-		a.addToInputMap(im, am);
+    WbAction a = popup.getPasteAction();
+    a.addToInputMap(im, am);
 
-		a = popup.getCopyAction();
-		a.addToInputMap(im, am);
+    a = popup.getCopyAction();
+    a.addToInputMap(im, am);
 
-		a = popup.getCutAction();
-		a.addToInputMap(im, am);
+    a = popup.getCutAction();
+    a.addToInputMap(im, am);
 
-		pasteToFolderAction = new WbAction(this, "pasteToFolder");
-		pasteToFolderAction.removeIcon();
-		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
-		popup.addAction(pasteToFolderAction, true);
+    pasteToFolderAction = new WbAction(this, "pasteToFolder");
+    pasteToFolderAction.removeIcon();
+    pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
+    popup.addAction(pasteToFolderAction, true);
 
-		RenameGroupAction renameGroup = new RenameGroupAction(this);
-		popup.addAction(renameGroup, false);
+    RenameGroupAction renameGroup = new RenameGroupAction(this);
+    popup.addAction(renameGroup, false);
 
 		setCellRenderer(new ProfileTreeCellRenderer(getCellRenderer()));
 //    System.out.println(getCellRenderer().getClass());
@@ -127,14 +128,14 @@ public class ProfileTree
 		setRowHeight(0);
 	}
 
-	public void setDeleteAction(DeleteListEntryAction delete)
-	{
-		this.popup.addSeparator();
-		this.popup.add(delete);
-		InputMap im = this.getInputMap(WHEN_FOCUSED);
-		ActionMap am = this.getActionMap();
-		delete.addToInputMap(im, am);
-	}
+  public void setDeleteAction(DeleteListEntryAction delete)
+  {
+    this.popup.addSeparator();
+    this.popup.add(delete);
+    InputMap im = this.getInputMap(WHEN_FOCUSED);
+    ActionMap am = this.getActionMap();
+    delete.addToInputMap(im, am);
+  }
 
 	@Override
 	public void setModel(TreeModel model)
@@ -487,6 +488,14 @@ public class ProfileTree
 			this.clipboardNodes = null;
 		}
 	}
+
+  public void handleCopiedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent)
+  {
+    if (nodes == null || nodes.length < 1) return;
+    if (newParent == null) return;
+    
+    profileModel.copyProfilesToGroup(nodes, newParent);
+  }
 
 	public void handleDroppedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent, int action)
 	{
