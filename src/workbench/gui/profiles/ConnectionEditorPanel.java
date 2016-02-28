@@ -81,8 +81,10 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
+import workbench.gui.components.PropertiesEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbColorPicker;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTraversalPolicy;
@@ -334,6 +336,7 @@ public class ConnectionEditorPanel
     jPanel6 = new javax.swing.JPanel();
     editConnectionScriptsButton = new FlatButton();
     editFilterButton = new FlatButton();
+    editVariablesButton = new javax.swing.JButton();
     filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
     groupNameLabel = new javax.swing.JLabel();
     tfProfileName = new StringPropertyEditor();
@@ -962,9 +965,7 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weighty = 1.0;
     jPanel6.add(editConnectionScriptsButton, gridBagConstraints);
 
     editFilterButton.setText(ResourceMgr.getString("LblSchemaFilterBtn")); // NOI18N
@@ -975,13 +976,23 @@ public class ConnectionEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
     jPanel6.add(editFilterButton, gridBagConstraints);
+
+    editVariablesButton.setText(ResourceMgr.getString("TxtVariables")); // NOI18N
+    editVariablesButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+    editVariablesButton.setIconTextGap(10);
+    editVariablesButton.addActionListener(formListener);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 12, 0, 0);
+    jPanel6.add(editVariablesButton, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     jPanel6.add(filler2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1034,6 +1045,10 @@ public class ConnectionEditorPanel
       else if (evt.getSource() == editFilterButton)
       {
         ConnectionEditorPanel.this.editFilterButtonActionPerformed(evt);
+      }
+      else if (evt.getSource() == editVariablesButton)
+      {
+        ConnectionEditorPanel.this.editVariablesButtonActionPerformed(evt);
       }
     }
 
@@ -1153,6 +1168,34 @@ public class ConnectionEditorPanel
     checkOracle();
   }//GEN-LAST:event_tfURLFocusLost
 
+  private void editVariablesButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editVariablesButtonActionPerformed
+  {//GEN-HEADEREND:event_editVariablesButtonActionPerformed
+    ConnectionProfile profile = getProfile();
+
+    Properties variables = profile.getConnectionVariables();
+    if (variables == null)
+    {
+      variables = new Properties();
+    }
+
+    PropertiesEditor editor = new PropertiesEditor(variables);
+    Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
+    ValidatingDialog dialog = ValidatingDialog.createDialog(d, editor, ResourceMgr.getString("TxtEditConnVars"), null, 0, false);
+
+    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.profile.variables"))
+    {
+      dialog.setSize(400, 300);
+    }
+    editor.optimizeColumnWidths();
+    dialog.setVisible(true);
+
+		if (!dialog.isCancelled())
+		{
+      profile.setConnectionVariables(editor.getProperties());
+      checkScriptsAndFilters();
+		}
+  }//GEN-LAST:event_editVariablesButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
   protected javax.swing.JTextField altDelimiter;
@@ -1168,6 +1211,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JPanel controlUpdates;
   protected javax.swing.JButton editConnectionScriptsButton;
   protected javax.swing.JButton editFilterButton;
+  protected javax.swing.JButton editVariablesButton;
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
   protected javax.swing.JLabel fetchSizeLabel;
@@ -1436,6 +1480,7 @@ public class ConnectionEditorPanel
 	{
 		editConnectionScriptsButton.setIcon(null);
 		editFilterButton.setIcon(null);
+    editVariablesButton.setIcon(null);
 
 		int f1 = currentProfile == null ? 0 : getFilterSize(currentProfile.getSchemaFilter());
 		int f2 = currentProfile == null ? 0 : getFilterSize(currentProfile.getCatalogFilter());
@@ -1452,6 +1497,11 @@ public class ConnectionEditorPanel
 		{
 			editConnectionScriptsButton.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
 		}
+
+    if (CollectionUtil.isNonEmpty(currentProfile.getConnectionVariables()))
+    {
+      editVariablesButton.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
+    }
 	}
 
 	private void checkExtendedProps()

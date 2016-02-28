@@ -616,18 +616,36 @@
 			</para></note>
 		</section>
 
-  <section id="profile-tags">
-    <title>Tagging connection profiles</title>
-    <para>
-      To organize a large number of profiles it is possible to supply tags for each profile. These tags are
-      then used by the <link linkend="connection-profile-quickfilter">profile filter</link> to quickly show only certain profiles.
-    </para>
-    <para>
-      The tags for a profile are entered as a comma separated list. To see a list of already defined tags,
-      press <keycap>Ctrl-Space</keycap> in the input field.
-    </para>
-  </section>
+    <section id="profile-tags">
+      <title>Tagging connection profiles</title>
+      <para>
+        To organize a large number of profiles it is possible to supply tags for each profile. These tags are
+        then used by the <link linkend="connection-profile-quickfilter">profile filter</link> to quickly show only certain profiles.
+      </para>
+      <para>
+        The tags for a profile are entered as a comma separated list. To see a list of already defined tags,
+        press <keycap>Ctrl-Space</keycap> in the input field.
+      </para>
+    </section>
 
+    <section id="profile-icon">
+      <title>Main window icon</title>
+      <para>
+        You can assign an icon file for each connection profile. The icon will then be used for the main window
+        instead of the default application icon.
+      </para>
+      <para>
+        The icon file can <emphasis role="bold">only</emphasis> be a <literal>png</literal> or <literal>gif</literal> file.
+      </para>
+      <para>
+        Do <emphasis role="bold">not</emphasis> use an animated GIF file because that will hang the application!
+      </para>
+      <para>
+        At least one file with an icon of 16x16 pixel should be selected. You can select multiple files with different
+        icon sizes (e.g. a 16x16 and a 32x32 icon). Whether or not the additional sizes (i.e. bigger than 16x16)
+        will be used depends on your operating system and desktop theme.
+      </para>
+    </section>
 
 		<section id="profile-connect-scripts">
 			<title>Connect scripts</title>
@@ -685,6 +703,7 @@
 			</simplesect>
 
 		</section>
+
     <section id="profile-filters">
       <title>Schema and Catalog filters</title>
       <para>
@@ -718,24 +737,17 @@
       </para>
     </section>
 
-    <section id="profile-icon">
-      <title>Main window icon</title>
+    <section id="profile-variables">
+      <title>Variables</title>
       <para>
-        You can assign an icon file for each connection profile. The icon will then be used for the main window
-        instead of the default application icon.
+        It is possible to setup <link linkend="using-variables">variables</link> that are automatically defined when the connection for the profile
+        is created. These variables will be removed after the connection is closed.
       </para>
       <para>
-        The icon file can <emphasis role="bold">only</emphasis> be a <literal>png</literal> or <literal>gif</literal> file.
-      </para>
-      <para>
-        Do <emphasis role="bold">not</emphasis> use an animated GIF file because that will hang the application!
-      </para>
-      <para>
-        At least one file with an icon of 16x16 pixel should be selected. You can select multiple files with different
-        icon sizes (e.g. a 16x16 and a 32x32 icon). Whether or not the additional sizes (i.e. bigger than 16x16)
-        will be used depends on your operating system and desktop theme.
+        Variables defined in the connection profile are overwritten by variables defined for the <link linkend="workspace-variables">workspace</link>.
       </para>
     </section>
+
   </section>
 
 	<section id="oracle-sysdba-connection">

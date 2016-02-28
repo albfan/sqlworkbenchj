@@ -183,42 +183,33 @@ public class VariablesEditor
 	public static boolean showVariablesDialog(final DataStore vardata)
 	{
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				VariablesEditor editor = new VariablesEditor(vardata);
-
-				String settingsId = "workbench.gui.variables.dialog";
-				JFrame window = WbManager.getInstance().getCurrentWindow();
-
-				editor.dialog = ValidatingDialog.createDialog(window, editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"), null, 0, false);
-				int width = -1;
-				if (Settings.getInstance().restoreWindowSize(editor.dialog, settingsId))
-				{
-					editor.dialog.setLocationRelativeTo(window);
-					width = (int)(editor.dialog.getWidth() * 0.92);
-				}
-				else
-				{
-					width = (int)(editor.dialog.getPreferredSize().getWidth() * 0.92);
-				}
-
-				// make the first column use as much space as needed
-				// and the second one all the rest
-				ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(editor.variablesTable);
-				optimizer.optimizeColWidth(0, true);
-
-				int w1 = editor.variablesTable.getColumnModel().getColumn(0).getWidth();
-				int w2 = width - w1;
-				editor.variablesTable.getColumnModel().getColumn(1).setPreferredWidth(w2);
-
-				editor.dialog.setVisible(true);
-				dialogResult = !editor.dialog.isCancelled();
-				Settings.getInstance().storeWindowSize(editor.dialog, settingsId);
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      VariablesEditor editor = new VariablesEditor(vardata);
+      String settingsId = "workbench.gui.variables.dialog";
+      JFrame window = WbManager.getInstance().getCurrentWindow();
+      editor.dialog = ValidatingDialog.createDialog(window, editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"), null, 0, false);
+      int width1 = -1;
+      if (Settings.getInstance().restoreWindowSize(editor.dialog, settingsId))
+      {
+        editor.dialog.setLocationRelativeTo(window);
+        width1 = (int)(editor.dialog.getWidth() * 0.92);
+      }
+      else
+      {
+        width1 = (int)(editor.dialog.getPreferredSize().getWidth() * 0.92);
+      }
+      // make the first column use as much space as needed
+      // and the second one all the rest
+      ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(editor.variablesTable);
+      optimizer.optimizeColWidth(0, true);
+      int w1 = editor.variablesTable.getColumnModel().getColumn(0).getWidth();
+      int w2 = width1 - w1;
+      editor.variablesTable.getColumnModel().getColumn(1).setPreferredWidth(w2);
+      editor.dialog.setVisible(true);
+      dialogResult = !editor.dialog.isCancelled();
+      Settings.getInstance().storeWindowSize(editor.dialog, settingsId);
+    });
 
 		boolean result = false;
 		if (dialogResult)

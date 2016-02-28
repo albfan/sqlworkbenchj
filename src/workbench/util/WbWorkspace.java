@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -50,67 +51,269 @@ import workbench.gui.sql.SqlHistory;
 public class WbWorkspace
 	implements Closeable
 {
+  private static final String VARIABLES_FILENAME = "variables.properties";
+  private static final String TABINFO_FILENAME = "tabs.properties";
+	private static final String TOOL_ENTRY_PREFIX = "toolprop_";
+
+  private enum WorkspaceState
+  {
+    closed,
+    reading,
+    writing;
+  }
+
 	private ZipOutputStream zout;
 	private ZipFile archive;
 
-	private boolean isReadOnly;
-	private WbProperties tabInfo = new WbProperties(null, 0);
+  private WorkspaceState state = WorkspaceState.closed;
 	private int tabCount = -1;
-	private Map<String, WbProperties> toolProperties = new HashMap<>();
-	private final String toolEntryPrefix = "toolprop_";
 
-	public WbWorkspace(String archiveName, boolean createNew)
+	private WbProperties tabInfo = new WbProperties(0);
+	private Map<String, WbProperties> toolProperties = new HashMap<>();
+  private WbProperties variables = new WbProperties(0);
+
+  private String filename;
+
+	public WbWorkspace(String archiveName)
+	{
+    if (archiveName == null) throw new NullPointerException("Filename cannot be null");
+    this.filename = archiveName;
+	}
+
+  /**
+   * Opens the workspace for writing.
+   *
+   * Nothing will be saved. To actually save the workspace content the following methods need to be called:
+   *
+   * <ul>
+   * <li>{@link #saveProperties() }</li>
+   * <li>{@link #addHistoryEntry(int, workbench.gui.sql.SqlHistory) }
+   * </ul>
+   *
+   * If the workspace was already open, it is closed.
+   *
+   * @throws IOException
+   * @see #saveProperties()
+   */
+  public void openForWriting()
+    throws IOException
+  {
+    close();
+
+    File f = new File(filename);
+    OutputStream out = new BufferedOutputStream(new FileOutputStream(f), 64*1024);
+    zout = new ZipOutputStream(out);
+    zout.setLevel(Settings.getInstance().getIntProperty("workbench.workspace.compression", 9));
+    zout.setComment("SQL Workbench/J Workspace file");
+
+    state = WorkspaceState.writing;
+  }
+
+  /**
+   * Opens the workspace for reading.
+   *
+   * This will automatically load all properties stored in the workspace, but not the panel statements.
+   *
+   * If the workspace was already open, it is closed and all internal properties are discarded.
+   *
+   * @throws IOException
+   * @see #readHistoryData(int, workbench.gui.sql.SqlHistory)
+   */
+  public void openForReading()
+    throws IOException
+  {
+    close();
+    clear();
+
+    this.zout = null;
+    this.archive = new ZipFile(filename);
+
+    ZipEntry entry = archive.getEntry(TABINFO_FILENAME);
+    long size = (entry != null ? entry.getSize() : 0);
+    if (size <= 0)
+    {
+      // Old definition of tabs for builds before 103.2
+      entry = archive.getEntry("tabinfo.properties");
+    }
+
+    readTabInfo(entry);
+    readToolProperties();
+    readVariables();
+
+    tabCount = calculateTabCount();
+
+    state = WorkspaceState.reading;
+  }
+
+  public void setFilename(String archiveName)
+  {
+    if (archiveName == null) throw new NullPointerException("Filename cannot be null");
+    if (state != WorkspaceState.closed) throw new IllegalStateException("Cannot change filename if workspace is open");
+    filename = archiveName;
+  }
+
+  public String getFilename()
+  {
+    return filename;
+  }
+
+	public Map<String, WbProperties> getToolProperties()
+	{
+		return toolProperties;
+	}
+
+	public void setEntryCount(int count)
+	{
+		tabInfo.setProperty("tab.total.count", count);
+	}
+
+	public void addHistoryEntry(int index, SqlHistory history)
 		throws IOException
 	{
-		if (createNew)
-		{
-			this.isReadOnly = false;
-			File f = new File(archiveName);
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(f), 128*1024);
-			zout = new ZipOutputStream(out);
-			zout.setLevel(Settings.getInstance().getIntProperty("workbench.workspace.compression", 3));
-			zout.setComment("SQL Workbench/J Workspace file");
-		}
-		else
-		{
-			this.isReadOnly = true;
-			this.zout = null;
-			this.archive = new ZipFile(archiveName);
+    if (state != WorkspaceState.writing) throw new IllegalStateException("Workspace is not opened for writing. addHistoryEntry() may not be called");
 
-			ZipEntry entry = archive.getEntry("tabs.properties");
-			long size = (entry != null ? entry.getSize() : 0);
-			if (size <= 0)
-			{
-				// Old definition of tabs for builds before 103.2
-				entry = archive.getEntry("tabinfo.properties");
-			}
-			this.readTabInfo(entry);
-			this.readToolProperties();
-			tabCount = calculateTabCount();
+		ZipEntry entry = new ZipEntry("WbStatements" + (index + 1) + ".txt");
+		this.zout.putNextEntry(entry);
+		if (history != null)
+		{
+			history.writeToStream(zout);
 		}
+		zout.closeEntry();
 	}
 
-	/**
-	 * For testing purposes only
-	 * @param props
-	 */
-	WbWorkspace(WbProperties props)
+  public WbProperties getVariables()
+  {
+    WbProperties props = new WbProperties(0);
+    props.putAll(variables);
+    return props;
+  }
+
+  public void setVariables(Properties newVars)
+  {
+    variables.clear();
+    if (newVars != null)
+    {
+      variables.putAll(newVars);
+    }
+  }
+
+  /**
+   * Returns the number of available tab entries.
+   *
+   * Calling this method is only valid if {@link #openForReading() } has been called before.
+   *
+   * @return the number of tabs stored in this workspace
+   * @see #openForReading()
+   */
+	public int getEntryCount()
 	{
-		this.tabInfo = props;
-		tabCount = calculateTabCount();
-		this.isReadOnly = true;
+    if (state != WorkspaceState.reading) throw new IllegalStateException("Workspace is not open for reading. Entry count is not available");
+		return tabCount;
 	}
+
+	public PanelType getPanelType(int index)
+	{
+		String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
+		try
+		{
+			return PanelType.valueOf(type);
+		}
+		catch (Exception e)
+		{
+			return PanelType.sqlPanel;
+		}
+	}
+
+  /**
+   *
+   * @param anIndex
+   * @param history
+   * @throws IOException
+   */
+	public void readHistoryData(int anIndex, SqlHistory history)
+		throws IOException
+	{
+    if (state != WorkspaceState.reading) throw new IllegalStateException("Workspace is not open for reading. Entry count is not available");
+
+		ZipEntry e = this.archive.getEntry("WbStatements" + (anIndex + 1) + ".txt");
+		if (e != null)
+		{
+			InputStream in = this.archive.getInputStream(e);
+			history.readFromStream(in);
+		}
+	}
+
+  public void saveProperties()
+  {
+    if (this.zout != null)
+    {
+      saveTabInfo();
+      saveToolProperties();
+      saveVariables();
+    }
+  }
+
+	@Override
+	public void close()
+		throws IOException
+	{
+		if (this.zout != null)
+		{
+      zout.close();
+      zout = null;
+		}
+		else if (this.archive != null)
+		{
+			archive.close();
+      archive = null;
+		}
+    state = WorkspaceState.closed;
+	}
+
+  public WbProperties getSettings()
+	{
+		return this.tabInfo;
+	}
+
+  private void clear()
+  {
+    toolProperties.clear();
+    variables.clear();
+    tabInfo.clear();
+  }
+
+  private void readVariables()
+  {
+    if (archive == null) return;
+
+    variables.clear();
+
+    try
+    {
+ 			ZipEntry entry = archive.getEntry(VARIABLES_FILENAME);
+      if (entry != null && entry.getSize() > 0)
+      {
+        InputStream in = this.archive.getInputStream(entry);
+        variables.load(in);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("WbWorkspace.readVariables()", "Could not read variables file", ex);
+    }
+  }
 
 	private void readToolProperties()
 	{
+    toolProperties.clear();
 		Enumeration<? extends ZipEntry> entries = archive.entries();
 		while (entries.hasMoreElements())
 		{
 			ZipEntry entry = entries.nextElement();
 			String name = entry.getName();
-			if (name.startsWith(toolEntryPrefix))
+			if (name.startsWith(TOOL_ENTRY_PREFIX))
 			{
-				WbFile f = new WbFile(name.substring(toolEntryPrefix.length()));
+				WbFile f = new WbFile(name.substring(TOOL_ENTRY_PREFIX.length()));
 				String toolkey = f.getFileName();
 				WbProperties props = readProperties(entry);
 				toolProperties.put(toolkey, props);
@@ -157,116 +360,64 @@ public class WbWorkspace
 		return index;
 	}
 
-	public Map<String, WbProperties> getToolProperties()
-	{
-		return toolProperties;
-	}
-
-	public void setToolProperties(Map<String, WbProperties> toolProps)
-	{
-		this.toolProperties = new HashMap<>(toolProps);
-	}
-
-	public void setEntryCount(int count)
-	{
-		tabInfo.setProperty("tab.total.count", count);
-	}
-
-	public void addHistoryEntry(int index, SqlHistory history)
-		throws IOException
-	{
-		if (this.isReadOnly) throw new IllegalStateException("Workspace is opened for reading. addHistoryEntry() may not be called");
-
-		ZipEntry entry = new ZipEntry("WbStatements" + (index + 1) + ".txt");
-		this.zout.putNextEntry(entry);
-		if (history != null)
-		{
-			history.writeToStream(zout);
-		}
-		zout.closeEntry();
-	}
-
-	public int getEntryCount()
-	{
-		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		return tabCount;
-	}
-
-	public PanelType getPanelType(int index)
-	{
-		String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
-		try
-		{
-			return PanelType.valueOf(type);
-		}
-		catch (Exception e)
-		{
-			return PanelType.sqlPanel;
-		}
-	}
-
-	public void readHistoryData(int anIndex, SqlHistory history)
-		throws IOException
-	{
-		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		//if (anIndex > this.entries.length - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.length - 1));
-
-		ZipEntry e = this.archive.getEntry("WbStatements" + (anIndex + 1) + ".txt");
-		if (e != null)
-		{
-			InputStream in = this.archive.getInputStream(e);
-			history.readFromStream(in);
-		}
-	}
-
-	public WbProperties getSettings()
-	{
-		return this.tabInfo;
-	}
+  private void saveVariables()
+  {
+    if (CollectionUtil.isEmpty(variables)) return;
+    try
+    {
+      ZipEntry entry = new ZipEntry(VARIABLES_FILENAME);
+      this.zout.putNextEntry(entry);
+      variables.save(this.zout);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("WbWorkspace.saveVariables()", "Could not write variables", ex);
+    }
+    finally
+    {
+      try { zout.closeEntry(); } catch (Throwable th) {}
+    }
+  }
 
 	private void saveToolProperties()
-		throws IOException
 	{
-		if (this.toolProperties == null || this.toolProperties.isEmpty()) return;
-		for (Map.Entry<String, WbProperties> propEntry : toolProperties.entrySet())
-		{
-			ZipEntry entry = new ZipEntry(toolEntryPrefix + propEntry.getKey() + ".properties");
-			this.zout.putNextEntry(entry);
-			propEntry.getValue().save(this.zout);
-			zout.closeEntry();
-		}
+    if (CollectionUtil.isEmpty(this.toolProperties)) return;
+    try
+    {
+      for (Map.Entry<String, WbProperties> propEntry : toolProperties.entrySet())
+      {
+        ZipEntry entry = new ZipEntry(TOOL_ENTRY_PREFIX + propEntry.getKey() + ".properties");
+        zout.putNextEntry(entry);
+        propEntry.getValue().save(zout);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("WbWorkspace.saveToolProperties()", "Could not write variables", ex);
+    }
+    finally
+    {
+      try { zout.closeEntry(); } catch (Throwable th) {}
+    }
 	}
 
-	@Override
-	public void close()
-		throws IOException
+	private void saveTabInfo()
 	{
-		if (this.zout != null)
-		{
-			if (this.tabInfo != null && this.tabInfo.size() > 0)
-			{
-				try
-				{
-					ZipEntry entry = new ZipEntry("tabs.properties");
-					this.zout.putNextEntry(entry);
-					this.tabInfo.save(this.zout);
-					zout.closeEntry();
-					saveToolProperties();
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logError("WbWorkspace.close()", "Could not write tab info!", e);
-				}
-				finally
-				{
-					this.zout.close();
-				}
-			}
-		}
-		else if (this.archive != null)
-		{
-			this.archive.close();
-		}
+    if (CollectionUtil.isEmpty(tabInfo)) return;
+    try
+    {
+      ZipEntry entry = new ZipEntry(TABINFO_FILENAME);
+      this.zout.putNextEntry(entry);
+      tabInfo.save(this.zout);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("WbWorkspace.saveToolProperties()", "Could not write variables", ex);
+    }
+    finally
+    {
+      try { zout.closeEntry(); } catch (Throwable th) {}
+    }
 	}
 
 	private void readTabInfo(ZipEntry entry)

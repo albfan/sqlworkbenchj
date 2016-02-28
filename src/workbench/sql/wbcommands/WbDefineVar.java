@@ -206,7 +206,7 @@ public class WbDefineVar
 		{
 			for (String name : varNames)
 			{
-				VariablePool.getInstance().removeValue(name);
+				VariablePool.getInstance().removeVariable(name);
 				String removed = ResourceMgr.getString("MsgVarDefVariableRemoved");
 				removed = removed.replace("%var%", name);
 				result.addMessage(removed);
@@ -306,8 +306,7 @@ public class WbDefineVar
 			if (file.exists())
 			{
 				VariablePool.getInstance().readFromFile(file.getFullPath(), encoding);
-				String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-				msg = StringUtil.replace(msg, "%file%", file.getFullPath());
+				String msg = ResourceMgr.getFormattedString("MsgVarDefFileLoaded", file.getFullPath());
 				result.addMessage(msg);
 				result.setSuccess();
 			}

@@ -27,8 +27,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,19 +39,14 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
 import workbench.storage.DataStore;
-import workbench.storage.DmlStatement;
-import workbench.storage.RowData;
 
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 
@@ -254,7 +247,7 @@ public class VariablePool
   public boolean containsVariable(String sql, Set<String> names)
   {
     if (StringUtil.isBlank(sql)) return false;
-    
+
     for (String var : names)
     {
       String varPattern = buildVarNamePattern(var, false);
@@ -307,7 +300,7 @@ public class VariablePool
 
 	public DataStore getVariablesDataStore(Set<String> varNames, boolean doSort)
 	{
-		DataStore vardata = new VariableDataStore();
+		DataStore vardata = new VariablesDataStore();
 
 		synchronized (this.data)
 		{
@@ -447,7 +440,7 @@ public class VariablePool
 		return result.toString();
 	}
 
-	public boolean removeValue(String varName)
+	public boolean removeVariable(String varName)
 	{
 		if (varName == null) return false;
 		synchronized (this.data)
@@ -550,6 +543,32 @@ public class VariablePool
 		}
 	}
 
+  public void readFromProperties(Properties props)
+  {
+    if (CollectionUtil.isEmpty(props)) return;
+
+    synchronized(data)
+    {
+      for (String key : props.stringPropertyNames())
+      {
+        setParameterValue(key, props.getProperty(key));
+      }
+    }
+  }
+
+  public void removeVariables(Properties props)
+  {
+    if (props == null) return;
+
+    synchronized(data)
+    {
+      for (String key : props.stringPropertyNames())
+      {
+        removeVariable(key);
+      }
+    }
+  }
+
 	/**
 	 * Read the variable defintions from an external file.
 	 * The file has to be a regular Java properties file, but does not support
@@ -572,92 +591,7 @@ public class VariablePool
 				this.setParameterValue((String)key, (String)value);
 			}
 		}
-		String msg = ResourceMgr.getString("MsgVarDefFileLoaded");
-		msg = StringUtil.replace(msg, "%file%", f.getAbsolutePath());
+		String msg = ResourceMgr.getFormattedString("MsgVarDefFileLoaded", f.getAbsolutePath());
 		LogMgr.logInfo("SqlParameterPool.readFromFile", msg);
 	}
-
-}
-class VariableDataStore
-	extends DataStore
-{
-	private static final String[] cols = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
-	private static final int[] types =   {Types.VARCHAR, Types.VARCHAR};
-	private static final int[] sizes =   {20, 50};
-	private static final TableIdentifier TABLE_ID = new TableIdentifier("WB$VARIABLE_DEFINITION");
-
-	VariableDataStore()
-	{
-		super(cols, types, sizes);
-		this.setUpdateTable(TABLE_ID);
-	}
-
-	@Override
-	public List<DmlStatement> getUpdateStatements(WbConnection aConn)
-	{
-		return Collections.emptyList();
-	}
-
-	@Override
-	public boolean hasPkColumns()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean isUpdateable()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean hasUpdateableColumns()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean checkUpdateTable()
-	{
-		return true;
-	}
-
-	@Override
-	public boolean checkUpdateTable(WbConnection aConn)
-	{
-		return true;
-	}
-
-	@Override
-	public int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
-		throws SQLException, IllegalArgumentException
-	{
-		int rowcount = this.getRowCount();
-		this.resetUpdateRowCounters();
-
-		VariablePool pool = VariablePool.getInstance();
-		for (int i=0; i < rowcount; i++)
-		{
-			String key = this.getValueAsString(i, 0);
-			String oldkey = (String)this.getOriginalValue(i, 0);
-			if (oldkey != null && !key.equals(oldkey))
-			{
-				pool.removeValue(oldkey);
-			}
-			String value = this.getValueAsString(i, 1);
-			// Treat null as an empty value
-			pool.setParameterValue(key, value == null ? "" : value);
-		}
-
-		RowData row = this.getNextDeletedRow();
-		while (row != null)
-		{
-			String key = (String)row.getValue(0);
-			pool.removeValue(key);
-			row = this.getNextDeletedRow();
-		}
-		this.resetStatus();
-		return rowcount;
-	}
-
 }

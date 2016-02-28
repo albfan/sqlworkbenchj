@@ -69,7 +69,7 @@ public class WbRemoveVar extends SqlCommand
 		}
 		else
 		{
-			boolean removed = VariablePool.getInstance().removeValue(var);
+			boolean removed = VariablePool.getInstance().removeVariable(var);
 			if (removed)
 			{
 				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");

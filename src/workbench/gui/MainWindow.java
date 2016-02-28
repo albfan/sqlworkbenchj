@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -88,6 +90,7 @@ import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DataPumperAction;
 import workbench.gui.actions.DisconnectTabAction;
+import workbench.gui.actions.EditWorkspaceVarsAction;
 import workbench.gui.actions.FileCloseAction;
 import workbench.gui.actions.FileConnectAction;
 import workbench.gui.actions.FileDisconnectAction;
@@ -159,8 +162,10 @@ import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
 import workbench.gui.tabhistory.ClosedTabManager;
 
+import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
@@ -217,8 +222,9 @@ public class MainWindow
 	private WbToolbar currentToolbar;
 	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
 
-	private String currentWorkspaceFile;
+	private WbWorkspace currentWorkspace;
 
+  private EditWorkspaceVarsAction editWorkspaceVariables;
 	private CloseWorkspaceAction closeWorkspaceAction;
 	private SaveWorkspaceAction saveWorkspaceAction;
 	private SaveAsNewWorkspaceAction saveAsWorkspaceAction;
@@ -228,7 +234,12 @@ public class MainWindow
 	private final NextTabAction nextTab;
 	private final PrevTabAction prevTab;
 
-	private boolean resultForWorkspaceClose;
+  private enum ActionState
+  {
+    success,
+    error;
+  }
+  private ActionState lastWorkspaceActionResult = ActionState.success;
 
 	private boolean ignoreTabChange;
 
@@ -252,12 +263,6 @@ public class MainWindow
   private boolean shouldShowTree;
 
   private final ClosedTabManager closedTabHistory;
-
-	/**
-	 * Stores additional properties that should be saved into the Worskpace from objects that are not constantly visible.
-	 * e.g. the Macro Popup window
-	 */
-	private final Map<String, WbProperties> toolProperties = new HashMap<>();
 
 	public MainWindow()
 	{
@@ -558,9 +563,10 @@ public class MainWindow
 
 	protected void checkWorkspaceActions()
 	{
-		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
-		this.assignWorkspaceAction.setEnabled(this.currentWorkspaceFile != null && this.currentProfile != null);
-		this.closeWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
+		this.saveWorkspaceAction.setEnabled(this.currentWorkspace != null);
+		this.assignWorkspaceAction.setEnabled(this.currentWorkspace != null && this.currentProfile != null);
+		this.closeWorkspaceAction.setEnabled(this.currentWorkspace != null);
+    this.editWorkspaceVariables.setEnabled(this.currentWorkspace != null);
 		checkReloadWkspAction();
 	}
 
@@ -571,6 +577,7 @@ public class MainWindow
 		this.assignWorkspaceAction = new AssignWorkspaceAction(this);
 		this.reloadWorkspace = new ReloadProfileWkspAction(this);
 		this.closeWorkspaceAction = new CloseWorkspaceAction(this);
+    this.editWorkspaceVariables = new EditWorkspaceVarsAction(this);
 		this.saveAsWorkspaceAction = new SaveAsNewWorkspaceAction(this);
 
 		this.createNewConnection = new CreateNewConnection(this);
@@ -711,6 +718,7 @@ public class MainWindow
 		menu.add(this.saveAsWorkspaceAction);
 		menu.add(this.loadWorkspaceAction);
 		menu.add(this.reloadWorkspace);
+    menu.add(this.editWorkspaceVariables);
 		menu.addSeparator();
 		menu.add(this.closeWorkspaceAction);
 		menu.add(this.assignWorkspaceAction);
@@ -1026,8 +1034,12 @@ public class MainWindow
 	 */
 	public WbProperties getToolProperties(String toolKey)
 	{
-		synchronized (toolProperties)
+    if (currentWorkspace == null) return null;
+
+		synchronized (currentWorkspace)
 		{
+      Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
+
 			WbProperties props = toolProperties.get(toolKey);
 			if (props == null)
 			{
@@ -1527,9 +1539,9 @@ public class MainWindow
 			return false;
 		}
 
-		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
+		if (this.currentWorkspace != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
-			if (!this.saveWorkspace(this.currentWorkspaceFile, true))
+			if (!this.saveWorkspace(currentWorkspace.getFilename(), true))
 			{
 				return false;
 			}
@@ -1551,6 +1563,8 @@ public class MainWindow
 		this.setConnectIsInProgress();
 
 		this.currentProfile = aProfile;
+
+    applyProfileVariables();
 
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		if (info != null)
@@ -1736,6 +1750,8 @@ public class MainWindow
 				((StatusBar)sql).clearStatusMessage();
 			}
 		}
+
+    logVariables();
 		this.clearConnectIsInProgress();
 	}
 
@@ -1766,7 +1782,7 @@ public class MainWindow
 		else return IGNORE_MISSING_WORKSPACE;
 	}
 
-	private void handleWorkspaceLoadError(Throwable e, String realFilename)
+	private ActionState showWorkspaceLoadError(Throwable e)
 	{
 		String error = ExceptionUtil.getDisplay(e);
 		String msg = StringUtil.replace(ResourceMgr.getString("ErrLoadingWorkspace"), "%error%", error);
@@ -1775,19 +1791,8 @@ public class MainWindow
 			msg = ResourceMgr.getString("MsgOutOfMemoryError");
 		}
 		boolean create = WbSwingUtilities.getYesNo(this, msg);
-		if (create)
-		{
-			this.currentWorkspaceFile = realFilename;
-		}
-		else
-		{
-			this.currentWorkspaceFile = null;
-		}
-	}
-
-	private void resetWorkspace()
-	{
-		this.closeWorkspace(false);
+    if (create) return ActionState.success;
+    return ActionState.error;
 	}
 
 	private String getRealWorkspaceFilename(String filename)
@@ -1821,19 +1826,20 @@ public class MainWindow
 		{
 			// if the file does not exist, set all variables as if it did
 			// thus the file will be created automatically.
-			this.resetWorkspace();
-			this.currentWorkspaceFile = realFilename;
+			this.closeWorkspace();
+
+      // resetWorkspace also sets currentWorkspace to null
+      // but we want to prevent a workspace has been loaded here
+      currentWorkspace = new WbWorkspace(realFilename);
 			this.updateWindowTitle();
 			this.checkWorkspaceActions();
 			return true;
 		}
 
-		this.currentWorkspaceFile = null;
-		this.resultForWorkspaceClose = false;
+    currentWorkspace = new WbWorkspace(realFilename);
 
 		WbSwingUtilities.invoke(() ->
     {
-      WbWorkspace w = null;
       try
       {
         removeAllPanels(false);
@@ -1841,12 +1847,12 @@ public class MainWindow
         // Ignore all stateChanged() events from the SQL Tab during loading
         setIgnoreTabChange(true);
 
-        w = new WbWorkspace(realFilename, false);
-        final int entryCount = w.getEntryCount();
+        currentWorkspace.openForReading();
+        final int entryCount = currentWorkspace.getEntryCount();
 
         for (int i = 0; i < entryCount; i++)
         {
-          if (w.getPanelType(i) == PanelType.dbExplorer)
+          if (currentWorkspace.getPanelType(i) == PanelType.dbExplorer)
           {
             newDbExplorerPanel(false);
           }
@@ -1856,7 +1862,7 @@ public class MainWindow
           }
           MainPanel p = getSqlPanel(i);
           ((JComponent)p).validate();
-          p.readFromWorkspace(w, i);
+          p.readFromWorkspace(currentWorkspace, i);
         }
 
         if (entryCount == 0)
@@ -1865,19 +1871,17 @@ public class MainWindow
           addTabAtIndex(false, false, false, -1);
         }
 
-        currentWorkspaceFile = realFilename;
-        resultForWorkspaceClose = true;
+        lastWorkspaceActionResult = ActionState.success;
 
         renumberTabs();
         updateWindowTitle();
         checkWorkspaceActions();
         updateAddMacroAction();
-        toolProperties.clear();
-        toolProperties.putAll(w.getToolProperties());
+        applyWorkspaceVariables();
 
         setIgnoreTabChange(false);
 
-        int newIndex = entryCount > 0 ? w.getSelectedTab() : 0;
+        int newIndex = entryCount > 0 ? currentWorkspace.getSelectedTab() : 0;
         if (newIndex < sqlTab.getTabCount())
         {
           sqlTab.setSelectedIndex(newIndex);
@@ -1890,15 +1894,18 @@ public class MainWindow
       catch (Throwable e)
       {
         LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
-        handleWorkspaceLoadError(e, realFilename);
-        resultForWorkspaceClose = false;
+        lastWorkspaceActionResult = showWorkspaceLoadError(e);
+        if (lastWorkspaceActionResult == ActionState.error)
+        {
+          currentWorkspace = null;
+        }
       }
       finally
       {
         updateTabHistoryMenu();
         checkReloadWkspAction();
         setIgnoreTabChange(false);
-        FileUtil.closeQuietely(w);
+        FileUtil.closeQuietely(currentWorkspace);
         updateGuiForTab(sqlTab.getSelectedIndex());
       }
     });
@@ -1922,8 +1929,62 @@ public class MainWindow
 
 		BookmarkManager.getInstance().updateInBackground(this);
 
-		return resultForWorkspaceClose;
+    return lastWorkspaceActionResult == ActionState.success;
 	}
+
+  private void applyProfileVariables()
+  {
+    if (currentProfile == null) return;
+    Properties variables = currentProfile.getConnectionVariables();
+    if (CollectionUtil.isNonEmpty(variables))
+    {
+      LogMgr.logDebug("MainWindow.applyProfileVariables()", "Applying " + variables.size() + " variables defined in the connection profile");
+      VariablePool.getInstance().readFromProperties(variables);
+    }
+  }
+
+  private void applyWorkspaceVariables()
+  {
+    if (currentWorkspace == null) return;
+    WbProperties variables = currentWorkspace.getVariables();
+    if (CollectionUtil.isNonEmpty(variables))
+    {
+      LogMgr.logDebug("MainWindow.applyWorkspaceVariables()", "Applying " + variables.size() + " variables defined in the workspace");
+      VariablePool.getInstance().readFromProperties(variables);
+    }
+  }
+
+  private void logVariables()
+  {
+    StringBuilder msg = new StringBuilder();
+
+    if (currentProfile != null)
+    {
+      appendVariables(msg, currentProfile.getConnectionVariables(), ResourceMgr.getString("TxtProfile"));
+    }
+    if (currentWorkspace != null)
+    {
+      if (msg.length() > 0)
+      {
+        msg.append("\n");
+      }
+      appendVariables(msg, currentWorkspace.getVariables(), ResourceMgr.getString("TxtWorkspace"));
+    }
+    showLogMessage(msg.toString());
+  }
+
+  private void appendVariables(StringBuilder msg, Properties variables, String source)
+  {
+    if (CollectionUtil.isNonEmpty(variables))
+    {
+      msg.append(ResourceMgr.getFormattedString("MsgVarsLoaded", source) + ":\n");
+      Set<Map.Entry<Object, Object>> entrySet = variables.entrySet();
+      for (Map.Entry<Object, Object> entry : entrySet)
+      {
+        msg.append(entry.getKey() + "=" + entry.getValue() + "\n");
+      }
+    }
+  }
 
 	private void checkReloadWkspAction()
 	{
@@ -1933,9 +1994,9 @@ public class MainWindow
 		{
 			boolean isProfileWorkspace = false;
 			WbFile profileWksp = new WbFile(getRealWorkspaceFilename(profileWkspName));
-			if (this.currentWorkspaceFile != null)
+			if (this.currentWorkspace != null)
 			{
-				WbFile current = new WbFile(currentWorkspaceFile);
+				WbFile current = new WbFile(currentWorkspace.getFilename());
 				isProfileWorkspace = current.equals(profileWksp);
 			}
 			this.reloadWorkspace.setEnabled(!isProfileWorkspace);
@@ -1989,7 +2050,7 @@ public class MainWindow
 				{
 					// start with an empty workspace
 					// and create a new workspace file.
-					resetWorkspace();
+					closeWorkspace();
 				}
 			}
 
@@ -2003,7 +2064,7 @@ public class MainWindow
 		catch (Throwable e)
 		{
 			LogMgr.logError("MainWindow.loadWorkspaceForProfile()", "Error reading workspace " + realFilename, e);
-			this.handleWorkspaceLoadError(e, realFilename);
+      showWorkspaceLoadError(e);
 		}
 	}
 
@@ -2187,6 +2248,11 @@ public class MainWindow
 
 	protected void disconnected(boolean closeWorkspace)
 	{
+    if (currentProfile != null)
+    {
+      VariablePool.getInstance().removeVariables(currentProfile.getConnectionVariables());
+    }
+
 		this.currentProfile = null;
 		this.currentConnection = null;
 		if (closeWorkspace)
@@ -2278,7 +2344,7 @@ public class MainWindow
 		EventQueue.invokeLater(() ->
     {
       WindowTitleBuilder titleBuilder = new WindowTitleBuilder();
-      String title1 = titleBuilder.getWindowTitle(currentProfile, currentWorkspaceFile, getCurrentEditorFile());
+      String title1 = titleBuilder.getWindowTitle(currentProfile, getCurrentWorkspaceFile(), getCurrentEditorFile());
       setTitle(title1);
       getJobIndicator().baseTitleChanged();
     });
@@ -2924,9 +2990,22 @@ public class MainWindow
 		return false;
 	}
 
+  public void replaceWorkspaceVariables(Properties newVars)
+  {
+    if (currentWorkspace == null) return;
+    currentWorkspace.setVariables(newVars);
+  }
+
+  public Properties getCurrentWorkspaceVariables()
+  {
+    if (currentWorkspace == null) return null;
+    return currentWorkspace.getVariables();
+  }
+
 	public String getCurrentWorkspaceFile()
 	{
-		return this.currentWorkspaceFile;
+    if (currentWorkspace == null) return null;
+		return this.currentWorkspace.getFilename();
 	}
 
 	public void loadWorkspace()
@@ -2943,15 +3022,37 @@ public class MainWindow
 		WbSwingUtilities.repaintLater(this);
 	}
 
-	/**
-	 *	Closes the current workspace.
-	 *  The tab count is dispose to 1, the SQL history for the tab will be emptied
-  and the workspace filename will be "forgotten".
-	 */
-	public void closeWorkspace(boolean checkUnsaved)
-	{
-		this.currentWorkspaceFile = null;
 
+  /**
+   * Close the current worksace without checking if the panels can be closed.
+   *
+   * @see #closeWorkspace(boolean)
+   */
+	private void closeWorkspace()
+	{
+		this.closeWorkspace(false);
+	}
+
+	/**
+	 * Closes the current workspace.
+   *
+	 * All editor tabs are closed except for one. The SQL history for the tab will be emptied.
+   * And the association with the current workspace filename will be "forgotten".
+   *
+   * If checkUnsaved is true, each panel will be asked if it can be closed. If at least one panel
+   * refuses to close, the workspace will <b>not</b> be closed.
+   *
+   * @param checkUnsaved   if true editor tabs are checked if they can be closed.
+   *
+   * @return true if the workspace was closed
+   *
+   * @see MainPanel#canClosePanel(boolean)
+   * @see #removeAllPanels(boolean)
+   * @see #updateWindowTitle()
+   * @see #checkWorkspaceActions()
+	 */
+	public boolean closeWorkspace(boolean checkUnsaved)
+	{
 		if (checkUnsaved)
 		{
 			int count = this.sqlTab.getTabCount();
@@ -2963,7 +3064,7 @@ public class MainWindow
 				{
 					first = i == 0;
 				}
-				if (!p.canClosePanel(first)) return;
+				if (!p.canClosePanel(first)) return false;
 			}
 		}
 
@@ -2980,6 +3081,14 @@ public class MainWindow
       updateWindowTitle();
       checkWorkspaceActions();
     });
+
+    if (currentWorkspace != null)
+    {
+      VariablePool.getInstance().removeVariables(currentWorkspace.getVariables());
+    }
+    this.currentWorkspace = null;
+
+    return true;
 	}
 
 	/**
@@ -2987,11 +3096,11 @@ public class MainWindow
 	 */
 	public void assignWorkspace()
 	{
-		if (this.currentWorkspaceFile == null) return;
+		if (this.currentWorkspace == null) return;
 		if (this.currentProfile == null) return;
 		FileDialogUtil util = new FileDialogUtil();
-		String filename = util.removeConfigDir(this.currentWorkspaceFile);
-		this.currentProfile.setWorkspaceFile(filename);
+		String filename = util.removeConfigDir(currentWorkspace.getFilename());
+		currentProfile.setWorkspaceFile(filename);
 
 		// The MainWindow gets a copy of the profile managed by the ConnectionMgr
 		// so we need to update that one as well.
@@ -3013,9 +3122,9 @@ public class MainWindow
 
 	public boolean saveWorkspace(boolean checkUnsaved)
 	{
-		if (this.currentWorkspaceFile != null)
+		if (this.currentWorkspace != null)
 		{
-			return this.saveWorkspace(this.currentWorkspaceFile, checkUnsaved);
+			return this.saveWorkspace(currentWorkspace.getFilename(), checkUnsaved);
 		}
 		return true;
 	}
@@ -3030,7 +3139,7 @@ public class MainWindow
 	public boolean saveWorkspace(String filename, boolean checkUnsaved)
 	{
 		if (!WbManager.getInstance().getSettingsShouldBeSaved()) return true;
-		WbWorkspace w = null;
+
 		boolean interactive = false;
 
 		if (filename == null)
@@ -3043,6 +3152,15 @@ public class MainWindow
 
 		String realFilename = getRealWorkspaceFilename(filename);
 		WbFile f = new WbFile(realFilename);
+
+    if (currentWorkspace == null)
+    {
+      currentWorkspace = new WbWorkspace(realFilename);
+    }
+    else
+    {
+      currentWorkspace.setFilename(realFilename);
+    }
 
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
@@ -3094,16 +3212,16 @@ public class MainWindow
 					if (!p.canClosePanel(first)) return false;
 				}
 			}
-			w = new WbWorkspace(realFilename, true);
-			w.setToolProperties(this.toolProperties);
+      currentWorkspace.openForWriting();
 			int selected = this.sqlTab.getSelectedIndex();
-			w.setSelectedTab(selected);
-			w.setEntryCount(count);
+			currentWorkspace.setSelectedTab(selected);
+			currentWorkspace.setEntryCount(count);
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
-				p.saveToWorkspace(w,i);
+				p.saveToWorkspace(currentWorkspace, i);
 			}
+      currentWorkspace.saveProperties();
 			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + filename + " saved");
 		}
 		catch (Throwable e)
@@ -3113,10 +3231,8 @@ public class MainWindow
 		}
 		finally
 		{
-			FileUtil.closeQuietely(w);
+			FileUtil.closeQuietely(currentWorkspace);
 		}
-
-		this.currentWorkspaceFile = filename;
 
 		if (interactive)
 		{
@@ -3406,7 +3522,7 @@ public class MainWindow
 	@Override
 	public boolean canRenameTab()
 	{
-		return (this.currentWorkspaceFile != null);
+		return (this.currentWorkspace != null);
 	}
 
 	/**

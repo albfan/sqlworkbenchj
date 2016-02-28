@@ -171,7 +171,7 @@ public class VariablePoolTest
 		Set vars = pool.getVariablesNeedingPrompt(sql);
 		assertEquals("Prompt not detected", 0, vars.size());
 
-		pool.removeValue("id");
+		pool.removeVariable("id");
 		vars = pool.getVariablesNeedingPrompt(sql);
 		assertEquals("Prompt not detected", 1, vars.size());
 		assertEquals("Variable not in prompt pool", true, vars.contains("id"));

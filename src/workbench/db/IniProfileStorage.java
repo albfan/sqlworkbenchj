@@ -93,9 +93,12 @@ public class IniProfileStorage
   private static final String PROP_MACROFILE = ".macro.file";
   private static final String PROP_COPY_PROPS = ".copy.props";
   private static final String PROP_CONN_PROPS = ".connection.properties";
+  private static final String PROP_CONN_VARS = ".connection.variables";
   private static final String PROP_INFO_COLOR = ".info.color";
   private static final String PROP_SCHEMA_FILTER = ".schema.filter";
   private static final String PROP_CATALOG_FILTER = ".catalog.filter";
+
+  private static final String XML_PREFIX = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?><!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">";
 
   @Override
   public List<ConnectionProfile> readProfiles(String filename)
@@ -153,9 +156,11 @@ public class IniProfileStorage
     String preDisconnect = props.getProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, null);
     String idleScript = props.getProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, null);
     String xmlProps = props.getProperty(PROP_PREFIX + key + PROP_CONN_PROPS, null);
+    String xmlVars = props.getProperty(PROP_PREFIX + key + PROP_CONN_VARS, null);
     String colorValue = props.getProperty(PROP_PREFIX + key + PROP_INFO_COLOR, null);
 
     Properties connProps = toProperties(xmlProps);
+    Properties vars = toProperties(xmlVars);
     Color color = Settings.stringToColor(colorValue);
 
     boolean autoCommit = props.getBoolProperty(PROP_PREFIX + key + PROP_AUTOCOMMMIT, false);
@@ -254,6 +259,7 @@ public class IniProfileStorage
     profile.setStorePassword(storePwd);
     profile.setCopyExtendedPropsToSystem(copyProps);
     profile.setConnectionProperties(connProps);
+    profile.setConnectionVariables(vars);
     profile.setInfoDisplayColor(color);
     profile.setSchemaFilter(schemaFilter);
     profile.setCatalogFilter(catalogFilter);
@@ -387,6 +393,7 @@ public class IniProfileStorage
 
     String xml = toXML(profile.getConnectionProperties());
     props.setProperty(PROP_PREFIX + key + PROP_CONN_PROPS, xml);
+    props.setProperty(PROP_PREFIX + key + PROP_CONN_VARS, toXML(profile.getConnectionVariables()));
   }
 
   private void setNonDefaultProperty(WbProperties props, String key, boolean value, boolean defaultValue)
@@ -406,11 +413,13 @@ public class IniProfileStorage
       ByteArrayOutputStream out = new ByteArrayOutputStream(props.size() * 20);
       props.storeToXML(out, null, "ISO-8859-1");
       String xml = out.toString("ISO-8859-1");
-      return xml.replaceAll(StringUtil.REGEX_CRLF, "");
+      xml = xml.replaceAll(StringUtil.REGEX_CRLF, "");
+      xml = xml.replace(XML_PREFIX, "");
+      return xml;
     }
     catch (Throwable th)
     {
-      LogMgr.logError("IniProfileStorage.toXM()", "Could not convert connection properties to XML", th);
+      LogMgr.logError("IniProfileStorage.toXM()", "Could not convert properties to XML", th);
       return null;
     }
   }
@@ -419,6 +428,10 @@ public class IniProfileStorage
   {
     if (StringUtil.isBlank(xml)) return null;
 
+    if (!xml.startsWith(XML_PREFIX))
+    {
+      xml = XML_PREFIX + xml;
+    }
     try
     {
       Properties props = new Properties();

@@ -83,5 +83,16 @@
     </para>
   </section>
 
+  <section id="workspace-variables">
+    <title>Workspace variables</title>
+    <para>
+      It is possible to setup <link linkend="using-variables">variables</link> that are automatically defined when the workspace is loaded.
+      These variables will be removed when the workspace is closed or a different workspace is loaded.
+    </para>
+    <para>
+      Variables defined in the workspace will overwrite variables defined in the <link linkend="profile-variables">connection profile</link>.
+    </para>
+  </section>
+
 </section>
 

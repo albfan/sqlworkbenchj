@@ -27,7 +27,6 @@ import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -50,6 +49,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbDesCipher;
 import workbench.util.WbFile;
+import workbench.util.WbProperties;
 
 /**
  *	A class to store a connection definition including non-JDBC properties
@@ -80,6 +80,7 @@ public class ConnectionProfile
 	private boolean storePassword = true;
 	private boolean separateConnection;
 	private Properties connectionProperties;
+  private Properties variables;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
 	private boolean trimCharData;
@@ -1035,18 +1036,8 @@ public class ConnectionProfile
     result.tags.addAll(tags);
 		result.lastSettingsKey = this.lastSettingsKey;
 		result.temporaryUsername = null;
-		if (connectionProperties != null)
-		{
-			Enumeration keys = connectionProperties.propertyNames();
-			result.connectionProperties = new Properties();
-
-			while (keys.hasMoreElements())
-			{
-				String key = (String)keys.nextElement();
-				String value = connectionProperties.getProperty(key);
-				result.connectionProperties.put(key, value);
-			}
-		}
+    result.connectionProperties = WbProperties.createCopy(this.connectionProperties);
+    result.variables = WbProperties.createCopy(this.variables);
 		return result;
 	}
 
@@ -1109,10 +1100,28 @@ public class ConnectionProfile
     else if (!props.equals(connectionProperties))
     {
       changed = true;
-      connectionProperties = new Properties();
-      connectionProperties.putAll(props);
+      connectionProperties = WbProperties.createCopy(props);
 		}
 	}
+
+  public Properties getConnectionVariables()
+  {
+    return variables;
+  }
+
+  public void setConnectionVariables(Properties vars)
+  {
+		if (CollectionUtil.isEmpty(vars))
+		{
+      changed = CollectionUtil.isNonEmpty(variables);
+			variables = null;
+    }
+    else if (!vars.equals(variables))
+    {
+      changed = true;
+      variables = WbProperties.createCopy(vars);
+		}
+  }
 
 	public boolean getConfirmUpdates()
 	{

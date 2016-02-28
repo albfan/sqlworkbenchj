@@ -86,3 +86,4 @@ TxtPSParameterName
 TxtFileFilterJson
 LblBookPanel
 LblMacroToolTip
+TxtWorkspace

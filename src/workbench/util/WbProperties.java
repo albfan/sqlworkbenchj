@@ -156,16 +156,16 @@ public class WbProperties
 				bw.write(comment);
 				bw.newLine();
 			}
-			if (lastKey != null)
+			if (lastKey != null && distinctSections > 0)
 			{
 				String k1 = null;
 				String k2 = null;
-				k1 = getSections(lastKey, this.distinctSections);
-				k2 = getSections(key, this.distinctSections);
-				if (!k1.equals(k2) && StringUtil.isBlank(comment))
-				{
-					bw.newLine();
-				}
+        k1 = getSections(lastKey, this.distinctSections);
+        k2 = getSections(key, this.distinctSections);
+        if (!k1.equals(k2) && StringUtil.isBlank(comment))
+        {
+          bw.newLine();
+        }
 			}
 			final String newlineEscape = "_$wb$nl$_";
 			String value = this.getProperty(key);
@@ -242,6 +242,8 @@ public class WbProperties
 	private String getSections(String aString, int aNum)
 	{
 		int pos = aString.indexOf('.');
+    if (pos < 0) return aString;
+
 		String result = null;
 		for (int i=1; i < aNum; i++)
 		{
@@ -522,5 +524,13 @@ public class WbProperties
 		}
 		changed = false;
 	}
+
+  public static Properties createCopy(Properties source)
+  {
+    if (source == null) return null;
+    Properties copy = new Properties();
+    copy.putAll(source);
+    return copy;
+  }
 
 }
