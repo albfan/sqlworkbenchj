@@ -28,6 +28,9 @@
   <xsl:param name="commitAfterEachTable">true</xsl:param>
   <xsl:param name="prefixIndexNames">false</xsl:param>
   <xsl:param name="unrestrictedVarchar">false</xsl:param>
+  <xsl:param name="identifierCleanup">quote_if_needed</xsl:param>
+  <xsl:param name="sequencePrefix"></xsl:param>
+  <xsl:param name="indexPrefix"></xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -44,23 +47,30 @@
     <xsl:message>
 Supported parameters:
 
-* useJdbcTypes         - if true create column definitions based on JDBC types, not DBMS data types (current value: <xsl:value-of select="$useJdbcTypes"/>)
-* makeLowerCase        - if true make all identifiers lowercase (current value: <xsl:value-of select="$makeLowerCase"/>)
-* quoteAllNames        - if true all identifiers are quoted using double quotes (current value: <xsl:value-of select="$quoteAllNames"/>)
+* useJdbcTypes         - if true, create column definitions based on JDBC types, not DBMS data types (current value: <xsl:value-of select="$useJdbcTypes"/>)
+* makeLowerCase        - if true, make all identifiers lowercase (current value: <xsl:value-of select="$makeLowerCase"/>)
+* identifierCleanup    - how to deal with illegal SQL identifiers possible values: quote_if_needed, to_snake_case, preserve_case, cleanup (current value: <xsl:value-of select="$identifierCleanup"/>)
+* quoteAllNames        - if true, all identifiers are quoted using double quotes. Only used when identifierCleanup is not defined (current value: <xsl:value-of select="$quoteAllNames"/>)
 * commitAfterEachTable - if false, write only one commit at the end (current value: <xsl:value-of select="$commitAfterEachTable"/>)
 * prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
 * unrestrictedVarchar  - use VARCHAR type without length restriction (current value: <xsl:value-of select="$unrestrictedVarchar"/>)
+* sequencePrefix       - a prefix value for sequence names (current value: <xsl:value-of select="$sequencePrefix"/>)
+* indexPrefix          - a prefix value for index names, only used when prefixIndexNames is false (current value: <xsl:value-of select="$sequencePrefix"/>)
     </xsl:message>
 
     <xsl:apply-templates select="/schema-report/sequence-def">
       <xsl:with-param name="definition-part" select="'create'"/>
     </xsl:apply-templates>
+
     <xsl:apply-templates select="/schema-report/table-def"/>
+
     <xsl:apply-templates select="/schema-report/sequence-def">
       <xsl:with-param name="definition-part" select="'owner'"/>
     </xsl:apply-templates>
+
     <xsl:apply-templates select="/schema-report/view-def"/>
     <xsl:call-template name="process-fk"/>
+
     <xsl:value-of select="$newline"/>
     <xsl:if test="$commitAfterEachTable = 'false'">
       <xsl:text>COMMIT;</xsl:text>
@@ -69,25 +79,11 @@ Supported parameters:
 
   <xsl:template match="table-def">
 
-    <!-- plain XSLT solution to cleanup the identifier name -->
     <xsl:variable name="tablename">
       <xsl:call-template name="write-object-name">
         <xsl:with-param name="objectname" select="table-name"/>
       </xsl:call-template>
     </xsl:variable>
-
-    <!-- alternatively: use the Workbench utility class:
-         Using this, the XSLT can only be executed from within SQL Workbench
-
-    cleanupIdentifier() will remove any special characters from the name so that it doesn't require quoting
-
-    <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, 'true')"/>
-    <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, $makeLowerCase)"/>
-
-    The utility functions camelCaseToSnakeLower() or camelCaseToSnakeUpper() can be used
-    to convert names from a case-preserving DBMS (e.g. SQL Server). OrderEntry would be converted to order_entry
-    <xsl:variable name="tablename" select="wb-name-util:camelCaseToSnakeLower(table-name)"/>
-    -->
 
     <xsl:text>DROP TABLE IF EXISTS </xsl:text>
     <xsl:value-of select="$tablename"/>
@@ -291,34 +287,27 @@ Supported parameters:
         <xsl:if test="unique='true'">UNIQUE </xsl:if>
       </xsl:variable>
 
-      <xsl:variable name="prefix">
-        <xsl:choose>
-          <xsl:when test="$prefixIndexNames = 'false' or contains(name, $real-tablename)">
-            <xsl:value-of select="''"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="concat($real-tablename, '_')"/>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:variable>
-
       <xsl:variable name="idx-name">
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname">
             <xsl:choose>
               <xsl:when test="string-length(name) = 0">
-                <xsl:value-of select="concat($prefix, 'index')"/>
+                <xsl:value-of select="''"/>
               </xsl:when>
-              <xsl:when test="name = $real-tablename">
+              <xsl:when test="name = $real-tablename and string-length($indexPrefix) = 0">
                 <!--
                   Tables, indexes, views and other "relation" like objects share the same namespace
-                  If for some reason the index name is the same as the table name, add the "_index" suffix
-                  to avoid a name clash (this can happen if the XML report was generated from a different DBMS)
+                  If for some reason the index name is the same as the table name, don't use a name
+                  and let Postgres choose one.
+                  This will however not catch the case where the index name is the name of another table
                 -->
-                <xsl:value-of select="concat(name, '_index')"/>
+                <xsl:value-of select="''"/>
+              </xsl:when>
+              <xsl:when test="string-length($indexPrefix) &gt; 0">
+                <xsl:value-of select="concat($indexPrefix, name)"/>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="concat($prefix, name)"/>
+                <xsl:value-of select="name"/>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:with-param>
@@ -327,8 +316,12 @@ Supported parameters:
 
       <xsl:text>CREATE </xsl:text>
       <xsl:value-of select="$unique"/>
-      <xsl:text>INDEX </xsl:text>
-      <xsl:value-of select="$idx-name"/>
+      <xsl:text>INDEX</xsl:text>
+      <xsl:if test="string-length($idx-name) &gt; 0">
+        <xsl:text> </xsl:text>
+        <!-- postgres does not require an index name, if none is given, it will automatically create a unique one -->
+        <xsl:value-of select="$idx-name"/>
+      </xsl:if>
       <xsl:text> ON </xsl:text>
       <xsl:value-of select="$tablename"/>
       <xsl:value-of select="$newline"/>
@@ -356,16 +349,29 @@ Supported parameters:
   <xsl:template match="sequence-def">
     <xsl:param name="definition-part" select="'create'"/>
     <xsl:variable name="max-value" select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
+    <xsl:variable name="min-value" select="sequence-properties/property[@name='MIN_VALUE']/@value"/>
     <xsl:variable name="owned-by" select="sequence-properties/property[@name='OWNED_BY']/@value"/>
+    <xsl:variable name="cycle-flag" select="sequence-properties/property[@name='CYCLE']/@value"/>
     <xsl:variable name="owner-table" select="owned-by-table"/>
     <xsl:variable name="owner-column" select="owned-by-column"/>
 
     <xsl:variable name="col-type" select="/schema-report/table-def[@name=$owner-table]/column-def[@name=$owner-column]/dbms-data-type"/>
 
-    <xsl:if test="$col-type != 'serial' and $col-type != 'bigserial' and $definition-part = 'create'">
+    <xsl:variable name="seq-name">
+      <xsl:choose>
+        <xsl:when test="string-length($sequencePrefix) &gt; 0">
+          <xsl:value-of select="concat($sequencePrefix, sequence-name)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="sequence-name"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:if test="$definition-part = 'create' and string-length($col-type) = 0 or ($col-type != 'serial' and $col-type != 'bigserial')">
       <xsl:text>CREATE SEQUENCE </xsl:text>
       <xsl:call-template name="write-object-name">
-        <xsl:with-param name="objectname" select="sequence-name"/>
+        <xsl:with-param name="objectname" select="$seq-name"/>
       </xsl:call-template>
       <xsl:value-of select="$newline"/>
       <xsl:for-each select="sequence-properties/property">
@@ -375,13 +381,13 @@ Supported parameters:
         <xsl:value-of select="$newline"/>
         <xsl:text>   CACHE </xsl:text><xsl:value-of select="sequence-properties/property[@name='CACHE']/@value"/>
       </xsl:if>
-      <xsl:if test="sequence-properties/property[@name='CYCLE']/@value = 'true'">
+      <xsl:if test="$cycle-flag = 'true' or $cycle-flag = 'CYCLE'">
         <xsl:value-of select="$newline"/>
         <xsl:text>   CYCLE</xsl:text>
       </xsl:if>
-      <xsl:if test="sequence-properties/property[@name='MINVALUE']/@value != '1'">
+      <xsl:if test="string-length($min-value) &gt; 0 and $min-value != '1'">
         <xsl:value-of select="$newline"/>
-        <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="sequence-properties/property[@name='MINVALUE']/@value"/>
+        <xsl:text>   MINVALUE </xsl:text><xsl:value-of select="$min-value"/>
       </xsl:if>
       <xsl:if test="string-length($max-value) &gt; 0 and $max-value != '9223372036854775807'">
         <xsl:value-of select="$newline"/>
@@ -391,7 +397,8 @@ Supported parameters:
       <xsl:value-of select="$newline"/>
       <xsl:value-of select="$newline"/>
     </xsl:if>
-    <xsl:if test="$col-type != 'serial' and $col-type != 'bigserial' and string-length($owned-by) &gt; 0 and $definition-part = 'owner'">
+
+    <xsl:if test="$definition-part = 'owner' and $col-type != 'serial' and $col-type != 'bigserial' and string-length($owned-by) &gt; 0">
       <xsl:text>ALTER SEQUENCE </xsl:text>
       <xsl:call-template name="write-object-name">
         <xsl:with-param name="objectname" select="sequence-name"/>
@@ -667,6 +674,82 @@ Supported parameters:
   </xsl:template>
 
   <xsl:template name="write-object-name">
+    <xsl:param name="objectname"/>
+    <xsl:choose>
+      <xsl:when test="$identifierCleanup = 'quote_if_needed'">
+        <xsl:call-template name="_quote_if_needed">
+          <xsl:with-param name="identifier" select="$objectname"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$identifierCleanup = 'to_snake_case'">
+        <xsl:call-template name="_cleanup-camel-case">
+          <xsl:with-param name="identifier" select="$objectname"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$identifierCleanup = 'cleanup'">
+        <xsl:call-template name="_cleanup_identifier">
+          <xsl:with-param name="identifier" select="$objectname"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$identifierCleanup = 'preserve_case'">
+        <xsl:call-template name="_quote_mixed_case">
+          <xsl:with-param name="identifier" select="$objectname"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$quoteAllNames = 'true'">
+        <xsl:value-of select="concat($quote, objectname, $quote)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:call-template name="_simple_cleanup">
+          <xsl:with-param name="objectname" select="$objectname"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <!--
+
+  Functions available in SQL Workbench:
+
+  cleanupIdentifier() will remove any special characters from the name so that it doesn't require quoting
+
+  <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, 'true')"/>
+  <xsl:variable name="tablename" select="wb-name-util:cleanupIdentifier(table-name, $makeLowerCase)"/>
+
+  The utility functions camelCaseToSnakeLower() or camelCaseToSnakeUpper() can be used
+  to convert names from a case-preserving DBMS (e.g. SQL Server). OrderEntry would be converted to order_entry
+  <xsl:variable name="tablename" select="wb-name-util:camelCaseToSnakeLower(table-name)"/>
+  -->
+
+  <xsl:template name="_cleanup-camel-case">
+    <xsl:param name="identifier"/>
+    <!-- remove any invalid characters first -->
+    <xsl:variable name="clean-name" select="wb-name-util:cleanupIdentifier($identifier, 'false')"/>
+    <xsl:value-of select="wb-name-util:camelCaseToSnakeLower($clean-name)"/>
+  </xsl:template>
+
+  <xsl:template name="_quote_if_needed">
+    <xsl:param name="identifier"/>
+    <xsl:value-of select="wb-name-util:preserveUppercase($identifier)"/>
+  </xsl:template>
+
+  <xsl:template name="_cleanup_identifier">
+    <xsl:param name="identifier"/>
+    <xsl:value-of select="wb-name-util:cleanupIdentifier($identifier, $makeLowerCase)"/>
+  </xsl:template>
+
+  <xsl:template name="_quote_mixed_case">
+    <xsl:param name="identifier"/>
+    <xsl:value-of select="wb-name-util:preserveCase($identifier)"/>
+  </xsl:template>
+
+  <!--
+     use _simple_cleanup if this XSLT is run without SQL Workbench
+
+     the other templates need to be removed in that case, because the presence
+     of the referenced functions is tested when parsing the XSLT, not when running it
+  -->
+  <xsl:template name="_simple_cleanup">
     <xsl:param name="objectname"/>
 
     <xsl:variable name="lcletters">abcdefghijklmnopqrstuvwxyz</xsl:variable>
