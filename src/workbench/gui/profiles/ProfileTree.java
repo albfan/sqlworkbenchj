@@ -31,6 +31,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -81,8 +83,9 @@ public class ProfileTree
 	private int clipboardType;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
-
+  private WbAction renameGroup;
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
+  private boolean allowDirectChange = true;
 
 	public ProfileTree()
 	{
@@ -115,7 +118,7 @@ public class ProfileTree
     pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
     popup.addAction(pasteToFolderAction, true);
 
-    RenameGroupAction renameGroup = new RenameGroupAction(this);
+    renameGroup = new RenameGroupAction(this);
     popup.addAction(renameGroup, false);
 
 		setCellRenderer(new ProfileTreeCellRenderer(getCellRenderer()));
@@ -127,6 +130,12 @@ public class ProfileTree
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
 	}
+
+  public void setPopupEnabled(boolean flag)
+  {
+    allowDirectChange = flag;
+    checkActions();
+  }
 
   public void setDeleteAction(DeleteListEntryAction delete)
   {
@@ -293,19 +302,22 @@ public class ProfileTree
 		pasteToFolderAction.setEnabled(canPaste);
 
 		WbAction a = popup.getPasteAction();
-		a.setEnabled(canPaste);
+		a.setEnabled(allowDirectChange && canPaste);
 
 		a = popup.getCopyAction();
-		a.setEnabled(canCopy);
+		a.setEnabled(allowDirectChange && canCopy);
 
 		a = popup.getCutAction();
-		a.setEnabled(canCopy);
+		a.setEnabled(allowDirectChange && canCopy);
 
+    renameGroup.setEnabled(allowDirectChange && groupSelected);
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
+    if (!allowDirectChange) return;
+
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
 		{
 			TreePath p = this.getClosestPathForLocation(e.getX(), e.getY());
@@ -385,6 +397,27 @@ public class ProfileTree
 		return null;
 	}
 
+	/**
+	 * Checks if the current selection contains only profiles
+	 */
+	public List<ConnectionProfile> getSelectedProfiles()
+	{
+		TreePath[] selection = getSelectionPaths();
+		if (selection == null) return Collections.emptyList();
+
+    List<ConnectionProfile> result = new ArrayList<>(selection.length);
+
+		for (TreePath element : selection)
+		{
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)element.getLastPathComponent();
+      if (!node.getAllowsChildren())
+      {
+        result.add((ConnectionProfile)node.getUserObject());
+      }
+		}
+		return result;
+	}
+  
 	/**
 	 * Returns the currently selected Profile. If either more then one
 	 * entry is selected or a group is selected, null is returned

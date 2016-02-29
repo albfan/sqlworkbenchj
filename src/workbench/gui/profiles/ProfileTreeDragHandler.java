@@ -23,7 +23,6 @@
  */
 package workbench.gui.profiles;
 
-import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -74,24 +73,11 @@ class ProfileTreeDragHandler
 
     TreePath[] draggedProfiles = profileTree.getSelectionPaths();
 		ProfileTreeTransferable transferable = new ProfileTreeTransferable(draggedProfiles, profileTree.getName());
-    int action = dge.getDragAction();
-    Cursor c = null;
-    switch (action)
-    {
-      case DnDConstants.ACTION_MOVE:
-        c = DragSource.DefaultMoveDrop;
-        break;
-      case DnDConstants.ACTION_COPY_OR_MOVE:
-        c = DragSource.DefaultMoveDrop;
-        break;
-      default:
-        c = DragSource.DefaultCopyDrop;
-        break;
-    }
-		dragSource.startDrag(dge, c, transferable, this);
+		dragSource.startDrag(dge, null, transferable, this);
 		setCurrentDropTargetItem(null);
 	}
 
+  // --- DragSourceListener ---
 	private void handleDragSourceEvent(DragSourceDragEvent dsde)
 	{
 		int action = dsde.getDropAction();
@@ -119,7 +105,7 @@ class ProfileTreeDragHandler
 	@Override
 	public void dragExit(DragSourceEvent dse)
 	{
-		dse.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
+		dse.getDragSourceContext().setCursor(null);
 	}
 
 	@Override
@@ -137,9 +123,16 @@ class ProfileTreeDragHandler
 	@Override
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
+    if (dsde.getDropSuccess() && dsde.getDropAction() == DnDConstants.ACTION_MOVE)
+    {
+      System.out.println("dropEnd on: " + profileTree.getName());
+      Transferable transferable = dsde.getDragSourceContext().getTransferable();
+      System.out.println("remove profiles from the source");
+    }
 		setCurrentDropTargetItem(null);
 	}
 
+  // --- DropTargetListener ---
 	private void handleDragTargetEvent(DropTargetDragEvent dtde)
 	{
 		Point dropLocation = dtde.getLocation();
@@ -155,16 +148,10 @@ class ProfileTreeDragHandler
     }
 
 		TreeNode node = (TreeNode)path.getLastPathComponent();
-    if (node.getAllowsChildren())
+    int action = dtde.getDropAction();
+    if (node.getAllowsChildren() && (action == DnDConstants.ACTION_COPY || action == DnDConstants.ACTION_MOVE))
 		{
-      if (isSameTree(transferNode))
-      {
-        dtde.acceptDrag(dtde.getDropAction());
-      }
-      else
-      {
-        dtde.acceptDrag(DnDConstants.ACTION_COPY);
-      }
+      dtde.acceptDrag(action);
       setCurrentDropTargetItem(node);
 		}
 		else
@@ -213,7 +200,7 @@ class ProfileTreeDragHandler
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
 
     TransferableProfileNode transferNode = getTransferNode(dtde.getTransferable());
-    
+
     if (!parent.getAllowsChildren() || transferNode == null)
 		{
 			dtde.rejectDrop();
@@ -245,13 +232,15 @@ class ProfileTreeDragHandler
         }
 
         int action = dtde.getDropAction();
-        if (isSameTree(transferNode) == false)
-        {
-          action = DnDConstants.ACTION_COPY;
-        }
-
         dtde.acceptDrop(action);
-        profileTree.handleDroppedNodes(nodes, parent, dtde.getDropAction());
+
+        profileTree.handleDroppedNodes(nodes, parent, action);
+
+//        if (action == DnDConstants.ACTION_MOVE && transferNode.getSource() != null && !isSameTree(transferNode))
+//        {
+//          ProfileTree source = transferNode.getSource();
+//          source.getModel().deleteNodes(nodes);
+//        }
         dtde.dropComplete(true);
       }
 		}
@@ -282,10 +271,11 @@ class ProfileTreeDragHandler
     }
   }
 
-  private boolean isSameTree(TransferableProfileNode transferNode)
-  {
-    if (transferNode == null) return false;
-    return transferNode.getSourceTreeName().equals(profileTree.getName());
-  }
+//  private boolean isSameTree(TransferableProfileNode transferNode)
+//  {
+//    if (transferNode == null) return false;
+//    ProfileTree source = transferNode.getSource();
+//    return source == profileTree;
+//  }
 
 }

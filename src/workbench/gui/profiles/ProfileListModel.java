@@ -258,6 +258,11 @@ class ProfileListModel
 		node.removeAllChildren();
 	}
 
+  public void deleteNodes(DefaultMutableTreeNode[] node)
+  {
+
+  }
+
 	public void deleteProfile(ConnectionProfile prof)
 	{
 		TreePath path = getPath(prof);
@@ -372,7 +377,7 @@ class ProfileListModel
 		}
 	}
 
-	private List<ConnectionProfile> getAllProfiles()
+	public List<ConnectionProfile> getAllProfiles()
 	{
 		List<ConnectionProfile> current = new ArrayList<>(profiles.size() + filtered.size());
 		for (ConnectionProfile prof : profiles)

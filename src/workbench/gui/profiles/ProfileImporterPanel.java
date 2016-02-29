@@ -117,9 +117,39 @@ public class ProfileImporterPanel
     currentInfopanel.setPreferredSize(sourceInfoPanel.getPreferredSize());
   }
 
+  private void saveCurrent()
+  {
+    ProfileListModel model = currentProfiles.getModel();
+    if (model.profilesAreModified() || model.groupsChanged())
+    {
+      currentProfiles.getModel().applyProfiles();
+    }
+  }
+
+  private boolean saveSource()
+  {
+    ProfileListModel model = currentProfiles.getModel();
+    try
+    {
+      if (model.profilesAreModified() || model.groupsChanged())
+      {
+        ProfileManager mgr = new ProfileManager(sourceFilename.getText());
+        mgr.applyProfiles(sourceProfiles.getModel().getAllProfiles());
+        mgr.save();
+      }
+      return true;
+    }
+    catch (Exception ex)
+    {
+      return false;
+    }
+  }
+  
   @Override
   public boolean validateInput()
   {
+    saveCurrent();
+    saveSource();
     return true;
   }
 
@@ -127,6 +157,8 @@ public class ProfileImporterPanel
   public void componentDisplayed()
   {
     loadCurrentProfiles();
+    sourceProfiles.setPopupEnabled(false);
+    currentProfiles.setPopupEnabled(false);
   }
 
   @Override
