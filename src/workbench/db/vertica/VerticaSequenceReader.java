@@ -75,11 +75,11 @@ public class VerticaSequenceReader
 		try
 		{
 			String name = def.getSequenceName();
-			Long maxO = (Long) def.getSequenceProperty("MAXVALUE");
-			Long minO = (Long) def.getSequenceProperty("MINVALUE");
-			Long incO = (Long) def.getSequenceProperty("INCREMENT");
-			Long cacheO = (Long) def.getSequenceProperty("CACHE");
-			Boolean cycle = (Boolean) def.getSequenceProperty("CYCLE");
+			Long maxO = (Long) def.getSequenceProperty(PROP_MAX_VALUE);
+			Long minO = (Long) def.getSequenceProperty(PROP_MIN_VALUE);
+			Long incO = (Long) def.getSequenceProperty(PROP_INCREMENT);
+			Long cacheO = (Long) def.getSequenceProperty(PROP_CACHE_SIZE);
+			Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
 			if (cycle == null) cycle = Boolean.FALSE;
 
 			long max = (maxO == null ? Long.MAX_VALUE : maxO.longValue());
@@ -186,11 +186,11 @@ public class VerticaSequenceReader
 		String name = ds.getValueAsString(row, "sequence_name");
 		String schema = ds.getValueAsString(row, "sequence_schema");
 		SequenceDefinition def = new SequenceDefinition(catalog, schema, name);
-		def.setSequenceProperty("INCREMENT", ds.getValue(0, "increment_by"));
-		def.setSequenceProperty("MAXVALUE", ds.getValue(0, "maximum"));
-		def.setSequenceProperty("MINVALUE", ds.getValue(0, "minimum"));
-		def.setSequenceProperty("CACHE", ds.getValue(0, "session_cache_count"));
-		def.setSequenceProperty("CYCLE", ds.getValue(0, "allow_cycle"));
+		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(0, "increment_by"));
+		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(0, "maximum"));
+		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "minimum"));
+		def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "session_cache_count"));
+		def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "allow_cycle"));
 		return def;
 	}
 

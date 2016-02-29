@@ -35,6 +35,7 @@ import workbench.db.ibm.InformixSynonymReader;
 import workbench.db.ingres.IngresSynonymReader;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.oracle.OracleSynonymReader;
+import workbench.db.progress.OpenEdgeSynonymReader;
 
 /**
  * Read the definition of synonyms from the database.
@@ -110,6 +111,10 @@ public interface SynonymReader
       if (conn.getDbId().equals(DbMetadata.DBID_HANA))
       {
         return new HanaSynonymReader();
+      }
+      if (conn.getDbId().equals(DbMetadata.DBID_OPENEDGE))
+      {
+        return new OpenEdgeSynonymReader();
       }
 			return null;
 		}

@@ -1,5 +1,5 @@
 /*
- * IngresSequenceReader.java
+ * PostgresSequenceReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -21,7 +21,8 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.ingres;
+package workbench.db.progress;
+
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,26 +42,25 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A sequence reader for Ingres
- *
  * @author  Thomas Kellerer
  */
-public class IngresSequenceReader
+public class OpenEdgeSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConn;
-	private final String SELECT_SEQUENCE_DEF =
-			       "SELECT SEQ_NAME,  \n" +
-			       "       SEQ_OWNER, \n" +
-             "       MIN_VALUE,  \n" +
-             "       MAX_VALUE,  \n" +
-             "       INCREMENT_VALUE,  \n" +
-             "       CYCLE_FLAG,  \n" +
-             "       ORDER_FLAG,  \n" +
-             "       CACHE_SIZE  \n" +
-             "FROM   iisequences \n";
 
-	public IngresSequenceReader(WbConnection conn)
+  // TODO: how to find the "multi tenant" attribute
+  private final String SELECT_SEQUENCE_DEF =
+    "SELECT \"SEQ-OWNER\" as owner, \n" +
+    "       \"SEQ-NAME\" as sequence_name, \n" +
+    "       \"SEQ-INIT\" as initial, \n" +
+    "       \"SEQ-INCR\" as increment, \n" +
+    "       \"SEQ-MIN\" as \"MINVALUE\", \n" +
+    "       \"SEQ-MAX\" as \"MAXVALUE\", \n" +
+    "       case when \"CYCLE-OK\" = 1 then 'CYCLE' ELSE 'NOCYCLE' end as \"CYCLE\" \n" +
+    "FROM sysprogress.syssequences \n";
+
+	public OpenEdgeSequenceReader(WbConnection conn)
 	{
 		dbConn = conn;
 	}
@@ -74,11 +74,14 @@ public class IngresSequenceReader
 		int ownerIndex = -1;
 		int nameIndex = -1;
 
+    owner = StringUtil.trimToNull(owner);
+    namePattern = StringUtil.trimToNull(namePattern);
+
 		if (StringUtil.isNonBlank(owner))
 		{
 			whereAdded = true;
 			ownerIndex = 1;
-			sql.append(" WHERE seq_owner = ?");
+			sql.append(" WHERE \"SEQ-OWNER\" = ?");
 		}
 
 		if (StringUtil.isNonBlank(namePattern))
@@ -95,13 +98,13 @@ public class IngresSequenceReader
 			}
 			if (namePattern.indexOf('%') > 0)
 			{
-				sql.append(" seq_name LIKE ? ");
+				sql.append(" \"SEQ-NAME\" LIKE ? ");
 				SqlUtil.appendEscapeClause(sql, this.dbConn, namePattern);
 				namePattern = SqlUtil.escapeUnderscore(namePattern, dbConn);
 			}
 			else
 			{
-				sql.append(" seq_name = ? ");
+				sql.append(" \"SEQ-NAME\" = ? ");
 			}
 		}
 
@@ -111,27 +114,26 @@ public class IngresSequenceReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("IngresSequenceReqder.getSquences()", "Query to retrieve sequence:" + sql);
+			LogMgr.logInfo("ProgressSequenceReader.getSquences()", "Query to retrieve sequence: \n" + SqlUtil.replaceParameters(sql, owner, namePattern));
 		}
 
 		try
 		{
 			stmt = this.dbConn.getSqlConnection().prepareStatement(sql.toString());
-			if (ownerIndex != -1) stmt.setString(ownerIndex, owner.trim());
-			if (nameIndex != -1) stmt.setString(nameIndex, namePattern.trim());
+			if (ownerIndex != -1) stmt.setString(ownerIndex, SqlUtil.removeObjectQuotes(owner));
+			if (nameIndex != -1) stmt.setString(nameIndex, SqlUtil.removeObjectQuotes(namePattern));
 			rs = stmt.executeQuery();
 			DataStore ds = new DataStore(rs);
-			ds.setTrimCharData(true);
 			ds.initData(rs);
 
 			for (int i=0; i < ds.getRowCount(); i++)
 			{
-				result.add(createDefinition(ds, i, ds.getValueAsString(i, 1), ds.getValueAsString(i, 0)));
+				result.add(createDefinition(ds, i, ds.getValueAsString(i, 0), ds.getValueAsString(i, 1)));
 			}
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("IngresMetaData.getSequences()", "Error when retrieving sequences",e);
+			LogMgr.logError("ProgressSequenceReader.getSequences()", "Error when retrieving sequences using: \n" + sql, e);
 		}
 		finally
 		{
@@ -151,12 +153,11 @@ public class IngresSequenceReader
 	private SequenceDefinition createDefinition(DataStore ds, int row, String owner, String sequence)
 	{
 		SequenceDefinition def = new SequenceDefinition(owner.trim(), sequence.trim());
-		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "MIN_VALUE"));
-		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "MAX_VALUE"));
-		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT_VALUE"));
-		def.setSequenceProperty(PROP_CYCLE, ds.getValue(row, "CYCLE_FLAG"));
-		def.setSequenceProperty(PROP_ORDERED, ds.getValue(row, "ORDER_FLAG"));
-		def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(row, "CACHE_SIZE"));
+		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "MINVALUE"));
+		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "MAXVALUE"));
+		def.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "INITIAL"));
+		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "INCREMENT"));
+		def.setSequenceProperty(PROP_CYCLE, ds.getValue(row, "CYCLE"));
 		def.setSource(buildSource(def));
 		return def;
 	}
@@ -167,7 +168,7 @@ public class IngresSequenceReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
-		String sql = SELECT_SEQUENCE_DEF + " WHERE seq_owner = ? AND seq_name = ?";
+		String sql = SELECT_SEQUENCE_DEF + " WHERE \"SEQ-OWNER\" = ? AND \"SEQ-NAME\" = ?";
 		try
 		{
 			stmt = this.dbConn.getSqlConnection().prepareStatement(sql);
@@ -175,12 +176,11 @@ public class IngresSequenceReader
 			stmt.setString(2, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs);
-			result.setTrimCharData(true);
 			result.initData(rs);
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("IngresMetaData.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
+			LogMgr.logError("ProgressSequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
 		}
 		finally
 		{
@@ -203,50 +203,41 @@ public class IngresSequenceReader
 		StringBuilder result = new StringBuilder(100);
 		Number minvalue = (Number)def.getSequenceProperty(PROP_MIN_VALUE);
 		Number maxvalue = (Number)def.getSequenceProperty(PROP_MAX_VALUE);
-		String increment = def.getSequenceProperty(PROP_INCREMENT).toString();
-		String cycle = def.getSequenceProperty(PROP_CYCLE).toString();
-		String order = def.getSequenceProperty(PROP_ORDERED).toString();
-		Number cache = (Number)def.getSequenceProperty(PROP_CACHE_SIZE);
+		Number init = (Number)def.getSequenceProperty(PROP_START_VALUE);
+		Number increment = (Number)def.getSequenceProperty(PROP_INCREMENT);
+		String cycle = (String)def.getSequenceProperty(PROP_CYCLE);
 
 		result.append("CREATE SEQUENCE ");
-		result.append(def.getSequenceName());
+		result.append(def.getObjectExpression(dbConn));
 
-		result.append("\n       INCREMENT BY ");
-		result.append(increment);
+    if (increment != null)
+    {
+      result.append("\n     INCREMENT BY ");
+      result.append(increment);
+    }
 
-		if (minvalue.intValue() == 0)
+    if (init != null)
+    {
+      result.append("\n     START WITH ");
+      result.append(init);
+    }
+
+		if (minvalue != null && minvalue.intValue() != 0)
 		{
-			result.append("\n       NO MINVALUE");
-		}
-		else
-		{
-			result.append("\n       MINVALUE ");
+			result.append("\n     MINVALUE ");
 			result.append(minvalue);
 		}
 
-		if (maxvalue.intValue() < Integer.MAX_VALUE)
+		if (maxvalue != null)
 		{
-			result.append("\n       MAXVALUE ");
+			result.append("\n     MAXVALUE ");
 			result.append(maxvalue);
 		}
-		else
-		{
-			result.append("\n       NO MAXVALUE");
-		}
-		if (cache.intValue() > 0)
-		{
-			result.append("\n       CACHE ");
-			result.append(cache);
-		}
-		else
-		{
-			result.append("\n       NO CACHE");
-		}
-		result.append("\n       ");
-		result.append(cycle.equals("Y") ? "CYCLE" : "NO CYCLE");
 
-		result.append("\n       ");
-		result.append(order.equals("Y") ? "ORDER" : "NO ORDER");
+    if (StringUtil.equalString(cycle, "CYCLE"))
+    {
+      result.append("\n     CYCLE");
+    }
 
 		result.append(";\n");
 		return result.toString();

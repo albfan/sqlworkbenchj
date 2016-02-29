@@ -78,6 +78,7 @@ import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.progress.OpenEdgeObjectListEnhancer;
+import workbench.db.progress.OpenEdgeSequenceReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.db.vertica.VerticaTableDefinitionReader;
 import workbench.db.vertica.VerticaTableReader;
@@ -373,6 +374,7 @@ public class DbMetadata
       // Progress returns a different name through JDBC and ODBC
       dbId = DBID_OPENEDGE;
  			objectListEnhancer = new OpenEdgeObjectListEnhancer();
+      sequenceReader = new OpenEdgeSequenceReader(aConnection);
     }
     else if (productLower.equals("hdb"))
     {

@@ -48,9 +48,9 @@ public class NameUtil
   private static final String INVALID_CHARS = "- .:\\/\"'!%&()=?+*";
 
   /**
-   * Cleanup an identifier and convert CamelCase to SNAKE_CASE
+   * Cleanup an identifier and convert CamelCase to SNAKE_CASE.
    *
-   * @param input  the identifier to cleanup
+   * @param input the identifier to cleanup
    * @return a clean identifier in uppercase
    */
   public static String camelCaseToSnakeUpper(String input)
@@ -61,7 +61,7 @@ public class NameUtil
   /**
    * Cleanup an identifier and convert CamelCase to snake_case
    *
-   * @param input  the identifier to cleanup
+   * @param input the identifier to cleanup
    * @return a clean identifier in lowercase
    */
   public static String camelCaseToSnakeLower(String input)
@@ -74,6 +74,15 @@ public class NameUtil
     return camelCaseToSnake(input, IdentifierCase.mixed);
   }
 
+  /**
+   * Convert CamelCase to snake_case (either upper or lower case).
+   *
+   * Invalid characters are replaced with with an underscore.
+   * 
+   * @param input   the identifier to clean up
+   * @param idCase
+   * @return a cleaned identifier that does not need quoting
+   */
   public static String camelCaseToSnake(String input, IdentifierCase idCase)
   {
     if (input == null) return "";
@@ -82,7 +91,8 @@ public class NameUtil
     StringBuilder result = new StringBuilder(input.length() + 5);
     char current = 0;
     char previous = 0;
-    for (int i=0; i < input.length(); i++)
+
+    for (int i = 0; i < input.length(); i++)
     {
       current = input.charAt(i);
       if (Character.isUpperCase(current) && (Character.isLowerCase(previous) || Character.isWhitespace(previous)) && previous != '_')
@@ -113,10 +123,10 @@ public class NameUtil
   /**
    * Cleanup an identifier and optionally convert to lowercase
    *
-   * @param input  the identifier to cleanup
+   * @param input the identifier to cleanup
    * @return a clean identifier
    */
-   public static String cleanupIdentifier(String input, String lowerCase)
+  public static String cleanupIdentifier(String input, String lowerCase)
   {
     if (input == null) return "";
     boolean toLowerCase = StringUtil.stringToBool(lowerCase);
@@ -128,8 +138,45 @@ public class NameUtil
     return SqlUtil.cleanupIdentifier(input);
   }
 
-   public static String quoteIfNeeded(String input)
-   {
-     return SqlUtil.quoteObjectname(input, false, true, '"');
-   }
+  public static String quoteIfNeeded(String input)
+  {
+    return SqlUtil.quoteObjectname(input, false, true, '"');
+  }
+
+  /**
+   * Quotes the identifier if it is in mixed case.
+   */
+  public static String preserveCase(String input)
+  {
+    if (StringUtil.isMixedCase(input))
+    {
+      return '"' + input + '"';
+    }
+    return SqlUtil.quoteObjectname(input, false, true, '"');
+  }
+
+  /**
+   * Quotes the identifier if it is in mixed or lowercase.
+   */
+  public static String preserveLowercase(String input)
+  {
+    if (StringUtil.isMixedCase(input) || StringUtil.isLowerCase(input))
+    {
+      return '"' + input + '"';
+    }
+    return SqlUtil.quoteObjectname(input, false, true, '"');
+  }
+
+  /**
+   * Quotes the identifier if it is in mixed or uppercase.
+   */
+  public static String preserveUppercase(String input)
+  {
+    if (StringUtil.isMixedCase(input) || StringUtil.isUpperCase(input))
+    {
+      return '"' + input + '"';
+    }
+    return SqlUtil.quoteObjectname(input, false, true, '"');
+  }
+
 }
