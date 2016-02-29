@@ -78,7 +78,7 @@ public class NameUtil
    * Convert CamelCase to snake_case (either upper or lower case).
    *
    * Invalid characters are replaced with with an underscore.
-   * 
+   *
    * @param input   the identifier to clean up
    * @param idCase
    * @return a cleaned identifier that does not need quoting
@@ -117,7 +117,7 @@ public class NameUtil
           break;
       }
     }
-    return result.toString();
+    return SqlUtil.quoteObjectname(result.toString(), false, true, '"');
   }
 
   /**

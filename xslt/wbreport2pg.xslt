@@ -26,11 +26,12 @@
   <!-- Should column names be quoted (surrounded by variable quote)? -->
   <xsl:param name="quoteAllNames">true</xsl:param>
   <xsl:param name="commitAfterEachTable">true</xsl:param>
-  <xsl:param name="prefixIndexNames">false</xsl:param>
   <xsl:param name="unrestrictedVarchar">false</xsl:param>
   <xsl:param name="identifierCleanup">quote_if_needed</xsl:param>
   <xsl:param name="sequencePrefix"></xsl:param>
+  <xsl:param name="prefixIndexNames">false</xsl:param>
   <xsl:param name="indexPrefix"></xsl:param>
+  <xsl:param name="useIndexName">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -52,9 +53,9 @@ Supported parameters:
 * identifierCleanup    - how to deal with illegal SQL identifiers possible values: quote_if_needed, to_snake_case, preserve_case, cleanup (current value: <xsl:value-of select="$identifierCleanup"/>)
 * quoteAllNames        - if true, all identifiers are quoted using double quotes. Only used when identifierCleanup is not defined (current value: <xsl:value-of select="$quoteAllNames"/>)
 * commitAfterEachTable - if false, write only one commit at the end (current value: <xsl:value-of select="$commitAfterEachTable"/>)
-* prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
 * unrestrictedVarchar  - use VARCHAR type without length restriction (current value: <xsl:value-of select="$unrestrictedVarchar"/>)
 * sequencePrefix       - a prefix value for sequence names (current value: <xsl:value-of select="$sequencePrefix"/>)
+* prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
 * indexPrefix          - a prefix value for index names, only used when prefixIndexNames is false (current value: <xsl:value-of select="$sequencePrefix"/>)
     </xsl:message>
 
@@ -123,6 +124,9 @@ Supported parameters:
           <xsl:choose>
             <xsl:when test="dbms-data-type = 'CLOB'">
               <xsl:value-of select="'text'"/>
+            </xsl:when>
+            <xsl:when test="dbms-data-type = 'BIT'">
+              <xsl:value-of select="'boolean'"/>
             </xsl:when>
             <xsl:when test="dbms-data-type = 'BLOB'">
               <xsl:value-of select="'bytea'"/>
@@ -291,7 +295,7 @@ Supported parameters:
         <xsl:call-template name="write-object-name">
           <xsl:with-param name="objectname">
             <xsl:choose>
-              <xsl:when test="string-length(name) = 0">
+              <xsl:when test="$useIndexName = 'false' or string-length(name) = 0">
                 <xsl:value-of select="''"/>
               </xsl:when>
               <xsl:when test="name = $real-tablename and string-length($indexPrefix) = 0">
