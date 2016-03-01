@@ -66,7 +66,7 @@ public class PostgresCopyStatementWriter
 			out = new PrintWriter(new FileWriter(ctl));
 			out.print("copy ");
 			String table = exporter.getTableNameToUse();
-			out.print(table);
+			out.print(exporter.getConnection().getMetadata().quoteObjectname(table));
 			out.print(" (");
 			for (int i=0; i < resultInfo.getColumnCount(); i++)
 			{
@@ -82,7 +82,7 @@ public class PostgresCopyStatementWriter
 			boolean useText = exporter.getTextQuoteChar() == null && exporter.getExportHeaders()== false && canDecode && canDecodeBlobs;
 
 			out.print("\n     from ");
-			out.print("'" + baseFile.getFullPath() + "'");
+			out.print("'" + baseFile.getName() + "'");
 
 			String delim = exporter.getTextDelimiter();
 			out.print("\n     with (format ");
