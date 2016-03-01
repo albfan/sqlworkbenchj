@@ -220,7 +220,7 @@ public class ProfileManager
 	{
 		if (newProfiles == null) return;
 
-    this.profilesChanged = (profiles.size() != newProfiles.size());
+    this.profilesChanged = true;
 
     this.profiles.clear();
     for (ConnectionProfile profile : newProfiles)

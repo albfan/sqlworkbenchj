@@ -122,7 +122,7 @@ public class ProfileImporterPanel
     ProfileListModel model = currentProfiles.getModel();
     if (model.profilesAreModified() || model.groupsChanged())
     {
-      currentProfiles.getModel().applyProfiles();
+      currentProfiles.getModel().saveProfiles();
     }
   }
 

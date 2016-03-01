@@ -92,7 +92,10 @@ public class ProfileTreeTransferHandler
       for (TreePath treePath : dropPath)
       {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
-        tree.getModel().removeNodeFromParent(node);
+        if (node.getParent() != null)
+        {
+          tree.getModel().removeNodeFromParent(node);
+        }
       }
     }
     catch (Exception ex)
@@ -107,7 +110,8 @@ public class ProfileTreeTransferHandler
     for (TreePath treePath : lastCutNodes)
     {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
-      myTree.getModel().removeNodeFromParent(node);
+      ConnectionProfile profile = (ConnectionProfile)node.getUserObject();
+      myTree.getModel().deleteProfile(profile);
     }
   }
 
@@ -171,19 +175,39 @@ public class ProfileTreeTransferHandler
         ConnectionProfile profile = (ConnectionProfile)node.getUserObject();
         profiles.add(profile);
       }
-      tree.handleDroppedNodes(profiles, parentNode, action);
 
-      if (!support.isDrop())
+      Window parent = SwingUtilities.getWindowAncestor(tree);
+      ProfileTree sourceTree = (ProfileTree)WbSwingUtilities.findComponentByName(ProfileTree.class, transferNode.getSourceName(), parent);
+
+      if (support.isDrop() && sourceTree != myTree && action == MOVE && sourceTree != null)
       {
-        Window parent = SwingUtilities.getWindowAncestor(tree);
-        ProfileTree sourceTree = (ProfileTree)WbSwingUtilities.findComponentByName(ProfileTree.class, transferNode.getSourceName(), parent);
-
-        if (sourceTree != null)
+        for (ConnectionProfile profile : profiles)
         {
-          ProfileTreeTransferHandler handler = (ProfileTreeTransferHandler)sourceTree.getTransferHandler();
-          handler.removeCutNodes();
+          sourceTree.getModel().deleteProfile(profile);
         }
       }
+
+      if (sourceTree == myTree)
+      {
+        // inside the same tree we can use the action that was provided
+        tree.handleDroppedNodes(profiles, parentNode, action);
+      }
+      else
+      {
+        // action == MOVE would not add the profiles to the TreeModel
+        // it only changes the group name of the profile
+        // so if the source was a different tree, we have to use COPY on the target
+        // to add the profile to the model.
+        tree.handleDroppedNodes(profiles, parentNode, COPY);
+      }
+
+      // for a Cut & Paste action we need to remove the "stored" nodes
+      if (!support.isDrop() && sourceTree != null)
+      {
+        ProfileTreeTransferHandler handler = (ProfileTreeTransferHandler)sourceTree.getTransferHandler();
+        handler.removeCutNodes();
+      }
+
       return true;
     }
     catch (Exception ex)
