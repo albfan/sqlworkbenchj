@@ -25,6 +25,7 @@ package workbench.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -67,6 +68,7 @@ import javax.swing.JToolTip;
 import javax.swing.KeyStroke;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
+import javax.swing.RootPaneContainer;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
@@ -1631,5 +1633,37 @@ public class WbSwingUtilities
       info += flavors[i].getHumanPresentableName();
     }
     return info;
+  }
+
+  public static JComponent findComponentByName(Class componentClass, String name, Window owner)
+  {
+    Container root = null;
+    if (owner instanceof RootPaneContainer)
+    {
+      root = ((RootPaneContainer)owner).getContentPane();
+    }
+    if (root == null) return null;
+
+    return findComponent(componentClass, name, root);
+  }
+
+  private static JComponent findComponent(Class componentClass, String name, Container container)
+  {
+    if (container == null) return null;
+    Component[] components = container.getComponents();
+    for (Component c : components)
+    {
+      if (StringUtil.equalString(name, c.getName()) && c.getClass().equals(componentClass))
+      {
+        return (JComponent)c;
+      }
+      
+      if (c instanceof Container)
+      {
+        JComponent comp = findComponent(componentClass, name, (Container)c);
+        if (comp != null) return comp;
+      }
+    }
+    return null;
   }
 }

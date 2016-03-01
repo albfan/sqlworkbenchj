@@ -41,9 +41,9 @@ class ProfileTreeTransferable
 {
 	private TransferableProfileNode node;
 
-	ProfileTreeTransferable(TreePath[] tp, String sourceName)
+	ProfileTreeTransferable(TreePath[] tp, ProfileTree source)
 	{
-    node = new TransferableProfileNode(tp, sourceName);
+    node = new TransferableProfileNode(tp, source);
 	}
 
 	@Override

@@ -26,6 +26,7 @@ package workbench.gui.profiles;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.event.ActionEvent;
@@ -91,7 +92,7 @@ public class ProfileTree
   private WbAction renameGroup;
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
   private boolean allowDirectChange = true;
-  private ProfileTreeTransferHandler transferHandler = new ProfileTreeTransferHandler();
+  private ProfileTreeTransferHandler transferHandler = new ProfileTreeTransferHandler(this);
 
 	public ProfileTree()
 	{
@@ -516,7 +517,8 @@ public class ProfileTree
 	{
     try
     {
-      Transferable contents = getToolkit().getSystemClipboard().getContents(this);
+      Clipboard clipboard = getToolkit().getSystemClipboard();
+      Transferable contents = clipboard.getContents(this);
       transferHandler.importData(new TransferHandler.TransferSupport(this, contents));
     }
     catch (Exception ex)

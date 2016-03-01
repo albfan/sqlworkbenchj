@@ -32,12 +32,12 @@ public class TransferableProfileNode
   implements Serializable
 {
   private final TreePath[] path;
-  private final String sourceTreeName;
+  private final String sourceName;
 
-  public TransferableProfileNode(TreePath[] tp, String sourceName)
+  public TransferableProfileNode(TreePath[] tp, ProfileTree source)
   {
     path = tp;
-    sourceTreeName = sourceName;
+    sourceName = source.getName();
   }
 
   public TreePath[] getPath()
@@ -45,8 +45,8 @@ public class TransferableProfileNode
     return path;
   }
 
-  public String getSourceTreeName()
+  public String getSourceName()
   {
-    return sourceTreeName;
+    return sourceName;
   }
 }

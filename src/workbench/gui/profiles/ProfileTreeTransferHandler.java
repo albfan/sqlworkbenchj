@@ -20,6 +20,8 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.Window;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -36,6 +39,8 @@ import workbench.log.LogMgr;
 
 import workbench.db.ConnectionProfile;
 
+import workbench.gui.WbSwingUtilities;
+
 /**
  *
  * @author Thomas Kellerer
@@ -43,11 +48,13 @@ import workbench.db.ConnectionProfile;
 public class ProfileTreeTransferHandler
   extends TransferHandler
 {
-  private int lastClipboardAction = NONE;
+  private TreePath[] lastCutNodes = null;
+  private ProfileTree myTree;
 
-  public ProfileTreeTransferHandler()
+  public ProfileTreeTransferHandler(ProfileTree tree)
   {
     super();
+    myTree = tree;
   }
 
   @Override
@@ -62,7 +69,7 @@ public class ProfileTreeTransferHandler
     if (c instanceof ProfileTree)
     {
       TreePath[] paths = ((ProfileTree)c).getSelectionPaths();
-      return new ProfileTreeTransferable(paths, c.getName());
+      return new ProfileTreeTransferable(paths, (ProfileTree)c);
     }
     return null;
   }
@@ -73,13 +80,15 @@ public class ProfileTreeTransferHandler
     if (transferable == null) return;
     if (action != MOVE) return;
 
+    if (!(c instanceof ProfileTree)) return;
+    ProfileTree tree = (ProfileTree)c;
+
     try
     {
       TransferableProfileNode profileNode = (TransferableProfileNode)transferable.getTransferData(ProfileFlavor.FLAVOR);
       TreePath[] dropPath = profileNode.getPath();
       if (dropPath == null) return;
 
-      ProfileTree tree = (ProfileTree)c;
       for (TreePath treePath : dropPath)
       {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
@@ -89,6 +98,16 @@ public class ProfileTreeTransferHandler
     catch (Exception ex)
     {
       LogMgr.logError("ProfileTreeTransferHandler.importData()", "Could not process drop event", ex);
+    }
+  }
+
+  private void removeCutNodes()
+  {
+    if (lastCutNodes == null) return;
+    for (TreePath treePath : lastCutNodes)
+    {
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
+      myTree.getModel().removeNodeFromParent(node);
     }
   }
 
@@ -135,20 +154,15 @@ public class ProfileTreeTransferHandler
     {
       action = support.getDropAction();
     }
-    else
-    {
-      action = lastClipboardAction;
-    }
 
     try
     {
       Transferable transferable = support.getTransferable();
       if (transferable == null) return false;
 
-      TransferableProfileNode profileNode = (TransferableProfileNode)transferable.getTransferData(ProfileFlavor.FLAVOR);
-      TreePath[] dropPath = profileNode.getPath();
+      TransferableProfileNode transferNode = (TransferableProfileNode)transferable.getTransferData(ProfileFlavor.FLAVOR);
+      TreePath[] dropPath = transferNode.getPath();
       if (dropPath == null) return false;
-
 
       List<ConnectionProfile> profiles = new ArrayList<>(dropPath.length);
       for (TreePath treePath : dropPath)
@@ -159,12 +173,17 @@ public class ProfileTreeTransferHandler
       }
       tree.handleDroppedNodes(profiles, parentNode, action);
 
-      if (!support.isDrop() && action == MOVE)
+      if (!support.isDrop())
       {
-        exportDone(tree, transferable, action);
-        lastClipboardAction = NONE;
-      }
+        Window parent = SwingUtilities.getWindowAncestor(tree);
+        ProfileTree sourceTree = (ProfileTree)WbSwingUtilities.findComponentByName(ProfileTree.class, transferNode.getSourceName(), parent);
 
+        if (sourceTree != null)
+        {
+          ProfileTreeTransferHandler handler = (ProfileTreeTransferHandler)sourceTree.getTransferHandler();
+          handler.removeCutNodes();
+        }
+      }
       return true;
     }
     catch (Exception ex)
@@ -174,12 +193,19 @@ public class ProfileTreeTransferHandler
     }
   }
 
-//  @Override
-//  public void exportToClipboard(JComponent comp, Clipboard clip, int action)
-//    throws IllegalStateException
-//  {
-//    lastClipboardAction = action;
-//    super.exportToClipboard(comp, clip, action);
-//  }
+  @Override
+  public void exportToClipboard(JComponent comp, Clipboard clip, int action)
+    throws IllegalStateException
+  {
+    if (action == MOVE)
+    {
+      lastCutNodes = ((ProfileTree)comp).getSelectionPaths();
+    }
+    else
+    {
+      lastCutNodes = null;
+    }
+    super.exportToClipboard(comp, clip, COPY);
+  }
 
 }
