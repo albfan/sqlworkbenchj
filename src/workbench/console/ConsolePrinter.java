@@ -159,7 +159,8 @@ public abstract class ConsolePrinter
 			for (int i=0; i < getColumnCount(); i++)
 			{
 				if (!isColumnIncluded(i)) continue;
-				if (i > 0) pw.print("-+-");
+        
+				if (currentCol > 0) pw.print("-+-");
 				pw.print(StringUtil.padRight("-", columnWidths.get(Integer.valueOf(i)), '-'));
 				currentCol ++;
 			}
