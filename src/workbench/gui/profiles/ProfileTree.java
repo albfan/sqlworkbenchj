@@ -26,25 +26,31 @@ package workbench.gui.profiles;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.ActionMap;
+import javax.swing.DropMode;
+import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -53,6 +59,8 @@ import javax.swing.tree.TreeSelectionModel;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.ExpandableTree;
 import workbench.interfaces.GroupTree;
+import workbench.log.LogMgr;
+import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionProfile;
@@ -62,6 +70,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.CutCopyPastePopup;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -77,15 +86,12 @@ public class ProfileTree
 						 GroupTree, ExpandableTree
 {
 	private ProfileListModel profileModel;
-	private DefaultMutableTreeNode[] clipboardNodes;
-	private static final int CLIP_COPY = 1;
-	private static final int CLIP_CUT = 2;
-	private int clipboardType;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
   private WbAction renameGroup;
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
   private boolean allowDirectChange = true;
+  private ProfileTreeTransferHandler transferHandler = new ProfileTreeTransferHandler();
 
 	public ProfileTree()
 	{
@@ -121,20 +127,41 @@ public class ProfileTree
     renameGroup = new RenameGroupAction(this);
     popup.addAction(renameGroup, false);
 
-		setCellRenderer(new ProfileTreeCellRenderer(getCellRenderer()));
-//    System.out.println(getCellRenderer().getClass());
-    new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
+    setupIcons();
 		setAutoscrolls(true);
+    setDragEnabled(true);
+    setDropMode(DropMode.ON);
+    setTransferHandler(transferHandler);
 
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
 	}
 
-  public void setPopupEnabled(boolean flag)
+  private void setupIcons()
   {
-    allowDirectChange = flag;
-    checkActions();
+    // Use reflection to call the various setXXXIcon() methods.
+    // not all look and feels use a DefaultTreeCellRenderer
+    // but many non-standard one do still provided these methods
+    TreeCellRenderer tcr = getCellRenderer();
+    setIcon(tcr, "setLeafIcon", IconMgr.getInstance().getLabelIcon("profile"));
+    setIcon(tcr, "setOpenIcon", IconMgr.getInstance().getLabelIcon("folder-open"));
+    setIcon(tcr, "setClosedIcon", IconMgr.getInstance().getLabelIcon("folder"));
+  }
+
+  private void setIcon(TreeCellRenderer renderer, String setter, Icon toSet)
+  {
+    try
+    {
+      Method setIcon = renderer.getClass().getMethod(setter, Icon.class);
+      if (setIcon != null)
+      {
+        setIcon.invoke(renderer, toSet);
+      }
+    }
+    catch (Throwable th)
+    {
+    }
   }
 
   public void setDeleteAction(DeleteListEntryAction delete)
@@ -296,7 +323,7 @@ public class ProfileTree
 	private void checkActions()
 	{
 		boolean groupSelected = onlyGroupSelected();
-		boolean canPaste = this.clipboardNodes != null && groupSelected;
+    boolean canPaste = getToolkit().getSystemClipboard().isDataFlavorAvailable(ProfileFlavor.FLAVOR);
 		boolean canCopy = onlyProfilesSelected();
 
 		pasteToFolderAction.setEnabled(canPaste);
@@ -417,7 +444,7 @@ public class ProfileTree
 		}
 		return result;
 	}
-  
+
 	/**
 	 * Returns the currently selected Profile. If either more then one
 	 * entry is selected or a group is selected, null is returned
@@ -462,25 +489,10 @@ public class ProfileTree
 	{
 	}
 
-	/**
-	 * Stores the selected nodes in the internal "clipboard"
-	 */
-	private void storeSelectedNodes()
-	{
-		TreePath[] p = getSelectionPaths();
-
-		this.clipboardNodes = new DefaultMutableTreeNode[p.length];
-		for (int i = 0; i < p.length; i++)
-		{
-			this.clipboardNodes[i] = (DefaultMutableTreeNode)p[i].getLastPathComponent();
-		}
-	}
-
 	@Override
 	public void copy()
 	{
-		storeSelectedNodes();
-		this.clipboardType = CLIP_COPY;
+		transferHandler.exportToClipboard(this, getToolkit().getSystemClipboard(), DnDConstants.ACTION_COPY);
 	}
 
 	@Override
@@ -496,60 +508,38 @@ public class ProfileTree
 	@Override
 	public void cut()
 	{
-		storeSelectedNodes();
-		this.clipboardType = CLIP_CUT;
+    transferHandler.exportToClipboard(this, getToolkit().getSystemClipboard(), DnDConstants.ACTION_MOVE);
 	}
 
 	@Override
 	public void paste()
 	{
-		if (clipboardNodes == null) return;
-		if (clipboardNodes.length == 0) return;
-
-		DefaultMutableTreeNode group = (DefaultMutableTreeNode)getLastSelectedPathComponent();
-		if (group == null) return;
-		if (!group.getAllowsChildren()) return;
-
-		try
-		{
-			if (clipboardType == CLIP_CUT)
-			{
-				profileModel.moveProfilesToGroup(clipboardNodes, group);
-			}
-			else if (clipboardType == CLIP_COPY)
-			{
-				profileModel.copyProfilesToGroup(clipboardNodes, group);
-			}
-		}
-		finally
-		{
-			this.clipboardType = 0;
-			this.clipboardNodes = null;
-		}
+    try
+    {
+      Transferable contents = getToolkit().getSystemClipboard().getContents(this);
+      transferHandler.importData(new TransferHandler.TransferSupport(this, contents));
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ProfileTree.paste()", "Could not access clipboard", ex);
+    }
 	}
 
-  public void handleCopiedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent)
-  {
-    if (nodes == null || nodes.length < 1) return;
-    if (newParent == null) return;
-
-    profileModel.copyProfilesToGroup(nodes, newParent);
-  }
-
-	public void handleDroppedNodes(DefaultMutableTreeNode[] droppedNodes, DefaultMutableTreeNode newParent, int action)
+	public void handleDroppedNodes(List<ConnectionProfile> profiles, DefaultMutableTreeNode newParent, int action)
 	{
-		if (droppedNodes == null || droppedNodes.length < 1) return;
+    if (CollectionUtil.isEmpty(profiles)) return;
 		if (newParent == null) return;
 
+    DefaultMutableTreeNode firstNode = null;
 		if (action == DnDConstants.ACTION_MOVE)
 		{
-			profileModel.moveProfilesToGroup(droppedNodes, newParent);
+			firstNode = profileModel.moveProfilesToGroup(profiles, newParent);
 		}
 		else if (action == DnDConstants.ACTION_COPY)
 		{
-			profileModel.copyProfilesToGroup(droppedNodes, newParent);
+			firstNode = profileModel.copyProfilesToGroup(profiles, newParent);
 		}
-		selectNode(droppedNodes[0]);
+		selectNode(firstNode);
 	}
 
 	@Override
@@ -622,6 +612,7 @@ public class ProfileTree
 
 	private void selectNode(DefaultMutableTreeNode node)
 	{
+    if (node == null) return;
 		TreeNode[] nodes = this.profileModel.getPathToRoot(node);
 		TreePath path = new TreePath(nodes);
 		this.selectPath(path);

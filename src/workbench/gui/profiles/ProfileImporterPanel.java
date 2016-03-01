@@ -144,7 +144,7 @@ public class ProfileImporterPanel
       return false;
     }
   }
-  
+
   @Override
   public boolean validateInput()
   {
@@ -157,8 +157,6 @@ public class ProfileImporterPanel
   public void componentDisplayed()
   {
     loadCurrentProfiles();
-    sourceProfiles.setPopupEnabled(false);
-    currentProfiles.setPopupEnabled(false);
   }
 
   @Override

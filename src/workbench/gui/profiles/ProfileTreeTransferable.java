@@ -39,7 +39,6 @@ import javax.swing.tree.TreePath;
 class ProfileTreeTransferable
 	implements Transferable
 {
-	public static final DataFlavor PROFILE_FLAVOR = new DataFlavor(TreePath.class, "ProfileTreeElement");
 	private TransferableProfileNode node;
 
 	ProfileTreeTransferable(TreePath[] tp, String sourceName)
@@ -50,17 +49,17 @@ class ProfileTreeTransferable
 	@Override
 	public DataFlavor[] getTransferDataFlavors()
 	{
-		return new DataFlavor[] { PROFILE_FLAVOR };
+		return new DataFlavor[] { ProfileFlavor.FLAVOR };
 	}
 
 	@Override
 	public boolean isDataFlavorSupported(DataFlavor flavor)
 	{
-		return (flavor.getRepresentationClass() == PROFILE_FLAVOR.getRepresentationClass());
+		return (flavor.getRepresentationClass() == ProfileFlavor.FLAVOR.getRepresentationClass());
 	}
 
 	@Override
-	public synchronized Object getTransferData(DataFlavor flavor)
+	public synchronized TransferableProfileNode getTransferData(DataFlavor flavor)
 		throws UnsupportedFlavorException, IOException
 	{
 		if (isDataFlavorSupported(flavor))
