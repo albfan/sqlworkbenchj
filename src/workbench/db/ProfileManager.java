@@ -40,8 +40,7 @@ import workbench.util.WbFile;
 public class ProfileManager
 {
   private boolean loaded = false;
-  private boolean profilesChanged = false;
-
+  private boolean profilesDeleted = false;
   private List<ConnectionProfile> profiles = new ArrayList<>();
   private WbFile currentFile;
 
@@ -162,7 +161,7 @@ public class ProfileManager
     {
       profile.resetChangedFlags();
     }
-    this.profilesChanged = false;
+    profilesDeleted = false;
 	}
 
   public void reset(String newStorageFile)
@@ -170,7 +169,7 @@ public class ProfileManager
     LogMgr.logDebug("ProfileManager.reset()", "Using new profile storage: " + newStorageFile);
     loaded = false;
     profiles.clear();
-    profilesChanged = false;
+    profilesDeleted = false;
     currentFile = new WbFile(newStorageFile);
   }
 
@@ -202,9 +201,8 @@ public class ProfileManager
 	 */
 	public boolean profilesAreModified()
 	{
-		if (this.profilesChanged) return true;
-
-    if (this.profiles == null) return false;
+    if (profiles == null) return false;
+    if (profilesDeleted) return true;
 
     for (ConnectionProfile profile : this.profiles)
     {
@@ -220,9 +218,17 @@ public class ProfileManager
 	{
 		if (newProfiles == null) return;
 
-    this.profilesChanged = true;
+    for (ConnectionProfile profile : profiles)
+    {
+      if (!newProfiles.contains(profile))
+      {
+        profilesDeleted = true;
+        break;
+      }
+    }
 
     this.profiles.clear();
+
     for (ConnectionProfile profile : newProfiles)
     {
       this.profiles.add(profile.createStatefulCopy());
@@ -233,16 +239,16 @@ public class ProfileManager
 	{
     this.profiles.remove(aProfile);
     this.profiles.add(aProfile);
-    this.profilesChanged = true;
 	}
 
 	public void removeProfile(ConnectionProfile aProfile)
 	{
     this.profiles.remove(aProfile);
-    // deleting a new profile should not change the status to changed
+
+    // deleting a new profile should not change the status to "modified"
     if (!aProfile.isNew())
     {
-      this.profilesChanged = true;
+      this.profilesDeleted = true;
     }
 	}
 
