@@ -35,6 +35,7 @@ import workbench.log.LogMgr;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
@@ -352,6 +353,8 @@ public abstract class ExportWriter
 		for (ControlFileFormat format : formats)
 		{
 			FormatFileWriter writer = ControlFileFormat.createFormatWriter(format);
+      boolean useFullpath = Settings.getInstance().getBoolProperty("workbench.db.exporter.formatfile." + format.name() + ".fullpath", false);
+      writer.setUseFullFilepath(useFullpath);
 			writer.writeFormatFile(exporter, converter);
 		}
 	}

@@ -83,6 +83,8 @@ import workbench.util.WbFile;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import workbench.util.CollectionUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -142,14 +144,14 @@ public class TestUtil
 
 	public String[] getArgs(boolean noTemplates)
 	{
-		String cmdline = "-nosettings -configdir='" + basedir + "' -Dworkbench.log.console=false ";
+		List<String> cmdline = CollectionUtil.arrayList("-nosettings", "-configdir='" + basedir + "'", "-Dworkbench.log.console=false");
 
 		if (noTemplates)
 		{
-			cmdline +=  " -notemplates";
+			cmdline.add("-notemplates");
 		}
 
-		return new String[] { cmdline };
+		return cmdline.toArray(new String[]{});
 	}
 
 	public void prepareBaseDir()

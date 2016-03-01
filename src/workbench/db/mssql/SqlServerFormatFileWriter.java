@@ -50,6 +50,11 @@ public class SqlServerFormatFileWriter
 	implements FormatFileWriter
 {
 
+  @Override
+  public void setUseFullFilepath(boolean flag)
+  {
+  }
+
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{

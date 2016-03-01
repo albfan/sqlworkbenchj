@@ -23,8 +23,8 @@
  */
 package workbench.console;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Types;
 
 import workbench.WbTestCase;
@@ -92,17 +92,16 @@ public class DataStorePrinterTest
 	}
 
 	@Test
-	public void testSelectedColumns()
+	public void testSelectedColumns1()
 	{
 		DataStore ds = createTestData();
 
 		DataStorePrinter printer = new DataStorePrinter(ds);
 		printer.setColumnsToPrint(CollectionUtil.arrayList("DESCRIPTION", "QUANTITY"));
-		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
-		PrintStream ps = new PrintStream(ba);
-		printer.printTo(ps);
-		String out = ba.toString();
-		ps.close();
+    StringWriter sw = new StringWriter(500);
+    PrintWriter pw = new PrintWriter(sw);
+		printer.printTo(pw);
+		String out = sw.toString();
 
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
@@ -116,17 +115,66 @@ public class DataStorePrinterTest
 		assertEquals("My comment           |        3", lines[5]);
 	}
 
+	private DataStore createTestData2()
+	{
+		String[] cols = new String[] { "ID", "FIRSTNAME", "LASTNAME"};
+		int[] types = new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
+		int[] sizes = new int[] { 10, 5, 25 };
+
+		DataStore ds = new DataStore(cols, types, sizes);
+		int row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(1));
+		ds.setValue(row, 1, "Zaphod");
+		ds.setValue(row, 2, "Beeblebrox");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(2));
+		ds.setValue(row, 1, "Ford");
+		ds.setValue(row, 2, "Prefect");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(3));
+		ds.setValue(row, 1, "Arthur");
+		ds.setValue(row, 2, "Dent");
+
+		return ds;
+	}
+
+	@Test
+	public void testSelectedColumns2()
+	{
+		DataStore ds = createTestData2();
+
+		DataStorePrinter printer = new DataStorePrinter(ds);
+		printer.setColumnsToPrint(CollectionUtil.arrayList("FIRSTNAME", "LASTNAME"));
+
+    StringWriter sw = new StringWriter(500);
+    PrintWriter writer = new PrintWriter(sw);
+		printer.printTo(writer);
+		String out = sw.toString();
+
+		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
+		int linecount = lines.length;
+		assertEquals(7, linecount);
+
+		assertEquals("FIRSTNAME | LASTNAME  ", lines[0]);
+		assertEquals("----------+-----------", lines[1]);
+		assertEquals("Zaphod    | Beeblebrox", lines[2]);
+		assertEquals("Ford      | Prefect   ", lines[3]);
+		assertEquals("Arthur    | Dent      ", lines[4]);
+	}
+
 	@Test
 	public void testTabularPrint()
 	{
 		DataStore ds = createTestData();
 
 		DataStorePrinter printer = new DataStorePrinter(ds);
-		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
-		PrintStream ps = new PrintStream(ba);
-		printer.printTo(ps);
-		String out = ba.toString();
-		ps.close();
+
+    StringWriter sw = new StringWriter(500);
+    PrintWriter pw = new PrintWriter(sw);
+		printer.printTo(pw);
+		String out = sw.toString();
 
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
@@ -140,15 +188,14 @@ public class DataStorePrinterTest
 		assertEquals("My comment           |        3 | lastname      ", lines[5]);
 		assertEquals("                                : with two lines", lines[6]);
 
-		// Test the unformatted output
-		ba = new ByteArrayOutputStream(500);
-		ps = new PrintStream(ba);
+    sw = new StringWriter(500);
+    pw = new PrintWriter(sw);
 		printer = new DataStorePrinter(ds);
 		printer.setFormatColumns(false);
 		printer.setPrintRowCount(false);
-		printer.printTo(ps);
-		out = ba.toString();
-		ps.close();
+		printer.printTo(pw);
+		out = sw.toString();
+
 		lines = out.split(StringUtil.LINE_TERMINATOR);
 		linecount = lines.length;
 //		System.out.println(out);
@@ -165,12 +212,12 @@ public class DataStorePrinterTest
 		DataStore ds = createTestData();
 		DataStorePrinter printer = new DataStorePrinter(ds);
 		printer.setPrintRowsAsLine(false);
-		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
-		PrintStream ps = new PrintStream(ba);
-		printer.printTo(ps);
-		String out = ba.toString();
-//		System.out.println(out);
-		ps.close();
+
+    StringWriter sw = new StringWriter(500);
+    PrintWriter pw = new PrintWriter(sw);
+		printer.printTo(pw);
+		String out = sw.toString();
+
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
 		assertEquals(25, linecount);

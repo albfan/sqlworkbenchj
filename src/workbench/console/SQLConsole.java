@@ -639,7 +639,8 @@ public class SQLConsole
 		}
 		else
 		{
-      WbManager.initConsoleMode(args);
+      WbManager.initConsoleMode();
+      WbManager.getInstance().readParameters(args);
       runConsole();
 		}
 	}

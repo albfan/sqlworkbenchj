@@ -49,6 +49,14 @@ public class MySQLLoadDataWriter
 	implements FormatFileWriter
 {
 
+  private boolean useFullFilepath;
+
+  @Override
+  public void setUseFullFilepath(boolean flag)
+  {
+    useFullFilepath = flag;
+  }
+
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
@@ -62,7 +70,7 @@ public class MySQLLoadDataWriter
 		{
 			out = new PrintWriter(new FileWriter(ctl));
 			out.print("load data infile '");
-			out.print(baseFile.getFullPath());
+			out.print(useFullFilepath ? baseFile.getFullPath() : baseFile.getName());
 			out.print("'\n");
 			out.print("  into table ");
 			out.println(tableName);

@@ -31,4 +31,5 @@ package workbench.db.exporter;
 public interface FormatFileWriter
 {
 	void writeFormatFile(DataExporter exporter, RowDataConverter converter);
+  void setUseFullFilepath(boolean flag);
 }

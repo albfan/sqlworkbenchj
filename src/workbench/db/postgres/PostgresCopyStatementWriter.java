@@ -26,6 +26,8 @@ package workbench.db.postgres;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
+import workbench.db.QuoteHandler;
+import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
 import workbench.log.LogMgr;
 
@@ -34,9 +36,11 @@ import workbench.db.exporter.FormatFileWriter;
 import workbench.db.exporter.RowDataConverter;
 
 import workbench.storage.ResultInfo;
+import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -50,6 +54,13 @@ import workbench.util.WbFile;
 public class PostgresCopyStatementWriter
 	implements FormatFileWriter
 {
+  private boolean useFullFilepath;
+
+  @Override
+  public void setUseFullFilepath(boolean flag)
+  {
+    useFullFilepath = flag;
+  }
 
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
@@ -65,8 +76,9 @@ public class PostgresCopyStatementWriter
 		{
 			out = new PrintWriter(new FileWriter(ctl));
 			out.print("copy ");
+
 			String table = exporter.getTableNameToUse();
-			out.print(exporter.getConnection().getMetadata().quoteObjectname(table));
+			out.print(getQuoteHandler(exporter.getConnection()).quoteObjectname(table));
 			out.print(" (");
 			for (int i=0; i < resultInfo.getColumnCount(); i++)
 			{
@@ -82,7 +94,7 @@ public class PostgresCopyStatementWriter
 			boolean useText = exporter.getTextQuoteChar() == null && exporter.getExportHeaders()== false && canDecode && canDecodeBlobs;
 
 			out.print("\n     from ");
-			out.print("'" + baseFile.getName() + "'");
+			out.print("'" + (useFullFilepath ? baseFile.getFullPath() : baseFile.getName()) + "'");
 
 			String delim = exporter.getTextDelimiter();
 			out.print("\n     with (format ");
@@ -105,11 +117,12 @@ public class PostgresCopyStatementWriter
 				}
 			}
 
-			if ("\\t".equals(delim))
-			{
-				delim = "\t";
-			}
-			out.print(", delimiter '" + delim + "'");  // a tab should be written as a tab!
+      String visibleDelim = delim;
+      if (delim.length() == 1) // if it's longer than two characters it's already escaped
+      {
+        visibleDelim = StringUtil.escapeText(delim, CharacterRange.RANGE_CONTROL, null, CharacterEscapeType.hex);
+      }
+			out.print(", delimiter E'" + visibleDelim + "'");
 
 			String encoding = exporter.getEncoding();
 			if (encoding != null)
@@ -136,5 +149,15 @@ public class PostgresCopyStatementWriter
 			FileUtil.closeQuietely(out);
 		}
 	}
+
+  private QuoteHandler getQuoteHandler(WbConnection conn)
+  {
+    if (conn == null)
+    {
+      // this is essentially only for the unit tests
+      return QuoteHandler.STANDARD_HANDLER;
+    }
+    return conn.getMetadata();
+  }
 
 }

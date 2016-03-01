@@ -33,6 +33,7 @@ import workbench.db.mssql.SqlServerFormatFileWriter;
 import workbench.db.mysql.MySQLLoadDataWriter;
 import workbench.db.oracle.OracleControlFileWriter;
 import workbench.db.postgres.PostgresCopyStatementWriter;
+import workbench.resource.Settings;
 
 import workbench.util.StringUtil;
 

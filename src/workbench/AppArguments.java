@@ -35,6 +35,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to define and parse the arguments that are available when the application is started.
@@ -192,7 +193,18 @@ public class AppArguments
   @Override
   public void parse(String[] args)
   {
-    super.parse(args);
+    List<String> entries = new ArrayList<>(args.length);
+    for (String entry : args)
+    {
+      if (StringUtil.isBlank(entry)) continue;
+      if (entry.startsWith("-"))
+      {
+        entry = entry.substring(1);
+      }
+      entries.add(entry);
+    }
+    super.parse(entries);
+
     String propfile = getValue(ARG_PROPFILE);
     if (propfile != null)
     {

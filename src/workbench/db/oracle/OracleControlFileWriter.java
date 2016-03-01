@@ -60,6 +60,7 @@ import workbench.util.WbFile;
 public class OracleControlFileWriter
 	implements FormatFileWriter
 {
+  private boolean useFullFilepath;
 
 	private final Map<String, String> encodingMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
@@ -81,13 +82,19 @@ public class OracleControlFileWriter
 		List<String> custom = Settings.getInstance().getListProperty("workbench.db.oracle.encodingmap", false, null);
 		for (String map : custom)
 		{
-			String[] elements = map.split(";");
+			String[] elements = map.split(":");
 			if (elements.length == 2)
 			{
 				encodingMap.put(elements[0], elements[1]);
 			}
 		}
 	}
+
+  @Override
+  public void setUseFullFilepath(boolean flag)
+  {
+    useFullFilepath = flag;
+  }
 
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
@@ -113,7 +120,7 @@ public class OracleControlFileWriter
 			out.println("-- The specified characterset might not be correct, please check the Oracle documentation");
 			out.print("LOAD DATA CHARACTERSET '");
 			out.println(convertJavaCharsetToOracle(exporter.getEncoding()) + "'");
-			out.println("INFILE '" + baseFile.getName() + "'");
+			out.println("INFILE '" + (useFullFilepath ? baseFile.getFullPath() : baseFile.getName()) + "'");
 			out.println("-- to replace the data in the table use TRUNCATE instead of APPEND");
 			out.println("APPEND");
 			out.print("INTO TABLE ");

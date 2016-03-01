@@ -53,6 +53,7 @@ import workbench.util.WbFile;
 public class Db2FormatFileWriter
 	implements FormatFileWriter
 {
+  private boolean useFullFilepath;
 	private Map<String, String> codePageMap;
 
 	public Db2FormatFileWriter()
@@ -69,6 +70,11 @@ public class Db2FormatFileWriter
 		codePageMap.put("US-ASCII", "437");
 	}
 
+  @Override
+  public void setUseFullFilepath(boolean flag)
+  {
+    useFullFilepath = flag;
+  }
 
 	@Override
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
@@ -77,13 +83,14 @@ public class Db2FormatFileWriter
 		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
 		String baseName = baseFile.getFileName();
+    String importFile = useFullFilepath ? baseFile.getFullPath() : baseFile.getName();
 		WbFile ctl = new WbFile(dir, baseName + ".clp");
 		PrintWriter out = null;
 		try
 		{
 			out = new PrintWriter(new FileWriter(ctl));
 			out.println("-- use db2 -tf " + ctl.getName() + " to run this file");
-			out.println("IMPORT FROM " + baseFile.getName() + " OF DEL");
+			out.println("IMPORT FROM " + importFile + " OF DEL");
 
 			int count = resultInfo.getColumnCount();
 			boolean containsLobs = false;

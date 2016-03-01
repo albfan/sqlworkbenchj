@@ -136,7 +136,8 @@ public class WbManagerTest
 			String[] args =
 			{
 				"-" + AppArguments.ARG_NOSETTNGS + " ",
-				"-driver='org.h2.Driver' -configdir='" + util.getBaseDir() + "' ",
+				"-driver='org.h2.Driver'",
+        "-configdir='" + util.getBaseDir() + "' ",
 				"-url='jdbc:h2:" + db.getAbsolutePath() + "' ",
 				"-" + AppArguments.ARG_CONN_USER + "='sa' ",
 				"-logfile='" + logfile.getFullPath() + "'",

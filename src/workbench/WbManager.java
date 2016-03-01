@@ -754,7 +754,7 @@ public final class WbManager
 		}
 	}
 
-	private void readParameters(String[] args)
+	public void readParameters(String[] args)
 	{
 		try
 		{
@@ -959,7 +959,7 @@ public final class WbManager
 		else
 		{
 			initRegistry();
-      
+
 			boolean doWarmup = Settings.getInstance().getBoolProperty("workbench.gui.warmup", false);
 
       // if the connection dialog is not shown, pre-load the profiles
@@ -1130,7 +1130,7 @@ public final class WbManager
 		this.doShutdown(exitCode);
 	}
 
-	public static void initConsoleMode(String[] args)
+	public static void initConsoleMode()
 	{
     System.setProperty("workbench.log.console", "false");
 		wb = new WbManager();
@@ -1139,7 +1139,6 @@ public final class WbManager
 		wb.cmdLine.removeArgument(AppArguments.ARG_SHOW_SEARCHER);
 		wb.cmdLine.removeArgument(AppArguments.ARG_CONN_SEPARATE);
 		wb.cmdLine.removeArgument(AppArguments.ARG_WORKSPACE);
-		wb.readParameters(args);
 		wb.runMode = RunMode.Console;
 		ConnectionMgr.getInstance().setReadTemplates(false);
 		wb.writeSettings = false; // SQLConsole will save the settings explicitely
@@ -1218,14 +1217,15 @@ public final class WbManager
     if (GraphicsEnvironment.isHeadless())
     {
       // no gui available --> default to console mode
-      initConsoleMode(args);
+      initConsoleMode();
       runConsole = true;
     }
 		else
     {
       wb = new WbManager();
-      wb.cmdLine.parse(args);
     }
+
+    wb.readParameters(args);
 
     boolean hasScripts = wb.cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || wb.cmdLine.isArgPresent(AppArguments.ARG_COMMAND);
     boolean showHelp = wb.cmdLine.isArgPresent("help");
@@ -1246,7 +1246,6 @@ public final class WbManager
     else
     {
       wb.installShutdownHook();
-      wb.readParameters(args);
       wb.startApplication();
     }
 	}

@@ -149,8 +149,8 @@ public class PostgresCopyStatementWriterTest
 			assertNotNull(contents);
 			assertEquals(3, contents.size());
 			assertEquals("copy person (id, firstname, lastname)", contents.get(0).trim());
-			assertEquals("from '" + export.getFullPath() + "'", contents.get(1).trim());
-			String expected = "with (format csv, header true, quote '\"', delimiter '\t', encoding 'UTF-8', null '');";
+			assertEquals("from '" + export.getName() + "'", contents.get(1).trim());
+			String expected = "with (format csv, header true, quote '\"', delimiter E'\\t', encoding 'UTF-8', null '');";
 			assertEquals(expected, contents.get(2).trim());
 
 		}
