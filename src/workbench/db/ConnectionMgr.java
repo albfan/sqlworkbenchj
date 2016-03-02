@@ -141,6 +141,11 @@ public class ConnectionMgr
     return profileMgr.getProfilesPath();
   }
 
+  public WbFile getProfilesFile()
+  {
+    return profileMgr.getFile();
+  }
+
 	/**
 	 * Create a new connection to the database.
 	 *

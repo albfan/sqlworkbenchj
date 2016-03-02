@@ -20,6 +20,7 @@
  */
 package workbench.db;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,11 @@ public class ProfileManager
   public ProfileManager(String filename)
   {
     currentFile = new WbFile(filename);
+  }
+
+  public ProfileManager(File file)
+  {
+    currentFile = new WbFile(file);
   }
 
 	/**
@@ -178,7 +184,7 @@ public class ProfileManager
     return getFile().getFullPath();
   }
 
-	private WbFile getFile()
+	public WbFile getFile()
 	{
 		return currentFile;
 	}

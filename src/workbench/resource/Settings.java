@@ -3759,6 +3759,9 @@ public class Settings
 
 	public static void createBackup(WbFile f)
 	{
+    if (f == null) return;
+    if (!f.exists()) return;
+    
 		int maxVersions = getInstance().getMaxBackupFiles();
 		String dir = getInstance().getBackupDir();
 		String sep = getInstance().getFileVersionDelimiter();
@@ -3766,9 +3769,12 @@ public class Settings
 		try
 		{
 			File bck = version.createBackup(f);
-      LogMgr.logInfo("Settings.createBackup()", "Created " + bck.getAbsolutePath() + " as a backup of: " + f.getFullPath());
+      if (bck != null)
+      {
+        LogMgr.logInfo("Settings.createBackup()", "Created " + bck.getAbsolutePath() + " as a backup of: " + f.getFullPath());
+      }
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			LogMgr.logWarning("Settings.createBackup()", "Error when creating backup for: " + f.getAbsolutePath(), e);
 		}

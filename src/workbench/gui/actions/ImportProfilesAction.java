@@ -55,7 +55,7 @@ public class ImportProfilesAction
 
     ProfileImporterPanel panel = new ProfileImporterPanel();
 
-    ValidatingDialog dialog = ValidatingDialog.createDialog(window, panel, "Import profiles", null, 0, false);
+    ValidatingDialog dialog = new ValidatingDialog(window, "Import profiles", panel, new String[] { ResourceMgr.getString("LblClose") }, false);
 
     if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.import.profiles"))
     {
@@ -63,11 +63,6 @@ public class ImportProfilesAction
     }
     dialog.setLocationRelativeTo(window);
     dialog.setVisible(true);
-
-    if (!dialog.isCancelled())
-    {
-      panel.applyProfiles();
-    }
   }
 
 }

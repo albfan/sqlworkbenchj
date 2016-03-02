@@ -23,6 +23,7 @@
  */
 package workbench.gui.profiles;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,6 +36,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+
+import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -52,9 +55,17 @@ import workbench.util.StringUtil;
 class ProfileListModel
 	extends DefaultTreeModel
 {
+  private File sourceFile;
 	private	final DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private final List<ConnectionProfile> profiles = new ArrayList<>();;
 	private final List<ConnectionProfile> filtered = new ArrayList<>();
+
+	ProfileListModel()
+  {
+    super(null, true);
+    buildTree();
+    addGroup(ResourceMgr.getString("LblDefGroup"));
+  }
 
 	ProfileListModel(List<ConnectionProfile> sourceProfiles)
 	{
@@ -66,6 +77,16 @@ class ProfileListModel
 		}
 		buildTree();
 	}
+
+  public void setSourceFile(File f)
+  {
+    sourceFile = f;
+  }
+
+  public File getSourceFile()
+  {
+    return sourceFile;
+  }
 
 	private void sortList(List<ConnectionProfile> toSort)
 	{
@@ -362,6 +383,14 @@ class ProfileListModel
 		this.removeNodeFromParent(groupNode);
 	}
 
+  public void saveTo(File file)
+  {
+    ProfileManager mgr = new ProfileManager(file);
+    mgr.applyProfiles(getAllProfiles());
+    mgr.save();
+    sourceFile = file;
+  }
+
 	public void saveProfiles()
 	{
 		applyProfiles();
@@ -475,7 +504,7 @@ class ProfileListModel
 
 	public DefaultMutableTreeNode copyProfilesToGroup(List<ConnectionProfile> droppedProfiles, DefaultMutableTreeNode groupNode)
 	{
-		if (CollectionUtil.isEmpty(profiles)) return null;
+		if (CollectionUtil.isEmpty(droppedProfiles)) return null;
 		if (groupNode == null) return null;
 
 		String groupName = (String)groupNode.getUserObject();
