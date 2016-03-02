@@ -55,7 +55,9 @@ public class ImportProfilesAction
 
     ProfileImporterPanel panel = new ProfileImporterPanel();
 
-    ValidatingDialog dialog = new ValidatingDialog(window, "Import profiles", panel, new String[] { ResourceMgr.getString("LblClose") }, false);
+    String title = ResourceMgr.getString("MnuTxtImportProfiles").replace("...", "");
+
+    ValidatingDialog dialog = new ValidatingDialog(window, title, panel, new String[] { ResourceMgr.getString("LblClose") }, false);
 
     if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.import.profiles"))
     {
