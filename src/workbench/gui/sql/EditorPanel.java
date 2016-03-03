@@ -697,8 +697,7 @@ public class EditorPanel
 
     if (this.isModified())
     {
-      String msg = ResourceMgr.getString("MsgConfirmUnsavedEditorFile");
-      msg = StringUtil.replace(msg, "%filename%", this.getCurrentFileName());
+      String msg = ResourceMgr.getFormattedString("MsgConfirmUnsavedEditorFile", this.getCurrentFileName());
       if (allowCancel)
       {
         result = WbSwingUtilities.getYesNoCancel(this, msg);

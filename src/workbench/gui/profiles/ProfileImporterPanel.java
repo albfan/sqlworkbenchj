@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
@@ -68,6 +69,13 @@ public class ProfileImporterPanel
   private WbAction openCurrentAction;
   private WbAction saveCurrentAction;
 
+  private enum CheckResult
+  {
+    ok,
+    saveFile,
+    cancel;
+  }
+
   public ProfileImporterPanel()
   {
     initComponents();
@@ -92,13 +100,13 @@ public class ProfileImporterPanel
     saveCurrentAction.setIcon("save");
     currentToolbar.add(saveCurrentAction);
     currentToolbar.addSeparator();
-
     currentInfopanel.setPreferredSize(sourceInfoPanel.getPreferredSize());
   }
 
   public void loadCurrentProfiles()
   {
     ProfileListModel model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
+    model.setSourceFile(ConnectionMgr.getInstance().getProfilesFile());
     WbSwingUtilities.invoke(() ->
     {
       currentProfiles.setModel(model);
@@ -115,7 +123,6 @@ public class ProfileImporterPanel
   @Override
   public void actionPerformed(ActionEvent e)
   {
-
     if (e.getActionCommand().equals(CMD_OPEN_SOURCE))
     {
       ProfileListModel model = loadFile(DIRKEY_SOURCE, sourceFilename);
@@ -273,7 +280,53 @@ public class ProfileImporterPanel
   @Override
   public boolean validateInput()
   {
+    CheckResult result = checkUnsaved(currentProfiles.getModel());
+    if (result == CheckResult.cancel) return false;
+
+    if (result == CheckResult.saveFile)
+    {
+      saveCurrent(false);
+    }
+
+    result = checkUnsaved(sourceProfiles.getModel());
+    if (result == CheckResult.cancel) return false;
+
+    if (result == CheckResult.saveFile)
+    {
+      saveSource(false);
+    }
+
     return true;
+  }
+
+  private CheckResult checkUnsaved(ProfileListModel model)
+  {
+    if (model == null) return CheckResult.ok;
+    if (!model.isChanged()) return CheckResult.ok;
+
+    File f = model.getSourceFile();
+    String fname = null;
+    if (f == null)
+    {
+      fname = ResourceMgr.getString("LblNone");
+    }
+    else
+    {
+      fname = f.getAbsolutePath();
+    }
+
+    String msg = ResourceMgr.getFormattedString("MsgConfirmUnsavedEditorFile", fname);
+
+    int choice = WbSwingUtilities.getYesNoCancel(this, msg);
+    if (choice == JOptionPane.YES_OPTION)
+    {
+      return CheckResult.saveFile;
+    }
+    if (choice == JOptionPane.CANCEL_OPTION)
+    {
+      return CheckResult.cancel;
+    }
+    return CheckResult.ok;
   }
 
   @Override

@@ -207,6 +207,11 @@ class ProfileListModel
 		buildTree();
 	}
 
+  public boolean isChanged()
+  {
+    return profilesAreModified() || groupsChanged();
+  }
+
 	/**
 	 *	Returns true if any of the profile definitions has changed.
 	 *	(Or if a profile has been deleted or added)
