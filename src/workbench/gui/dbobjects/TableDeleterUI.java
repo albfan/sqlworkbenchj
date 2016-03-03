@@ -147,7 +147,7 @@ public class TableDeleterUI
     gridBagConstraints.insets = new Insets(0, 20, 0, 20);
     buttonPanel.add(deleteButton, gridBagConstraints);
 
-    cancelButton.setText(ResourceMgr.getString("LblCancel")); // NOI18N
+    cancelButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
     cancelButton.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)
@@ -516,6 +516,7 @@ public class TableDeleterUI
 
 		try
 		{
+      cancelButton.setText(ResourceMgr.getString("LblCancel"));
 			deletedTables = deleter.deleteTableData(this.objectNames, doCommitEach, useTruncate, cascadedTruncate);
 		}
 		catch (SQLException e)
@@ -526,6 +527,7 @@ public class TableDeleterUI
 		}
 		finally
 		{
+      cancelButton.setText(ResourceMgr.getString("LblClose"));
 			EventQueue.invokeLater(() ->
       {
         deleteButton.setEnabled(true);

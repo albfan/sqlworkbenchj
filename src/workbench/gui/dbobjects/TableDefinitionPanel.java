@@ -410,6 +410,7 @@ public class TableDefinitionPanel
 				WbSwingUtilities.invoke(() ->
         {
           applyTableModel(model);
+          tableDefinition.adjustColumns();
         });
 				alterColumnsAction.setSourceTable(dbConnection, currentTable);
 				alterColumnsAction.setEnabled(false);

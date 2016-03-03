@@ -179,4 +179,16 @@ public class NameUtil
     return SqlUtil.quoteObjectname(input, false, true, '"');
   }
 
+  public static String toLowerCase(String input)
+  {
+    if (input == null) return "";
+    return input.toLowerCase();
+  }
+
+  public static String toUpperCase(String input)
+  {
+    if (input == null) return "";
+    return input.toUpperCase();
+  }
+
 }
