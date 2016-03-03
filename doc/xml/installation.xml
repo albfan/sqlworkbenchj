@@ -196,11 +196,12 @@
           with the following parameter:
         </para>
 
-        <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\client\jvm.dll</programlisting>
+        <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\server\jvm.dll</programlisting>
         <para>
           You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
-          not the directory where the Java runtime is installed. Note that the 64bit JRE does not have the <literal>client</literal>
-          subdirectory, only <literal>jre\bin\server\jvm.dll</literal>
+          <emphasis role="bold">not</emphasis> the <emphasis>directory</emphasis> where the Java runtime is installed.
+          Note that the 32bit Java runtime has both a <literal>server\jvm.dll</literal> <emphasis>and</emphasis> <literal>client\jvm.dll</literal>
+          A 64bit Java runtime only has a <literal>server\jvm.dll</literal>.
         </para>
       </section>
 
