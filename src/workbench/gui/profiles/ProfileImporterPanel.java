@@ -107,6 +107,7 @@ public class ProfileImporterPanel
   {
     ProfileListModel model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
     model.setSourceFile(ConnectionMgr.getInstance().getProfilesFile());
+    model.resetChanged();
     WbSwingUtilities.invoke(() ->
     {
       currentProfiles.setModel(model);
@@ -188,6 +189,7 @@ public class ProfileImporterPanel
         info.setText(ConnectionMgr.getInstance().getProfilesPath());
         ProfileListModel model = new ProfileListModel(ConnectionMgr.getInstance().getProfiles());
         model.setSourceFile(ConnectionMgr.getInstance().getProfilesFile());
+        model.resetChanged();
       }
       else
       {
@@ -196,6 +198,7 @@ public class ProfileImporterPanel
         mgr.load();
         ProfileListModel model = new ProfileListModel(mgr.getProfiles());
         model.setSourceFile(f);
+        model.resetChanged();
         return model;
       }
     }

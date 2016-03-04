@@ -25,7 +25,6 @@ package workbench.db.postgres;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
 
@@ -159,15 +158,18 @@ public class PostgresColumnEnhancer
 
 		HashMap<String, ArrayDef> dims = new HashMap<>(table.getColumnCount());
 
+    String tname = table.getTable().getRawTableName();
+    String tschema = table.getTable().getRawSchema();
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "Retrieving array information using:\n" + SqlUtil.replaceParameters(sql, tname, tschema));
+    }
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getTable().getTableName());
-			stmt.setString(2, table.getTable().getSchema());
-      if (Settings.getInstance().getDebugMetadataSql())
-      {
-        LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "Retrieving array information using SQL=\n" + stmt.toString());
-      }
+			stmt.setString(1, tname);
+			stmt.setString(2, tschema);
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
@@ -178,14 +180,15 @@ public class PostgresColumnEnhancer
 				dims.put(colname, def);
 			}
 		}
-		catch (SQLException ex)
+		catch (Exception ex)
 		{
-			LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read array information using:\n" + stmt.toString(), ex);
+			LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read array information using:\n" + SqlUtil.replaceParameters(sql, tname, tschema), ex);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			ArrayDef def = dims.get(col.getColumnName());
@@ -219,15 +222,18 @@ public class PostgresColumnEnhancer
 			"  and ns.nspname = ? \n" +
 			"  and not att.attisdropped";
 
+    String tname = table.getTable().getRawTableName();
+    String tschema = table.getTable().getRawSchema();
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("PostgresColumnEnhancer.readColumnInfo()", "Retrieving column information using :\n" + SqlUtil.replaceParameters(sql, tname, tschema));
+    }
+
 		try
 		{
 			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getTable().getTableName());
-			stmt.setString(2, table.getTable().getSchema());
-      if (Settings.getInstance().getDebugMetadataSql())
-      {
-        LogMgr.logDebug("PostgresColumnEnhancer.readCollations()", "Retrieving column information using SQL=\n" + stmt.toString());
-      }
+			stmt.setString(1, tname);
+			stmt.setString(2, tschema);
 
 			rs = stmt.executeQuery();
 			while (rs.next())
@@ -268,9 +274,9 @@ public class PostgresColumnEnhancer
 				}
 			}
 		}
-		catch (SQLException ex)
+		catch (Exception ex)
 		{
-			LogMgr.logError("PostgresColumnEnhancer.readColumnInfo()", "Could not read column information using: " + stmt.toString(), ex);
+			LogMgr.logError("PostgresColumnEnhancer.readColumnInfo()", "Could not read column information using: " + SqlUtil.replaceParameters(sql, tname, tschema), ex);
 		}
 		finally
 		{

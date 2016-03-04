@@ -152,6 +152,8 @@ public class ProfileTreeTransferHandler
 
     if (parentNode == null) return false;
 
+    if (!parentNode.getAllowsChildren()) return false;
+    
     int action = DnDConstants.ACTION_COPY;
 
     if (support.isDrop())

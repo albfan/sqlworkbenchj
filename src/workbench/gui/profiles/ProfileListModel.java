@@ -394,6 +394,7 @@ class ProfileListModel
     mgr.applyProfiles(getAllProfiles());
     mgr.save();
     sourceFile = file;
+    resetChanged();
   }
 
 	public void saveProfiles()

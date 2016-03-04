@@ -24,7 +24,6 @@
 package workbench.gui.profiles;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -39,16 +38,12 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -79,7 +74,6 @@ import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DividerBorder;
-import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbLabel;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
@@ -102,7 +96,6 @@ public class ProfileSelectionPanel
 	private MouseListener listMouseListener;
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
-	private DeleteListEntryAction deleteItem;
   private JTextField filterValue;
 	protected boolean dummyAdded;
 	private List<String> orgExpandedGroups;
@@ -137,9 +130,7 @@ public class ProfileSelectionPanel
 		this.toolbar.add(new NewGroupAction(tree, "LblNewProfileGroup"));
 
 		this.toolbar.addSeparator();
-		deleteItem = new DeleteListEntryAction(this);
-		deleteItem.setEnabled(false);
-		this.toolbar.add(deleteItem);
+		this.toolbar.add(getDeleteAction());
 
 		this.toolbar.addSeparator();
 		this.toolbar.add(new SaveListFileAction(this));
@@ -185,8 +176,6 @@ public class ProfileSelectionPanel
 
 		this.listPanel.add(p, BorderLayout.NORTH);
 
-		tree.setDeleteAction(deleteItem);
-
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		this.setFocusCycleRoot(false);
 		policy.addComponent(this.profileTree);
@@ -206,6 +195,11 @@ public class ProfileSelectionPanel
       filterValue.addKeyListener(this);
     }
 	}
+
+  private DeleteListEntryAction getDeleteAction()
+  {
+    return ((ProfileTree)profileTree).getDeleteAction();
+  }
 
   private void showTagPopup()
   {
@@ -478,51 +472,6 @@ public class ProfileSelectionPanel
 		this.listMouseListener = aListener;
 	}
 
-	private boolean checkGroupWithProfiles(DefaultMutableTreeNode groupNode)
-	{
-		List<String> groups = model.getGroups();
-		JPanel p = new JPanel();
-		DefaultComboBoxModel m = new DefaultComboBoxModel(groups.toArray());
-		JComboBox groupBox = new JComboBox(m);
-		groupBox.setSelectedIndex(0);
-		p.setLayout(new BorderLayout(0, 5));
-		String groupName = (String)groupNode.getUserObject();
-		String lbl = ResourceMgr.getFormattedString("LblDeleteNonEmptyGroup", groupName);
-		p.add(new JLabel(lbl), BorderLayout.NORTH);
-		p.add(groupBox, BorderLayout.SOUTH);
-		String[] options = new String[]{ResourceMgr.getString("LblMoveProfiles"), ResourceMgr.getString("LblDeleteProfiles")};
-
-		Dialog parent = (Dialog)SwingUtilities.getWindowAncestor(this);
-
-		ValidatingDialog dialog = new ValidatingDialog(parent, ResourceMgr.TXT_PRODUCT_NAME, p, options);
-		WbSwingUtilities.center(dialog, parent);
-		dialog.setVisible(true);
-		if (dialog.isCancelled())
-		{
-			return false;
-		}
-
-		int result = dialog.getSelectedOption();
-		if (result == 0)
-		{
-			// move profiles
-			String group = (String)groupBox.getSelectedItem();
-			if (group == null)
-			{
-				return false;
-			}
-
-			model.moveProfilesToGroup(groupNode, group);
-			return true;
-		}
-		else if (result == 1)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
 	/**
 	 *	Remove an item from the listmodel.
 	 *	This will also remove the profile from the ConnectionMgr's
@@ -532,46 +481,7 @@ public class ProfileSelectionPanel
 	public void deleteItem()
 		throws Exception
 	{
-		TreePath[] path = profileTree.getSelectionPaths();
-		if (path == null) return;
-		if (path.length == 0)	return;
-
-		ProfileTree tree = (ProfileTree)profileTree;
-		if (tree.onlyProfilesSelected())
-		{
-			DefaultMutableTreeNode group = (DefaultMutableTreeNode)path[0].getPathComponent(1);
-			DefaultMutableTreeNode firstNode = (DefaultMutableTreeNode)path[0].getLastPathComponent();
-			int newIndex = model.getIndexOfChild(group, firstNode);
-			if (newIndex > 0)
-			{
-				newIndex--;
-			}
-
-			for (TreePath element : path)
-			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) element.getLastPathComponent();
-				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
-				this.model.deleteProfile(prof);
-			}
-			if (group.getChildCount() > 0)
-			{
-				Object newChild = model.getChild(group, newIndex);
-				TreePath newPath = new TreePath(new Object[]{model.getRoot(), group, newChild});
-				((ProfileTree)profileTree).selectPath(newPath);
-			}
-		}
-		else // delete a group
-		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path[0].getLastPathComponent();
-			if (node.getChildCount() > 0)
-			{
-				if (!checkGroupWithProfiles(node))
-				{
-					return;
-				}
-			}
-			model.removeGroupNode(node);
-		}
+    ((ProfileTree)profileTree).deleteSelectedItem();
 	}
 
 	/**
@@ -802,13 +712,13 @@ public class ProfileSelectionPanel
 					}
 					this.connectionEditor.setProfile(newProfile);
           this.connectionEditor.setAllTags(model.getAllTags());
-					this.deleteItem.setEnabled(true);
+					getDeleteAction().setEnabled(true);
 					this.copyItem.setEnabled(true);
 				}
 				else
 				{
 					this.connectionEditor.setVisible(false);
-					this.deleteItem.setEnabled(true);
+					getDeleteAction().setEnabled(true);
 					this.copyItem.setEnabled(false);
 				}
 			}

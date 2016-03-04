@@ -23,6 +23,8 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -40,9 +42,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DropMode;
 import javax.swing.Icon;
 import javax.swing.InputMap;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -59,6 +65,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.ExpandableTree;
+import workbench.interfaces.FileActions;
 import workbench.interfaces.GroupTree;
 import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
@@ -69,6 +76,7 @@ import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.menu.CutCopyPastePopup;
 
 import workbench.util.CollectionUtil;
@@ -93,6 +101,8 @@ public class ProfileTree
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
   private boolean allowDirectChange = true;
   private ProfileTreeTransferHandler transferHandler = new ProfileTreeTransferHandler(this);
+  private NewGroupAction newGroupAction;
+  private DeleteListEntryAction deleteAction;
 
 	public ProfileTree()
 	{
@@ -109,7 +119,30 @@ public class ProfileTree
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 
-    this.popup = new CutCopyPastePopup(this);
+    popup = new CutCopyPastePopup(this);
+
+    newGroupAction = new NewGroupAction(this, "LblNewProfileGroup");
+    deleteAction = new DeleteListEntryAction(new FileActions()
+    {
+      @Override
+      public void saveItem()
+        throws Exception
+      {
+      }
+
+      @Override
+      public void deleteItem()
+        throws Exception
+      {
+        deleteSelectedItem();
+      }
+
+      @Override
+      public void newItem(boolean copyCurrent)
+        throws Exception
+      {
+      }
+    });
 
     WbAction a = popup.getPasteAction();
     a.addToInputMap(im, am);
@@ -123,10 +156,14 @@ public class ProfileTree
     pasteToFolderAction = new WbAction(this, "pasteToFolder");
     pasteToFolderAction.removeIcon();
     pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
-    popup.addAction(pasteToFolderAction, true);
 
+    popup.addAction(newGroupAction, true);
+    popup.addAction(pasteToFolderAction, false);
     renameGroup = new RenameGroupAction(this);
     popup.addAction(renameGroup, false);
+
+    popup.addAction(deleteAction, true);
+    deleteAction.addToInputMap(im, am);
 
     setupIcons();
 		setAutoscrolls(true);
@@ -138,6 +175,11 @@ public class ProfileTree
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
 	}
+
+  public DeleteListEntryAction getDeleteAction()
+  {
+    return deleteAction;
+  }
 
   private void setupIcons()
   {
@@ -165,14 +207,94 @@ public class ProfileTree
     }
   }
 
-  public void setDeleteAction(DeleteListEntryAction delete)
-  {
-    this.popup.addSeparator();
-    this.popup.add(delete);
-    InputMap im = this.getInputMap(WHEN_FOCUSED);
-    ActionMap am = this.getActionMap();
-    delete.addToInputMap(im, am);
-  }
+	public void deleteSelectedItem()
+		throws Exception
+	{
+		TreePath[] path = getSelectionPaths();
+		if (path == null) return;
+		if (path.length == 0)	return;
+
+		if (onlyProfilesSelected())
+		{
+			DefaultMutableTreeNode group = (DefaultMutableTreeNode)path[0].getPathComponent(1);
+			DefaultMutableTreeNode firstNode = (DefaultMutableTreeNode)path[0].getLastPathComponent();
+			int newIndex = getModel().getIndexOfChild(group, firstNode);
+			if (newIndex > 0)
+			{
+				newIndex--;
+			}
+
+			for (TreePath element : path)
+			{
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) element.getLastPathComponent();
+				ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
+				getModel().deleteProfile(prof);
+			}
+			if (group.getChildCount() > 0)
+			{
+				Object newChild = getModel().getChild(group, newIndex);
+				TreePath newPath = new TreePath(new Object[]{getModel().getRoot(), group, newChild});
+				selectPath(newPath);
+			}
+		}
+		else // delete a group
+		{
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)path[0].getLastPathComponent();
+			if (node.getChildCount() > 0)
+			{
+				if (!checkGroupWithProfiles(node))
+				{
+					return;
+				}
+			}
+			getModel().removeGroupNode(node);
+		}
+	}
+
+	private boolean checkGroupWithProfiles(DefaultMutableTreeNode groupNode)
+	{
+		List<String> groups = getModel().getGroups();
+		JPanel p = new JPanel();
+		DefaultComboBoxModel m = new DefaultComboBoxModel(groups.toArray());
+		JComboBox groupBox = new JComboBox(m);
+		groupBox.setSelectedIndex(0);
+		p.setLayout(new BorderLayout(0, 5));
+		String groupName = (String)groupNode.getUserObject();
+		String lbl = ResourceMgr.getFormattedString("LblDeleteNonEmptyGroup", groupName);
+		p.add(new JLabel(lbl), BorderLayout.NORTH);
+		p.add(groupBox, BorderLayout.SOUTH);
+		String[] options = new String[]{ResourceMgr.getString("LblMoveProfiles"), ResourceMgr.getString("LblDeleteProfiles")};
+
+		Dialog parent = (Dialog)SwingUtilities.getWindowAncestor(this);
+
+		ValidatingDialog dialog = new ValidatingDialog(parent, ResourceMgr.TXT_PRODUCT_NAME, p, options);
+		WbSwingUtilities.center(dialog, parent);
+		dialog.setVisible(true);
+		if (dialog.isCancelled())
+		{
+			return false;
+		}
+
+		int result = dialog.getSelectedOption();
+		if (result == 0)
+		{
+			// move profiles
+			String group = (String)groupBox.getSelectedItem();
+			if (group == null)
+			{
+				return false;
+			}
+
+			getModel().moveProfilesToGroup(groupNode, group);
+			return true;
+		}
+		else if (result == 1)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	@Override
 	public void setModel(TreeModel model)
@@ -564,7 +686,7 @@ public class ProfileTree
 		DefaultMutableTreeNode group = this.getSelectedGroupNode();
 		if (group == null) return;
 		String oldName = (String)group.getUserObject();
-		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), oldName);
+		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblRenameProfileGroup"), oldName);
 		if (StringUtil.isEmptyString(newName)) return;
 		group.setUserObject(newName);
 		renameGroup(group, newName);

@@ -97,7 +97,7 @@ public class PostgresInheritanceReader
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresInheritanceReader.getChildTables()", "Retrieving child tables using:\n" + pstmt.toString());
+				LogMgr.logDebug("PostgresInheritanceReader.getChildTables()", "Retrieving child tables using:\n" + SqlUtil.replaceParameters(sqlToUse, table.getSchema(), table.getTableName()));
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -113,7 +113,7 @@ public class PostgresInheritanceReader
 		catch (Exception e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresInheritanceReader.getChildTables()", "Error retrieving table options using: " + pstmt.toString(), e);
+      LogMgr.logError("PostgresInheritanceReader.getChildTables()", "Error retrieving table options using:\n" + SqlUtil.replaceParameters(sqlToUse, table.getSchema(), table.getTableName()), e);
 			return null;
 		}
 		finally
@@ -150,7 +150,7 @@ public class PostgresInheritanceReader
 			pstmt.setString(2, table.getTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresInheritanceReader.getParents()", "Reading parent tables using:\n" + pstmt);
+				LogMgr.logDebug("PostgresInheritanceReader.getParents()", "Reading parent tables using:\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
 			}
 			rs = pstmt.executeQuery();
 			while (rs.next())
@@ -164,7 +164,7 @@ public class PostgresInheritanceReader
 		catch (Exception e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresInheritanceReader.getParents()", "Error retrieving table inheritance using:\n" + pstmt, e);
+			LogMgr.logError("PostgresInheritanceReader.getParents()", "Error retrieving table inheritance using:\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), e);
 			return null;
 		}
 		finally

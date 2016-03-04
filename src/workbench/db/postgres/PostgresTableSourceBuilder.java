@@ -384,19 +384,26 @@ public class PostgresTableSourceBuilder
 
 	private String getOwnerSql(TableIdentifier table)
 	{
-		DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
-		if (genType == DbSettings.GenerateOwnerType.never) return null;
+    try
+    {
+      DbSettings.GenerateOwnerType genType = dbConnection.getDbSettings().getGenerateTableOwner();
+      if (genType == DbSettings.GenerateOwnerType.never) return null;
 
-		String owner = table.getOwner();
-		if (StringUtil.isBlank(owner)) return null;
+      String owner = table.getOwner();
+      if (StringUtil.isBlank(owner)) return null;
 
-		if (genType == DbSettings.GenerateOwnerType.whenNeeded)
-		{
-			String user = dbConnection.getCurrentUser();
-			if (user.equalsIgnoreCase(owner)) return null;
-		}
+      if (genType == DbSettings.GenerateOwnerType.whenNeeded)
+      {
+        String user = dbConnection.getCurrentUser();
+        if (user.equalsIgnoreCase(owner)) return null;
+      }
 
-		return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " SET OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
+      return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " SET OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
+    }
+    catch (Exception ex)
+    {
+      return null;
+    }
 	}
 
 	private CharSequence getColumnSequenceInformation(TableIdentifier table, List<ColumnIdentifier> columns)
@@ -435,7 +442,7 @@ public class PostgresTableSourceBuilder
 			}
 			dbConnection.releaseSavepoint(sp);
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			dbConnection.rollback(sp);
 			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information", e);
@@ -452,7 +459,8 @@ public class PostgresTableSourceBuilder
 	{
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection, schema, null);
-		if (enums == null || enums.isEmpty()) return null;
+    if (CollectionUtil.isEmpty(enums)) return null;
+    
 		StringBuilder result = null;
 
 		for (ColumnIdentifier col : columns)

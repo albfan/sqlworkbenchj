@@ -24,7 +24,6 @@
 package workbench.db.postgres;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
@@ -58,14 +57,15 @@ import workbench.util.StringUtil;
 public class PostgresEnumReader
 	implements ObjectListExtender
 {
-	final	String baseSql = "select current_database() as enum_catalog, \n" +
-             "       n.nspname as enum_schema,  \n" +
-             "       t.typname as enum_name,  \n" +
-             "       e.enumlabel as enum_value,  \n" +
-             "       obj_description(t.oid) as remarks \n" +
-             "from pg_type t \n" +
-             "   join pg_enum e on t.oid = e.enumtypid  \n" +
-             "   join pg_catalog.pg_namespace n ON n.oid = t.typnamespace";
+	final	String baseSql =
+    "select current_database() as enum_catalog, \n" +
+    "       n.nspname as enum_schema,  \n" +
+    "       t.typname as enum_name,  \n" +
+    "       e.enumlabel as enum_value,  \n" +
+    "       obj_description(t.oid) as remarks \n" +
+    "from pg_type t \n" +
+    "   join pg_enum e on t.oid = e.enumtypid  \n" +
+    "   join pg_catalog.pg_namespace n ON n.oid = t.typnamespace";
 
 	@Override
 	public EnumIdentifier getObjectDefinition(WbConnection con, DbObject obj)
@@ -77,16 +77,23 @@ public class PostgresEnumReader
 		Savepoint sp = null;
 
 		String enumName = obj.getObjectName();
-		String sql = "SELECT * FROM (" + baseSql + ") ei ";
-		sql += " WHERE enum_name = '" + con.getMetadata().quoteObjectname(enumName) + "' ";
+		String sql =
+      "SELECT * \n" +
+      "FROM (\n" + baseSql + "\n) ei\n" +
+		  "WHERE enum_name = '" + enumName + "' ";
 
 		String schema = obj.getSchema();
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql += " AND enum_schema = '"  + con.getMetadata().quoteObjectname(schema) + "'";
+			sql += "\n  AND enum_schema = '"  + schema + "'";
 		}
 
 		EnumIdentifier enumDef = null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresEnumReader.getObjectDefinition()", "Reading enums values using:\n" + sql);
+		}
 
 		try
 		{
@@ -114,10 +121,10 @@ public class PostgresEnumReader
 
 			con.releaseSavepoint(sp);
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresEnumReader.getEnumValues()", "Could not read enum values", e);
+			LogMgr.logError("PostgresEnumReader.getEnumValues()", "Could not read enum values using: " + sql, e);
 		}
 		finally
 		{
@@ -155,7 +162,7 @@ public class PostgresEnumReader
 		sql.append("\n ORDER BY 2");
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresEnumReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("PostgresEnumReader.getSql()", "Reading enums using:\n" + sql);
 		}
 		return sql.toString();
 	}
@@ -198,10 +205,10 @@ public class PostgresEnumReader
 			}
 			con.releaseSavepoint(sp);
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresEnumReader.getEnumValues()", "Could not read enum values", e);
+			LogMgr.logError("PostgresEnumReader.getEnumValues()", "Could not read enum values using:\n" + sql, e);
 		}
 		finally
 		{

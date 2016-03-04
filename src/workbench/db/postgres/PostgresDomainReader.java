@@ -24,7 +24,6 @@
 package workbench.db.postgres;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
@@ -113,7 +112,7 @@ public class PostgresDomainReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresDomainReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("PostgresDomainReader.getSql()", "Retrieving domains using:\n" + sql);
 		}
 
 		return sql.toString();
@@ -124,12 +123,13 @@ public class PostgresDomainReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
+    String sql = null;
 		List<DomainIdentifier> result = new ArrayList<>();
 		try
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern);
+			sql = getSql(connection, schemaPattern, namePattern);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -146,10 +146,10 @@ public class PostgresDomainReader
 			}
 			connection.releaseSavepoint(sp);
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
 			connection.rollback(sp);
-			LogMgr.logError("PostgresDomainReader.getDomainList()", "Could not read domains", e);
+			LogMgr.logError("PostgresDomainReader.getDomainList()", "Could not read domains using:\n" + sql, e);
 		}
 		finally
 		{
