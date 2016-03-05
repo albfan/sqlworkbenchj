@@ -126,8 +126,12 @@ public class ProfileTreeTransferHandler
     JTree.DropLocation location = (JTree.DropLocation)support.getDropLocation();
     TreePath path = location.getPath();
     if (path == null) return false;
+
     TreeNode node = (TreeNode)path.getLastPathComponent();
-    return node.getAllowsChildren();
+    if (!node.getAllowsChildren()) return false;
+
+    Transferable transferable = support.getTransferable();
+    return transferable != null;
   }
 
   @Override
@@ -151,9 +155,8 @@ public class ProfileTreeTransferHandler
     }
 
     if (parentNode == null) return false;
-
     if (!parentNode.getAllowsChildren()) return false;
-    
+
     int action = DnDConstants.ACTION_COPY;
 
     if (support.isDrop())
@@ -167,16 +170,7 @@ public class ProfileTreeTransferHandler
       if (transferable == null) return false;
 
       TransferableProfileNode transferNode = (TransferableProfileNode)transferable.getTransferData(ProfileFlavor.FLAVOR);
-      TreePath[] dropPath = transferNode.getPath();
-      if (dropPath == null) return false;
-
-      List<ConnectionProfile> profiles = new ArrayList<>(dropPath.length);
-      for (TreePath treePath : dropPath)
-      {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
-        ConnectionProfile profile = (ConnectionProfile)node.getUserObject();
-        profiles.add(profile);
-      }
+      List<ConnectionProfile> profiles = getProfiles(transferable);
 
       Window parent = SwingUtilities.getWindowAncestor(tree);
       ProfileTree sourceTree = (ProfileTree)WbSwingUtilities.findComponentByName(ProfileTree.class, transferNode.getSourceName(), parent);
@@ -219,10 +213,40 @@ public class ProfileTreeTransferHandler
     }
   }
 
+  private List<ConnectionProfile> getProfiles(Transferable transferable)
+  {
+    List<ConnectionProfile> profiles = new ArrayList<>();
+    TransferableProfileNode transferNode = null;
+
+    try
+    {
+      transferNode = (TransferableProfileNode)transferable.getTransferData(ProfileFlavor.FLAVOR);
+    }
+    catch (Exception ex)
+    {
+      return profiles;
+    }
+
+    TreePath[] dropPath = transferNode.getPath();
+    if (dropPath == null) return profiles;
+
+    for (TreePath treePath : dropPath)
+    {
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
+      ConnectionProfile profile = (ConnectionProfile)node.getUserObject();
+      profiles.add(profile);
+    }
+    return profiles;
+  }
+
   @Override
   public void exportToClipboard(JComponent comp, Clipboard clip, int action)
     throws IllegalStateException
   {
+    // this changes a Cut & Paste action into a Copy & Paste action
+    // so that the cut nodes are still visible in the tree until
+    // pasted into their new location. The default MOVE action
+    // removes the nodes immediately.
     if (action == MOVE)
     {
       lastCutNodes = ((ProfileTree)comp).getSelectionPaths();

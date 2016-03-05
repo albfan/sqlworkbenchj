@@ -268,7 +268,7 @@ public class PostgresIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresIndexReader.processIndexList()", "Using sql: " + sql.toString());
+			LogMgr.logDebug("PostgresIndexReader.processIndexList()", "Retrieving index tablespace information using:\n" + sql);
 		}
 
 		Savepoint sp = null;
@@ -296,7 +296,7 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresIndexReader.processIndexList()", "Error retrieving source", e);
+			LogMgr.logError("PostgresIndexReader.processIndexList()", "Error retrieving index tablespace using:\n" + sql, e);
 		}
 		finally
 		{
@@ -350,7 +350,8 @@ public class PostgresIndexReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresIndexReader.getIndexSource2()", "Using SQL:\n " + sql);
+      LogMgr.logDebug("PostgresIndexReader.getIndexSource2()", "Retrieving index source using:\n " +
+        SqlUtil.replaceParameters(sql, indexDefinition.getName(), table.getSchema()));
 		}
 
 		Savepoint sp = null;
@@ -379,7 +380,8 @@ public class PostgresIndexReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresIndexReader.getIndexSource2()", "Error when retrieving index", e);
+			LogMgr.logError("PostgresIndexReader.getIndexSource2()", "Error when retrieving index information using:\n" +
+          SqlUtil.replaceParameters(sql, indexDefinition.getName(), table.getSchema()), e);
 		}
 		finally
 		{

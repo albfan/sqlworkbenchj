@@ -176,7 +176,7 @@ public class PostgresTypeReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("PostgresTypeReader.extendObjectList()", "Using SQL: " + select);
+			LogMgr.logInfo("PostgresTypeReader.getTypes()", "Retrieving types using:\n" + select);
 		}
 
 		Statement stmt = null;
@@ -201,7 +201,7 @@ public class PostgresTypeReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresTypeReader.getTypes()", "Error retrieving object types", e);
+			LogMgr.logError("PostgresTypeReader.getTypes()", "Error retrieving object types using:\n" + select, e);
 		}
 		finally
 		{
@@ -362,7 +362,8 @@ public class PostgresTypeReader
     }
     catch (Exception ex)
     {
-      LogMgr.logWarning("PostgresTypeReader.getColumns()", "Could not read colums for type: " + object.getFullyQualifiedName(con), ex);
+      LogMgr.logWarning("PostgresTypeReader.getColumns()", "Could not read colums for type: " + object.getFullyQualifiedName(con) + " using:\n" +
+        SqlUtil.replaceParameters(sql, object.getSchema(), object.getObjectName()), ex);
     }
     finally
     {

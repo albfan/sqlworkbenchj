@@ -1,5 +1,5 @@
 <section id="wb-grep-commands">
-  <title>&wb-productname; commands to search the complete database</title>
+  <title>Search data and code in the database</title>
 
 	<important><para>
     All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;

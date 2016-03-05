@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -495,9 +497,9 @@ class ProfileListModel
 			profile.setGroup(groupName);
 
       // this method is called as part of a Drag & Drop or Copy & Paste action
-      // we only need to take care of inserting the new node. The TransferHandler
-      // will take care of removing the original node from it's parent in the model
-      // this is necessary to support transfer between two differen trees
+      // We only need to take care of inserting the new node. The TransferHandler
+      // will take care of removing the original node from it's parent in the model.
+      // This is necessary to support transfer between two differen trees
       DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(profile, false);
       if (firstNode == null)
       {
@@ -507,6 +509,55 @@ class ProfileListModel
 		}
     return firstNode;
 	}
+
+  /**
+   * Renames the passed profile to make the name unique in the target group.
+   *
+   * The "copy index" is appended to the new name in parentheses. So if a profile "Foo" is passed
+   * and the group already contains "Foo", this method will rename the profile to "Foo (1)".
+   * If the group already contains "Foo", "Foo (1)" and "Foo (2)" this method will rename the profile to "Foo (3)".
+   *
+   * @param copy       the new profile
+   * @param groupNode  the group into which the profile is copied
+   */
+  private void adjustCopiededProfileName(ConnectionProfile copy, DefaultMutableTreeNode groupNode)
+  {
+    String newName = copy.getName();
+    String plainName = newName.toLowerCase();
+    boolean hasNumber = false;
+
+    Pattern p = Pattern.compile("\\(([0-9+])\\)$");
+    Matcher m = p.matcher(newName);
+    if (m.find())
+    {
+      hasNumber = true;
+      plainName = newName.substring(0, m.start()).trim().toLowerCase();
+    }
+
+    int copyIndex = 0;
+
+    int count = groupNode.getChildCount();
+    for (int i=0; i < count; i++)
+    {
+      DefaultMutableTreeNode child = (DefaultMutableTreeNode)groupNode.getChildAt(i);
+      Object uo = child.getUserObject();
+      if (uo instanceof ConnectionProfile)
+      {
+        String name = ((ConnectionProfile)uo).getName();
+        if (name.toLowerCase().startsWith(plainName))
+        {
+          copyIndex ++;
+        }
+      }
+    }
+
+    if (copyIndex > 0)
+    {
+      String suffix = "(" + copyIndex + ")";
+      String renamed = hasNumber ? m.replaceFirst(suffix) : newName + " " + suffix;
+      copy.setName(renamed);
+    }
+  }
 
 	public DefaultMutableTreeNode copyProfilesToGroup(List<ConnectionProfile> droppedProfiles, DefaultMutableTreeNode groupNode)
 	{
@@ -532,6 +583,8 @@ class ProfileListModel
       {
         firstNode = newNode;
       }
+
+      adjustCopiededProfileName(copy, groupNode);
 			insertNodeInto(newNode, groupNode, groupNode.getChildCount());
 		}
     return firstNode;

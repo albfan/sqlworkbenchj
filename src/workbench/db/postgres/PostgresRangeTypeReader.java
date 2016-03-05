@@ -134,7 +134,7 @@ public class PostgresRangeTypeReader
 		catch (Exception e)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresRangeTypeReader.getTypes()", "Error retrieving object types", e);
+			LogMgr.logError("PostgresRangeTypeReader.getTypes()", "Error retrieving range types using:\n" + select, e);
 		}
 		finally
 		{

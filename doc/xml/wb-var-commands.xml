@@ -1,5 +1,5 @@
 <section id="wb-var-commands">
-  <title>&wb-productname; specific commands to manage variables</title>
+  <title>Manage variables with &wb-productname;</title>
 
 	<important><para>
     All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;

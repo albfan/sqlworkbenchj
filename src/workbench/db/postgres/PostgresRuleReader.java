@@ -134,7 +134,7 @@ public class PostgresRuleReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresRuleReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logInfo("PostgresRuleReader.getSql()", "Retrieving rules using:\n" + sql);
 		}
 
 		return sql.toString();
@@ -146,11 +146,11 @@ public class PostgresRuleReader
 		ResultSet rs = null;
 		Savepoint sp = null;
 		List<PostgresRule> result = new ArrayList<>();
+    String sql = getSql(connection, schemaPattern, namePattern, ruleTable, DbSettings.getExcludePostgresDefaultRules());
 		try
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern, ruleTable, DbSettings.getExcludePostgresDefaultRules());
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -170,7 +170,7 @@ public class PostgresRuleReader
 		catch (SQLException e)
 		{
 			connection.rollback(sp);
-			LogMgr.logError("PostgresRuleReader.getRuleList()", "Could not read domains", e);
+			LogMgr.logError("PostgresRuleReader.getRuleList()", "Could not read rules using:\n" + sql, e);
 		}
 		finally
 		{
@@ -201,7 +201,7 @@ public class PostgresRuleReader
 				}
 				catch (SQLException e)
 				{
-					LogMgr.logError("PostgresTableSourceBuilder.getTableRuleSource()", "Error retrieving rule source!", e);
+					LogMgr.logError("PostgresTableSourceBuilder.getTableRuleSource()", "Error retrieving rule source", e);
 				}
 			}
 			return result.toString();

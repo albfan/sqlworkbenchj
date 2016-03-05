@@ -2,6 +2,10 @@
 <section id="compare-commands">
   <title>Comparing databases</title>
 
+	<important><para>
+    All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
+  </para></important>
+
   <para>
     There are two &wb-productname; specific commands that can compare either the structure of two databases or
     the data contained in them.
@@ -35,10 +39,10 @@
 
     <note>
     <para>
-      This feature should only be considered as a one-off solution to quickly compare to database schemas. Is not intended
+      This feature should only be considered as a one-off solution to quickly compare two database schemas. Is not intended
       to replace a proper schema (script) management. You should consider tools like <ulink url="http://liquibase.org/">Liquibase</ulink>
       or <ulink url="http://flywaydb.org/">Flyway</ulink> to manage a database schema.
-      Those scripts should also be stored in a version control system (Subversion, GIT, ...)
+      Those scripts should also be stored in a version control system (Subversion, Git, ...)
     </para>
     </note>
 

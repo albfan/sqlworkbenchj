@@ -227,20 +227,22 @@ public class PostgresSequenceReader
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
+
+    String sql
+      = "select min_value, max_value, last_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
+      "from ( \n" + baseSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n";
+    sql += " where sequence_name = ? ";
+
+    if (schema != null)
+    {
+      sql += "\n  and sequence_schema = ? ";
+    }
+
 		try
 		{
-			String sql =
-				"select min_value, max_value, last_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
-				"from ( \n" + baseSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n";
-			sql += " where sequence_name = ? ";
-			if (schema != null)
-			{
-				sql +=" and sequence_schema = ? ";
-			}
-
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Retrieving sequence details using:\n" + SqlUtil.replaceParameters(sql, sequence, schema));
+				LogMgr.logInfo("PostgresSequenceReader.getRawSequenceDefinition()", "Retrieving sequence details using:\n" + SqlUtil.replaceParameters(sql, sequence, schema));
 			}
 
 			sp = this.dbConnection.setSavepoint();
@@ -257,7 +259,8 @@ public class PostgresSequenceReader
 		catch (SQLException e)
 		{
 			this.dbConnection.rollback(sp);
-			LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition", e);
+			LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition using:\n" +
+        SqlUtil.replaceParameters(sql, sequence, schema), e);
 		}
 		finally
 		{

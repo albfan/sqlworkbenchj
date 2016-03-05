@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableIdentifier;
@@ -94,7 +95,7 @@ public class PostgresSequenceAdjuster
 		catch (SQLException ex)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresSequenceSync.getColumnSequences()", "Could not read sequences", ex);
+			LogMgr.logError("PostgresSequenceSync.getColumnSequences()", "Could not sync sequence using:\n" + sql, ex);
 			throw ex;
 		}
 		finally
@@ -119,6 +120,11 @@ public class PostgresSequenceAdjuster
 			") t \n" +
 			"where sequence_name is not null";
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("PostgreSequenceAdjuster.getColumnSequences()", "Retrieving column sequences using:\n" + sql);
+		}
+
 		Map<String, String> result = new HashMap<>();
 		try
 		{
@@ -137,7 +143,7 @@ public class PostgresSequenceAdjuster
 		}
 		catch (SQLException ex)
 		{
-			LogMgr.logError("PostgresSequenceSync.getColumnSequences()", "Could not read sequences", ex);
+			LogMgr.logError("PostgresSequenceSync.getColumnSequences()", "Could not read sequences using:\n" + sql, ex);
 		}
 		finally
 		{

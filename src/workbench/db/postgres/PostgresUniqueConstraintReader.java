@@ -132,7 +132,7 @@ public class PostgresUniqueConstraintReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
+			LogMgr.logDebug("PostgresUniqueConstraintReader.readUniqueConstraints()", "Retrieving unique constraints using:\n" + sql);
 		}
 
 		Statement stmt = null;
@@ -164,7 +164,7 @@ public class PostgresUniqueConstraintReader
 		catch (SQLException se)
 		{
 			con.rollback(sp);
-			LogMgr.logError("PostgresUniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
+			LogMgr.logError("PostgresUniqueConstraintReader.readUniqueConstraints()", "Could not retrieve unique constraints using:\n" + sql, se);
 		}
 		finally
 		{

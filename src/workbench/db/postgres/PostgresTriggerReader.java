@@ -88,9 +88,8 @@ public class PostgresTriggerReader
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + sql);
+			LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Retrieving event triggers using:\n" + sql);
 		}
-
 
 		int triggerCount = 0;
 		try
@@ -116,7 +115,7 @@ public class PostgresTriggerReader
 		catch (Exception ex)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logWarning("PostgresTriggerReader.retrieveEventTriggers()", "Couldn not retrieve event triggers", ex);
+			LogMgr.logError("PostgresTriggerReader.retrieveEventTriggers()", "Couldn not retrieve event triggers using:\n" + sql, ex);
 		}
 		finally
 		{
@@ -152,6 +151,20 @@ public class PostgresTriggerReader
 		ResultSet rs = null;
 		Savepoint sp = null;
 
+    final String sql
+      = "select pr.proname, \n" +
+      "       trg.evtevent, \n " +
+      "       pg_get_functiondef(pr.oid) as func_source \n" +
+      "FROM pg_event_trigger trg \n" +
+      " JOIN pg_proc pr on pr.oid = trg.evtfoid \n" +
+      " join pg_namespace nsp on nsp.oid = pr.pronamespace \n" +
+      "where trg.evtname = ?";
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresTriggerReader.getEventTriggerSource()", "Retrieving event trigger source using:\n" + SqlUtil.replaceParameters(sql, triggerName));
+    }
+
 		try
 		{
 			String funcName = null;
@@ -159,19 +172,6 @@ public class PostgresTriggerReader
 			String funcSource = null;
 
 			sp = dbConnection.setSavepoint();
-			final String sql =
-				"select pr.proname, \n" +
-				"       trg.evtevent, \n " +
-				"       pg_get_functiondef(pr.oid) as func_source \n" +
-				"FROM pg_event_trigger trg \n" +
-				" JOIN pg_proc pr on pr.oid = trg.evtfoid \n" +
-				" join pg_namespace nsp on nsp.oid = pr.pronamespace \n" +
-				"where trg.evtname = ?";
-
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + SqlUtil.replaceParameters(sql, triggerName));
-			}
 
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, triggerName);
@@ -204,6 +204,7 @@ public class PostgresTriggerReader
 		}
 		catch (SQLException ex)
 		{
+      LogMgr.logInfo("PostgresTriggerReader.getEventTriggerSource()", "Could not retrieve event trigger source using:\n" + SqlUtil.replaceParameters(sql, triggerName), ex);
 			dbConnection.rollback(sp);
 			throw ex;
 		}
@@ -219,34 +220,34 @@ public class PostgresTriggerReader
 		throws SQLException
 	{
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String funcName = null;
-		String funcSchema = null;
-		StringBuilder result = null;
-		Savepoint sp = null;
+    final String sql
+      = "SELECT trgsch.nspname as function_schema, proc.proname as function_name \n" +
+      "FROM pg_trigger trg  \n" +
+      "  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
+      "  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
+      "  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
+      "  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n" +
+      "WHERE trg.tgname = ? \n" +
+      "  AND tblsch.nspname = ? ";
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Retrieving dependent trigger source using:\n" +
+        SqlUtil.replaceParameters(sql, triggerName, triggerTable.getSchema()));
+    }
+
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    String funcName = null;
+    String funcSchema = null;
+    StringBuilder result = null;
+    Savepoint sp = null;
+
 		try
 		{
 			sp = dbConnection.setSavepoint();
-			final String sql =
-				"SELECT trgsch.nspname as function_schema, proc.proname as function_name \n" +
-				"FROM pg_trigger trg  \n" +
-				"  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
-				"  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
-				"  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
-				"  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n";
 
-			StringBuilder query = new StringBuilder(sql.length() + 50);
-			query.append(sql);
-			query.append("WHERE trg.tgname = ? \n");
-			query.append("  AND tblsch.nspname = ? ");
-
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Using query=\n" + SqlUtil.replaceParameters(sql, triggerName, triggerTable.getSchema()));
-			}
-
-			stmt = dbConnection.getSqlConnection().prepareStatement(query.toString());
+			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, triggerName);
 			stmt.setString(2, triggerTable.getSchema());
 			rs = stmt.executeQuery();
@@ -257,10 +258,12 @@ public class PostgresTriggerReader
 			}
 			dbConnection.releaseSavepoint(sp);
 		}
-		catch (SQLException sql)
+		catch (SQLException ex)
 		{
 			dbConnection.rollback(sp);
-			throw sql;
+      LogMgr.logError("PostgresTriggerReader.getDependentSource()", "Could not retrieve dependent trigger source using:\n" +
+        SqlUtil.replaceParameters(sql, triggerName, triggerTable.getSchema()), ex);
+			throw ex;
 		}
 		finally
 		{

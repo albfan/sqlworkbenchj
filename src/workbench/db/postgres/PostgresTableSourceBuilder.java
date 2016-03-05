@@ -142,11 +142,12 @@ public class PostgresTableSourceBuilder
 		{
 			sp = dbConnection.setSavepoint();
 			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getSchema());
-			pstmt.setString(2, tbl.getTableName());
+			pstmt.setString(1, tbl.getRawSchema());
+			pstmt.setString(2, tbl.getRawTableName());
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Using sql: " + pstmt.toString());
+				LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Retrieving table options using:\n"
+          + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
 			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
@@ -194,7 +195,8 @@ public class PostgresTableSourceBuilder
 		catch (SQLException e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTableSourceBuilder.readTableOptions()", "Error retrieving table options", e);
+			LogMgr.logError("PostgresTableSourceBuilder.readTableOptions()", "Error retrieving table options using:\n" +
+        SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()), e);
 		}
 		finally
 		{
@@ -262,12 +264,13 @@ public class PostgresTableSourceBuilder
 		{
 			sp = dbConnection.setSavepoint();
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getTableName());
-			stmt.setString(2, table.getSchema());
+			stmt.setString(1, table.getRawTableName());
+			stmt.setString(2, table.getRawSchema());
 
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logDebug("PostgresTableSourceBuilder.readForeignTableOptions()", "Retrieving table options using:\n" + stmt);
+				LogMgr.logDebug("PostgresTableSourceBuilder.readForeignTableOptions()", "Retrieving table options using:\n" +
+          SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
 			}
 
 			rs = stmt.executeQuery();
@@ -302,8 +305,9 @@ public class PostgresTableSourceBuilder
 		{
 			dbConnection.rollback(sp);
 			sp = null;
-			LogMgr.logError("PostgresTableSourceBuilder.readForeignTableOptions()", "Could not retrieve table options using:\n" + stmt, ex);
-		}
+			LogMgr.logError("PostgresTableSourceBuilder.readForeignTableOptions()", "Could not retrieve table options using:\n" +
+        SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), ex);
+    }
 		finally
 		{
 			dbConnection.releaseSavepoint(sp);
@@ -417,7 +421,7 @@ public class PostgresTableSourceBuilder
 		StringBuilder b = new StringBuilder(100);
 
 		Savepoint sp = null;
-
+    String sql = null;
 		try
 		{
 			sp = dbConnection.setSavepoint();
@@ -428,7 +432,8 @@ public class PostgresTableSourceBuilder
 				// if the default value is shown as nextval, the sequence name is already visible
 				if (defaultValue != null && defaultValue.toLowerCase().startsWith("nextval")) continue;
 				String colname = StringUtil.trimQuotes(col.getColumnName());
-				rs = stmt.executeQuery("select pg_get_serial_sequence('" + tblname + "', '" + colname + "')");
+        sql = "select pg_get_serial_sequence('" + tblname + "', '" + colname + "')";
+				rs = stmt.executeQuery(sql);
 				if (rs.next())
 				{
 					String seq = rs.getString(1);
@@ -445,7 +450,7 @@ public class PostgresTableSourceBuilder
 		catch (Exception e)
 		{
 			dbConnection.rollback(sp);
-			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information", e);
+			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information using: " + sql, e);
 		}
 		finally
 		{
@@ -460,7 +465,7 @@ public class PostgresTableSourceBuilder
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection, schema, null);
     if (CollectionUtil.isEmpty(enums)) return null;
-    
+
 		StringBuilder result = null;
 
 		for (ColumnIdentifier col : columns)
