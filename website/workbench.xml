@@ -157,6 +157,7 @@ WHERE id=42;</p>
     </content>
   </page>
   
+  <!--
   <page name="lookandfeel" title="Alternative Look &amp; Feels" toc="main">
     <title>Alternative Look &amp; Feels</title>
     <content>
@@ -164,7 +165,8 @@ WHERE id=42;</p>
       <image-link title="Main window" name="lnf/beautyeye/mainwindow.png" back="lookandfeeld" next="lnf/beautyeye/profiles.png">Main Window</image-link><br/>
     </content>
   </page>
-
+  -->
+  
   <!-- ======================== Getting started ========================== -->
   <page name="getting-started" title="Getting started" toc="main">
     <title>SQL Workbench/J</title>
