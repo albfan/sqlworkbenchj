@@ -523,7 +523,9 @@ public class TableDataPanel
 			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
-			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query: " + sql);
+
+			LogMgr.logDebug("TableDataPanel.showRowCount()", "Retrieving row count using:\n" + sql);
+      
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
 			{
@@ -851,7 +853,7 @@ public class TableDataPanel
 			}
 			else
 			{
-				LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query: " + sql);
+				LogMgr.logDebug("TableDataPanel.doRetrieve()", "Retrieving table data using:\n" + sql);
 
 				error = !dataDisplay.runQuery(sql, respectMaxRows);
 				if (GuiSettings.getRetrieveQueryComments())
@@ -914,7 +916,7 @@ public class TableDataPanel
         cancelRetrieve.setEnabled(false);
         reloadAction.setEnabled(true);
       });
-      
+
 			this.retrieveEnd();
 			if (error)
 			{

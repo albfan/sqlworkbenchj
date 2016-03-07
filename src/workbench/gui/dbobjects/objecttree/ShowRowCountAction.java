@@ -39,6 +39,7 @@ import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
+import workbench.resource.Settings;
 
 import workbench.util.SqlUtil;
 import workbench.util.WbThread;
@@ -103,8 +104,10 @@ public class ShowRowCountAction
     if (tables.isEmpty()) return;
     WbConnection conn = source.getConnection();
 
-    TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+    TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.ROWCOUNT_TEMPLATE_NAME, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+
     boolean useSavepoint = conn.getDbSettings().useSavePointForDML();
+    boolean logStatements = Settings.getInstance().getLogAllStatements();
 
     ResultSet rs = null;
 
@@ -126,6 +129,8 @@ public class ShowRowCountAction
         }
 
         String sql = builder.getSelectForCount(table);
+
+        LogMgr.logDebug("ShowRowCountAction.doCount()", "Retrieving rowcount using:\n" + sql);
 
         rs = JdbcUtils.runStatement(conn, currentStatement, sql, useSavepoint);
 

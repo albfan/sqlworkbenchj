@@ -39,6 +39,7 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
@@ -206,7 +207,9 @@ public class WbRowCount
 				{
 					rowMonitor.setCurrentObject(msg, row + 1, tableCount);
 				}
-        
+
+        LogMgr.logDebug("WbRowCount.execute()", "Retrieving rowcount using:\n" + countQuery);
+
 				rs = JdbcUtils.runStatement(currentConnection, currentStatement, countQuery, useSavepoint);
 
 				if (isCancelled) break;
