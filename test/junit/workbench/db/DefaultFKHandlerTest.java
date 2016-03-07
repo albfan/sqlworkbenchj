@@ -76,7 +76,7 @@ public class DefaultFKHandlerTest
 				");\n" +
 				"commit;");
 
-			FKHandler handler = FKHandlerFactory.createInstance(con);
+			FKHandler handler = FKHandler.createInstance(con);
 			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PK_CHILD"));
 			assertNotNull(tbl);
 			DataStore fk = handler.getForeignKeys(tbl, false);

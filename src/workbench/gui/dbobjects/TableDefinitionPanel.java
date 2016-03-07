@@ -81,8 +81,8 @@ import workbench.gui.components.WbLabelField;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
+import workbench.gui.renderer.SqlTypeRenderer;
 
 import workbench.storage.DataStore;
 
@@ -477,7 +477,7 @@ public class TableDefinitionPanel
 		{
 			int typeIndex = colmod.getColumnIndex(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME);
 			TableColumn col = colmod.getColumn(typeIndex);
-			col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+			col.setCellRenderer(new SqlTypeRenderer());
 		}
 		catch (IllegalArgumentException e)
 		{

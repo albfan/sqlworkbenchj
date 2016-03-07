@@ -74,7 +74,7 @@ public class TableDependency
 	{
 		this.connection = con;
 		this.metaData = this.connection.getMetadata();
-		this.fkHandler = FKHandlerFactory.createInstance(connection);
+		this.fkHandler = FKHandler.createInstance(connection);
 	}
 
 	public TableDependency(WbConnection con, TableIdentifier tbl)

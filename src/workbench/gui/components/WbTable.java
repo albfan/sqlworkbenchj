@@ -136,8 +136,8 @@ import workbench.gui.fontzoom.IncreaseFontSize;
 import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.renderer.BlobColumnRenderer;
+import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
-import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
 import workbench.gui.renderer.RowStatusRenderer;
@@ -1813,13 +1813,15 @@ public class WbTable
 		Settings sett = Settings.getInstance();
 
 		String format = sett.getDefaultDateFormat();
-		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
-		this.setDefaultRenderer(java.util.Date.class, RendererFactory.getDateRenderer(format));
+    DateColumnRenderer dateRenderer = new DateColumnRenderer(format);
+		this.setDefaultRenderer(java.sql.Date.class, dateRenderer);
+		this.setDefaultRenderer(java.util.Date.class, dateRenderer);
 
 		format = sett.getDefaultTimestampFormat();
-		this.setDefaultRenderer(java.sql.Timestamp.class, RendererFactory.getDateRenderer(format));
+    DateColumnRenderer tsRenderer = new DateColumnRenderer(format);
+		this.setDefaultRenderer(java.sql.Timestamp.class, tsRenderer);
 		format = sett.getDefaultTimeFormat();
-		this.setDefaultRenderer(java.sql.Time.class, RendererFactory.getDateRenderer(format));
+		this.setDefaultRenderer(java.sql.Time.class, tsRenderer);
 	}
 
 	@Override

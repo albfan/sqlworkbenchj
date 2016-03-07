@@ -39,7 +39,6 @@ import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
 import workbench.db.DropType;
 import workbench.db.FKHandler;
-import workbench.db.FKHandlerFactory;
 import workbench.db.IndexReader;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -343,7 +342,7 @@ public class ObjectInfo
       try
       {
         connection.setBusy(false);
-        FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
+        FKHandler fkHandler = FKHandler.createInstance(connection);
 
         List<DependencyNode> referencingTables = connection.getObjectCache().getReferencingTables(toDescribe);
         if (CollectionUtil.isNonEmpty(referencingTables))
@@ -381,7 +380,7 @@ public class ObjectInfo
       try
       {
         connection.setBusy(false);
-        FKHandler fkHandler = FKHandlerFactory.createInstance(connection);
+        FKHandler fkHandler = FKHandler.createInstance(connection);
         List<DependencyNode> refTables = connection.getObjectCache().getReferencedTables(toDescribe);
         if (CollectionUtil.isNonEmpty(refTables))
         {

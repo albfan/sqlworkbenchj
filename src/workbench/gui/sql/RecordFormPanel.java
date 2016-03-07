@@ -72,8 +72,8 @@ import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.BlobColumnPanel;
+import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
-import workbench.gui.renderer.RendererFactory;
 import workbench.gui.renderer.WbRenderer;
 import workbench.gui.renderer.WrapEnabledEditor;
 
@@ -209,15 +209,11 @@ public class RecordFormPanel
 			if (SqlUtil.isMultiLineColumn(col))
 			{
 				final JTextArea area = new JTextArea(new WbDocument());
-				WrapEnabledEditor wrap = new WrapEnabledEditor()
-				{
-					@Override
-					public void setWordwrap(boolean flag)
-					{
-						area.setLineWrap(flag);
-						area.setWrapStyleWord(flag);
-					}
-				};
+				WrapEnabledEditor wrap = (boolean flag) ->
+        {
+          area.setLineWrap(flag);
+          area.setWrapStyleWord(flag);
+        };
 				area.setEditable(editable);
 				TextComponentMouseListener contextMenu = new TextComponentMouseListener();
 				contextMenu.addAction(new MultilineWrapAction(wrap, area, null));
@@ -305,9 +301,9 @@ public class RecordFormPanel
 
 		Settings sett = Settings.getInstance();
 		String dateFormat = sett.getDefaultDateFormat();
-		WbRenderer dateRenderer = (WbRenderer)RendererFactory.getDateRenderer(dateFormat);
+		WbRenderer dateRenderer = new DateColumnRenderer(dateFormat);
 		String tsFormat = sett.getDefaultTimestampFormat();
-		WbRenderer tsRenderer = (WbRenderer)RendererFactory.getDateRenderer(tsFormat);
+		WbRenderer tsRenderer = new DateColumnRenderer(tsFormat);
 
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);

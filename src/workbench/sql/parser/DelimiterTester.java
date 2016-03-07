@@ -49,4 +49,18 @@ public interface DelimiterTester
 	boolean isSingleLineStatement(SQLToken token, boolean isStartOfLine);
 	void lineEnd();
 
+	static DelimiterTester createInstance(ParserType type)
+	{
+		switch (type)
+		{
+			case Oracle:
+				return new OracleDelimiterTester();
+			case Postgres:
+				return new PostgresDelimiterTester();
+			case Standard:
+				// Don't use @ for WbInclude for SQL Server or MySQL as that conflicts with parameter prefix
+			return new ShortIncludeDelimiterTester();
+		}
+		return null;
+	}
 }

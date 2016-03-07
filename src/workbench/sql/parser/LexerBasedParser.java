@@ -80,7 +80,7 @@ public class LexerBasedParser
 	{
 		parserType = type;
 		setCheckPgQuoting(parserType == ParserType.Postgres);
-		delimiterTester = DelimiterTesterFactory.getDelimiterTester(type);
+		delimiterTester = DelimiterTester.createInstance(type);
 	}
 
 	public LexerBasedParser(String script)

@@ -25,6 +25,10 @@ package workbench.db;
 
 import java.sql.SQLException;
 
+import workbench.db.mssql.SqlServerFKHandler;
+import workbench.db.mssql.SqlServerUtil;
+import workbench.db.oracle.OracleFKHandler;
+
 import workbench.storage.DataStore;
 
 /**
@@ -138,4 +142,16 @@ public interface FKHandler
 		}
 	}
 
+	static FKHandler createInstance(WbConnection conn)
+	{
+		if (conn.getMetadata().isOracle() && conn.getDbSettings().fixFKRetrieval())
+		{
+			return new OracleFKHandler(conn);
+		}
+		if (conn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2005(conn))
+		{
+			return new SqlServerFKHandler(conn);
+		}
+		return new DefaultFKHandler(conn);
+	}
 }

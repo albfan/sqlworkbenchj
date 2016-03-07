@@ -95,7 +95,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.ProcStatusRenderer;
-import workbench.gui.renderer.RendererFactory;
+import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
@@ -797,7 +797,7 @@ public class ProcedureListPanel
 				TableColumn col = colmod.getColumn(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE);
 				if (col != null)
 				{
-					col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+					col.setCellRenderer(new SqlTypeRenderer());
 				}
 			}
 			catch (Exception ex)
