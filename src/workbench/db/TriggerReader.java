@@ -84,13 +84,13 @@ public interface TriggerReader {
 	String TRIGGER_LEVEL_COLUMN = "LEVEL";
 
 	String[] LIST_COLUMNS = {
-		TriggerReader.TRIGGER_NAME_COLUMN,
-		TriggerReader.TRIGGER_TYPE_COLUMN,
-		TriggerReader.TRIGGER_EVENT_COLUMN,
-		TriggerReader.TRIGGER_TABLE_COLUMN,
-		TriggerReader.TRIGGER_COMMENT_COLUMN,
-		TriggerReader.TRIGGER_STATUS_COLUMN,
-    TriggerReader.TRIGGER_LEVEL_COLUMN
+		TRIGGER_NAME_COLUMN,
+		TRIGGER_TYPE_COLUMN,
+		TRIGGER_EVENT_COLUMN,
+		TRIGGER_TABLE_COLUMN,
+		TRIGGER_COMMENT_COLUMN,
+		TRIGGER_STATUS_COLUMN,
+    TRIGGER_LEVEL_COLUMN
 	};
 
 	TriggerDefinition findTrigger(String catalog, String schema, String name)

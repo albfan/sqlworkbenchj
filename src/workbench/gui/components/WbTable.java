@@ -421,7 +421,7 @@ public class WbTable
     if (sortRenderer != null) sortRenderer.setShowDatatype(flag);
   }
 
-  public void setShowRemarksInHeder(boolean flag)
+  public void setShowRemarksInHeader(boolean flag)
   {
     if (sortRenderer != null) sortRenderer.setShowRemarks(flag);
   }

@@ -52,43 +52,42 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A renderer for table headers to be able to display a sort indicator and customized
- * tooltips that show the data type of the column.
+ * A renderer for table headers to be able to display a sort indicator and customized tooltips that show the data type
+ * of the column.
  *
  * It relies on the default header renderer and only adds the sort indicator to it.
  *
- * As a fallback in case the default renderer is not using a JLabel the SortHeaderRenderer is using
- * it's own JLabel instance which is returned instead in getTableCellRendererComponent().
- * This should usually not happen though.
+ * As a fallback in case the default renderer is not using a JLabel the SortHeaderRenderer is using it's own JLabel
+ * instance which is returned instead in getTableCellRendererComponent(). This should usually not happen though.
  *
  * @author Thomas Kellerer
  */
 public class SortHeaderRenderer
-	implements TableCellRenderer, PropertyChangeListener
+  implements TableCellRenderer, PropertyChangeListener
 {
-	private final JLabel displayLabel = new JLabel();
-	private boolean showFullTypeInfo;
-	private boolean showBoldHeader;
-	private boolean showDatatype;
-	private boolean underlinePK;
-	private boolean showRemarks;
+  private final JLabel displayLabel = new JLabel();
+  private boolean showFullTypeInfo;
+  private boolean showBoldHeader;
+  private boolean showDatatype;
+  private boolean underlinePK;
+  private boolean showRemarks;
 
-	public SortHeaderRenderer()
-	{
-		readSettings();
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_TABLE_HEADER_BOLD, GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO);
-	}
+  public SortHeaderRenderer()
+  {
+    readSettings();
+    Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROP_TABLE_HEADER_BOLD, GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO);
+  }
 
-	public void setUnderlinePK(boolean flag)
-	{
-		this.underlinePK = flag;
-	}
+  public void setUnderlinePK(boolean flag)
+  {
+    this.underlinePK = flag;
+  }
 
-	private void readSettings()
-	{
-		showBoldHeader = GuiSettings.showTableHeaderInBold();
-		showFullTypeInfo = Settings.getInstance().getBoolProperty(GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO, false);
-	}
+  private void readSettings()
+  {
+    showBoldHeader = GuiSettings.showTableHeaderInBold();
+    showFullTypeInfo = Settings.getInstance().getBoolProperty(GuiSettings.PROP_TABLE_HEADER_FULL_TYPE_INFO, false);
+  }
 
   public void setShowRemarks(boolean flag)
   {
@@ -110,51 +109,51 @@ public class SortHeaderRenderer
     return showDatatype;
   }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		readSettings();
-	}
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    readSettings();
+  }
 
-	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
-	{
-		TableCellRenderer realRenderer = table.getTableHeader().getDefaultRenderer();
+  @Override
+  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
+  {
+    TableCellRenderer realRenderer = table.getTableHeader().getDefaultRenderer();
 
-		JComponent c = (JComponent)realRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+    JComponent c = (JComponent)realRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 
-		boolean sorted = false;
-		boolean ascending = false;
-		boolean primary = false;
+    boolean sorted = false;
+    boolean ascending = false;
+    boolean primary = false;
 
-		String text = (value == null ? "" : value.toString());
-		JLabel display = null;
-		if (c instanceof JLabel)
-		{
-			display = (JLabel)c;
-		}
-		else
-		{
-			// this is a fallback and should not happen
-			displayLabel.setFont(c.getFont());
-			displayLabel.setBorder(c.getBorder());
-			displayLabel.setForeground(c.getForeground());
-			displayLabel.setBackground(c.getBackground());
-			displayLabel.setText(text);
-			displayLabel.setOpaque(c.isOpaque());
-			display = displayLabel;
-		}
+    String text = (value == null ? "" : value.toString());
+    JLabel display = null;
+    if (c instanceof JLabel)
+    {
+      display = (JLabel)c;
+    }
+    else
+    {
+      // this is a fallback and should not happen
+      displayLabel.setFont(c.getFont());
+      displayLabel.setBorder(c.getBorder());
+      displayLabel.setForeground(c.getForeground());
+      displayLabel.setBackground(c.getBackground());
+      displayLabel.setText(text);
+      displayLabel.setOpaque(c.isOpaque());
+      display = displayLabel;
+    }
 
-		display.setIconTextGap(5);
+    display.setIconTextGap(5);
     display.setVerticalAlignment(SwingConstants.TOP);
-		display.setHorizontalTextPosition(SwingConstants.LEFT);
-		display.setHorizontalAlignment(SwingConstants.LEFT);
+    display.setHorizontalTextPosition(SwingConstants.LEFT);
+    display.setHorizontalAlignment(SwingConstants.LEFT);
 
     String type = null;
-		String javaTypeName = null;
-		String remarks = null;
+    String javaTypeName = null;
+    String remarks = null;
 
-		int javaType = Types.OTHER;
+    int javaType = Types.OTHER;
 
     String label = text;
 
@@ -163,34 +162,34 @@ public class SortHeaderRenderer
       label = "<b>" + text + "</b>";
     }
 
-		if (table instanceof WbTable)
-		{
-			WbTable sortTable = (WbTable)table;
+    if (table instanceof WbTable)
+    {
+      WbTable sortTable = (WbTable)table;
 
-			sorted = sortTable.isViewColumnSorted(col);
-			if (sorted)
-			{
-				ascending = sortTable.isViewColumnSortAscending(col);
-				primary = sortTable.isPrimarySortColumn(col);
-			}
+      sorted = sortTable.isViewColumnSorted(col);
+      if (sorted)
+      {
+        ascending = sortTable.isViewColumnSortAscending(col);
+        primary = sortTable.isPrimarySortColumn(col);
+      }
 
-			DataStoreTableModel model = sortTable.getDataStoreTableModel();
+      DataStoreTableModel model = sortTable.getDataStoreTableModel();
 
-			if (model != null)
-			{
-				int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
-				if (realCol >= 0)
-				{
-					DataStore ds = model.getDataStore();
-					ResultInfo info = (ds == null ? null : ds.getResultInfo());
+      if (model != null)
+      {
+        int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
+        if (realCol >= 0)
+        {
+          DataStore ds = model.getDataStore();
+          ResultInfo info = (ds == null ? null : ds.getResultInfo());
 
-					ColumnIdentifier colId = (info == null ? null : info.getColumn(realCol));
-					if (colId != null)
-					{
-						type = colId.getDbmsType();
+          ColumnIdentifier colId = (info == null ? null : info.getColumn(realCol));
+          if (colId != null)
+          {
+            type = colId.getDbmsType();
             javaType = colId.getDataType();
-						javaTypeName = SqlUtil.getTypeName(javaType);
-						remarks = colId.getComment();
+            javaTypeName = SqlUtil.getTypeName(javaType);
+            remarks = colId.getComment();
 
             if (underlinePK && colId.isPkColumn())
             {
@@ -206,76 +205,75 @@ public class SortHeaderRenderer
             {
               label += "<p style=\"word-wrap: break-word\">" + colId.getComment() + "</p>";
             }
-					}
-				}
-			}
-		}
+          }
+        }
+      }
+    }
 
     display.setText("<html>" + label + "</html>");
     display.invalidate();
 
-		if (sorted)
-		{
-			SortArrowIcon icon = null;
-			Font f = display.getFont();
-			FontMetrics fm = display.getFontMetrics(f);
-			int height = getArrowSize(fm, primary);
-			icon = SortArrowIcon.getIcon(ascending ? SortArrowIcon.Direction.UP : SortArrowIcon.Direction.DOWN, height);
-			display.setIcon(icon);
-		}
-		else
-		{
-			display.setIcon(null);
-		}
+    if (sorted)
+    {
+      SortArrowIcon icon = null;
+      Font f = display.getFont();
+      FontMetrics fm = display.getFontMetrics(f);
+      int height = getArrowSize(fm, primary);
+      icon = SortArrowIcon.getIcon(ascending ? SortArrowIcon.Direction.UP : SortArrowIcon.Direction.DOWN, height);
+      display.setIcon(icon);
+    }
+    else
+    {
+      display.setIcon(null);
+    }
 
-		if (type == null)
-		{
-			display.setToolTipText(text);
-		}
-		else
-		{
-			StringBuilder tip = new StringBuilder(text.length() + 20);
-			tip.append("<html><code>");
+    if (type == null)
+    {
+      display.setToolTipText(text);
+    }
+    else
+    {
+      StringBuilder tip = new StringBuilder(text.length() + 20);
+      tip.append("<html><code>");
       if (showBoldHeader) tip.append("<b>");
-			tip.append(text);
+      tip.append(text);
       if (showBoldHeader) tip.append("</b>");
-			tip.append("</code><br>");
-			tip.append(type);
-			if (StringUtil.isNonBlank(remarks))
-			{
-				tip.append("<br>\"<i>");
-				tip.append(remarks);
-				tip.append("</i>\"");
-			}
+      tip.append("</code><br>");
+      tip.append(type);
+      if (StringUtil.isNonBlank(remarks))
+      {
+        tip.append("<br>\"<i>");
+        tip.append(remarks);
+        tip.append("</i>\"");
+      }
 
-			if (showFullTypeInfo)
-			{
-				tip.append("<br><tt>");
-				tip.append(table.getColumnClass(col).getName());
-				tip.append("<br>");
-				tip.append(javaType);
+      if (showFullTypeInfo)
+      {
+        tip.append("<br><tt>");
+        tip.append(table.getColumnClass(col).getName());
+        tip.append("<br>");
+        tip.append(javaType);
         tip.append('/');
         tip.append(javaTypeName);
         tip.append("</tt>");
-			}
-			tip.append("</html>");
-			display.setToolTipText(tip.toString());
-		}
-		return display;
-	}
+      }
+      tip.append("</html>");
+      display.setToolTipText(tip.toString());
+    }
+    return display;
+  }
 
-	public static int getArrowSize(FontMetrics fm, boolean primary)
-	{
-		if (fm == null)
-		{
-			return primary ? 16 : 8;
-		}
-		int headerHeight = fm.getHeight();
-		if (primary)
-		{
-			return (int) (headerHeight * 0.6);
-		}
-		return (int) (headerHeight * 0.5);
-	}
+  public static int getArrowSize(FontMetrics fm, boolean primary)
+  {
+    if (fm == null)
+    {
+      return primary ? 16 : 8;
+    }
+    int headerHeight = fm.getHeight();
+    if (primary)
+    {
+      return (int)(headerHeight * 0.6);
+    }
+    return (int)(headerHeight * 0.5);
+  }
 }
-

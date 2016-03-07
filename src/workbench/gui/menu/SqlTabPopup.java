@@ -32,6 +32,7 @@ import workbench.gui.actions.FileDiscardAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
 import workbench.gui.actions.RenameTabAction;
+import workbench.gui.actions.RestoreClosedTabAction;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
@@ -71,6 +72,9 @@ public class SqlTabPopup
 
 		CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
 		this.add(closeOthers);
+
+    RestoreClosedTabAction restoreClosedTabAction = new RestoreClosedTabAction(aClient);
+    this.add(restoreClosedTabAction.getMenuItem());
 
 		if (aClient.canRenameTab())
 		{

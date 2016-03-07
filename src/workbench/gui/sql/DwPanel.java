@@ -197,7 +197,7 @@ public class DwPanel
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SHOW_RESULT_SQL);
     dataTable.setShowDataTypeInHeader(GuiSettings.showDatatypeInTableHeader());
-    dataTable.setShowRemarksInHeder(GuiSettings.showRemarksInTableHeader());
+    dataTable.setShowRemarksInHeader(GuiSettings.showRemarksInTableHeader());
 		initColors();
 	}
 

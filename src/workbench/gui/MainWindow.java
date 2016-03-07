@@ -1084,6 +1084,11 @@ public class MainWindow
 		else return null;
 	}
 
+  public ClosedTabManager getClosedTabHistory()
+  {
+    return closedTabHistory;
+  }
+
 	public SqlPanel getCurrentSqlPanel()
 	{
 		MainPanel p = this.getCurrentPanel();
