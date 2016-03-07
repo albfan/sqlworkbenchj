@@ -110,6 +110,10 @@ Supported parameters:
         </xsl:if>
       </xsl:variable>
 
+      <xsl:variable name="dbms-typename">
+        <xsl:value-of select="wb-name-util:toLowerCase(dbms-data-type)"/>
+      </xsl:variable>
+
       <xsl:variable name="datatype">
         <xsl:if test="$useJdbcTypes = 'true'">
           <xsl:call-template name="write-data-type">
@@ -122,13 +126,22 @@ Supported parameters:
 
         <xsl:if test="$useJdbcTypes = 'false'">
           <xsl:choose>
-            <xsl:when test="dbms-data-type = 'CLOB'">
+            <xsl:when test="$dbms-typename = 'clob' or $dbms-typename = 'longvarchar' or $dbms-typename = 'lvarchar'">
               <xsl:value-of select="'text'"/>
             </xsl:when>
-            <xsl:when test="dbms-data-type = 'BIT'">
+            <!-- handle Oracle's "integer" types -->
+            <xsl:when test="$dbms-typename = 'number' and string-length(dbms-data-digits) = 0">
+              <xsl:if test="dbms-data-size &gt; 10">
+                <xsl:value-of select="'integer'"/>
+              </xsl:if>
+              <xsl:if test="dbms-data-size &lt;= 10">
+                <xsl:value-of select="'bigint'"/>
+              </xsl:if>
+            </xsl:when>
+            <xsl:when test="$dbms-typename = 'bit'">
               <xsl:value-of select="'boolean'"/>
             </xsl:when>
-            <xsl:when test="dbms-data-type = 'BLOB'">
+            <xsl:when test="dbms-data-type = 'blob' or $dbms-typename = 'lvarbinary' or $dbms-typename = 'varbinary'">
               <xsl:value-of select="'bytea'"/>
             </xsl:when>
             <xsl:when test="java-sql-type-name = 'VARCHAR'">
@@ -292,30 +305,32 @@ Supported parameters:
       </xsl:variable>
 
       <xsl:variable name="idx-name">
-        <xsl:call-template name="write-object-name">
-          <xsl:with-param name="objectname">
-            <xsl:choose>
-              <xsl:when test="$useIndexName = 'false' or string-length(name) = 0">
-                <xsl:value-of select="''"/>
-              </xsl:when>
-              <xsl:when test="name = $real-tablename and string-length($indexPrefix) = 0">
-                <!--
-                  Tables, indexes, views and other "relation" like objects share the same namespace
-                  If for some reason the index name is the same as the table name, don't use a name
-                  and let Postgres choose one.
-                  This will however not catch the case where the index name is the name of another table
-                -->
-                <xsl:value-of select="''"/>
-              </xsl:when>
-              <xsl:when test="string-length($indexPrefix) &gt; 0">
-                <xsl:value-of select="concat($indexPrefix, name)"/>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="name"/>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:with-param>
-        </xsl:call-template>
+        <xsl:if test="$useIndexName = 'false' or string-length(name) = 0">
+          <xsl:value-of select="''"/>
+        </xsl:if>
+        <xsl:if test="$useIndexName = 'true' and string-length(name) = 0">
+          <xsl:call-template name="write-object-name">
+            <xsl:with-param name="objectname">
+              <xsl:choose>
+                <xsl:when test="name = $real-tablename and string-length($indexPrefix) = 0">
+                  <!--
+                    Tables, indexes, views and other "relation" like objects share the same namespace
+                    If for some reason the index name is the same as the table name, don't use a name
+                    and let Postgres choose one.
+                    This will however not catch the case where the index name is the name of another table
+                  -->
+                  <xsl:value-of select="''"/>
+                </xsl:when>
+                <xsl:when test="string-length($indexPrefix) &gt; 0">
+                  <xsl:value-of select="concat($indexPrefix, name)"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="name"/>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:with-param>
+          </xsl:call-template>
+        </xsl:if>
       </xsl:variable>
 
       <xsl:text>CREATE </xsl:text>
