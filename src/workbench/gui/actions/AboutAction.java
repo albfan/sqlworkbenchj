@@ -25,10 +25,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.JDialog;
-
 import workbench.gui.MainWindow;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.dialogs.WbAboutDialog;
 
 /**
@@ -52,9 +49,6 @@ public class AboutAction
 	@Override
 	public void executeAction(ActionEvent e)
 	{
-		WbAboutDialog about = new WbAboutDialog(mainWindow);
-		about.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		WbSwingUtilities.center(about, mainWindow);
-		about.setVisible(true);
+    WbAboutDialog.showDialog(mainWindow);
 	}
 }

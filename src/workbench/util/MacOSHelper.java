@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.actions.OptionsDialogAction;
+import workbench.gui.dialogs.WbAboutDialog;
 
 /**
  * This class - if running on Mac OS - will install an ApplicationListener
@@ -148,8 +149,7 @@ public class MacOSHelper
 			}
 			else if ("handleAbout".equals(methodName))
 			{
-				WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");
-				setHandled(args[0], true);
+        WbAboutDialog.showDialog(null);
 			}
 			else if ("handlePreferences".equals(methodName))
 			{

@@ -29,7 +29,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -131,49 +130,6 @@ public final class WbManager
 	public boolean getSettingsShouldBeSaved()
 	{
 		return this.writeSettings;
-	}
-
-	public void showDialog(String clazz)
-	{
-		JFrame parent = WbManager.getInstance().getCurrentWindow();
-		if (parent == null)
-		{
-			LogMgr.logWarning("WbManager.showDialog()", "Could not find the current MainWindow!", null);
-		}
-
-		JDialog dialog = null;
-		try
-		{
-			// Use reflection to load various dialogs in order to
-			// avoid unnecessary class loading during startup
-			Class cls = Class.forName(clazz);
-			Class[] types = new Class[] { java.awt.Frame.class  };
-			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { parent };
-			dialog = (JDialog)cons.newInstance(args);
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			if (dialog.isResizable())
-			{
-				Settings.getInstance().restoreWindowSize(dialog);
-			}
-			WbSwingUtilities.center(dialog, parent);
-			dialog.setVisible(true);
-			if (dialog.isResizable())
-			{
-				Settings.getInstance().storeWindowSize(dialog);
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("WbManager.showDialog()", "Error when creating dialog " + clazz, ex);
-		}
-		finally
-		{
-			if (dialog != null && dialog.isModal())
-			{
-				dialog.dispose();
-			}
-		}
 	}
 
 	public void setOutOfMemoryOcurred()

@@ -28,6 +28,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -49,11 +50,13 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import workbench.gui.MainWindow;
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.actions.HelpContactAction;
 import workbench.gui.components.WbLabelField;
@@ -73,7 +76,7 @@ public class WbAboutDialog
 {
 	private EscAction escAction;
 
-	public WbAboutDialog(java.awt.Frame parent)
+	public WbAboutDialog(Frame parent)
 	{
 		super(parent, true);
 		initComponents();
@@ -101,6 +104,18 @@ public class WbAboutDialog
 		memoryLabel.setText(ResourceMgr.getString("LblMemory") + " " + freeMem + "MB/" + maxMem + "MB");
 		pack();
 	}
+
+  public static void showDialog(Frame mainWindow)
+  {
+    if (mainWindow == null)
+    {
+      mainWindow = (Frame)WbManager.getInstance().getCurrentWindow();
+    }
+		WbAboutDialog about = new WbAboutDialog(mainWindow);
+		about.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		WbSwingUtilities.center(about, mainWindow);
+		about.setVisible(true);
+  }
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
