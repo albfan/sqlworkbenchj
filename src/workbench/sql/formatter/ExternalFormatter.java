@@ -22,8 +22,6 @@ package workbench.sql.formatter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -31,7 +29,6 @@ import workbench.resource.Settings;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
-import workbench.util.WbStringTokenizer;
 
 
 /**
@@ -138,25 +135,26 @@ public class ExternalFormatter
   {
     File infile = File.createTempFile("wbf$_in", ".sql");
     File outfile = File.createTempFile("wbf$_out", ".sql");
-    File errFile = File.createTempFile("wbf$_err", ".txt");
-    File sysOut = File.createTempFile("wbf$_out", ".txt");
+    File errFile = File.createTempFile("wbf$_syserr", ".txt");
+    File sysOut = File.createTempFile("wbf$_sysout", ".txt");
 
     boolean useSystemOut = true;
     boolean useSystemIn = true;
 
-    String allArgs = "";
+    String args = StringUtil.coalesce(cmdLine, "");
 
-    if (cmdLine != null && cmdLine.contains(INPUT_FILE))
+    if (args.contains(INPUT_FILE))
     {
-      allArgs = cmdLine.replace(INPUT_FILE, "\"" + infile.getAbsolutePath() + "\"");
+      args = args.replace(INPUT_FILE, "\"" + infile.getAbsolutePath() + "\"");
       useSystemIn = false;
     }
 
-    if (allArgs.contains(OUTPUT_FILE))
+    if (args.contains(OUTPUT_FILE))
     {
       // just to be sure that the tool doesn't fail because the file is already there
       FileUtil.deleteSilently(outfile);
-      allArgs = allArgs.replace(OUTPUT_FILE, "\"" + outfile.getAbsolutePath() + "\"");
+
+      args = args.replace(OUTPUT_FILE, "\"" + outfile.getAbsolutePath() + "\"");
       useSystemOut = false;
     }
 
@@ -178,13 +176,7 @@ public class ExternalFormatter
 
       WbFile exe = new WbFile(program);
 
-      List<String> args = new ArrayList<>();
-      args.add(program);
-
-      WbStringTokenizer tok = new WbStringTokenizer(allArgs, " ", true, "'\"", true);
-      args.addAll(tok.getAllTokens());
-
-      ProcessBuilder pb = new ProcessBuilder(args);
+      ProcessBuilder pb = new ProcessBuilder("\"" + exe.getFullPath() + "\"", args);
       pb.directory(exe.getAbsoluteFile().getParentFile());
 
       if (useSystemIn)
@@ -215,14 +207,14 @@ public class ExternalFormatter
 
       if (!useSystemOut)
       {
-        String out = readOutFile(sysOut);
+        String out = readFile(sysOut);
         if (StringUtil.isNonEmpty(out))
         {
-          LogMgr.logWarning("ExternalFormatter.runFormatter()", "Output from formatter: " + out);
+          LogMgr.logInfo("ExternalFormatter.runFormatter()", "Output from formatter: " + out);
         }
       }
 
-      String error = readOutFile(errFile);
+      String error = readFile(errFile);
       if (StringUtil.isNonEmpty(error))
       {
         LogMgr.logWarning("ExternalFormatter.runFormatter()", "Error message from formatter: " + error);
@@ -232,7 +224,7 @@ public class ExternalFormatter
     }
     catch (Exception ex)
     {
-      String error = readOutFile(errFile);
+      String error = readFile(errFile);
       if (StringUtil.isNonEmpty(error))
       {
         LogMgr.logError("ExternalFormatter.runFormatter()", "Error message from formatter: " + error, null);
@@ -255,15 +247,16 @@ public class ExternalFormatter
     return sql;
   }
 
-  private String readOutFile(File errFile)
+  private String readFile(File errFile)
   {
+    if (errFile == null) return null;
+    if (!errFile.exists()) return null;
+
     String error = null;
     try
     {
-      if (errFile.exists())
-      {
-        error = FileUtil.readFile(errFile, System.getProperty("file.encoding"));
-      }
+      error = FileUtil.readFile(errFile, System.getProperty("file.encoding"));
+      error = StringUtil.trimToNull(error);
     }
     catch (Throwable th)
     {
