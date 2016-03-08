@@ -135,6 +135,7 @@ public class ExternalFormatter
   {
     File infile = File.createTempFile("wbf$_in", ".sql");
     File outfile = File.createTempFile("wbf$_out", ".sql");
+    File errFile = File.createTempFile("wbf$_err", ".txt");
 
     boolean useSystemOut = true;
     boolean useSystemIn = true;
@@ -149,8 +150,7 @@ public class ExternalFormatter
     if (args.contains(OUTPUT_FILE))
     {
       // just to be sure that the tool doesn't fail because the file is already there
-      outfile.delete();
-
+      FileUtil.deleteSilently(outfile);
       args = args.replace(OUTPUT_FILE, "\"" + outfile.getAbsolutePath() + "\"");
       useSystemOut = false;
     }
@@ -173,7 +173,7 @@ public class ExternalFormatter
 
       WbFile exe = new WbFile(program);
 
-      ProcessBuilder pb = new ProcessBuilder(program, args);
+      ProcessBuilder pb = new ProcessBuilder("\"" + exe.getAbsolutePath() + "\"", args);
       pb.directory(exe.getAbsoluteFile().getParentFile());
 
       if (useSystemIn)
@@ -186,28 +186,65 @@ public class ExternalFormatter
         pb.redirectOutput(outfile);
       }
 
+      pb.redirectError(errFile);
+
 			LogMgr.logInfo("ExternalFormatter.runFormatter()", "Running external formatter: " + pb.command());
 
 			Process task = pb.start();
-
 			task.waitFor();
 
 			int exitValue = task.exitValue();
       LogMgr.logDebug("ExternalFormatter.runFormatter()", "Return value was: " + exitValue);
 
       String formatted = FileUtil.readFile(outfile, outputEncoding);
+
+      String error = getErrorOutput(errFile);
+      if (StringUtil.isNonEmpty(error))
+      {
+        LogMgr.logWarning("ExternalFormatter.runFormatter()", "Error message from formatter: " + error);
+      }
+
       return StringUtil.trim(formatted);
     }
     catch (Exception ex)
     {
-      LogMgr.logError("ExternalFormatter.runFormatter()", "Error running formatter", ex);
+      String error = getErrorOutput(errFile);
+      if (StringUtil.isNonEmpty(error))
+      {
+        LogMgr.logError("ExternalFormatter.runFormatter()", "Error message from formatter: " + error, null);
+        LogMgr.logDebug("ExternalFormatter.runFormatter()", "Error cause", ex);
+      }
+      else
+      {
+        LogMgr.logError("ExternalFormatter.runFormatter()", "Error running formatter", ex);
+      }
     }
     finally
     {
-      infile.delete();
-      outfile.delete();
+      FileUtil.deleteSilently(infile);
+      FileUtil.deleteSilently(outfile);
+      FileUtil.deleteSilently(errFile);
     }
+
+    // something went wrong, return the original SQL statement
     return sql;
+  }
+
+  private String getErrorOutput(File errFile)
+  {
+    String error = null;
+    try
+    {
+      if (errFile.exists())
+      {
+        error = FileUtil.readFile(errFile, System.getProperty("file.encoding"));
+      }
+    }
+    catch (Throwable th)
+    {
+      // ignore
+    }
+    return error;
   }
 
   @Override

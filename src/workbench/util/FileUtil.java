@@ -625,6 +625,20 @@ public class FileUtil
 		Collections.sort(files, comp);
 	}
 
+  public static boolean deleteSilently(File toDelete)
+  {
+    if (toDelete == null) return false;
+    try
+    {
+      return toDelete.delete();
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("FileUtil.deleteSilently()", "Could not delete file: " + toDelete);
+      return false;
+    }
+  }
+
 	/**
 	 * Reads input from System.in if data is avaiable.
 	 *
