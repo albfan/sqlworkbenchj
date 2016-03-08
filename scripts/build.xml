@@ -667,6 +667,14 @@
       <option value="-Xdock:name=SQLWorkbench/J"/>
     </bundleapp>
 
+    <replace file="${bundledir}/SQLWorkbenchJ.app/Contents/Info.plist">
+      <replacefilter>
+        <replacetoken>&lt;/dict&gt;</replacetoken>
+        <replacevalue>&lt;key&gt;NSHighResolutionCapable&lt;/key&gt;
+&lt;true/&gt;
+&lt;/dict&gt;</replacevalue>
+      </replacefilter>
+    </replace>
   </target>
 
   <target name="mac-package" depends="init,publish,bundleapp">
