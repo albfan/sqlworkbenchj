@@ -55,7 +55,6 @@ public class WbStringTokenizerTest
 		assertEquals(2, tokens.size());
 		assertEquals("foo=#x=1,z=2", tokens.get(0).trim());
 		assertEquals("foo=#a=5,b=6", tokens.get(1).trim());
-
 	}
 
 	@Test

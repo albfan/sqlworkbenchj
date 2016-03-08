@@ -22,6 +22,8 @@ package workbench.sql.formatter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -29,6 +31,7 @@ import workbench.resource.Settings;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbStringTokenizer;
 
 
 /**
@@ -136,22 +139,24 @@ public class ExternalFormatter
     File infile = File.createTempFile("wbf$_in", ".sql");
     File outfile = File.createTempFile("wbf$_out", ".sql");
     File errFile = File.createTempFile("wbf$_err", ".txt");
+    File sysOut = File.createTempFile("wbf$_out", ".txt");
 
     boolean useSystemOut = true;
     boolean useSystemIn = true;
-    String args = "";
+
+    String allArgs = "";
 
     if (cmdLine != null && cmdLine.contains(INPUT_FILE))
     {
-      args = cmdLine.replace(INPUT_FILE, "\"" + infile.getAbsolutePath() + "\"");
+      allArgs = cmdLine.replace(INPUT_FILE, "\"" + infile.getAbsolutePath() + "\"");
       useSystemIn = false;
     }
 
-    if (args.contains(OUTPUT_FILE))
+    if (allArgs.contains(OUTPUT_FILE))
     {
       // just to be sure that the tool doesn't fail because the file is already there
       FileUtil.deleteSilently(outfile);
-      args = args.replace(OUTPUT_FILE, "\"" + outfile.getAbsolutePath() + "\"");
+      allArgs = allArgs.replace(OUTPUT_FILE, "\"" + outfile.getAbsolutePath() + "\"");
       useSystemOut = false;
     }
 
@@ -173,7 +178,13 @@ public class ExternalFormatter
 
       WbFile exe = new WbFile(program);
 
-      ProcessBuilder pb = new ProcessBuilder("\"" + exe.getAbsolutePath() + "\"", args);
+      List<String> args = new ArrayList<>();
+      args.add(program);
+
+      WbStringTokenizer tok = new WbStringTokenizer(allArgs, " ", true, "'\"", true);
+      args.addAll(tok.getAllTokens());
+
+      ProcessBuilder pb = new ProcessBuilder(args);
       pb.directory(exe.getAbsoluteFile().getParentFile());
 
       if (useSystemIn)
@@ -184,6 +195,10 @@ public class ExternalFormatter
       if (useSystemOut)
       {
         pb.redirectOutput(outfile);
+      }
+      else
+      {
+        pb.redirectOutput(sysOut);
       }
 
       pb.redirectError(errFile);
@@ -198,7 +213,16 @@ public class ExternalFormatter
 
       String formatted = FileUtil.readFile(outfile, outputEncoding);
 
-      String error = getErrorOutput(errFile);
+      if (!useSystemOut)
+      {
+        String out = readOutFile(sysOut);
+        if (StringUtil.isNonEmpty(out))
+        {
+          LogMgr.logWarning("ExternalFormatter.runFormatter()", "Output from formatter: " + out);
+        }
+      }
+
+      String error = readOutFile(errFile);
       if (StringUtil.isNonEmpty(error))
       {
         LogMgr.logWarning("ExternalFormatter.runFormatter()", "Error message from formatter: " + error);
@@ -208,7 +232,7 @@ public class ExternalFormatter
     }
     catch (Exception ex)
     {
-      String error = getErrorOutput(errFile);
+      String error = readOutFile(errFile);
       if (StringUtil.isNonEmpty(error))
       {
         LogMgr.logError("ExternalFormatter.runFormatter()", "Error message from formatter: " + error, null);
@@ -224,13 +248,14 @@ public class ExternalFormatter
       FileUtil.deleteSilently(infile);
       FileUtil.deleteSilently(outfile);
       FileUtil.deleteSilently(errFile);
+      FileUtil.deleteSilently(sysOut);
     }
 
     // something went wrong, return the original SQL statement
     return sql;
   }
 
-  private String getErrorOutput(File errFile)
+  private String readOutFile(File errFile)
   {
     String error = null;
     try
