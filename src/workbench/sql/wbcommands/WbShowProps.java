@@ -170,7 +170,7 @@ public class WbShowProps
 		return false;
 	}
 
-	static class PropertyDataStore
+	private static class PropertyDataStore
 		extends DataStore
 	{
 		private boolean wbProps;
