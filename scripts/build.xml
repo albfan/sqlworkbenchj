@@ -659,8 +659,6 @@
         <include name="${jarfile}"/>
       </classpath>
 
-      <option value="-Dapple.awt.antialiasing=true"/>
-      <option value="-Dapple.awt.textantialiasing=true"/>
       <option value="-Dapple.laf.useScreenMenuBar=true"/>
       <option value="-Dapple.awt.showGrowBoxtrue=true"/>
       <option value="-Xmx1024m"/>
