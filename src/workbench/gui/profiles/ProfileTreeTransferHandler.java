@@ -175,7 +175,9 @@ public class ProfileTreeTransferHandler
       Window parent = SwingUtilities.getWindowAncestor(tree);
       ProfileTree sourceTree = (ProfileTree)WbSwingUtilities.findComponentByName(ProfileTree.class, transferNode.getSourceName(), parent);
 
-      if (support.isDrop() && sourceTree != myTree && action == MOVE && sourceTree != null)
+      // as the Transferable contains a copy of the profiles we need to delete the original ones
+      // before we add the dropped profiles. Merely changing the group name does not work.
+      if (support.isDrop() && action == MOVE && sourceTree != null)
       {
         for (ConnectionProfile profile : profiles)
         {
@@ -183,21 +185,11 @@ public class ProfileTreeTransferHandler
         }
       }
 
-      if (sourceTree == myTree)
-      {
-        // inside the same tree we can use the action that was provided
-        tree.handleDroppedNodes(profiles, parentNode, action);
-      }
-      else
-      {
-        // action == MOVE would not add the profiles to the TreeModel
-        // it only changes the group name of the profile
-        // so if the source was a different tree, we have to use COPY on the target
-        // to add the profile to the model.
-        tree.handleDroppedNodes(profiles, parentNode, COPY);
-      }
+      // action == MOVE would not add the profiles to the TreeModel
+      // it only changes the group name of the profile
+      tree.handleDroppedNodes(profiles, parentNode, COPY);
 
-      // for a Cut & Paste action we need to remove the "stored" nodes
+      // for a Cut & Paste action we need to remove the stored nodes in the source tree
       if (!support.isDrop() && sourceTree != null)
       {
         ProfileTreeTransferHandler handler = (ProfileTreeTransferHandler)sourceTree.getTransferHandler();

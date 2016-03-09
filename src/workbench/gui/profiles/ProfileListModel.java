@@ -431,7 +431,7 @@ class ProfileListModel
 	public void applyProfiles()
 	{
 		ConnectionMgr.getInstance().applyProfiles(getAllProfiles());
-	}
+  }
 
 	private void buildTree()
 	{
@@ -470,10 +470,9 @@ class ProfileListModel
 		{
 			nodes[i] = (DefaultMutableTreeNode)sourceGroupNode.getChildAt(i);
 		}
-		// moveProfilesToGroup(nodes, target);
 	}
 
-  public void removeNodesFromParen(DefaultMutableTreeNode[] profileNodes)
+  public void removeNodesFromParent(DefaultMutableTreeNode[] profileNodes)
   {
 		if (profileNodes == null) return;
 		for (DefaultMutableTreeNode profileNode : profileNodes)
