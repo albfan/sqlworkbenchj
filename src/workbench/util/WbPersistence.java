@@ -43,82 +43,82 @@ import workbench.log.LogMgr;
  * @author Thomas Kellerer
  */
 public class WbPersistence
-	implements ExceptionListener
+  implements ExceptionListener
 {
-	private String filename;
+  private String filename;
 
-	public WbPersistence()
-	{
-	}
+  public WbPersistence()
+  {
+  }
 
-	public WbPersistence(String file)
-	{
-		filename = file;
-	}
+  public WbPersistence(String file)
+  {
+    filename = file;
+  }
 
-	/**
-	 * Makes a property of the given class transient, so that it won't be written
-	 * into the XML file when saved using WbPersistence
-	 * @param clazz
-	 * @param property
-	 */
-	public static void makeTransient(Class clazz, String property)
-	{
-		try
-		{
-			BeanInfo info = Introspector.getBeanInfo( clazz );
-			PropertyDescriptor[] propertyDescriptors = info.getPropertyDescriptors();
-			for (PropertyDescriptor pd : propertyDescriptors)
-			{
-				if ( pd.getName().equals(property) )
-				{
-					pd.setValue( "transient", Boolean.TRUE );
-				}
-			}
-		}
-		catch ( IntrospectionException e )
-		{
-		}
-	}
+  /**
+   * Makes a property of the given class transient, so that it won't be written
+   * into the XML file when saved using WbPersistence
+   * @param clazz
+   * @param property
+   */
+  public static void makeTransient(Class clazz, String property)
+  {
+    try
+    {
+      BeanInfo info = Introspector.getBeanInfo( clazz );
+      PropertyDescriptor[] propertyDescriptors = info.getPropertyDescriptors();
+      for (PropertyDescriptor pd : propertyDescriptors)
+      {
+        if ( pd.getName().equals(property) )
+        {
+          pd.setValue( "transient", Boolean.TRUE );
+        }
+      }
+    }
+    catch ( IntrospectionException e )
+    {
+    }
+  }
 
-	public Object readObject()
-		throws Exception
-	{
-		if (this.filename == null) throw new IllegalArgumentException("No filename specified!");
-		InputStream in = new BufferedInputStream(new FileInputStream(filename));
-		return readObject(in);
-	}
+  public Object readObject()
+    throws Exception
+  {
+    if (this.filename == null) throw new IllegalArgumentException("No filename specified!");
+    InputStream in = new BufferedInputStream(new FileInputStream(filename));
+    return readObject(in);
+  }
 
-	public Object readObject(InputStream in)
-		throws Exception
-	{
-		try (XMLDecoder e = new XMLDecoder(in, null, this))
-		{
-			Object result = e.readObject();
-			return result;
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-	}
+  public Object readObject(InputStream in)
+    throws Exception
+  {
+    try (XMLDecoder e = new XMLDecoder(in, null, this))
+    {
+      Object result = e.readObject();
+      return result;
+    }
+    finally
+    {
+      FileUtil.closeQuietely(in);
+    }
+  }
 
-	public void writeObject(Object aValue)
-		throws IOException
-	{
-		if (aValue == null) return;
+  public void writeObject(Object aValue)
+    throws IOException
+  {
+    if (aValue == null) return;
 
-		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
-				XMLEncoder e = new XMLEncoder(out))
-		{
-			e.writeObject(aValue);
-		}
-	}
+    try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename), 32*1024);
+        XMLEncoder e = new XMLEncoder(out))
+    {
+      e.writeObject(aValue);
+    }
+  }
 
-	@Override
-	public void exceptionThrown(Exception e)
-	{
-		LogMgr.logError("WbPersistence", "Error reading file " + filename, e);
-	}
+  @Override
+  public void exceptionThrown(Exception e)
+  {
+    LogMgr.logError("WbPersistence", "Error reading file " + filename, e);
+  }
 
 }

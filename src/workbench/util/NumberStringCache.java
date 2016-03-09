@@ -29,68 +29,68 @@ package workbench.util;
  */
 public class NumberStringCache
 {
-	private final int CACHE_SIZE = 5000;
-	private final String[] cache = new String[CACHE_SIZE];
-	private final String[] hexCache = new String[256];
+  private final int CACHE_SIZE = 5000;
+  private final String[] cache = new String[CACHE_SIZE];
+  private final String[] hexCache = new String[256];
 
-	public static NumberStringCache getInstance()
-	{
-		return InstanceHolder.LAZY_INSTANCE;
-	}
+  public static NumberStringCache getInstance()
+  {
+    return InstanceHolder.LAZY_INSTANCE;
+  }
 
-	private static class InstanceHolder
-	{
-		static final NumberStringCache LAZY_INSTANCE = new NumberStringCache();
-	}
+  private static class InstanceHolder
+  {
+    static final NumberStringCache LAZY_INSTANCE = new NumberStringCache();
+  }
 
-	private NumberStringCache()
-	{
-	}
+  private NumberStringCache()
+  {
+  }
 
-	public static String getHexString(int value)
-	{
-		return getInstance()._getHexString(value);
-	}
+  public static String getHexString(int value)
+  {
+    return getInstance()._getHexString(value);
+  }
 
-	private String _getHexString(int value)
-	{
-		if (value > 255 || value < 0) return Integer.toHexString(value);
-		if (hexCache[value] == null)
-		{
-			if (value < 16)
-			{
-				hexCache[value] = "0" + Integer.toHexString(value);
-			}
-			else
-			{
-				hexCache[value] = Integer.toHexString(value);
-			}
+  private String _getHexString(int value)
+  {
+    if (value > 255 || value < 0) return Integer.toHexString(value);
+    if (hexCache[value] == null)
+    {
+      if (value < 16)
+      {
+        hexCache[value] = "0" + Integer.toHexString(value);
+      }
+      else
+      {
+        hexCache[value] = Integer.toHexString(value);
+      }
 
-		}
-		return hexCache[value];
-	}
+    }
+    return hexCache[value];
+  }
 
-	public static String getNumberString(long lvalue)
-	{
-		return getInstance()._getNumberString(lvalue);
-	}
+  public static String getNumberString(long lvalue)
+  {
+    return getInstance()._getNumberString(lvalue);
+  }
 
-	private String _getNumberString(long lvalue)
-	{
-		if (lvalue < 0 || lvalue >= CACHE_SIZE) return Long.toString(lvalue);
+  private String _getNumberString(long lvalue)
+  {
+    if (lvalue < 0 || lvalue >= CACHE_SIZE) return Long.toString(lvalue);
 
-		int value = (int)lvalue;
+    int value = (int)lvalue;
 
-		// I'm not synchronizing this, because the worst that can
-		// happen is, that the same number is created two or three times
-		// instead of exactly one time.
-		// And because this is most of the time called from Swing Event Thread
-		// it is more or less a single-threaded access anyway.
-		if (cache[value] == null)
-		{
-			cache[value] = Integer.toString(value);
-		}
-		return cache[value];
-	}
+    // I'm not synchronizing this, because the worst that can
+    // happen is, that the same number is created two or three times
+    // instead of exactly one time.
+    // And because this is most of the time called from Swing Event Thread
+    // it is more or less a single-threaded access anyway.
+    if (cache[value] == null)
+    {
+      cache[value] = Integer.toString(value);
+    }
+    return cache[value];
+  }
 
 }

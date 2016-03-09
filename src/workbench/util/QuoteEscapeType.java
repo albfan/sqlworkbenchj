@@ -29,7 +29,7 @@ package workbench.util;
  */
 public enum QuoteEscapeType
 {
-	none,
-	duplicate,
-	escape
+  none,
+  duplicate,
+  escape
 }

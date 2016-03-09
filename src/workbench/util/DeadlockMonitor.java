@@ -31,58 +31,58 @@ import workbench.resource.Settings;
  * @author Thomas Kellerer
  */
 public class DeadlockMonitor
-	extends WbThread
+  extends WbThread
 {
-	private ThreadDumper monitor;
-	private int sleepTime;
-	private int minLogDuration;
-	private boolean keepRunning = true;
+  private ThreadDumper monitor;
+  private int sleepTime;
+  private int minLogDuration;
+  private boolean keepRunning = true;
 
-	public DeadlockMonitor()
-	{
-		super("WbDeadlockMonitor");
-		monitor = new ThreadDumper();
-		sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 5000);
-		minLogDuration = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.logduration", 50);
-	}
+  public DeadlockMonitor()
+  {
+    super("WbDeadlockMonitor");
+    monitor = new ThreadDumper();
+    sleepTime = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.sleeptime", 5000);
+    minLogDuration = Settings.getInstance().getIntProperty("workbench.gui.debug.deadlockmonitor.logduration", 50);
+  }
 
-	@Override
-	public void run()
-	{
-		while (keepRunning)
-		{
-			long start = System.currentTimeMillis();
-			String dump = monitor.getDeadlockDump();
-			long duration = System.currentTimeMillis() - start;
+  @Override
+  public void run()
+  {
+    while (keepRunning)
+    {
+      long start = System.currentTimeMillis();
+      String dump = monitor.getDeadlockDump();
+      long duration = System.currentTimeMillis() - start;
 
-			if (duration > minLogDuration)
-			{
-				LogMgr.logInfo("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
-			}
+      if (duration > minLogDuration)
+      {
+        LogMgr.logInfo("DeadlockMonitor.run()", "Checking for deadlocks took: " + duration + "ms");
+      }
 
-			if (dump != null)
-			{
-				LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);
-			}
+      if (dump != null)
+      {
+        LogMgr.logError("DeadlockMonitor.run()", "Deadlock detected:\n" + dump, null);
+      }
 
-			if (keepRunning)
-			{
-				try
-				{
-					Thread.sleep(sleepTime);
-				}
-				catch (InterruptedException ir)
-				{
-					break;
-				}
-			}
-		}
-	}
+      if (keepRunning)
+      {
+        try
+        {
+          Thread.sleep(sleepTime);
+        }
+        catch (InterruptedException ir)
+        {
+          break;
+        }
+      }
+    }
+  }
 
-	public void cancel()
-	{
-		keepRunning = false;
-		interrupt();
-	}
+  public void cancel()
+  {
+    keepRunning = false;
+    interrupt();
+  }
 
 }

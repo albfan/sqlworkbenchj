@@ -38,25 +38,25 @@ import workbench.log.LogMgr;
 public class FileAttributeChanger
 {
 
-	public void removeHidden(File dir)
-	{
-		if (PlatformHelper.isWindows())
-		{
-			removeAttribute(dir);
-		}
-	}
+  public void removeHidden(File dir)
+  {
+    if (PlatformHelper.isWindows())
+    {
+      removeAttribute(dir);
+    }
+  }
 
-	private void removeAttribute(File dir)
-	{
-		try
-		{
-			Path file = dir.toPath();
-			Files.setAttribute(file, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute of config dir: " + dir.getAbsolutePath(), th);
-		}
-	}
+  private void removeAttribute(File dir)
+  {
+    try
+    {
+      Path file = dir.toPath();
+      Files.setAttribute(file, "dos:hidden", false, LinkOption.NOFOLLOW_LINKS);
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("FileAttributeChanger.removeAttribute()", "Could not remove hidden attribute of config dir: " + dir.getAbsolutePath(), th);
+    }
+  }
 
 }

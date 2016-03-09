@@ -26,14 +26,14 @@ package workbench.util;
  */
 public class ObjectUtil
 {
-	public static <T> T coalesce(T ... args)
-	{
-		if (args == null) return null;
-		for (T obj : args)
-		{
-			if (obj != null) return obj;
-		}
-		return null;
-	}
+  public static <T> T coalesce(T ... args)
+  {
+    if (args == null) return null;
+    for (T obj : args)
+    {
+      if (obj != null) return obj;
+    }
+    return null;
+  }
 
 }

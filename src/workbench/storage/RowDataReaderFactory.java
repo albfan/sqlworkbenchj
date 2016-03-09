@@ -33,21 +33,21 @@ import workbench.db.WbConnection;
  */
 public class RowDataReaderFactory
 {
-	public static RowDataReader createReader(ResultInfo info, WbConnection conn)
-	{
-		if (conn != null  && conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.db.oracle.fix.timstamptz", true))
-		{
-			try
-			{
-				return new OracleRowDataReader(info, conn);
-			}
-			catch (ClassNotFoundException cnf)
-			{
-				LogMgr.logError("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader", cnf);
-				// disable the usage of the OracleRowDataReader for now, to avoid unnecessary further attempts
-				System.setProperty("workbench.db.oracle.fix.timstamptz", "false");
-			}
-		}
-		return new RowDataReader(info, conn);
-	}
+  public static RowDataReader createReader(ResultInfo info, WbConnection conn)
+  {
+    if (conn != null  && conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.db.oracle.fix.timstamptz", true))
+    {
+      try
+      {
+        return new OracleRowDataReader(info, conn);
+      }
+      catch (ClassNotFoundException cnf)
+      {
+        LogMgr.logError("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader", cnf);
+        // disable the usage of the OracleRowDataReader for now, to avoid unnecessary further attempts
+        System.setProperty("workbench.db.oracle.fix.timstamptz", "false");
+      }
+    }
+    return new RowDataReader(info, conn);
+  }
 }

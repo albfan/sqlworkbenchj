@@ -43,38 +43,38 @@ import workbench.db.exporter.InfinityLiterals;
  * @author Thomas Kellerer
  */
 public class WbDateFormatter
-	extends SimpleDateFormat
+  extends SimpleDateFormat
 {
-	// copied from the PostgreSQL driver
-	public static final long DATE_POSITIVE_INFINITY = 9223372036825200000l;
-	public static final long DATE_NEGATIVE_INFINITY = -9223372036832400000l;
+  // copied from the PostgreSQL driver
+  public static final long DATE_POSITIVE_INFINITY = 9223372036825200000l;
+  public static final long DATE_NEGATIVE_INFINITY = -9223372036832400000l;
 
-	private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
+  private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
   private int millisStart = -1;
   private int millisLength = -1;
 
-	public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
-	{
-		super(pattern, formatSymbols);
+  public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
+  {
+    super(pattern, formatSymbols);
     checkMicroSeconds();
-	}
+  }
 
-	public WbDateFormatter(String pattern, Locale locale)
-	{
-		super(pattern, locale);
+  public WbDateFormatter(String pattern, Locale locale)
+  {
+    super(pattern, locale);
     checkMicroSeconds();
-	}
+  }
 
-	public WbDateFormatter(String pattern)
-	{
-		super(pattern);
+  public WbDateFormatter(String pattern)
+  {
+    super(pattern);
     checkMicroSeconds();
-	}
+  }
 
-	public WbDateFormatter()
-	{
-	}
+  public WbDateFormatter()
+  {
+  }
 
   @Override
   public void applyLocalizedPattern(String pattern)
@@ -90,26 +90,26 @@ public class WbDateFormatter
     checkMicroSeconds();
   }
 
-	public void setInfinityLiterals(InfinityLiterals literals)
-	{
-		this.infinityLiterals = literals;
-	}
+  public void setInfinityLiterals(InfinityLiterals literals)
+  {
+    this.infinityLiterals = literals;
+  }
 
-	@Override
-	public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition pos)
-	{
-		if (infinityLiterals != null)
-		{
-			long dt = (date == null ? 0 : date.getTime());
-			if (dt == DATE_POSITIVE_INFINITY)
-			{
-				return toAppendTo.append(infinityLiterals.getPositiveInfinity());
-			}
-			else if (dt == DATE_NEGATIVE_INFINITY)
-			{
-				return toAppendTo.append(infinityLiterals.getNegativeInfinity());
-			}
-		}
+  @Override
+  public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition pos)
+  {
+    if (infinityLiterals != null)
+    {
+      long dt = (date == null ? 0 : date.getTime());
+      if (dt == DATE_POSITIVE_INFINITY)
+      {
+        return toAppendTo.append(infinityLiterals.getPositiveInfinity());
+      }
+      else if (dt == DATE_NEGATIVE_INFINITY)
+      {
+        return toAppendTo.append(infinityLiterals.getNegativeInfinity());
+      }
+    }
 
     if (date instanceof Timestamp && millisLength > 3)
     {
@@ -117,8 +117,8 @@ public class WbDateFormatter
       return formatTimestamp((Timestamp)date, toAppendTo, pos);
     }
 
-		return super.format(date, toAppendTo, pos);
-	}
+    return super.format(date, toAppendTo, pos);
+  }
 
   private StringBuffer formatTimestamp(Timestamp date, StringBuffer toAppendTo, FieldPosition pos)
   {
@@ -141,35 +141,35 @@ public class WbDateFormatter
     return result;
   }
 
-	@Override
-	public Date parse(String source)
-		throws ParseException
-	{
-		if (infinityLiterals != null)
-		{
-			if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
-			{
-				return new Date(DATE_POSITIVE_INFINITY);
-			}
-			if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
-			{
-				return new Date(DATE_NEGATIVE_INFINITY);
-			}
-		}
-		return super.parse(source);
-	}
+  @Override
+  public Date parse(String source)
+    throws ParseException
+  {
+    if (infinityLiterals != null)
+    {
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
+      {
+        return new Date(DATE_POSITIVE_INFINITY);
+      }
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
+      {
+        return new Date(DATE_NEGATIVE_INFINITY);
+      }
+    }
+    return super.parse(source);
+  }
 
-	public Date parseQuietly(String source)
-	{
-		try
-		{
-			return this.parse(source);
-		}
-		catch (ParseException ex)
-		{
-			return null;
-		}
-	}
+  public Date parseQuietly(String source)
+  {
+    try
+    {
+      return this.parse(source);
+    }
+    catch (ParseException ex)
+    {
+      return null;
+    }
+  }
 
 
   /**
@@ -203,42 +203,42 @@ public class WbDateFormatter
         }
       }
       pos ++;
-		}
+    }
   }
 
-	public static String getDisplayValue(Object value)
-	{
-		if (value == null) return "";
+  public static String getDisplayValue(Object value)
+  {
+    if (value == null) return "";
 
-		if (value instanceof java.sql.Date)
-		{
-			String format = Settings.getInstance().getDefaultDateFormat();
-			WbDateFormatter formatter = new WbDateFormatter(format);
-			return formatter.format((java.sql.Date) value);
-		}
+    if (value instanceof java.sql.Date)
+    {
+      String format = Settings.getInstance().getDefaultDateFormat();
+      WbDateFormatter formatter = new WbDateFormatter(format);
+      return formatter.format((java.sql.Date) value);
+    }
 
-		if (value instanceof java.sql.Timestamp)
-		{
-			String format = Settings.getInstance().getDefaultTimestampFormat();
-			WbDateFormatter formatter = new WbDateFormatter(format);
-			return formatter.format((java.sql.Timestamp) value);
-		}
+    if (value instanceof java.sql.Timestamp)
+    {
+      String format = Settings.getInstance().getDefaultTimestampFormat();
+      WbDateFormatter formatter = new WbDateFormatter(format);
+      return formatter.format((java.sql.Timestamp) value);
+    }
 
-		if (value instanceof java.util.Date)
-		{
-			long time = ((java.util.Date)value).getTime();
-			if (time == DATE_POSITIVE_INFINITY)
-			{
-				return InfinityLiterals.PG_POSITIVE_LITERAL;
-			}
-			if (time == WbDateFormatter.DATE_NEGATIVE_INFINITY)
-			{
-				return InfinityLiterals.PG_NEGATIVE_LITERAL;
-			}
-		}
+    if (value instanceof java.util.Date)
+    {
+      long time = ((java.util.Date)value).getTime();
+      if (time == DATE_POSITIVE_INFINITY)
+      {
+        return InfinityLiterals.PG_POSITIVE_LITERAL;
+      }
+      if (time == WbDateFormatter.DATE_NEGATIVE_INFINITY)
+      {
+        return InfinityLiterals.PG_NEGATIVE_LITERAL;
+      }
+    }
 
-		return value.toString();
-	}
+    return value.toString();
+  }
 
 
 }

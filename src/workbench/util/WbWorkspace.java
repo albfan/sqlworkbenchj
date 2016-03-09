@@ -49,11 +49,11 @@ import workbench.gui.sql.SqlHistory;
  * @author  Thomas Kellerer
  */
 public class WbWorkspace
-	implements Closeable
+  implements Closeable
 {
   private static final String VARIABLES_FILENAME = "variables.properties";
   private static final String TABINFO_FILENAME = "tabs.properties";
-	private static final String TOOL_ENTRY_PREFIX = "toolprop_";
+  private static final String TOOL_ENTRY_PREFIX = "toolprop_";
 
   private enum WorkspaceState
   {
@@ -62,23 +62,23 @@ public class WbWorkspace
     writing;
   }
 
-	private ZipOutputStream zout;
-	private ZipFile archive;
+  private ZipOutputStream zout;
+  private ZipFile archive;
 
   private WorkspaceState state = WorkspaceState.closed;
-	private int tabCount = -1;
+  private int tabCount = -1;
 
-	private WbProperties tabInfo = new WbProperties(0);
-	private Map<String, WbProperties> toolProperties = new HashMap<>();
+  private WbProperties tabInfo = new WbProperties(0);
+  private Map<String, WbProperties> toolProperties = new HashMap<>();
   private WbProperties variables = new WbProperties(0);
 
   private String filename;
 
-	public WbWorkspace(String archiveName)
-	{
+  public WbWorkspace(String archiveName)
+  {
     if (archiveName == null) throw new NullPointerException("Filename cannot be null");
     this.filename = archiveName;
-	}
+  }
 
   /**
    * Opens the workspace for writing.
@@ -157,29 +157,29 @@ public class WbWorkspace
     return filename;
   }
 
-	public Map<String, WbProperties> getToolProperties()
-	{
-		return toolProperties;
-	}
+  public Map<String, WbProperties> getToolProperties()
+  {
+    return toolProperties;
+  }
 
-	public void setEntryCount(int count)
-	{
-		tabInfo.setProperty("tab.total.count", count);
-	}
+  public void setEntryCount(int count)
+  {
+    tabInfo.setProperty("tab.total.count", count);
+  }
 
-	public void addHistoryEntry(int index, SqlHistory history)
-		throws IOException
-	{
+  public void addHistoryEntry(int index, SqlHistory history)
+    throws IOException
+  {
     if (state != WorkspaceState.writing) throw new IllegalStateException("Workspace is not opened for writing. addHistoryEntry() may not be called");
 
-		ZipEntry entry = new ZipEntry("WbStatements" + (index + 1) + ".txt");
-		this.zout.putNextEntry(entry);
-		if (history != null)
-		{
-			history.writeToStream(zout);
-		}
-		zout.closeEntry();
-	}
+    ZipEntry entry = new ZipEntry("WbStatements" + (index + 1) + ".txt");
+    this.zout.putNextEntry(entry);
+    if (history != null)
+    {
+      history.writeToStream(zout);
+    }
+    zout.closeEntry();
+  }
 
   public WbProperties getVariables()
   {
@@ -205,24 +205,24 @@ public class WbWorkspace
    * @return the number of tabs stored in this workspace
    * @see #openForReading()
    */
-	public int getEntryCount()
-	{
+  public int getEntryCount()
+  {
     if (state != WorkspaceState.reading) throw new IllegalStateException("Workspace is not open for reading. Entry count is not available");
-		return tabCount;
-	}
+    return tabCount;
+  }
 
-	public PanelType getPanelType(int index)
-	{
-		String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
-		try
-		{
-			return PanelType.valueOf(type);
-		}
-		catch (Exception e)
-		{
-			return PanelType.sqlPanel;
-		}
-	}
+  public PanelType getPanelType(int index)
+  {
+    String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
+    try
+    {
+      return PanelType.valueOf(type);
+    }
+    catch (Exception e)
+    {
+      return PanelType.sqlPanel;
+    }
+  }
 
   /**
    *
@@ -230,18 +230,18 @@ public class WbWorkspace
    * @param history
    * @throws IOException
    */
-	public void readHistoryData(int anIndex, SqlHistory history)
-		throws IOException
-	{
+  public void readHistoryData(int anIndex, SqlHistory history)
+    throws IOException
+  {
     if (state != WorkspaceState.reading) throw new IllegalStateException("Workspace is not open for reading. Entry count is not available");
 
-		ZipEntry e = this.archive.getEntry("WbStatements" + (anIndex + 1) + ".txt");
-		if (e != null)
-		{
-			InputStream in = this.archive.getInputStream(e);
-			history.readFromStream(in);
-		}
-	}
+    ZipEntry e = this.archive.getEntry("WbStatements" + (anIndex + 1) + ".txt");
+    if (e != null)
+    {
+      InputStream in = this.archive.getInputStream(e);
+      history.readFromStream(in);
+    }
+  }
 
   public void saveProperties()
   {
@@ -253,27 +253,27 @@ public class WbWorkspace
     }
   }
 
-	@Override
-	public void close()
-		throws IOException
-	{
-		if (this.zout != null)
-		{
+  @Override
+  public void close()
+    throws IOException
+  {
+    if (this.zout != null)
+    {
       zout.close();
       zout = null;
-		}
-		else if (this.archive != null)
-		{
-			archive.close();
+    }
+    else if (this.archive != null)
+    {
+      archive.close();
       archive = null;
-		}
+    }
     state = WorkspaceState.closed;
-	}
+  }
 
   public WbProperties getSettings()
-	{
-		return this.tabInfo;
-	}
+  {
+    return this.tabInfo;
+  }
 
   private void clear()
   {
@@ -303,62 +303,62 @@ public class WbWorkspace
     }
   }
 
-	private void readToolProperties()
-	{
+  private void readToolProperties()
+  {
     toolProperties.clear();
-		Enumeration<? extends ZipEntry> entries = archive.entries();
-		while (entries.hasMoreElements())
-		{
-			ZipEntry entry = entries.nextElement();
-			String name = entry.getName();
-			if (name.startsWith(TOOL_ENTRY_PREFIX))
-			{
-				WbFile f = new WbFile(name.substring(TOOL_ENTRY_PREFIX.length()));
-				String toolkey = f.getFileName();
-				WbProperties props = readProperties(entry);
-				toolProperties.put(toolkey, props);
-			}
-		}
-	}
+    Enumeration<? extends ZipEntry> entries = archive.entries();
+    while (entries.hasMoreElements())
+    {
+      ZipEntry entry = entries.nextElement();
+      String name = entry.getName();
+      if (name.startsWith(TOOL_ENTRY_PREFIX))
+      {
+        WbFile f = new WbFile(name.substring(TOOL_ENTRY_PREFIX.length()));
+        String toolkey = f.getFileName();
+        WbProperties props = readProperties(entry);
+        toolProperties.put(toolkey, props);
+      }
+    }
+  }
 
-	private int calculateTabCount()
-	{
-		// new property that stores the total count of tabs
-		int count = tabInfo.getIntProperty("tab.total.count", -1);
-		if (count > 0) return count;
+  private int calculateTabCount()
+  {
+    // new property that stores the total count of tabs
+    int count = tabInfo.getIntProperty("tab.total.count", -1);
+    if (count > 0) return count;
 
-		// Old tabinfo.properties format
-		boolean found = true;
-		int index = 0;
-		while (found)
-		{
-			if (tabInfo.containsKey("tab" + index + ".maxrows") ||
-					tabInfo.containsKey("tab" + index + ".title") ||
-					tabInfo.containsKey("tab" + index + ".append.results"))
-			{
-				tabInfo.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
-				index ++;
-			}
-			else if (tabInfo.containsKey("tab" + index + ".type"))
-			{
-				index ++;
-			}
-			else
-			{
-				found = false;
-			}
-		}
+    // Old tabinfo.properties format
+    boolean found = true;
+    int index = 0;
+    while (found)
+    {
+      if (tabInfo.containsKey("tab" + index + ".maxrows") ||
+          tabInfo.containsKey("tab" + index + ".title") ||
+          tabInfo.containsKey("tab" + index + ".append.results"))
+      {
+        tabInfo.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
+        index ++;
+      }
+      else if (tabInfo.containsKey("tab" + index + ".type"))
+      {
+        index ++;
+      }
+      else
+      {
+        found = false;
+      }
+    }
 
-		int dbExplorer = this.tabInfo.getIntProperty("dbexplorer.visible", 0);
+    int dbExplorer = this.tabInfo.getIntProperty("dbexplorer.visible", 0);
 
-		// now add the missing .type entries for the DbExplorer panels
-		for (int i=0; i < dbExplorer; i++)
-		{
-			tabInfo.setProperty("tab" + index + ".type", PanelType.dbExplorer.toString());
-			index ++;
-		}
-		return index;
-	}
+    // now add the missing .type entries for the DbExplorer panels
+    for (int i=0; i < dbExplorer; i++)
+    {
+      tabInfo.setProperty("tab" + index + ".type", PanelType.dbExplorer.toString());
+      index ++;
+    }
+    return index;
+  }
 
   private void saveVariables()
   {
@@ -379,8 +379,8 @@ public class WbWorkspace
     }
   }
 
-	private void saveToolProperties()
-	{
+  private void saveToolProperties()
+  {
     if (CollectionUtil.isEmpty(this.toolProperties)) return;
     try
     {
@@ -399,10 +399,10 @@ public class WbWorkspace
     {
       try { zout.closeEntry(); } catch (Throwable th) {}
     }
-	}
+  }
 
-	private void saveTabInfo()
-	{
+  private void saveTabInfo()
+  {
     if (CollectionUtil.isEmpty(tabInfo)) return;
     try
     {
@@ -418,161 +418,161 @@ public class WbWorkspace
     {
       try { zout.closeEntry(); } catch (Throwable th) {}
     }
-	}
+  }
 
-	private void readTabInfo(ZipEntry entry)
-	{
-		this.tabInfo = readProperties(entry);
-	}
+  private void readTabInfo(ZipEntry entry)
+  {
+    this.tabInfo = readProperties(entry);
+  }
 
-	private WbProperties readProperties(ZipEntry entry)
-	{
-		WbProperties props = new WbProperties(null, 1);
-		try
-		{
-			InputStream in = this.archive.getInputStream(entry);
-			props.load(in);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbWorkspace.readProperties()", "Could not read property file: " + entry.getName(), e);
-		}
-		return props;
-	}
+  private WbProperties readProperties(ZipEntry entry)
+  {
+    WbProperties props = new WbProperties(null, 1);
+    try
+    {
+      InputStream in = this.archive.getInputStream(entry);
+      props.load(in);
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("WbWorkspace.readProperties()", "Could not read property file: " + entry.getName(), e);
+    }
+    return props;
+  }
 
-	public void setSelectedTab(int anIndex)
-	{
-		this.tabInfo.setProperty("tab.selected", Integer.toString(anIndex));
-	}
+  public void setSelectedTab(int anIndex)
+  {
+    this.tabInfo.setProperty("tab.selected", Integer.toString(anIndex));
+  }
 
-	public int getSelectedTab()
-	{
-		return StringUtil.getIntValue(this.tabInfo.getProperty("tab.selected", "0"));
-	}
+  public int getSelectedTab()
+  {
+    return StringUtil.getIntValue(this.tabInfo.getProperty("tab.selected", "0"));
+  }
 
-	public boolean isSelectedTabExplorer()
-	{
-		int index = getSelectedTab();
-		return PanelType.dbExplorer == this.getPanelType(index);
-	}
+  public boolean isSelectedTabExplorer()
+  {
+    int index = getSelectedTab();
+    return PanelType.dbExplorer == this.getPanelType(index);
+  }
 
-	public void setTabTitle(int index, String name)
-	{
-		String key = "tab" + index + ".title";
-		String encoded = StringUtil.escapeText(name, CharacterRange.RANGE_7BIT);
-		this.tabInfo.setProperty(key, encoded);
-	}
+  public void setTabTitle(int index, String name)
+  {
+    String key = "tab" + index + ".title";
+    String encoded = StringUtil.escapeText(name, CharacterRange.RANGE_7BIT);
+    this.tabInfo.setProperty(key, encoded);
+  }
 
-	public String getTabTitle(int index)
-	{
-		if (this.tabInfo == null) return null;
-		String key = "tab" + index + ".title";
-		String value = (String)this.tabInfo.get(key);
-		return StringUtil.decodeUnicode(value);
-	}
+  public String getTabTitle(int index)
+  {
+    if (this.tabInfo == null) return null;
+    String key = "tab" + index + ".title";
+    String value = (String)this.tabInfo.get(key);
+    return StringUtil.decodeUnicode(value);
+  }
 
-	public int getExternalFileCursorPos(int tabIndex)
-	{
-		if (this.tabInfo == null) return -1;
-		String key = "tab" + tabIndex + ".file.cursorpos";
-		String value = (String)this.tabInfo.get(key);
-		if (value == null) return -1;
-		int result = -1;
-		try
-		{
-			result = Integer.parseInt(value);
-		}
-		catch (Exception e)
-		{
-			result = -1;
-		}
+  public int getExternalFileCursorPos(int tabIndex)
+  {
+    if (this.tabInfo == null) return -1;
+    String key = "tab" + tabIndex + ".file.cursorpos";
+    String value = (String)this.tabInfo.get(key);
+    if (value == null) return -1;
+    int result = -1;
+    try
+    {
+      result = Integer.parseInt(value);
+    }
+    catch (Exception e)
+    {
+      result = -1;
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	public void setQueryTimeout(int index, int timeout)
-	{
-		String key = "tab" + index + ".timeout";
-		this.tabInfo.setProperty(key, Integer.toString(timeout));
-	}
+  public void setQueryTimeout(int index, int timeout)
+  {
+    String key = "tab" + index + ".timeout";
+    this.tabInfo.setProperty(key, Integer.toString(timeout));
+  }
 
-	public int getQueryTimeout(int index)
-	{
-		if (this.tabInfo == null) return 0;
-		String key = "tab" + index + ".timeout";
-		String value = (String)this.tabInfo.get(key);
-		if (value == null) return 0;
-		int result = 0;
-		try
-		{
-			result = Integer.parseInt(value);
-		}
-		catch (Exception e)
-		{
-			result = 0;
-		}
-		return result;
-	}
+  public int getQueryTimeout(int index)
+  {
+    if (this.tabInfo == null) return 0;
+    String key = "tab" + index + ".timeout";
+    String value = (String)this.tabInfo.get(key);
+    if (value == null) return 0;
+    int result = 0;
+    try
+    {
+      result = Integer.parseInt(value);
+    }
+    catch (Exception e)
+    {
+      result = 0;
+    }
+    return result;
+  }
 
-	public void setMaxRows(int index, int numRows)
-	{
-		String key = "tab" + index + ".maxrows";
-		this.tabInfo.setProperty(key, Integer.toString(numRows));
-	}
+  public void setMaxRows(int index, int numRows)
+  {
+    String key = "tab" + index + ".maxrows";
+    this.tabInfo.setProperty(key, Integer.toString(numRows));
+  }
 
-	public int getMaxRows(int tabIndex)
-	{
-		if (this.tabInfo == null) return 0;
-		String key = "tab" + tabIndex + ".maxrows";
-		String value = (String)this.tabInfo.get(key);
-		if (value == null) return 0;
-		int result = 0;
-		try
-		{
-			result = Integer.parseInt(value);
-		}
-		catch (Exception e)
-		{
-			result = 0;
-		}
-		return result;
-	}
+  public int getMaxRows(int tabIndex)
+  {
+    if (this.tabInfo == null) return 0;
+    String key = "tab" + tabIndex + ".maxrows";
+    String value = (String)this.tabInfo.get(key);
+    if (value == null) return 0;
+    int result = 0;
+    try
+    {
+      result = Integer.parseInt(value);
+    }
+    catch (Exception e)
+    {
+      result = 0;
+    }
+    return result;
+  }
 
-	public String getExternalFileName(int tabIndex)
-	{
-		if (this.tabInfo == null) return null;
-		String key = "tab" + tabIndex + ".filename";
-		String value = (String)this.tabInfo.get(key);
-		return StringUtil.decodeUnicode(value);
-	}
+  public String getExternalFileName(int tabIndex)
+  {
+    if (this.tabInfo == null) return null;
+    String key = "tab" + tabIndex + ".filename";
+    String value = (String)this.tabInfo.get(key);
+    return StringUtil.decodeUnicode(value);
+  }
 
-	public String getExternalFileEncoding(int tabIndex)
-	{
-		if (this.tabInfo == null) return null;
-		String key = "tab" + tabIndex + ".encoding";
-		String value = (String)this.tabInfo.get(key);
-		if (StringUtil.isEmptyString(value)) return Settings.getInstance().getDefaultEncoding();
-		return value;
-	}
+  public String getExternalFileEncoding(int tabIndex)
+  {
+    if (this.tabInfo == null) return null;
+    String key = "tab" + tabIndex + ".encoding";
+    String value = (String)this.tabInfo.get(key);
+    if (StringUtil.isEmptyString(value)) return Settings.getInstance().getDefaultEncoding();
+    return value;
+  }
 
-	public void setExternalFileCursorPos(int tabIndex, int cursor)
-	{
-		String key = "tab" + tabIndex + ".file.cursorpos";
-		this.tabInfo.setProperty(key, Integer.toString(cursor));
-	}
+  public void setExternalFileCursorPos(int tabIndex, int cursor)
+  {
+    String key = "tab" + tabIndex + ".file.cursorpos";
+    this.tabInfo.setProperty(key, Integer.toString(cursor));
+  }
 
-	public void setExternalFileName(int tabIndex, String filename)
-	{
-		String key = "tab" + tabIndex + ".filename";
-		String encoded = StringUtil.escapeText(filename, CharacterRange.RANGE_7BIT);
-		this.tabInfo.setProperty(key, encoded);
-	}
+  public void setExternalFileName(int tabIndex, String filename)
+  {
+    String key = "tab" + tabIndex + ".filename";
+    String encoded = StringUtil.escapeText(filename, CharacterRange.RANGE_7BIT);
+    this.tabInfo.setProperty(key, encoded);
+  }
 
-	public void setExternalFileEncoding(int tabIndex, String encoding)
-	{
-		if (encoding == null) return;
-		String key = "tab" + tabIndex + ".encoding";
-		this.tabInfo.setProperty(key, encoding);
-	}
+  public void setExternalFileEncoding(int tabIndex, String encoding)
+  {
+    if (encoding == null) return;
+    String key = "tab" + tabIndex + ".encoding";
+    this.tabInfo.setProperty(key, encoding);
+  }
 
 }

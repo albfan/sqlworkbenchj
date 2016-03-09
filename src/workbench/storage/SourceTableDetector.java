@@ -41,56 +41,56 @@ import workbench.util.SqlUtil;
 public class SourceTableDetector
 {
 
-	public void checkColumnTables(String sql, ResultInfo result, WbConnection connection)
-	{
-		resetResult(result);
+  public void checkColumnTables(String sql, ResultInfo result, WbConnection connection)
+  {
+    resetResult(result);
 
-		List<Alias> tables = SqlUtil.getTables(sql, true, connection);
+    List<Alias> tables = SqlUtil.getTables(sql, true, connection);
 
-		List<String> colNames = SqlUtil.getSelectColumns(sql, true, connection);
-		List<SelectColumn> columns = new ArrayList<>(colNames.size());
-		for (String name : colNames)
-		{
-			columns.add(new SelectColumn(name));
-		}
+    List<String> colNames = SqlUtil.getSelectColumns(sql, true, connection);
+    List<SelectColumn> columns = new ArrayList<>(colNames.size());
+    for (String name : colNames)
+    {
+      columns.add(new SelectColumn(name));
+    }
 
-		if (tables.size() == 1)
-		{
-			for (ColumnIdentifier col : result.getColumns())
-			{
-				col.setSourceTableName(tables.get(0).getObjectName());
-			}
-			result.setColumnTableDetected(true);
-			return;
-		}
+    if (tables.size() == 1)
+    {
+      for (ColumnIdentifier col : result.getColumns())
+      {
+        col.setSourceTableName(tables.get(0).getObjectName());
+      }
+      result.setColumnTableDetected(true);
+      return;
+    }
 
-		if (columns.size() != result.getColumnCount())
-		{
-			LogMgr.logWarning("SourceTableDetector.checkColumnTables()", "The SQL statement contains a different number of columns than the ResultInfo");
-			return;
-		}
+    if (columns.size() != result.getColumnCount())
+    {
+      LogMgr.logWarning("SourceTableDetector.checkColumnTables()", "The SQL statement contains a different number of columns than the ResultInfo");
+      return;
+    }
 
-		int matchedCols = 0;
-		for (int i=0; i < columns.size(); i++)
-		{
-			SelectColumn col = columns.get(i);
-			String colTable = col.getColumnTable();
-			String table = findTableFromAlias(colTable, tables);
-			if (table != null)
-			{
-				LogMgr.logDebug("SourceTableDetector.checkColumnTables()", "Column " + col.toString() + " seems to belong to table " + table);
-				result.getColumn(i).setSourceTableName(table);
-				matchedCols ++;
-			}
-		}
-		result.setColumnTableDetected(matchedCols == columns.size());
-	}
+    int matchedCols = 0;
+    for (int i=0; i < columns.size(); i++)
+    {
+      SelectColumn col = columns.get(i);
+      String colTable = col.getColumnTable();
+      String table = findTableFromAlias(colTable, tables);
+      if (table != null)
+      {
+        LogMgr.logDebug("SourceTableDetector.checkColumnTables()", "Column " + col.toString() + " seems to belong to table " + table);
+        result.getColumn(i).setSourceTableName(table);
+        matchedCols ++;
+      }
+    }
+    result.setColumnTableDetected(matchedCols == columns.size());
+  }
 
-	private String findTableFromAlias(String alias, List<Alias> tables)
-	{
-		for (Alias tbl : tables)
-		{
-			if (tbl.getNameToUse().equalsIgnoreCase(alias)) return tbl.getObjectName();
+  private String findTableFromAlias(String alias, List<Alias> tables)
+  {
+    for (Alias tbl : tables)
+    {
+      if (tbl.getNameToUse().equalsIgnoreCase(alias)) return tbl.getObjectName();
 
       // take fully qualified names without an alias into account
       // e.g. select foo.id from public.foo join ...
@@ -103,17 +103,17 @@ public class SourceTableDetector
           return tbl.getObjectName();
         }
       }
-		}
-		return null;
-	}
+    }
+    return null;
+  }
 
-	private void resetResult(ResultInfo result)
-	{
-		for (ColumnIdentifier col : result.getColumns())
-		{
-			col.setSourceTableName(null);
-		}
-		result.setColumnTableDetected(false);
-	}
+  private void resetResult(ResultInfo result)
+  {
+    for (ColumnIdentifier col : result.getColumns())
+    {
+      col.setSourceTableName(null);
+    }
+    result.setColumnTableDetected(false);
+  }
 
 }

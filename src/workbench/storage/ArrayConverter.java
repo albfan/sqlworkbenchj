@@ -37,10 +37,10 @@ public class ArrayConverter
   private static final char[] DEFAULT_ARG_CHARACTERS = new char[]{'[',']'};
   private static final char[] ORACLE_ARG_CHARACTERS = new char[]{'(',')'};
 
-	public static String getArrayDisplay(Object value, String dbmsType, boolean showType, boolean isOracle)
-		throws SQLException
-	{
-		if (value == null) return null;
+  public static String getArrayDisplay(Object value, String dbmsType, boolean showType, boolean isOracle)
+    throws SQLException
+  {
+    if (value == null) return null;
 
     char[] parentheses;
     if (isOracle)
@@ -52,50 +52,50 @@ public class ArrayConverter
       parentheses = DEFAULT_ARG_CHARACTERS;
     }
 
-		Object[] elements = null;
-		String prefix = "";
-		if (value instanceof Array)
-		{
-			Array ar = (Array)value;
-			elements = (Object[])ar.getArray();
-			prefix = dbmsType;
-		}
-		else if (value instanceof Object[])
-		{
-			// this is for H2
-			elements = (Object[])value;
-		}
+    Object[] elements = null;
+    String prefix = "";
+    if (value instanceof Array)
+    {
+      Array ar = (Array)value;
+      elements = (Object[])ar.getArray();
+      prefix = dbmsType;
+    }
+    else if (value instanceof Object[])
+    {
+      // this is for H2
+      elements = (Object[])value;
+    }
 
-		if (elements != null)
-		{
-			int len = elements.length;
-			StringBuilder sb = new StringBuilder(len * 10);
-			if (showType)
-			{
-				sb.append(prefix);
-			}
-			sb.append(parentheses[0]);
-			StructConverter conv = StructConverter.getInstance();
+    if (elements != null)
+    {
+      int len = elements.length;
+      StringBuilder sb = new StringBuilder(len * 10);
+      if (showType)
+      {
+        sb.append(prefix);
+      }
+      sb.append(parentheses[0]);
+      StructConverter conv = StructConverter.getInstance();
 
-			for (int x=0; x < len; x++)
-			{
-				if (x > 0) sb.append(',');
-				if (elements[x] == null)
-				{
-					sb.append("NULL");
-				}
-				else if (elements[x] instanceof Struct)
-				{
-					sb.append(conv.getStructDisplay((Struct)elements[x], isOracle));
-				}
-				else
-				{
-					conv.appendValue(sb, elements[x]);
-				}
-			}
-			sb.append(parentheses[1]);
-			return sb.toString();
-		}
-		return value.toString();
-	}
+      for (int x=0; x < len; x++)
+      {
+        if (x > 0) sb.append(',');
+        if (elements[x] == null)
+        {
+          sb.append("NULL");
+        }
+        else if (elements[x] instanceof Struct)
+        {
+          sb.append(conv.getStructDisplay((Struct)elements[x], isOracle));
+        }
+        else
+        {
+          conv.appendValue(sb, elements[x]);
+        }
+      }
+      sb.append(parentheses[1]);
+      return sb.toString();
+    }
+    return value.toString();
+  }
 }

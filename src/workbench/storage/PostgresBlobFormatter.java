@@ -48,150 +48,150 @@ import workbench.util.NumberStringCache;
  * @author Thomas Kellerer
  */
 public class PostgresBlobFormatter
-	implements BlobLiteralFormatter
+  implements BlobLiteralFormatter
 {
-	private final BlobLiteralType blobLiteral;
+  private final BlobLiteralType blobLiteral;
 
-	public PostgresBlobFormatter()
-	{
-		String type = Settings.getInstance().getProperty("workbench.db.postgresql.blobformat", "decode");
-		if ("escape".equalsIgnoreCase(type))
-		{
-			blobLiteral = BlobLiteralType.pgEscape;
-		}
-		else
-		{
-			blobLiteral = BlobLiteralType.pgDecode;
-		}
-	}
+  public PostgresBlobFormatter()
+  {
+    String type = Settings.getInstance().getProperty("workbench.db.postgresql.blobformat", "decode");
+    if ("escape".equalsIgnoreCase(type))
+    {
+      blobLiteral = BlobLiteralType.pgEscape;
+    }
+    else
+    {
+      blobLiteral = BlobLiteralType.pgDecode;
+    }
+  }
 
-	public PostgresBlobFormatter(BlobMode mode)
-	{
-		switch (mode)
-		{
-			case pgEscape:
-				blobLiteral = BlobLiteralType.pgEscape;
-				break;
-			case pgHex:
-				blobLiteral = BlobLiteralType.pgHex;
-				break;
-			default:
-				blobLiteral = BlobLiteralType.pgDecode;
-		}
-	}
+  public PostgresBlobFormatter(BlobMode mode)
+  {
+    switch (mode)
+    {
+      case pgEscape:
+        blobLiteral = BlobLiteralType.pgEscape;
+        break;
+      case pgHex:
+        blobLiteral = BlobLiteralType.pgHex;
+        break;
+      default:
+        blobLiteral = BlobLiteralType.pgDecode;
+    }
+  }
 
-	public PostgresBlobFormatter(BlobLiteralType mode)
-	{
-		this.blobLiteral = mode;
-	}
+  public PostgresBlobFormatter(BlobLiteralType mode)
+  {
+    this.blobLiteral = mode;
+  }
 
 
-	@Override
-	public CharSequence getBlobLiteral(Object value)
-		throws SQLException
-	{
-		switch (blobLiteral)
-		{
-			case pgEscape:
-				return getEscapeString(value);
-			case pgHex:
-				return getHexString(value);
-			default:
-				return getDecodeString(value);
+  @Override
+  public CharSequence getBlobLiteral(Object value)
+    throws SQLException
+  {
+    switch (blobLiteral)
+    {
+      case pgEscape:
+        return getEscapeString(value);
+      case pgHex:
+        return getHexString(value);
+      default:
+        return getDecodeString(value);
 
-		}
-	}
+    }
+  }
 
-	private CharSequence getDecodeString(Object value)
-	{
-		if (value == null) return null;
-		byte[] buffer = getBytes(value);
-		if (buffer == null) return value.toString();
+  private CharSequence getDecodeString(Object value)
+  {
+    if (value == null) return null;
+    byte[] buffer = getBytes(value);
+    if (buffer == null) return value.toString();
 
-		StringBuilder result = new StringBuilder(buffer.length * 2 + 20);
-		result.append("decode('");
-		appendBuffer(buffer, result);
-		result.append("', 'hex')");
-		return result;
-	}
+    StringBuilder result = new StringBuilder(buffer.length * 2 + 20);
+    result.append("decode('");
+    appendBuffer(buffer, result);
+    result.append("', 'hex')");
+    return result;
+  }
 
-	private CharSequence getHexString(Object value)
-	{
-		if (value == null) return null;
-		byte[] buffer = getBytes(value);
-		if (buffer == null) return value.toString();
+  private CharSequence getHexString(Object value)
+  {
+    if (value == null) return null;
+    byte[] buffer = getBytes(value);
+    if (buffer == null) return value.toString();
 
-		StringBuilder result = new StringBuilder(buffer.length * 2 + 5);
-		result.append("\\\\x");
-		appendBuffer(buffer, result);
-		return result;
-	}
+    StringBuilder result = new StringBuilder(buffer.length * 2 + 5);
+    result.append("\\\\x");
+    appendBuffer(buffer, result);
+    return result;
+  }
 
-	private void appendBuffer(byte[] buffer, StringBuilder result)
-	{
-		for (int i = 0; i < buffer.length; i++)
-		{
-			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			result.append(NumberStringCache.getHexString(c));
-		}
-	}
+  private void appendBuffer(byte[] buffer, StringBuilder result)
+  {
+    for (int i = 0; i < buffer.length; i++)
+    {
+      int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
+      result.append(NumberStringCache.getHexString(c));
+    }
+  }
 
-	private CharSequence getEscapeString(Object value)
-	{
-		if (value == null) return null;
-		byte[] buffer = getBytes(value);
-		if (buffer == null) return value.toString();
+  private CharSequence getEscapeString(Object value)
+  {
+    if (value == null) return null;
+    byte[] buffer = getBytes(value);
+    if (buffer == null) return value.toString();
 
-		StringBuilder result = new StringBuilder(buffer.length * 5 + 10);
-		result.append("E'");
-		for (int i = 0; i < buffer.length; i++)
-		{
-			result.append("\\\\");
-			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
-			String s = Integer.toOctalString(c);
-			int l = s.length();
-			if (l == 1)
-			{
-				result.append("00");
-			}
-			else if (l == 2)
-			{
-				result.append('0');
-			}
-			result.append(s);
-		}
-		result.append("'::bytea");
-		return result;
-	}
+    StringBuilder result = new StringBuilder(buffer.length * 5 + 10);
+    result.append("E'");
+    for (int i = 0; i < buffer.length; i++)
+    {
+      result.append("\\\\");
+      int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
+      String s = Integer.toOctalString(c);
+      int l = s.length();
+      if (l == 1)
+      {
+        result.append("00");
+      }
+      else if (l == 2)
+      {
+        result.append('0');
+      }
+      result.append(s);
+    }
+    result.append("'::bytea");
+    return result;
+  }
 
-	private byte[] getBytes(Object value)
-	{
-		if (value instanceof byte[])
-		{
-			return (byte[])value;
-		}
+  private byte[] getBytes(Object value)
+  {
+    if (value instanceof byte[])
+    {
+      return (byte[])value;
+    }
 
-		if (value instanceof InputStream)
-		{
-			// When doing an export the Blobs might be returned as InputStreams
-			InputStream in = (InputStream)value;
-			try
-			{
-				return FileUtil.readBytes(in);
-			}
-			catch (IOException io)
-			{
-				LogMgr.logError("PostgresBlobFormatter.getBytes()", "Could not read input stream", io);
-			}
-		}
-		return null;
-	}
+    if (value instanceof InputStream)
+    {
+      // When doing an export the Blobs might be returned as InputStreams
+      InputStream in = (InputStream)value;
+      try
+      {
+        return FileUtil.readBytes(in);
+      }
+      catch (IOException io)
+      {
+        LogMgr.logError("PostgresBlobFormatter.getBytes()", "Could not read input stream", io);
+      }
+    }
+    return null;
+  }
 
-	@Override
-	public BlobLiteralType getType()
-	{
-		return blobLiteral;
-	}
+  @Override
+  public BlobLiteralType getType()
+  {
+    return blobLiteral;
+  }
 
 }
 

@@ -56,140 +56,140 @@ import workbench.util.SqlUtil;
 public class StructConverter
 {
 
-	public static StructConverter getInstance()
-	{
-		return InstanceHolder.INSTANCE;
-	}
+  public static StructConverter getInstance()
+  {
+    return InstanceHolder.INSTANCE;
+  }
 
-	private static class InstanceHolder
-	{
-		private static final StructConverter INSTANCE = new StructConverter();
-	}
+  private static class InstanceHolder
+  {
+    private static final StructConverter INSTANCE = new StructConverter();
+  }
 
-	private final SimpleDateFormat timestampFormatter;
-	private final SimpleDateFormat dateFormatter;
-	private final SimpleDateFormat timeFormatter;
-	private final DecimalFormat numberFormatter;
+  private final SimpleDateFormat timestampFormatter;
+  private final SimpleDateFormat dateFormatter;
+  private final SimpleDateFormat timeFormatter;
+  private final DecimalFormat numberFormatter;
 
-	private StructConverter()
-	{
-		// The ANSI literals should be OK, as all databases that support structs
-		// also support ANSI compliant date literals.
-		timestampFormatter = new SimpleDateFormat("'TIMESTAMP '''yyyy-MM-dd HH:mm:ss''");
-		timeFormatter = new SimpleDateFormat("'TIME '''HH:mm:ss''");
-		dateFormatter = new SimpleDateFormat("'DATE '''yyyy-MM-dd''");
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		symb.setDecimalSeparator('.');
-		numberFormatter = new DecimalFormat("0.#", symb);
-		numberFormatter.setMinimumIntegerDigits(0);
-		numberFormatter.setMaximumFractionDigits(100);
-	}
+  private StructConverter()
+  {
+    // The ANSI literals should be OK, as all databases that support structs
+    // also support ANSI compliant date literals.
+    timestampFormatter = new SimpleDateFormat("'TIMESTAMP '''yyyy-MM-dd HH:mm:ss''");
+    timeFormatter = new SimpleDateFormat("'TIME '''HH:mm:ss''");
+    dateFormatter = new SimpleDateFormat("'DATE '''yyyy-MM-dd''");
+    DecimalFormatSymbols symb = new DecimalFormatSymbols();
+    symb.setDecimalSeparator('.');
+    numberFormatter = new DecimalFormat("0.#", symb);
+    numberFormatter.setMinimumIntegerDigits(0);
+    numberFormatter.setMaximumFractionDigits(100);
+  }
 
-	/**
-	 * Create a display for the given Struct.
-	 * <br>
-	 * The display closeley duplicates the way SQL*Plus shows object types.
-	 * If attributes of the Struct are itself a Struct, this method is called
-	 * recursively.
-	 * <br/>
-	 * The name of the Struct will be followed by all values in paranthesis, e.g.
-	 * <tt>MY_TYPE('Hello', 'World', 42)</tt>
-	 * <br/>
-	 * Note that Oracle apparently always returns the owner as part of the type name,
-	 * so the actual display will be <tt>SCOTT.MY_TYPE('Hello', 'World', 42)</tt>
-	 *
-	 * @param data the Struct to convert
-	 * @return a String representation of the data
-	 * @throws SQLException
-	 */
-	public String getStructDisplay(Struct data, boolean isOracle)
-		throws SQLException
-	{
-		if (data == null) return null;
+  /**
+   * Create a display for the given Struct.
+   * <br>
+   * The display closeley duplicates the way SQL*Plus shows object types.
+   * If attributes of the Struct are itself a Struct, this method is called
+   * recursively.
+   * <br/>
+   * The name of the Struct will be followed by all values in paranthesis, e.g.
+   * <tt>MY_TYPE('Hello', 'World', 42)</tt>
+   * <br/>
+   * Note that Oracle apparently always returns the owner as part of the type name,
+   * so the actual display will be <tt>SCOTT.MY_TYPE('Hello', 'World', 42)</tt>
+   *
+   * @param data the Struct to convert
+   * @return a String representation of the data
+   * @throws SQLException
+   */
+  public String getStructDisplay(Struct data, boolean isOracle)
+    throws SQLException
+  {
+    if (data == null) return null;
 
-		Object[] attr = data.getAttributes();
-		if (attr == null) return null;
+    Object[] attr = data.getAttributes();
+    if (attr == null) return null;
 
-		StringBuilder buffer = new StringBuilder(attr.length * 20);
+    StringBuilder buffer = new StringBuilder(attr.length * 20);
 
-		String name = data.getSQLTypeName();
-		if (name != null) buffer.append(name);
+    String name = data.getSQLTypeName();
+    if (name != null) buffer.append(name);
 
-		buffer.append('(');
-		boolean first = true;
-		for (Object a : attr)
-		{
-			if (!first) buffer.append(", ");
-			else first = false;
-			if (a == null)
-			{
-				buffer.append("NULL");
-			}
-			else
-			{
-				if (a instanceof Struct)
-				{
-					buffer.append(getStructDisplay((Struct)a, isOracle));
-				}
+    buffer.append('(');
+    boolean first = true;
+    for (Object a : attr)
+    {
+      if (!first) buffer.append(", ");
+      else first = false;
+      if (a == null)
+      {
+        buffer.append("NULL");
+      }
+      else
+      {
+        if (a instanceof Struct)
+        {
+          buffer.append(getStructDisplay((Struct)a, isOracle));
+        }
         else if (a instanceof java.sql.Array)
         {
           buffer.append(getArrayDisplay(a, isOracle));
         }
-				else
-				{
-					appendValue(buffer, a);
-				}
-			}
-		}
-		buffer.append(')');
-		return buffer.toString();
-	}
+        else
+        {
+          appendValue(buffer, a);
+        }
+      }
+    }
+    buffer.append(')');
+    return buffer.toString();
+  }
 
-	public void appendValue(StringBuilder buffer, Object a)
-	{
-		if (a instanceof CharSequence)
-		{
-			// String need to be enclosed in single quotes
-			buffer.append('\'');
-			buffer.append(SqlUtil.escapeQuotes(a.toString()));
-			buffer.append('\'');
-		}
-		else if (a instanceof Timestamp)
-		{
-			synchronized (timestampFormatter)
-			{
-				buffer.append(timestampFormatter.format((Timestamp)a));
-			}
-		}
-		else if (a instanceof Time)
-		{
-			synchronized (timeFormatter)
-			{
-				buffer.append(timeFormatter.format((Time)a));
-			}
-		}
-		else if (a instanceof Date)
-		{
-			synchronized (dateFormatter)
-			{
-				buffer.append(dateFormatter.format((Date)a));
-			}
-		}
-		else if (a instanceof Number)
-		{
-			synchronized (numberFormatter)
-			{
-				buffer.append(numberFormatter.format(a));
-			}
-		}
-		else
-		{
-			// for anything else, rely on the driver
-			// as the JDBC type of this attribute is not known, we also
-			// cannot dispatch this to a DataConverter
-			buffer.append(a.toString());
-		}
-	}
+  public void appendValue(StringBuilder buffer, Object a)
+  {
+    if (a instanceof CharSequence)
+    {
+      // String need to be enclosed in single quotes
+      buffer.append('\'');
+      buffer.append(SqlUtil.escapeQuotes(a.toString()));
+      buffer.append('\'');
+    }
+    else if (a instanceof Timestamp)
+    {
+      synchronized (timestampFormatter)
+      {
+        buffer.append(timestampFormatter.format((Timestamp)a));
+      }
+    }
+    else if (a instanceof Time)
+    {
+      synchronized (timeFormatter)
+      {
+        buffer.append(timeFormatter.format((Time)a));
+      }
+    }
+    else if (a instanceof Date)
+    {
+      synchronized (dateFormatter)
+      {
+        buffer.append(dateFormatter.format((Date)a));
+      }
+    }
+    else if (a instanceof Number)
+    {
+      synchronized (numberFormatter)
+      {
+        buffer.append(numberFormatter.format(a));
+      }
+    }
+    else
+    {
+      // for anything else, rely on the driver
+      // as the JDBC type of this attribute is not known, we also
+      // cannot dispatch this to a DataConverter
+      buffer.append(a.toString());
+    }
+  }
 
 
   private String getArrayDisplay(Object data, boolean isOracle)
@@ -217,8 +217,8 @@ public class StructConverter
 
     try
     {
-			Method getName = data.getClass().getMethod("getSQLTypeName", (Class[])null);
-			getName.setAccessible(true);
+      Method getName = data.getClass().getMethod("getSQLTypeName", (Class[])null);
+      getName.setAccessible(true);
 
       Object name = getName.invoke(data, (Object[])null);
       if (name != null)

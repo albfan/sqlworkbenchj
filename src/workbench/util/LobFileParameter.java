@@ -30,65 +30,65 @@ import java.io.Closeable;
  */
 public class LobFileParameter
 {
-	private Closeable dataStream;
-	private String filename;
-	private String encoding;
-	private boolean binary;
+  private Closeable dataStream;
+  private String filename;
+  private String encoding;
+  private boolean binary;
 
-	public LobFileParameter()
-	{
-	}
+  public LobFileParameter()
+  {
+  }
 
-	public LobFileParameter(String fname, String enc, boolean isBinary)
-	{
-		setFilename(fname);
-		setEncoding(enc);
-		setBinary(isBinary);
-	}
+  public LobFileParameter(String fname, String enc, boolean isBinary)
+  {
+    setFilename(fname);
+    setEncoding(enc);
+    setBinary(isBinary);
+  }
 
-	@Override
-	public String toString()
-	{
-		return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
-	}
+  @Override
+  public String toString()
+  {
+    return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
+  }
 
-	public void setDataStream(Closeable in)
-	{
-		this.dataStream = in;
-	}
+  public void setDataStream(Closeable in)
+  {
+    this.dataStream = in;
+  }
 
-	public void close()
-	{
-		FileUtil.closeQuietely(dataStream);
-	}
+  public void close()
+  {
+    FileUtil.closeQuietely(dataStream);
+  }
 
-	public final void setBinary(boolean flag)
-	{
-		binary = flag;
-	}
+  public final void setBinary(boolean flag)
+  {
+    binary = flag;
+  }
 
-	public boolean isBinary()
-	{
-		return binary;
-	}
+  public boolean isBinary()
+  {
+    return binary;
+  }
 
-	public String getFilename()
-	{
-		return filename;
-	}
+  public String getFilename()
+  {
+    return filename;
+  }
 
-	public final void setFilename(String fname)
-	{
-		filename = fname;
-	}
+  public final void setFilename(String fname)
+  {
+    filename = fname;
+  }
 
-	public String getEncoding()
-	{
-		return encoding;
-	}
+  public String getEncoding()
+  {
+    return encoding;
+  }
 
-	public final void setEncoding(String enc)
-	{
-		encoding = enc;
-	}
+  public final void setEncoding(String enc)
+  {
+    encoding = enc;
+  }
 }

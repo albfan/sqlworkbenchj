@@ -29,8 +29,8 @@ package workbench.util;
  */
 public enum CharacterEscapeType
 {
-	unicode,
-	hex,
-	pgOctal,
-	pgHex;
+  unicode,
+  hex,
+  pgOctal,
+  pgHex;
 }

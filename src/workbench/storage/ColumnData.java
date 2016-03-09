@@ -37,63 +37,63 @@ import workbench.db.ColumnIdentifier;
  */
 public class ColumnData
 {
-	final private Object data;
-	final private ColumnIdentifier column;
+  final private Object data;
+  final private ColumnIdentifier column;
 
-	/**
-	 * Creates a new instance of ColumnData
-	 *
-	 * @param value The current value of the column
-	 * @param colid The definition of the column
-	 */
-	public ColumnData(Object value, ColumnIdentifier colid)
-	{
-		data = value;
-		column = colid;
-	}
+  /**
+   * Creates a new instance of ColumnData
+   *
+   * @param value The current value of the column
+   * @param colid The definition of the column
+   */
+  public ColumnData(Object value, ColumnIdentifier colid)
+  {
+    data = value;
+    column = colid;
+  }
 
-	public Object getValue()
-	{
-		return data;
-	}
+  public Object getValue()
+  {
+    return data;
+  }
 
-	public ColumnIdentifier getIdentifier()
-	{
-		return column;
-	}
+  public ColumnIdentifier getIdentifier()
+  {
+    return column;
+  }
 
-	public boolean isNull()
-	{
-		return (data == null);
-	}
+  public boolean isNull()
+  {
+    return (data == null);
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == null) return false;
-		if (obj instanceof ColumnData)
-		{
-			final ColumnData other = (ColumnData) obj;
-			return this.column.equals(other.column);
-		}
-		else if (obj instanceof ColumnIdentifier)
-		{
-			return this.column.equals(obj);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null) return false;
+    if (obj instanceof ColumnData)
+    {
+      final ColumnData other = (ColumnData) obj;
+      return this.column.equals(other.column);
+    }
+    else if (obj instanceof ColumnIdentifier)
+    {
+      return this.column.equals(obj);
+    }
+    return false;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		return column.hashCode();
-	}
+  @Override
+  public int hashCode()
+  {
+    return column.hashCode();
+  }
 
-	@Override
-	public String toString()
-	{
-		return column.getColumnName() + " = " + (data == null ? "NULL" : data.toString());
-	}
+  @Override
+  public String toString()
+  {
+    return column.getColumnName() + " = " + (data == null ? "NULL" : data.toString());
+  }
 
   public ColumnData createCopy(Object newValue)
   {

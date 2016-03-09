@@ -46,146 +46,146 @@ import workbench.resource.Settings;
  */
 public class MessageBuffer
 {
-	private LinkedList<CharSequence> messages = new LinkedList<>();
-	private int length = 0;
-	private final String newLine = "\n";
-	private final int maxSize;
-	private boolean trimmed = false;
+  private LinkedList<CharSequence> messages = new LinkedList<>();
+  private int length = 0;
+  private final String newLine = "\n";
+  private final int maxSize;
+  private boolean trimmed = false;
 
-	/**
-	 * Create a new MessageBuffer, retrieving the max. number of entries
-	 * from the Settings object. If nothing has been specified in the .settings
-	 * file, a maximum number of 1000 entries is used.
-	 */
-	public MessageBuffer()
-	{
-		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 2500));
-	}
+  /**
+   * Create a new MessageBuffer, retrieving the max. number of entries
+   * from the Settings object. If nothing has been specified in the .settings
+   * file, a maximum number of 1000 entries is used.
+   */
+  public MessageBuffer()
+  {
+    this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 2500));
+  }
 
-	/**
-	 * Create a new MessageBuffer holding a maximum number of <tt>maxEntries</tt>
-	 * Entries in its internal list
-	 * @param maxEntries the max. number of entries to hold in the internal list
-	 */
-	public MessageBuffer(int maxEntries)
-	{
-		maxSize = maxEntries;
-	}
+  /**
+   * Create a new MessageBuffer holding a maximum number of <tt>maxEntries</tt>
+   * Entries in its internal list
+   * @param maxEntries the max. number of entries to hold in the internal list
+   */
+  public MessageBuffer(int maxEntries)
+  {
+    maxSize = maxEntries;
+  }
 
-	/**
-	 * Returns an unmodifiable reference to the stored messages.
-	 */
-	public List<CharSequence> getMessages()
-	{
-		return Collections.unmodifiableList(messages);
-	}
+  /**
+   * Returns an unmodifiable reference to the stored messages.
+   */
+  public List<CharSequence> getMessages()
+  {
+    return Collections.unmodifiableList(messages);
+  }
 
-	public synchronized void clear()
-	{
-		this.messages.clear();
-		this.length = 0;
-	}
+  public synchronized void clear()
+  {
+    this.messages.clear();
+    this.length = 0;
+  }
 
-	/**
-	 * Write the messages of this MessageBuffer directly to a ResultLogger
-	 * The internal buffer is cleared during the writing
-	 *
-	 * @return the total number of characters written
-	 */
-	public synchronized int appendTo(ResultLogger log)
-	{
-		int size = 0;
-		while (messages.size() > 0)
-		{
-			CharSequence s = messages.removeFirst();
-			size += s.length();
-			log.appendToLog(s.toString());
-		}
-		length = 0;
-		return size;
-	}
+  /**
+   * Write the messages of this MessageBuffer directly to a ResultLogger
+   * The internal buffer is cleared during the writing
+   *
+   * @return the total number of characters written
+   */
+  public synchronized int appendTo(ResultLogger log)
+  {
+    int size = 0;
+    while (messages.size() > 0)
+    {
+      CharSequence s = messages.removeFirst();
+      size += s.length();
+      log.appendToLog(s.toString());
+    }
+    length = 0;
+    return size;
+  }
 
-	/**
-	 * Create a StringBuilder that contains the collected messages.
-	 * Once the result is returned, the internal list is emptied.
-	 * This means the second call to this method returns an empty
-	 * buffer if no messages have been added between the calls.
-	 */
-	public synchronized CharSequence getBuffer()
-	{
-		StringBuilder result = new StringBuilder(this.length + 50);
-		if (trimmed) result.append("(...)\n");
+  /**
+   * Create a StringBuilder that contains the collected messages.
+   * Once the result is returned, the internal list is emptied.
+   * This means the second call to this method returns an empty
+   * buffer if no messages have been added between the calls.
+   */
+  public synchronized CharSequence getBuffer()
+  {
+    StringBuilder result = new StringBuilder(this.length + 50);
+    if (trimmed) result.append("(...)\n");
 
-		while (messages.size() > 0)
-		{
-			CharSequence s = messages.removeFirst();
-			result.append(s);
-		}
-		length = 0;
-		return result;
-	}
+    while (messages.size() > 0)
+    {
+      CharSequence s = messages.removeFirst();
+      result.append(s);
+    }
+    length = 0;
+    return result;
+  }
 
-	private synchronized void trimSize()
-	{
-		if (maxSize > 0 && messages.size() >= maxSize)
-		{
-			trimmed = true;
-			while (messages.size() >= maxSize)
-			{
-				CharSequence s = messages.removeFirst();
-				if (s != null) this.length -= s.length();
-			}
-		}
-	}
+  private synchronized void trimSize()
+  {
+    if (maxSize > 0 && messages.size() >= maxSize)
+    {
+      trimmed = true;
+      while (messages.size() >= maxSize)
+      {
+        CharSequence s = messages.removeFirst();
+        if (s != null) this.length -= s.length();
+      }
+    }
+  }
 
-	/**
-	 * Returns the total length in characters of all messages
-	 * that are currently kept in this MessageBuffer
-	 */
-	public synchronized int getLength()
-	{
-		return length;
-	}
+  /**
+   * Returns the total length in characters of all messages
+   * that are currently kept in this MessageBuffer
+   */
+  public synchronized int getLength()
+  {
+    return length;
+  }
 
-	public synchronized void append(MessageBuffer buff)
-	{
-		if (buff == null) return;
+  public synchronized void append(MessageBuffer buff)
+  {
+    if (buff == null) return;
  		int count = buff.messages.size();
-		if (count == 0) return;
-		this.length += buff.length;
-		while (this.messages.size() + count > maxSize)
-		{
-			CharSequence s = messages.removeFirst();
-			if (s != null) this.length -= s.length();
-		}
-		for (CharSequence s : buff.messages)
-		{
-			this.messages.add(s);
-		}
-	}
+    if (count == 0) return;
+    this.length += buff.length;
+    while (this.messages.size() + count > maxSize)
+    {
+      CharSequence s = messages.removeFirst();
+      if (s != null) this.length -= s.length();
+    }
+    for (CharSequence s : buff.messages)
+    {
+      this.messages.add(s);
+    }
+  }
 
-	public synchronized void append(CharSequence s)
-	{
-		if (StringUtil.isEmptyString(s)) return;
-		trimSize();
-		this.messages.add(s);
-		length += s.length();
-	}
+  public synchronized void append(CharSequence s)
+  {
+    if (StringUtil.isEmptyString(s)) return;
+    trimSize();
+    this.messages.add(s);
+    length += s.length();
+  }
 
-	public synchronized void appendMessageKey(String key)
-	{
-		append(ResourceMgr.getString(key));
-	}
+  public synchronized void appendMessageKey(String key)
+  {
+    append(ResourceMgr.getString(key));
+  }
 
-	public synchronized void appendNewLine()
-	{
-		append(newLine);
-	}
+  public synchronized void appendNewLine()
+  {
+    append(newLine);
+  }
 
-	@Override
-	public String toString()
-	{
-		return "[" + getLength() + " messages]";
-	}
+  @Override
+  public String toString()
+  {
+    return "[" + getLength() + " messages]";
+  }
 
 }

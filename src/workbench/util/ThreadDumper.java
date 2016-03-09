@@ -53,195 +53,195 @@ import java.util.Map;
  */
 public class ThreadDumper
 {
-	private ThreadMXBean tmbean;
-	private static String INDENT = "    ";
+  private ThreadMXBean tmbean;
+  private static String INDENT = "    ";
 
-	/**
-	 * Constructs a ThreadDumper object to get thread information
-	 * in the local JVM.
-	 */
-	public ThreadDumper()
-	{
-		this.tmbean = ManagementFactory.getThreadMXBean();
-	}
+  /**
+   * Constructs a ThreadDumper object to get thread information
+   * in the local JVM.
+   */
+  public ThreadDumper()
+  {
+    this.tmbean = ManagementFactory.getThreadMXBean();
+  }
 
-	/**
-	 * Returns a String with a full thread dump.
-	 */
-	public String getThreadDump()
-	{
-		String result = null;
-		try
-		{
-			result = dumpThreadInfo();
-		}
-		catch (Throwable th)
-		{
-			result = getStandardDump();
-		}
-		return result;
-	}
+  /**
+   * Returns a String with a full thread dump.
+   */
+  public String getThreadDump()
+  {
+    String result = null;
+    try
+    {
+      result = dumpThreadInfo();
+    }
+    catch (Throwable th)
+    {
+      result = getStandardDump();
+    }
+    return result;
+  }
 
-	private String getStandardDump()
-	{
-		Map<Thread, StackTraceElement[]> all = Thread.getAllStackTraces();
-		StringBuilder dump = new StringBuilder(all.size() * 100);
+  private String getStandardDump()
+  {
+    Map<Thread, StackTraceElement[]> all = Thread.getAllStackTraces();
+    StringBuilder dump = new StringBuilder(all.size() * 100);
 
-		for (Map.Entry<Thread, StackTraceElement[]> entry : all.entrySet())
-		{
-			Thread t = entry.getKey();
-			dump.append("Thread: \"" + t.getName() + "\", id=" + t.getId() + ", prio=" + t.getPriority() + "\n");
-			dump.append("  State: " + t.getState().toString() + "\n");
-			for (StackTraceElement element : entry.getValue())
-			{
-				dump.append("      ");
-				dump.append(element.toString() + "\n");
-			}
-			dump.append('\n');
-		}
-		return dump.toString();
-	}
+    for (Map.Entry<Thread, StackTraceElement[]> entry : all.entrySet())
+    {
+      Thread t = entry.getKey();
+      dump.append("Thread: \"" + t.getName() + "\", id=" + t.getId() + ", prio=" + t.getPriority() + "\n");
+      dump.append("  State: " + t.getState().toString() + "\n");
+      for (StackTraceElement element : entry.getValue())
+      {
+        dump.append("      ");
+        dump.append(element.toString() + "\n");
+      }
+      dump.append('\n');
+    }
+    return dump.toString();
+  }
 
-	private String dumpThreadInfo()
-	{
-		StringWriter sw = new StringWriter(2000);
-		PrintWriter pw = new PrintWriter(sw);
-		pw.println("Full Java thread dump");
-		long[] tids = tmbean.getAllThreadIds();
-		ThreadInfo[] tinfos = tmbean.getThreadInfo(tids, Integer.MAX_VALUE);
-		for (ThreadInfo ti : tinfos)
-		{
-			printThreadInfo(pw, ti);
-		}
-		return sw.toString();
-	}
+  private String dumpThreadInfo()
+  {
+    StringWriter sw = new StringWriter(2000);
+    PrintWriter pw = new PrintWriter(sw);
+    pw.println("Full Java thread dump");
+    long[] tids = tmbean.getAllThreadIds();
+    ThreadInfo[] tinfos = tmbean.getThreadInfo(tids, Integer.MAX_VALUE);
+    for (ThreadInfo ti : tinfos)
+    {
+      printThreadInfo(pw, ti);
+    }
+    return sw.toString();
+  }
 
-	/**
-	 * Returns the thread dump information with locks.
-	 */
-	private String dumpThreadInfoWithLocks()
-	{
-		StringWriter sw = new StringWriter(2000);
-		PrintWriter pw = new PrintWriter(sw);
-		pw.println("Full Java thread dump with locks info");
+  /**
+   * Returns the thread dump information with locks.
+   */
+  private String dumpThreadInfoWithLocks()
+  {
+    StringWriter sw = new StringWriter(2000);
+    PrintWriter pw = new PrintWriter(sw);
+    pw.println("Full Java thread dump with locks info");
 
-		ThreadInfo[] tinfos = tmbean.dumpAllThreads(true, true);
-		for (ThreadInfo ti : tinfos)
-		{
-			printThreadInfo(pw, ti);
-			LockInfo[] syncs = ti.getLockedSynchronizers();
-			printLockInfo(pw, syncs);
-		}
-		return sw.toString();
-	}
+    ThreadInfo[] tinfos = tmbean.dumpAllThreads(true, true);
+    for (ThreadInfo ti : tinfos)
+    {
+      printThreadInfo(pw, ti);
+      LockInfo[] syncs = ti.getLockedSynchronizers();
+      printLockInfo(pw, syncs);
+    }
+    return sw.toString();
+  }
 
 
-	private void printThreadInfo(PrintWriter pw, ThreadInfo ti)
-	{
-		// print thread information
-		printThread(pw, ti);
+  private void printThreadInfo(PrintWriter pw, ThreadInfo ti)
+  {
+    // print thread information
+    printThread(pw, ti);
 
-		// print stack trace with locks
-		StackTraceElement[] stacktrace = ti.getStackTrace();
-		MonitorInfo[] monitors = ti.getLockedMonitors();
-		for (int i = 0; i < stacktrace.length; i++)
-		{
-			StackTraceElement ste = stacktrace[i];
-			pw.println(INDENT + "at " + ste.toString());
-			for (MonitorInfo mi : monitors)
-			{
-				if (mi.getLockedStackDepth() == i)
-				{
-					pw.println(INDENT + "  - locked " + mi);
-				}
-			}
-		}
-		pw.println();
-	}
+    // print stack trace with locks
+    StackTraceElement[] stacktrace = ti.getStackTrace();
+    MonitorInfo[] monitors = ti.getLockedMonitors();
+    for (int i = 0; i < stacktrace.length; i++)
+    {
+      StackTraceElement ste = stacktrace[i];
+      pw.println(INDENT + "at " + ste.toString());
+      for (MonitorInfo mi : monitors)
+      {
+        if (mi.getLockedStackDepth() == i)
+        {
+          pw.println(INDENT + "  - locked " + mi);
+        }
+      }
+    }
+    pw.println();
+  }
 
-	private void printThread(PrintWriter pw, ThreadInfo ti)
-	{
-		StringBuilder sb = new StringBuilder("\"" + ti.getThreadName() + "\"" + " Id=" + ti.getThreadId() + " in " + ti.getThreadState());
-		if (ti.getLockName() != null)
-		{
-			sb.append(" on lock=" + ti.getLockName());
-		}
-		if (ti.isSuspended())
-		{
-			sb.append(" (suspended)");
-		}
-		if (ti.isInNative())
-		{
-			sb.append(" (running in native)");
-		}
-		pw.println(sb.toString());
-		if (ti.getLockOwnerName() != null)
-		{
-			pw.println(INDENT + " owned by " + ti.getLockOwnerName() + " Id=" + ti.getLockOwnerId());
-		}
-	}
+  private void printThread(PrintWriter pw, ThreadInfo ti)
+  {
+    StringBuilder sb = new StringBuilder("\"" + ti.getThreadName() + "\"" + " Id=" + ti.getThreadId() + " in " + ti.getThreadState());
+    if (ti.getLockName() != null)
+    {
+      sb.append(" on lock=" + ti.getLockName());
+    }
+    if (ti.isSuspended())
+    {
+      sb.append(" (suspended)");
+    }
+    if (ti.isInNative())
+    {
+      sb.append(" (running in native)");
+    }
+    pw.println(sb.toString());
+    if (ti.getLockOwnerName() != null)
+    {
+      pw.println(INDENT + " owned by " + ti.getLockOwnerName() + " Id=" + ti.getLockOwnerId());
+    }
+  }
 
-	private void printMonitorInfo(PrintWriter pw, ThreadInfo ti, MonitorInfo[] monitors)
-	{
-		pw.println(INDENT + "Locked monitors: count = " + monitors.length);
-		for (MonitorInfo mi : monitors)
-		{
-			pw.println(INDENT + "  - " + mi + " locked at ");
-			pw.println(INDENT + "      " + mi.getLockedStackDepth() + " " + mi.getLockedStackFrame());
-		}
-	}
+  private void printMonitorInfo(PrintWriter pw, ThreadInfo ti, MonitorInfo[] monitors)
+  {
+    pw.println(INDENT + "Locked monitors: count = " + monitors.length);
+    for (MonitorInfo mi : monitors)
+    {
+      pw.println(INDENT + "  - " + mi + " locked at ");
+      pw.println(INDENT + "      " + mi.getLockedStackDepth() + " " + mi.getLockedStackFrame());
+    }
+  }
 
-	private void printLockInfo(PrintWriter pw, LockInfo[] locks)
-	{
-		pw.println(INDENT + "Locked synchronizers: count = " + locks.length);
-		for (LockInfo li : locks)
-		{
-			pw.println(INDENT + "  - " + li);
-		}
-		pw.println();
-	}
+  private void printLockInfo(PrintWriter pw, LockInfo[] locks)
+  {
+    pw.println(INDENT + "Locked synchronizers: count = " + locks.length);
+    for (LockInfo li : locks)
+    {
+      pw.println(INDENT + "  - " + li);
+    }
+    pw.println();
+  }
 
-	/**
-	 * Checks if any threads are deadlocked.
-	 *
-	 * If any, thread dump information is returned.
-	 */
-	public String getDeadlockDump()
-	{
-		StringWriter sw = new StringWriter(2000);
-		PrintWriter pw = new PrintWriter(sw);
-		long[] tids;
-		if (tmbean.isSynchronizerUsageSupported())
-		{
-			tids = tmbean.findDeadlockedThreads();
-			if (tids == null)
-			{
-				return null;
-			}
-			pw.println("Deadlock found :-");
-			ThreadInfo[] infos = tmbean.getThreadInfo(tids, true, true);
-			for (ThreadInfo ti : infos)
-			{
-				printThreadInfo(pw, ti);
-				printLockInfo(pw, ti.getLockedSynchronizers());
-				pw.println();
-			}
-		}
-		else
-		{
-			tids = tmbean.findMonitorDeadlockedThreads();
-			if (tids == null)
-			{
-				return null;
-			}
-			ThreadInfo[] infos = tmbean.getThreadInfo(tids, Integer.MAX_VALUE);
-			for (ThreadInfo ti : infos)
-			{
-				// print thread information
-				printThreadInfo(pw, ti);
-			}
-		}
-		return sw.toString();
-	}
+  /**
+   * Checks if any threads are deadlocked.
+   *
+   * If any, thread dump information is returned.
+   */
+  public String getDeadlockDump()
+  {
+    StringWriter sw = new StringWriter(2000);
+    PrintWriter pw = new PrintWriter(sw);
+    long[] tids;
+    if (tmbean.isSynchronizerUsageSupported())
+    {
+      tids = tmbean.findDeadlockedThreads();
+      if (tids == null)
+      {
+        return null;
+      }
+      pw.println("Deadlock found :-");
+      ThreadInfo[] infos = tmbean.getThreadInfo(tids, true, true);
+      for (ThreadInfo ti : infos)
+      {
+        printThreadInfo(pw, ti);
+        printLockInfo(pw, ti.getLockedSynchronizers());
+        pw.println();
+      }
+    }
+    else
+    {
+      tids = tmbean.findMonitorDeadlockedThreads();
+      if (tids == null)
+      {
+        return null;
+      }
+      ThreadInfo[] infos = tmbean.getThreadInfo(tids, Integer.MAX_VALUE);
+      for (ThreadInfo ti : infos)
+      {
+        // print thread information
+        printThreadInfo(pw, ti);
+      }
+    }
+    return sw.toString();
+  }
 
 }

@@ -27,18 +27,18 @@ package workbench.util;
  * @author  Thomas Kellerer
  */
 public class WbNullCipher
-	implements WbCipher
+  implements WbCipher
 {
 
-	@Override
-	public String decryptString(String aValue)
-	{
-		return aValue;
-	}
+  @Override
+  public String decryptString(String aValue)
+  {
+    return aValue;
+  }
 
-	@Override
-	public String encryptString(String aValue)
-	{
-		return aValue;
-	}
+  @Override
+  public String encryptString(String aValue)
+  {
+    return aValue;
+  }
 }

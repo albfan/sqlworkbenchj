@@ -31,5 +31,5 @@ import workbench.gui.components.DataStoreTableModel;
  */
 public interface InputValidator
 {
-	boolean isValid(Object newValue, int row, int col, DataStoreTableModel source);
+  boolean isValid(Object newValue, int row, int col, DataStoreTableModel source);
 }

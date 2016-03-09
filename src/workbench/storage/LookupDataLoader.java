@@ -60,176 +60,176 @@ import workbench.util.SqlUtil;
  */
 public class LookupDataLoader
 {
-	private TableDefinition lookupTable;
-	private boolean retrieved;
-	private TableIdentifier baseTable;
-	private String referencingColumn;
-	private Map<String, String> columnMap;
+  private TableDefinition lookupTable;
+  private boolean retrieved;
+  private TableIdentifier baseTable;
+  private String referencingColumn;
+  private Map<String, String> columnMap;
 
-	/**
-	 * Create a new LookupDataLoader
-	 *
-	 * @param table   the table that contains the foreign key column
-	 * @param column  the column for which to load the lookup data
-	 */
-	public LookupDataLoader(TableIdentifier table, String column)
-	{
-		referencingColumn = column;
-		baseTable = table;
-	}
+  /**
+   * Create a new LookupDataLoader
+   *
+   * @param table   the table that contains the foreign key column
+   * @param column  the column for which to load the lookup data
+   */
+  public LookupDataLoader(TableIdentifier table, String column)
+  {
+    referencingColumn = column;
+    baseTable = table;
+  }
 
-	public DataStore getLookupData(WbConnection conn, int maxRows, String searchValue, boolean useOrderBy)
-		throws SQLException
-	{
-		if (lookupTable == null && !retrieved)
-		{
-			retrieveReferencedTable(conn);
-		}
-		if (lookupTable == null)
-		{
-			return null;
-		}
-		String sql = null;
-		if (searchValue == null)
-		{
-			TableSelectBuilder builder = new TableSelectBuilder (conn, "lookupretrieval");
-			builder.setSortPksFirst(true);
-			builder.setIncludeBLOBColumns(false);
-			builder.setIncludeCLOBColumns(false);
-			sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns(), maxRows);
-		}
-		else
-		{
-			ServerSideTableSearcher searcher = new ServerSideTableSearcher();
-			searcher.setColumnFunction(conn.getDbSettings().getLowerFunctionTemplate());
-			searcher.setCriteria(searchValue, true);
-			searcher.setConnection(conn);
-			sql = searcher.buildSqlForTable(lookupTable, "lookupretrieval");
-		}
+  public DataStore getLookupData(WbConnection conn, int maxRows, String searchValue, boolean useOrderBy)
+    throws SQLException
+  {
+    if (lookupTable == null && !retrieved)
+    {
+      retrieveReferencedTable(conn);
+    }
+    if (lookupTable == null)
+    {
+      return null;
+    }
+    String sql = null;
+    if (searchValue == null)
+    {
+      TableSelectBuilder builder = new TableSelectBuilder (conn, "lookupretrieval");
+      builder.setSortPksFirst(true);
+      builder.setIncludeBLOBColumns(false);
+      builder.setIncludeCLOBColumns(false);
+      sql = builder.getSelectForColumns(lookupTable.getTable(), lookupTable.getColumns(), maxRows);
+    }
+    else
+    {
+      ServerSideTableSearcher searcher = new ServerSideTableSearcher();
+      searcher.setColumnFunction(conn.getDbSettings().getLowerFunctionTemplate());
+      searcher.setCriteria(searchValue, true);
+      searcher.setConnection(conn);
+      sql = searcher.buildSqlForTable(lookupTable, "lookupretrieval");
+    }
 
-		if (useOrderBy)
-		{
-			sql += getOrderBy(conn, lookupTable.getTable().getPrimaryKey());
-		}
+    if (useOrderBy)
+    {
+      sql += getOrderBy(conn, lookupTable.getTable().getPrimaryKey());
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		DataStore result = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+    DataStore result = null;
 
-		LogMgr.logDebug("LookupDataLoader.getLookupData()", "Using sql: " + sql);
+    LogMgr.logDebug("LookupDataLoader.getLookupData()", "Using sql: " + sql);
 
-		try
-		{
-			stmt = conn.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
-			result = new DataStore(rs, true, maxRows);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+    try
+    {
+      stmt = conn.createStatementForQuery();
+      rs = stmt.executeQuery(sql);
+      result = new DataStore(rs, true, maxRows);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	private String getOrderBy(WbConnection conn, PkDefinition pk)
-	{
-		if (pk == null || CollectionUtil.isEmpty(pk.getColumns())) return "";
+  private String getOrderBy(WbConnection conn, PkDefinition pk)
+  {
+    if (pk == null || CollectionUtil.isEmpty(pk.getColumns())) return "";
 
-		QuoteHandler handler = (conn == null ? QuoteHandler.STANDARD_HANDLER : conn.getMetadata());
+    QuoteHandler handler = (conn == null ? QuoteHandler.STANDARD_HANDLER : conn.getMetadata());
 
-		StringBuilder order = new StringBuilder(50);
-		order.append(" ORDER BY ");
-		int cols = 0;
-		for (String colName : pk.getColumns())
-		{
-			if (cols > 0)
-			{
-				order.append(',');
-			}
-			order.append(handler.quoteObjectname(colName));
-			cols++;
-		}
-		return order.toString();
-	}
+    StringBuilder order = new StringBuilder(50);
+    order.append(" ORDER BY ");
+    int cols = 0;
+    for (String colName : pk.getColumns())
+    {
+      if (cols > 0)
+      {
+        order.append(',');
+      }
+      order.append(handler.quoteObjectname(colName));
+      cols++;
+    }
+    return order.toString();
+  }
 
-	/**
-	 * Get the mapping between the foreign keys and the primary keys for this loader.
-	 *
-	 * The key to the map is the PK column from the table being referenced.
-	 * The value is the FK column of the referencing table.
-	 *
-	 * @return the FK to PK mapping
-	 */
-	public Map<String, String> getForeignkeyMap()
-	{
-		return Collections.unmodifiableMap(columnMap);
-	}
+  /**
+   * Get the mapping between the foreign keys and the primary keys for this loader.
+   *
+   * The key to the map is the PK column from the table being referenced.
+   * The value is the FK column of the referencing table.
+   *
+   * @return the FK to PK mapping
+   */
+  public Map<String, String> getForeignkeyMap()
+  {
+    return Collections.unmodifiableMap(columnMap);
+  }
 
-	public List<String> getReferencingColumns()
-	{
-		return new ArrayList<>(columnMap.values());
-	}
+  public List<String> getReferencingColumns()
+  {
+    return new ArrayList<>(columnMap.values());
+  }
 
-	public void retrieveReferencedTable(WbConnection conn)
-		throws SQLException
-	{
-		try
-		{
-			lookupTable = null;
-			TableIdentifier table = null;
-			List<DependencyNode> nodes = conn.getObjectCache().getReferencedTables(baseTable);
-			for (DependencyNode node : nodes)
-			{
-				Map<String, String> columns = node.getColumns();
+  public void retrieveReferencedTable(WbConnection conn)
+    throws SQLException
+  {
+    try
+    {
+      lookupTable = null;
+      TableIdentifier table = null;
+      List<DependencyNode> nodes = conn.getObjectCache().getReferencedTables(baseTable);
+      for (DependencyNode node : nodes)
+      {
+        Map<String, String> columns = node.getColumns();
 
-				for (Map.Entry<String, String> entry : columns.entrySet())
-				{
-					if (entry.getValue().equalsIgnoreCase(referencingColumn))
-					{
-						table = node.getTable();
-						columnMap = node.getColumns();
-					}
-				}
-			}
-			// can't use the objectCache here because I also need the PK of the table
-			conn.setBusy(true);
-			lookupTable = conn.getMetadata().getTableDefinition(table);
-		}
-		finally
-		{
-			conn.setBusy(false);
-			retrieved = true;
-		}
-	}
+        for (Map.Entry<String, String> entry : columns.entrySet())
+        {
+          if (entry.getValue().equalsIgnoreCase(referencingColumn))
+          {
+            table = node.getTable();
+            columnMap = node.getColumns();
+          }
+        }
+      }
+      // can't use the objectCache here because I also need the PK of the table
+      conn.setBusy(true);
+      lookupTable = conn.getMetadata().getTableDefinition(table);
+    }
+    finally
+    {
+      conn.setBusy(false);
+      retrieved = true;
+    }
+  }
 
-	/**
-	 * Return the cached lookup table.
-	 *
-	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
-	 * calling this method.
-	 *
-	 * @return the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
-	 */
-	public TableIdentifier getLookupTable()
-	{
-		if (lookupTable == null) return null;
-		return lookupTable.getTable();
-	}
+  /**
+   * Return the cached lookup table.
+   *
+   * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
+   * calling this method.
+   *
+   * @return the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
+   */
+  public TableIdentifier getLookupTable()
+  {
+    if (lookupTable == null) return null;
+    return lookupTable.getTable();
+  }
 
-	/**
-	 * Return the PK of the lookup table.
-	 *
-	 * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
-	 * calling this method, otherwise null will be returned.
-	 *
-	 * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
-	 * @see #getLookupTable()
-	 * @see #getReferencingColumns()
-	 */
-	public PkDefinition getPK()
-	{
-		if (lookupTable == null) return null;
-		return lookupTable.getTable().getPrimaryKey();
-	}
+  /**
+   * Return the PK of the lookup table.
+   *
+   * {@link #retrieveReferencedTable(workbench.db.WbConnection)} must be called before
+   * calling this method, otherwise null will be returned.
+   *
+   * @return the PK of the referenced table or null if no FK was found or retrieveReferencedTable() was not yet called
+   * @see #getLookupTable()
+   * @see #getReferencingColumns()
+   */
+  public PkDefinition getPK()
+  {
+    if (lookupTable == null) return null;
+    return lookupTable.getTable().getPrimaryKey();
+  }
 
 }

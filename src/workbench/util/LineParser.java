@@ -29,8 +29,8 @@ package workbench.util;
  */
 public interface LineParser
 {
-	boolean hasNext();
-	String getNext();
-	void setLine(String line);
-	void setTrimValues(boolean trimValues);
+  boolean hasNext();
+  String getNext();
+  void setLine(String line);
+  void setTrimValues(boolean trimValues);
 }

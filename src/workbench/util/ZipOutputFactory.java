@@ -36,76 +36,76 @@ import java.util.zip.ZipOutputStream;
  * @author Thomas Kellerer
  */
 public class ZipOutputFactory
-	implements OutputFactory
+  implements OutputFactory
 {
-	protected File archive;
-	protected OutputStream baseOut;
-	protected ZipOutputStream zout;
+  protected File archive;
+  protected OutputStream baseOut;
+  protected ZipOutputStream zout;
 
-	public ZipOutputFactory(File zip)
-	{
-		this.archive = zip;
-	}
+  public ZipOutputFactory(File zip)
+  {
+    this.archive = zip;
+  }
 
-	private void initArchive()
-		throws IOException
-	{
-		baseOut = new FileOutputStream(archive);
-		zout = new ZipOutputStream(baseOut);
-		zout.setLevel(9);
-	}
+  private void initArchive()
+    throws IOException
+  {
+    baseOut = new FileOutputStream(archive);
+    zout = new ZipOutputStream(baseOut);
+    zout.setLevel(9);
+  }
 
-	@Override
-	public boolean isArchive()
-	{
-		return true;
-	}
+  @Override
+  public boolean isArchive()
+  {
+    return true;
+  }
 
-	@Override
-	public OutputStream createOutputStream(File output)
-		throws IOException
-	{
-		String filename = output.getName();
-		return createOutputStream(filename);
-	}
+  @Override
+  public OutputStream createOutputStream(File output)
+    throws IOException
+  {
+    String filename = output.getName();
+    return createOutputStream(filename);
+  }
 
-	public OutputStream createOutputStream(String filename)
-		throws IOException
-	{
-		if (this.zout == null) initArchive();
+  public OutputStream createOutputStream(String filename)
+    throws IOException
+  {
+    if (this.zout == null) initArchive();
 
-		ZipEntry currentEntry = new ZipEntry(filename);
-		this.zout.putNextEntry(currentEntry);
-		return new ZipEntryOutputStream(zout);
-	}
+    ZipEntry currentEntry = new ZipEntry(filename);
+    this.zout.putNextEntry(currentEntry);
+    return new ZipEntryOutputStream(zout);
+  }
 
-	@Override
-	public Writer createWriter(String output, String encoding)
-		throws IOException
-	{
-		OutputStream out = createOutputStream(output);
-		return EncodingUtil.createWriter(out, encoding);
-	}
+  @Override
+  public Writer createWriter(String output, String encoding)
+    throws IOException
+  {
+    OutputStream out = createOutputStream(output);
+    return EncodingUtil.createWriter(out, encoding);
+  }
 
-	@Override
-	public Writer createWriter(File output, String encoding)
-		throws IOException
-	{
-		OutputStream out = createOutputStream(output);
-		return EncodingUtil.createWriter(out, encoding);
-	}
+  @Override
+  public Writer createWriter(File output, String encoding)
+    throws IOException
+  {
+    OutputStream out = createOutputStream(output);
+    return EncodingUtil.createWriter(out, encoding);
+  }
 
-	@Override
-	public void done() throws IOException
-	{
-		if (this.zout != null)
-		{
-			zout.close();
-		}
-		if (baseOut != null)
-		{
-			baseOut.close();
-		}
-	}
+  @Override
+  public void done() throws IOException
+  {
+    if (this.zout != null)
+    {
+      zout.close();
+    }
+    if (baseOut != null)
+    {
+      baseOut.close();
+    }
+  }
 
 }

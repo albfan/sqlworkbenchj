@@ -52,159 +52,159 @@ import workbench.util.CollectionUtil;
  */
 public interface MergeGenerator
 {
-	/**
-	 * Generate a single MERGE statment (or something equivalent depending on the DBMS)
-	 * based on the passed data.
-	 *
-	 * Depending on the capabilities of the DBMS, the result might be one
-	 * statement for each row or one statement for all rows.
-	 *
-	 * @param data       the data source
-	 *
-	 * @return one or more SQL statements to merge the data into an existing table.
-	 *         might be null (e.g. if no update table is present)
-	 */
-	String generateMerge(RowDataContainer data);
+  /**
+   * Generate a single MERGE statment (or something equivalent depending on the DBMS)
+   * based on the passed data.
+   *
+   * Depending on the capabilities of the DBMS, the result might be one
+   * statement for each row or one statement for all rows.
+   *
+   * @param data       the data source
+   *
+   * @return one or more SQL statements to merge the data into an existing table.
+   *         might be null (e.g. if no update table is present)
+   */
+  String generateMerge(RowDataContainer data);
 
-	/**
-	 * Generate the start of a MERGE statement.
-	 * <br/>
-	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
-	 *
-	 * @param data the data source
-	 * @return  the start of a MERGE statement
-	 */
-	String generateMergeStart(RowDataContainer data);
+  /**
+   * Generate the start of a MERGE statement.
+   * <br/>
+   * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+   *
+   * @param data the data source
+   * @return  the start of a MERGE statement
+   */
+  String generateMergeStart(RowDataContainer data);
 
-	/**
-	 * Generate the SQL for a single row in a MERGE statement.
-	 *
-	 * <br/>
-	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
-	 *
-	 * @param info      the metadata of the result
-	 * @param row       the data
-	 * @param rowIndex  the rowIndex in the result
-	 * @return  the SQL for a single row inside a MERGE statement.
-	 */
-	String addRow(ResultInfo info, RowData row, long rowIndex);
+  /**
+   * Generate the SQL for a single row in a MERGE statement.
+   *
+   * <br/>
+   * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+   *
+   * @param info      the metadata of the result
+   * @param row       the data
+   * @param rowIndex  the rowIndex in the result
+   * @return  the SQL for a single row inside a MERGE statement.
+   */
+  String addRow(ResultInfo info, RowData row, long rowIndex);
 
-	/**
-	 * Generate the end of a MERGE statement.
-	 * <br/>
-	 * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
-	 *
-	 * @param data the data source
-	 * @return  the end of a MERGE statement
-	 */
-	String generateMergeEnd(RowDataContainer data);
+  /**
+   * Generate the end of a MERGE statement.
+   * <br/>
+   * The complete MERGE statement needs to be assembled using generateMergeStart(), addRow() and generateMergeEnd().
+   *
+   * @param data the data source
+   * @return  the end of a MERGE statement
+   */
+  String generateMergeEnd(RowDataContainer data);
 
 
-	/**
-	 * The factory go create MergeGenerator instances depending on the DBMS.
-	 */
-	class Factory
-	{
-		private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
-		static
-		{
-			DBID_TO_TYPE_MAP.put("postgresql", "postgres");
-			DBID_TO_TYPE_MAP.put("h2database", "h2");
-			DBID_TO_TYPE_MAP.put("microsoft_sql_server", "sqlserver");
-			DBID_TO_TYPE_MAP.put("db2i", "db2");
-			DBID_TO_TYPE_MAP.put("db2h", "db2");
-			DBID_TO_TYPE_MAP.put("hsql_database_engine", "hsqldb");
-		}
+  /**
+   * The factory go create MergeGenerator instances depending on the DBMS.
+   */
+  class Factory
+  {
+    private static final Map<String, String> DBID_TO_TYPE_MAP = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+    static
+    {
+      DBID_TO_TYPE_MAP.put("postgresql", "postgres");
+      DBID_TO_TYPE_MAP.put("h2database", "h2");
+      DBID_TO_TYPE_MAP.put("microsoft_sql_server", "sqlserver");
+      DBID_TO_TYPE_MAP.put("db2i", "db2");
+      DBID_TO_TYPE_MAP.put("db2h", "db2");
+      DBID_TO_TYPE_MAP.put("hsql_database_engine", "hsqldb");
+    }
 
-		/**
-		 * Create a MergeGenerator for the DBMS identified by the connection.
-		 *
-		 * @param conn the connection identifying the DBMS
-		 * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
-		 */
-		public static MergeGenerator createGenerator(WbConnection conn)
-		{
-			if (conn == null) return new AnsiSQLMergeGenerator();
+    /**
+     * Create a MergeGenerator for the DBMS identified by the connection.
+     *
+     * @param conn the connection identifying the DBMS
+     * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
+     */
+    public static MergeGenerator createGenerator(WbConnection conn)
+    {
+      if (conn == null) return new AnsiSQLMergeGenerator();
       if (conn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(conn, "9.5"))
       {
         return new Postgres95MergeGenerator();
       }
-			return createGenerator(conn.getDbId());
-		}
+      return createGenerator(conn.getDbId());
+    }
 
-		/**
-		 * Create a MergeGenerator for the specify DBMS.
-		 *
-		 * @param type the database identifier or the "generator type"
-		 * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
-		 */
-		public static MergeGenerator createGenerator(String type)
-		{
-			if (type == null) return null;
+    /**
+     * Create a MergeGenerator for the specify DBMS.
+     *
+     * @param type the database identifier or the "generator type"
+     * @return the generator, never null (defaults to AnsiSQLMergeGenerator)
+     */
+    public static MergeGenerator createGenerator(String type)
+    {
+      if (type == null) return null;
 
-			if ("oracle".equals(type))
-			{
-				return new OracleMergeGenerator();
-			}
+      if ("oracle".equals(type))
+      {
+        return new OracleMergeGenerator();
+      }
 
-			if (type.equals("postgres-9.5"))
-			{
-				return new PostgresMergeGenerator();
-			}
+      if (type.equals("postgres-9.5"))
+      {
+        return new PostgresMergeGenerator();
+      }
 
-			if (type.equals("postgres") || type.equals("postgresql"))
-			{
-				return new PostgresMergeGenerator();
-			}
+      if (type.equals("postgres") || type.equals("postgresql"))
+      {
+        return new PostgresMergeGenerator();
+      }
 
-			if ("mysql".equals(type))
-			{
-				return new MySQLMergeGenerator();
-			}
+      if ("mysql".equals(type))
+      {
+        return new MySQLMergeGenerator();
+      }
 
-			if ("microsoft_sql_server".equals(type) || "sqlserver".equals(type))
-			{
-				return new SqlServerMergeGenerator(type);
-			}
+      if ("microsoft_sql_server".equals(type) || "sqlserver".equals(type))
+      {
+        return new SqlServerMergeGenerator(type);
+      }
 
-			if (type.startsWith("hsql"))
-			{
-				return new HsqlMergeGenerator();
-			}
+      if (type.startsWith("hsql"))
+      {
+        return new HsqlMergeGenerator();
+      }
 
-			if (type.startsWith("db2"))
-			{
-				return new Db2MergeGenerator();
-			}
+      if (type.startsWith("db2"))
+      {
+        return new Db2MergeGenerator();
+      }
 
-			if (type.startsWith("h2"))
-			{
-				return new H2MergeGenerator();
-			}
+      if (type.startsWith("h2"))
+      {
+        return new H2MergeGenerator();
+      }
 
-			if ("firebird".equals(type))
-			{
-				if (Settings.getInstance().getBoolProperty("workbench.db.firebird.mergegenerator.use.ansi", true))
-				{
-					return new Firebird21MergeGenerator();
-				}
-				return new Firebird20MergeGenerator();
-			}
+      if ("firebird".equals(type))
+      {
+        if (Settings.getInstance().getBoolProperty("workbench.db.firebird.mergegenerator.use.ansi", true))
+        {
+          return new Firebird21MergeGenerator();
+        }
+        return new Firebird20MergeGenerator();
+      }
 
-			return new AnsiSQLMergeGenerator();
-		}
+      return new AnsiSQLMergeGenerator();
+    }
 
-		public static List<String> getSupportedTypes()
-		{
-			return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "postgres-9.5", "sqlserver");
-		}
+    public static List<String> getSupportedTypes()
+    {
+      return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "postgres-9.5", "sqlserver");
+    }
 
-		public static String getTypeForDBID(String dbid)
-		{
-			if (dbid == null) return "ansi";
-			String type = DBID_TO_TYPE_MAP.get(dbid);
-			if (type == null) return "ansi";
-			return type;
-		}
-	}
+    public static String getTypeForDBID(String dbid)
+    {
+      if (dbid == null) return "ansi";
+      String type = DBID_TO_TYPE_MAP.get(dbid);
+      if (type == null) return "ansi";
+      return type;
+    }
+  }
 }

@@ -35,73 +35,73 @@ import workbench.db.ColumnIdentifier;
 public class ResultInfoDisplayBuilder
 {
 
-	public static DataStore getDataStore(ResultInfo info, boolean showComments, boolean showTableName)
-	{
-		List<String> columns = new ArrayList<>(12);
-		columns.add("INDEX");
-		columns.add("COLUMN_NAME");
-		columns.add("ALIAS");
-		columns.add("DATA_TYPE");
-		columns.add("JDBC Type");
-		if (showComments)
-		{
-			columns.add("REMARKS");
-			columns.add("BASE TABLE");
-		}
-		columns.add("CLASS_NAME");
-		columns.add("AUTO_GENERATED");
-		columns.add("IDENTITY_COLUMN");
-		columns.add("READONLY");
-		columns.add("UPDATEABLE");
-		if (showTableName)
-		{
-			columns.add("TABLE_NAME");
-		}
+  public static DataStore getDataStore(ResultInfo info, boolean showComments, boolean showTableName)
+  {
+    List<String> columns = new ArrayList<>(12);
+    columns.add("INDEX");
+    columns.add("COLUMN_NAME");
+    columns.add("ALIAS");
+    columns.add("DATA_TYPE");
+    columns.add("JDBC Type");
+    if (showComments)
+    {
+      columns.add("REMARKS");
+      columns.add("BASE TABLE");
+    }
+    columns.add("CLASS_NAME");
+    columns.add("AUTO_GENERATED");
+    columns.add("IDENTITY_COLUMN");
+    columns.add("READONLY");
+    columns.add("UPDATEABLE");
+    if (showTableName)
+    {
+      columns.add("TABLE_NAME");
+    }
 
-		String[] cols = columns.toArray(new String[0]);
-		int[] types = new int[cols.length];
+    String[] cols = columns.toArray(new String[0]);
+    int[] types = new int[cols.length];
 
-		for (int i=0; i < cols.length; i++)
-		{
-			if (cols[i].equals("JDBC TYPE"))
-			{
-				types[i] = Types.INTEGER;
-			}
-			else
-			{
-				types[i] = Types.VARCHAR;
-			}
-		}
+    for (int i=0; i < cols.length; i++)
+    {
+      if (cols[i].equals("JDBC TYPE"))
+      {
+        types[i] = Types.INTEGER;
+      }
+      else
+      {
+        types[i] = Types.VARCHAR;
+      }
+    }
 
-		DataStore infoDs = new DataStore(cols, types);
-		//for (ColumnIdentifier col : info.getColumns())
-		for (int columnPosition=0; columnPosition < info.getColumnCount(); columnPosition++)
-		{
-			int row = infoDs.addRow();
-			int colIndex = 0;
-			ColumnIdentifier col = info.getColumns()[columnPosition];
-			int colPos = col.getPosition() == 0 ? columnPosition + 1 : col.getPosition();
-			infoDs.setValue(row, colIndex++, colPos);
-			infoDs.setValue(row, colIndex++, col.getColumnName());
-			infoDs.setValue(row, colIndex++, col.getColumnAlias());
-			infoDs.setValue(row, colIndex++, col.getDbmsType());
-			infoDs.setValue(row, colIndex++, col.getDataType());
-			if (showComments)
-			{
-				infoDs.setValue(row, colIndex++, col.getComment());
-				infoDs.setValue(row, colIndex++, col.getSourceTableName());
-			}
-			infoDs.setValue(row, colIndex++, col.getColumnClassName());
-			infoDs.setValue(row, colIndex++, col.isAutoincrement());
-			infoDs.setValue(row, colIndex++, col.isIdentityColumn());
-			infoDs.setValue(row, colIndex++, col.isReadonly());
-			infoDs.setValue(row, colIndex++, col.isUpdateable());
-			if (showTableName)
-			{
-				infoDs.setValue(row, colIndex, col.getSourceTableName());
-			}
-		}
-		return infoDs;
-	}
+    DataStore infoDs = new DataStore(cols, types);
+    //for (ColumnIdentifier col : info.getColumns())
+    for (int columnPosition=0; columnPosition < info.getColumnCount(); columnPosition++)
+    {
+      int row = infoDs.addRow();
+      int colIndex = 0;
+      ColumnIdentifier col = info.getColumns()[columnPosition];
+      int colPos = col.getPosition() == 0 ? columnPosition + 1 : col.getPosition();
+      infoDs.setValue(row, colIndex++, colPos);
+      infoDs.setValue(row, colIndex++, col.getColumnName());
+      infoDs.setValue(row, colIndex++, col.getColumnAlias());
+      infoDs.setValue(row, colIndex++, col.getDbmsType());
+      infoDs.setValue(row, colIndex++, col.getDataType());
+      if (showComments)
+      {
+        infoDs.setValue(row, colIndex++, col.getComment());
+        infoDs.setValue(row, colIndex++, col.getSourceTableName());
+      }
+      infoDs.setValue(row, colIndex++, col.getColumnClassName());
+      infoDs.setValue(row, colIndex++, col.isAutoincrement());
+      infoDs.setValue(row, colIndex++, col.isIdentityColumn());
+      infoDs.setValue(row, colIndex++, col.isReadonly());
+      infoDs.setValue(row, colIndex++, col.isUpdateable());
+      if (showTableName)
+      {
+        infoDs.setValue(row, colIndex, col.getSourceTableName());
+      }
+    }
+    return infoDs;
+  }
 
 }

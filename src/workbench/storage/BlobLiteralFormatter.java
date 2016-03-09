@@ -30,7 +30,7 @@ import java.sql.SQLException;
  */
 public interface BlobLiteralFormatter
 {
-	CharSequence getBlobLiteral(Object value)
-		throws SQLException;
-	BlobLiteralType getType();
+  CharSequence getBlobLiteral(Object value)
+    throws SQLException;
+  BlobLiteralType getType();
 }

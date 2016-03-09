@@ -32,122 +32,122 @@ import workbench.db.WbConnection;
  */
 public interface RowDataContainer
 {
-	int getRowCount();
-	RowData getRow(int rowIndex);
-	ResultInfo getResultInfo();
-	TableIdentifier getUpdateTable();
-	WbConnection getOriginalConnection();
+  int getRowCount();
+  RowData getRow(int rowIndex);
+  ResultInfo getResultInfo();
+  TableIdentifier getUpdateTable();
+  WbConnection getOriginalConnection();
 
-	class Factory
-	{
-		public static RowDataContainer createContainer(DataStore data)
-		{
-			return data;
-		}
+  class Factory
+  {
+    public static RowDataContainer createContainer(DataStore data)
+    {
+      return data;
+    }
 
-		public static RowDataContainer createContainer(WbConnection conn, RowData row, ResultInfo info)
-		{
-			return new SingleRowDataContainer(conn, row, info);
-		}
+    public static RowDataContainer createContainer(WbConnection conn, RowData row, ResultInfo info)
+    {
+      return new SingleRowDataContainer(conn, row, info);
+    }
 
-		public static RowDataContainer createContainer(DataStore data, int row)
-		{
-			return new SingleRowDataContainer(data.getOriginalConnection(), data.getRow(row), data.getResultInfo());
-		}
+    public static RowDataContainer createContainer(DataStore data, int row)
+    {
+      return new SingleRowDataContainer(data.getOriginalConnection(), data.getRow(row), data.getResultInfo());
+    }
 
-		public static RowDataContainer createContainer(DataStore data, int[] selectedRows)
-		{
-			return new SelectionRowDataContainer(data, selectedRows);
-		}
-	}
+    public static RowDataContainer createContainer(DataStore data, int[] selectedRows)
+    {
+      return new SelectionRowDataContainer(data, selectedRows);
+    }
+  }
 }
 
 
 class SingleRowDataContainer
-	implements RowDataContainer
+  implements RowDataContainer
 {
-	private RowData row;
-	private ResultInfo info;
-	private WbConnection connection;
+  private RowData row;
+  private ResultInfo info;
+  private WbConnection connection;
 
-	SingleRowDataContainer(WbConnection conn, RowData row, ResultInfo info)
-	{
-		this.row = row;
-		this.info = info;
-		this.connection = conn;
-	}
+  SingleRowDataContainer(WbConnection conn, RowData row, ResultInfo info)
+  {
+    this.row = row;
+    this.info = info;
+    this.connection = conn;
+  }
 
-	@Override
-	public WbConnection getOriginalConnection()
-	{
-		return connection;
-	}
+  @Override
+  public WbConnection getOriginalConnection()
+  {
+    return connection;
+  }
 
-	@Override
-	public int getRowCount()
-	{
-		return 1;
-	}
+  @Override
+  public int getRowCount()
+  {
+    return 1;
+  }
 
-	@Override
-	public RowData getRow(int rowIndex)
-	{
-		if (rowIndex != 0) throw new ArrayIndexOutOfBoundsException(rowIndex);
-		return row;
-	}
+  @Override
+  public RowData getRow(int rowIndex)
+  {
+    if (rowIndex != 0) throw new ArrayIndexOutOfBoundsException(rowIndex);
+    return row;
+  }
 
-	@Override
-	public ResultInfo getResultInfo()
-	{
-		return info;
-	}
+  @Override
+  public ResultInfo getResultInfo()
+  {
+    return info;
+  }
 
-	@Override
-	public TableIdentifier getUpdateTable()
-	{
-		return info.getUpdateTable();
-	}
+  @Override
+  public TableIdentifier getUpdateTable()
+  {
+    return info.getUpdateTable();
+  }
 }
 
 class SelectionRowDataContainer
-	implements RowDataContainer
+  implements RowDataContainer
 {
-	private DataStore data;
-	private int[] selection;
+  private DataStore data;
+  private int[] selection;
 
-	SelectionRowDataContainer(DataStore data, int[] rows)
-	{
-		this.data = data;
-		this.selection = rows;
-	}
+  SelectionRowDataContainer(DataStore data, int[] rows)
+  {
+    this.data = data;
+    this.selection = rows;
+  }
 
-	@Override
-	public WbConnection getOriginalConnection()
-	{
-		return data.getOriginalConnection();
-	}
+  @Override
+  public WbConnection getOriginalConnection()
+  {
+    return data.getOriginalConnection();
+  }
 
-	@Override
-	public int getRowCount()
-	{
-		return selection.length;
-	}
+  @Override
+  public int getRowCount()
+  {
+    return selection.length;
+  }
 
-	@Override
-	public RowData getRow(int rowIndex)
-	{
-		return data.getRow(selection[rowIndex]);
-	}
+  @Override
+  public RowData getRow(int rowIndex)
+  {
+    return data.getRow(selection[rowIndex]);
+  }
 
-	@Override
-	public ResultInfo getResultInfo()
-	{
-		return data.getResultInfo();
-	}
+  @Override
+  public ResultInfo getResultInfo()
+  {
+    return data.getResultInfo();
+  }
 
-	@Override
-	public TableIdentifier getUpdateTable()
-	{
-		return data.getUpdateTable();
-	}
+  @Override
+  public TableIdentifier getUpdateTable()
+  {
+    return data.getUpdateTable();
+  }
 }

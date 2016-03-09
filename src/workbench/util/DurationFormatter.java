@@ -33,99 +33,99 @@ import workbench.resource.Settings;
  */
 public class DurationFormatter
 {
-	private final DecimalFormat numberFormatter;
-	public static final long ONE_SECOND = 1000;
-	public static final long ONE_MINUTE = ONE_SECOND * 60;
-	public static final long ONE_HOUR = ONE_MINUTE * 60;
+  private final DecimalFormat numberFormatter;
+  public static final long ONE_SECOND = 1000;
+  public static final long ONE_MINUTE = ONE_SECOND * 60;
+  public static final long ONE_HOUR = ONE_MINUTE * 60;
 
-	public DurationFormatter()
-	{
-		numberFormatter = createTimingFormatter();
-	}
+  public DurationFormatter()
+  {
+    numberFormatter = createTimingFormatter();
+  }
 
-	public DurationFormatter(char decimalSep)
-	{
-		numberFormatter = createTimingFormatter(decimalSep);
-	}
+  public DurationFormatter(char decimalSep)
+  {
+    numberFormatter = createTimingFormatter(decimalSep);
+  }
 
-	public static DecimalFormat createTimingFormatter(char decimalSep)
-	{
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		symb.setDecimalSeparator(decimalSep);
-		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
-		numberFormatter.setMaximumFractionDigits(2);
-		return numberFormatter;
-	}
+  public static DecimalFormat createTimingFormatter(char decimalSep)
+  {
+    DecimalFormatSymbols symb = new DecimalFormatSymbols();
+    symb.setDecimalSeparator(decimalSep);
+    DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
+    numberFormatter.setMaximumFractionDigits(2);
+    return numberFormatter;
+  }
 
-	/**
-	 * Create a timing formatter using the decimal separator defined
-	 * through the settings property <tt>workbench.gui.timining.decimal</tt>
-	 *
-	 * @return a properly initialized DecimalFormat
-	 */
-	public static DecimalFormat createTimingFormatter()
-	{
-		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
-		return createTimingFormatter(sep.charAt(0));
-	}
+  /**
+   * Create a timing formatter using the decimal separator defined
+   * through the settings property <tt>workbench.gui.timining.decimal</tt>
+   *
+   * @return a properly initialized DecimalFormat
+   */
+  public static DecimalFormat createTimingFormatter()
+  {
+    String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
+    return createTimingFormatter(sep.charAt(0));
+  }
 
-	public String getDurationAsSeconds(long millis)
-	{
-		double time = ((double)millis) / 1000.0;
-		synchronized (numberFormatter)
-		{
-			return numberFormatter.format(time);
-		}
-	}
+  public String getDurationAsSeconds(long millis)
+  {
+    double time = ((double)millis) / 1000.0;
+    synchronized (numberFormatter)
+    {
+      return numberFormatter.format(time);
+    }
+  }
 
-	public String formatDuration(long millis)
+  public String formatDuration(long millis)
   {
     return formatDuration(millis, (millis < ONE_MINUTE), true);
   }
 
-	public String formatDuration(long millis, boolean includeFractionalSeconds)
+  public String formatDuration(long millis, boolean includeFractionalSeconds)
   {
     return formatDuration(millis, includeFractionalSeconds, true);
   }
 
-	public String formatDuration(long millis, boolean includeFractionalSeconds, boolean includeZeroSeconds)
-	{
-		long hours = (millis / ONE_HOUR);
-		millis -= (hours * ONE_HOUR);
-		long minutes = millis / ONE_MINUTE;
-		millis -= (minutes * ONE_MINUTE);
+  public String formatDuration(long millis, boolean includeFractionalSeconds, boolean includeZeroSeconds)
+  {
+    long hours = (millis / ONE_HOUR);
+    millis -= (hours * ONE_HOUR);
+    long minutes = millis / ONE_MINUTE;
+    millis -= (minutes * ONE_MINUTE);
 
-		StringBuilder result = new StringBuilder(17);
+    StringBuilder result = new StringBuilder(17);
 
-		if (hours > 0)
-		{
-			result.append(hours);
-			result.append("h ");
-		}
+    if (hours > 0)
+    {
+      result.append(hours);
+      result.append("h ");
+    }
 
-		if (minutes == 0 && hours > 0 || minutes > 0)
-		{
-			result.append(minutes);
-			result.append("m ");
-		}
+    if (minutes == 0 && hours > 0 || minutes > 0)
+    {
+      result.append(minutes);
+      result.append("m ");
+    }
 
-		if (includeFractionalSeconds)
-		{
-			synchronized (numberFormatter)
-			{
-				result.append(numberFormatter.format(millis / 1000.0));
-			}
-		}
-		else
-		{
+    if (includeFractionalSeconds)
+    {
+      synchronized (numberFormatter)
+      {
+        result.append(numberFormatter.format(millis / 1000.0));
+      }
+    }
+    else
+    {
       int seconds = (int)millis / 1000;
       if (seconds > 0 || includeZeroSeconds)
       {
         result.append(Long.toString(seconds));
         result.append('s');
       }
-		}
+    }
 
-		return result.toString().trim();
-	}
+    return result.toString().trim();
+  }
 }

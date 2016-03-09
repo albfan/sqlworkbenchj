@@ -30,48 +30,48 @@ import java.util.Locale;
  * @author Thomas Kellerer
  */
 public class WbLocale
-	implements Comparable<WbLocale>
+  implements Comparable<WbLocale>
 {
-	private final Locale locale;
+  private final Locale locale;
 
-	public WbLocale(Locale l)
-	{
-		this.locale = l;
-	}
+  public WbLocale(Locale l)
+  {
+    this.locale = l;
+  }
 
-	public Locale getLocale()
-	{
-		return locale;
-	}
+  public Locale getLocale()
+  {
+    return locale;
+  }
 
-	@Override
-	public String toString()
-	{
-		String lang = StringUtil.capitalize(locale.getDisplayLanguage(locale));
-		return lang;
-	}
+  @Override
+  public String toString()
+  {
+    String lang = StringUtil.capitalize(locale.getDisplayLanguage(locale));
+    return lang;
+  }
 
-	@Override
-	public int compareTo(WbLocale other)
-	{
-		return this.toString().compareTo(other.toString());
-	}
+  @Override
+  public int compareTo(WbLocale other)
+  {
+    return this.toString().compareTo(other.toString());
+  }
 
-	@Override
-	public boolean equals(Object other)
-	{
-		if (other == null) return false;
-		if (locale == null) return false;
-		if (other instanceof WbLocale)
-		{
-			return this.locale.equals(((WbLocale)other).locale);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other == null) return false;
+    if (locale == null) return false;
+    if (other instanceof WbLocale)
+    {
+      return this.locale.equals(((WbLocale)other).locale);
+    }
+    return false;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		return locale.hashCode();
-	}
+  @Override
+  public int hashCode()
+  {
+    return locale.hashCode();
+  }
 }

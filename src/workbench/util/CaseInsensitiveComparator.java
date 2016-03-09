@@ -37,45 +37,45 @@ import workbench.db.objectcache.DbObjectCacheFactory;
  * @author Thomas Kellerer
  */
 public class CaseInsensitiveComparator
-	implements Comparator<String>, Serializable
+  implements Comparator<String>, Serializable
 {
-	public static final CaseInsensitiveComparator INSTANCE = new CaseInsensitiveComparator();
-	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+  public static final CaseInsensitiveComparator INSTANCE = new CaseInsensitiveComparator();
+  private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
 
-	private boolean ignoreQuotes;
+  private boolean ignoreQuotes;
 
-	public CaseInsensitiveComparator()
-	{
-	}
+  public CaseInsensitiveComparator()
+  {
+  }
 
-	public void setIgnoreQuotes(boolean flag)
-	{
-		this.ignoreQuotes = flag;
-	}
+  public void setIgnoreQuotes(boolean flag)
+  {
+    this.ignoreQuotes = flag;
+  }
 
-	/**
-	 * Compares to two strings.
-	 * null values are "sorted" after non-null values.
-	 * i.e. compare(null, "something") returns -1
-	 * and compare("something", null) returns 1
-	 *
-	 * @param value1 the first String, maybe null
-	 * @param value2 the second String, maybe null
-	 * @return 0 if both are null or compareToIgnoreCase() returns 0
-	 * @see workbench.util.StringUtil#compareStrings(String, String, boolean)
-	 */
-	@Override
-	public int compare(String value1, String value2)
-	{
-		if (value1 == null && value2 == null) return 0;
-		if (value1 == null) return -1;
-		if (value2 == null) return 1;
-		if (ignoreQuotes)
-		{
-			return StringUtil.trimQuotes(value1).compareToIgnoreCase(StringUtil.trimQuotes(value2));
-		}
-		return value1.compareToIgnoreCase(value2);
-	}
+  /**
+   * Compares to two strings.
+   * null values are "sorted" after non-null values.
+   * i.e. compare(null, "something") returns -1
+   * and compare("something", null) returns 1
+   *
+   * @param value1 the first String, maybe null
+   * @param value2 the second String, maybe null
+   * @return 0 if both are null or compareToIgnoreCase() returns 0
+   * @see workbench.util.StringUtil#compareStrings(String, String, boolean)
+   */
+  @Override
+  public int compare(String value1, String value2)
+  {
+    if (value1 == null && value2 == null) return 0;
+    if (value1 == null) return -1;
+    if (value2 == null) return 1;
+    if (ignoreQuotes)
+    {
+      return StringUtil.trimQuotes(value1).compareToIgnoreCase(StringUtil.trimQuotes(value2));
+    }
+    return value1.compareToIgnoreCase(value2);
+  }
 }
 
 

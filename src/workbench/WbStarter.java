@@ -51,101 +51,101 @@ import javax.swing.WindowConstants;
 public class WbStarter
 {
 
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String[] args)
-	{
-		String version = System.getProperty("java.version", null);
-		if (version == null)
-		{
-			version = System.getProperty("java.runtime.version");
-		}
+  /**
+   * @param args the command line arguments
+   */
+  public static void main(String[] args)
+  {
+    String version = System.getProperty("java.version", null);
+    if (version == null)
+    {
+      version = System.getProperty("java.runtime.version");
+    }
 
-		boolean versionIsOk = false;
-		final int minMinorVersion = 8;
+    boolean versionIsOk = false;
+    final int minMinorVersion = 8;
 
-		int minorversion = -1;
+    int minorversion = -1;
 
-		try
-		{
-			int majorversion = Integer.parseInt(version.substring(0,1));
-			minorversion = Integer.parseInt(version.substring(2,3));
-			versionIsOk = (majorversion >= 1) && (minorversion >= minMinorVersion);
-		}
-		catch (Exception e)
-		{
-			versionIsOk = false;
-		}
+    try
+    {
+      int majorversion = Integer.parseInt(version.substring(0,1));
+      minorversion = Integer.parseInt(version.substring(2,3));
+      versionIsOk = (majorversion >= 1) && (minorversion >= minMinorVersion);
+    }
+    catch (Exception e)
+    {
+      versionIsOk = false;
+    }
 
-		if (!versionIsOk)
-		{
-			String error =
+    if (!versionIsOk)
+    {
+      String error =
         "SQL Workbench/J requires Java 8, but only " + version + " was found\n\n" +
-				"If you do have Java 8 installed, please point JAVA_HOME to the location of your Java 8 installation.\n" +
-				"or refer to the manual for details on how to specify the Java runtime to be used.";
+        "If you do have Java 8 installed, please point JAVA_HOME to the location of your Java 8 installation.\n" +
+        "or refer to the manual for details on how to specify the Java runtime to be used.";
 
-			System.err.println("*** Cannot run this application ***");
-			System.err.println(error);
-			try
-			{
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      System.err.println("*** Cannot run this application ***");
+      System.err.println(error);
+      try
+      {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-				// The dummy Frame is needed for pre Java 5 because otherwise
-				// the dialog will not appear in the Windows task bar
-				Frame dummy = new Frame("SQL Workbench/J - Wrong Java version");
-				dummy.setBounds(-2000, -2000, 0, 0);
-				dummy.setVisible(true);
+        // The dummy Frame is needed for pre Java 5 because otherwise
+        // the dialog will not appear in the Windows task bar
+        Frame dummy = new Frame("SQL Workbench/J - Wrong Java version");
+        dummy.setBounds(-2000, -2000, 0, 0);
+        dummy.setVisible(true);
 
-				try
-				{
-					URL iconUrl = WbStarter.class.getClassLoader().getResource("workbench/resource/images/workbench16.png");
-					ImageIcon icon = new ImageIcon(iconUrl);
-					dummy.setIconImage(icon.getImage());
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-				final JDialog d = new JDialog(dummy, "SQL Workbench/J - Wrong Java version", true);
-				d.getContentPane().setLayout(new BorderLayout(5, 5));
-				JButton b = new JButton("Close");
-				b.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						d.setVisible(false);
-						d.dispose();
-					}
-				});
-				JOptionPane pane = new JOptionPane(error, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION, (Icon)null, new Object[] { b } );
-				d.getContentPane().add(pane, BorderLayout.CENTER);
-				d.pack();
-				d.setLocationRelativeTo(null);
-				d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-				d.setVisible(true);
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-				// Ignore
-			}
-			System.exit(1);
-		}
+        try
+        {
+          URL iconUrl = WbStarter.class.getClassLoader().getResource("workbench/resource/images/workbench16.png");
+          ImageIcon icon = new ImageIcon(iconUrl);
+          dummy.setIconImage(icon.getImage());
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+        final JDialog d = new JDialog(dummy, "SQL Workbench/J - Wrong Java version", true);
+        d.getContentPane().setLayout(new BorderLayout(5, 5));
+        JButton b = new JButton("Close");
+        b.addActionListener(new ActionListener()
+        {
+          public void actionPerformed(ActionEvent e)
+          {
+            d.setVisible(false);
+            d.dispose();
+          }
+        });
+        JOptionPane pane = new JOptionPane(error, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION, (Icon)null, new Object[] { b } );
+        d.getContentPane().add(pane, BorderLayout.CENTER);
+        d.pack();
+        d.setLocationRelativeTo(null);
+        d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        d.setVisible(true);
+      }
+      catch (Throwable e)
+      {
+        e.printStackTrace();
+        // Ignore
+      }
+      System.exit(1);
+    }
 
-		try
-		{
-			// Do not reference WbManager directly, otherwise a compile
-			// of this class will trigger a compile of the other classes, but they
-			// should be compiled with a different class file version (see build.xml)
-			Class mgr = Class.forName("workbench.WbManager");
-			Method main = mgr.getDeclaredMethod("main", new Class[] { String[].class });
-			main.invoke(null, new Object[] { args });
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-		}
-	}
+    try
+    {
+      // Do not reference WbManager directly, otherwise a compile
+      // of this class will trigger a compile of the other classes, but they
+      // should be compiled with a different class file version (see build.xml)
+      Class mgr = Class.forName("workbench.WbManager");
+      Method main = mgr.getDeclaredMethod("main", new Class[] { String[].class });
+      main.invoke(null, new Object[] { args });
+    }
+    catch (Throwable e)
+    {
+      e.printStackTrace();
+    }
+  }
 
 }

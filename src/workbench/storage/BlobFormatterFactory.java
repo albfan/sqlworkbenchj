@@ -56,7 +56,7 @@ public class BlobFormatterFactory
 
   public static BlobLiteralFormatter createInstance(DbMetadata meta)
   {
-		// Check for a user-defined formatter definition
+    // Check for a user-defined formatter definition
     // for the current DBMS
     DbSettings s = meta.getDbSettings();
     String prefix = s.getBlobLiteralPrefix();
@@ -92,7 +92,7 @@ public class BlobFormatterFactory
     }
     else if (meta.isOracle())
     {
-			// this might only work with Oracle 10g...
+      // this might only work with Oracle 10g...
       // and will probably fail on BLOBs > 4KB
       DefaultBlobFormatter f = new DefaultBlobFormatter();
       f.setUseUpperCase(true);

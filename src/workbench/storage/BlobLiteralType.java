@@ -28,11 +28,11 @@ package workbench.storage;
  */
 public enum BlobLiteralType
 {
-	hex,
-	octal,
-	unicode,
-	base64,
-	pgEscape,
-	pgDecode,
-	pgHex;
+  hex,
+  octal,
+  unicode,
+  base64,
+  pgEscape,
+  pgDecode,
+  pgHex;
 }

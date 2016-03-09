@@ -29,53 +29,53 @@ import workbench.db.TableIdentifier;
  * @author Thomas Kellerer
  */
 public class TableAlias
-	extends Alias
+  extends Alias
 {
-	private TableIdentifier table;
+  private TableIdentifier table;
 
-	public TableAlias(String value)
-	{
-		super(value);
+  public TableAlias(String value)
+  {
+    super(value);
     checkTable('.', '.');
-	}
+  }
 
-	public TableAlias(String objectName, char catalogSeparator, char schemaSeparator)
-	{
-		super(objectName);
+  public TableAlias(String objectName, char catalogSeparator, char schemaSeparator)
+  {
+    super(objectName);
     checkTable(catalogSeparator, schemaSeparator);
   }
 
-	public TableAlias(String objectName, String alias, char catalogSeparator, char schemaSeparator)
-	{
-		super(objectName, alias);
+  public TableAlias(String objectName, String alias, char catalogSeparator, char schemaSeparator)
+  {
+    super(objectName, alias);
     checkTable(catalogSeparator, schemaSeparator);
   }
 
   private void checkTable(char catalogSeparator, char schemaSeparator)
   {
-		if (getObjectName() != null)
-		{
-			this.table = new TableIdentifier(getObjectName(), catalogSeparator, schemaSeparator);
-		}
+    if (getObjectName() != null)
+    {
+      this.table = new TableIdentifier(getObjectName(), catalogSeparator, schemaSeparator);
+    }
   }
 
-	public final TableIdentifier getTable()
-	{
-		return this.table;
-	}
+  public final TableIdentifier getTable()
+  {
+    return this.table;
+  }
 
-	/**
-	 * Compares the given name to this TableAlias checking
-	 * if the name either references this table or its alias
-	 */
-	public boolean isTableOrAlias(String name, char catalogSeparator, char schemaSeparator)
-	{
-		if (StringUtil.isEmptyString(name))
-		{
-			return false;
-		}
+  /**
+   * Compares the given name to this TableAlias checking
+   * if the name either references this table or its alias
+   */
+  public boolean isTableOrAlias(String name, char catalogSeparator, char schemaSeparator)
+  {
+    if (StringUtil.isEmptyString(name))
+    {
+      return false;
+    }
 
-		TableIdentifier tbl = new TableIdentifier(name, catalogSeparator, schemaSeparator);
-		return (table.getTableName().equalsIgnoreCase(tbl.getTableName()) || name.equalsIgnoreCase(getAlias()));
-	}
+    TableIdentifier tbl = new TableIdentifier(name, catalogSeparator, schemaSeparator);
+    return (table.getTableName().equalsIgnoreCase(tbl.getTableName()) || name.equalsIgnoreCase(getAlias()));
+  }
 }

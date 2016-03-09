@@ -40,88 +40,88 @@ import static workbench.db.exporter.BlobMode.*;
  */
 public class BlobDecoder
 {
-	public File baseDir;
-	public BlobMode mode;
+  public File baseDir;
+  public BlobMode mode;
 
-	public BlobDecoder()
-	{
-		mode = BlobMode.SaveToFile;
-	}
+  public BlobDecoder()
+  {
+    mode = BlobMode.SaveToFile;
+  }
 
-	public void setBlobMode(BlobMode bmode)
-	{
-		mode = bmode;
-	}
+  public void setBlobMode(BlobMode bmode)
+  {
+    mode = bmode;
+  }
 
-	public void setBaseDir(File dir)
-	{
-		baseDir = dir;
-	}
+  public void setBaseDir(File dir)
+  {
+    baseDir = dir;
+  }
 
-	public Object decodeBlob(String value)
-		throws IOException
-	{
-		if (StringUtil.isEmptyString(value)) return null;
+  public Object decodeBlob(String value)
+    throws IOException
+  {
+    if (StringUtil.isEmptyString(value)) return null;
 
-		switch (mode)
-		{
-			case SaveToFile:
-				File bfile = new File(value.trim());
-				if (!bfile.isAbsolute() && baseDir != null)
-				{
-					bfile = new File(value.trim());
-				}
-				return bfile;
+    switch (mode)
+    {
+      case SaveToFile:
+        File bfile = new File(value.trim());
+        if (!bfile.isAbsolute() && baseDir != null)
+        {
+          bfile = new File(value.trim());
+        }
+        return bfile;
 
-			case Base64:
-				return DatatypeConverter.parseBase64Binary(value);
+      case Base64:
+        return DatatypeConverter.parseBase64Binary(value);
 
-			case AnsiLiteral:
-				return decodeHex(value);
-		}
-		return value;
-	}
+      case AnsiLiteral:
+        return decodeHex(value);
+    }
+    return value;
+  }
 
-	public byte[] decodeString(String value, BlobLiteralType type)
-		throws IOException
-	{
-		if (StringUtil.isEmptyString(value)) return null;
-		if (type == BlobLiteralType.base64)
-		{
-			return DatatypeConverter.parseBase64Binary(value);
-		}
-		else if (type == BlobLiteralType.octal)
-		{
-			return decodeOctal(value);
-		}
-		else if (type == BlobLiteralType.hex)
-		{
-			return decodeHex(value);
-		}
-		throw new IllegalArgumentException("BlobLiteralType " + type + " not supported");
-	}
+  public byte[] decodeString(String value, BlobLiteralType type)
+    throws IOException
+  {
+    if (StringUtil.isEmptyString(value)) return null;
+    if (type == BlobLiteralType.base64)
+    {
+      return DatatypeConverter.parseBase64Binary(value);
+    }
+    else if (type == BlobLiteralType.octal)
+    {
+      return decodeOctal(value);
+    }
+    else if (type == BlobLiteralType.hex)
+    {
+      return decodeHex(value);
+    }
+    throw new IllegalArgumentException("BlobLiteralType " + type + " not supported");
+  }
 
-	private byte[] decodeOctal(String value)
-		throws IOException
-	{
-		byte[] result = new byte[value.length() / 4];
-		for (int i = 0; i < result.length; i++)
-		{
-			String digit = value.substring((i*4)+1, (i*4)+ 4);
-			byte b = (byte)Integer.parseInt(digit, 8);
-			result[i] = b;
-		}
-		return result;
-	}
+  private byte[] decodeOctal(String value)
+    throws IOException
+  {
+    byte[] result = new byte[value.length() / 4];
+    for (int i = 0; i < result.length; i++)
+    {
+      String digit = value.substring((i*4)+1, (i*4)+ 4);
+      byte b = (byte)Integer.parseInt(digit, 8);
+      result[i] = b;
+    }
+    return result;
+  }
 
-	private byte[] decodeHex(String value)
-	{
-		int offset = 0;
+  private byte[] decodeHex(String value)
+  {
+    int offset = 0;
     int len = value.length();
-		if (value.toLowerCase().startsWith("0x"))
-		{
-			offset = 2;
-		}
+    if (value.toLowerCase().startsWith("0x"))
+    {
+      offset = 2;
+    }
     else if (value.toLowerCase().startsWith("x'"))
     {
       // ANSI BLOB literal X'ff...00'
@@ -129,14 +129,14 @@ public class BlobDecoder
       len --;
     }
 
-		byte[] result = new byte[(len - offset) / 2];
+    byte[] result = new byte[(len - offset) / 2];
 
-		for (int i = 0; i < result.length; i++)
-		{
-			String digit = value.substring((i*2)+offset, (i*2) + 2 + offset);
-			byte b = (byte)Integer.parseInt(digit, 16);
-			result[i] = b;
-		}
-		return result;
-	}
+    for (int i = 0; i < result.length; i++)
+    {
+      String digit = value.substring((i*2)+offset, (i*2) + 2 + offset);
+      byte b = (byte)Integer.parseInt(digit, 16);
+      result[i] = b;
+    }
+    return result;
+  }
 }

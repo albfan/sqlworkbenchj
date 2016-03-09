@@ -28,6 +28,6 @@ package workbench.util;
  */
 public interface WbCipher
 {
-	String decryptString(String aValue);
-	String encryptString(String aValue);
+  String decryptString(String aValue);
+  String encryptString(String aValue);
 }

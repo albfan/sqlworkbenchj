@@ -46,115 +46,115 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class OracleRowDataReader
-	extends RowDataReader
+  extends RowDataReader
 {
-	private Method stringValue;
+  private Method stringValue;
 
-	private Connection sqlConnection;
-	private SimpleDateFormat tsParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	private final Set<String> tsClasses = new HashSet<>(3);
+  private Connection sqlConnection;
+  private SimpleDateFormat tsParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+  private final Set<String> tsClasses = new HashSet<>(3);
 
-	public OracleRowDataReader(ResultInfo info, WbConnection conn)
-		throws ClassNotFoundException
-	{
-		super(info, conn);
-		sqlConnection = conn.getSqlConnection();
+  public OracleRowDataReader(ResultInfo info, WbConnection conn)
+    throws ClassNotFoundException
+  {
+    super(info, conn);
+    sqlConnection = conn.getSqlConnection();
 
-		// TODO: do I also need to convert TIMESTAMP WITH LOCAL TIME ZONE (oracle.sql.TIMESTAMPTLZ)?
-		tsClasses.add("oracle.sql.TIMESTAMPTZ");
+    // TODO: do I also need to convert TIMESTAMP WITH LOCAL TIME ZONE (oracle.sql.TIMESTAMPTLZ)?
+    tsClasses.add("oracle.sql.TIMESTAMPTZ");
 
-		// we cannot have any "hardcoded" references to the Oracle classes
-		// because that will throw a ClassNotFoundException as those classes were loaded through a different class loader.
-		// Therefor I need to use reflection to access the stringValue() method
-		try
-		{
-			Class oraDatum = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.Datum");
-			stringValue= oraDatum.getMethod("stringValue", java.sql.Connection.class);
-		}
-		catch (Throwable t)
-		{
-			LogMgr.logError("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum class", t);
-			throw new ClassNotFoundException("TIMESTAMPTZ");
-		}
-	}
+    // we cannot have any "hardcoded" references to the Oracle classes
+    // because that will throw a ClassNotFoundException as those classes were loaded through a different class loader.
+    // Therefor I need to use reflection to access the stringValue() method
+    try
+    {
+      Class oraDatum = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.Datum");
+      stringValue= oraDatum.getMethod("stringValue", java.sql.Connection.class);
+    }
+    catch (Throwable t)
+    {
+      LogMgr.logError("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum class", t);
+      throw new ClassNotFoundException("TIMESTAMPTZ");
+    }
+  }
 
-	@Override
-	protected Object readTimestampValue(ResultSet rs, int column)
-		throws SQLException
-	{
-		Object value = rs.getObject(column);
+  @Override
+  protected Object readTimestampValue(ResultSet rs, int column)
+    throws SQLException
+  {
+    Object value = rs.getObject(column);
 
-		if (value == null) return null;
-		if (rs.wasNull()) return null;
+    if (value == null) return null;
+    if (rs.wasNull()) return null;
 
-		if (tsClasses.contains(value.getClass().getName()))
-		{
-			return adjustTIMESTAMP(value);
-		}
+    if (tsClasses.contains(value.getClass().getName()))
+    {
+      return adjustTIMESTAMP(value);
+    }
 
-		if (value instanceof java.sql.Timestamp)
-		{
-			return value;
-		}
-		return rs.getTimestamp(column);
-	}
+    if (value instanceof java.sql.Timestamp)
+    {
+      return value;
+    }
+    return rs.getTimestamp(column);
+  }
 
-	private Object adjustTIMESTAMP(Object tz)
-	{
-		try
-		{
-			String tsValue = (String) stringValue.invoke(tz, sqlConnection);
+  private Object adjustTIMESTAMP(Object tz)
+  {
+    try
+    {
+      String tsValue = (String) stringValue.invoke(tz, sqlConnection);
 
-			// SimpleDateFormat doesn't support more than 3 digits for milliseconds
-			// Oracle returns 6 digits, e.g: 2015-01-26 11:42:46.894119 Europe/Berlin
-			// apparently SimpleDateFormat does some strange rounding there and will return
-			// the above timestamp as 11:57:40.119
-			// so we need to strip the additional milliseconds
-			// and the timezone name as Java can't handle that either.
+      // SimpleDateFormat doesn't support more than 3 digits for milliseconds
+      // Oracle returns 6 digits, e.g: 2015-01-26 11:42:46.894119 Europe/Berlin
+      // apparently SimpleDateFormat does some strange rounding there and will return
+      // the above timestamp as 11:57:40.119
+      // so we need to strip the additional milliseconds
+      // and the timezone name as Java can't handle that either.
 
-			String cleanValue = cleanupTSValue(tsValue);
+      String cleanValue = cleanupTSValue(tsValue);
 
-			// this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
-			// but otherwise the displayed time would be totally wrong.
-			java.util.Date date = tsParser.parse(cleanValue);
-			Timestamp ts = new java.sql.Timestamp(date.getTime());
+      // this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
+      // but otherwise the displayed time would be totally wrong.
+      java.util.Date date = tsParser.parse(cleanValue);
+      Timestamp ts = new java.sql.Timestamp(date.getTime());
 
       // TODO: extract the stripped nanoseconds from the passed object
       // and set them in the Timestamp instance using setNanos();
-			return ts;
-		}
-		catch (Throwable ex)
-		{
-			LogMgr.logDebug("OracleRowDataReader.adjustTIMESTAMP()", "Could not read timestamp", ex);
-		}
-		return tz;
-	}
+      return ts;
+    }
+    catch (Throwable ex)
+    {
+      LogMgr.logDebug("OracleRowDataReader.adjustTIMESTAMP()", "Could not read timestamp", ex);
+    }
+    return tz;
+  }
 
-	public static String cleanupTSValue(String tsValue)
-	{
-		int len = tsValue.length();
-		if (len < 19)
-		{
-			return tsValue;
-		}
-		int msPos = tsValue.indexOf('.');
-		int end = -1;
-		if (msPos == 19)
-		{
-			end = tsValue.indexOf(' ', msPos);
-		}
-		else
-		{
-			// no milliseconds, find the timezone name
-			end = tsValue.indexOf(' ', 12);
-		}
+  public static String cleanupTSValue(String tsValue)
+  {
+    int len = tsValue.length();
+    if (len < 19)
+    {
+      return tsValue;
+    }
+    int msPos = tsValue.indexOf('.');
+    int end = -1;
+    if (msPos == 19)
+    {
+      end = tsValue.indexOf(' ', msPos);
+    }
+    else
+    {
+      // no milliseconds, find the timezone name
+      end = tsValue.indexOf(' ', 12);
+    }
 
-		end = Math.min(len, 23);
+    end = Math.min(len, 23);
 
-		if (end < len)
-		{
-			tsValue = tsValue.substring(0, end);
-		}
-		return tsValue;
-	}
+    if (end < len)
+    {
+      tsValue = tsValue.substring(0, end);
+    }
+    return tsValue;
+  }
 }

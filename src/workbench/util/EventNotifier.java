@@ -33,48 +33,48 @@ import workbench.interfaces.EventDisplay;
  */
 public class EventNotifier
 {
-	private List<EventDisplay> displayClients = new LinkedList<>();
-	private NotifierEvent lastEvent = null;
-	private static EventNotifier instance = new EventNotifier();
+  private List<EventDisplay> displayClients = new LinkedList<>();
+  private NotifierEvent lastEvent = null;
+  private static EventNotifier instance = new EventNotifier();
 
-	private EventNotifier()
-	{
-	}
+  private EventNotifier()
+  {
+  }
 
-	public static EventNotifier getInstance()
-	{
-		return instance;
-	}
+  public static EventNotifier getInstance()
+  {
+    return instance;
+  }
 
-	public synchronized void addEventDisplay(EventDisplay d)
-	{
-		displayClients.add(d);
-		if (this.lastEvent != null)
-		{
-			d.showAlert(lastEvent);
-		}
-	}
+  public synchronized void addEventDisplay(EventDisplay d)
+  {
+    displayClients.add(d);
+    if (this.lastEvent != null)
+    {
+      d.showAlert(lastEvent);
+    }
+  }
 
-	public synchronized void removeEventDisplay(EventDisplay d)
-	{
-		displayClients.remove(d);
-	}
+  public synchronized void removeEventDisplay(EventDisplay d)
+  {
+    displayClients.remove(d);
+  }
 
-	public synchronized void displayNotification(NotifierEvent e)
-	{
-		this.lastEvent = e;
-		for (EventDisplay d : displayClients)
-		{
-			d.showAlert(e);
-		}
-	}
+  public synchronized void displayNotification(NotifierEvent e)
+  {
+    this.lastEvent = e;
+    for (EventDisplay d : displayClients)
+    {
+      d.showAlert(e);
+    }
+  }
 
-	public synchronized void removeNotification()
-	{
-		for (EventDisplay d : displayClients)
-		{
-			d.removeAlert();
-		}
-	}
+  public synchronized void removeNotification()
+  {
+    for (EventDisplay d : displayClients)
+    {
+      d.removeAlert();
+    }
+  }
 
 }

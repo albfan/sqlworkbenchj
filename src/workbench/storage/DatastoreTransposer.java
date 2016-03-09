@@ -42,90 +42,90 @@ import workbench.util.SqlUtil;
  */
 public class DatastoreTransposer
 {
-	private DataStore source;
-	private String resultName;
-	private final Set<String> excludeColumns = CollectionUtil.caseInsensitiveSet();
+  private DataStore source;
+  private String resultName;
+  private final Set<String> excludeColumns = CollectionUtil.caseInsensitiveSet();
 
-	public DatastoreTransposer(DataStore sourceData)
-	{
-		this.source = sourceData;
-		retrieveResultName();
-	}
+  public DatastoreTransposer(DataStore sourceData)
+  {
+    this.source = sourceData;
+    retrieveResultName();
+  }
 
-	public void setColumnsToExclude(Collection<String> toExclude)
-	{
-		excludeColumns.clear();
-		for (String colname : toExclude)
-		{
-			if (source.getColumnIndex(colname) > -1)
-			{
-				excludeColumns.add(colname);
-			}
-		}
-	}
+  public void setColumnsToExclude(Collection<String> toExclude)
+  {
+    excludeColumns.clear();
+    for (String colname : toExclude)
+    {
+      if (source.getColumnIndex(colname) > -1)
+      {
+        excludeColumns.add(colname);
+      }
+    }
+  }
 
-	private void retrieveResultName()
-	{
-		if (source == null)
-		{
-			resultName = "";
-			return;
-		}
-		resultName = source.getResultName();
-		if (resultName == null)
-		{
-			String sql = source.getGeneratingSql();
-			List<Alias> tables = SqlUtil.getTables(sql, false, source.getOriginalConnection());
-			if (tables.size() == 1)
-			{
-				resultName = tables.get(0).getObjectName();
-			}
-		}
-	}
+  private void retrieveResultName()
+  {
+    if (source == null)
+    {
+      resultName = "";
+      return;
+    }
+    resultName = source.getResultName();
+    if (resultName == null)
+    {
+      String sql = source.getGeneratingSql();
+      List<Alias> tables = SqlUtil.getTables(sql, false, source.getOriginalConnection());
+      if (tables.size() == 1)
+      {
+        resultName = tables.get(0).getObjectName();
+      }
+    }
+  }
 
-	public DataStore transposeRows(int[] rows)
-	{
-		if (rows == null || rows.length == 0) return null;
+  public DataStore transposeRows(int[] rows)
+  {
+    if (rows == null || rows.length == 0) return null;
 
-		String[] columns = new String[rows.length + 1];
-		int[] types = new int[rows.length + 1];
+    String[] columns = new String[rows.length + 1];
+    int[] types = new int[rows.length + 1];
 
-		columns[0] = ResourceMgr.getString("TxtColumnName");
-		types[0] = Types.VARCHAR;
+    columns[0] = ResourceMgr.getString("TxtColumnName");
+    types[0] = Types.VARCHAR;
 
-		for (int i=0; i < rows.length; i++)
-		{
-			columns[i+1] = ResourceMgr.getString("TxtRow") + " " + NumberStringCache.getNumberString(rows[i] + 1);
-			types[i+1] = Types.VARCHAR;
-		}
+    for (int i=0; i < rows.length; i++)
+    {
+      columns[i+1] = ResourceMgr.getString("TxtRow") + " " + NumberStringCache.getNumberString(rows[i] + 1);
+      types[i+1] = Types.VARCHAR;
+    }
 
-		DataStore ds = new DataStore(columns, types);
+    DataStore ds = new DataStore(columns, types);
 
-		int colCount = source.getColumnCount();
-		for (int i=0; i < colCount  - excludeColumns.size(); i++)
-		{
-			ds.addRow();
-		}
+    int colCount = source.getColumnCount();
+    for (int i=0; i < colCount  - excludeColumns.size(); i++)
+    {
+      ds.addRow();
+    }
 
-		for (int ix=0; ix < rows.length; ix++)
-		{
-			int sourceRow = rows[ix];
-			int colRow = 0;
+    for (int ix=0; ix < rows.length; ix++)
+    {
+      int sourceRow = rows[ix];
+      int colRow = 0;
 
-			for (int col=0; col < colCount; col ++)
-			{
-				String colDisplay = source.getColumnDisplayName(col);
-				if (!excludeColumns.contains(colDisplay))
-				{
-					ds.setValue(colRow, 0, colDisplay);
-					ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, col));
-					colRow ++;
-				}
-			}
-		}
-		ds.setResultName("<[ " + resultName + " ]>");
-		ds.resetStatus();
-		return ds;
-	}
+      for (int col=0; col < colCount; col ++)
+      {
+        String colDisplay = source.getColumnDisplayName(col);
+        if (!excludeColumns.contains(colDisplay))
+        {
+          ds.setValue(colRow, 0, colDisplay);
+          ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, col));
+          colRow ++;
+        }
+      }
+    }
+    ds.setResultName("<[ " + resultName + " ]>");
+    ds.resetStatus();
+    return ds;
+  }
 
 }

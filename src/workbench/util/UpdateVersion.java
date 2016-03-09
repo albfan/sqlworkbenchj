@@ -29,7 +29,7 @@ package workbench.util;
  */
 public enum UpdateVersion
 {
-	devBuild,
-	stable,
-	none;
+  devBuild,
+  stable,
+  none;
 }

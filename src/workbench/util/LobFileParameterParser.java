@@ -36,68 +36,68 @@ import java.util.regex.Pattern;
  */
 public class LobFileParameterParser
 {
-	private final String MARKER = "\\{\\$[cb]lobfile=";
-	private final Pattern MARKER_PATTERN = Pattern.compile(MARKER, Pattern.CASE_INSENSITIVE);
-	private LobFileParameter[] parameters;
-	private int parameterCount = 0;
+  private final String MARKER = "\\{\\$[cb]lobfile=";
+  private final Pattern MARKER_PATTERN = Pattern.compile(MARKER, Pattern.CASE_INSENSITIVE);
+  private LobFileParameter[] parameters;
+  private int parameterCount = 0;
 
-	public LobFileParameterParser(String sql)
-		throws FileNotFoundException
-	{
-		Matcher m = MARKER_PATTERN.matcher(sql);
-		if (!m.find())
-		{
-			return;
-		}
+  public LobFileParameterParser(String sql)
+    throws FileNotFoundException
+  {
+    Matcher m = MARKER_PATTERN.matcher(sql);
+    if (!m.find())
+    {
+      return;
+    }
 
-		// Calculate number of parameters
-		parameterCount++;
-		while (m.find())
-		{
-			parameterCount++;
-		}
-		m.reset();
-		parameters = new LobFileParameter[parameterCount];
-		int index = 0;
-		WbStringTokenizer tok = new WbStringTokenizer(" \t", false, "\"'", false);
+    // Calculate number of parameters
+    parameterCount++;
+    while (m.find())
+    {
+      parameterCount++;
+    }
+    m.reset();
+    parameters = new LobFileParameter[parameterCount];
+    int index = 0;
+    WbStringTokenizer tok = new WbStringTokenizer(" \t", false, "\"'", false);
 
-		while (m.find())
-		{
-			int start = m.start();
-			int end = sql.indexOf('}', start + 1);
-			if (end > -1)
-			{
-				String parm = sql.substring(start + 2, end);
-				tok.setSourceString(parm);
-				parameters[index] = new LobFileParameter();
-				while (tok.hasMoreTokens())
-				{
-					String s = tok.nextToken();
-					String arg = null;
-					String value = null;
-					int pos = s.indexOf('=');
-					if (pos > -1)
-					{
-						arg = s.substring(0, pos);
-						value = s.substring(pos + 1);
-					}
-					if ("encoding".equals(arg))
-					{
-						parameters[index].setEncoding(value);
-					}
-					else
-					{
-						parameters[index].setFilename(value);
-						parameters[index].setBinary("blobfile".equals(arg));
-					}
-				}
-			}
-			index++;
-		}
-	}
+    while (m.find())
+    {
+      int start = m.start();
+      int end = sql.indexOf('}', start + 1);
+      if (end > -1)
+      {
+        String parm = sql.substring(start + 2, end);
+        tok.setSourceString(parm);
+        parameters[index] = new LobFileParameter();
+        while (tok.hasMoreTokens())
+        {
+          String s = tok.nextToken();
+          String arg = null;
+          String value = null;
+          int pos = s.indexOf('=');
+          if (pos > -1)
+          {
+            arg = s.substring(0, pos);
+            value = s.substring(pos + 1);
+          }
+          if ("encoding".equals(arg))
+          {
+            parameters[index].setEncoding(value);
+          }
+          else
+          {
+            parameters[index].setFilename(value);
+            parameters[index].setBinary("blobfile".equals(arg));
+          }
+        }
+      }
+      index++;
+    }
+  }
 
-	public LobFileParameter[] getParameters()
-	{
-		return parameters;
-	}
+  public LobFileParameter[] getParameters()
+  {
+    return parameters;
+  }
 }

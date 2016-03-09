@@ -34,38 +34,38 @@ import workbench.interfaces.ValueProvider;
  * @author Thomas Kellerer
  */
 public class DataStoreValueProvider
-	implements ValueProvider
+  implements ValueProvider
 {
-	private DataStore data;
+  private DataStore data;
 
-	public DataStoreValueProvider(DataStore data)
-	{
-		this.data = data;
-	}
+  public DataStoreValueProvider(DataStore data)
+  {
+    this.data = data;
+  }
 
-	@Override
-	public ResultInfo getResultInfo()
-	{
-		return data.getResultInfo();
-	}
+  @Override
+  public ResultInfo getResultInfo()
+  {
+    return data.getResultInfo();
+  }
 
-	@Override
-	public Collection<String> getColumnValues(String columnName)
-	{
-		int rowCount = data.getRowCount();
-		Set<String> result = new TreeSet<>();
-		int col = data.getColumnIndex(columnName);
-		if (col < 0) return result;
+  @Override
+  public Collection<String> getColumnValues(String columnName)
+  {
+    int rowCount = data.getRowCount();
+    Set<String> result = new TreeSet<>();
+    int col = data.getColumnIndex(columnName);
+    if (col < 0) return result;
 
-		for (int row=0; row < rowCount; row ++)
-		{
-			String value = data.getValueAsString(row, columnName);
-			if (value != null)
-			{
-				result.add(value);
-			}
-		}
-		return result;
-	}
+    for (int row=0; row < rowCount; row ++)
+    {
+      String value = data.getValueAsString(row, columnName);
+      if (value != null)
+      {
+        result.add(value);
+      }
+    }
+    return result;
+  }
 
 }

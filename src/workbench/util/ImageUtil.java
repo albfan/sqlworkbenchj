@@ -41,166 +41,166 @@ import workbench.resource.Settings;
  */
 public class ImageUtil
 {
-	public enum GifType
-	{
-		Standard,
-		Animated,
-		None;
-	}
+  public enum GifType
+  {
+    Standard,
+    Animated,
+    None;
+  }
 
-	public static boolean isPng(File image)
-	{
-		if (image == null) return false;
-		if (!image.exists()) return false;
+  public static boolean isPng(File image)
+  {
+    if (image == null) return false;
+    if (!image.exists()) return false;
 
-		boolean valid = false;
-		InputStream in = null;
+    boolean valid = false;
+    InputStream in = null;
 
-		try
-		{
-			in = new FileInputStream(image);
-			byte[] header = new byte[] {(byte)137, 80, 78, 71, 13, 10, 26, 10};
-			byte[] buffer = new byte[header.length];
+    try
+    {
+      in = new FileInputStream(image);
+      byte[] header = new byte[] {(byte)137, 80, 78, 71, 13, 10, 26, 10};
+      byte[] buffer = new byte[header.length];
 
-			in.read(buffer, 0, header.length);
-			valid = Arrays.equals(header, buffer);
-		}
-		catch (Throwable th)
-		{
-			valid = false;
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-		return valid;
-	}
+      in.read(buffer, 0, header.length);
+      valid = Arrays.equals(header, buffer);
+    }
+    catch (Throwable th)
+    {
+      valid = false;
+    }
+    finally
+    {
+      FileUtil.closeQuietely(in);
+    }
+    return valid;
+  }
 
-	public static boolean isGifIcon(File file)
-	{
-		return getGifType(file) == GifType.Standard;
-	}
+  public static boolean isGifIcon(File file)
+  {
+    return getGifType(file) == GifType.Standard;
+  }
 
-	/**
-	 * Returns the type of an GIF image.
-	 *
-	 * Taken from: https://forums.oracle.com/thread/1270979
-	 *
-	 * @param file  the file to check
-	 * @return the type of the GIF image
-	 */
-	public static GifType getGifType(File file)
-	{
-		byte[] version = new byte[3];
-		InputStream in = null;
-		GifType result = GifType.None;
+  /**
+   * Returns the type of an GIF image.
+   *
+   * Taken from: https://forums.oracle.com/thread/1270979
+   *
+   * @param file  the file to check
+   * @return the type of the GIF image
+   */
+  public static GifType getGifType(File file)
+  {
+    byte[] version = new byte[3];
+    InputStream in = null;
+    GifType result = GifType.None;
 
-		try
-		{
-			in = new BufferedInputStream(new FileInputStream(file));
+    try
+    {
+      in = new BufferedInputStream(new FileInputStream(file));
 
-			// Read the GIF header and check if the file is a GIF file
-			in.read(version, 0, 3);
+      // Read the GIF header and check if the file is a GIF file
+      in.read(version, 0, 3);
 
-			byte[] gif = new byte[] { 0x47, 0x49, 0x46 }; // "GIF"
+      byte[] gif = new byte[] { 0x47, 0x49, 0x46 }; // "GIF"
 
-			if (Arrays.equals(version, gif))
-			{
-				result = GifType.Standard;
+      if (Arrays.equals(version, gif))
+      {
+        result = GifType.Standard;
 
-				int numberOfExtension = 0;
-				boolean extensionIntro = false;
+        int numberOfExtension = 0;
+        boolean extensionIntro = false;
 
-				int value = in.read();
+        int value = in.read();
 
-				// Read until the EOF or if extensions are > 2
-				// We try to detect the Graphic Control Extension, beginning with 0x21 0xF9
-				while (value != -1 && numberOfExtension < 2)
-				{
-					if (value == 0x21)
-					{
-						extensionIntro = true;
-					}
-					else if (value == 0xF9 && extensionIntro)
-					{
-						numberOfExtension++;
-						extensionIntro = false;
-					}
-					else
-					{
-						extensionIntro = false;
-					}
-					value = in.read();
-				}
+        // Read until the EOF or if extensions are > 2
+        // We try to detect the Graphic Control Extension, beginning with 0x21 0xF9
+        while (value != -1 && numberOfExtension < 2)
+        {
+          if (value == 0x21)
+          {
+            extensionIntro = true;
+          }
+          else if (value == 0xF9 && extensionIntro)
+          {
+            numberOfExtension++;
+            extensionIntro = false;
+          }
+          else
+          {
+            extensionIntro = false;
+          }
+          value = in.read();
+        }
 
-				if (numberOfExtension > 1)
-				{
-					result = GifType.Animated;
-				}
-			}
-		}
-		catch (Throwable th)
-		{
-			result = GifType.None;
-		}
-		finally
-		{
-			FileUtil.closeQuietely(in);
-		}
-		return result;
-	}
+        if (numberOfExtension > 1)
+        {
+          result = GifType.Animated;
+        }
+      }
+    }
+    catch (Throwable th)
+    {
+      result = GifType.None;
+    }
+    finally
+    {
+      FileUtil.closeQuietely(in);
+    }
+    return result;
+  }
 
-	/**
-	 * Extracts the filenames from the given (path-like) list of files and checks
-	 * if they reference valid (usable) icon files.
-	 *
-	 * @see #isPng(java.io.File)
-	 * @see #isGifIcon(java.io.File)
-	 *
-	 * @return a list of valid icon files, never null
-	 *
-	 */
-	public static List<File> getIcons(String iconList)
-	{
-		List<File> iconFiles = new ArrayList<>(2);
-		if (StringUtil.isBlank(iconList)) return iconFiles;
+  /**
+   * Extracts the filenames from the given (path-like) list of files and checks
+   * if they reference valid (usable) icon files.
+   *
+   * @see #isPng(java.io.File)
+   * @see #isGifIcon(java.io.File)
+   *
+   * @return a list of valid icon files, never null
+   *
+   */
+  public static List<File> getIcons(String iconList)
+  {
+    List<File> iconFiles = new ArrayList<>(2);
+    if (StringUtil.isBlank(iconList)) return iconFiles;
 
-		try
-		{
-			List<String> fileNames = StringUtil.stringToList(iconList, System.getProperty("path.separator"));
-			File jarDir = WbManager.getInstance().getJarFile().getParentFile();
-			File confDir = Settings.getInstance().getConfigDir();
+    try
+    {
+      List<String> fileNames = StringUtil.stringToList(iconList, System.getProperty("path.separator"));
+      File jarDir = WbManager.getInstance().getJarFile().getParentFile();
+      File confDir = Settings.getInstance().getConfigDir();
 
-			for (String fname : fileNames)
-			{
-				if (StringUtil.isNonEmpty(fname))
-				{
-					File f = new File(fname);
-					if (!f.isAbsolute())
-					{
-						f = new File(jarDir, fname);
-						if (!f.exists())
-						{
-							f = new File(confDir, fname);
-						}
-					}
-					if (ImageUtil.isPng(f) || ImageUtil.isGifIcon(f))
-					{
-						iconFiles.add(f);
-					}
-					else
-					{
-						LogMgr.logWarning("ImageUtil.getIcons()", "Ignoring invalid icon file: " + f.getAbsolutePath());
-					}
-				}
-			}
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("ImageUtil.getIcons()", "Could not retrieve list of icon files", e);
-			iconFiles.clear();
-		}
-		return iconFiles;
-	}
+      for (String fname : fileNames)
+      {
+        if (StringUtil.isNonEmpty(fname))
+        {
+          File f = new File(fname);
+          if (!f.isAbsolute())
+          {
+            f = new File(jarDir, fname);
+            if (!f.exists())
+            {
+              f = new File(confDir, fname);
+            }
+          }
+          if (ImageUtil.isPng(f) || ImageUtil.isGifIcon(f))
+          {
+            iconFiles.add(f);
+          }
+          else
+          {
+            LogMgr.logWarning("ImageUtil.getIcons()", "Ignoring invalid icon file: " + f.getAbsolutePath());
+          }
+        }
+      }
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("ImageUtil.getIcons()", "Could not retrieve list of icon files", e);
+      iconFiles.clear();
+    }
+    return iconFiles;
+  }
 
 }

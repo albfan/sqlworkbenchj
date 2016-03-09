@@ -30,63 +30,63 @@ import java.util.List;
  * @author Thomas Kellerer
  */
 public class FixedLengthLineParser
-	implements LineParser
+  implements LineParser
 {
-	private int currentColIndex;
-	private int[] widths;
-	private String line;
-	private int currentLineIndex;
+  private int currentColIndex;
+  private int[] widths;
+  private String line;
+  private int currentLineIndex;
   private boolean trimValues  = false;
 
-	public FixedLengthLineParser(List<Integer> colWidths)
-	{
-		if (colWidths == null)
-		{
-			throw new IllegalArgumentException("Column widths may not be null");
-		}
-		this.widths = new int[colWidths.size()];
-		for (int i=0; i < colWidths.size(); i++)
-		{
-			this.widths[i] = colWidths.get(i).intValue();
-		}
-	}
+  public FixedLengthLineParser(List<Integer> colWidths)
+  {
+    if (colWidths == null)
+    {
+      throw new IllegalArgumentException("Column widths may not be null");
+    }
+    this.widths = new int[colWidths.size()];
+    for (int i=0; i < colWidths.size(); i++)
+    {
+      this.widths[i] = colWidths.get(i).intValue();
+    }
+  }
 
-	@Override
-	public void setTrimValues(boolean flag)
-	{
-		this.trimValues = flag;
-	}
+  @Override
+  public void setTrimValues(boolean flag)
+  {
+    this.trimValues = flag;
+  }
 
-	@Override
-	public void setLine(String newLine)
-	{
-		this.line = newLine;
-		this.currentColIndex = 0;
-		this.currentLineIndex = 0;
-	}
+  @Override
+  public void setLine(String newLine)
+  {
+    this.line = newLine;
+    this.currentColIndex = 0;
+    this.currentLineIndex = 0;
+  }
 
-	@Override
-	public boolean hasNext()
-	{
-		return currentColIndex < widths.length;
-	}
+  @Override
+  public boolean hasNext()
+  {
+    return currentColIndex < widths.length;
+  }
 
-	@Override
-	public String getNext()
-	{
-		if (!hasNext())
-		{
-			return null;
-		}
-		int end = currentLineIndex + widths[currentColIndex];
-		if (end > line.length())
-		{
-			end = line.length();
-		}
-		String result = line.substring(currentLineIndex, end);
-		currentLineIndex += widths[currentColIndex];
-		currentColIndex++;
-		if (trimValues) return result.trim();
-		return result;
-	}
+  @Override
+  public String getNext()
+  {
+    if (!hasNext())
+    {
+      return null;
+    }
+    int end = currentLineIndex + widths[currentColIndex];
+    if (end > line.length())
+    {
+      end = line.length();
+    }
+    String result = line.substring(currentLineIndex, end);
+    currentLineIndex += widths[currentColIndex];
+    currentColIndex++;
+    if (trimValues) return result.trim();
+    return result;
+  }
 }
