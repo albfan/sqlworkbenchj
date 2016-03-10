@@ -229,8 +229,9 @@ public class DbExplorerPanel
 
 			this.toolbar = new WbToolbar();
 			this.toolbar.addDefaultBorder();
+      this.toolbar.setLayout(new BorderLayout());
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
-			this.toolbar.add(this.connectionInfo);
+			this.toolbar.add(this.connectionInfo, BorderLayout.CENTER);
 
       // this dummy button is used to calculate the height of the regular toolbar
       // to avoid the UI from "jumping" when switchting between a SQL tab and the DbExplorer
@@ -430,13 +431,9 @@ public class DbExplorerPanel
   {
     final List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter());
 
-    WbSwingUtilities.invoke(new Runnable()
+    WbSwingUtilities.invoke(() ->
     {
-      @Override
-      public void run()
-      {
-        _showSchemas(schemas, checkWorkspace);
-      }
+      _showSchemas(schemas, checkWorkspace);
     });
   }
 

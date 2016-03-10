@@ -30,7 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,7 +71,7 @@ public class MultiSelectComboBox<T extends Object>
 	private static final String PROP_KEY = "userObject";
 	private static final String ALL_ITEMS_SELECTED_DISPLAY = "*";
 	private static final EmptyBorder emptyBorder = new EmptyBorder(1,0,1,0);
-  
+
 	/** holds the index inside this combobox's items which represents the summary display. */
 	private int summaryIndex;
 
@@ -90,9 +89,10 @@ public class MultiSelectComboBox<T extends Object>
 
 	/**
 	 * The checkboxes that are displayed.
-	 * the actual item value is stored as a client properpty of the checkbox
+   *
+	 * The actual item value is stored as a client property of the checkbox.
 	 */
-	private final List<JCheckBox> values = Collections.synchronizedList(new ArrayList<JCheckBox>());
+	private final List<JCheckBox> values = new ArrayList<>();
 
 	private String nothingSelectedText;
 	private String selectAllLabel;
@@ -274,7 +274,7 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public int getSelectedCount()
 	{
-		if (values.isEmpty()) return 0;
+    if (CollectionUtil.isEmpty(values)) return 0;
 
 		synchronized (values)
 		{
@@ -299,7 +299,7 @@ public class MultiSelectComboBox<T extends Object>
 	public List<T> getSelectedItems()
 	{
 		List<T> ret = new ArrayList<>();
-		if (values.isEmpty()) return ret;
+		if (CollectionUtil.isEmpty(values)) return ret;
 
 		synchronized (values)
 		{

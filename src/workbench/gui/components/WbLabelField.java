@@ -87,6 +87,8 @@ public class WbLabelField
   @Override
   public void setText(String t)
   {
+    if (getFont() == null) return;
+    if (getFontMetrics(getFont()) == null) return;
     super.setText(t);
     setCaretPosition(0);
   }
@@ -94,6 +96,7 @@ public class WbLabelField
   public void useBoldFont()
   {
     Font std = getFont();
+    if (std == null) return;
     Font bold = std.deriveFont(Font.BOLD);
     setFont(bold);
   }
