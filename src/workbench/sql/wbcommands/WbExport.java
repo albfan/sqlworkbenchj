@@ -105,6 +105,7 @@ public class WbExport
 	public static final String ARG_CONTINUE_ON_ERROR = "continueOnError";
 	public static final String ARG_HEADER = "header";
 	public static final String ARG_TABLEWHERE = "tableWhere";
+	public static final String ARG_LOWERCASE_NAMES = "lowerCaseFilenames";
 
 	// spreadsheet options
 	public static final String ARG_ADD_INFOSHEET = "infoSheet";
@@ -173,6 +174,7 @@ public class WbExport
 
 		cmdLine.addArgument(ARG_EXPORT_TYPE, StringUtil.stringToList(exportTypes));
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
+		cmdLine.addArgument(ARG_LOWERCASE_NAMES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
 		cmdLine.addArgument(ARG_PAGE_TITLE);
 		cmdLine.addArgument(WbImport.ARG_SHEET_NAME);
@@ -904,6 +906,7 @@ public class WbExport
 		{
 			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, getIgnoreOwnerDefault());
       boolean useColumnList = cmdLine.getBoolean(ARG_RETRIEVE_COLUMN_INFO, currentConnection.getDbSettings().useColumnListInExport());
+      boolean lowerCase = cmdLine.getBoolean(ARG_LOWERCASE_NAMES, true);
 
 			String where = cmdLine.getValue(ARG_TABLEWHERE);
 			try
@@ -913,7 +916,7 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir, outputFile, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner, containerFileSupported, useColumnList);
+					exportTableList(tablesToExport, result, outputdir, outputFile, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner, containerFileSupported, useColumnList, lowerCase);
 				}
 				else
 				{
@@ -990,7 +993,7 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, File outfile, String prefix, String where, boolean ignoreOwner, boolean exporterSupportsContainers, boolean useColumnList)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, File outfile, String prefix, String where, boolean ignoreOwner, boolean exporterSupportsContainers, boolean useColumnList, boolean lowerCaseFilenames)
 		throws SQLException
 	{
 		result.setSuccess();
@@ -1037,7 +1040,7 @@ public class WbExport
 
 		for (TableIdentifier tbl : tableList)
 		{
-			String fname = StringUtil.makeFilename(ignoreOwner ? tbl.getTableName() : tbl.getTableExpression());
+			String fname = StringUtil.makeFilename(ignoreOwner ? tbl.getTableName() : tbl.getTableExpression(), lowerCaseFilenames);
 			WbFile f = null;
 			if (outdir == null)
 			{

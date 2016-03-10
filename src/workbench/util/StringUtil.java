@@ -449,17 +449,35 @@ public class StringUtil
   }
 
   /**
-   * Remove all characters  from the input string that might not be allowed in a filename.
+   * Remove all characters from the input string that might not be allowed in a filename.
+   *
    * @param input the value to be used as a filename
-   * @return input value without any characters that might not be allowed for a filename converted to lowercase
+   * @return input value without any characters invalid for a filename converted to lowercase
+   *
+   * @see #makeFilename(java.lang.String, boolean)
    */
   public static String makeFilename(String input)
+  {
+    return makeFilename(input, true);
+  }
+
+  /**
+   * Remove all characters from the input string that might not be allowed in a filename.
+   *
+   * @param input         the value to be used as a filename
+   * @param makeLowerCase if true the clean name will be returend in lowercase, otherwise unchanged
+   *
+   * @return input value without any characters invalid for a filename
+   */
+  public static String makeFilename(String input, boolean makeLowerCase)
   {
     if (input == null) return null;
     if (input.equals("..")) return "__";
     if (input.equals(".")) return "_";
-    return input.replaceAll("[\t:\\\\/\\?\\*\\|<>\"'%\u00A7\\^&\u0000]", EMPTY_STRING).toLowerCase();
+    String fname = input.replaceAll("[\t:\\\\/\\?\\*\\|<>\"'%\u00A7\\^&\u0000]", EMPTY_STRING);
+    return makeLowerCase ? fname.toLowerCase() : fname;
   }
+
 
   /**
    * Replacement for StringBuilder.lastIndexOf() which does
@@ -1033,7 +1051,7 @@ public class StringUtil
    *
    * @param input the string from which the quotes should be removed
    * @return the input with quotes removed
-   * @see SqlUtil#removeObjectQuotes(java.lang.String) 
+   * @see SqlUtil#removeObjectQuotes(java.lang.String)
    */
   public static String trimQuotes(String input)
   {

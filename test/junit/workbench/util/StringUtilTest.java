@@ -330,6 +330,15 @@ public class StringUtilTest
 
 		fname = StringUtil.makeFilename("TABLE_<>NAME");
 		assertEquals("table_name", fname);
+
+		fname = StringUtil.makeFilename("TABLE_<>NAME", false);
+		assertEquals("TABLE_NAME", fname);
+
+		fname = StringUtil.makeFilename("ProductDetails", false);
+		assertEquals("ProductDetails", fname);
+
+		fname = StringUtil.makeFilename("Produc:tDetails", false);
+		assertEquals("ProductDetails", fname);
 	}
 
 	@Test
