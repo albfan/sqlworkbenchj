@@ -53,8 +53,9 @@ import workbench.gui.components.WbToolbarButton;
 import workbench.util.StringUtil;
 
 /**
- * Base class for Actions in SQL Workbench/J
- * the actual work should be implemented in executeAction()
+ * Base class for Swing Actions in SQL Workbench/J.
+ *
+ * The actual work should be implemented in executeAction()
  * which is guaranteed to be called on the EDT.
  *
  * @author  Thomas Kellerer
@@ -230,11 +231,14 @@ public class WbAction
 	}
 
 	/**
-	 * Initialize the menu definition for this action. The passed key will
-	 * be used to initialize the menu label and tooltip.
+	 * Initialize the menu definition for this action.
+   *
+   * The passed key will be used to initialize the menu label and tooltip.
 	 * This method will register the action with the ShortcutManager even though
 	 * no shortcut is defined.
+   *
 	 * @param aKey Translation key for ResourceMgr
+   *
 	 * @see #setMenuTextByKey(String)
 	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
 	 */
@@ -247,8 +251,10 @@ public class WbAction
 	 * Initialize the menu definition for this action. The passed key will
 	 * be used to initialize the menu label and tooltip.
 	 * This method will register the action with the ShortcutManager.
+   *
 	 * @param aKey         Translation key for ResourceMgr
 	 * @param defaultKey   Default shortcut key, may be null
+   *
 	 * @see #setMenuTextByKey(String)
 	 * @see workbench.resource.ShortcutManager#registerAction(WbAction)
 	 */
@@ -547,11 +553,9 @@ public class WbAction
 
 	public void setIcon(String key)
 	{
-		// Just store the key for the resource manager
-		// the actual item will be retrieved when it's really
-		// needed in getValue()
-		// this will retrieve the icons "lazily" so not all
-		// of them are actually loaded during startup
+		// Only store the key for the resource manager, do not load the icon yet.
+		// the actual item will be retrieved when it's really needed in getValue()
+		// this will retrieve the icons lazily so not all of them are actually loaded during startup
 		this.iconKey = key;
 		if (key == null)
 		{
@@ -608,21 +612,17 @@ public class WbAction
 	{
 		if (isEnabled())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (original != null)
-					{
-						original.executeAction(e);
-					}
-					else
-					{
-						executeAction(e);
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (original != null)
+        {
+          original.executeAction(e);
+        }
+        else
+        {
+          executeAction(e);
+        }
+      });
 		}
 	}
 
@@ -712,17 +712,6 @@ public class WbAction
 
 	public void dispose()
 	{
-//		for (WeakReference<JMenuItem> ref : createdItems)
-//		{
-//			JMenuItem item = ref.get();
-//			if (item != null)
-//			{
-//				item.setAction(null);
-//				item.setIcon(null);
-//				item.removeAll();
-//			}
-//		}
-//		createdItems.clear();
 		delegate = null;
 		original = null;
 		proxy = null;
