@@ -137,7 +137,6 @@ public class DbExplorerPanel
   private boolean switchCatalog;
   private JComponent currentFocus;
   private ReloadAction reloadSchemasAction;
-  private Reloadable schemaReloader;
   private JButton reloadButton;
   private boolean locked;
   protected String tabName;
@@ -847,12 +846,13 @@ public class DbExplorerPanel
 		}
 		else if (e.getSource() == this.catalogSelector)
 		{
-			if (switchCatalog)
+      String catalog = getSelectedCatalog();
+			if (switchCatalog && !"*".equals(catalog))
 			{
 				try
 				{
 					CatalogChanger changer = new CatalogChanger();
-					changer.setCurrentCatalog(dbConnection, getSelectedCatalog());
+					changer.setCurrentCatalog(dbConnection, catalog);
 				}
 				catch (SQLException ex)
 				{

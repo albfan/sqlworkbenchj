@@ -275,6 +275,11 @@ public abstract class BaseAnalyzer
 	{
 		if (dbConnection == null) return null;
 
+    if (!dbConnection.getDbSettings().useCurrentNamespaceForCompletion())
+    {
+      return null;
+    }
+    
 		if (!dbConnection.getDbSettings().supportsSchemas())
 		{
 			// No schemas supported (e.g. MySQL) pretend a catalog is the same thing

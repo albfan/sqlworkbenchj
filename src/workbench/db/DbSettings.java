@@ -1838,6 +1838,11 @@ public class DbSettings
 		return getBoolProperty("completion.full.searchpath", false);
 	}
 
+	public boolean useCurrentNamespaceForCompletion()
+	{
+		return getBoolProperty("completion.current.namespace", true);
+	}
+
 	public boolean cleanupTypeList()
 	{
 		return getBoolProperty("metadata.cleanup.types", false);
@@ -1974,6 +1979,11 @@ public class DbSettings
 	public Collection<String> getIgnoreCompletionSchemas()
 	{
 		return Settings.getInstance().getListProperty(prefix + "completion.ignore.schema", false, null);
+	}
+
+	public Collection<String> getIgnoreCompletionCatalogs()
+	{
+		return Settings.getInstance().getListProperty(prefix + "completion.ignore.catalog", false, null);
 	}
 
 	public Set<String> getGrantorsToIgnore()

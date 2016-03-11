@@ -160,15 +160,42 @@ class ObjectCache
 
 	List<String> getSearchPath(WbConnection dbConn, String defaultSchema)
 	{
-		List<String> schemas = DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema);
-		if (schemas.isEmpty())
-		{
-			return CollectionUtil.arrayList((String)null);
-		}
+    if (!dbConn.getDbSettings().useCurrentNamespaceForCompletion())
+    {
+      if (dbConn.getDbSettings().supportsSchemas())
+      {
+        return CollectionUtil.arrayList((String)null);
+      }
+      else
+      {
+        // Databases that support catalogs don't support wildcards for the "catalog" parameter
+        // when retrieving tables, so use an explicit list of catalogs here.
+        return dbConn.getMetadata().getCatalogs();
+      }
+    }
 
-		Collection<String> ignore = dbConn.getDbSettings().getIgnoreCompletionSchemas();
-		schemas.removeAll(ignore);
-		return schemas;
+    List<String> namespaces = new ArrayList<>();
+    Collection<String> ignore = new ArrayList<>();
+
+    if (dbConn.getDbSettings().supportsSchemas())
+    {
+      namespaces.addAll(DbSearchPath.Factory.getSearchPathHandler(dbConn).getSearchPath(dbConn, defaultSchema));
+      ignore = dbConn.getDbSettings().getIgnoreCompletionSchemas();
+    }
+    else
+    {
+      namespaces.add(dbConn.getMetadata().getCurrentCatalog());
+      ignore = dbConn.getDbSettings().getIgnoreCompletionCatalogs();
+    }
+
+    namespaces.removeAll(ignore);
+    
+    if (namespaces.isEmpty())
+    {
+      return CollectionUtil.arrayList((String)null);
+    }
+
+		return namespaces;
 	}
 
 	private boolean isSchemaCached(String schema)
@@ -181,30 +208,30 @@ class ObjectCache
 	 */
 	synchronized Set<TableIdentifier> getTables(WbConnection dbConnection, String schema, Collection<String> types)
 	{
-		List<String> searchPath = getSearchPath(dbConnection, schema);
+    if (dbConnection.isBusy()) return Collections.emptySet();
+
+    List<String> searchPath = getSearchPath(dbConnection, schema);
 		LogMgr.logDebug("ObjectCache.getTables()", "Getting tables using schema: " + schema + ", filter: " + types + ", search path: " + searchPath);
 
-		for (String checkSchema  : searchPath)
+    DbMetadata meta = dbConnection.getMetadata();
+
+		for (String namespace  : searchPath)
 		{
-			if (this.objects.isEmpty() || !isSchemaCached(checkSchema))
+			if (this.objects.isEmpty() || !isSchemaCached(namespace))
 			{
 				try
 				{
-					if (!dbConnection.isBusy())
-					{
-						DbMetadata meta = dbConnection.getMetadata();
-						List<TableIdentifier> tables = meta.getSelectableObjectsList(null, checkSchema, getCompletionTypes(dbConnection));
-						for (TableIdentifier tbl : tables)
-						{
-							tbl.checkQuotesNeeded(dbConnection);
-						}
-						this.setTables(tables);
-						LogMgr.logDebug("ObjectCache.getTables()", "Schema: " + checkSchema + " not found in cache. Retrieved " + tables.size() + " objects");
-					}
+          List<TableIdentifier> tables = meta.getSelectableObjectsList(null, namespace, getCompletionTypes(dbConnection));
+          for (TableIdentifier tbl : tables)
+          {
+            tbl.checkQuotesNeeded(dbConnection);
+          }
+          this.setTables(tables);
+          LogMgr.logDebug("ObjectCache.getTables()", "Namespace: " + namespace + " not found in cache. Retrieved " + tables.size() + " objects");
 				}
 				catch (Exception e)
 				{
-					LogMgr.logError("ObjectCache.getTables()", "Could not retrieve table list", e);
+					LogMgr.logError("ObjectCache.getTables()", "Could not retrieve table list for namespace: " + namespace, e);
 				}
 			}
 		}
@@ -351,6 +378,8 @@ class ObjectCache
 
 	private void adjustSchemaAndCatalog(WbConnection conn, TableIdentifier table, String currentSchema, boolean alwaysUseSchema)
 	{
+    if (!conn.getDbSettings().useCurrentNamespaceForCompletion()) return;
+
 		DbMetadata meta = conn.getMetadata();
 		boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
 		String tSchema = table.getSchema();
