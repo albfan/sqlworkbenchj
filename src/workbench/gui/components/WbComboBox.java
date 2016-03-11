@@ -44,6 +44,7 @@ public class WbComboBox
 
 	public WbComboBox()
 	{
+    super();
 	}
 
 	public WbComboBox(ComboBoxModel aModel)
