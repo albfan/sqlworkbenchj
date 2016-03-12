@@ -243,6 +243,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>org.mariadb.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>mariadb-java-client-1.1.6.jar</string>
+    </void>
+    <void property="name">
+     <string>MariaDB</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:mariadb://hostname:port/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>oracle.jdbc.OracleDriver</string>
     </void>
     <void property="library">

@@ -1840,7 +1840,7 @@ public class DbSettings
 
 	public boolean useCurrentNamespaceForCompletion()
 	{
-		return getBoolProperty("completion.current.namespace", true);
+		return getBoolProperty("completion.current.namespace", Settings.getInstance().getAutoCompletionUseCurrentNameSpace());
 	}
 
 	public boolean cleanupTypeList()

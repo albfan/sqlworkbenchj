@@ -2105,6 +2105,7 @@ public class Settings
 	{
 		setProperty(PROP_JOIN_COMPLETION_PREFER_USING, flag);
 	}
+
 	public void setAutoCompletionPasteCase(GeneratedIdentifierCase value)
 	{
 		setIdentifierCase("workbench.editor.autocompletion.paste.case", value);
@@ -2130,6 +2131,16 @@ public class Settings
 	private GeneratedIdentifierCase getIdentifierCase(String property, GeneratedIdentifierCase defaultValue)
 	{
     return getEnumProperty(property, defaultValue);
+	}
+
+	public boolean getAutoCompletionUseCurrentNameSpace()
+	{
+		return getBoolProperty("workbench.editor.autocompletion.current.schema", true);
+	}
+
+	public void setAutoCompletionUseCurrentNameSpace(boolean flag)
+	{
+		setProperty("workbench.editor.autocompletion.current.schema", flag);
 	}
 
 	public ColumnSortType getAutoCompletionColumnSortType()
@@ -3761,7 +3772,7 @@ public class Settings
 	{
     if (f == null) return;
     if (!f.exists()) return;
-    
+
 		int maxVersions = getInstance().getMaxBackupFiles();
 		String dir = getInstance().getBackupDir();
 		String sep = getInstance().getFileVersionDelimiter();

@@ -265,6 +265,17 @@
 					</row>
 
 					<row>
+						<entry>MariaDB</entry>
+						<entry><literal>org.mariadb.jdbc.Driver</literal></entry>
+						<entry>
+							<simplelist columns="1">
+								<member><literal>mariadb-java-client-1.3.6.jar</literal> (exact name depends on the driver version)</member>
+								<member><ulink url="https://downloads.mariadb.org/connector-java/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
 						<entry>MySQL</entry>
 						<entry><literal>com.mysql.jdbc.Driver</literal></entry>
 						<entry>
