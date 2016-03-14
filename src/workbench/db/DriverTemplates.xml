@@ -277,6 +277,33 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>oracle.jdbc.OracleDriver</string>
+    </void>
+    <void property="libraryList">
+      <object class="java.util.ArrayList">
+       <void method="add">
+        <string>ojdbc7.jar</string>
+       </void>
+       <void method="add">
+        <string>xdb6.jar</string>
+       </void>
+       <void method="add">
+        <string>xmlparserv2.jar</string>
+       </void>
+      </object>
+    </void>
+    <void property="name">
+     <string>Oracle/XML</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:oracle:thin://@hostname:port/service_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>de.sag.jdbc.adabasd.ADriver</string>
     </void>
     <void property="library">
