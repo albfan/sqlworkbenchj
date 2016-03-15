@@ -62,6 +62,7 @@ import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
@@ -937,13 +938,25 @@ public class WbImport
 
 	private ImportFileLister getFileNameLister(ArgumentParser cmdLine, String defaultExt)
 	{
+    String fname = cmdLine.getValue(ARG_FILE);
 		String dir = cmdLine.getValue(ARG_DIRECTORY);
-		if (dir == null) return null;
-		String ext = cmdLine.getValue(ARG_FILE_EXT);
-		if (ext == null) ext = defaultExt;
+    if (StringUtil.isEmptyString(dir) && StringUtil.isEmptyString(fname)) return null;
 
-		WbFile fdir = evaluateFileArgument(dir);
-		ImportFileLister lister = new ImportFileLister(this.currentConnection, fdir, ext);
+    ImportFileLister lister = null;
+    
+    if (FileUtil.hasWildcard(fname))
+    {
+      lister = new ImportFileLister(this.currentConnection, fname);
+    }
+    else
+    {
+      String ext = cmdLine.getValue(ARG_FILE_EXT);
+      if (ext == null) ext = defaultExt;
+
+      WbFile fdir = evaluateFileArgument(dir);
+      lister = new ImportFileLister(this.currentConnection, fdir, ext);
+    }
+
 		lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
 		lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
 		lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));

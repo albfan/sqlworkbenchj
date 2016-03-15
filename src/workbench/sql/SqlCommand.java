@@ -716,7 +716,11 @@ public class SqlCommand
 			{
 				// SQL Exceptions should be shown to the user
 				LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", sql);
-				result.addWarning("\n" + sql.getMessage().trim() + "\n");
+        String msg = StringUtil.trimToNull(sql.getMessage());
+        if (msg != null)
+        {
+          result.addWarning("\n" + msg + "\n");
+        }
 				break;
 			}
 			catch (Throwable th)
@@ -767,7 +771,7 @@ public class SqlCommand
 	 * @return the sql with comments removed if necessary.
 	 *
 	 * @see workbench.db.ConnectionProfile#getRemoveComments()
-   * 
+   *
 	 * @see workbench.db.DbSettings#removeNewLinesInSQL()
 	 */
 	protected String getSqlToExecute(String originalSql)

@@ -36,6 +36,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import workbench.interfaces.Interruptable;
 import workbench.interfaces.Reloadable;
@@ -71,7 +73,7 @@ import workbench.util.WbThread;
  */
 public class FkDisplayPanel
 	extends JPanel
-	implements Resettable, Reloadable, Interruptable, ActionListener
+	implements Resettable, Reloadable, Interruptable, ActionListener, ListSelectionListener
 {
 	protected WbTable keys;
 	private final TableDependencyTreeDisplay dependencyTree;
@@ -97,6 +99,7 @@ public class FkDisplayPanel
 		this.keys = new WbTable();
 		this.keys.setAdjustToColumnLabel(false);
 		this.keys.setRendererSetup(RendererSetup.getBaseSetup());
+    this.keys.getSelectionModel().addListSelectionListener(this);
 		WbScrollPane scroll = new WbScrollPane(this.keys);
 		this.splitPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.splitPanel.setDividerLocation(100);
@@ -131,11 +134,21 @@ public class FkDisplayPanel
 
 		selectTableItem = new JMenuItem(ResourceMgr.getString("MnuTextSelectInList"));
 		selectTableItem.addActionListener(this);
+    selectTableItem.setEnabled(false);
 
 		dropFK = new DropForeignKeyAction(this);
+    dropFK.setEnabled(false);
 		keys.addPopupAction(dropFK, true);
 		keys.addPopupMenu(selectTableItem, false);
 	}
+
+  @Override
+  public void valueChanged(ListSelectionEvent e)
+  {
+    boolean selected = keys.getSelectedRowCount() > 0;
+    dropFK.setEnabled(selected);
+    selectTableItem.setEnabled(selected);
+  }
 
 	public boolean getRetrieveAll()
 	{

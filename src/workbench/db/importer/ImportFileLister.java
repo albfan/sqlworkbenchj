@@ -42,6 +42,8 @@ import workbench.db.WbConnection;
 
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
+import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -62,11 +64,13 @@ public class ImportFileLister
 	public ImportFileLister(WbConnection con, File dir, final String ext)
 	{
 		if (!dir.isDirectory()) throw new IllegalArgumentException(dir + " is not a directory");
+    if (StringUtil.isEmptyString(ext)) throw new IllegalArgumentException("Extension may not be empty");
 
 		toProcess = new ArrayList<>();
 		dbConn = con;
 		sourceDir = new WbFile(dir);
-		extension = ext;
+		extension = ext.toLowerCase();
+
 		FileFilter ff = new FileFilter()
 		{
 			@Override
@@ -75,7 +79,7 @@ public class ImportFileLister
 				if (pathname.isDirectory()) return false;
 				String fname = pathname.getName();
 				if (fname == null) return false;
-				return fname.toLowerCase().endsWith(ext.toLowerCase());
+				return fname.toLowerCase().endsWith(extension);
 			}
 		};
 
@@ -145,6 +149,13 @@ public class ImportFileLister
         LogMgr.logWarning("ImportFileLister.<init>", "Ignoring empty file: " + f.getAbsolutePath());
       }
     }
+    cleanupLobFiles();
+  }
+
+  public ImportFileLister(WbConnection con, String wildcard)
+  {
+    dbConn = con;
+    toProcess = FileUtil.listFiles(wildcard, null);
     cleanupLobFiles();
   }
 
@@ -280,7 +291,7 @@ public class ImportFileLister
 		{
 			TableIdentifier tbl = getTableForFile(f);
 			tables.add(tbl);
-			fileMapping.put(tbl.getTableExpression().toLowerCase(), f);
+			fileMapping.put(tbl.getTableExpression(), f);
 		}
 
 		TableDependencySorter sorter = new TableDependencySorter(dbConn);

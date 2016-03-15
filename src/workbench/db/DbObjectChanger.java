@@ -375,8 +375,19 @@ public class DbObjectChanger
 
 		if (sql == null) return null;
 
-		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
-		sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkName);
+    if (sql.contains(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER))
+    {
+      sql = sql.replace(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, table.getTableExpression(dbConnection));
+    }
+    else if (sql.contains(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER))
+    {
+      sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
+    }
+    
+    sql = sql.replace(MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, table.getRawSchema());
+    sql = sql.replace(MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, table.getRawCatalog());
+    sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getRawTableName());
+    sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkName);
 		return sql;
 	}
 
