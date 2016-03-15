@@ -157,6 +157,7 @@ public class DbMetadata
 	private boolean isFirebird;
 	private boolean isSqlServer;
 	private boolean isMySql;
+	private boolean isMariaDB;
 	private boolean isApacheDerby;
 	private boolean isExcel;
 	private boolean isAccess;
@@ -327,6 +328,11 @@ public class DbMetadata
 		{
 			this.objectListEnhancer = new MySQLTableCommentReader();
 			this.isMySql = true;
+      String dbVersion = dbConnection.getDatabaseProductVersion();
+      if (dbVersion.toLowerCase().contains("mariadb"))
+      {
+        isMariaDB = true;
+      }
 		}
 		else if (productLower.contains("derby"))
 		{
@@ -837,6 +843,7 @@ public class DbMetadata
 	}
 
 	public boolean isMySql() { return this.isMySql; }
+	public boolean isMariaDB() { return this.isMariaDB; }
 	public boolean isPostgres() { return this.isPostgres; }
   public boolean isVertica() { return getDbId().equals(DBID_VERTICA); }
 	public boolean isOracle() { return this.isOracle; }
@@ -1622,6 +1629,8 @@ public class DbMetadata
 
 			boolean useColumnNames = dbSettings.useColumnNameForMetadata();
 
+      Set<String> alternateTableTypeNames = getDbSettings().getTableTypeSynonyms();
+
 			while (tableRs != null && tableRs.next())
 			{
 				String cat = useColumnNames ? tableRs.getString("TABLE_CAT") : tableRs.getString(1);
@@ -1629,6 +1638,11 @@ public class DbMetadata
 				String name = useColumnNames ? tableRs.getString("TABLE_NAME") : tableRs.getString(3);
 				String ttype = useColumnNames ? tableRs.getString("TABLE_TYPE") : tableRs.getString(4);
 				if (name == null) continue;
+
+        if (alternateTableTypeNames.contains(ttype))
+        {
+          ttype = "TABLE";
+        }
 
 				if (filter.isExcluded(ttype, name)) continue;
 

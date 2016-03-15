@@ -68,7 +68,7 @@ public class MySQLColumnEnhancer
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-    boolean is57 = JdbcUtils.hasMinimumServerVersion(connection, "5.7");
+    boolean is57 = JdbcUtils.hasMinimumServerVersion(connection, "5.7") && !connection.getMetadata().isMariaDB();
 
     String sql =
       "select column_name, extra, " + (is57 ? "generation_expression " : "null as generation_expression ") + " \n" +
@@ -78,7 +78,7 @@ public class MySQLColumnEnhancer
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-      LogMgr.logDebug("MySQLColumnEnhancer.updateComputedColumns()", "Retrieving computed column definitions using:\n" + SqlUtil.replaceParameters(sql, tbl.getTable().getRawCatalog(), tbl.getTable().getRawTableName()));
+      LogMgr.logDebug("MySQLColumnEnhancer.updateComputedColumns()", "Retrieving column information using:\n" + SqlUtil.replaceParameters(sql, tbl.getTable().getRawCatalog(), tbl.getTable().getRawTableName()));
 		}
 
     try
@@ -119,7 +119,7 @@ public class MySQLColumnEnhancer
     }
     catch (Exception ex)
     {
-      LogMgr.logError("MySQLColumnEnhancer.updateComputedColumns()", "Could not retrieve computed column definition using SQL:\n" + sql, ex);
+      LogMgr.logError("MySQLColumnEnhancer.updateComputedColumns()", "Could not retrieve column information using SQL:\n" + sql, ex);
     }
     finally
     {

@@ -1654,6 +1654,13 @@ public class DbSettings
 		return getBoolProperty("fixfkretrieval", true);
 	}
 
+  public Set<String> getTableTypeSynonyms()
+  {
+    String typeList = getProperty("table.type.alternate.names", null);
+    if (typeList == null) return Collections.emptySet();
+    return CollectionUtil.caseInsensitiveSet(StringUtil.stringToList(typeList, ",", true, true, false, false));
+  }
+
 	public String getIdentifierQuoteString()
 	{
 		String propName = "identifier.quote";

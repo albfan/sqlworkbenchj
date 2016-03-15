@@ -65,6 +65,7 @@ public class DropScriptGenerator
 	private boolean includeDropTable = true;
 	private boolean sortByType;
 	private boolean includeTableMarkers = true;
+  private TextOutput display;
 
 	public DropScriptGenerator(WbConnection aConnection)
 	{
@@ -75,6 +76,7 @@ public class DropScriptGenerator
   @Override
   public void setTextOutput(TextOutput output)
   {
+    display = output;
   }
 
 	@Override
@@ -384,6 +386,11 @@ public class DropScriptGenerator
 		{
 			rowMonitor.jobFinished();
 		}
+
+    if (display != null)
+    {
+      display.append(getScript());
+    }
 	}
 
 	public List<TableIdentifier> getTables()
