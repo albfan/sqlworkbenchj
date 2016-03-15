@@ -182,7 +182,6 @@ public class ObjectScripter
 		this.progressMonitor = aMonitor;
 	}
 
-	@Override
 	public String getScript()
 	{
     output = new StringBuilderOutput(totalObjects * 50);

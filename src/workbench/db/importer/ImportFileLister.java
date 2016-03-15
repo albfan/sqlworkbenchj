@@ -71,17 +71,13 @@ public class ImportFileLister
 		sourceDir = new WbFile(dir);
 		extension = ext.toLowerCase();
 
-		FileFilter ff = new FileFilter()
-		{
-			@Override
-			public boolean accept(File pathname)
-			{
-				if (pathname.isDirectory()) return false;
-				String fname = pathname.getName();
-				if (fname == null) return false;
-				return fname.toLowerCase().endsWith(extension);
-			}
-		};
+		FileFilter ff = (File pathname) ->
+    {
+      if (pathname.isDirectory()) return false;
+      String fname = pathname.getName();
+      if (fname == null) return false;
+      return fname.toLowerCase().endsWith(extension);
+    };
 
 		File[] files = sourceDir.listFiles(ff);
 

@@ -943,12 +943,13 @@ public class WbImport
     if (StringUtil.isEmptyString(dir) && StringUtil.isEmptyString(fname)) return null;
 
     ImportFileLister lister = null;
-    
+
     if (FileUtil.hasWildcard(fname))
     {
-      lister = new ImportFileLister(this.currentConnection, fname);
+      WbFile f = evaluateFileArgument(fname);
+      lister = new ImportFileLister(this.currentConnection, f.getFullPath());
     }
-    else
+    else if (dir != null)
     {
       String ext = cmdLine.getValue(ARG_FILE_EXT);
       if (ext == null) ext = defaultExt;
@@ -957,9 +958,12 @@ public class WbImport
       lister = new ImportFileLister(this.currentConnection, fdir, ext);
     }
 
-		lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
-		lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
-		lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
+    if (lister != null)
+    {
+      lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
+      lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
+      lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
+    }
 		return lister;
 	}
 

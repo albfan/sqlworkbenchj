@@ -240,7 +240,6 @@ public class DropScriptGenerator
 		this.scriptMonitor = monitor;
 	}
 
-	@Override
 	public String getScript()
 	{
 		if (CollectionUtil.isEmpty(dropConstraints))

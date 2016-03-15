@@ -522,12 +522,6 @@ public class DeleteScriptGenerator
 		this.monitor = aMonitor;
 	}
 
-	@Override
-	public String getScript()
-  {
-    return getScript(CommitType.never);
-  }
-
 	public String getScript(CommitType commit)
 	{
 		if (this.statements.isEmpty())
