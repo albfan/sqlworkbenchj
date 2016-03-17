@@ -61,6 +61,7 @@ class ProfileListModel
 	private	final DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Profiles");
 	private final List<ConnectionProfile> profiles = new ArrayList<>();;
 	private final List<ConnectionProfile> filtered = new ArrayList<>();
+  private boolean profilesDeleted;
 
 	ProfileListModel()
   {
@@ -211,7 +212,7 @@ class ProfileListModel
 
   public boolean isChanged()
   {
-    return profilesAreModified() || groupsChanged();
+    return profilesDeleted || profilesAreModified() || groupsChanged();
   }
 
 	/**
@@ -299,6 +300,7 @@ class ProfileListModel
 
 		profiles.remove(prof);
 		this.removeNodeFromParent(node);
+    profilesDeleted = true;
 	}
 
 	public TreePath getFirstProfile()
@@ -412,6 +414,7 @@ class ProfileListModel
 		{
 			profile.resetChangedFlags();
 		}
+    profilesDeleted = false;
 	}
 
 	public List<ConnectionProfile> getAllProfiles()
