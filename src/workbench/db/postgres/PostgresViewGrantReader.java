@@ -40,29 +40,29 @@ import workbench.db.ViewGrantReader;
  * @author Thomas Kellerer
  */
 public class PostgresViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
 
-	@Override
-	public String getViewGrantSql()
-	{
-		String sql = "select grantee, privilege_type, is_grantable  \n" +
-             "from information_schema.table_privileges \n" +
-             "where table_name = ? \n" +
-             " and table_schema = ? ";
-		return sql;
-	}
+  @Override
+  public String getViewGrantSql()
+  {
+    return 
+      "select grantee, privilege_type, is_grantable  \n" +
+      "from information_schema.table_privileges \n" +
+      "where table_name = ? \n" +
+      "  and table_schema = ? ";
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 
 }

@@ -32,50 +32,50 @@ import workbench.db.AbstractConstraintReader;
  * @author  Thomas Kellerer
  */
 public class PostgresConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private final String TABLE_SQL =
-				"select rel.conname,  \n" +
-				"       case  \n" +
-				"         when rel.consrc is null then pg_get_constraintdef(rel.oid) \n" +
-				"         else rel.consrc \n" +
-				"       end as src, \n" +
-				"       obj_description(t.oid) as remarks  \n" +
-				"from pg_class t \n" +
-				"  join pg_constraint rel on t.oid = rel.conrelid   \n" +
-				"  join pg_namespace nsp on t.relnamespace = nsp.oid \n" +
-				"where rel.contype in ('c', 'x') \n" +
-				" and t.relname = ? \n" +
-				" and nsp.nspname = ? ";
+  private final String TABLE_SQL =
+        "select rel.conname,  \n" +
+        "       case  \n" +
+        "         when rel.consrc is null then pg_get_constraintdef(rel.oid) \n" +
+        "         else rel.consrc \n" +
+        "       end as src, \n" +
+        "       obj_description(t.oid) as remarks  \n" +
+        "from pg_class t \n" +
+        "  join pg_constraint rel on t.oid = rel.conrelid   \n" +
+        "  join pg_namespace nsp on t.relnamespace = nsp.oid \n" +
+        "where rel.contype in ('c', 'x') \n" +
+        " and t.relname = ? \n" +
+        " and nsp.nspname = ? ";
 
-	public PostgresConstraintReader(String dbId)
-	{
-		super(dbId);
-	}
+  public PostgresConstraintReader(String dbId)
+  {
+    super(dbId);
+  }
 
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		return TABLE_SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    return TABLE_SQL;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 
 }

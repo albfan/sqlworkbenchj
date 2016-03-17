@@ -33,73 +33,73 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class PostgresDataTypeResolver
-	implements DataTypeResolver
+  implements DataTypeResolver
 {
 
-	@Override
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
-	{
-		if (sqlType == Types.VARCHAR && "text".equals(dbmsName)) return "text";
-		if (sqlType == Types.VARCHAR && "character varying".equals(dbmsName))
+  @Override
+  public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
+  {
+    if (sqlType == Types.VARCHAR && "text".equals(dbmsName)) return "text";
+    if (sqlType == Types.VARCHAR && "character varying".equals(dbmsName))
     {
       dbmsName = "varchar";
     }
-		if (sqlType == Types.SMALLINT && "int2".equals(dbmsName)) return "smallint";
-		if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
-		if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
-		if ((sqlType == Types.BIT || sqlType == Types.BOOLEAN) && "bool".equals(dbmsName)) return "boolean";
+    if (sqlType == Types.SMALLINT && "int2".equals(dbmsName)) return "smallint";
+    if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
+    if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
+    if ((sqlType == Types.BIT || sqlType == Types.BOOLEAN) && "bool".equals(dbmsName)) return "boolean";
 
-		if (sqlType == Types.CHAR && "bpchar".equals(dbmsName))
-		{
-			return "char(" + size + ")";
-		}
+    if (sqlType == Types.CHAR && "bpchar".equals(dbmsName))
+    {
+      return "char(" + size + ")";
+    }
 
-		if (sqlType == Types.VARCHAR && size == Integer.MAX_VALUE)
-		{
-			// enums are returned as Types.VARCHAR and size == Integer.MAX_VALUE
-			// in order to not change the underlying data type, we just use
-			// the type name that the driver returned
-			return dbmsName;
-		}
+    if (sqlType == Types.VARCHAR && size == Integer.MAX_VALUE)
+    {
+      // enums are returned as Types.VARCHAR and size == Integer.MAX_VALUE
+      // in order to not change the underlying data type, we just use
+      // the type name that the driver returned
+      return dbmsName;
+    }
 
-		if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)
-		{
-			if (size == 65535 || size == 131089) size = 0;
-			if (digits == 65531) digits = 0;
-		}
+    if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)
+    {
+      if (size == 65535 || size == 131089) size = 0;
+      if (digits == 65531) digits = 0;
+    }
 
-		if (sqlType == Types.OTHER && "varbit".equals(dbmsName))
-		{
-			return "bit varying(" + size + ")";
-		}
+    if (sqlType == Types.OTHER && "varbit".equals(dbmsName))
+    {
+      return "bit varying(" + size + ")";
+    }
 
-		if (sqlType == Types.BIT && "bit".equals(dbmsName))
-		{
-			return "bit(" + size + ")";
-		}
-		if (sqlType == Types.ARRAY && dbmsName.charAt(0) == '_')
-		{
-			if ("_int2".equals(dbmsName)) return "smallint[]";
-			if ("_int4".equals(dbmsName)) return "integer[]";
-			if ("_int8".equals(dbmsName)) return "bigint[]";
-		}
-		if ("_varchar".equals(dbmsName)) return "varchar[]";
+    if (sqlType == Types.BIT && "bit".equals(dbmsName))
+    {
+      return "bit(" + size + ")";
+    }
+    if (sqlType == Types.ARRAY && dbmsName.charAt(0) == '_')
+    {
+      if ("_int2".equals(dbmsName)) return "smallint[]";
+      if ("_int4".equals(dbmsName)) return "integer[]";
+      if ("_int8".equals(dbmsName)) return "bigint[]";
+    }
+    if ("_varchar".equals(dbmsName)) return "varchar[]";
     if ("varchar".equals(dbmsName) && size < 0) return "varchar";
 
-		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
-	}
+    return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
+  }
 
-	@Override
-	public String getColumnClassName(int type, String dbmsType)
-	{
-		return null;
-	}
+  @Override
+  public String getColumnClassName(int type, String dbmsType)
+  {
+    return null;
+  }
 
-	@Override
-	public int fixColumnType(int type, String dbmsType)
-	{
-		if (type == Types.BIT && "bool".equals(dbmsType)) return Types.BOOLEAN;
-		return type;
-	}
+  @Override
+  public int fixColumnType(int type, String dbmsType)
+  {
+    if (type == Types.BIT && "bool".equals(dbmsType)) return Types.BOOLEAN;
+    return type;
+  }
 
 }

@@ -33,89 +33,89 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class PgRangeType
-	extends BaseObjectType
+  extends BaseObjectType
 {
-	public static final String RANGE_TYPE_NAME = "RANGE TYPE";
-	private String dataType;
+  public static final String RANGE_TYPE_NAME = "RANGE TYPE";
+  private String dataType;
 
-	public PgRangeType(String schema, String typeName)
-	{
-		super(schema, typeName);
-	}
+  public PgRangeType(String schema, String typeName)
+  {
+    super(schema, typeName);
+  }
 
-	public String getDataType()
-	{
-		return dataType;
-	}
+  public String getDataType()
+  {
+    return dataType;
+  }
 
-	public void setDataType(String dataType)
-	{
-		this.dataType = dataType;
-	}
+  public void setDataType(String dataType)
+  {
+    this.dataType = dataType;
+  }
 
-	@Override
-	public String getObjectType()
-	{
-		return RANGE_TYPE_NAME;
-	}
+  @Override
+  public String getObjectType()
+  {
+    return RANGE_TYPE_NAME;
+  }
 
-	@Override
-	public String getObjectExpression(WbConnection conn)
-	{
-		return SqlUtil.buildExpression(conn, this);
-	}
+  @Override
+  public String getObjectExpression(WbConnection conn)
+  {
+    return SqlUtil.buildExpression(conn, this);
+  }
 
-	@Override
-	public String toString()
-	{
-		return getObjectName();
-	}
+  @Override
+  public String toString()
+  {
+    return getObjectName();
+  }
 
-	@Override
-	public String getDropStatement(WbConnection con, boolean cascade)
-	{
-		// range types aren't really called "RANGE TYPE" in Postgres,
-		// so we need to construct a drop statement that uses "TYPE" instead
-		String ddl = "DROP TYPE %name%";
-		if (con != null)
-		{
-			// if a specific template was configured, use that
-			ddl = con.getDbSettings().getDropDDL("TYPE", cascade);
-		}
-		else if (cascade)
-		{
-			ddl += " CASCADE";
-		}
-		ddl = ddl.replace("%name%", getFullyQualifiedName(con));
-		return ddl;
-	}
+  @Override
+  public String getDropStatement(WbConnection con, boolean cascade)
+  {
+    // range types aren't really called "RANGE TYPE" in Postgres,
+    // so we need to construct a drop statement that uses "TYPE" instead
+    String ddl = "DROP TYPE %name%";
+    if (con != null)
+    {
+      // if a specific template was configured, use that
+      ddl = con.getDbSettings().getDropDDL("TYPE", cascade);
+    }
+    else if (cascade)
+    {
+      ddl += " CASCADE";
+    }
+    ddl = ddl.replace("%name%", getFullyQualifiedName(con));
+    return ddl;
+  }
 
-	@Override
-	public String getObjectNameForDrop(WbConnection con)
-	{
-		return getFullyQualifiedName(con);
-	}
+  @Override
+  public String getObjectNameForDrop(WbConnection con)
+  {
+    return getFullyQualifiedName(con);
+  }
 
-	@Override
-	public boolean isComparableWith(DbObject other)
-	{
-		return (other instanceof PgRangeType);
-	}
+  @Override
+  public boolean isComparableWith(DbObject other)
+  {
+    return (other instanceof PgRangeType);
+  }
 
-	@Override
-	public boolean isEqualTo(DbObject other)
-	{
-		if (other instanceof PgRangeType)
-		{
-			String otherName = other.getObjectName();
-			String otherSchema = other.getSchema();
-			String otherType = ((PgRangeType)other).dataType;
+  @Override
+  public boolean isEqualTo(DbObject other)
+  {
+    if (other instanceof PgRangeType)
+    {
+      String otherName = other.getObjectName();
+      String otherSchema = other.getSchema();
+      String otherType = ((PgRangeType)other).dataType;
 
-			return StringUtil.equalString(getObjectName(), otherName)
-				&& StringUtil.equalString(getSchema(), otherSchema)
-				&& StringUtil.equalString(dataType, otherType);
-		}
-		return false;
-	}
+      return StringUtil.equalString(getObjectName(), otherName)
+        && StringUtil.equalString(getSchema(), otherSchema)
+        && StringUtil.equalString(dataType, otherType);
+    }
+    return false;
+  }
 
 }

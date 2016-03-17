@@ -29,36 +29,36 @@ package workbench.db.postgres;
  */
 class PGArg
 {
-	static enum ArgMode
-	{
-		in,
-		out,
-		inout,
-		returnValue;
-	};
+  static enum ArgMode
+  {
+    in,
+    out,
+    inout,
+    returnValue;
+  };
 
-	public final PGType argType;
-	public final ArgMode argMode;
+  public final PGType argType;
+  public final ArgMode argMode;
 
-	PGArg(PGType type, String mode)
-	{
-		argType = type;
-		if ("inout".equalsIgnoreCase(mode))
-		{
-			argMode = ArgMode.inout;
-		}
-		else if ("out".equalsIgnoreCase(mode))
-		{
-			argMode = ArgMode.out;
-		}
-		else if ("return".equalsIgnoreCase(mode))
-		{
-			argMode = ArgMode.returnValue;
-		}
-		else
-		{
-			argMode = ArgMode.in;
-		}
-	}
+  PGArg(PGType type, String mode)
+  {
+    argType = type;
+    if ("inout".equalsIgnoreCase(mode))
+    {
+      argMode = ArgMode.inout;
+    }
+    else if ("out".equalsIgnoreCase(mode))
+    {
+      argMode = ArgMode.out;
+    }
+    else if ("return".equalsIgnoreCase(mode))
+    {
+      argMode = ArgMode.returnValue;
+    }
+    else
+    {
+      argMode = ArgMode.in;
+    }
+  }
 
 }

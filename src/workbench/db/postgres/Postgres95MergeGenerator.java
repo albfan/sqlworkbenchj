@@ -40,92 +40,92 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class Postgres95MergeGenerator
-	implements MergeGenerator
+  implements MergeGenerator
 {
-	private SqlLiteralFormatter formatter;
+  private SqlLiteralFormatter formatter;
 
-	public Postgres95MergeGenerator()
-	{
-		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
-	}
+  public Postgres95MergeGenerator()
+  {
+    this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
+  }
 
-	@Override
-	public String generateMergeStart(RowDataContainer data)
-	{
+  @Override
+  public String generateMergeStart(RowDataContainer data)
+  {
     TableIdentifier tbl = data.getUpdateTable();
-		String result = "INSERT INTO ";
-		result += tbl.getTableExpression();
-		result += "\n  (";
-		ResultInfo info = data.getResultInfo();
-		for (int col=0; col < info.getColumnCount(); col ++)
-		{
-			if (col > 0) result += ", ";
-			result += info.getColumnName(col);
-		}
-		result += ")\nVALUES\n";
+    String result = "INSERT INTO ";
+    result += tbl.getTableExpression();
+    result += "\n  (";
+    ResultInfo info = data.getResultInfo();
+    for (int col=0; col < info.getColumnCount(); col ++)
+    {
+      if (col > 0) result += ", ";
+      result += info.getColumnName(col);
+    }
+    result += ")\nVALUES\n";
     return result;
-	}
+  }
 
-	@Override
-	public String addRow(ResultInfo info, RowData row, long rowIndex)
-	{
-		StringBuilder result = new StringBuilder(100);
-		appendValues(result, row, info, rowIndex);
-		return result.toString();
-	}
+  @Override
+  public String addRow(ResultInfo info, RowData row, long rowIndex)
+  {
+    StringBuilder result = new StringBuilder(100);
+    appendValues(result, row, info, rowIndex);
+    return result.toString();
+  }
 
-	@Override
-	public String generateMergeEnd(RowDataContainer data)
-	{
-		String sql = "\nON CONFLICT (";
-		ResultInfo info = data.getResultInfo();
+  @Override
+  public String generateMergeEnd(RowDataContainer data)
+  {
+    String sql = "\nON CONFLICT (";
+    ResultInfo info = data.getResultInfo();
     int colNr = 0;
     for (ColumnIdentifier col : info.getColumnList())
-		{
+    {
       if (!col.isPkColumn()) continue;
-			if (colNr > 0) sql += ", ";
+      if (colNr > 0) sql += ", ";
       sql += SqlUtil.quoteObjectname(col.getColumnName());
       colNr ++;
-		}
-		sql += ") DO UPDATE\n  SET ";
+    }
+    sql += ") DO UPDATE\n  SET ";
     colNr = 0;
     for (ColumnIdentifier col : info.getColumnList())
-		{
+    {
       if (col.isPkColumn()) continue;
 
-			if (colNr > 0) sql += ",\n      ";
+      if (colNr > 0) sql += ",\n      ";
       String colname = SqlUtil.quoteObjectname(col.getColumnName());
       sql += colname + " = EXCLUDED." + colname;
       colNr ++;
-		}
+    }
     return sql;
-	}
+  }
 
-	@Override
-	public String generateMerge(RowDataContainer data)
-	{
-		StringBuilder sql = new StringBuilder(data.getRowCount() * 20);
-		sql.append(generateMergeStart(data));
+  @Override
+  public String generateMerge(RowDataContainer data)
+  {
+    StringBuilder sql = new StringBuilder(data.getRowCount() * 20);
+    sql.append(generateMergeStart(data));
     for (int i=0; i < data.getRowCount(); i++)
     {
       RowData row = data.getRow(i);
       appendValues(sql, row, data.getResultInfo(), i);
     }
     sql.append(generateMergeEnd(data));
-		return sql.toString();
-	}
+    return sql.toString();
+  }
 
-	private void appendValues(StringBuilder sql, RowData rd, ResultInfo info, long rowNumber)
-	{
-		if (rowNumber > 0) sql.append(",\n");
-		sql.append("  (");
-		for (int col=0; col < info.getColumnCount(); col++)
-		{
-			if (col > 0) sql.append(", ");
-			ColumnData cd = new ColumnData(rd.getValue(col), info.getColumn(col));
-			sql.append(formatter.getDefaultLiteral(cd));
-		}
-		sql.append(')');
-	}
+  private void appendValues(StringBuilder sql, RowData rd, ResultInfo info, long rowNumber)
+  {
+    if (rowNumber > 0) sql.append(",\n");
+    sql.append("  (");
+    for (int col=0; col < info.getColumnCount(); col++)
+    {
+      if (col > 0) sql.append(", ");
+      ColumnData cd = new ColumnData(rd.getValue(col), info.getColumn(col));
+      sql.append(formatter.getDefaultLiteral(cd));
+    }
+    sql.append(')');
+  }
 
 }

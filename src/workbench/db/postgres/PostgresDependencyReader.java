@@ -165,11 +165,11 @@ public class PostgresDependencyReader
 
     List<DbObject> result = new ArrayList<>();
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("PostgresDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+      LogMgr.logDebug("PostgresDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
+    }
 
     Savepoint sp = null;
     try
@@ -207,7 +207,7 @@ public class PostgresDependencyReader
     catch (Exception ex)
     {
       connection.rollback(sp);
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+      String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
       LogMgr.logError("PostgresDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally

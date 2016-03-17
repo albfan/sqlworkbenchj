@@ -43,21 +43,21 @@ import workbench.util.VersionNumber;
 public class PostgresUtil
 {
 
-	/**
-	 * The property that can be passed during connecting to identify the application.
-	 *
-	 * @see #supportsAppInfoProperty(java.lang.Class)
-	 */
-	public static final String APP_NAME_PROPERTY = "ApplicationName";
+  /**
+   * The property that can be passed during connecting to identify the application.
+   *
+   * @see #supportsAppInfoProperty(java.lang.Class)
+   */
+  public static final String APP_NAME_PROPERTY = "ApplicationName";
 
-	/**
-	 * Sets the application name for pg_stat_activity.
-	 * To set the name, the autocommit will be turned off, and the transaction will be committed afterwards.
-	 * The name will only be set if the PostgreSQL version is >= 9.0
-	 *
-	 * @param con the connection
-	 * @param appName the name to set
-	 */
+  /**
+   * Sets the application name for pg_stat_activity.
+   * To set the name, the autocommit will be turned off, and the transaction will be committed afterwards.
+   * The name will only be set if the PostgreSQL version is >= 9.0
+   *
+   * @param con the connection
+   * @param appName the name to set
+   */
   public static void setApplicationName(Connection con, String appName)
   {
     if (JdbcUtils.hasMinimumServerVersion(con, "9.0") && Settings.getInstance().getBoolProperty("workbench.db.postgresql.set.appname", true))
@@ -88,87 +88,87 @@ public class PostgresUtil
     }
   }
 
-	/**
-	 * Checks if the passed driver supports the ApplicationName property.
-	 *
-	 * Setting the application name for pg_stat_activity is only supported by drivers >= 9.1
-	 *
-	 * @param pgDriver the Postgres JDBC driver class
-	 * @return true if the driver supports the ApplicationName property
-	 * @see #APP_NAME_PROPERTY
-	 */
-	public static boolean supportsAppInfoProperty(Class pgDriver)
-	{
-		try
-		{
-			Field major = pgDriver.getDeclaredField("MAJORVERSION");
-			Field minor = pgDriver.getDeclaredField("MINORVERSION");
-			int majorVersion = major.getInt(null);
-			int minorVersion = minor.getInt(null);
+  /**
+   * Checks if the passed driver supports the ApplicationName property.
+   *
+   * Setting the application name for pg_stat_activity is only supported by drivers >= 9.1
+   *
+   * @param pgDriver the Postgres JDBC driver class
+   * @return true if the driver supports the ApplicationName property
+   * @see #APP_NAME_PROPERTY
+   */
+  public static boolean supportsAppInfoProperty(Class pgDriver)
+  {
+    try
+    {
+      Field major = pgDriver.getDeclaredField("MAJORVERSION");
+      Field minor = pgDriver.getDeclaredField("MINORVERSION");
+      int majorVersion = major.getInt(null);
+      int minorVersion = minor.getInt(null);
 
-			VersionNumber version = new VersionNumber(majorVersion, minorVersion);
-			VersionNumber min = new VersionNumber(9,1);
-			return version.isNewerOrEqual(min);
-		}
-		catch (Throwable th)
-		{
-			return false;
-		}
-	}
+      VersionNumber version = new VersionNumber(majorVersion, minorVersion);
+      VersionNumber min = new VersionNumber(9,1);
+      return version.isNewerOrEqual(min);
+    }
+    catch (Throwable th)
+    {
+      return false;
+    }
+  }
 
-	/**
-	 * Returns the current search path defined in the session (or the user).
-	 * <br/>
-	 * This uses the Postgres function <tt>current_schemas(boolean)</tt>
-	 * <br/>
-	 * @param con the connection for which the search path should be retrieved
-	 * @return the list of schemas in the search path.
-	 */
-	public static List<String> getSearchPath(WbConnection con)
-	{
-		if (con == null) return Collections.emptyList();
-		List<String> result = new ArrayList<>();
+  /**
+   * Returns the current search path defined in the session (or the user).
+   * <br/>
+   * This uses the Postgres function <tt>current_schemas(boolean)</tt>
+   * <br/>
+   * @param con the connection for which the search path should be retrieved
+   * @return the list of schemas in the search path.
+   */
+  public static List<String> getSearchPath(WbConnection con)
+  {
+    if (con == null) return Collections.emptyList();
+    List<String> result = new ArrayList<>();
 
-		ResultSet rs = null;
-		Statement stmt = null;
-		Savepoint sp = null;
+    ResultSet rs = null;
+    Statement stmt = null;
+    Savepoint sp = null;
 
-		String query = Settings.getInstance().getProperty("workbench.db.postgresql.retrieve.search_path", "select array_to_string(current_schemas(true), ',')");
+    String query = Settings.getInstance().getProperty("workbench.db.postgresql.retrieve.search_path", "select array_to_string(current_schemas(true), ',')");
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("PostgresUtil.getSearchPath()", "Query used to retrieve search path:\n" + query);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresUtil.getSearchPath()", "Query used to retrieve search path:\n" + query);
+    }
 
-		try
-		{
-			sp = con.setSavepoint();
-			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(query);
-			if (rs.next())
-			{
-				String path = rs.getString(1);
-				result.addAll(StringUtil.stringToList(path, ",", true, true, false, false));
-			}
-			con.releaseSavepoint(sp);
-		}
-		catch (SQLException sql)
-		{
-			con.rollback(sp);
-			LogMgr.logError("PostgresUtil.getSearchPath()", "Could not read search path", sql);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+    try
+    {
+      sp = con.setSavepoint();
+      stmt = con.createStatementForQuery();
+      rs = stmt.executeQuery(query);
+      if (rs.next())
+      {
+        String path = rs.getString(1);
+        result.addAll(StringUtil.stringToList(path, ",", true, true, false, false));
+      }
+      con.releaseSavepoint(sp);
+    }
+    catch (SQLException sql)
+    {
+      con.rollback(sp);
+      LogMgr.logError("PostgresUtil.getSearchPath()", "Could not read search path", sql);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		if (result.isEmpty())
-		{
-			LogMgr.logWarning("PostgresUtil.getSearchPath()", "Using public as the default search path");
-			// Fallback. At least look in the public schema
-			result.add("public");
-		}
-		return result;
-	}
+    if (result.isEmpty())
+    {
+      LogMgr.logWarning("PostgresUtil.getSearchPath()", "Using public as the default search path");
+      // Fallback. At least look in the public schema
+      result.add("public");
+    }
+    return result;
+  }
 
 }

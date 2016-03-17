@@ -29,27 +29,27 @@ import workbench.db.WbConnection;
 
 
 public class PostgresExpressionBuilder
-	extends DefaultExpressionBuilder
+  extends DefaultExpressionBuilder
 {
 
-	public PostgresExpressionBuilder(WbConnection conn)
-	{
-		super(conn);
-	}
+  public PostgresExpressionBuilder(WbConnection conn)
+  {
+    super(conn);
+  }
 
-	@Override
-	public String getDmlExpression(ColumnIdentifier column)
-	{
-		String expression = settings.getDmlExpressionValue(column.getDbmsType());
-		if (expression != null)
-		{
-			return expression;
-		}
-		if (column.getDataType() == Types.STRUCT)
-		{
-			return "cast(? as " + column.getDbmsType() + ")";
-		}
-		return "?";
-	}
+  @Override
+  public String getDmlExpression(ColumnIdentifier column)
+  {
+    String expression = settings.getDmlExpressionValue(column.getDbmsType());
+    if (expression != null)
+    {
+      return expression;
+    }
+    if (column.getDataType() == Types.STRUCT)
+    {
+      return "cast(? as " + column.getDbmsType() + ")";
+    }
+    return "?";
+  }
 
 }

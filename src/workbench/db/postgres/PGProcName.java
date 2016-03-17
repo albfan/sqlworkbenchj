@@ -38,217 +38,217 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class PGProcName
-	implements Comparable<PGProcName>
+  implements Comparable<PGProcName>
 {
-	private List<PGArg> arguments;
-	private String procName;
+  private List<PGArg> arguments;
+  private String procName;
 
-	public PGProcName(ProcedureDefinition def, PGTypeLookup typeMap)
-	{
-		procName = def.getProcedureName();
-		List<ColumnIdentifier> parameters = def.getParameters(null);
-		if (CollectionUtil.isNonEmpty(parameters))
-		{
-			arguments = new ArrayList<>(parameters.size());
-			for (ColumnIdentifier col : parameters)
-			{
-				String mode = col.getArgumentMode();
-				PGType typ = typeMap.getEntryByType(col.getDbmsType());
+  public PGProcName(ProcedureDefinition def, PGTypeLookup typeMap)
+  {
+    procName = def.getProcedureName();
+    List<ColumnIdentifier> parameters = def.getParameters(null);
+    if (CollectionUtil.isNonEmpty(parameters))
+    {
+      arguments = new ArrayList<>(parameters.size());
+      for (ColumnIdentifier col : parameters)
+      {
+        String mode = col.getArgumentMode();
+        PGType typ = typeMap.getEntryByType(col.getDbmsType());
         if (typ == null)
         {
           typ = new PGType(col.getDbmsType(), -1);
         }
-				PGArg arg = new PGArg(typ, mode);
-				arguments.add(arg);
-			}
-		}
-		else
-		{
-			initFromDisplayName(def.getDisplayName(), typeMap);
-		}
-	}
+        PGArg arg = new PGArg(typ, mode);
+        arguments.add(arg);
+      }
+    }
+    else
+    {
+      initFromDisplayName(def.getDisplayName(), typeMap);
+    }
+  }
 
-	/**
-	 * Initialize a PGProcName from a "full" name that includes the
-	 * procedure's name and all parameter types in brackets.
-	 * <br/>
-	 * e.g. my_func(int4, varchar, date)
-	 *
-	 * @param fullname
-	 * @param typeMap
-	 */
-	public PGProcName(String fullname, PGTypeLookup typeMap)
-	{
-		initFromDisplayName(fullname, typeMap);
-	}
+  /**
+   * Initialize a PGProcName from a "full" name that includes the
+   * procedure's name and all parameter types in brackets.
+   * <br/>
+   * e.g. my_func(int4, varchar, date)
+   *
+   * @param fullname
+   * @param typeMap
+   */
+  public PGProcName(String fullname, PGTypeLookup typeMap)
+  {
+    initFromDisplayName(fullname, typeMap);
+  }
 
-	private void initFromDisplayName(String displayName, PGTypeLookup typeMap)
-	{
-		int pos = displayName.indexOf('(');
-		if (pos > -1)
-		{
-			procName = displayName.substring(0, pos);
-			String args = displayName.substring(pos + 1, displayName.indexOf(')'));
-			String[] elements = args.split(",");
-			arguments = new ArrayList<>();
-			for (String s : elements)
-			{
-				PGType typ = typeMap.getEntryByType(s.trim());
-				if (typ != null)
-				{
-					PGArg arg = new PGArg(typ, "in");
-					arguments.add(arg);
-				}
-			}
-		}
-		else
-		{
-			procName = displayName;
-			arguments = Collections.emptyList();
-		}
-	}
+  private void initFromDisplayName(String displayName, PGTypeLookup typeMap)
+  {
+    int pos = displayName.indexOf('(');
+    if (pos > -1)
+    {
+      procName = displayName.substring(0, pos);
+      String args = displayName.substring(pos + 1, displayName.indexOf(')'));
+      String[] elements = args.split(",");
+      arguments = new ArrayList<>();
+      for (String s : elements)
+      {
+        PGType typ = typeMap.getEntryByType(s.trim());
+        if (typ != null)
+        {
+          PGArg arg = new PGArg(typ, "in");
+          arguments.add(arg);
+        }
+      }
+    }
+    else
+    {
+      procName = displayName;
+      arguments = Collections.emptyList();
+    }
+  }
 
-	public PGProcName(String name, String oidArgs, String modes, PGTypeLookup typeMap)
-	{
-		procName = name;
-		if (StringUtil.isNonBlank(oidArgs))
-		{
-			arguments = getTypesFromOid(oidArgs, modes, typeMap);
-		}
-	}
+  public PGProcName(String name, String oidArgs, String modes, PGTypeLookup typeMap)
+  {
+    procName = name;
+    if (StringUtil.isNonBlank(oidArgs))
+    {
+      arguments = getTypesFromOid(oidArgs, modes, typeMap);
+    }
+  }
 
-	private List<PGArg> getTypesFromOid(String oidList, String modes, PGTypeLookup typeMap)
-	{
-		String[] items = oidList.split(";");
-		String[] paramModes = modes.split(";");
+  private List<PGArg> getTypesFromOid(String oidList, String modes, PGTypeLookup typeMap)
+  {
+    String[] items = oidList.split(";");
+    String[] paramModes = modes.split(";");
 
-		List<PGArg> result = new ArrayList<>(items.length);
-		for (int i=0; i < items.length; i++)
-		{
-			String arg = items[i];
-			String mode = (i < paramModes.length ? paramModes[i] : null);
+    List<PGArg> result = new ArrayList<>(items.length);
+    for (int i=0; i < items.length; i++)
+    {
+      String arg = items[i];
+      String mode = (i < paramModes.length ? paramModes[i] : null);
 
-			if ("t".equals(mode)) continue;
+      if ("t".equals(mode)) continue;
 
-			Long oid = Long.valueOf(arg.trim());
-			PGType typ = typeMap.getTypeFromOID(oid);
-			if (typ != null)
-			{
-				PGArg parg = new PGArg(typ, mode);
-				result.add(parg);
-			}
-		}
-		return result;
-	}
+      Long oid = Long.valueOf(arg.trim());
+      PGType typ = typeMap.getTypeFromOID(oid);
+      if (typ != null)
+      {
+        PGArg parg = new PGArg(typ, mode);
+        result.add(parg);
+      }
+    }
+    return result;
+  }
 
-	public String getInputOIDs()
-	{
-		if (arguments == null || arguments.isEmpty()) return null;
-		StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
-		int argCount = 0;
-		for (PGArg arg : arguments)
-		{
-			if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
-			{
-				if (argCount > 0) argTypes.append(' ');
-				argTypes.append(Long.toString(arg.argType.getOid()));
-				argCount ++;
-			}
-		}
-		return argTypes.toString();
-	}
+  public String getInputOIDs()
+  {
+    if (arguments == null || arguments.isEmpty()) return null;
+    StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
+    int argCount = 0;
+    for (PGArg arg : arguments)
+    {
+      if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
+      {
+        if (argCount > 0) argTypes.append(' ');
+        argTypes.append(Long.toString(arg.argType.getOid()));
+        argCount ++;
+      }
+    }
+    return argTypes.toString();
+  }
 
-	public String getOIDs()
-	{
-		if (arguments == null || arguments.isEmpty()) return null;
+  public String getOIDs()
+  {
+    if (arguments == null || arguments.isEmpty()) return null;
 
-		StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
-		for (int i=0; i < arguments.size(); i++)
-		{
-			if (i > 0) argTypes.append(' ');
-			argTypes.append(Long.toString(arguments.get(i).argType.getOid()));
-		}
-		return argTypes.toString();
-	}
+    StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
+    for (int i=0; i < arguments.size(); i++)
+    {
+      if (i > 0) argTypes.append(' ');
+      argTypes.append(Long.toString(arguments.get(i).argType.getOid()));
+    }
+    return argTypes.toString();
+  }
 
-	List<PGArg> getArguments()
-	{
-		return arguments;
-	}
+  List<PGArg> getArguments()
+  {
+    return arguments;
+  }
 
-	@Override
-	public int compareTo(PGProcName o)
-	{
-		return getFormattedName().compareTo(o.getFormattedName());
-	}
+  @Override
+  public int compareTo(PGProcName o)
+  {
+    return getFormattedName().compareTo(o.getFormattedName());
+  }
 
-	public String getName()
-	{
-		return procName;
-	}
+  public String getName()
+  {
+    return procName;
+  }
 
-	public String getSignature()
-	{
-		if (arguments == null || arguments.isEmpty()) return procName +"()";
-		StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
-		b.append(procName);
-		b.append('(');
-		int argCount = 0;
-		for (PGArg arg : arguments)
-		{
-			if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
-			{
-				if (argCount > 0) b.append(", ");
-				b.append(arg.argType.getTypeName());
-				argCount ++;
-			}
-		}
-		b.append(')');
-		return b.toString();
-	}
+  public String getSignature()
+  {
+    if (arguments == null || arguments.isEmpty()) return procName +"()";
+    StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
+    b.append(procName);
+    b.append('(');
+    int argCount = 0;
+    for (PGArg arg : arguments)
+    {
+      if (arg.argMode == PGArg.ArgMode.in || arg.argMode == PGArg.ArgMode.inout)
+      {
+        if (argCount > 0) b.append(", ");
+        b.append(arg.argType.getTypeName());
+        argCount ++;
+      }
+    }
+    b.append(')');
+    return b.toString();
+  }
 
-	public String getFormattedName()
-	{
-		if (arguments == null || arguments.isEmpty()) return procName +"()";
-		StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
-		b.append(procName);
-		b.append('(');
-		for (int i=0; i < arguments.size(); i++)
-		{
-			if (i > 0) b.append(", ");
-			b.append(arguments.get(i).argType.getTypeName());
-		}
-		b.append(')');
-		return b.toString();
-	}
+  public String getFormattedName()
+  {
+    if (arguments == null || arguments.isEmpty()) return procName +"()";
+    StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
+    b.append(procName);
+    b.append('(');
+    for (int i=0; i < arguments.size(); i++)
+    {
+      if (i > 0) b.append(", ");
+      b.append(arguments.get(i).argType.getTypeName());
+    }
+    b.append(')');
+    return b.toString();
+  }
 
-	@Override
-	public String toString()
-	{
-		return getFormattedName();
-	}
+  @Override
+  public String toString()
+  {
+    return getFormattedName();
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj instanceof PGProcName)
-		{
-			final PGProcName other = (PGProcName) obj;
-			String myName = getFormattedName();
-			String otherName = other.getFormattedName();
-			return myName.equals(otherName);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj instanceof PGProcName)
+    {
+      final PGProcName other = (PGProcName) obj;
+      String myName = getFormattedName();
+      String otherName = other.getFormattedName();
+      return myName.equals(otherName);
+    }
+    return false;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 5;
-		hash = 79 * hash + (this.arguments != null ? this.arguments.hashCode() : 0);
-		hash = 79 * hash + (this.procName != null ? this.procName.hashCode() : 0);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 5;
+    hash = 79 * hash + (this.arguments != null ? this.arguments.hashCode() : 0);
+    hash = 79 * hash + (this.procName != null ? this.procName.hashCode() : 0);
+    return hash;
+  }
 
 
 }

@@ -37,35 +37,35 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class PostgresViewReader
-	extends DefaultViewReader
+  extends DefaultViewReader
 {
 
-	public PostgresViewReader(WbConnection con)
-	{
-		super(con);
-	}
+  public PostgresViewReader(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
+  @Override
   public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
-		throws SQLException
-	{
-		CharSequence source = super.getExtendedViewSource(view, dropType, false);
-		PostgresRuleReader ruleReader = new PostgresRuleReader();
+    throws SQLException
+  {
+    CharSequence source = super.getExtendedViewSource(view, dropType, false);
+    PostgresRuleReader ruleReader = new PostgresRuleReader();
 
-		CharSequence rules = ruleReader.getTableRuleSource(this.connection, view.getTable());
-		StringBuilder result = new StringBuilder(source.length() + (rules == null ? 0 : rules.length()));
-		result.append(source);
-		if (rules != null)
-		{
-			result.append("\n\n");
-			result.append(rules);
-		}
+    CharSequence rules = ruleReader.getTableRuleSource(this.connection, view.getTable());
+    StringBuilder result = new StringBuilder(source.length() + (rules == null ? 0 : rules.length()));
+    result.append(source);
+    if (rules != null)
+    {
+      result.append("\n\n");
+      result.append(rules);
+    }
 
-		if (includeCommit)
-		{
-			result.append("COMMIT;");
-			result.append(Settings.getInstance().getInternalEditorLineEnding());
-		}
-		return result;
-	}
+    if (includeCommit)
+    {
+      result.append("COMMIT;");
+      result.append(Settings.getInstance().getInternalEditorLineEnding());
+    }
+    return result;
+  }
 }

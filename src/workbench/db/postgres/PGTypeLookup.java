@@ -31,29 +31,29 @@ import java.util.Map;
  */
 public class PGTypeLookup
 {
-	private Map<Long, PGType> oidToTypeMap;
+  private Map<Long, PGType> oidToTypeMap;
 
-	public PGTypeLookup(Map<Long, PGType> oidMap)
-	{
-		oidToTypeMap = oidMap;
-	}
+  public PGTypeLookup(Map<Long, PGType> oidMap)
+  {
+    oidToTypeMap = oidMap;
+  }
 
-	public PGType getTypeFromOID(long oid)
-	{
-		return oidToTypeMap.get(Long.valueOf(oid));
-	}
+  public PGType getTypeFromOID(long oid)
+  {
+    return oidToTypeMap.get(Long.valueOf(oid));
+  }
 
-	public PGType getEntryByType(String type)
-	{
-		for (PGType typ : oidToTypeMap.values())
-		{
-			if (typ.getTypeName().equals(type))
-			{
-				return typ;
-			}
-		}
-		return null;
-	}
+  public PGType getEntryByType(String type)
+  {
+    for (PGType typ : oidToTypeMap.values())
+    {
+      if (typ.getTypeName().equals(type))
+      {
+        return typ;
+      }
+    }
+    return null;
+  }
 
   public void clear()
   {

@@ -53,103 +53,103 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class PostgresTriggerReader
-	extends DefaultTriggerReader
+  extends DefaultTriggerReader
 {
-	private boolean is93 = false;
-	public PostgresTriggerReader(WbConnection conn)
-	{
-		super(conn);
-		is93 = JdbcUtils.hasMinimumServerVersion(conn, "9.3");
-	}
+  private boolean is93 = false;
+  public PostgresTriggerReader(WbConnection conn)
+  {
+    super(conn);
+    is93 = JdbcUtils.hasMinimumServerVersion(conn, "9.3");
+  }
 
-	@Override
-	public DataStore getTriggers(String catalog, String schema)
-		throws SQLException
-	{
-		DataStore result = super.getTriggers(catalog, schema);
-		if (is93)
-		{
-			retrieveEventTriggers(result);
-		}
-		return result;
-	}
+  @Override
+  public DataStore getTriggers(String catalog, String schema)
+    throws SQLException
+  {
+    DataStore result = super.getTriggers(catalog, schema);
+    if (is93)
+    {
+      retrieveEventTriggers(result);
+    }
+    return result;
+  }
 
-	private void retrieveEventTriggers(DataStore triggers)
-	{
-		String sql =
-			"select evtname as trigger,  \n" +
-			"       evtevent as event,  \n" +
-			"       obj_description(trg.oid, 'pg_event_trigger') as remarks \n" +
-			"FROM pg_event_trigger trg";
+  private void retrieveEventTriggers(DataStore triggers)
+  {
+    String sql =
+      "select evtname as trigger,  \n" +
+      "       evtevent as event,  \n" +
+      "       obj_description(trg.oid, 'pg_event_trigger') as remarks \n" +
+      "FROM pg_event_trigger trg";
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		Savepoint sp = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    Savepoint sp = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Retrieving event triggers using:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresTriggerReader.getDependentSource()", "Retrieving event triggers using:\n" + sql);
+    }
 
-		int triggerCount = 0;
-		try
-		{
-			sp = dbConnection.setSavepoint();
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			rs = stmt.executeQuery();
+    int triggerCount = 0;
+    try
+    {
+      sp = dbConnection.setSavepoint();
+      stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      rs = stmt.executeQuery();
 
-			while (rs.next())
-			{
-				triggerCount ++;
-				String name = rs.getString(1);
-				String event = rs.getString(2);
-				String remarks = rs.getString(3);
-				int row = triggers.addRow();
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, name);
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, "EVENT");
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, event);
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, remarks);
-			}
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (Exception ex)
-		{
-			dbConnection.rollback(sp);
-			LogMgr.logError("PostgresTriggerReader.retrieveEventTriggers()", "Couldn not retrieve event triggers using:\n" + sql, ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      while (rs.next())
+      {
+        triggerCount ++;
+        String name = rs.getString(1);
+        String event = rs.getString(2);
+        String remarks = rs.getString(3);
+        int row = triggers.addRow();
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, name);
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, "EVENT");
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, event);
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, remarks);
+      }
+      dbConnection.releaseSavepoint(sp);
+    }
+    catch (Exception ex)
+    {
+      dbConnection.rollback(sp);
+      LogMgr.logError("PostgresTriggerReader.retrieveEventTriggers()", "Couldn not retrieve event triggers using:\n" + sql, ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		if (triggerCount > 0)
-		{
-			// sort the datastore again
-			SortDefinition def = new SortDefinition();
-			def.addSortColumn(0, true);
-			triggers.sort(def);
-		}
-		triggers.resetStatus();
-	}
+    if (triggerCount > 0)
+    {
+      // sort the datastore again
+      SortDefinition def = new SortDefinition();
+      def.addSortColumn(0, true);
+      triggers.sort(def);
+    }
+    triggers.resetStatus();
+  }
 
-	@Override
-	public String getTriggerSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable, String trgComment, boolean includeDependencies)
-		throws SQLException
-	{
-		if (triggerTable == null && is93)
-		{
-			return getEventTriggerSource(triggerName);
-		}
-		return super.getTriggerSource(triggerCatalog, triggerSchema, triggerName, triggerTable, trgComment, includeDependencies);
-	}
+  @Override
+  public String getTriggerSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable, String trgComment, boolean includeDependencies)
+    throws SQLException
+  {
+    if (triggerTable == null && is93)
+    {
+      return getEventTriggerSource(triggerName);
+    }
+    return super.getTriggerSource(triggerCatalog, triggerSchema, triggerName, triggerTable, trgComment, includeDependencies);
+  }
 
-	public String getEventTriggerSource(String triggerName)
-		throws SQLException
-	{
-		StringBuilder result = new StringBuilder(100);
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		Savepoint sp = null;
+  public String getEventTriggerSource(String triggerName)
+    throws SQLException
+  {
+    StringBuilder result = new StringBuilder(100);
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    Savepoint sp = null;
 
     final String sql
       = "select pr.proname, \n" +
@@ -165,60 +165,60 @@ public class PostgresTriggerReader
       LogMgr.logInfo("PostgresTriggerReader.getEventTriggerSource()", "Retrieving event trigger source using:\n" + SqlUtil.replaceParameters(sql, triggerName));
     }
 
-		try
-		{
-			String funcName = null;
-			String event = null;
-			String funcSource = null;
+    try
+    {
+      String funcName = null;
+      String event = null;
+      String funcSource = null;
 
-			sp = dbConnection.setSavepoint();
+      sp = dbConnection.setSavepoint();
 
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, triggerName);
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				funcName = rs.getString(1);
-				event = rs.getString(2);
-				funcSource = rs.getString(3);
-			}
+      stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, triggerName);
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        funcName = rs.getString(1);
+        event = rs.getString(2);
+        funcSource = rs.getString(3);
+      }
 
-			result.append("DROP EVENT TRIGGER IF EXISTS ");
-			result.append(dbConnection.getMetadata().quoteObjectname(funcName));
-			result.append(" CASCADE;\n\n");
-			result.append("CREATE EVENT TRIGGER ");
-			result.append(dbConnection.getMetadata().quoteObjectname(funcName));
-			result.append("\n  ON ");
-			result.append(event);
-			result.append("\n  EXECUTE PROCEDURE ");
-			result.append(funcName);
-			result.append("();\n\nCOMMIT;\n");
+      result.append("DROP EVENT TRIGGER IF EXISTS ");
+      result.append(dbConnection.getMetadata().quoteObjectname(funcName));
+      result.append(" CASCADE;\n\n");
+      result.append("CREATE EVENT TRIGGER ");
+      result.append(dbConnection.getMetadata().quoteObjectname(funcName));
+      result.append("\n  ON ");
+      result.append(event);
+      result.append("\n  EXECUTE PROCEDURE ");
+      result.append(funcName);
+      result.append("();\n\nCOMMIT;\n");
 
-			result.append("\n---[ ");
-			result.append(funcName);
-			result.append(" ]---\n");
-			result.append(funcSource);
-			result.append('\n');
+      result.append("\n---[ ");
+      result.append(funcName);
+      result.append(" ]---\n");
+      result.append(funcSource);
+      result.append('\n');
 
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException ex)
-		{
+      dbConnection.releaseSavepoint(sp);
+    }
+    catch (SQLException ex)
+    {
       LogMgr.logInfo("PostgresTriggerReader.getEventTriggerSource()", "Could not retrieve event trigger source using:\n" + SqlUtil.replaceParameters(sql, triggerName), ex);
-			dbConnection.rollback(sp);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result.toString();
-	}
+      dbConnection.rollback(sp);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result.toString();
+  }
 
-	@Override
-	public CharSequence getDependentSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable)
-		throws SQLException
-	{
+  @Override
+  public CharSequence getDependentSource(String triggerCatalog, String triggerSchema, String triggerName, TableIdentifier triggerTable)
+    throws SQLException
+  {
 
     final String sql
       = "SELECT trgsch.nspname as function_schema, proc.proname as function_name \n" +
@@ -243,67 +243,67 @@ public class PostgresTriggerReader
     StringBuilder result = null;
     Savepoint sp = null;
 
-		try
-		{
-			sp = dbConnection.setSavepoint();
+    try
+    {
+      sp = dbConnection.setSavepoint();
 
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, triggerName);
-			stmt.setString(2, triggerTable.getSchema());
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				funcSchema = rs.getString(1);
-				funcName = rs.getString(2);
-			}
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException ex)
-		{
-			dbConnection.rollback(sp);
+      stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, triggerName);
+      stmt.setString(2, triggerTable.getSchema());
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        funcSchema = rs.getString(1);
+        funcName = rs.getString(2);
+      }
+      dbConnection.releaseSavepoint(sp);
+    }
+    catch (SQLException ex)
+    {
+      dbConnection.rollback(sp);
       LogMgr.logError("PostgresTriggerReader.getDependentSource()", "Could not retrieve dependent trigger source using:\n" +
         SqlUtil.replaceParameters(sql, triggerName, triggerTable.getSchema()), ex);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		if (funcName != null && funcSchema != null)
-		{
-			ProcedureReader reader = dbMeta.getProcedureReader();
-			ProcedureDefinition def = new ProcedureDefinition(null, funcSchema, funcName, DatabaseMetaData.procedureNoResult);
-			try
-			{
-				reader.readProcedureSource(def);
-				CharSequence src = def.getSource();
-				if (src != null)
-				{
-					result = new StringBuilder(src.length() + 50);
-					result.append("\n---[ ");
-					result.append(funcName);
-					result.append(" ]---\n");
-					result.append(src);
-					result.append('\n');
-				}
-			}
-			catch (NoConfigException cfg)
-			{
-				// nothing to do
-			}
-		}
-		return result;
-	}
+    if (funcName != null && funcSchema != null)
+    {
+      ProcedureReader reader = dbMeta.getProcedureReader();
+      ProcedureDefinition def = new ProcedureDefinition(null, funcSchema, funcName, DatabaseMetaData.procedureNoResult);
+      try
+      {
+        reader.readProcedureSource(def);
+        CharSequence src = def.getSource();
+        if (src != null)
+        {
+          result = new StringBuilder(src.length() + 50);
+          result.append("\n---[ ");
+          result.append(funcName);
+          result.append(" ]---\n");
+          result.append(src);
+          result.append('\n');
+        }
+      }
+      catch (NoConfigException cfg)
+      {
+        // nothing to do
+      }
+    }
+    return result;
+  }
 
-	/**
-	 * Triggers on views are supported since Version 9.1
-	 */
-	@Override
-	public boolean supportsTriggersOnViews()
-	{
-		if (dbConnection == null) return false;
-		return JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
-	}
+  /**
+   * Triggers on views are supported since Version 9.1
+   */
+  @Override
+  public boolean supportsTriggersOnViews()
+  {
+    if (dbConnection == null) return false;
+    return JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1");
+  }
 
 }
