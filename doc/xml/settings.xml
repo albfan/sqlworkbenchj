@@ -1365,7 +1365,14 @@
       <para>
         If the SQL returned by the DBMS includes the indexes defined for the table, the property:
         <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.index_included</literal> has to
-        be set to <literal>true</literal>.
+        be set to <literal>true</literal>. Otherwise &wb-productname; will generate the DDL statement to re-create the
+        indexes.
+      </para>
+
+      <para>
+        If the SQL returned by the DBMS includes table and column comments, the property:
+        <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.comments_included</literal> has to
+        be set to <literal>true</literal>. Otherwise &wb-productname; will generate table and column comments.
       </para>
     </simplesect>
 
