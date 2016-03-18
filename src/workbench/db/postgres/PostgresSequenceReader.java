@@ -259,13 +259,11 @@ public class PostgresSequenceReader
     catch (SQLException e)
     {
       this.dbConnection.rollback(sp);
-      if (StringUtil.stringsAreNotEqual("42P01", e.getSQLState()))
-      {
-        // sqlstate = 42P01 is "undefined table" which can happen if this method was called
-        // for a sequence that doesn't exist. There is no need to log this
-        LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition using:\n" +
-          SqlUtil.replaceParameters(sql, sequence, schema), e);
-      }
+      // sqlstate = 42P01 is "undefined table" which can happen if this method was called
+      // for a sequence that doesn't exist. There is no need to log this
+      LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition using:\n" +
+        SqlUtil.replaceParameters(sql, sequence, schema), e);
+      
       return null;
     }
     finally

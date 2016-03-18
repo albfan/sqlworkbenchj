@@ -43,103 +43,104 @@ import workbench.util.WbDateFormatter;
  */
 public class SequenceDiff
 {
-	public static final String TAG_CREATE_SEQUENCE = "create-sequence";
-	public static final String TAG_UPDATE_SEQUENCE = "update-sequence";
-	public static final String TAG_ATTRIB_LIST = "modify-properties";
+  public static final String TAG_CREATE_SEQUENCE = "create-sequence";
+  public static final String TAG_UPDATE_SEQUENCE = "update-sequence";
+  public static final String TAG_ATTRIB_LIST = "modify-properties";
 
-	private ReportSequence reference;
-	private ReportSequence target;
-	private final TagWriter writer = new TagWriter();
-	private StringBuilder indent = StringUtil.emptyBuilder();
-	private boolean includeSource;
-	private String targetSchema;
-	public SequenceDiff(ReportSequence ref, ReportSequence tar, String targetSchema)
-	{
-		reference = ref;
-		target = tar;
-		this.targetSchema = targetSchema;
-		includeSource = Settings.getInstance().getBoolProperty("workbench.diff.sequence.include_sql", false);
-	}
+  private ReportSequence reference;
+  private ReportSequence target;
+  private final TagWriter writer = new TagWriter();
+  private StringBuilder indent = StringUtil.emptyBuilder();
+  private boolean includeSource;
+  private String targetSchema;
 
-	public StringBuilder getMigrateTargetXml()
-	{
-		StringBuilder result = new StringBuilder(50);
+  public SequenceDiff(ReportSequence ref, ReportSequence tar, String targetSchema)
+  {
+    reference = ref;
+    target = tar;
+    this.targetSchema = targetSchema;
+    includeSource = Settings.getInstance().getBoolProperty("workbench.diff.sequence.include_sql", false);
+  }
 
-		StringBuilder myindent = new StringBuilder(indent);
-		myindent.append("  ");
-		boolean createSequence = (target == null);
-		boolean different = (target == null || !reference.getSequence().propertiesAreEqual(target.getSequence()));
-		if (!different) return result;
+  public StringBuilder getMigrateTargetXml()
+  {
+    StringBuilder result = new StringBuilder(50);
 
-		writer.appendOpenTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
-		result.append('\n');
-		if (different)
-		{
-			if (reference != null && target != null)
-			{
-				writeChangedProperties(myindent, result, reference.getSequence(), target.getSequence());
-			}
-			if (createSequence)
-			{
-				reference.setSchemaNameToUse(targetSchema);
-			}
-			result.append(reference.getXml(myindent, includeSource));
-			if (createSequence)
-			{
-				reference.setSchemaNameToUse(null);
-			}
-		}
-		writer.appendCloseTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
+    StringBuilder myindent = new StringBuilder(indent);
+    myindent.append("  ");
+    boolean createSequence = (target == null);
+    boolean different = (target == null || !reference.getSequence().propertiesAreEqual(target.getSequence()));
+    if (!different) return result;
 
-		return result;
-	}
+    writer.appendOpenTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
+    result.append('\n');
+    if (different)
+    {
+      if (reference != null && target != null)
+      {
+        writeChangedProperties(myindent, result, reference.getSequence(), target.getSequence());
+      }
+      if (createSequence)
+      {
+        reference.setSchemaNameToUse(targetSchema);
+      }
+      result.append(reference.getXml(myindent, includeSource));
+      if (createSequence)
+      {
+        reference.setSchemaNameToUse(null);
+      }
+    }
+    writer.appendCloseTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
 
-	private void writeChangedProperties(StringBuilder ind, StringBuilder result, SequenceDefinition refSeq, SequenceDefinition targetSeq)
-	{
-		if (refSeq == null || targetSeq == null) return;
+    return result;
+  }
 
-		StringBuilder myindent = new StringBuilder(ind);
-		myindent.append("  ");
+  private void writeChangedProperties(StringBuilder ind, StringBuilder result, SequenceDefinition refSeq, SequenceDefinition targetSeq)
+  {
+    if (refSeq == null || targetSeq == null) return;
 
-		boolean open = false;
-		for (String key : refSeq.getProperties())
-		{
-			Object refValue = refSeq.getSequenceProperty(key);
-			Object tValue = targetSeq.getSequenceProperty(key);
-			if (!RowData.objectsAreEqual(refValue, tValue))
-			{
-				if (!open)
-				{
-					writer.appendOpenTag(result, ind, TAG_ATTRIB_LIST);
-					result.append('\n');
-					open = true;
-				}
-				String display = WbDateFormatter.getDisplayValue(refValue);
-				TagAttribute name = new TagAttribute("name", key);
-				TagAttribute val = new TagAttribute("value", display);
-				writer.appendOpenTag(result, myindent, ReportSequence.TAG_SEQ_PROPERTY, false, name, val);
-				result.append("/>\n");
-			}
-		}
-		if (open)
-		{
-			writer.appendCloseTag(result, ind, TAG_ATTRIB_LIST);
-		}
-	}
+    StringBuilder myindent = new StringBuilder(ind);
+    myindent.append("  ");
 
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(StringBuilder ind)
-	{
-		if (ind == null)
-		{
-			this.indent = StringUtil.emptyBuilder();
-		}
-		else
-		{
-			this.indent = ind;
-		}
-	}
+    boolean open = false;
+    for (String key : refSeq.getProperties())
+    {
+      Object refValue = refSeq.getSequenceProperty(key);
+      Object tValue = targetSeq.getSequenceProperty(key);
+      if (!RowData.objectsAreEqual(refValue, tValue))
+      {
+        if (!open)
+        {
+          writer.appendOpenTag(result, ind, TAG_ATTRIB_LIST);
+          result.append('\n');
+          open = true;
+        }
+        String display = WbDateFormatter.getDisplayValue(refValue);
+        TagAttribute name = new TagAttribute("name", key);
+        TagAttribute val = new TagAttribute("value", display);
+        writer.appendOpenTag(result, myindent, ReportSequence.TAG_SEQ_PROPERTY, false, name, val);
+        result.append("/>\n");
+      }
+    }
+    if (open)
+    {
+      writer.appendCloseTag(result, ind, TAG_ATTRIB_LIST);
+    }
+  }
+
+  /**
+   * Set an indent for generating the XML
+   */
+  public void setIndent(StringBuilder ind)
+  {
+    if (ind == null)
+    {
+      this.indent = StringUtil.emptyBuilder();
+    }
+    else
+    {
+      this.indent = ind;
+    }
+  }
 
 }

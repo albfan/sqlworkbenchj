@@ -733,7 +733,6 @@ public class SchemaDiff
 
 	private void processSequenceList(List<SequenceDefinition> refSeqs, List<SequenceDefinition> targetSeqs)
 	{
-		HashSet<String> refSeqNames = new HashSet<>();
 		this.sequencesToDelete= new ArrayList<>();
 
 		if (this.monitor != null)
@@ -757,12 +756,12 @@ public class SchemaDiff
 			}
 
 			SequenceDiffEntry entry;
+
 			if (targetReader != null)
 			{
-				SequenceDefinition def = targetReader.getSequenceDefinition(null, this.targetSchema, refSeq.getSequenceName());
-				entry = new SequenceDiffEntry(refSeq, def);
+        SequenceDefinition targetSequence = findSequence(targetSeqs, targetSchema, refSeq.getSequenceName());
+				entry = new SequenceDiffEntry(refSeq, targetSequence);
 				objectsToCompare.add(entry);
-				refSeqNames.add(refSeq.getSequenceName());
 			}
 		}
 
@@ -770,13 +769,27 @@ public class SchemaDiff
 
 		for (SequenceDefinition tSeq : targetSeqs)
 		{
-			String seqname = tSeq.getSequenceName();
-			if (!refSeqNames.contains(seqname))
+			if (findSequence(refSeqs, referenceSchema, tSeq.getSequenceName()) == null)
 			{
 				this.sequencesToDelete.add(tSeq);
 			}
 		}
 	}
+
+  private SequenceDefinition findSequence(List<SequenceDefinition> sequences, String schema, String sequenceName)
+  {
+    for (SequenceDefinition seq : sequences)
+    {
+      if (StringUtil.equalStringIgnoreCase(seq.getObjectName(), sequenceName))
+      {
+        if (seq.getSchema() != null && schema != null)
+        {
+          if (StringUtil.equalStringIgnoreCase(seq.getSchema(), schema)) return seq;
+        }
+      }
+    }
+    return null;
+  }
 
 	private void buildObjectsList()
 	{
