@@ -194,8 +194,6 @@ public class TableSourceBuilder
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkList, DropType dropType, boolean includeFk, boolean includeGrants)
 	{
-		readTableOptions(table, columns);
-
 		CharSequence createSql = getCreateTable(table, columns, indexList, fkList, dropType, includeFk);
 
 		StringBuilder result = new StringBuilder(createSql.length() + 50);
@@ -302,12 +300,7 @@ public class TableSourceBuilder
 	 */
 	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk)
 	{
-		return getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, true);
-	}
-
-	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk, boolean includePK)
-	{
-		return getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, includePK, false);
+		return getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, true, false);
 	}
 
 	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk, boolean includePK, boolean useFQN)
@@ -316,6 +309,8 @@ public class TableSourceBuilder
 
 		String nativeSql = getNativeTableSource(table, dropType);
 		if (nativeSql != null) return nativeSql;
+
+		readTableOptions(table, columns);
 
 		if (CollectionUtil.isEmpty(columns)) return StringUtil.EMPTY_STRING;
 
