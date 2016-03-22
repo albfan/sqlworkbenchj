@@ -30,13 +30,13 @@ import workbench.db.ViewGrantReader;
  * @author Thomas Kellerer
  */
 public class DerbyViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
 
-	@Override
-	public String getViewGrantSql()
-	{
-		String sql = "select trim(grantee) as grantee, privilege, is_grantable \n" +
+  @Override
+  public String getViewGrantSql()
+  {
+    String sql = "select trim(grantee) as grantee, privilege, is_grantable \n" +
              "from (  \n" +
              "select grantee,   \n" +
              "       'SELECT' as privilege,   \n" +
@@ -79,14 +79,14 @@ public class DerbyViewGrantReader
              "where insertpriv in ('Y', 'y')  \n" +
              ") t, sys.systables tab  \n" +
              "where t.tableid = tab.tableid " +
-						 "and tab.tablename = ?";
-		return sql;
-	}
+             "and tab.tablename = ?";
+    return sql;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
 }

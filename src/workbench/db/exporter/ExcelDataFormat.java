@@ -34,100 +34,100 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 class ExcelDataFormat
 {
-	protected String decimalFormat;
-	protected String dateFormat;
-	protected String timestampFormat;
-	protected String integerFormat;
-	protected CellStyle headerCellStyle = null;
-	protected CellStyle dateCellStyle = null;
-	protected CellStyle tsCellStyle = null;
-	protected CellStyle decimalCellStyle = null;
-	protected CellStyle integerCellStyle = null;
-	protected CellStyle textCellStyle = null;
-	protected CellStyle multilineCellStyle = null;
-	protected short gridDateFormat;
-	protected short gridDecimalFormat;
-	protected short gridIntegerFormat;
-	protected short gridTsFormat;
+  protected String decimalFormat;
+  protected String dateFormat;
+  protected String timestampFormat;
+  protected String integerFormat;
+  protected CellStyle headerCellStyle = null;
+  protected CellStyle dateCellStyle = null;
+  protected CellStyle tsCellStyle = null;
+  protected CellStyle decimalCellStyle = null;
+  protected CellStyle integerCellStyle = null;
+  protected CellStyle textCellStyle = null;
+  protected CellStyle multilineCellStyle = null;
+  protected short gridDateFormat;
+  protected short gridDecimalFormat;
+  protected short gridIntegerFormat;
+  protected short gridTsFormat;
 
-	ExcelDataFormat(String decFormat, String dtFormat, String intFormat, String tsFormat)
-	{
-		this.decimalFormat = decFormat;
-		this.dateFormat = dtFormat;
-		this.integerFormat = intFormat;
-		this.timestampFormat = tsFormat;
-	}
+  ExcelDataFormat(String decFormat, String dtFormat, String intFormat, String tsFormat)
+  {
+    this.decimalFormat = decFormat;
+    this.dateFormat = dtFormat;
+    this.integerFormat = intFormat;
+    this.timestampFormat = tsFormat;
+  }
 
-	protected void setupWithWorkbook(Workbook wb)
-	{
-		CreationHelper helper = wb.getCreationHelper();
-		DataFormat dataFormat = helper.createDataFormat();
-		setUpHeader(wb);
-		setUpText(wb);
-		setUpDate(wb, dataFormat);
-		setUpDecimal(wb, dataFormat);
-		setUpInteger(wb, dataFormat);
-		setUpTs(wb, dataFormat);
-		setUpMultiline(wb);
-	}
+  protected void setupWithWorkbook(Workbook wb)
+  {
+    CreationHelper helper = wb.getCreationHelper();
+    DataFormat dataFormat = helper.createDataFormat();
+    setUpHeader(wb);
+    setUpText(wb);
+    setUpDate(wb, dataFormat);
+    setUpDecimal(wb, dataFormat);
+    setUpInteger(wb, dataFormat);
+    setUpTs(wb, dataFormat);
+    setUpMultiline(wb);
+  }
 
-	protected void setUpMultiline(Workbook wb)
-	{
-		multilineCellStyle = wb.createCellStyle();
-		multilineCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		multilineCellStyle.setWrapText(true);
-	}
+  protected void setUpMultiline(Workbook wb)
+  {
+    multilineCellStyle = wb.createCellStyle();
+    multilineCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+    multilineCellStyle.setWrapText(true);
+  }
 
-	protected void setUpText(Workbook wb)
-	{
-		textCellStyle = wb.createCellStyle();
-		textCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		textCellStyle.setWrapText(false);
-	}
+  protected void setUpText(Workbook wb)
+  {
+    textCellStyle = wb.createCellStyle();
+    textCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+    textCellStyle.setWrapText(false);
+  }
 
-	protected void setUpDate(Workbook wb, DataFormat dataFormat)
-	{
-		dateCellStyle = wb.createCellStyle();
-		dateCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		gridDateFormat = getFormat(dataFormat, dateFormat);
-		dateCellStyle.setDataFormat(gridDateFormat);
-	}
+  protected void setUpDate(Workbook wb, DataFormat dataFormat)
+  {
+    dateCellStyle = wb.createCellStyle();
+    dateCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+    gridDateFormat = getFormat(dataFormat, dateFormat);
+    dateCellStyle.setDataFormat(gridDateFormat);
+  }
 
-	protected void setUpDecimal(Workbook wb, DataFormat dataFormat)
-	{
-		decimalCellStyle = wb.createCellStyle();
-		decimalCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-		gridDecimalFormat = getFormat(dataFormat, decimalFormat);
-		decimalCellStyle.setDataFormat(gridDecimalFormat);
-	}
+  protected void setUpDecimal(Workbook wb, DataFormat dataFormat)
+  {
+    decimalCellStyle = wb.createCellStyle();
+    decimalCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+    gridDecimalFormat = getFormat(dataFormat, decimalFormat);
+    decimalCellStyle.setDataFormat(gridDecimalFormat);
+  }
 
-	protected void setUpInteger(Workbook wb, DataFormat dataFormat)
-	{
-		integerCellStyle = wb.createCellStyle();
-		integerCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
-		gridIntegerFormat = getFormat(dataFormat, integerFormat);
-		integerCellStyle.setDataFormat(gridIntegerFormat);
-	}
+  protected void setUpInteger(Workbook wb, DataFormat dataFormat)
+  {
+    integerCellStyle = wb.createCellStyle();
+    integerCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+    gridIntegerFormat = getFormat(dataFormat, integerFormat);
+    integerCellStyle.setDataFormat(gridIntegerFormat);
+  }
 
-	protected void setUpHeader(Workbook wb)
-	{
-		headerCellStyle = wb.createCellStyle();
-		Font font = wb.createFont();
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-		headerCellStyle.setFont(font);
-		headerCellStyle.setAlignment(CellStyle.ALIGN_CENTER);
-	}
+  protected void setUpHeader(Workbook wb)
+  {
+    headerCellStyle = wb.createCellStyle();
+    Font font = wb.createFont();
+    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    headerCellStyle.setFont(font);
+    headerCellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+  }
 
-	protected void setUpTs(Workbook wb, DataFormat dataFormat)
-	{
-		tsCellStyle = wb.createCellStyle();
-		tsCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
-		gridTsFormat = getFormat(dataFormat, timestampFormat);
-		tsCellStyle.setDataFormat(gridTsFormat);
-	}
+  protected void setUpTs(Workbook wb, DataFormat dataFormat)
+  {
+    tsCellStyle = wb.createCellStyle();
+    tsCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
+    gridTsFormat = getFormat(dataFormat, timestampFormat);
+    tsCellStyle.setDataFormat(gridTsFormat);
+  }
 
-	private short getFormat(DataFormat dataFormat, String formatString)
-	{
-		return dataFormat.getFormat(formatString);
-	}
+  private short getFormat(DataFormat dataFormat, String formatString)
+  {
+    return dataFormat.getFormat(formatString);
+  }
 }

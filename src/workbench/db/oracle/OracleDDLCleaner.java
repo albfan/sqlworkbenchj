@@ -35,41 +35,41 @@ import workbench.sql.lexer.SQLToken;
 public class OracleDDLCleaner
 {
 
-	/**
-	 * Remove double quotes from all quoted uppercase identifiers.
-	 *
-	 * @param input the SQL text (typically retrieved using dbms_metadata)
-	 * @return a clean version without quotes that are not needed.
-	 */
-	public static String cleanupQuotedIdentifiers(String input)
-	{
-		StringBuilder result = new StringBuilder(input.length());
-		SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, input);
-		SQLToken token = lexer.getNextToken(true, true);
-		while (token != null)
-		{
-			if (token.isIdentifier())
-			{
-				String text = token.getText();
-				char firstChar = text.charAt(0);
-				char lastChar = text.charAt(text.length() - 1);
+  /**
+   * Remove double quotes from all quoted uppercase identifiers.
+   *
+   * @param input the SQL text (typically retrieved using dbms_metadata)
+   * @return a clean version without quotes that are not needed.
+   */
+  public static String cleanupQuotedIdentifiers(String input)
+  {
+    StringBuilder result = new StringBuilder(input.length());
+    SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, input);
+    SQLToken token = lexer.getNextToken(true, true);
+    while (token != null)
+    {
+      if (token.isIdentifier())
+      {
+        String text = token.getText();
+        char firstChar = text.charAt(0);
+        char lastChar = text.charAt(text.length() - 1);
 
-				if (firstChar == '"' && lastChar == '"' && text.toUpperCase().equals(text))
-				{
-					result.append(text.substring(1, text.length() - 1));
-				}
-				else
-				{
-					result.append(text);
-				}
-			}
-			else
-			{
-				result.append(token.getText());
-			}
-			token = lexer.getNextToken(true, true);
-		}
-		return result.toString();
-	}
+        if (firstChar == '"' && lastChar == '"' && text.toUpperCase().equals(text))
+        {
+          result.append(text.substring(1, text.length() - 1));
+        }
+        else
+        {
+          result.append(text);
+        }
+      }
+      else
+      {
+        result.append(token.getText());
+      }
+      token = lexer.getNextToken(true, true);
+    }
+    return result.toString();
+  }
 
 }

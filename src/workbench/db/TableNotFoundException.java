@@ -30,18 +30,18 @@ import java.sql.SQLException;
  * @author Thomas Kellerer
  */
 public class TableNotFoundException
-	extends SQLException
+  extends SQLException
 {
-	private String tableName;
+  private String tableName;
 
-	public TableNotFoundException(String name)
-	{
-		super("Table " + name + " not found");
-		tableName = name;
-	}
+  public TableNotFoundException(String name)
+  {
+    super("Table " + name + " not found");
+    tableName = name;
+  }
 
-	public String getTableName()
-	{
-		return tableName;
-	}
+  public String getTableName()
+  {
+    return tableName;
+  }
 }

@@ -28,12 +28,12 @@ import java.sql.SQLException;
  * @author Thomas Kellerer
  */
 public class NoConnectionException
-	extends SQLException
+  extends SQLException
 {
 
-	public NoConnectionException(String reason)
-	{
-		super(reason);
-	}
+  public NoConnectionException(String reason)
+  {
+    super(reason);
+  }
 
 }

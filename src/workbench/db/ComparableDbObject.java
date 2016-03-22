@@ -28,9 +28,9 @@ package workbench.db;
  * @author Thomas Kellerer
  */
 public interface ComparableDbObject
-	extends DbObject
+  extends DbObject
 {
-	boolean isComparableWith(DbObject other);
-	boolean isEqualTo(DbObject other);
+  boolean isComparableWith(DbObject other);
+  boolean isEqualTo(DbObject other);
 
 }

@@ -52,67 +52,67 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class H2IndexReader
-	extends JdbcIndexReader
+  extends JdbcIndexReader
 {
-	private Statement primaryKeysStatement;
-	private boolean useJDBCRetrieval;
+  private Statement primaryKeysStatement;
+  private boolean useJDBCRetrieval;
 
-	public H2IndexReader(DbMetadata meta)
-	{
-		super(meta);
-		this.useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.h2.getprimarykeyindex.usejdbc", false);
-		if (!this.useJDBCRetrieval)
-		{
-			this.pkIndexNameColumn = "PK_INDEX_NAME";
-		}
-	}
+  public H2IndexReader(DbMetadata meta)
+  {
+    super(meta);
+    this.useJDBCRetrieval = Settings.getInstance().getBoolProperty("workbench.db.h2.getprimarykeyindex.usejdbc", false);
+    if (!this.useJDBCRetrieval)
+    {
+      this.pkIndexNameColumn = "PK_INDEX_NAME";
+    }
+  }
 
-	@Override
-	protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String table)
-		throws SQLException
-	{
-		if (useJDBCRetrieval)
-		{
-			return super.getPrimaryKeyInfo(catalog, schema, table);
-		}
+  @Override
+  protected ResultSet getPrimaryKeyInfo(String catalog, String schema, String table)
+    throws SQLException
+  {
+    if (useJDBCRetrieval)
+    {
+      return super.getPrimaryKeyInfo(catalog, schema, table);
+    }
 
-		if (primaryKeysStatement != null)
-		{
-			LogMgr.logWarning("H2IndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
-			primaryKeysResultDone();
-		}
+    if (primaryKeysStatement != null)
+    {
+      LogMgr.logWarning("H2IndexReader.getPrimeryKeys()", "getPrimeryKeys() called with pending statement!");
+      primaryKeysResultDone();
+    }
 
-		String sql = "" +
-			"SELECT table_catalog as table_cat, \n" +
-			"       table_schema as table_schem, \n" +
-			"       table_name, \n" +
-			"       column_name, \n " +
-			"       ordinal_position as key_seq, \n " +
-			"       constraint_name as pk_name, \n" +
-			"       index_name as pk_index_name \n" +
+    String sql = "" +
+      "SELECT table_catalog as table_cat, \n" +
+      "       table_schema as table_schem, \n" +
+      "       table_name, \n" +
+      "       column_name, \n " +
+      "       ordinal_position as key_seq, \n " +
+      "       constraint_name as pk_name, \n" +
+      "       index_name as pk_index_name \n" +
       "FROM information_schema.indexes \n" +
       "WHERE primary_key = true \n";
 
-		primaryKeysStatement = this.metaData.getSqlConnection().createStatement();
-		if (StringUtil.isNonBlank(schema))
-		{
-			sql += " AND table_schema = '" + StringUtil.trimQuotes(schema) + "' ";
-		}
-		sql += " AND table_name = '" + StringUtil.trimQuotes(table) + "'";
+    primaryKeysStatement = this.metaData.getSqlConnection().createStatement();
+    if (StringUtil.isNonBlank(schema))
+    {
+      sql += " AND table_schema = '" + StringUtil.trimQuotes(schema) + "' ";
+    }
+    sql += " AND table_name = '" + StringUtil.trimQuotes(table) + "'";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("H2IndexReader.getPrimaryKeys()", "Using query=\n" + sql);
-		}
-		return primaryKeysStatement.executeQuery(sql);
-	}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("H2IndexReader.getPrimaryKeys()", "Using query=\n" + sql);
+    }
+    return primaryKeysStatement.executeQuery(sql);
+  }
 
-	@Override
-	protected void primaryKeysResultDone()
-	{
-		SqlUtil.closeStatement(primaryKeysStatement);
-		primaryKeysStatement = null;
-	}
+  @Override
+  protected void primaryKeysResultDone()
+  {
+    SqlUtil.closeStatement(primaryKeysStatement);
+    primaryKeysStatement = null;
+  }
 
   @Override
   public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition)

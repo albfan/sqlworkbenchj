@@ -42,64 +42,64 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class HsqlTableSourceBuilder
-	extends TableSourceBuilder
+  extends TableSourceBuilder
 {
 
-	public HsqlTableSourceBuilder(WbConnection con)
-	{
-		super(con);
-	}
+  public HsqlTableSourceBuilder(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
-	{
-		if (tbl == null) return;
-		if (tbl.getSourceOptions().isInitialized()) return;
+  @Override
+  public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
+  {
+    if (tbl == null) return;
+    if (tbl.getSourceOptions().isInitialized()) return;
 
-		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
+    boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.hsql_database_engine.table_type.show_always", false);
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select hsqldb_type, \n" +
-			"       (select upper(property_value) from information_schema.system_properties where property_name = 'hsqldb.default_table_type') as default_type \n" +
-			"from information_schema.system_tables \n" +
-			"where table_name = ? \n" +
-			"and table_schem = ?";
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql =
+      "select hsqldb_type, \n" +
+      "       (select upper(property_value) from information_schema.system_properties where property_name = 'hsqldb.default_table_type') as default_type \n" +
+      "from information_schema.system_tables \n" +
+      "where table_name = ? \n" +
+      "and table_schem = ?";
 
-		try
-		{
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getTableName());
-			pstmt.setString(2, tbl.getSchema());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("HsqlTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String type = rs.getString(1);
-				String defaultType = rs.getString(2);
-				if (defaultType == null)
-				{
-					defaultType = "CACHED";
-				}
-				if (alwaysShowType || !defaultType.equals(type))
-				{
-					tbl.getSourceOptions().setTypeModifier(type);
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("HsqlTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		tbl.getSourceOptions().setInitialized();
-	}
+    try
+    {
+      pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, tbl.getTableName());
+      pstmt.setString(2, tbl.getSchema());
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("HsqlTableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+      }
+      rs = pstmt.executeQuery();
+      if (rs.next())
+      {
+        String type = rs.getString(1);
+        String defaultType = rs.getString(2);
+        if (defaultType == null)
+        {
+          defaultType = "CACHED";
+        }
+        if (alwaysShowType || !defaultType.equals(type))
+        {
+          tbl.getSourceOptions().setTypeModifier(type);
+        }
+      }
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("HsqlTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    tbl.getSourceOptions().setInitialized();
+  }
 
 }

@@ -36,237 +36,237 @@ import workbench.util.NumberStringCache;
  */
 public class ForeignKeyDefinition
 {
-	public static final String TAG_FOREIGN_KEY = "foreign-key";
-	public static final String TAG_CONSTRAINT_NAME = "constraint-name";
-	public static final String TAG_SOURCE_COLS = "source-columns";
-	public static final String TAG_TARGET_COLS = "referenced-columns";
-	public static final String TAG_UPDATE_RULE = "update-rule";
-	public static final String TAG_DELETE_RULE = "delete-rule";
-	public static final String TAG_DEFER_RULE = "deferrable";
+  public static final String TAG_FOREIGN_KEY = "foreign-key";
+  public static final String TAG_CONSTRAINT_NAME = "constraint-name";
+  public static final String TAG_SOURCE_COLS = "source-columns";
+  public static final String TAG_TARGET_COLS = "referenced-columns";
+  public static final String TAG_UPDATE_RULE = "update-rule";
+  public static final String TAG_DELETE_RULE = "delete-rule";
+  public static final String TAG_DEFER_RULE = "deferrable";
 
-	private DependencyNode fkDefinition;
+  private DependencyNode fkDefinition;
 
-	private ReportTable foreignTable;
-	private TagWriter tagWriter = new TagWriter();
-	private boolean compareFKRules;
+  private ReportTable foreignTable;
+  private TagWriter tagWriter = new TagWriter();
+  private boolean compareFKRules;
 
-	public ForeignKeyDefinition(DependencyNode node)
-	{
-		this.fkDefinition = node;
-	}
+  public ForeignKeyDefinition(DependencyNode node)
+  {
+    this.fkDefinition = node;
+  }
 
-	public void setForeignTable(ReportTable table)
-	{
-		foreignTable = table;
-	}
+  public void setForeignTable(ReportTable table)
+  {
+    foreignTable = table;
+  }
 
-	public boolean isEnabled()
-	{
-		return fkDefinition.isEnabled();
-	}
+  public boolean isEnabled()
+  {
+    return fkDefinition.isEnabled();
+  }
 
-	public void setCompareFKRules(boolean flag)
-	{
-		compareFKRules = flag;
-	}
+  public void setCompareFKRules(boolean flag)
+  {
+    compareFKRules = flag;
+  }
 
-	public int getUpdateRuleValue()
-	{
-		return fkDefinition.getUpdateActionValue();
-	}
+  public int getUpdateRuleValue()
+  {
+    return fkDefinition.getUpdateActionValue();
+  }
 
-	public int getDeleteRuleValue()
-	{
-		return fkDefinition.getDeleteActionValue();
-	}
+  public int getDeleteRuleValue()
+  {
+    return fkDefinition.getDeleteActionValue();
+  }
 
-	public int getDeferrableRuleValue()
-	{
-		return fkDefinition.getDeferrableValue();
-	}
+  public int getDeferrableRuleValue()
+  {
+    return fkDefinition.getDeferrableValue();
+  }
 
-	public String getUpdateRule()
-	{
-		return fkDefinition.getUpdateAction();
-	}
+  public String getUpdateRule()
+  {
+    return fkDefinition.getUpdateAction();
+  }
 
-	public String getDeleteRule()
-	{
-		return fkDefinition.getDeleteAction();
-	}
+  public String getDeleteRule()
+  {
+    return fkDefinition.getDeleteAction();
+  }
 
-	public String getDeferRule()
-	{
-		return fkDefinition.getDeferrableType();
-	}
+  public String getDeferRule()
+  {
+    return fkDefinition.getDeferrableType();
+  }
 
-	public ReportTable getForeignTable()
-	{
-		return foreignTable;
-	}
+  public ReportTable getForeignTable()
+  {
+    return foreignTable;
+  }
 
-	public String getFkName()
-	{
-		return fkDefinition.getFkName();
-	}
+  public String getFkName()
+  {
+    return fkDefinition.getFkName();
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.getFkName();
-	}
+  @Override
+  public String toString()
+  {
+    return this.getFkName();
+  }
 
-	public StringBuilder getXml(StringBuilder indent)
-	{
-		StringBuilder result = new StringBuilder(250);
-		StringBuilder myindent = new StringBuilder(indent);
-		myindent.append("  ");
-		tagWriter.appendOpenTag(result, indent, TAG_FOREIGN_KEY);
-		result.append('\n');
+  public StringBuilder getXml(StringBuilder indent)
+  {
+    StringBuilder result = new StringBuilder(250);
+    StringBuilder myindent = new StringBuilder(indent);
+    myindent.append("  ");
+    tagWriter.appendOpenTag(result, indent, TAG_FOREIGN_KEY);
+    result.append('\n');
 
-		result.append(getInnerXml(myindent));
+    result.append(getInnerXml(myindent));
 
-		tagWriter.appendCloseTag(result, indent, TAG_FOREIGN_KEY);
+    tagWriter.appendCloseTag(result, indent, TAG_FOREIGN_KEY);
 
-		return result;
-	}
+    return result;
+  }
 
-	public StringBuilder getInnerXml(StringBuilder indent)
-	{
-		StringBuilder result = new StringBuilder(250);
-		StringBuilder colIndent = new StringBuilder(indent);
-		colIndent.append("  ");
-		if (isEnabled())
-		{
-			tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName());
-		}
-		else
-		{
-			tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName(), "enabled", Boolean.toString(isEnabled()));
-		}
-		tagWriter.appendOpenTag(result, indent, "references");
-		result.append('\n');
-		this.foreignTable.appendTableNameXml(result, colIndent);
-		tagWriter.appendCloseTag(result, indent, "references");
+  public StringBuilder getInnerXml(StringBuilder indent)
+  {
+    StringBuilder result = new StringBuilder(250);
+    StringBuilder colIndent = new StringBuilder(indent);
+    colIndent.append("  ");
+    if (isEnabled())
+    {
+      tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName());
+    }
+    else
+    {
+      tagWriter.appendTag(result, indent, TAG_CONSTRAINT_NAME, this.getFkName(), "enabled", Boolean.toString(isEnabled()));
+    }
+    tagWriter.appendOpenTag(result, indent, "references");
+    result.append('\n');
+    this.foreignTable.appendTableNameXml(result, colIndent);
+    tagWriter.appendCloseTag(result, indent, "references");
 
-		tagWriter.appendOpenTag(result, indent, TAG_SOURCE_COLS);
-		result.append('\n');
+    tagWriter.appendOpenTag(result, indent, TAG_SOURCE_COLS);
+    result.append('\n');
 
-		Map<String, String> columnMap = fkDefinition.getColumns();
-		for (String col : columnMap.keySet())
-		{
-			tagWriter.appendTag(result, colIndent, "column", columnMap.get(col));
-		}
-		tagWriter.appendCloseTag(result, indent, TAG_SOURCE_COLS);
+    Map<String, String> columnMap = fkDefinition.getColumns();
+    for (String col : columnMap.keySet())
+    {
+      tagWriter.appendTag(result, colIndent, "column", columnMap.get(col));
+    }
+    tagWriter.appendCloseTag(result, indent, TAG_SOURCE_COLS);
 
-		tagWriter.appendOpenTag(result, indent, TAG_TARGET_COLS);
-		result.append('\n');
-		for (String col : columnMap.keySet())
-		{
-			tagWriter.appendTag(result, colIndent, "column", col);
-		}
-		tagWriter.appendCloseTag(result, indent, TAG_TARGET_COLS);
+    tagWriter.appendOpenTag(result, indent, TAG_TARGET_COLS);
+    result.append('\n');
+    for (String col : columnMap.keySet())
+    {
+      tagWriter.appendTag(result, colIndent, "column", col);
+    }
+    tagWriter.appendCloseTag(result, indent, TAG_TARGET_COLS);
 
-		tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.getDeleteRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeleteRuleValue()));
-		tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.getUpdateRule(), "jdbcValue", NumberStringCache.getNumberString(this.getUpdateRuleValue()));
-		tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.getDeferRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeferrableRuleValue()));
+    tagWriter.appendTag(result, indent, TAG_DELETE_RULE, this.getDeleteRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeleteRuleValue()));
+    tagWriter.appendTag(result, indent, TAG_UPDATE_RULE, this.getUpdateRule(), "jdbcValue", NumberStringCache.getNumberString(this.getUpdateRuleValue()));
+    tagWriter.appendTag(result, indent, TAG_DEFER_RULE, this.getDeferRule(), "jdbcValue", NumberStringCache.getNumberString(this.getDeferrableRuleValue()));
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 53 * hash + (this.getFkName() != null ? this.getFkName().hashCode() : 0);
-		hash = 53 * hash + (this.foreignTable != null ? this.foreignTable.hashCode() : 0);
-		if (compareFKRules)
-		{
-			hash = 53 * hash + this.getUpdateRuleValue();
-			hash = 53 * hash + this.getDeleteRuleValue();
-			hash = 53 * hash + this.getDeferrableRuleValue();
-		}
-		return hash;
-	}
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 53 * hash + (this.getFkName() != null ? this.getFkName().hashCode() : 0);
+    hash = 53 * hash + (this.foreignTable != null ? this.foreignTable.hashCode() : 0);
+    if (compareFKRules)
+    {
+      hash = 53 * hash + this.getUpdateRuleValue();
+      hash = 53 * hash + this.getDeleteRuleValue();
+      hash = 53 * hash + this.getDeferrableRuleValue();
+    }
+    return hash;
+  }
 
-	@Override
-	public boolean equals(Object o)
-	{
-		if (o == null) return false;
-		if (o instanceof ForeignKeyDefinition) return equals((ForeignKeyDefinition)o);
-		return false;
-	}
+  @Override
+  public boolean equals(Object o)
+  {
+    if (o == null) return false;
+    if (o instanceof ForeignKeyDefinition) return equals((ForeignKeyDefinition)o);
+    return false;
+  }
 
-	private boolean compareColumns(ForeignKeyDefinition other)
-	{
-		if (other == null) return false;
-		Map<String, String> myCols = fkDefinition.getColumns();
-		Map<String, String> otherCols = other.fkDefinition.getColumns();
-		if (myCols.size() != otherCols.size()) return false;
+  private boolean compareColumns(ForeignKeyDefinition other)
+  {
+    if (other == null) return false;
+    Map<String, String> myCols = fkDefinition.getColumns();
+    Map<String, String> otherCols = other.fkDefinition.getColumns();
+    if (myCols.size() != otherCols.size()) return false;
 
-		Iterator<String> myItr = myCols.keySet().iterator();
-		Iterator<String> otherItr = otherCols.keySet().iterator();
+    Iterator<String> myItr = myCols.keySet().iterator();
+    Iterator<String> otherItr = otherCols.keySet().iterator();
 
-		while (myItr.hasNext())
-		{
-			String myCol = myItr.next();
-			String otherCol = otherItr.next();  // this is safe because both iterators have the same number of elements
-			if (myCol.equalsIgnoreCase(otherCol))
-			{
-				String myFk = myCols.get(myCol);
-				String otherFk = otherCols.get(otherCol);
-				if (!myFk.equalsIgnoreCase(otherFk)) return false;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+    while (myItr.hasNext())
+    {
+      String myCol = myItr.next();
+      String otherCol = otherItr.next();  // this is safe because both iterators have the same number of elements
+      if (myCol.equalsIgnoreCase(otherCol))
+      {
+        String myFk = myCols.get(myCol);
+        String otherFk = otherCols.get(otherCol);
+        if (!myFk.equalsIgnoreCase(otherFk)) return false;
+      }
+      else
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 
-	public boolean isNameEqual(ForeignKeyDefinition ref)
-	{
-		try
-		{
-			return this.getFkName().equalsIgnoreCase(ref.getFkName());
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
+  public boolean isNameEqual(ForeignKeyDefinition ref)
+  {
+    try
+    {
+      return this.getFkName().equalsIgnoreCase(ref.getFkName());
+    }
+    catch (Exception e)
+    {
+      return false;
+    }
+  }
 
-	public boolean isDefinitionEqual(ForeignKeyDefinition ref)
-	{
-		try
-		{
-			boolean baseEqual = compareColumns(ref);
-			baseEqual = baseEqual && this.foreignTable.equals(ref.foreignTable);
+  public boolean isDefinitionEqual(ForeignKeyDefinition ref)
+  {
+    try
+    {
+      boolean baseEqual = compareColumns(ref);
+      baseEqual = baseEqual && this.foreignTable.equals(ref.foreignTable);
 
-			if (baseEqual && compareFKRules)
-			{
-				baseEqual = baseEqual &&
-							(this.getUpdateRuleValue() == ref.getUpdateRuleValue()) &&
-							(this.getDeleteRuleValue() == ref.getDeleteRuleValue()) &&
-							(this.getDeferrableRuleValue() == ref.getDeferrableRuleValue());
-			}
-			return baseEqual;
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
+      if (baseEqual && compareFKRules)
+      {
+        baseEqual = baseEqual &&
+              (this.getUpdateRuleValue() == ref.getUpdateRuleValue()) &&
+              (this.getDeleteRuleValue() == ref.getDeleteRuleValue()) &&
+              (this.getDeferrableRuleValue() == ref.getDeferrableRuleValue());
+      }
+      return baseEqual;
+    }
+    catch (Exception e)
+    {
+      return false;
+    }
+  }
 
-	public boolean equals(ForeignKeyDefinition ref)
-	{
-		try
-		{
-			return isDefinitionEqual(ref) && isNameEqual(ref);
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
+  public boolean equals(ForeignKeyDefinition ref)
+  {
+    try
+    {
+      return isDefinitionEqual(ref) && isNameEqual(ref);
+    }
+    catch (Exception e)
+    {
+      return false;
+    }
+  }
 }

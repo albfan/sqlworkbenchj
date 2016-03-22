@@ -43,15 +43,15 @@ import workbench.util.StringUtil;
 public class SpHelpTextRunner
 {
 
-	public CharSequence getSource(WbConnection connection, String dbName, String schemaName, String objectName)
-		throws NoConfigException
-	{
-		String currentDb = connection.getCurrentCatalog();
-		CharSequence sql = null;
+  public CharSequence getSource(WbConnection connection, String dbName, String schemaName, String objectName)
+    throws NoConfigException
+  {
+    String currentDb = connection.getCurrentCatalog();
+    CharSequence sql = null;
 
-		boolean changeCatalog = StringUtil.stringsAreNotEqual(currentDb, dbName) && StringUtil.isNonBlank(dbName);
-		Statement stmt = null;
-		ResultSet rs = null;
+    boolean changeCatalog = StringUtil.stringsAreNotEqual(currentDb, dbName) && StringUtil.isNonBlank(dbName);
+    Statement stmt = null;
+    ResultSet rs = null;
 
     String query;
 
@@ -64,63 +64,63 @@ public class SpHelpTextRunner
       query = "sp_helptext [" + schemaName + "." + objectName + "]";
     }
 
-		try
-		{
-			if (changeCatalog)
-			{
-				setCatalog(connection, dbName);
-			}
-			stmt = connection.createStatement();
+    try
+    {
+      if (changeCatalog)
+      {
+        setCatalog(connection, dbName);
+      }
+      stmt = connection.createStatement();
 
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("SpHelpTextRunner.getSource()", "Retrieving view definition using query: " + query);
-			}
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logInfo("SpHelpTextRunner.getSource()", "Retrieving view definition using query: " + query);
+      }
 
-			boolean hasResult = stmt.execute(query);
+      boolean hasResult = stmt.execute(query);
 
-			if (hasResult)
-			{
-				rs = stmt.getResultSet();
-				StringBuilder source = new StringBuilder(1000);
-				while (rs.next())
-				{
-					String line = rs.getString(1);
-					if (line != null)
-					{
-						source.append(rs.getString(1));
-					}
-				}
-				StringUtil.trimTrailingWhitespace(source);
-				sql = source;
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("SpHelpTextRunner.getSource()", "Could not retrieve view definition using: " + query, ex);
-			sql = ex.getMessage();
-		}
-		finally
-		{
-			if (changeCatalog)
-			{
-				setCatalog(connection, currentDb);
-			}
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return sql;
-	}
+      if (hasResult)
+      {
+        rs = stmt.getResultSet();
+        StringBuilder source = new StringBuilder(1000);
+        while (rs.next())
+        {
+          String line = rs.getString(1);
+          if (line != null)
+          {
+            source.append(rs.getString(1));
+          }
+        }
+        StringUtil.trimTrailingWhitespace(source);
+        sql = source;
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("SpHelpTextRunner.getSource()", "Could not retrieve view definition using: " + query, ex);
+      sql = ex.getMessage();
+    }
+    finally
+    {
+      if (changeCatalog)
+      {
+        setCatalog(connection, currentDb);
+      }
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return sql;
+  }
 
-	private void setCatalog(WbConnection connection, String newCatalog)
-	{
-		try
-		{
-			connection.getSqlConnection().setCatalog(newCatalog);
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logWarning("SpHelpTextRunner.setCatalog()", "Could not change database", ex);
-		}
-	}
+  private void setCatalog(WbConnection connection, String newCatalog)
+  {
+    try
+    {
+      connection.getSqlConnection().setCatalog(newCatalog);
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("SpHelpTextRunner.setCatalog()", "Could not change database", ex);
+    }
+  }
 
 }

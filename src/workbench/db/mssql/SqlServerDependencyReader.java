@@ -162,9 +162,9 @@ public class SqlServerDependencyReader
 
     String fqName = buildFQName(connection, base);
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s;
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      String s;
       if (useFQN)
       {
         s = SqlUtil.replaceParameters(sql, fqName);
@@ -174,8 +174,8 @@ public class SqlServerDependencyReader
         s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
       }
 
-			LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
-		}
+      LogMgr.logDebug("SqlServerDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
+    }
 
     String oldCatalog = changeDatabase(connection, base.getCatalog());
 

@@ -50,459 +50,459 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DependencyNode
-	implements Serializable
+  implements Serializable
 {
-	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+  private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
 
-	private DependencyNode parentNode;
-	private final TableIdentifier table;
-	private String updateAction = "";
-	private String deleteAction = "";
-	private String fkName;
-	private String deferrable;
+  private DependencyNode parentNode;
+  private final TableIdentifier table;
+  private String updateAction = "";
+  private String deleteAction = "";
+  private String fkName;
+  private String deferrable;
 
-	private int updateActionValue;
-	private int deleteActionValue;
-	private int deferrableValue;
+  private int updateActionValue;
+  private int deleteActionValue;
+  private int deferrableValue;
 
-	private boolean enabled = true;
-	private boolean validated = true;
+  private boolean enabled = true;
+  private boolean validated = true;
 
-	/**
-	 * Maps the columns of the base table (this.table) to the matching column
-	 * of the parent table (parentNode.getTable()).
-	 *
-	 * The LinkedHashMap is used to preserve the order of the columns in the FK definition.
-	 */
-	private final Map<String, String> columns = new LinkedHashMap<>();
+  /**
+   * Maps the columns of the base table (this.table) to the matching column
+   * of the parent table (parentNode.getTable()).
+   *
+   * The LinkedHashMap is used to preserve the order of the columns in the FK definition.
+   */
+  private final Map<String, String> columns = new LinkedHashMap<>();
 
-	private final List<DependencyNode> childTables = new ArrayList<>();
+  private final List<DependencyNode> childTables = new ArrayList<>();
 
-	public DependencyNode(TableIdentifier aTable)
-	{
-		this.table = aTable.createCopy();
-		this.parentNode = null;
-	}
+  public DependencyNode(TableIdentifier aTable)
+  {
+    this.table = aTable.createCopy();
+    this.parentNode = null;
+  }
 
-	public void addColumnDefinition(String aColumn, String aParentColumn)
-	{
-		Object currentParent = this.columns.get(aColumn);
-		if (currentParent == null)
-		{
-			this.columns.put(aColumn, aParentColumn);
-		}
-	}
+  public void addColumnDefinition(String aColumn, String aParentColumn)
+  {
+    Object currentParent = this.columns.get(aColumn);
+    if (currentParent == null)
+    {
+      this.columns.put(aColumn, aParentColumn);
+    }
+  }
 
-	public boolean isEnabled()
-	{
-		return enabled;
-	}
+  public boolean isEnabled()
+  {
+    return enabled;
+  }
 
-	public void setEnabled(boolean enabled)
-	{
-		this.enabled = enabled;
-	}
+  public void setEnabled(boolean enabled)
+  {
+    this.enabled = enabled;
+  }
 
-	public boolean isValidated()
-	{
-		return validated;
-	}
+  public boolean isValidated()
+  {
+    return validated;
+  }
 
-	public void setValidated(boolean validated)
-	{
-		this.validated = validated;
-	}
+  public void setValidated(boolean validated)
+  {
+    this.validated = validated;
+  }
 
-	public String getDeferrableType()
-	{
-		return deferrable;
-	}
+  public String getDeferrableType()
+  {
+    return deferrable;
+  }
 
-	public void setDeferrableType(String type)
-	{
-		this.deferrable = type;
-	}
+  public void setDeferrableType(String type)
+  {
+    this.deferrable = type;
+  }
 
-	/**
-	 * Returns the level of this node in the dependency hierarchy.
-	 * @return 0 if no parent is available (i.e. the root of the tree)
-	 *         -1 if this is a self referencing dependency
-	 */
-	public int getLevel()
-	{
-		if (parentNode == null) return 0;
-		if (parentNode == this) return -1;
-		return 1 + parentNode.getLevel();
-	}
+  /**
+   * Returns the level of this node in the dependency hierarchy.
+   * @return 0 if no parent is available (i.e. the root of the tree)
+   *         -1 if this is a self referencing dependency
+   */
+  public int getLevel()
+  {
+    if (parentNode == null) return 0;
+    if (parentNode == this) return -1;
+    return 1 + parentNode.getLevel();
+  }
 
-	public void setParent(DependencyNode aParent, String aFkName)
-	{
-		if (aFkName == null) throw new NullPointerException("FK Name may not be null");
-		this.parentNode = aParent;
-		this.fkName = aFkName;
-	}
+  public void setParent(DependencyNode aParent, String aFkName)
+  {
+    if (aFkName == null) throw new NullPointerException("FK Name may not be null");
+    this.parentNode = aParent;
+    this.fkName = aFkName;
+  }
 
-	@Override
-	public String toString()
-	{
-		String result = this.table.getTableName();
-		if (this.fkName != null)
-		{
-			result += " (" + this.fkName + ")";
-		}
-		return result;
-	}
+  @Override
+  public String toString()
+  {
+    String result = this.table.getTableName();
+    if (this.fkName != null)
+    {
+      result += " (" + this.fkName + ")";
+    }
+    return result;
+  }
 
-	public String debugString()
-	{
+  public String debugString()
+  {
 
-		if (parentNode == null)
-		{
-			return "root node for table " + this.table.getTableName();
-		}
+    if (parentNode == null)
+    {
+      return "root node for table " + this.table.getTableName();
+    }
 
-		StringBuilder result = new StringBuilder(20);
-		if (fkName != null)
-		{
-			result.append("foreign key " + this.fkName + ", ");
-		}
+    StringBuilder result = new StringBuilder(20);
+    if (fkName != null)
+    {
+      result.append("foreign key " + this.fkName + ", ");
+    }
 
-		result.append(this.table.getTableName());
-		if (columns.size() > 0)
-		{
-			String cols = StringUtil.listToString(columns.keySet(), ',');
-			result.append('(');
-			result.append(cols);
-			result.append(')');
-		}
+    result.append(this.table.getTableName());
+    if (columns.size() > 0)
+    {
+      String cols = StringUtil.listToString(columns.keySet(), ',');
+      result.append('(');
+      result.append(cols);
+      result.append(')');
+    }
 
-		if (parentNode != null)
-		{
-			result.append(" references ");
-			result.append(parentNode.table.getTableName());
-			result.append('(');
-		}
-		else if (columns.size() > 0)
-		{
-			result.append(" --> (");
-		}
-		boolean first = true;
-		for (String col : columns.keySet())
-		{
-			if (!first)
-			{
-				result.append(',');
-			}
-			result.append(columns.get(col));
-			first = false;
-		}
-		if (columns.size() > 0)
-		{
-			result.append(')');
-		}
-		result.append(", level:");
-		result.append(getLevel());
-		return result.toString();
-	}
+    if (parentNode != null)
+    {
+      result.append(" references ");
+      result.append(parentNode.table.getTableName());
+      result.append('(');
+    }
+    else if (columns.size() > 0)
+    {
+      result.append(" --> (");
+    }
+    boolean first = true;
+    for (String col : columns.keySet())
+    {
+      if (!first)
+      {
+        result.append(',');
+      }
+      result.append(columns.get(col));
+      first = false;
+    }
+    if (columns.size() > 0)
+    {
+      result.append(')');
+    }
+    result.append(", level:");
+    result.append(getLevel());
+    return result.toString();
+  }
 
   public List<String> getSourceColumns()
   {
     return new ArrayList<>(columns.keySet());
   }
 
-	public String getSourceColumnsList()
-	{
-		if (CollectionUtil.isEmpty(columns)) return "";
-		return StringUtil.listToString(columns.keySet(), ',');
-	}
+  public String getSourceColumnsList()
+  {
+    if (CollectionUtil.isEmpty(columns)) return "";
+    return StringUtil.listToString(columns.keySet(), ',');
+  }
 
   public List<String> getTargetColumns()
   {
     List<String> result = new ArrayList<>(columns.size());
-		for (String col : columns.keySet())
-		{
-			result.add(columns.get(col));
-		}
+    for (String col : columns.keySet())
+    {
+      result.add(columns.get(col));
+    }
     return result;
   }
 
-	public String getTargetColumnsList()
-	{
-		if (CollectionUtil.isEmpty(columns)) return "";
-		StringBuilder result = new StringBuilder(columns.size() * 15);
-		boolean first = true;
-		for (String col : columns.keySet())
-		{
-			if (!first)
-			{
-				result.append(',');
-			}
-			result.append(columns.get(col));
-			first = false;
-		}
-		return result.toString();
-	}
+  public String getTargetColumnsList()
+  {
+    if (CollectionUtil.isEmpty(columns)) return "";
+    StringBuilder result = new StringBuilder(columns.size() * 15);
+    boolean first = true;
+    for (String col : columns.keySet())
+    {
+      if (!first)
+      {
+        result.append(',');
+      }
+      result.append(columns.get(col));
+      first = false;
+    }
+    return result.toString();
+  }
 
-	public String getFkName()
-	{
-		return this.fkName;
-	}
+  public String getFkName()
+  {
+    return this.fkName;
+  }
 
-	public TableIdentifier getParentTable()
-	{
-		if (parentNode == null) return null;
-		return this.parentNode.getTable();
-	}
+  public TableIdentifier getParentTable()
+  {
+    if (parentNode == null) return null;
+    return this.parentNode.getTable();
+  }
 
-	public TableIdentifier getTable()
-	{
-		return this.table;
-	}
+  public TableIdentifier getTable()
+  {
+    return this.table;
+  }
 
-	/**
-	 * Returns a Map that maps the columns of the base table to the matching column
-	 * of the related (parent/child) table.
-	 *
-	 * The keys to the map are columns from this node's table {@link #getTable()}
-	 * The values in this map are columns found in this node's "parent" table
-	 *
-	 * @see #getTable()
-	 * @see #getParentTable()
-	 */
-	public Map<String, String> getColumns()
-	{
-		if (this.columns == null)
-		{
-			return Collections.emptyMap();
-		}
-		else
-		{
-			return Collections.unmodifiableMap(this.columns);
-		}
-	}
+  /**
+   * Returns a Map that maps the columns of the base table to the matching column
+   * of the related (parent/child) table.
+   *
+   * The keys to the map are columns from this node's table {@link #getTable()}
+   * The values in this map are columns found in this node's "parent" table
+   *
+   * @see #getTable()
+   * @see #getParentTable()
+   */
+  public Map<String, String> getColumns()
+  {
+    if (this.columns == null)
+    {
+      return Collections.emptyMap();
+    }
+    else
+    {
+      return Collections.unmodifiableMap(this.columns);
+    }
+  }
 
-	/**
-	 *	Checks if this node defines the foreign key constraint name aFkname
-	 *	to the given table
-	 */
-	public boolean isDefinitionFor(TableIdentifier tbl, String aFkname)
-	{
-		if (aFkname == null) return false;
-		return this.table.equals(tbl) && aFkname.equals(this.fkName);
-	}
+  /**
+   *  Checks if this node defines the foreign key constraint name aFkname
+   *  to the given table
+   */
+  public boolean isDefinitionFor(TableIdentifier tbl, String aFkname)
+  {
+    if (aFkname == null) return false;
+    return this.table.equals(tbl) && aFkname.equals(this.fkName);
+  }
 
-	@Override
-	public boolean equals(Object other)
-	{
-		if (other instanceof DependencyNode)
-		{
-			DependencyNode node = (DependencyNode) other;
-			return this.isDefinitionFor(node.getTable(), node.getFkName());
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other instanceof DependencyNode)
+    {
+      DependencyNode node = (DependencyNode) other;
+      return this.isDefinitionFor(node.getTable(), node.getFkName());
+    }
+    return false;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		StringBuilder sb = new StringBuilder(60);
-		sb.append(this.table.getTableExpression() + "-" + this.fkName);
-		return StringUtil.hashCode(sb);
-	}
+  @Override
+  public int hashCode()
+  {
+    StringBuilder sb = new StringBuilder(60);
+    sb.append(this.table.getTableExpression() + "-" + this.fkName);
+    return StringUtil.hashCode(sb);
+  }
 
-	public boolean isRoot()
-	{
-		return this.parentNode == null;
-	}
+  public boolean isRoot()
+  {
+    return this.parentNode == null;
+  }
 
-	public DependencyNode getParent()
-	{
-		return this.parentNode;
-	}
+  public DependencyNode getParent()
+  {
+    return this.parentNode;
+  }
 
-	public List<DependencyNode> getChildren()
-	{
-		return this.childTables;
-	}
+  public List<DependencyNode> getChildren()
+  {
+    return this.childTables;
+  }
 
-	/**
-	 * Recursively finds a DependencyNode in the tree of nodes
-	 */
-	public DependencyNode findNode(DependencyNode toFind)
-	{
-		if (toFind == null) return null;
-		if (toFind.equals(this)) return this;
-		for (DependencyNode node : childTables)
-		{
-			if (toFind.equals(node))
-			{
-				return node;
-			}
-			else
-			{
-				DependencyNode n = node.findNode(toFind);
-				if (n != null) return n;
-			}
-		}
-		return null;
-	}
+  /**
+   * Recursively finds a DependencyNode in the tree of nodes
+   */
+  public DependencyNode findNode(DependencyNode toFind)
+  {
+    if (toFind == null) return null;
+    if (toFind.equals(this)) return this;
+    for (DependencyNode node : childTables)
+    {
+      if (toFind.equals(node))
+      {
+        return node;
+      }
+      else
+      {
+        DependencyNode n = node.findNode(toFind);
+        if (n != null) return n;
+      }
+    }
+    return null;
+  }
 
-	public DependencyNode addChild(TableIdentifier table, String aFkname)
-	{
-		if (aFkname == null) throw new NullPointerException("FK Name may not be null");
-		for (DependencyNode node : childTables)
-		{
-			if (node.isDefinitionFor(table, aFkname))
-			{
-				return node;
-			}
-		}
-		DependencyNode node = new DependencyNode(table);
-		node.setParent(this, aFkname);
-		this.childTables.add(node);
-		return node;
-	}
+  public DependencyNode addChild(TableIdentifier table, String aFkname)
+  {
+    if (aFkname == null) throw new NullPointerException("FK Name may not be null");
+    for (DependencyNode node : childTables)
+    {
+      if (node.isDefinitionFor(table, aFkname))
+      {
+        return node;
+      }
+    }
+    DependencyNode node = new DependencyNode(table);
+    node.setParent(this, aFkname);
+    this.childTables.add(node);
+    return node;
+  }
 
-	public DependencyNode findChildTree(TableIdentifier table)
-	{
-		if (table == null) return null;
-		if (this.table.equals(table)) return this;
-		for (DependencyNode node : childTables)
-		{
-			DependencyNode tree = node.findChildTree(table);
-			if (tree != null) return tree;
-		}
-		return null;
-	}
+  public DependencyNode findChildTree(TableIdentifier table)
+  {
+    if (table == null) return null;
+    if (this.table.equals(table)) return this;
+    for (DependencyNode node : childTables)
+    {
+      DependencyNode tree = node.findChildTree(table);
+      if (tree != null) return tree;
+    }
+    return null;
+  }
 
-	public boolean containsParentTable(TableIdentifier toCheck)
-	{
-		if (this.parentNode == null) return false;
-		DependencyNode parent = parentNode;
-		while (parent != null)
-		{
-			if (parent.table.equals(toCheck)) return true;
-			parent = parent.parentNode;
-		}
-		return false;
-	}
+  public boolean containsParentTable(TableIdentifier toCheck)
+  {
+    if (this.parentNode == null) return false;
+    DependencyNode parent = parentNode;
+    while (parent != null)
+    {
+      if (parent.table.equals(toCheck)) return true;
+      parent = parent.parentNode;
+    }
+    return false;
+  }
 
-	public boolean containsChildTable(TableIdentifier toCheck)
-	{
-		for (DependencyNode node : childTables)
-		{
-			if (node.getTable().equals(toCheck)) return true;
-		}
-		return false;
-	}
+  public boolean containsChildTable(TableIdentifier toCheck)
+  {
+    for (DependencyNode node : childTables)
+    {
+      if (node.getTable().equals(toCheck)) return true;
+    }
+    return false;
+  }
 
-	public boolean containsChild(DependencyNode aNode)
-	{
-		if (aNode == null) return false;
-		return this.childTables.contains(aNode);
-	}
+  public boolean containsChild(DependencyNode aNode)
+  {
+    if (aNode == null) return false;
+    return this.childTables.contains(aNode);
+  }
 
-	public boolean addChild(DependencyNode aTable)
-	{
-		if (this.containsChild(aTable)) return false;
-		this.childTables.add(aTable);
-		return true;
-	}
+  public boolean addChild(DependencyNode aTable)
+  {
+    if (this.containsChild(aTable)) return false;
+    this.childTables.add(aTable);
+    return true;
+  }
 
-	public String getDeleteAction()
-	{
-		return this.deleteAction;
-	}
+  public String getDeleteAction()
+  {
+    return this.deleteAction;
+  }
 
-	public void setDeleteAction(String anAction)
-	{
-		this.deleteAction = anAction;
-	}
+  public void setDeleteAction(String anAction)
+  {
+    this.deleteAction = anAction;
+  }
 
-	public String getUpdateAction()
-	{
-		return this.updateAction;
-	}
+  public String getUpdateAction()
+  {
+    return this.updateAction;
+  }
 
-	public void setUpdateAction(String anAction)
-	{
-		this.updateAction = anAction;
-	}
+  public void setUpdateAction(String anAction)
+  {
+    this.updateAction = anAction;
+  }
 
-	public void setUpdateActionValue(int action)
-	{
-		this.updateActionValue = action;
-	}
+  public void setUpdateActionValue(int action)
+  {
+    this.updateActionValue = action;
+  }
 
-	public int getUpdateActionValue()
-	{
-		return updateActionValue;
-	}
+  public int getUpdateActionValue()
+  {
+    return updateActionValue;
+  }
 
-	public int getDeleteActionValue()
-	{
-		return deleteActionValue;
-	}
+  public int getDeleteActionValue()
+  {
+    return deleteActionValue;
+  }
 
-	public void setDeleteActionValue(int action)
-	{
-		this.deleteActionValue = action;
-	}
+  public void setDeleteActionValue(int action)
+  {
+    this.deleteActionValue = action;
+  }
 
-	public int getDeferrableValue()
-	{
-		return deferrableValue;
-	}
+  public int getDeferrableValue()
+  {
+    return deferrableValue;
+  }
 
-	public void setDeferrableValue(int deferrable)
-	{
-		this.deferrableValue = deferrable;
-	}
+  public void setDeferrableValue(int deferrable)
+  {
+    this.deferrableValue = deferrable;
+  }
 
-	public void printAll(File debugFile)
-	{
-		PrintWriter out = null;
-		try
-		{
-			out = new PrintWriter(new FileWriter(debugFile));
-			printAll(out);
-		}
-		catch (IOException io)
-		{
+  public void printAll(File debugFile)
+  {
+    PrintWriter out = null;
+    try
+    {
+      out = new PrintWriter(new FileWriter(debugFile));
+      printAll(out);
+    }
+    catch (IOException io)
+    {
 
-		}
-		finally
-		{
-			FileUtil.closeQuietely(out);
-		}
-	}
+    }
+    finally
+    {
+      FileUtil.closeQuietely(out);
+    }
+  }
 
-	public void printAll(PrintWriter out)
-	{
-		int level = getLevel();
-		StringBuilder indent = new StringBuilder(level * 2);
-		for (int i=0; i < level; i++) indent.append("  ");
+  public void printAll(PrintWriter out)
+  {
+    int level = getLevel();
+    StringBuilder indent = new StringBuilder(level * 2);
+    for (int i=0; i < level; i++) indent.append("  ");
 
-		out.println(indent + debugString());
-		for (DependencyNode node : childTables)
-		{
-			node.printAll(out);
-		}
-	}
+    out.println(indent + debugString());
+    for (DependencyNode node : childTables)
+    {
+      node.printAll(out);
+    }
+  }
 
-	public void printParents(PrintWriter out)
-	{
-		int level = getLevel();
-		StringBuilder indent = new StringBuilder(level * 2);
-		for (int i=0; i < level; i++) indent.append("  ");
+  public void printParents(PrintWriter out)
+  {
+    int level = getLevel();
+    StringBuilder indent = new StringBuilder(level * 2);
+    for (int i=0; i < level; i++) indent.append("  ");
 
-		out.println(indent + debugString());
-		DependencyNode parent = parentNode;
-		while (parent != null)
-		{
-			out.print(indent + parent.debugString());
-			parent = parent.parentNode;
-		}
-	}
+    out.println(indent + debugString());
+    DependencyNode parent = parentNode;
+    while (parent != null)
+    {
+      out.print(indent + parent.debugString());
+      parent = parent.parentNode;
+    }
+  }
 
 }

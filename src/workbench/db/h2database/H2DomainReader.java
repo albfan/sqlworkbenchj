@@ -54,9 +54,9 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class H2DomainReader
-	implements ObjectListExtender
+  implements ObjectListExtender
 {
-	final String baseSql = "SELECT domain_catalog,  \n" +
+  final String baseSql = "SELECT domain_catalog,  \n" +
                          "       domain_schema, \n" +
                          "       domain_name, \n" +
                          "       type_name, \n" +
@@ -66,209 +66,209 @@ public class H2DomainReader
                          "       is_nullable as nullable, \n" +
                          "       column_default as default_value, \n" +
                          "       check_constraint as constraint_definition, \n" +
-						             "       remarks \n" +
+                         "       remarks \n" +
                          " FROM information_schema.domains ";
 
-	private String getSql(WbConnection connection, String schema, String name)
-	{
-		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
+  private String getSql(WbConnection connection, String schema, String name)
+  {
+    StringBuilder sql = new StringBuilder(baseSql.length() + 40);
 
-		sql.append(baseSql);
+    sql.append(baseSql);
 
-		boolean whereAdded = false;
-		if (StringUtil.isNonBlank(name))
-		{
-			sql.append(" WHERE domain_name like '");
-			sql.append(connection.getMetadata().quoteObjectname(name));
-			sql.append("%' ");
-			whereAdded = true;
-		}
+    boolean whereAdded = false;
+    if (StringUtil.isNonBlank(name))
+    {
+      sql.append(" WHERE domain_name like '");
+      sql.append(connection.getMetadata().quoteObjectname(name));
+      sql.append("%' ");
+      whereAdded = true;
+    }
 
-		if (StringUtil.isNonBlank(schema))
-		{
-			sql.append(whereAdded ? " AND " : " WHERE ");
+    if (StringUtil.isNonBlank(schema))
+    {
+      sql.append(whereAdded ? " AND " : " WHERE ");
 
-			sql.append(" domain_schema = '");
-			sql.append(connection.getMetadata().quoteObjectname(schema));
-			sql.append("'");
-		}
-		sql.append(" ORDER BY 1, 2 ");
+      sql.append(" domain_schema = '");
+      sql.append(connection.getMetadata().quoteObjectname(schema));
+      sql.append("'");
+    }
+    sql.append(" ORDER BY 1, 2 ");
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("H2DomainReader.getSql()", "Using SQL=\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("H2DomainReader.getSql()", "Using SQL=\n" + sql);
+    }
 
-		return sql.toString();
-	}
+    return sql.toString();
+  }
 
-	public List<DomainIdentifier> getDomainList(WbConnection connection, String schemaPattern, String namePattern)
-	{
-		Statement stmt = null;
-		ResultSet rs = null;
-		Savepoint sp = null;
-		List<DomainIdentifier> result = new ArrayList<>();
-		try
-		{
-			sp = connection.setSavepoint();
-			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern);
-			rs = stmt.executeQuery(sql);
-			while (rs.next())
-			{
-				String cat = rs.getString("domain_catalog");
-				String schema = rs.getString("domain_schema");
-				String name = rs.getString("domain_name");
-				DomainIdentifier domain = new DomainIdentifier(cat, schema, name);
-				domain.setCheckConstraint(rs.getString("constraint_definition"));
-				String typeName = rs.getString("type_name");
-				int type = rs.getInt("data_type");
-				int precision = rs.getInt("precision");
-				int scale = rs.getInt("scale");
-				String dataType = SqlUtil.getSqlTypeDisplay(typeName, type, scale, precision);
-				domain.setDataType(dataType);
-				domain.setNullable(rs.getBoolean("nullable"));
-				domain.setDefaultValue(rs.getString("default_value"));
-				domain.setComment(rs.getString("remarks"));
-				result.add(domain);
-			}
-			connection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			connection.rollback(sp);
-			LogMgr.logError("H2DomainReader.getDomainList()", "Could not read domains", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+  public List<DomainIdentifier> getDomainList(WbConnection connection, String schemaPattern, String namePattern)
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
+    Savepoint sp = null;
+    List<DomainIdentifier> result = new ArrayList<>();
+    try
+    {
+      sp = connection.setSavepoint();
+      stmt = connection.createStatementForQuery();
+      String sql = getSql(connection, schemaPattern, namePattern);
+      rs = stmt.executeQuery(sql);
+      while (rs.next())
+      {
+        String cat = rs.getString("domain_catalog");
+        String schema = rs.getString("domain_schema");
+        String name = rs.getString("domain_name");
+        DomainIdentifier domain = new DomainIdentifier(cat, schema, name);
+        domain.setCheckConstraint(rs.getString("constraint_definition"));
+        String typeName = rs.getString("type_name");
+        int type = rs.getInt("data_type");
+        int precision = rs.getInt("precision");
+        int scale = rs.getInt("scale");
+        String dataType = SqlUtil.getSqlTypeDisplay(typeName, type, scale, precision);
+        domain.setDataType(dataType);
+        domain.setNullable(rs.getBoolean("nullable"));
+        domain.setDefaultValue(rs.getString("default_value"));
+        domain.setComment(rs.getString("remarks"));
+        result.add(domain);
+      }
+      connection.releaseSavepoint(sp);
+    }
+    catch (SQLException e)
+    {
+      connection.rollback(sp);
+      LogMgr.logError("H2DomainReader.getDomainList()", "Could not read domains", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	@Override
-	public boolean isDerivedType()
-	{
-		return false;
-	}
+  @Override
+  public boolean isDerivedType()
+  {
+    return false;
+  }
 
-	@Override
-	public DomainIdentifier getObjectDefinition(WbConnection connection, DbObject object)
-	{
-		List<DomainIdentifier> domains = getDomainList(connection, object.getSchema(), object.getObjectName());
-		if (CollectionUtil.isEmpty(domains)) return null;
-		return domains.get(0);
-	}
+  @Override
+  public DomainIdentifier getObjectDefinition(WbConnection connection, DbObject object)
+  {
+    List<DomainIdentifier> domains = getDomainList(connection, object.getSchema(), object.getObjectName());
+    if (CollectionUtil.isEmpty(domains)) return null;
+    return domains.get(0);
+  }
 
-	public String getDomainSource(DomainIdentifier domain)
-	{
-		if (domain == null) return null;
+  public String getDomainSource(DomainIdentifier domain)
+  {
+    if (domain == null) return null;
 
-		StringBuilder result = new StringBuilder(50);
-		result.append("CREATE DOMAIN ");
-		result.append(domain.getObjectName());
-		result.append(" AS ");
-		result.append(domain.getDataType());
-		if (domain.getDefaultValue() != null)
-		{
-			result.append("\n   DEFAULT ");
-			result.append(domain.getDefaultValue());
-		}
-		if (StringUtil.isNonBlank(domain.getCheckConstraint()) || !domain.isNullable())
-		{
-			result.append("\n   CHECK ");
-			if (StringUtil.isNonBlank(domain.getConstraintName()))
-			{
-				result.append(domain.getConstraintName() + " ");
-			}
-			if (!domain.isNullable()) result.append("NOT NULL ");
-			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
-			{
-				result.append(domain.getCheckConstraint());
-			}
-		}
-		result.append(";\n");
-		if (StringUtil.isNonBlank(domain.getComment()))
-		{
-			result.append("\nCOMMENT ON DOMAIN " + domain.getObjectName() + " IS '");
-			result.append(SqlUtil.escapeQuotes(domain.getComment()));
-			result.append("';\n");
-		}
-		return result.toString();
-	}
+    StringBuilder result = new StringBuilder(50);
+    result.append("CREATE DOMAIN ");
+    result.append(domain.getObjectName());
+    result.append(" AS ");
+    result.append(domain.getDataType());
+    if (domain.getDefaultValue() != null)
+    {
+      result.append("\n   DEFAULT ");
+      result.append(domain.getDefaultValue());
+    }
+    if (StringUtil.isNonBlank(domain.getCheckConstraint()) || !domain.isNullable())
+    {
+      result.append("\n   CHECK ");
+      if (StringUtil.isNonBlank(domain.getConstraintName()))
+      {
+        result.append(domain.getConstraintName() + " ");
+      }
+      if (!domain.isNullable()) result.append("NOT NULL ");
+      if (StringUtil.isNonBlank(domain.getCheckConstraint()))
+      {
+        result.append(domain.getCheckConstraint());
+      }
+    }
+    result.append(";\n");
+    if (StringUtil.isNonBlank(domain.getComment()))
+    {
+      result.append("\nCOMMENT ON DOMAIN " + domain.getObjectName() + " IS '");
+      result.append(SqlUtil.escapeQuotes(domain.getComment()));
+      result.append("';\n");
+    }
+    return result.toString();
+  }
 
-	@Override
-	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
-	{
-		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return false;
+  @Override
+  public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+  {
+    if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return false;
 
-		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
-		if (domains.isEmpty()) return false;
+    List<DomainIdentifier> domains = getDomainList(con, schema, objects);
+    if (domains.isEmpty()) return false;
 
-		for (DomainIdentifier domain : domains)
-		{
-			int row = result.addRow();
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, domain.getSchema());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, domain.getObjectName());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, domain.getComment());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, domain.getObjectType());
-			result.getRow(row).setUserObject(domain);
-		}
-		return true;
-	}
+    for (DomainIdentifier domain : domains)
+    {
+      int row = result.addRow();
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, domain.getSchema());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, domain.getObjectName());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, domain.getComment());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, domain.getObjectType());
+      result.getRow(row).setUserObject(domain);
+    }
+    return true;
+  }
 
-	@Override
-	public boolean handlesType(String type)
-	{
-		return StringUtil.equalStringIgnoreCase("DOMAIN", type);
-	}
+  @Override
+  public boolean handlesType(String type)
+  {
+    return StringUtil.equalStringIgnoreCase("DOMAIN", type);
+  }
 
-	@Override
-	public boolean handlesType(String[] types)
-	{
-		if (types == null) return true;
-		for (String type : types)
-		{
-			if (handlesType(type)) return true;
-		}
-		return false;
-	}
+  @Override
+  public boolean handlesType(String[] types)
+  {
+    if (types == null) return true;
+    for (String type : types)
+    {
+      if (handlesType(type)) return true;
+    }
+    return false;
+  }
 
-	@Override
-	public DataStore getObjectDetails(WbConnection con, DbObject object)
-	{
-		if (object == null) return null;
-		if (!handlesType(object.getObjectType())) return null;
+  @Override
+  public DataStore getObjectDetails(WbConnection con, DbObject object)
+  {
+    if (object == null) return null;
+    if (!handlesType(object.getObjectType())) return null;
 
-		DomainIdentifier domain = getObjectDefinition(con, object);
-		if (domain == null) return null;
+    DomainIdentifier domain = getObjectDefinition(con, object);
+    if (domain == null) return null;
 
-		String[] columns = new String[] { "DOMAIN", "DATA_TYPE", "NULLABLE", "CONSTRAINT", "REMARKS" };
-		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.BOOLEAN, Types.VARCHAR, Types.VARCHAR };
-		int[] sizes = new int[] { 20, 10, 5, 30, 30 };
-		DataStore result = new DataStore(columns, types, sizes);
-		result.addRow();
-		result.setValue(0, 0, domain.getObjectName());
-		result.setValue(0, 1, domain.getDataType());
-		result.setValue(0, 2, domain.isNullable());
-		result.setValue(0, 3, domain.getCheckConstraint());
-		result.setValue(0, 4, domain.getComment());
+    String[] columns = new String[] { "DOMAIN", "DATA_TYPE", "NULLABLE", "CONSTRAINT", "REMARKS" };
+    int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.BOOLEAN, Types.VARCHAR, Types.VARCHAR };
+    int[] sizes = new int[] { 20, 10, 5, 30, 30 };
+    DataStore result = new DataStore(columns, types, sizes);
+    result.addRow();
+    result.setValue(0, 0, domain.getObjectName());
+    result.setValue(0, 1, domain.getDataType());
+    result.setValue(0, 2, domain.isNullable());
+    result.setValue(0, 3, domain.getCheckConstraint());
+    result.setValue(0, 4, domain.getComment());
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public List<String> supportedTypes()
-	{
-		return Collections.singletonList("DOMAIN");
-	}
+  @Override
+  public List<String> supportedTypes()
+  {
+    return Collections.singletonList("DOMAIN");
+  }
 
-	@Override
-	public String getObjectSource(WbConnection con, DbObject object)
-	{
-		return getDomainSource(getObjectDefinition(con, object));
-	}
+  @Override
+  public String getObjectSource(WbConnection con, DbObject object)
+  {
+    return getDomainSource(getObjectDefinition(con, object));
+  }
 
   @Override
   public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)

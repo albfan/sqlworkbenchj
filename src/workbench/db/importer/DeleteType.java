@@ -29,7 +29,7 @@ package workbench.db.importer;
  */
 public enum DeleteType
 {
-	none,
-	delete,
-	truncate;
+  none,
+  delete,
+  truncate;
 }

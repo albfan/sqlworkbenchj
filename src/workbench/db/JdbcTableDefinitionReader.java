@@ -122,11 +122,11 @@ public class JdbcTableDefinitionReader
 
     try
     {
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()",
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("JdbcTableDefinitionReader.getTableColumns()",
           "Calling getColumns() using: catalog="+ catalog + ", schema=" + schema + ", table=" + tablename);
-			}
+      }
 
       long start = System.currentTimeMillis();
       rs = getColumns(catalog, schema, tablename, "%", table.getType());
@@ -210,7 +210,7 @@ public class JdbcTableDefinitionReader
 
         if (dbConnection.getMetadata().isSqlServer() && dbSettings.fixSqlServerAutoincrement())
         {
-					// The Microsoft JDBC Driver does not return the autoincrement attribute correctly for identity columns.
+          // The Microsoft JDBC Driver does not return the autoincrement attribute correctly for identity columns.
           // (And they refuse to fix this: http://social.msdn.microsoft.com/Forums/en/sqldataaccess/thread/20df12f3-d1bf-4526-9daa-239a83a8e435)
           // This hack works around Microsoft's ignorance regarding Java and JDBC
           autoincrement = display.contains("identity");
@@ -243,7 +243,7 @@ public class JdbcTableDefinitionReader
       SqlUtil.closeResult(rs);
     }
 
-		// Some JDBC drivers (e.g. Ingres) do not return the columns in the correct order, so we need to make sure they are sorted correctly
+    // Some JDBC drivers (e.g. Ingres) do not return the columns in the correct order, so we need to make sure they are sorted correctly
     // for any DBMS returning them in the correct order, this shouldn't make a difference.
     ColumnIdentifier.sortByPosition(columns);
 

@@ -46,119 +46,119 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class DB2UniqueConstraintReader
-	implements UniqueConstraintReader
+  implements UniqueConstraintReader
 {
 
-	@Override
-	public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
-	{
-		if (CollectionUtil.isEmpty(indexList))  return;
-		if (con == null) return;
+  @Override
+  public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
+  {
+    if (CollectionUtil.isEmpty(indexList))  return;
+    if (con == null) return;
 
-		String dbid = con.getDbId();
-		// Not supported for db2 iSeries
+    String dbid = con.getDbId();
+    // Not supported for db2 iSeries
     if (dbid.equals(DbMetadata.DBID_DB2_ISERIES)) return;
 
-		StringBuilder sql = new StringBuilder(500);
-		if (dbid.equals(DbMetadata.DBID_DB2_LUW))
-		{
-			// DB2 LUW
-			sql.append(
-				"select indname, indschema, constname \n " +
-				"from ( \n" +
-				"  select ind.indname, ind.indschema, tc.constname \n" +
-				"  from syscat.indexes ind \n" +
-				"    join syscat.tabconst tc \n " +
-				"      on ind.tabschema = tc.tabschema \n " +
-				"     and ind.tabname = tc.tabname \n " +
-				"     and tc.constname = ind.indname \n" +
-				"  where type = 'U' \n" +
-			  ") t \n " +
-				"where (");
-		}
-		else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
-		{
-			// DB2 host
-			sql.append(
-				"select indname, indschema, constname \n" +
-				"from ( \n" +
-				"  select ind.name as indname, ind.creator as indschema, tc.constname  \n" +
-				"  from sysibm.sysindexes ind \n" +
-				"    join sysibm.systabconst tc \n " +
-				"      on ind.tbcreator = tc.tbcreator \n " +
-				"     and ind.tbname = tc.tbname \n " +
-				"     and tc.constname = ind.name \n" +
-				"  where type = 'U' \n " +
-				") t\n " +
-				"where (");
-		}
+    StringBuilder sql = new StringBuilder(500);
+    if (dbid.equals(DbMetadata.DBID_DB2_LUW))
+    {
+      // DB2 LUW
+      sql.append(
+        "select indname, indschema, constname \n " +
+        "from ( \n" +
+        "  select ind.indname, ind.indschema, tc.constname \n" +
+        "  from syscat.indexes ind \n" +
+        "    join syscat.tabconst tc \n " +
+        "      on ind.tabschema = tc.tabschema \n " +
+        "     and ind.tabname = tc.tabname \n " +
+        "     and tc.constname = ind.indname \n" +
+        "  where type = 'U' \n" +
+        ") t \n " +
+        "where (");
+    }
+    else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
+    {
+      // DB2 host
+      sql.append(
+        "select indname, indschema, constname \n" +
+        "from ( \n" +
+        "  select ind.name as indname, ind.creator as indschema, tc.constname  \n" +
+        "  from sysibm.sysindexes ind \n" +
+        "    join sysibm.systabconst tc \n " +
+        "      on ind.tbcreator = tc.tbcreator \n " +
+        "     and ind.tbname = tc.tbname \n " +
+        "     and tc.constname = ind.name \n" +
+        "  where type = 'U' \n " +
+        ") t\n " +
+        "where (");
+    }
 
-		boolean first = true;
-		int idxCount = 0;
+    boolean first = true;
+    int idxCount = 0;
 
-		for (IndexDefinition idx : indexList)
-		{
-			if (!idx.isUnique() || idx.isPrimaryKeyIndex())
-			{
-				continue;
-			}
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				sql.append(" OR ");
-			}
+    for (IndexDefinition idx : indexList)
+    {
+      if (!idx.isUnique() || idx.isPrimaryKeyIndex())
+      {
+        continue;
+      }
+      if (first)
+      {
+        first = false;
+      }
+      else
+      {
+        sql.append(" OR ");
+      }
 
-			idxCount ++;
-			String schema = con.getMetadata().removeQuotes(idx.getSchema());
-			String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
-			sql.append(" (indname = '");
-			sql.append(idxName);
-			sql.append("' AND indschema = '");
-			sql.append(schema);
-			sql.append("') ");
-		}
-		sql.append(')');
+      idxCount ++;
+      String schema = con.getMetadata().removeQuotes(idx.getSchema());
+      String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
+      sql.append(" (indname = '");
+      sql.append(idxName);
+      sql.append("' AND indschema = '");
+      sql.append(schema);
+      sql.append("') ");
+    }
+    sql.append(')');
 
-		if (idxCount == 0)
-		{
-			return;
-		}
+    if (idxCount == 0)
+    {
+      return;
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("DB2UniqueConstraintReader.processIndexList()", "Query to retrieve constraints:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("DB2UniqueConstraintReader.processIndexList()", "Query to retrieve constraints:\n" + sql);
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql.toString());
-			while (rs.next())
-			{
-				String idxName = rs.getString(1).trim();
-				String idxSchema = rs.getString(2).trim();
-				String consName = rs.getString(3).trim();
-				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
-				if (def != null)
-				{
-					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
-					def.setUniqueConstraint(cons);
-				}
-			}
-		}
-		catch (SQLException se)
-		{
-			LogMgr.logError("DB2UniqueConstraintReader.processIndexList()", "Could not retrieve index definition using:\n" + sql, se);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.createStatement();
+      rs = stmt.executeQuery(sql.toString());
+      while (rs.next())
+      {
+        String idxName = rs.getString(1).trim();
+        String idxSchema = rs.getString(2).trim();
+        String consName = rs.getString(3).trim();
+        IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
+        if (def != null)
+        {
+          ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+          def.setUniqueConstraint(cons);
+        }
+      }
+    }
+    catch (SQLException se)
+    {
+      LogMgr.logError("DB2UniqueConstraintReader.processIndexList()", "Could not retrieve index definition using:\n" + sql, se);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
 }

@@ -46,130 +46,130 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerSynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
-	private DbMetadata meta;
+  private DbMetadata meta;
 
-	private final String baseSql =
-		"SELECT db_name(), \n" +
+  private final String baseSql =
+    "SELECT db_name(), \n" +
     "       sc.name as schema_name, \n" +
     "       syn.name as synonym_name, \n" +
     "       syn.base_object_name \n" +
     "FROM sys.synonyms syn with (nolock) \n" +
     "  JOIN sys.schemas sc with (nolock) ON syn.schema_id = sc.schema_id \n";
 
-	public SqlServerSynonymReader(DbMetadata dbMeta)
-	{
-		this.meta = dbMeta;
-	}
+  public SqlServerSynonymReader(DbMetadata dbMeta)
+  {
+    this.meta = dbMeta;
+  }
 
-	public static boolean supportsSynonyms(WbConnection con)
-	{
-		return SqlServerUtil.isSqlServer2005(con);
-	}
+  public static boolean supportsSynonyms(WbConnection con)
+  {
+    return SqlServerUtil.isSqlServer2005(con);
+  }
 
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String schemaPattern, String namePattern)
-		throws SQLException
-	{
-		List<TableIdentifier> result = new ArrayList<>();
-		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
-		sql.append(baseSql);
-		int schemaIndex = -1;
-		int nameIndex = -1;
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String schemaPattern, String namePattern)
+    throws SQLException
+  {
+    List<TableIdentifier> result = new ArrayList<>();
+    StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+    sql.append(baseSql);
+    int schemaIndex = -1;
+    int nameIndex = -1;
 
-		boolean whereAdded = false;
+    boolean whereAdded = false;
 
-		if (StringUtil.isNonBlank(schemaPattern))
-		{
-			sql.append("WHERE sc.name = ?");
-			whereAdded = true;
-			schemaIndex = 1;
-		}
+    if (StringUtil.isNonBlank(schemaPattern))
+    {
+      sql.append("WHERE sc.name = ?");
+      whereAdded = true;
+      schemaIndex = 1;
+    }
 
-		if (StringUtil.isNonBlank(namePattern))
-		{
-			if (whereAdded)
-			{
-				sql.append(" AND ");
-			}
-			else
-			{
-				sql.append("WHERE ");
-			}
-			if (namePattern.indexOf('%') > -1)
-			{
-				sql.append(" syn.name LIKE ? ");
-				namePattern = SqlUtil.escapeUnderscore(namePattern, con);
-				SqlUtil.appendEscapeClause(sql, con, namePattern);
-			}
-			else
-			{
-				sql.append(" syn.name = ? ");
-			}
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      if (whereAdded)
+      {
+        sql.append(" AND ");
+      }
+      else
+      {
+        sql.append("WHERE ");
+      }
+      if (namePattern.indexOf('%') > -1)
+      {
+        sql.append(" syn.name LIKE ? ");
+        namePattern = SqlUtil.escapeUnderscore(namePattern, con);
+        SqlUtil.appendEscapeClause(sql, con, namePattern);
+      }
+      else
+      {
+        sql.append(" syn.name = ? ");
+      }
 
-			if (schemaIndex == 1) nameIndex = 2;
-			else nameIndex = 1;
-		}
+      if (schemaIndex == 1) nameIndex = 2;
+      else nameIndex = 1;
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schemaPattern, namePattern));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schemaPattern, namePattern));
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(sql.toString());
-			if (schemaIndex != -1) stmt.setString(schemaIndex, schemaPattern);
-			if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareStatement(sql.toString());
+      if (schemaIndex != -1) stmt.setString(schemaIndex, schemaPattern);
+      if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
 
-			rs = stmt.executeQuery();
+      rs = stmt.executeQuery();
 
-			while (rs.next())
-			{
+      while (rs.next())
+      {
         String synCat = rs.getString(1);
-				String synSchema = rs.getString(2);
-				String synName = rs.getString(3);
+        String synSchema = rs.getString(2);
+        String synName = rs.getString(3);
 
-				if (synName != null)
-				{
-					TableIdentifier tbl = new TableIdentifier(synCat, synSchema, synName, false);
-					tbl.setType(SYN_TYPE_NAME);
-					tbl.setNeverAdjustCase(true);
-					result.add(tbl);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+        if (synName != null)
+        {
+          TableIdentifier tbl = new TableIdentifier(synCat, synSchema, synName, false);
+          tbl.setType(SYN_TYPE_NAME);
+          tbl.setNeverAdjustCase(true);
+          result.add(tbl);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
-		throws SQLException
-	{
-		String sql = baseSql +
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
+    throws SQLException
+  {
+    String sql = baseSql +
       "WHERE syn.name = ? \n" +
       "  AND sc.name = ?";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" + sql);
+    }
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
+    PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
 
-		stmt.setString(1, synonymName);
-		stmt.setString(2, schema);
+    stmt.setString(1, synonymName);
+    stmt.setString(2, schema);
 
-		ResultSet rs = stmt.executeQuery();
-		TableIdentifier result = null;
+    ResultSet rs = stmt.executeQuery();
+    TableIdentifier result = null;
 
     try
     {
@@ -190,12 +190,12 @@ public class SqlServerSynonymReader
     {
       SqlUtil.closeAll(rs, stmt);
     }
-		if (result == null) return null;
+    if (result == null) return null;
 
-		result.setSchema(schema);
-		TableIdentifier tbl = meta.findObject(result);
+    result.setSchema(schema);
+    TableIdentifier tbl = meta.findObject(result);
 
-		return tbl;
-	}
+    return tbl;
+  }
 
 }

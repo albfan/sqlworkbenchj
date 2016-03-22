@@ -29,25 +29,25 @@ package workbench.db.exporter;
  * @author  Thomas Kellerer
  */
 public class JsonExportWriter
-	extends ExportWriter
+  extends ExportWriter
 {
-	public JsonExportWriter(DataExporter exp)
-	{
-		super(exp);
-	}
+  public JsonExportWriter(DataExporter exp)
+  {
+    super(exp);
+  }
 
-	@Override
-	public RowDataConverter createConverter()
-	{
-		return new JsonRowDataConverter();
-	}
+  @Override
+  public RowDataConverter createConverter()
+  {
+    return new JsonRowDataConverter();
+  }
 
-	@Override
-	public void configureConverter()
-	{
-		super.configureConverter();
-		JsonRowDataConverter conv = (JsonRowDataConverter)this.converter;
-		conv.setNullString(exporter.getNullString());
-	}
+  @Override
+  public void configureConverter()
+  {
+    super.configureConverter();
+    JsonRowDataConverter conv = (JsonRowDataConverter)this.converter;
+    conv.setNullString(exporter.getNullString());
+  }
 
 }

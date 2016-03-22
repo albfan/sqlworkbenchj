@@ -43,130 +43,130 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class NuoDBSequenceReader
-	implements SequenceReader
+  implements SequenceReader
 {
-	private WbConnection dbConn;
-	private String baseQuery;
+  private WbConnection dbConn;
+  private String baseQuery;
 
-	public NuoDBSequenceReader(WbConnection conn)
-	{
-		this.dbConn = conn;
-		baseQuery =
-			"SELECT schema, \n" +
-			"       sequencename\n " +
-			"FROM system.sequences";
-	}
+  public NuoDBSequenceReader(WbConnection conn)
+  {
+    this.dbConn = conn;
+    baseQuery =
+      "SELECT schema, \n" +
+      "       sequencename\n " +
+      "FROM system.sequences";
+  }
 
-	@Override
-	public void readSequenceSource(SequenceDefinition def)
-	{
-		if (def == null) return;
-		CharSequence s = getSequenceSource(def.getCatalog(), def.getSequenceOwner(), def.getSequenceName());
-		def.setSource(s);
-	}
+  @Override
+  public void readSequenceSource(SequenceDefinition def)
+  {
+    if (def == null) return;
+    CharSequence s = getSequenceSource(def.getCatalog(), def.getSequenceOwner(), def.getSequenceName());
+    def.setSource(s);
+  }
 
-	@Override
-	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
-	{
-		StringBuilder query = new StringBuilder(baseQuery.length() + 20);
-		query.append(baseQuery);
-		boolean whereAdded = false;
+  @Override
+  public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
+  {
+    StringBuilder query = new StringBuilder(baseQuery.length() + 20);
+    query.append(baseQuery);
+    boolean whereAdded = false;
 
-		if (StringUtil.isNonBlank(namePattern))
-		{
-			whereAdded = true;
-			query.append(" WHERE ");
-			SqlUtil.appendExpression(query, "SEQUENCENAME", StringUtil.trimQuotes(namePattern), dbConn);
-		}
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      whereAdded = true;
+      query.append(" WHERE ");
+      SqlUtil.appendExpression(query, "SEQUENCENAME", StringUtil.trimQuotes(namePattern), dbConn);
+    }
 
-		if (StringUtil.isNonBlank(schema))
-		{
-			if (!whereAdded)
-			{
-				query.append(" WHERE ");
-			}
-			else
-			{
-				query.append(" AND ");
-			}
-			SqlUtil.appendExpression(query, "SCHEMA", StringUtil.trimQuotes(schema), null);
-		}
+    if (StringUtil.isNonBlank(schema))
+    {
+      if (!whereAdded)
+      {
+        query.append(" WHERE ");
+      }
+      else
+      {
+        query.append(" AND ");
+      }
+      SqlUtil.appendExpression(query, "SCHEMA", StringUtil.trimQuotes(schema), null);
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("NuoDBSequenceReader.getRawSequenceDefinition()", "Query to retrieve sequence:" + query);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("NuoDBSequenceReader.getRawSequenceDefinition()", "Query to retrieve sequence:" + query);
+    }
 
-		DataStore result = null;
-		try
-		{
-			result = SqlUtil.getResultData(dbConn, query.toString(), false);
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("NuoDbSequenceReader.getSequenceDefinition()", "Error when retrieving sequence definition", e);
-		}
-		return result;
-	}
+    DataStore result = null;
+    try
+    {
+      result = SqlUtil.getResultData(dbConn, query.toString(), false);
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("NuoDbSequenceReader.getSequenceDefinition()", "Error when retrieving sequence definition", e);
+    }
+    return result;
+  }
 
 
-	@Override
-	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
-	{
-		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
-		if (ds == null) return Collections.emptyList();
+  @Override
+  public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
+  {
+    DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
+    if (ds == null) return Collections.emptyList();
 
-		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+    List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
-		for (int row = 0; row < ds.getRowCount(); row++)
-		{
-			result.add(createSequenceDefinition(ds, row));
-		}
-		return result;
-	}
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      result.add(createSequenceDefinition(ds, row));
+    }
+    return result;
+  }
 
-	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
-	{
-		SequenceDefinition result = null;
+  private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
+  {
+    SequenceDefinition result = null;
 
     if (ds == null || ds.getRowCount() == 0) return null;
 
-		String name = ds.getValueAsString(row, "SEQUENCENAME");
-		String schema = ds.getValueAsString(row, "SCHEMA");
-		result = new SequenceDefinition(schema, name);
-		result.setSource(buildSource(result));
-		return result;
-	}
+    String name = ds.getValueAsString(row, "SEQUENCENAME");
+    String schema = ds.getValueAsString(row, "SCHEMA");
+    result = new SequenceDefinition(schema, name);
+    result.setSource(buildSource(result));
+    return result;
+  }
 
-	@Override
-	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
-	{
-		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
-		if (ds == null) return null;
-		return createSequenceDefinition(ds, 0);
-	}
+  @Override
+  public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
+  {
+    DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
+    if (ds == null) return null;
+    return createSequenceDefinition(ds, 0);
+  }
 
-	@Override
-	public CharSequence getSequenceSource(String catalog, String owner, String sequence)
-	{
-		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
-		return buildSource(def);
-	}
+  @Override
+  public CharSequence getSequenceSource(String catalog, String owner, String sequence)
+  {
+    SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
+    return buildSource(def);
+  }
 
-	protected CharSequence buildSource(SequenceDefinition def)
-	{
-		if (def == null) return StringUtil.EMPTY_STRING;
+  protected CharSequence buildSource(SequenceDefinition def)
+  {
+    if (def == null) return StringUtil.EMPTY_STRING;
 
-		StringBuilder result = new StringBuilder(100);
-		result.append("CREATE SEQUENCE ");
-		result.append(SqlUtil.buildExpression(dbConn, null, def.getSchema(), def.getSequenceName()));
-		result.append(';');
-		return result;
-	}
+    StringBuilder result = new StringBuilder(100);
+    result.append("CREATE SEQUENCE ");
+    result.append(SqlUtil.buildExpression(dbConn, null, def.getSchema(), def.getSequenceName()));
+    result.append(';');
+    return result;
+  }
 
-	@Override
-	public String getSequenceTypeName()
-	{
-		return SequenceReader.DEFAULT_TYPE_NAME;
-	}
+  @Override
+  public String getSequenceTypeName()
+  {
+    return SequenceReader.DEFAULT_TYPE_NAME;
+  }
 }

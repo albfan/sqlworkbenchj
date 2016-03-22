@@ -29,20 +29,20 @@ package workbench.db.exporter;
  * @author Alessandro Palumbo
  */
 public class XlsxExportWriter
-	extends XlsExportWriter
+  extends XlsExportWriter
 {
 
-	public XlsxExportWriter(DataExporter exp)
-	{
-		super(exp);
-	}
+  public XlsxExportWriter(DataExporter exp)
+  {
+    super(exp);
+  }
 
-	@Override
-	public RowDataConverter createConverter()
-	{
-		XlsRowDataConverter xls = (XlsRowDataConverter)super.createConverter();
-		xls.setUseXLSX();
-		return xls;
-	}
+  @Override
+  public RowDataConverter createConverter()
+  {
+    XlsRowDataConverter xls = (XlsRowDataConverter)super.createConverter();
+    xls.setUseXLSX();
+    return xls;
+  }
 
 }

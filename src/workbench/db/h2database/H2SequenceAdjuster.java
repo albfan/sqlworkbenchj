@@ -43,108 +43,108 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class H2SequenceAdjuster
-	implements SequenceAdjuster
+  implements SequenceAdjuster
 {
-	public H2SequenceAdjuster()
-	{
-	}
+  public H2SequenceAdjuster()
+  {
+  }
 
-	@Override
-	public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
-		throws SQLException
-	{
-		Map<String, String> columns = getColumnSequences(connection, table);
+  @Override
+  public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
+    throws SQLException
+  {
+    Map<String, String> columns = getColumnSequences(connection, table);
 
-		for (Map.Entry<String, String> entry : columns.entrySet())
-		{
-			syncSingleSequence(connection, table, entry.getKey(), entry.getValue());
-		}
+    for (Map.Entry<String, String> entry : columns.entrySet())
+    {
+      syncSingleSequence(connection, table, entry.getKey(), entry.getValue());
+    }
 
-		if (includeCommit && !connection.getAutoCommit())
-		{
-			connection.commit();
-		}
-		return columns.size();
-	}
+    if (includeCommit && !connection.getAutoCommit())
+    {
+      connection.commit();
+    }
+    return columns.size();
+  }
 
-	private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column, String sequence)
-		throws SQLException
-	{
-		Statement stmt = null;
-		ResultSet rs = null;
+  private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column, String sequence)
+    throws SQLException
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
 
-		try
-		{
-			stmt = dbConnection.createStatement();
+    try
+    {
+      stmt = dbConnection.createStatement();
 
-			long maxValue = -1;
-			rs = stmt.executeQuery("select max(" + column + ") from " + table.getTableExpression(dbConnection));
+      long maxValue = -1;
+      rs = stmt.executeQuery("select max(" + column + ") from " + table.getTableExpression(dbConnection));
 
-			if (rs.next())
-			{
-				maxValue = rs.getLong(1) + 1;
-				SqlUtil.closeResult(rs);
-			}
+      if (rs.next())
+      {
+        maxValue = rs.getLong(1) + 1;
+        SqlUtil.closeResult(rs);
+      }
 
-			if (maxValue > 0)
-			{
-				String ddl = "alter sequence " + sequence + " restart with " + Long.toString(maxValue);
-				LogMgr.logDebug("H2SequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
-				stmt.execute(ddl);
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("H2SequenceAdjuster.syncSingleSequence()", "Could not read sequences", ex);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      if (maxValue > 0)
+      {
+        String ddl = "alter sequence " + sequence + " restart with " + Long.toString(maxValue);
+        LogMgr.logDebug("H2SequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
+        stmt.execute(ddl);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("H2SequenceAdjuster.syncSingleSequence()", "Could not read sequences", ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
-	private Map<String, String> getColumnSequences(WbConnection dbConnection, TableIdentifier table)
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select column_name,  \n" +
-			"       column_default \n" +
-			"from information_schema.columns \n" +
-			"where table_name = ? \n" +
-			" and table_schema = ? \n" +
-			" and column_default like '(NEXT VALUE FOR%'";
+  private Map<String, String> getColumnSequences(WbConnection dbConnection, TableIdentifier table)
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql =
+      "select column_name,  \n" +
+      "       column_default \n" +
+      "from information_schema.columns \n" +
+      "where table_name = ? \n" +
+      " and table_schema = ? \n" +
+      " and column_default like '(NEXT VALUE FOR%'";
 
-		Map<String, String> result = new HashMap<>();
-		try
-		{
-			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, table.getRawTableName());
-			pstmt.setString(2, table.getRawSchema());
+    Map<String, String> result = new HashMap<>();
+    try
+    {
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, table.getRawTableName());
+      pstmt.setString(2, table.getRawSchema());
 
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String column = rs.getString(1);
-				String defValue = rs.getString(2);
-				defValue = defValue.replace("NEXT VALUE FOR", "");
-				if (defValue.startsWith("(") && defValue.endsWith(")"))
-				{
-					defValue = defValue.substring(1, defValue.length() -1 );
-				}
-				result.put(column, defValue);
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("H2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return result;
-	}
+      rs = pstmt.executeQuery();
+      while (rs.next())
+      {
+        String column = rs.getString(1);
+        String defValue = rs.getString(2);
+        defValue = defValue.replace("NEXT VALUE FOR", "");
+        if (defValue.startsWith("(") && defValue.endsWith(")"))
+        {
+          defValue = defValue.substring(1, defValue.length() -1 );
+        }
+        result.put(column, defValue);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("H2SequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return result;
+  }
 
 }

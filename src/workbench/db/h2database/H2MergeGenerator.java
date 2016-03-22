@@ -36,95 +36,95 @@ import workbench.storage.SqlLiteralFormatter;
  * @author Thomas Kellerer
  */
 public class H2MergeGenerator
-	implements MergeGenerator
+  implements MergeGenerator
 {
-	private SqlLiteralFormatter formatter;
+  private SqlLiteralFormatter formatter;
 
-	public H2MergeGenerator()
-	{
-		this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
-	}
+  public H2MergeGenerator()
+  {
+    this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
+  }
 
-	@Override
-	public String generateMergeStart(RowDataContainer data)
-	{
-		StringBuilder result = new StringBuilder(100);
-		generateStart(result, data, false);
-		return result.toString();
-	}
+  @Override
+  public String generateMergeStart(RowDataContainer data)
+  {
+    StringBuilder result = new StringBuilder(100);
+    generateStart(result, data, false);
+    return result.toString();
+  }
 
-	@Override
-	public String addRow(ResultInfo info, RowData row, long rowIndex)
-	{
-		StringBuilder sql = new StringBuilder(100);
-		if (rowIndex > 0) sql.append(",\n  ");
-		sql.append('(');
-		appendValues(sql, info, row);
-		sql.append(')');
-		return sql.toString();
-	}
+  @Override
+  public String addRow(ResultInfo info, RowData row, long rowIndex)
+  {
+    StringBuilder sql = new StringBuilder(100);
+    if (rowIndex > 0) sql.append(",\n  ");
+    sql.append('(');
+    appendValues(sql, info, row);
+    sql.append(')');
+    return sql.toString();
+  }
 
-	@Override
-	public String generateMergeEnd(RowDataContainer data)
-	{
-		return ";\n";
-	}
+  @Override
+  public String generateMergeEnd(RowDataContainer data)
+  {
+    return ";\n";
+  }
 
-	@Override
-	public String generateMerge(RowDataContainer data)
-	{
-		StringBuilder sql = new StringBuilder(data.getRowCount());
-		generateStart(sql, data, true);
-		sql.append(";\n");
-		return sql.toString();
-	}
+  @Override
+  public String generateMerge(RowDataContainer data)
+  {
+    StringBuilder sql = new StringBuilder(data.getRowCount());
+    generateStart(sql, data, true);
+    sql.append(";\n");
+    return sql.toString();
+  }
 
-	private void generateStart(StringBuilder sql, RowDataContainer data, boolean withData)
-	{
-		TableIdentifier tbl = data.getUpdateTable();
-		sql.append("MERGE INTO ");
-		sql.append(tbl.getTableExpression(data.getOriginalConnection()));
-		sql.append(" (");
+  private void generateStart(StringBuilder sql, RowDataContainer data, boolean withData)
+  {
+    TableIdentifier tbl = data.getUpdateTable();
+    sql.append("MERGE INTO ");
+    sql.append(tbl.getTableExpression(data.getOriginalConnection()));
+    sql.append(" (");
 
-		ResultInfo info = data.getResultInfo();
-		for (int col=0; col < info.getColumnCount(); col ++)
-		{
-			if (col > 0) sql.append(", ");
-			sql.append(info.getColumnName(col));
-		}
-		sql.append(")\n  KEY (");
-		int pkCount = 0;
-		for (int col=0; col < info.getColumnCount(); col ++)
-		{
-			if (info.getColumn(col).isPkColumn())
-			{
-				if (pkCount > 0) sql.append(", ");
-				sql.append(info.getColumnName(col));
-				pkCount ++;
-			}
-		}
-		sql.append(")\nVALUES\n  ");
-		if (withData)
-		{
-			for (int row=0; row < data.getRowCount(); row++)
-			{
-				if (row > 0) sql.append(",\n  ");
-				sql.append('(');
-				appendValues(sql, info, data.getRow(row));
-				sql.append(')');
-			}
-		}
-	}
+    ResultInfo info = data.getResultInfo();
+    for (int col=0; col < info.getColumnCount(); col ++)
+    {
+      if (col > 0) sql.append(", ");
+      sql.append(info.getColumnName(col));
+    }
+    sql.append(")\n  KEY (");
+    int pkCount = 0;
+    for (int col=0; col < info.getColumnCount(); col ++)
+    {
+      if (info.getColumn(col).isPkColumn())
+      {
+        if (pkCount > 0) sql.append(", ");
+        sql.append(info.getColumnName(col));
+        pkCount ++;
+      }
+    }
+    sql.append(")\nVALUES\n  ");
+    if (withData)
+    {
+      for (int row=0; row < data.getRowCount(); row++)
+      {
+        if (row > 0) sql.append(",\n  ");
+        sql.append('(');
+        appendValues(sql, info, data.getRow(row));
+        sql.append(')');
+      }
+    }
+  }
 
-	private void appendValues(StringBuilder sql, ResultInfo info, RowData rd)
-	{
-		for (int col=0; col < info.getColumnCount(); col++)
-		{
-			if (col > 0) sql.append(", ");
-			ColumnData cd = new ColumnData(rd.getValue(col), info.getColumn(col));
-			sql.append(formatter.getDefaultLiteral(cd));
-		}
-	}
+  private void appendValues(StringBuilder sql, ResultInfo info, RowData rd)
+  {
+    for (int col=0; col < info.getColumnCount(); col++)
+    {
+      if (col > 0) sql.append(", ");
+      ColumnData cd = new ColumnData(rd.getValue(col), info.getColumn(col));
+      sql.append(formatter.getDefaultLiteral(cd));
+    }
+  }
 
 }
 

@@ -45,109 +45,109 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DerbySynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
-	public DerbySynonymReader()
-	{
-	}
+  public DerbySynonymReader()
+  {
+  }
 
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		List<TableIdentifier> result = new ArrayList<>();
-		String sql =
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    List<TableIdentifier> result = new ArrayList<>();
+    String sql =
       "SELECT s.schemaname, a.alias \n" +
       "FROM sys.sysaliases a \n" +
       "  JOIN sys.sysschemas s ON a.schemaid = s.schemaid \n" +
-			"WHERE a.aliastype = 'S'\n" +
-			"  AND s.schemaname = ? \n";
+      "WHERE a.aliastype = 'S'\n" +
+      "  AND s.schemaname = ? \n";
 
-		if (StringUtil.isNonBlank(namePattern))
-		{
-			sql += " AND a.alias LIKE ?";
-		}
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      sql += " AND a.alias LIKE ?";
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, owner);
-			if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, owner);
+      if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
 
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String schema = rs.getString(1);
-				String alias = rs.getString(2);
-				if (!rs.wasNull())
-				{
-					TableIdentifier tbl = new TableIdentifier(null, schema, alias, false);
-					tbl.setType(SYN_TYPE_NAME);
-					tbl.setNeverAdjustCase(true);
-					result.add(tbl);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String schema = rs.getString(1);
+        String alias = rs.getString(2);
+        if (!rs.wasNull())
+        {
+          TableIdentifier tbl = new TableIdentifier(null, schema, alias, false);
+          tbl.setType(SYN_TYPE_NAME);
+          tbl.setNeverAdjustCase(true);
+          result.add(tbl);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
-		throws SQLException
-	{
-		String sql = "select a.aliasinfo \n" +
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
+    throws SQLException
+  {
+    String sql = "select a.aliasinfo \n" +
              "from sys.sysaliases a, sys.sysschemas s \n" +
              "where a.schemaid = s.schemaid \n" +
              " and a.alias = ?" +
-			       " and s.schemaname = ?";
+             " and s.schemaname = ?";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + SqlUtil.replaceParameters(sql, synonym, owner));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + SqlUtil.replaceParameters(sql, synonym, owner));
+    }
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
-		stmt.setString(1, synonym);
-		stmt.setString(2, owner);
-		ResultSet rs = stmt.executeQuery();
-		String table = null;
-		TableIdentifier result = null;
-		try
-		{
-			if (rs.next())
-			{
-				table = rs.getString(1);
-				if (table != null)
-				{
-					result = new TableIdentifier(table);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs,stmt);
-		}
+    PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
+    stmt.setString(1, synonym);
+    stmt.setString(2, owner);
+    ResultSet rs = stmt.executeQuery();
+    String table = null;
+    TableIdentifier result = null;
+    try
+    {
+      if (rs.next())
+      {
+        table = rs.getString(1);
+        if (table != null)
+        {
+          result = new TableIdentifier(table);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs,stmt);
+    }
 
-		if (result != null)
-		{
-			String type = con.getMetadata().getObjectType(result);
-			result.setType(type);
-		}
+    if (result != null)
+    {
+      String type = con.getMetadata().getObjectType(result);
+      result.setType(type);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
   @Override
   public boolean supportsReplace(WbConnection con)

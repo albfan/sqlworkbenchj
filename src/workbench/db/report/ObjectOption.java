@@ -30,108 +30,108 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ObjectOption
-	implements Comparable<ObjectOption>
+  implements Comparable<ObjectOption>
 {
-	private String type;
-	private String optionSource;
-	private boolean flatXML;
+  private String type;
+  private String optionSource;
+  private boolean flatXML;
 
-	public ObjectOption(String type, String optionSource)
-	{
-		this.type = type;
-		this.optionSource = optionSource;
-	}
+  public ObjectOption(String type, String optionSource)
+  {
+    this.type = type;
+    this.optionSource = optionSource;
+  }
 
-	public StringBuilder getXml(StringBuilder indent)
-	{
-		StringBuilder result = new StringBuilder(100);
-		StringBuilder myindent = new StringBuilder(indent);
-		myindent.append("  ");
-		result.append(indent);
-		result.append("<option type=\"");
-		result.append(type);
-		result.append("\">\n");
+  public StringBuilder getXml(StringBuilder indent)
+  {
+    StringBuilder result = new StringBuilder(100);
+    StringBuilder myindent = new StringBuilder(indent);
+    myindent.append("  ");
+    result.append(indent);
+    result.append("<option type=\"");
+    result.append(type);
+    result.append("\">\n");
 
-		if (flatXML)
-		{
-			result.append(myindent);
-			result.append("<definition>");
-			result.append(optionSource);
-			result.append("</definition>\n");
-		}
-		else
-		{
-			result.append(myindent);
-			result.append("<definition>\n");
-			result.append(myindent);
-			result.append("  ");
-			result.append(TagWriter.CDATA_START);
-			result.append('\n');
-			result.append(myindent);
-			result.append("  ");
-			result.append(optionSource.replace("\n", "\n  " + myindent.toString()));
-			result.append('\n');
+    if (flatXML)
+    {
+      result.append(myindent);
+      result.append("<definition>");
+      result.append(optionSource);
+      result.append("</definition>\n");
+    }
+    else
+    {
+      result.append(myindent);
+      result.append("<definition>\n");
+      result.append(myindent);
+      result.append("  ");
+      result.append(TagWriter.CDATA_START);
+      result.append('\n');
+      result.append(myindent);
+      result.append("  ");
+      result.append(optionSource.replace("\n", "\n  " + myindent.toString()));
+      result.append('\n');
 
-			result.append(myindent);
-			result.append("  ");
-			result.append(TagWriter.CDATA_END);
-			result.append('\n');
-			result.append(myindent);
-			result.append("</definition>\n");
-		}
-		result.append(indent);
-		result.append("</option>\n");
-		return result;
-	}
+      result.append(myindent);
+      result.append("  ");
+      result.append(TagWriter.CDATA_END);
+      result.append('\n');
+      result.append(myindent);
+      result.append("</definition>\n");
+    }
+    result.append(indent);
+    result.append("</option>\n");
+    return result;
+  }
 
-	public void setWriteFlaxXML(boolean flag)
-	{
-		this.flatXML = flag;
-	}
+  public void setWriteFlaxXML(boolean flag)
+  {
+    this.flatXML = flag;
+  }
 
-	public String getType()
-	{
-		return type;
-	}
+  public String getType()
+  {
+    return type;
+  }
 
-	public String getOptionSource()
-	{
-		return optionSource;
-	}
+  public String getOptionSource()
+  {
+    return optionSource;
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == null)
-		{
-			return false;
-		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final ObjectOption other = (ObjectOption) obj;
-		return compareTo(other) == 0;
-	}
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    final ObjectOption other = (ObjectOption) obj;
+    return compareTo(other) == 0;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 7;
-		hash = 47 * hash + (this.type != null ? this.type.hashCode() : 0);
-		hash = 47 * hash + (this.optionSource != null ? this.optionSource.hashCode() : 0);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 47 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 47 * hash + (this.optionSource != null ? this.optionSource.hashCode() : 0);
+    return hash;
+  }
 
-	@Override
-	public int compareTo(ObjectOption other)
-	{
-		int result = StringUtil.compareStrings(this.type, other.type, false);
-		if (result != 0)
-		{
-			return result;
-		}
-		return StringUtil.compareStrings(this.optionSource, other.optionSource, false);
-	}
+  @Override
+  public int compareTo(ObjectOption other)
+  {
+    int result = StringUtil.compareStrings(this.type, other.type, false);
+    if (result != 0)
+    {
+      return result;
+    }
+    return StringUtil.compareStrings(this.optionSource, other.optionSource, false);
+  }
 
 }

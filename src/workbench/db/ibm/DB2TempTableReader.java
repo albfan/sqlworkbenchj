@@ -90,10 +90,10 @@ public class DB2TempTableReader
 
     sql += "\nfor read only";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("Db2TempTableReader.extendObjectList()", "Reading temp tables using:\n" + SqlUtil.replaceParameters(sql, schema, objects));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("Db2TempTableReader.extendObjectList()", "Reading temp tables using:\n" + SqlUtil.replaceParameters(sql, schema, objects));
+    }
 
     PreparedStatement stmt = null;
     ResultSet rs = null;

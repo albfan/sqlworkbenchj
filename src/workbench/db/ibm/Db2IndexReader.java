@@ -46,14 +46,14 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class Db2IndexReader
-	extends JdbcIndexReader
+  extends JdbcIndexReader
 {
-	private static final String KEY_INCLUDED_COLS = "include_columns";
+  private static final String KEY_INCLUDED_COLS = "include_columns";
 
-	public Db2IndexReader(DbMetadata meta)
-	{
-		super(meta);
-	}
+  public Db2IndexReader(DbMetadata meta)
+  {
+    super(meta);
+  }
 
   @Override
   public void processIndexList(Collection<IndexDefinition> indexList)
@@ -156,91 +156,91 @@ public class Db2IndexReader
     }
   }
 
-	@Override
-	public String getIndexOptions(TableIdentifier table, IndexDefinition index)
-	{
-		String type = index.getIndexType();
-		if ("CLUSTERED".equals(type))
-		{
-			return " CLUSTER";
-		}
+  @Override
+  public String getIndexOptions(TableIdentifier table, IndexDefinition index)
+  {
+    String type = index.getIndexType();
+    if ("CLUSTERED".equals(type))
+    {
+      return " CLUSTER";
+    }
 
-		if (!index.getSourceOptions().isInitialized())
-		{
-			readIndexOptions(table, index);
-		}
+    if (!index.getSourceOptions().isInitialized())
+    {
+      readIndexOptions(table, index);
+    }
 
-		String include = index.getSourceOptions().getConfigSettings().get(KEY_INCLUDED_COLS);
-		if (include != null)
-		{
-			return " INCLUDE (" + include + ")";
-		}
+    String include = index.getSourceOptions().getConfigSettings().get(KEY_INCLUDED_COLS);
+    if (include != null)
+    {
+      return " INCLUDE (" + include + ")";
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	private void readIndexOptions(TableIdentifier table, IndexDefinition index)
-	{
-		String sql =
-			"select colcount, unique_colcount, remarks \n" +
-			"from syscat.indexes \n" +
-			"where indschema = ? \n" +
-			"  and indname = ? \n" +
-			"  and tabname = ? \n"  +
-			"  and tabschema = ? \n" +
+  private void readIndexOptions(TableIdentifier table, IndexDefinition index)
+  {
+    String sql =
+      "select colcount, unique_colcount, remarks \n" +
+      "from syscat.indexes \n" +
+      "where indschema = ? \n" +
+      "  and indname = ? \n" +
+      "  and tabname = ? \n"  +
+      "  and tabschema = ? \n" +
       "for read only";
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("Db2IndexReader.readIndexOptions()", "Retrieving index information using:\n" +
-				SqlUtil.replaceParameters(sql, index.getSchema(), index.getName(), table.getRawTableName(), table.getRawSchema()));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("Db2IndexReader.readIndexOptions()", "Retrieving index information using:\n" +
+        SqlUtil.replaceParameters(sql, index.getSchema(), index.getName(), table.getRawTableName(), table.getRawSchema()));
+    }
 
-		try
-		{
-			stmt = metaData.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, index.getSchema());
-			stmt.setString(2, index.getName());
-			stmt.setString(3, table.getRawTableName());
-			stmt.setString(4, table.getRawSchema());
+    try
+    {
+      stmt = metaData.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, index.getSchema());
+      stmt.setString(2, index.getName());
+      stmt.setString(3, table.getRawTableName());
+      stmt.setString(4, table.getRawSchema());
 
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				int colCount = rs.getInt(1);
-				int uniqueCols = rs.getInt(2);
-				if (uniqueCols > -1 && uniqueCols < colCount)
-				{
-					List<IndexColumn> cols = index.getColumns();
-					String includedCols = "";
-					for (int c = uniqueCols; c < cols.size(); c++)
-					{
-						if (c > uniqueCols) includedCols += ",";
-						includedCols += cols.get(c).getColumn();
-					}
-					for (int c = cols.size() - 1; c > uniqueCols - 1; c-- )
-					{
-						cols.remove(c);
-					}
-					index.getSourceOptions().addConfigSetting(KEY_INCLUDED_COLS, includedCols);
-					index.getSourceOptions().setInitialized();
-				}
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        int colCount = rs.getInt(1);
+        int uniqueCols = rs.getInt(2);
+        if (uniqueCols > -1 && uniqueCols < colCount)
+        {
+          List<IndexColumn> cols = index.getColumns();
+          String includedCols = "";
+          for (int c = uniqueCols; c < cols.size(); c++)
+          {
+            if (c > uniqueCols) includedCols += ",";
+            includedCols += cols.get(c).getColumn();
+          }
+          for (int c = cols.size() - 1; c > uniqueCols - 1; c-- )
+          {
+            cols.remove(c);
+          }
+          index.getSourceOptions().addConfigSetting(KEY_INCLUDED_COLS, includedCols);
+          index.getSourceOptions().setInitialized();
+        }
         index.setComment(rs.getString(3));
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("Db2IndexReader.readIndexOptions()", "Could not read index options using:\n" +
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("Db2IndexReader.readIndexOptions()", "Could not read index options using:\n" +
         SqlUtil.replaceParameters(sql, index.getSchema(), index.getName(), table.getRawTableName(), table.getRawSchema()), ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
 
 }

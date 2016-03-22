@@ -32,31 +32,31 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class OracleViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
 
-	@Override
-	public String getViewGrantSql()
-	{
-		return
+  @Override
+  public String getViewGrantSql()
+  {
+    return
       "-- SQL Workbench \n" +
       "SELECT grantee, privilege, grantable \n" +
       "FROM all_tab_privs \n" +
       "WHERE table_name = ? \n" +
       "  AND table_schema = ? ";
-	}
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 
   @Override
   public StringBuilder getViewGrantSource(WbConnection dbConnection, TableIdentifier view)

@@ -47,445 +47,445 @@ import workbench.util.StringUtil;
  */
 public abstract class AbstractOraclePartition
 {
-	private String type;
-	private List<String> columns;
-	private List<OraclePartitionDefinition> partitions;
-	private String subType;
-	private int defaultSubpartitionCount;
-	private List<String> subColumns;
-	protected boolean useCompression;
-	protected boolean supportsIntervals;
-	protected boolean isIndex;
-	protected String locality; // only used for indexes
-	protected String intervalDefinition;
-	protected String tableSpace;
-	protected String objectOwner;
-	protected String defaultUserTablespace;
-	protected String currentUser;
-	protected boolean retrievePartitionsForLocalIndex;
+  private String type;
+  private List<String> columns;
+  private List<OraclePartitionDefinition> partitions;
+  private String subType;
+  private int defaultSubpartitionCount;
+  private List<String> subColumns;
+  protected boolean useCompression;
+  protected boolean supportsIntervals;
+  protected boolean isIndex;
+  protected String locality; // only used for indexes
+  protected String intervalDefinition;
+  protected String tableSpace;
+  protected String objectOwner;
+  protected String defaultUserTablespace;
+  protected String currentUser;
+  protected boolean retrievePartitionsForLocalIndex;
 
-	public AbstractOraclePartition(WbConnection conn)
-		throws SQLException
-	{
-		this(conn, true);
-	}
+  public AbstractOraclePartition(WbConnection conn)
+    throws SQLException
+  {
+    this(conn, true);
+  }
 
-	protected AbstractOraclePartition(WbConnection conn, boolean retrieveCompression)
-		throws SQLException
-	{
-		boolean is11r1 = JdbcUtils.hasMinimumServerVersion(conn, "11.1");
-		useCompression = retrieveCompression && is11r1;
-		supportsIntervals = is11r1;
-		currentUser = conn.getMetadata().getCurrentSchema();
-	}
+  protected AbstractOraclePartition(WbConnection conn, boolean retrieveCompression)
+    throws SQLException
+  {
+    boolean is11r1 = JdbcUtils.hasMinimumServerVersion(conn, "11.1");
+    useCompression = retrieveCompression && is11r1;
+    supportsIntervals = is11r1;
+    currentUser = conn.getMetadata().getCurrentSchema();
+  }
 
-	public void retrieve(DbObject object, WbConnection conn)
-		throws SQLException
-	{
-		if (object == null) return;
+  public void retrieve(DbObject object, WbConnection conn)
+    throws SQLException
+  {
+    if (object == null) return;
 
-		if (OracleUtils.checkDefaultTablespace())
-		{
-			defaultUserTablespace = OracleUtils.getDefaultTablespace(conn);
-		}
-		boolean hasPartitions = retrieveDefinition(object, conn);
-		if (hasPartitions)
-		{
-			retrieveColumns(object, conn);
-			retrievePartitions(object, conn);
-		}
-	}
+    if (OracleUtils.checkDefaultTablespace())
+    {
+      defaultUserTablespace = OracleUtils.getDefaultTablespace(conn);
+    }
+    boolean hasPartitions = retrieveDefinition(object, conn);
+    if (hasPartitions)
+    {
+      retrieveColumns(object, conn);
+      retrievePartitions(object, conn);
+    }
+  }
 
-	protected abstract String getRetrievePartitionDefinitionSql();
-	protected abstract String getRetrieveColumnsSql();
-	protected abstract String getRetrieveSubColumnsSql();
-	protected abstract String getRetrieveSubPartitionsSql();
-	protected abstract String getRetrievePartitionsSql();
+  protected abstract String getRetrievePartitionDefinitionSql();
+  protected abstract String getRetrieveColumnsSql();
+  protected abstract String getRetrieveSubColumnsSql();
+  protected abstract String getRetrieveSubPartitionsSql();
+  protected abstract String getRetrievePartitionsSql();
 
-	public List<OraclePartitionDefinition> getPartitions()
-	{
-		if (!isPartitioned()) return Collections.emptyList();
-		return Collections.unmodifiableList(partitions);
-	}
+  public List<OraclePartitionDefinition> getPartitions()
+  {
+    if (!isPartitioned()) return Collections.emptyList();
+    return Collections.unmodifiableList(partitions);
+  }
 
-	public boolean isPartitioned()
-	{
-		return columns != null && !columns.isEmpty();
-	}
+  public boolean isPartitioned()
+  {
+    return columns != null && !columns.isEmpty();
+  }
 
-	public List<String> getColumns()
-	{
-		if (columns == null) return Collections.emptyList();
-		return Collections.unmodifiableList(columns);
-	}
+  public List<String> getColumns()
+  {
+    if (columns == null) return Collections.emptyList();
+    return Collections.unmodifiableList(columns);
+  }
 
-	public String getPartitionType()
-	{
-		return type;
-	}
+  public String getPartitionType()
+  {
+    return type;
+  }
 
-	public String getSourceForTableDefinition()
-	{
-		return getSource(true, "", true);
-	}
+  public String getSourceForTableDefinition()
+  {
+    return getSource(true, "", true);
+  }
 
-	public String getSourceForTableDefinition(boolean includeTablespace)
-	{
-		return getSource(true, "", includeTablespace);
-	}
+  public String getSourceForTableDefinition(boolean includeTablespace)
+  {
+    return getSource(true, "", includeTablespace);
+  }
 
-	public String getSourceForTableDefinition(String indent)
-	{
-		return getSource(true, indent, true);
-	}
+  public String getSourceForTableDefinition(String indent)
+  {
+    return getSource(true, indent, true);
+  }
 
-	public String getSourceForTableDefinition(String indent, boolean includeTablespace)
-	{
-		return getSource(true, indent, includeTablespace);
-	}
+  public String getSourceForTableDefinition(String indent, boolean includeTablespace)
+  {
+    return getSource(true, indent, includeTablespace);
+  }
 
-	public String getSourceForIndexDefinition(String indent)
-	{
-		return getSource(false, indent, true);
-	}
+  public String getSourceForIndexDefinition(String indent)
+  {
+    return getSource(false, indent, true);
+  }
 
-	public String getSourceForIndexDefinition()
-	{
-		return getSource(false, "", true);
-	}
+  public String getSourceForIndexDefinition()
+  {
+    return getSource(false, "", true);
+  }
 
-	private String getSource(boolean forTable, String indent, boolean includeTablespace)
-	{
-		if (!this.isPartitioned()) return null;
-		StringBuilder result = new StringBuilder(partitions.size() * 15);
-		if (locality != null)
-		{
-			result.append(indent);
-			result.append(locality);
-		}
-		if (locality == null)
-		{
-			result.append(indent);
-			result.append("PARTITION BY ");
-			result.append(type);
-			result.append(' ');
-			if (columns != null)
-			{
-				result.append('(');
-				result.append(StringUtil.listToString(columns, ','));
-				result.append(')');
-			}
-			if (StringUtil.isNonBlank(intervalDefinition))
-			{
-				result.append(" INTERVAL (");
-				result.append(intervalDefinition);
-				result.append(") ");
-			}
-			if (!"NONE".equals(subType))
-			{
-				result.append('\n');
-				result.append(indent);
-				result.append("SUBPARTITION BY ");
-				result.append(subType);
-				result.append(" (");
-				result.append(StringUtil.listToString(subColumns, ','));
-				result.append(')');
-				if (defaultSubpartitionCount > 1)
-				{
-					result.append('\n');
-					result.append(indent);
-					result.append("SUBPARTITIONS ");
-					result.append(defaultSubpartitionCount);
-				}
-			}
-		}
-		if (partitions.size() > 0)
-		{
-			result.append('\n');
-			result.append(indent);
-			result.append("(\n");
-			int maxLength = forTable ? OraclePartitionDefinition.getMaxPartitionNameLength(partitions): 0;
-			for (int i=0; i < partitions.size(); i++)
-			{
-				if (i > 0)
-				{
-					result.append(',');
-					result.append(indent);
-					result.append('\n');
-				}
-				result.append(partitions.get(i).getSource(forTable, maxLength, indent));
-			}
-			result.append("\n");
-			result.append(indent);
-			result.append(')');
-		}
-		if (includeTablespace && OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
-		{
-			result.append('\n');
-			result.append(indent);
-			result.append("TABLESPACE ");
-			result.append(tableSpace);
-		}
-		return result.toString();
-	}
+  private String getSource(boolean forTable, String indent, boolean includeTablespace)
+  {
+    if (!this.isPartitioned()) return null;
+    StringBuilder result = new StringBuilder(partitions.size() * 15);
+    if (locality != null)
+    {
+      result.append(indent);
+      result.append(locality);
+    }
+    if (locality == null)
+    {
+      result.append(indent);
+      result.append("PARTITION BY ");
+      result.append(type);
+      result.append(' ');
+      if (columns != null)
+      {
+        result.append('(');
+        result.append(StringUtil.listToString(columns, ','));
+        result.append(')');
+      }
+      if (StringUtil.isNonBlank(intervalDefinition))
+      {
+        result.append(" INTERVAL (");
+        result.append(intervalDefinition);
+        result.append(") ");
+      }
+      if (!"NONE".equals(subType))
+      {
+        result.append('\n');
+        result.append(indent);
+        result.append("SUBPARTITION BY ");
+        result.append(subType);
+        result.append(" (");
+        result.append(StringUtil.listToString(subColumns, ','));
+        result.append(')');
+        if (defaultSubpartitionCount > 1)
+        {
+          result.append('\n');
+          result.append(indent);
+          result.append("SUBPARTITIONS ");
+          result.append(defaultSubpartitionCount);
+        }
+      }
+    }
+    if (partitions.size() > 0)
+    {
+      result.append('\n');
+      result.append(indent);
+      result.append("(\n");
+      int maxLength = forTable ? OraclePartitionDefinition.getMaxPartitionNameLength(partitions): 0;
+      for (int i=0; i < partitions.size(); i++)
+      {
+        if (i > 0)
+        {
+          result.append(',');
+          result.append(indent);
+          result.append('\n');
+        }
+        result.append(partitions.get(i).getSource(forTable, maxLength, indent));
+      }
+      result.append("\n");
+      result.append(indent);
+      result.append(')');
+    }
+    if (includeTablespace && OracleUtils.shouldAppendTablespace(tableSpace, defaultUserTablespace, objectOwner, currentUser))
+    {
+      result.append('\n');
+      result.append(indent);
+      result.append("TABLESPACE ");
+      result.append(tableSpace);
+    }
+    return result.toString();
+  }
 
 
-	protected boolean retrieveDefinition(DbObject dbObject, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		int subKeyCount = 0;
+  protected boolean retrieveDefinition(DbObject dbObject, WbConnection conn)
+    throws SQLException
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    int subKeyCount = 0;
 
-		String retrievePartitionDefinitionSql = getRetrievePartitionDefinitionSql();
+    String retrievePartitionDefinitionSql = getRetrievePartitionDefinitionSql();
 
     long start = System.currentTimeMillis();
 
-		try
+    try
     {
-			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionDefinitionSql);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug(getClassName() + ".retrieveDefinition()", "Retrieving partition information using:\n" +
-					SqlUtil.replaceParameters(retrievePartitionDefinitionSql, dbObject.getSchema(), dbObject.getObjectName()));
-			}
+      pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionDefinitionSql);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug(getClassName() + ".retrieveDefinition()", "Retrieving partition information using:\n" +
+          SqlUtil.replaceParameters(retrievePartitionDefinitionSql, dbObject.getSchema(), dbObject.getObjectName()));
+      }
 
-			pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
-			pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
-			rs = pstmt.executeQuery();
+      pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
+      pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
+      rs = pstmt.executeQuery();
 
-			if (rs.next())
-			{
-				type = rs.getString("PARTITIONING_TYPE");
-				subType = rs.getString("SUBPARTITIONING_TYPE");
-				if (isIndex)
-				{
-					locality = rs.getString("LOCALITY");
-				}
-				defaultSubpartitionCount = rs.getInt("DEF_SUBPARTITION_COUNT");
-				intervalDefinition = supportsIntervals ? rs.getString("INTERVAL") : null;
-				subKeyCount = rs.getInt("SUBPARTITIONING_KEY_COUNT");
-				int colCount = rs.getInt("PARTITIONING_KEY_COUNT");
-				columns = new ArrayList<>(colCount);
-				int partCount = rs.getInt("PARTITION_COUNT");
-				partitions = new ArrayList<>(partCount);
-				tableSpace = rs.getString("DEF_TABLESPACE_NAME");
-				objectOwner = dbObject.getSchema();
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		if (subKeyCount > 0)
-		{
-			retrieveSubColumns(dbObject, conn);
-		}
+      if (rs.next())
+      {
+        type = rs.getString("PARTITIONING_TYPE");
+        subType = rs.getString("SUBPARTITIONING_TYPE");
+        if (isIndex)
+        {
+          locality = rs.getString("LOCALITY");
+        }
+        defaultSubpartitionCount = rs.getInt("DEF_SUBPARTITION_COUNT");
+        intervalDefinition = supportsIntervals ? rs.getString("INTERVAL") : null;
+        subKeyCount = rs.getInt("SUBPARTITIONING_KEY_COUNT");
+        int colCount = rs.getInt("PARTITIONING_KEY_COUNT");
+        columns = new ArrayList<>(colCount);
+        int partCount = rs.getInt("PARTITION_COUNT");
+        partitions = new ArrayList<>(partCount);
+        tableSpace = rs.getString("DEF_TABLESPACE_NAME");
+        objectOwner = dbObject.getSchema();
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    if (subKeyCount > 0)
+    {
+      retrieveSubColumns(dbObject, conn);
+    }
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("AbstractOraclePartition.retrieveDefinition()", "Retrieving partition definition for " + dbObject.getFullyQualifiedName(conn)+ " took: " + duration + "ms");
-		return type != null;
-	}
+    return type != null;
+  }
 
 
-	private void retrieveColumns(DbObject table, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String retrieveColumnsSql = getRetrieveColumnsSql();
+  private void retrieveColumns(DbObject table, WbConnection conn)
+    throws SQLException
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String retrieveColumnsSql = getRetrieveColumnsSql();
 
     long start = System.currentTimeMillis();
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrieveColumnsSql);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug(getClassName() + ".retrieveColumns()", "Retrieving partition columns using:\n" +
-					SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getObjectName()));
-			}
+    try
+    {
+      pstmt = conn.getSqlConnection().prepareStatement(retrieveColumnsSql);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug(getClassName() + ".retrieveColumns()", "Retrieving partition columns using:\n" +
+          SqlUtil.replaceParameters(retrieveColumnsSql, table.getSchema(), table.getObjectName()));
+      }
 
-			pstmt.setString(1, SqlUtil.removeObjectQuotes(table.getSchema()));
-			pstmt.setString(2, SqlUtil.removeObjectQuotes(table.getObjectName()));
-			rs = pstmt.executeQuery();
+      pstmt.setString(1, SqlUtil.removeObjectQuotes(table.getSchema()));
+      pstmt.setString(2, SqlUtil.removeObjectQuotes(table.getObjectName()));
+      rs = pstmt.executeQuery();
 
-			columns = new ArrayList<>();
-			while (rs.next())
-			{
-				columns.add(rs.getString("COLUMN_NAME"));
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+      columns = new ArrayList<>();
+      while (rs.next())
+      {
+        columns.add(rs.getString("COLUMN_NAME"));
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("AbstractOraclePartition.retrieveColumns()", "Retrieving partition columns for " + table.getObjectName() + " took: " + duration + "ms");
-	}
+  }
 
-	private void retrieveSubColumns(DbObject dbObject, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String retrieveSubColumns = getRetrieveSubColumnsSql();
+  private void retrieveSubColumns(DbObject dbObject, WbConnection conn)
+    throws SQLException
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String retrieveSubColumns = getRetrieveSubColumnsSql();
     long start = System.currentTimeMillis();
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubColumns);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug(getClassName() + ".retrieveSubColumns()", "Using SQL=\n" +
-					SqlUtil.replaceParameters(retrieveSubColumns, dbObject.getSchema(), dbObject.getObjectName()));
-			}
+    try
+    {
+      pstmt = conn.getSqlConnection().prepareStatement(retrieveSubColumns);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug(getClassName() + ".retrieveSubColumns()", "Using SQL=\n" +
+          SqlUtil.replaceParameters(retrieveSubColumns, dbObject.getSchema(), dbObject.getObjectName()));
+      }
 
-			pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
-			pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
-			rs = pstmt.executeQuery();
+      pstmt.setString(1, SqlUtil.removeObjectQuotes(dbObject.getSchema()));
+      pstmt.setString(2, SqlUtil.removeObjectQuotes(dbObject.getObjectName()));
+      rs = pstmt.executeQuery();
 
-			subColumns = new ArrayList<>();
-			while (rs.next())
-			{
-				subColumns.add(rs.getString("COLUMN_NAME"));
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+      subColumns = new ArrayList<>();
+      while (rs.next())
+      {
+        subColumns.add(rs.getString("COLUMN_NAME"));
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("AbstractOraclePartition.retrieveSubColumns()", "Retrieving sub partition columns for " + dbObject.getObjectName() + " took: " + duration + "ms");
-	}
+  }
 
-	private OraclePartitionDefinition findPartition(String name)
-	{
-		if (partitions == null || partitions.isEmpty()) return null;
-		for (OraclePartitionDefinition def : partitions)
-		{
-			if (def.getName().equals(name))
-			{
-				return def;
-			}
-		}
-		return null;
-	}
+  private OraclePartitionDefinition findPartition(String name)
+  {
+    if (partitions == null || partitions.isEmpty()) return null;
+    for (OraclePartitionDefinition def : partitions)
+    {
+      if (def.getName().equals(name))
+      {
+        return def;
+      }
+    }
+    return null;
+  }
 
-	private void retrieveSubPartitions(DbObject object, WbConnection conn)
-		throws SQLException
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String retrieveSubPartitions = getRetrieveSubPartitionsSql();
+  private void retrieveSubPartitions(DbObject object, WbConnection conn)
+    throws SQLException
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String retrieveSubPartitions = getRetrieveSubPartitionsSql();
 
     long start = System.currentTimeMillis();
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrieveSubPartitions);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug(getClassName() + ".retrieveSubPartitions()", "Using SQL=\n" +
-					SqlUtil.replaceParameters(retrieveSubPartitions, object.getSchema(), object.getObjectName()));
-			}
+    try
+    {
+      pstmt = conn.getSqlConnection().prepareStatement(retrieveSubPartitions);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug(getClassName() + ".retrieveSubPartitions()", "Using SQL=\n" +
+          SqlUtil.replaceParameters(retrieveSubPartitions, object.getSchema(), object.getObjectName()));
+      }
 
-			pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
-			pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
-			rs = pstmt.executeQuery();
+      pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
+      pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
+      rs = pstmt.executeQuery();
 
-			while (rs.next())
-			{
-				String name = rs.getString("PARTITION_NAME");
-				String subPart = rs.getString("SUBPARTITION_NAME");
-				String value = rs.getString("HIGH_VALUE");
-				int position = rs.getInt("SUBPARTITION_POSITION");
-				String compress = null;
-				if (useCompression)
-				{
-					compress = rs.getString("COMPRESSION");
-				}
-				OraclePartitionDefinition subPartition = new OraclePartitionDefinition(subPart, subType, position);
-				subPartition.setPartitionValue(value);
-				subPartition.setCompressOption(compress);
-				subPartition.setIsSubpartition(true);
+      while (rs.next())
+      {
+        String name = rs.getString("PARTITION_NAME");
+        String subPart = rs.getString("SUBPARTITION_NAME");
+        String value = rs.getString("HIGH_VALUE");
+        int position = rs.getInt("SUBPARTITION_POSITION");
+        String compress = null;
+        if (useCompression)
+        {
+          compress = rs.getString("COMPRESSION");
+        }
+        OraclePartitionDefinition subPartition = new OraclePartitionDefinition(subPart, subType, position);
+        subPartition.setPartitionValue(value);
+        subPartition.setCompressOption(compress);
+        subPartition.setIsSubpartition(true);
 
-				OraclePartitionDefinition mainPartition = findPartition(name);
-				if (mainPartition != null)
-				{
-					mainPartition.addSubPartition(subPartition);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+        OraclePartitionDefinition mainPartition = findPartition(name);
+        if (mainPartition != null)
+        {
+          mainPartition.addSubPartition(subPartition);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("AbstractOraclePartition.retrieveSubPartitions()", "Retrieving sub partitions " + object.getObjectName() + " took: " + duration + "ms");
-	}
+  }
 
 
-	protected boolean shouldRetrievePartitions()
-	{
-		return true;
-	}
+  protected boolean shouldRetrievePartitions()
+  {
+    return true;
+  }
 
-	private void retrievePartitions(DbObject object, WbConnection conn)
-		throws SQLException
-	{
-		if (!shouldRetrievePartitions()) return;
+  private void retrievePartitions(DbObject object, WbConnection conn)
+    throws SQLException
+  {
+    if (!shouldRetrievePartitions()) return;
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String retrievePartitionSQL = getRetrievePartitionsSql();
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String retrievePartitionSQL = getRetrievePartitionsSql();
 
     long start = System.currentTimeMillis();
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionSQL);
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug(getClassName() + ".retrievePartitions()", "Using SQL=\n" +
-					SqlUtil.replaceParameters(retrievePartitionSQL, object.getSchema(), object.getObjectName()));
-			}
+    try
+    {
+      pstmt = conn.getSqlConnection().prepareStatement(retrievePartitionSQL);
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug(getClassName() + ".retrievePartitions()", "Using SQL=\n" +
+          SqlUtil.replaceParameters(retrievePartitionSQL, object.getSchema(), object.getObjectName()));
+      }
 
-			pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
-			pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
-			rs = pstmt.executeQuery();
+      pstmt.setString(1, SqlUtil.removeObjectQuotes(object.getSchema()));
+      pstmt.setString(2, SqlUtil.removeObjectQuotes(object.getObjectName()));
+      rs = pstmt.executeQuery();
 
-			partitions = new ArrayList<>();
+      partitions = new ArrayList<>();
 
-			while (rs.next())
-			{
-				String name = rs.getString("PARTITION_NAME");
-				String value = rs.getString("HIGH_VALUE");
-				int position = rs.getInt("PARTITION_POSITION");
-				String compress = null;
-				if (useCompression)
-				{
-					compress = rs.getString("COMPRESSION");
-				}
-				OraclePartitionDefinition def = new OraclePartitionDefinition(name, type, position);
-				def.setPartitionValue(value);
-				def.setCompressOption(compress);
-				partitions.add(def);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
+      while (rs.next())
+      {
+        String name = rs.getString("PARTITION_NAME");
+        String value = rs.getString("HIGH_VALUE");
+        int position = rs.getInt("PARTITION_POSITION");
+        String compress = null;
+        if (useCompression)
+        {
+          compress = rs.getString("COMPRESSION");
+        }
+        OraclePartitionDefinition def = new OraclePartitionDefinition(name, type, position);
+        def.setPartitionValue(value);
+        def.setCompressOption(compress);
+        partitions.add(def);
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
 
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("AbstractOraclePartition.retrievePartitions()", "Retrieving partitions " + object.getObjectName() + " took: " + duration + "ms");
 
-		if (defaultSubpartitionCount <= 1 && subColumns != null)
-		{
-			retrieveSubPartitions(object, conn);
-		}
-	}
+    if (defaultSubpartitionCount <= 1 && subColumns != null)
+    {
+      retrieveSubPartitions(object, conn);
+    }
+  }
 
-	private String getClassName()
-	{
-		String clsname = getClass().getName();
-		return clsname.substring(clsname.lastIndexOf('.') + 1);
-	}
+  private String getClassName()
+  {
+    String clsname = getClass().getName();
+    return clsname.substring(clsname.lastIndexOf('.') + 1);
+  }
 
 }

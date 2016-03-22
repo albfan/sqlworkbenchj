@@ -27,11 +27,11 @@ package workbench.db;
  * @author Thomas Kellerer
  */
 public class NoConfigException
-	extends java.lang.Exception
+  extends java.lang.Exception
 {
 
-	public NoConfigException(String msg)
-	{
-		super(msg);
-	}
+  public NoConfigException(String msg)
+  {
+    super(msg);
+  }
 }

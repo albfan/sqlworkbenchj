@@ -46,139 +46,139 @@ import workbench.util.StringUtil;
  */
 public class ViewDiff
 {
-	public static final String TAG_CREATE_VIEW = "create-view";
-	public static final String TAG_UPDATE_VIEW = "update-view";
+  public static final String TAG_CREATE_VIEW = "create-view";
+  public static final String TAG_UPDATE_VIEW = "update-view";
 
-	private ReportView reference;
-	private ReportView target;
-	private final TagWriter writer = new TagWriter();
-	private StringBuilder indent = StringUtil.emptyBuilder();
+  private ReportView reference;
+  private ReportView target;
+  private final TagWriter writer = new TagWriter();
+  private StringBuilder indent = StringUtil.emptyBuilder();
 
-	public ViewDiff(ReportView ref, ReportView tar)
-	{
-		reference = ref;
-		target = tar;
-	}
+  public ViewDiff(ReportView ref, ReportView tar)
+  {
+    reference = ref;
+    target = tar;
+  }
 
-	public StringBuilder getMigrateTargetXml()
-	{
-		StringBuilder result = new StringBuilder(500);
+  public StringBuilder getMigrateTargetXml()
+  {
+    StringBuilder result = new StringBuilder(500);
 
-		StringBuilder myindent = new StringBuilder(indent);
-		myindent.append("  ");
-		boolean sourceDifferent = false;
-		boolean indexDifferent = false;
-		boolean grantDifferent = false;
-		boolean createView = (target == null);
+    StringBuilder myindent = new StringBuilder(indent);
+    myindent.append("  ");
+    boolean sourceDifferent = false;
+    boolean indexDifferent = false;
+    boolean grantDifferent = false;
+    boolean createView = (target == null);
 
-		CharSequence s = null;
+    CharSequence s = null;
 
-		s = reference.getViewSource();
-		String refSource = (s == null ? null : s.toString());
-		s = (target == null ? null : target.getViewSource());
-		String targetSource = (s == null ? null : s.toString());
+    s = reference.getViewSource();
+    String refSource = (s == null ? null : s.toString());
+    s = (target == null ? null : target.getViewSource());
+    String targetSource = (s == null ? null : s.toString());
 
-		if (targetSource != null)
-		{
-			sourceDifferent = !refSource.trim().equals(targetSource.trim());
-		}
+    if (targetSource != null)
+    {
+      sourceDifferent = !refSource.trim().equals(targetSource.trim());
+    }
 
-		StringBuilder indexDiff = getIndexDiff();
-		StringBuilder grants = getGrantDiff();
-		if (indexDiff != null && indexDiff.length() > 0)
-		{
-			indexDifferent = true;
-		}
+    StringBuilder indexDiff = getIndexDiff();
+    StringBuilder grants = getGrantDiff();
+    if (indexDiff != null && indexDiff.length() > 0)
+    {
+      indexDifferent = true;
+    }
 
-		if (grants != null && grants.length() > 0)
-		{
-			grantDifferent = true;
-		}
+    if (grants != null && grants.length() > 0)
+    {
+      grantDifferent = true;
+    }
 
-		if (!sourceDifferent && !createView && !indexDifferent && !grantDifferent) return result;
+    if (!sourceDifferent && !createView && !indexDifferent && !grantDifferent) return result;
 
-		List<TagAttribute> att = new ArrayList<>();
+    List<TagAttribute> att = new ArrayList<>();
 
-		String type = reference.getView().getType();
-		if (!"VIEW".equals(type))
-		{
-			att.add(new TagAttribute("type", type));
-		}
+    String type = reference.getView().getType();
+    if (!"VIEW".equals(type))
+    {
+      att.add(new TagAttribute("type", type));
+    }
 
-		if (indexDifferent && !sourceDifferent)
-		{
-			att.add(new TagAttribute("name", target.getView().getTableName()));
-		}
+    if (indexDifferent && !sourceDifferent)
+    {
+      att.add(new TagAttribute("name", target.getView().getTableName()));
+    }
 
-		writer.appendOpenTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW), att, true);
+    writer.appendOpenTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW), att, true);
 
-		result.append('\n');
-		if (createView)
-		{
-			result.append(reference.getXml(myindent, true));
-		}
-		else if (sourceDifferent)
-		{
-			String schema = reference.getView().getSchema();
-			String cat = reference.getView().getCatalog();
-			reference.getView().setSchema(target.getView().getSchema());
-			reference.getView().setCatalog(target.getView().getCatalog());
-			result.append(reference.getXml(myindent, indexDifferent));
-			reference.getView().setSchema(schema);
-			reference.getView().setCatalog(cat);
-		}
-		else
-		{
-			result.append(indexDiff);
-		}
+    result.append('\n');
+    if (createView)
+    {
+      result.append(reference.getXml(myindent, true));
+    }
+    else if (sourceDifferent)
+    {
+      String schema = reference.getView().getSchema();
+      String cat = reference.getView().getCatalog();
+      reference.getView().setSchema(target.getView().getSchema());
+      reference.getView().setCatalog(target.getView().getCatalog());
+      result.append(reference.getXml(myindent, indexDifferent));
+      reference.getView().setSchema(schema);
+      reference.getView().setCatalog(cat);
+    }
+    else
+    {
+      result.append(indexDiff);
+    }
 
-		if (grantDifferent)
-		{
-			result.append(grants);
-		}
+    if (grantDifferent)
+    {
+      result.append(grants);
+    }
 
-		writer.appendCloseTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW));
+    writer.appendCloseTag(result, this.indent, (createView ? TAG_CREATE_VIEW : TAG_UPDATE_VIEW));
 
-		return result;
-	}
+    return result;
+  }
 
-	private StringBuilder getGrantDiff()
-	{
-		ReportTableGrants refGrants = this.reference.getGrants();
-		ReportTableGrants targetGrants = target == null ? null : this.target.getGrants();
-		if (refGrants == null && targetGrants == null) return null;
+  private StringBuilder getGrantDiff()
+  {
+    ReportTableGrants refGrants = this.reference.getGrants();
+    ReportTableGrants targetGrants = target == null ? null : this.target.getGrants();
+    if (refGrants == null && targetGrants == null) return null;
 
-		TableGrantDiff td = new TableGrantDiff(refGrants, targetGrants);
-		StringBuilder diffXml = td.getMigrateTargetXml(writer, indent);
-		return diffXml;
-	}
+    TableGrantDiff td = new TableGrantDiff(refGrants, targetGrants);
+    StringBuilder diffXml = td.getMigrateTargetXml(writer, indent);
+    return diffXml;
+  }
 
-	private StringBuilder getIndexDiff()
-	{
-		if (this.target == null) return null;
+  private StringBuilder getIndexDiff()
+  {
+    if (this.target == null) return null;
 
-		Collection<IndexDefinition> ref = this.reference.getIndexList();
-		Collection<IndexDefinition> targ = this.target.getIndexList();
-		if (ref == null && targ == null) return null;
-		IndexDiff id = new IndexDiff(ref, targ);
-		id.setIndent(indent);
-		StringBuilder diff = id.getMigrateTargetXml();
-		return diff;
-	}
+    Collection<IndexDefinition> ref = this.reference.getIndexList();
+    Collection<IndexDefinition> targ = this.target.getIndexList();
+    if (ref == null && targ == null) return null;
+    IndexDiff id = new IndexDiff(ref, targ);
+    id.setIndent(indent);
+    StringBuilder diff = id.getMigrateTargetXml();
+    return diff;
+  }
 
-	/**
-	 *	Set an indent for generating the XML
-	 */
-	public void setIndent(StringBuilder ind)
-	{
-		if (ind == null)
-		{
-			this.indent = StringUtil.emptyBuilder();
-		}
-		else
-		{
-			this.indent = ind;
-		}
-	}
+  /**
+   *  Set an indent for generating the XML
+   */
+  public void setIndent(StringBuilder ind)
+  {
+    if (ind == null)
+    {
+      this.indent = StringUtil.emptyBuilder();
+    }
+    else
+    {
+      this.indent = ind;
+    }
+  }
 
 }

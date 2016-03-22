@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 
 import workbench.interfaces.WbSelectionListener;
 import workbench.interfaces.WbSelectionModel;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
@@ -37,7 +38,6 @@ import workbench.db.ObjectScripter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
-import workbench.resource.DbExplorerSettings;
 
 /**
  * @author Thomas Kellerer
@@ -93,6 +93,7 @@ public class ScriptDbObjectAction
 
 		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
     s.setShowPackageProcedureOnly(showSinglePackageProcedure);
+    s.setIncludeForeignKeys(source.getConnection().getDbSettings().getGenerateTableFKSource());
     s.setIncludeGrants(DbExplorerSettings.getGenerateTableGrants());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
     if (objects.size() == 1)

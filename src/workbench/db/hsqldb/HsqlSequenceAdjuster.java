@@ -43,101 +43,101 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class HsqlSequenceAdjuster
-	implements SequenceAdjuster
+  implements SequenceAdjuster
 {
-	public HsqlSequenceAdjuster()
-	{
-	}
+  public HsqlSequenceAdjuster()
+  {
+  }
 
-	@Override
-	public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
-		throws SQLException
-	{
-		List<String> columns = getIdentityColumns(connection, table);
+  @Override
+  public int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
+    throws SQLException
+  {
+    List<String> columns = getIdentityColumns(connection, table);
 
-		for (String column : columns)
-		{
-			syncSingleSequence(connection, table, column);
-		}
+    for (String column : columns)
+    {
+      syncSingleSequence(connection, table, column);
+    }
 
-		if (includeCommit && !connection.getAutoCommit())
-		{
-			connection.commit();
-		}
-		return columns.size();
-	}
+    if (includeCommit && !connection.getAutoCommit())
+    {
+      connection.commit();
+    }
+    return columns.size();
+  }
 
-	private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column)
-		throws SQLException
-	{
-		Statement stmt = null;
-		ResultSet rs = null;
+  private void syncSingleSequence(WbConnection dbConnection, TableIdentifier table, String column)
+    throws SQLException
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
 
-		try
-		{
-			stmt = dbConnection.createStatement();
+    try
+    {
+      stmt = dbConnection.createStatement();
 
-			long maxValue = -1;
-			rs = stmt.executeQuery("select max(" + column + ") from " + table.getTableExpression(dbConnection));
+      long maxValue = -1;
+      rs = stmt.executeQuery("select max(" + column + ") from " + table.getTableExpression(dbConnection));
 
-			if (rs.next())
-			{
-				maxValue = rs.getLong(1) + 1;
-				SqlUtil.closeResult(rs);
-			}
+      if (rs.next())
+      {
+        maxValue = rs.getLong(1) + 1;
+        SqlUtil.closeResult(rs);
+      }
 
-			if (maxValue > 0)
-			{
-				String ddl = "alter table " + table.getTableExpression(dbConnection) + " alter column " + column + " restart with " + Long.toString(maxValue);
-				LogMgr.logDebug("HsqlSequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
-				stmt.execute(ddl);
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("HsqlSequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      if (maxValue > 0)
+      {
+        String ddl = "alter table " + table.getTableExpression(dbConnection) + " alter column " + column + " restart with " + Long.toString(maxValue);
+        LogMgr.logDebug("HsqlSequenceAdjuster.syncSingleSequence()", "Syncing sequence using: " + ddl);
+        stmt.execute(ddl);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("HsqlSequenceAdjuster.getColumnSequences()", "Could not read sequences", ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
-	private List<String> getIdentityColumns(WbConnection dbConnection, TableIdentifier table)
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select column_name " +
-			"from information_schema.columns \n" +
-			"where table_name = ? \n" +
-			" and table_schema = ? \n" +
-			" and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))";
+  private List<String> getIdentityColumns(WbConnection dbConnection, TableIdentifier table)
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql =
+      "select column_name " +
+      "from information_schema.columns \n" +
+      "where table_name = ? \n" +
+      " and table_schema = ? \n" +
+      " and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))";
 
-		List<String> result = new ArrayList<String>(1);
-		try
-		{
-			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, table.getRawTableName());
-			pstmt.setString(2, table.getRawSchema());
+    List<String> result = new ArrayList<String>(1);
+    try
+    {
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, table.getRawTableName());
+      pstmt.setString(2, table.getRawSchema());
 
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String column = rs.getString(1);
-				result.add(column);
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("HsqlSequenceAdjuster.getIdentityColumns()", "Could not read sequence columns", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return result;
-	}
+      rs = pstmt.executeQuery();
+      while (rs.next())
+      {
+        String column = rs.getString(1);
+        result.add(column);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("HsqlSequenceAdjuster.getIdentityColumns()", "Could not read sequence columns", ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return result;
+  }
 
 }

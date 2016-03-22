@@ -29,7 +29,7 @@ package workbench.db;
  */
 public enum DropType
 {
-	none,
-	regular,
-	cascaded
+  none,
+  regular,
+  cascaded
 }

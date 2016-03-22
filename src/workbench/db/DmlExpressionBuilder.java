@@ -29,20 +29,20 @@ import workbench.db.postgres.PostgresExpressionBuilder;
  */
 public interface DmlExpressionBuilder
 {
-	String getDmlExpression(ColumnIdentifier column);
-	boolean isDmlExpressionDefined(String baseType);
+  String getDmlExpression(ColumnIdentifier column);
+  boolean isDmlExpressionDefined(String baseType);
 
-	public static class Factory
-	{
-		public static DmlExpressionBuilder getBuilder(WbConnection conn)
-		{
-			if (conn != null && conn.getMetadata().isPostgres())
-			{
-				return new PostgresExpressionBuilder(conn);
-			}
-			return new DefaultExpressionBuilder(conn);
-		}
-	}
+  public static class Factory
+  {
+    public static DmlExpressionBuilder getBuilder(WbConnection conn)
+    {
+      if (conn != null && conn.getMetadata().isPostgres())
+      {
+        return new PostgresExpressionBuilder(conn);
+      }
+      return new DefaultExpressionBuilder(conn);
+    }
+  }
 
 }
 

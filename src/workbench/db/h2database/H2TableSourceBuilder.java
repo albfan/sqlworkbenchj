@@ -45,133 +45,133 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class H2TableSourceBuilder
-	extends TableSourceBuilder
+  extends TableSourceBuilder
 {
-	public H2TableSourceBuilder(WbConnection con)
-	{
-		super(con);
-	}
+  public H2TableSourceBuilder(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
+  @Override
   public String getTableSource(TableIdentifier table, DropType drop, boolean includeFk, boolean includeGrants)
-		throws SQLException
-	{
-		if ("TABLE LINK".equals(table.getType()))
-		{
-			String sql = getLinkedTableSource(table, drop != DropType.none);
-			if (sql != null) return sql;
-		}
-		return super.getTableSource(table, drop, includeFk, includeGrants);
-	}
+    throws SQLException
+  {
+    if ("TABLE LINK".equals(table.getType()))
+    {
+      String sql = getLinkedTableSource(table, drop != DropType.none);
+      if (sql != null) return sql;
+    }
+    return super.getTableSource(table, drop, includeFk, includeGrants);
+  }
 
-	private String getLinkedTableSource(TableIdentifier table, boolean includeDrop)
-		throws SQLException
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+  private String getLinkedTableSource(TableIdentifier table, boolean includeDrop)
+    throws SQLException
+  {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		String sql =
-			"SELECT sql FROM information_schema.tables " +
-			" WHERE table_schema = ? " +
-			"   AND table_name = ? " +
-			"   AND table_type = 'TABLE LINK'";
+    String sql =
+      "SELECT sql FROM information_schema.tables " +
+      " WHERE table_schema = ? " +
+      "   AND table_name = ? " +
+      "   AND table_type = 'TABLE LINK'";
 
-		StringBuilder createSql = new StringBuilder(100);
+    StringBuilder createSql = new StringBuilder(100);
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("H2TableSourceBuilder.getLinkedTableSource()", "Using statement: " + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("H2TableSourceBuilder.getLinkedTableSource()", "Using statement: " + sql);
+    }
 
-		if (includeDrop)
-		{
-			createSql.append("DROP TABLE ");
-			createSql.append(table.getTableExpression(dbConnection));
-			createSql.append(";\n\n");
-		}
-		try
-		{
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getSchema());
-			stmt.setString(2, table.getTableName());
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				String create = rs.getString(1);
-				if (StringUtil.isNonEmpty(create))
-				{
-					create = create.replace("/*--hide--*/", "");
-				}
-				createSql.append(create.trim());
-				createSql.append(";\n");
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("H2TableSourceBuilder.getLinkedTableSource()", "Error retrieving table source", ex);
-			return null;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return createSql.toString();
-	}
+    if (includeDrop)
+    {
+      createSql.append("DROP TABLE ");
+      createSql.append(table.getTableExpression(dbConnection));
+      createSql.append(";\n\n");
+    }
+    try
+    {
+      stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, table.getSchema());
+      stmt.setString(2, table.getTableName());
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        String create = rs.getString(1);
+        if (StringUtil.isNonEmpty(create))
+        {
+          create = create.replace("/*--hide--*/", "");
+        }
+        createSql.append(create.trim());
+        createSql.append(";\n");
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("H2TableSourceBuilder.getLinkedTableSource()", "Error retrieving table source", ex);
+      return null;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return createSql.toString();
+  }
 
-	@Override
-	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
-	{
-		if (tbl.getSourceOptions().isInitialized()) return;
+  @Override
+  public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
+  {
+    if (tbl.getSourceOptions().isInitialized()) return;
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select storage_type, \n" +
-			"       (select value from information_schema.settings where name = 'DEFAULT_TABLE_TYPE') as default_type \n" +
-			"from information_schema.tables \n" +
-			"where table_name = ? \n" +
-			"and table_schema = ?";
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql =
+      "select storage_type, \n" +
+      "       (select value from information_schema.settings where name = 'DEFAULT_TABLE_TYPE') as default_type \n" +
+      "from information_schema.tables \n" +
+      "where table_name = ? \n" +
+      "and table_schema = ?";
 
-		boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.h2.table_type.show_always", false);
+    boolean alwaysShowType = Settings.getInstance().getBoolProperty("workbench.db.h2.table_type.show_always", false);
 
-		try
-		{
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getTableName());
-			pstmt.setString(2, tbl.getSchema());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("H2TableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String type = rs.getString(1);
-				String defaultType = rs.getString(2);
-				if ("0".equals(defaultType))
-				{
-					defaultType = "CACHED";
-				}
-				else
-				{
-					defaultType = "MEMORY";
-				}
+    try
+    {
+      pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, tbl.getTableName());
+      pstmt.setString(2, tbl.getSchema());
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("H2TableSourceBuilder.readTableConfigOptions()", "Using sql: " + pstmt.toString());
+      }
+      rs = pstmt.executeQuery();
+      if (rs.next())
+      {
+        String type = rs.getString(1);
+        String defaultType = rs.getString(2);
+        if ("0".equals(defaultType))
+        {
+          defaultType = "CACHED";
+        }
+        else
+        {
+          defaultType = "MEMORY";
+        }
 
-				if (alwaysShowType || !defaultType.equals(type))
-				{
-					tbl.getSourceOptions().setTypeModifier(type);
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("H2TableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		tbl.getSourceOptions().setInitialized();
-	}
+        if (alwaysShowType || !defaultType.equals(type))
+        {
+          tbl.getSourceOptions().setTypeModifier(type);
+        }
+      }
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("H2TableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    tbl.getSourceOptions().setInitialized();
+  }
 
 }

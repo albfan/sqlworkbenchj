@@ -51,187 +51,187 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class OracleConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private final String TABLE_SQL =
+  private final String TABLE_SQL =
     "-- SQL Workbench \n" +
     "SELECT " + OracleUtils.getCacheHint() + " constraint_name, search_condition, status, validated \n" +
-		 "FROM all_constraints cons   \n" +
-		 "WHERE constraint_type = 'C' \n" +
-		 " and owner = ? \n" +
-		 " and table_name = ?  \n";
+     "FROM all_constraints cons   \n" +
+     "WHERE constraint_type = 'C' \n" +
+     " and owner = ? \n" +
+     " and table_name = ?  \n";
 
-	public OracleConstraintReader(String dbId)
-	{
-		super(dbId);
-	}
+  public OracleConstraintReader(String dbId)
+  {
+    super(dbId);
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForCatalogParameter()
-	{
-		return -1;
-	}
+  @Override
+  public int getIndexForCatalogParameter()
+  {
+    return -1;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 2;
+  }
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		return TABLE_SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    return TABLE_SQL;
+  }
 
-	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
-	{
-		String sql = this.getTableConstraintSql();
-		if (sql == null) return null;
-		List<TableConstraint> result = CollectionUtil.arrayList();
+  @Override
+  public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
+  {
+    String sql = this.getTableConstraintSql();
+    if (sql == null) return null;
+    List<TableConstraint> result = CollectionUtil.arrayList();
 
-		TableIdentifier table = def.getTable();
+    TableIdentifier table = def.getTable();
 
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
       LogMgr.logDebug("OracleConstraintReader.getTableConstraints", "Retrieving table constraints using:\n" + SqlUtil.replaceParameters(sql, table.getRawSchema(), table.getRawTableName()));
     }
 
-		try
-		{
-			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, table.getRawSchema());
-			stmt.setString(2, table.getRawTableName());
+    try
+    {
+      stmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, table.getRawSchema());
+      stmt.setString(2, table.getRawTableName());
 
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String name = rs.getString(1);
-				String constraint = rs.getString(2);
-				String status = rs.getString(3);
-				String valid = rs.getString(4);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String name = rs.getString(1);
+        String constraint = rs.getString(2);
+        String status = rs.getString(3);
+        String valid = rs.getString(4);
 
-				if (constraint != null)
-				{
-					if (hideTableConstraint(name, constraint, def.getColumns())) continue;
+        if (constraint != null)
+        {
+          if (hideTableConstraint(name, constraint, def.getColumns())) continue;
 
-					String expression = "(" + constraint + ")";
-					if ("DISABLED".equalsIgnoreCase(status))
-					{
-						expression += " DISABLE";
-					}
-					if ("NOT VALIDATED".equalsIgnoreCase(valid))
-					{
-						expression += " NOVALIDATE";
-					}
-					TableConstraint c = new TableConstraint(name, expression);
-					c.setIsSystemName(isSystemConstraintName(name));
-					result.add(c);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("OracleConstraintReader", "Error when reading column constraints", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+          String expression = "(" + constraint + ")";
+          if ("DISABLED".equalsIgnoreCase(status))
+          {
+            expression += " DISABLE";
+          }
+          if ("NOT VALIDATED".equalsIgnoreCase(valid))
+          {
+            expression += " NOVALIDATE";
+          }
+          TableConstraint c = new TableConstraint(name, expression);
+          c.setIsSystemName(isSystemConstraintName(name));
+          result.add(c);
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("OracleConstraintReader", "Error when reading column constraints", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	/**
-	 * Checks if the constraint definition is a valid Not null definition that should be displayed.
-	 */
-	protected boolean hideTableConstraint(String name, String definition, List<ColumnIdentifier> columns)
-	{
-		/*
-			There are four ways to create a column that is not nullable in Oracle:
+  /**
+   * Checks if the constraint definition is a valid Not null definition that should be displayed.
+   */
+  protected boolean hideTableConstraint(String name, String definition, List<ColumnIdentifier> columns)
+  {
+    /*
+      There are four ways to create a column that is not nullable in Oracle:
 
-			create table foo (id integer not null);
-			--> the column will be marked as NOT NULL and a check constraints with a system name will be created in all_constraints
+      create table foo (id integer not null);
+      --> the column will be marked as NOT NULL and a check constraints with a system name will be created in all_constraints
 
-			create table foo (id integer constraint id_not_null not null);
-			--> the column will be marked as NOT NULL and a check constraint with the specified name will created in all_constraints
+      create table foo (id integer constraint id_not_null not null);
+      --> the column will be marked as NOT NULL and a check constraint with the specified name will created in all_constraints
 
-			create table foo (id integer check (id is not null));
-			--> the column will be marked as NULLABLE and a check constraint with a system name will be created in all_constraints
+      create table foo (id integer check (id is not null));
+      --> the column will be marked as NULLABLE and a check constraint with a system name will be created in all_constraints
 
-			create table foo (id integer constraint id_not_null check (id is not null));
-			--> the column will be marked as NULLABLE and a check constraint with the specified name will be created in all_constraints
-		*/
+      create table foo (id integer constraint id_not_null check (id is not null));
+      --> the column will be marked as NULLABLE and a check constraint with the specified name will be created in all_constraints
+    */
 
-		boolean systemConstraint = isSystemConstraintName(name);
+    boolean systemConstraint = isSystemConstraintName(name);
 
-		try
-		{
-			SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, definition);
-			SQLToken tok = lexer.getNextToken(false, false);
-			if (tok == null) return false;
+    try
+    {
+      SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, definition);
+      SQLToken tok = lexer.getNextToken(false, false);
+      if (tok == null) return false;
 
-			if (!tok.isIdentifier()) return false;
-			String colName = SqlUtil.removeObjectQuotes(tok.getText());
+      if (!tok.isIdentifier()) return false;
+      String colName = SqlUtil.removeObjectQuotes(tok.getText());
 
-			ColumnIdentifier colId = ColumnIdentifier.findColumnInList(columns, colName);
-			if (colId == null) return false;
+      ColumnIdentifier colId = ColumnIdentifier.findColumnInList(columns, colName);
+      if (colId == null) return false;
 
-			// If no further tokens exist, this cannot be a not null constraint
-			tok = lexer.getNextToken(false, false);
-			if (tok == null) return false;
+      // If no further tokens exist, this cannot be a not null constraint
+      tok = lexer.getNextToken(false, false);
+      if (tok == null) return false;
 
-			SQLToken tok2 = lexer.getNextToken(false, false);
-			if (tok2 != null) return false; // another token means this can't be a simple NOT NULL constraint
+      SQLToken tok2 = lexer.getNextToken(false, false);
+      if (tok2 != null) return false; // another token means this can't be a simple NOT NULL constraint
 
-			if ("IS NOT NULL".equalsIgnoreCase(tok.getContents()))
-			{
-				if (colId.isNullable())
-				{
-					// column is nullable but has a not null constraint
-					String check = "CHECK (" + definition + ")";
-					if (systemConstraint)
-					{
-						colId.setConstraint(check);
-					}
-					else
-					{
-						colId.setConstraint("CONSTRAINT " + name + " " + check);
-					}
-				}
-				else
-				{
-					if (!systemConstraint)
-					{
-						// only show the column constraint if it is a named constraint
-						// in that case the column was defined as "col_name type constraint xxxx not null"
-						colId.setConstraint("CONSTRAINT " + name + " NOT NULL");
-					}
-				}
-			}
+      if ("IS NOT NULL".equalsIgnoreCase(tok.getContents()))
+      {
+        if (colId.isNullable())
+        {
+          // column is nullable but has a not null constraint
+          String check = "CHECK (" + definition + ")";
+          if (systemConstraint)
+          {
+            colId.setConstraint(check);
+          }
+          else
+          {
+            colId.setConstraint("CONSTRAINT " + name + " " + check);
+          }
+        }
+        else
+        {
+          if (!systemConstraint)
+          {
+            // only show the column constraint if it is a named constraint
+            // in that case the column was defined as "col_name type constraint xxxx not null"
+            colId.setConstraint("CONSTRAINT " + name + " NOT NULL");
+          }
+        }
+      }
 
-			// hide not null constraints at table level, always display them with the column
-			return true;
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
+      // hide not null constraints at table level, always display them with the column
+      return true;
+    }
+    catch (Exception e)
+    {
+      return false;
+    }
+  }
 
 }

@@ -29,12 +29,12 @@ package workbench.db.importer;
  */
 public interface ImportOptions
 {
-	void setDateFormat(String format);
-	String getDateFormat();
-	void setTimestampFormat(String format);
-	String getTimestampFormat();
-	void setEncoding(String enc);
-	String getEncoding();
-	void setMode(String mode);
-	String getMode();
+  void setDateFormat(String format);
+  String getDateFormat();
+  void setTimestampFormat(String format);
+  String getTimestampFormat();
+  void setEncoding(String enc);
+  String getEncoding();
+  void setMode(String mode);
+  String getMode();
 }

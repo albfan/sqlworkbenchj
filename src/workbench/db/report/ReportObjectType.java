@@ -38,87 +38,87 @@ import workbench.util.SqlUtil;
  */
 public class ReportObjectType
 {
-	public static final String TAG_TYPE_DEF = "type-def";
-	public static final String TAG_TYPE_NAME = "type-name";
-	public static final String TAG_TYPE_CATALOG = "type-catalog";
-	public static final String TAG_TYPE_SCHEMA = "type-schema";
-	public static final String TAG_TYPE_COMMENT = "type-comment";
+  public static final String TAG_TYPE_DEF = "type-def";
+  public static final String TAG_TYPE_NAME = "type-name";
+  public static final String TAG_TYPE_CATALOG = "type-catalog";
+  public static final String TAG_TYPE_SCHEMA = "type-schema";
+  public static final String TAG_TYPE_COMMENT = "type-comment";
 
-	private BaseObjectType type;
-	private final TagWriter tagWriter = new TagWriter();
-	private String schemaToUse;
+  private BaseObjectType type;
+  private final TagWriter tagWriter = new TagWriter();
+  private String schemaToUse;
 
-	public ReportObjectType(BaseObjectType objectType)
-	{
-		this.type = objectType;
-	}
+  public ReportObjectType(BaseObjectType objectType)
+  {
+    this.type = objectType;
+  }
 
-	public void writeXml(Writer out)
-		throws IOException
-	{
-		StringBuilder line = this.getXml();
-		out.append(line);
-	}
+  public void writeXml(Writer out)
+    throws IOException
+  {
+    StringBuilder line = this.getXml();
+    out.append(line);
+  }
 
-	public BaseObjectType getType()
-	{
-		return this.type;
-	}
+  public BaseObjectType getType()
+  {
+    return this.type;
+  }
 
-	public void setSchemaToUse(String schemaToUse)
-	{
-		this.schemaToUse = schemaToUse;
-	}
+  public void setSchemaToUse(String schemaToUse)
+  {
+    this.schemaToUse = schemaToUse;
+  }
 
-	public StringBuilder getXml()
-	{
-		return getXml(TAG_TYPE_DEF, new StringBuilder("  "));
-	}
+  public StringBuilder getXml()
+  {
+    return getXml(TAG_TYPE_DEF, new StringBuilder("  "));
+  }
 
-	@Override
-	public String toString()
-	{
-		return this.type.toString();
-	}
+  @Override
+  public String toString()
+  {
+    return this.type.toString();
+  }
 
-	/**
-	 * Return an XML representation of this type information.
-	 *
-	 * The columns will be listed alphabetically not in the order
-	 * they were retrieved from the database.
-	 */
-	public StringBuilder getXml(String tag, StringBuilder indent)
-	{
-		StringBuilder line = new StringBuilder(500);
-		StringBuilder myIndent = new StringBuilder(indent);
-		myIndent.append("  ");
+  /**
+   * Return an XML representation of this type information.
+   *
+   * The columns will be listed alphabetically not in the order
+   * they were retrieved from the database.
+   */
+  public StringBuilder getXml(String tag, StringBuilder indent)
+  {
+    StringBuilder line = new StringBuilder(500);
+    StringBuilder myIndent = new StringBuilder(indent);
+    myIndent.append("  ");
 
-		tagWriter.appendOpenTag(line, indent, tag, "name", SqlUtil.removeObjectQuotes(type.getObjectName()));
-		line.append('\n');
-		appendDefinitionXml(line, myIndent);
+    tagWriter.appendOpenTag(line, indent, tag, "name", SqlUtil.removeObjectQuotes(type.getObjectName()));
+    line.append('\n');
+    appendDefinitionXml(line, myIndent);
 
-		List<ColumnIdentifier> atts = new ArrayList<ColumnIdentifier>(type.getAttributes());
-		if (atts.size() > 0)
-		{
-			Collections.sort(atts);
-			for (ColumnIdentifier col : atts)
-			{
-				ReportColumn rc = new ReportColumn(col);
-				rc.appendXml(line, myIndent);
-			}
-		}
-		tagWriter.appendCloseTag(line, indent, tag);
-		line.append('\n');
+    List<ColumnIdentifier> atts = new ArrayList<ColumnIdentifier>(type.getAttributes());
+    if (atts.size() > 0)
+    {
+      Collections.sort(atts);
+      for (ColumnIdentifier col : atts)
+      {
+        ReportColumn rc = new ReportColumn(col);
+        rc.appendXml(line, myIndent);
+      }
+    }
+    tagWriter.appendCloseTag(line, indent, tag);
+    line.append('\n');
 
-		return line;
-	}
+    return line;
+  }
 
-	public void appendDefinitionXml(StringBuilder line, StringBuilder myIndent)
-	{
-		tagWriter.appendTag(line, myIndent, TAG_TYPE_CATALOG, SqlUtil.removeObjectQuotes(this.type.getCatalog()));
-		tagWriter.appendTag(line, myIndent, TAG_TYPE_SCHEMA, schemaToUse == null ? SqlUtil.removeObjectQuotes(this.type.getSchema()) : schemaToUse);
-		tagWriter.appendTag(line, myIndent, TAG_TYPE_NAME, SqlUtil.removeObjectQuotes(this.type.getObjectName()));
-		tagWriter.appendTag(line, myIndent, TAG_TYPE_COMMENT, type.getComment());
-	}
+  public void appendDefinitionXml(StringBuilder line, StringBuilder myIndent)
+  {
+    tagWriter.appendTag(line, myIndent, TAG_TYPE_CATALOG, SqlUtil.removeObjectQuotes(this.type.getCatalog()));
+    tagWriter.appendTag(line, myIndent, TAG_TYPE_SCHEMA, schemaToUse == null ? SqlUtil.removeObjectQuotes(this.type.getSchema()) : schemaToUse);
+    tagWriter.appendTag(line, myIndent, TAG_TYPE_NAME, SqlUtil.removeObjectQuotes(this.type.getObjectName()));
+    tagWriter.appendTag(line, myIndent, TAG_TYPE_COMMENT, type.getComment());
+  }
 
 }

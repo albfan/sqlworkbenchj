@@ -44,104 +44,104 @@ import workbench.util.SqlUtil;
  * @author  Thomas Kellerer
  */
 public class IngresSynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
-	public IngresSynonymReader()
-	{
-	}
+  public IngresSynonymReader()
+  {
+  }
 
-	/**
-	 * 	Get a list of synonyms for the given owner
-	 */
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection conn, String catalog, String owner, String namePattern)
-	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		List<TableIdentifier> result = new ArrayList<>();
+  /**
+   *  Get a list of synonyms for the given owner
+   */
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection conn, String catalog, String owner, String namePattern)
+  {
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
+    List<TableIdentifier> result = new ArrayList<>();
 
-		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT synonym_owner, synonym_name FROM iisynonyms ");
-		if (owner != null)
-		{
-			sql.append(" WHERE synonym_owner = ?");
-		}
+    StringBuilder sql = new StringBuilder(200);
+    sql.append("SELECT synonym_owner, synonym_name FROM iisynonyms ");
+    if (owner != null)
+    {
+      sql.append(" WHERE synonym_owner = ?");
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("IngresSynonymReader.getSynonymList()", "Query to retrieve synonyms:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("IngresSynonymReader.getSynonymList()", "Query to retrieve synonyms:\n" + sql);
+    }
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql.toString());
-			if (owner != null) stmt.setString(1, owner);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String schema = rs.getString(1);
-				String name = rs.getString(2);
-				if (name == null) continue;
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql.toString());
+      if (owner != null) stmt.setString(1, owner);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String schema = rs.getString(1);
+        String name = rs.getString(2);
+        if (name == null) continue;
 
-				TableIdentifier tbl = new TableIdentifier(schema.trim(), name.trim());
-				tbl.setNeverAdjustCase(true);
-				tbl.setType(SYN_TYPE_NAME);
-				result.add(tbl);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("OracleMetaData.getSynonymList()", "Error when retrieving synonyms using SQL:\n" + sql,e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+        TableIdentifier tbl = new TableIdentifier(schema.trim(), name.trim());
+        tbl.setNeverAdjustCase(true);
+        tbl.setType(SYN_TYPE_NAME);
+        result.add(tbl);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("OracleMetaData.getSynonymList()", "Error when retrieving synonyms using SQL:\n" + sql,e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
-		throws SQLException
-	{
-		String sql =
-		  "SELECT synonym_name, table_owner, table_name \n" +
-			"FROM iisynonyms \n" +
-			"WHERE synonym_name = ? \n " +
-			"  AND synonym_owner = ? ";
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String anOwner, String aSynonym)
+    throws SQLException
+  {
+    String sql =
+      "SELECT synonym_name, table_owner, table_name \n" +
+      "FROM iisynonyms \n" +
+      "WHERE synonym_name = ? \n " +
+      "  AND synonym_owner = ? ";
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
-		stmt.setString(1, aSynonym);
-		stmt.setString(2, anOwner);
+    PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
+    stmt.setString(1, aSynonym);
+    stmt.setString(2, anOwner);
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("IngresSynonymReader.getSynonymTable()", "Query to retrieve synonym table:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("IngresSynonymReader.getSynonymTable()", "Query to retrieve synonym table:\n" + sql);
+    }
 
-		ResultSet rs = stmt.executeQuery();
-		String table = null;
-		String owner = null;
-		TableIdentifier result = null;
-		try
-		{
-			if (rs.next())
-			{
-				owner = rs.getString(2);
-				table = rs.getString(3);
-				if (table != null)
-				{
-					result = new TableIdentifier(null, owner, table);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+    ResultSet rs = stmt.executeQuery();
+    String table = null;
+    String owner = null;
+    TableIdentifier result = null;
+    try
+    {
+      if (rs.next())
+      {
+        owner = rs.getString(2);
+        table = rs.getString(3);
+        if (table != null)
+        {
+          result = new TableIdentifier(null, owner, table);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
 }
 

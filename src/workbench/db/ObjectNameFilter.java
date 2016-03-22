@@ -50,64 +50,64 @@ public class ObjectNameFilter
   public static final String PARAM_CURRENT_CATALOG = "${current_catalog}";
 
   private final Set<String> parameters = CollectionUtil.caseInsensitiveSet(PARAM_CURRENT_USER, PARAM_CURRENT_SCHEMA, PARAM_CURRENT_CATALOG);
-	private final Set<Pattern> filterPatterns = new HashSet<>();
-	private final Set<String> patternSource = CollectionUtil.caseInsensitiveSet();
-	private boolean modified;
+  private final Set<Pattern> filterPatterns = new HashSet<>();
+  private final Set<String> patternSource = CollectionUtil.caseInsensitiveSet();
+  private boolean modified;
 
-	/**
-	 * If true, the filter defines the names to include instead of names to exclude.
-	 */
-	private boolean inclusionFilter;
+  /**
+   * If true, the filter defines the names to include instead of names to exclude.
+   */
+  private boolean inclusionFilter;
 
-	public ObjectNameFilter()
-	{
-	}
+  public ObjectNameFilter()
+  {
+  }
 
-	/**
-	 * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
-	 *
-	 * @see #isInclusionFilter()
-	 */
-	public void setInclusionFilter(boolean flag)
-	{
-		modified = flag != inclusionFilter;
-		inclusionFilter = flag;
-	}
+  /**
+   * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
+   *
+   * @see #isInclusionFilter()
+   */
+  public void setInclusionFilter(boolean flag)
+  {
+    modified = flag != inclusionFilter;
+    inclusionFilter = flag;
+  }
 
-	/**
-	 * If true, the filter defines the names to include (=display) instead of names to exclude.
-	 *
-	 * @see #setInclusionFilter(boolean)
-	 */
-	public boolean isInclusionFilter()
-	{
-		return inclusionFilter;
-	}
+  /**
+   * If true, the filter defines the names to include (=display) instead of names to exclude.
+   *
+   * @see #setInclusionFilter(boolean)
+   */
+  public boolean isInclusionFilter()
+  {
+    return inclusionFilter;
+  }
 
-	/**
-	 * Define the expressions to be used.
-	 * <br/>
-	 * This will replace any existing filter definitions and reset the modified flag
-	 * Empy expressions (null, "") in the collection will be ignored.
-	 * <br/>
-	 * If the list is empty the current filter definitions are not changed
-	 * <br/>
-	 *
-	 * This will set the modified flag to false as this method is called when XMLDecoder reads
-	 * a connection profile.
-	 *
-	 * To modify the filter expressions and update the modified flag, use {@link #addExpression(java.lang.String)}
-	 *
-	 * @param expressions
-	 * @see #setExpressionList(java.lang.String)
-	 * @see #addExpression(java.lang.String)
-	 */
-	public void setFilterExpressions(Collection<String> expressions)
-	{
-		if (CollectionUtil.isEmpty(expressions)) return;
+  /**
+   * Define the expressions to be used.
+   * <br/>
+   * This will replace any existing filter definitions and reset the modified flag
+   * Empy expressions (null, "") in the collection will be ignored.
+   * <br/>
+   * If the list is empty the current filter definitions are not changed
+   * <br/>
+   *
+   * This will set the modified flag to false as this method is called when XMLDecoder reads
+   * a connection profile.
+   *
+   * To modify the filter expressions and update the modified flag, use {@link #addExpression(java.lang.String)}
+   *
+   * @param expressions
+   * @see #setExpressionList(java.lang.String)
+   * @see #addExpression(java.lang.String)
+   */
+  public void setFilterExpressions(Collection<String> expressions)
+  {
+    if (CollectionUtil.isEmpty(expressions)) return;
 
     patternSource.clear();
-		filterPatterns.clear();
+    filterPatterns.clear();
 
     for (String exp : expressions)
     {
@@ -118,12 +118,12 @@ public class ObjectNameFilter
       }
     }
 
-		for (String exp : expressions)
-		{
+    for (String exp : expressions)
+    {
       addExpression(exp);
-		}
-		modified = false;
-	}
+    }
+    modified = false;
+  }
 
   private boolean usesVariables()
   {
@@ -165,74 +165,74 @@ public class ObjectNameFilter
     return expression;
   }
 
-	/**
-	 * Returns the defined expression values.
-	 * <br/>
-	 * The values will be sorted alphabetically
-	 */
-	public Collection<String> getFilterExpressions()
-	{
+  /**
+   * Returns the defined expression values.
+   * <br/>
+   * The values will be sorted alphabetically
+   */
+  public Collection<String> getFilterExpressions()
+  {
     return Collections.unmodifiableCollection(patternSource);
-	}
+  }
 
-	public void resetModified()
-	{
-		modified = false;
-	}
+  public void resetModified()
+  {
+    modified = false;
+  }
 
-	public void removeExpressions()
-	{
-		modified = CollectionUtil.isNonEmpty(filterPatterns);
+  public void removeExpressions()
+  {
+    modified = CollectionUtil.isNonEmpty(filterPatterns);
     patternSource.clear();
     filterPatterns.clear();
-	}
+  }
 
-	/**
-	 * Defines a list of expressions for this filter.
-	 * <br/>
-	 * The expressions can be separated by a semicolon, optionally enclosed with double quotes
-	 * This will replace any existing filter definitions.
-	 * <br/>
-	 * If the list is empty the current filter definitions are not changed
-	 *
-	 * @param list a semicolon separated list of expressions
-	 * @see #setFilterExpressions(java.util.Collection)
-	 */
-	public void setExpressionList(String list)
-	{
-		List<String> items = StringUtil.stringToList(list, ";", true, true);
-		setFilterExpressions(items);
-	}
+  /**
+   * Defines a list of expressions for this filter.
+   * <br/>
+   * The expressions can be separated by a semicolon, optionally enclosed with double quotes
+   * This will replace any existing filter definitions.
+   * <br/>
+   * If the list is empty the current filter definitions are not changed
+   *
+   * @param list a semicolon separated list of expressions
+   * @see #setFilterExpressions(java.util.Collection)
+   */
+  public void setExpressionList(String list)
+  {
+    List<String> items = StringUtil.stringToList(list, ";", true, true);
+    setFilterExpressions(items);
+  }
 
-	public void addExpression(String exp)
-	{
-		if (StringUtil.isBlank(exp)) return;
+  public void addExpression(String exp)
+  {
+    if (StringUtil.isBlank(exp)) return;
 
-		try
-		{
+    try
+    {
       patternSource.add(exp);
     // parameters can't be compile right now, we have to wait until the parameters are set
       if (!parameters.contains(exp))
       {
         addPattern(exp);
       }
-		}
-		catch (PatternSyntaxException p)
-		{
-			LogMgr.logError("ObjectNameFilter.addExpression()", "Could not compile expression: " + exp , p);
-		}
-		modified = true;
-	}
+    }
+    catch (PatternSyntaxException p)
+    {
+      LogMgr.logError("ObjectNameFilter.addExpression()", "Could not compile expression: " + exp , p);
+    }
+    modified = true;
+  }
 
   private void addPattern(String expression)
   {
     filterPatterns.add(Pattern.compile(expression.trim(), Pattern.CASE_INSENSITIVE));
   }
 
-	public boolean isModified()
-	{
-		return modified;
-	}
+  public boolean isModified()
+  {
+    return modified;
+  }
 
   public boolean isExcluded(String name)
   {
@@ -247,52 +247,52 @@ public class ObjectNameFilter
     return inclusionFilter;
   }
 
-	public int getSize()
-	{
-		return (patternSource == null ? 0 : patternSource.size());
-	}
+  public int getSize()
+  {
+    return (patternSource == null ? 0 : patternSource.size());
+  }
 
-	public ObjectNameFilter createCopy()
-	{
-		ObjectNameFilter copy = new ObjectNameFilter();
+  public ObjectNameFilter createCopy()
+  {
+    ObjectNameFilter copy = new ObjectNameFilter();
     copy.setFilterExpressions(this.patternSource);
-		copy.modified = this.modified;
-		copy.inclusionFilter = this.inclusionFilter;
-		return copy;
-	}
+    copy.modified = this.modified;
+    copy.inclusionFilter = this.inclusionFilter;
+    return copy;
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == null)
-		{
-			return false;
-		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		ObjectNameFilter other = (ObjectNameFilter) obj;
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    ObjectNameFilter other = (ObjectNameFilter) obj;
 
-		Collection<String> myPatterns = getFilterExpressions();
-		Collection<String> otherPatterns = other.getFilterExpressions();
-		for (String s : myPatterns)
-		{
-			if (!otherPatterns.contains(s)) return false;
-		}
+    Collection<String> myPatterns = getFilterExpressions();
+    Collection<String> otherPatterns = other.getFilterExpressions();
+    for (String s : myPatterns)
+    {
+      if (!otherPatterns.contains(s)) return false;
+    }
 
-		for (String s : otherPatterns)
-		{
-			if (!myPatterns.contains(s)) return false;
-		}
-		return true;
-	}
+    for (String s : otherPatterns)
+    {
+      if (!myPatterns.contains(s)) return false;
+    }
+    return true;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		return 7 + this.filterPatterns.hashCode();
-	}
+  @Override
+  public int hashCode()
+  {
+    return 7 + this.filterPatterns.hashCode();
+  }
 
   public void applyFilter(Collection<String> elements)
   {

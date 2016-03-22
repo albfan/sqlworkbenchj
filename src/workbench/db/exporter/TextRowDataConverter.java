@@ -47,7 +47,7 @@ import workbench.util.StringUtil;
  *
  * The following things can be configured
  * <ul>
- *	<li>Timestamp and Date formats</li>
+ *  <li>Timestamp and Date formats</li>
  *  <li>Decimal characters</li>
  *  <li>Escaping of non-ASCI characters</li>
  *  <li>Line ending uses</li>
@@ -56,167 +56,167 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class TextRowDataConverter
-	extends RowDataConverter
+  extends RowDataConverter
 {
-	private String delimiter = "\t";
-	private String quoteCharacter;
-	private boolean quoteAlways;
-	private CharacterRange escapeRange = CharacterRange.RANGE_NONE;
-	private String delimiterAndQuote;
-	private String lineEnding = StringUtil.LINE_TERMINATOR;
-	private boolean writeBlobFiles = true;
-	private boolean writeClobFiles;
-	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
-	private String rowIndexColumnName;
-	private DataConverter converter;
-	private CharacterEscapeType escapeType;
+  private String delimiter = "\t";
+  private String quoteCharacter;
+  private boolean quoteAlways;
+  private CharacterRange escapeRange = CharacterRange.RANGE_NONE;
+  private String delimiterAndQuote;
+  private String lineEnding = StringUtil.LINE_TERMINATOR;
+  private boolean writeBlobFiles = true;
+  private boolean writeClobFiles;
+  private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
+  private String rowIndexColumnName;
+  private DataConverter converter;
+  private CharacterEscapeType escapeType;
 
-	public void setWriteClobToFile(boolean flag)
-	{
-		this.writeClobFiles = flag;
-	}
+  public void setWriteClobToFile(boolean flag)
+  {
+    this.writeClobFiles = flag;
+  }
 
-	public void setWriteBlobToFile(boolean flag)
-	{
-		writeBlobFiles = flag;
-	}
+  public void setWriteBlobToFile(boolean flag)
+  {
+    writeBlobFiles = flag;
+  }
 
-	@Override
-	public void setOriginalConnection(WbConnection conn)
-	{
-		super.setOriginalConnection(conn);
-		converter = RowDataReader.getConverterInstance(conn);
-	}
+  @Override
+  public void setOriginalConnection(WbConnection conn)
+  {
+    super.setOriginalConnection(conn);
+    converter = RowDataReader.getConverterInstance(conn);
+  }
 
-	/**
-	 * Define a column name to include the rowindex in the output
-	 * If the name is null, the rowindex column will not be written.
-	 *
-	 * @param colname
-	 */
-	public void setRowIndexColName(String colname)
-	{
-		if (StringUtil.isEmptyString(colname))
-		{
-			this.rowIndexColumnName = null;
-		}
-		else
-		{
-			this.rowIndexColumnName = colname;
-		}
-	}
+  /**
+   * Define a column name to include the rowindex in the output
+   * If the name is null, the rowindex column will not be written.
+   *
+   * @param colname
+   */
+  public void setRowIndexColName(String colname)
+  {
+    if (StringUtil.isEmptyString(colname))
+    {
+      this.rowIndexColumnName = null;
+    }
+    else
+    {
+      this.rowIndexColumnName = colname;
+    }
+  }
 
-	@Override
-	public StringBuilder getEnd(long totalRows)
-	{
-		return null;
-	}
+  @Override
+  public StringBuilder getEnd(long totalRows)
+  {
+    return null;
+  }
 
-	public void setQuoteEscaping(QuoteEscapeType type)
-	{
-		if (type != null)
-		{
-			this.quoteEscape = type;
-		}
-	}
+  public void setQuoteEscaping(QuoteEscapeType type)
+  {
+    if (type != null)
+    {
+      this.quoteEscape = type;
+    }
+  }
 
-	public QuoteEscapeType getQuoteEscaping()
-	{
-		return this.quoteEscape;
-	}
+  public QuoteEscapeType getQuoteEscaping()
+  {
+    return this.quoteEscape;
+  }
 
-	@Override
-	public StringBuilder convertRowData(RowData row, long rowIndex)
-	{
-		return convertRowData(row, rowIndex, null);
-	}
+  @Override
+  public StringBuilder convertRowData(RowData row, long rowIndex)
+  {
+    return convertRowData(row, rowIndex, null);
+  }
 
-	private boolean isConverted(int jdbcType, String dbmsType)
-	{
-		if (converter == null) return false;
-		return converter.convertsType(jdbcType, dbmsType);
-	}
+  private boolean isConverted(int jdbcType, String dbmsType)
+  {
+    if (converter == null) return false;
+    return converter.convertsType(jdbcType, dbmsType);
+  }
 
-	public StringBuilder convertRowData(RowData row, long rowIndex, int[] colMap)
-	{
-		int count = this.metaData.getColumnCount();
-		StringBuilder result = new StringBuilder(count * 30);
+  public StringBuilder convertRowData(RowData row, long rowIndex, int[] colMap)
+  {
+    int count = this.metaData.getColumnCount();
+    StringBuilder result = new StringBuilder(count * 30);
 
-		boolean hasQuoteChar = this.quoteCharacter != null;
+    boolean hasQuoteChar = this.quoteCharacter != null;
 
-		DbSettings dbs = originalConnection != null ? this.originalConnection.getDbSettings() : null;
+    DbSettings dbs = originalConnection != null ? this.originalConnection.getDbSettings() : null;
 
-		int currentColIndex = 0;
+    int currentColIndex = 0;
 
-		if (rowIndexColumnName != null)
-		{
-			result.append(Long.toString(rowIndex + 1));
-			result.append(this.delimiter);
-		}
+    if (rowIndexColumnName != null)
+    {
+      result.append(Long.toString(rowIndex + 1));
+      result.append(this.delimiter);
+    }
 
-		for (int c=0; c < count; c++)
-		{
-			int colIndex = getRealIndex(c, colMap);
-			if (!this.includeColumnInExport(colIndex)) continue;
+    for (int c=0; c < count; c++)
+    {
+      int colIndex = getRealIndex(c, colMap);
+      if (!this.includeColumnInExport(colIndex)) continue;
 
-			if (currentColIndex > 0)
-			{
-				result.append(this.delimiter);
-			}
+      if (currentColIndex > 0)
+      {
+        result.append(this.delimiter);
+      }
 
-			int colType = this.metaData.getColumnType(colIndex);
-			String dbmsType = this.metaData.getDbmsTypeName(colIndex);
-			String value = null;
+      int colType = this.metaData.getColumnType(colIndex);
+      String dbmsType = this.metaData.getDbmsTypeName(colIndex);
+      String value = null;
 
-			boolean addQuote = quoteAlways;
-			boolean isConverted = false;
+      boolean addQuote = quoteAlways;
+      boolean isConverted = false;
 
-			if (converter != null)
-			{
-				isConverted = isConverted(colType, dbmsType);
-			}
+      if (converter != null)
+      {
+        isConverted = isConverted(colType, dbmsType);
+      }
 
-			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
-			{
-				try
-				{
-					File blobFile = createBlobFile(row, colIndex, rowIndex);
-					value = getBlobFileValue(blobFile);
-					long blobSize = writeBlobFile(row.getValue(colIndex), blobFile);
-					if (blobSize <= 0)
-					{
-						value = null;
-					}
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
-					throw new RuntimeException("Error writing BLOB file", e);
-				}
-			}
-			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, dbs))
-			{
-				Object clobData = row.getValue(colIndex);
-				if (clobData != null)
-				{
-					try
-					{
-						File clobFile = createBlobFile(row, colIndex, rowIndex);
-						value = getBlobFileValue(clobFile);
-						String s = clobData.toString();
-						writeClobFile(s, clobFile, this.encoding);
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing CLOB file", e);
-						throw new RuntimeException("Error writing CLOB file", e);
-					}
-				}
-			}
-			else
-			{
-				value = this.getValueAsFormattedString(row, colIndex);
-			}
+      if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
+      {
+        try
+        {
+          File blobFile = createBlobFile(row, colIndex, rowIndex);
+          value = getBlobFileValue(blobFile);
+          long blobSize = writeBlobFile(row.getValue(colIndex), blobFile);
+          if (blobSize <= 0)
+          {
+            value = null;
+          }
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
+          throw new RuntimeException("Error writing BLOB file", e);
+        }
+      }
+      else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, dbs))
+      {
+        Object clobData = row.getValue(colIndex);
+        if (clobData != null)
+        {
+          try
+          {
+            File clobFile = createBlobFile(row, colIndex, rowIndex);
+            value = getBlobFileValue(clobFile);
+            String s = clobData.toString();
+            writeClobFile(s, clobFile, this.encoding);
+          }
+          catch (Exception e)
+          {
+            LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing CLOB file", e);
+            throw new RuntimeException("Error writing CLOB file", e);
+          }
+        }
+      }
+      else
+      {
+        value = this.getValueAsFormattedString(row, colIndex);
+      }
 
       if (value == null)
       {
@@ -225,44 +225,44 @@ public class TextRowDataConverter
         boolean quoteNulls = exporter == null ? false : exporter.getQuoteNulls();
         addQuote = value.isEmpty() ? quoteNulls : quoteAlways;
       }
-			else if (SqlUtil.isCharacterType(colType))
-			{
-				addQuote = needsQuotes(value);
+      else if (SqlUtil.isCharacterType(colType))
+      {
+        addQuote = needsQuotes(value);
 
-				if (this.escapeRange != CharacterRange.RANGE_NONE)
-				{
-					if (addQuote)
-					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter, getEscapeType());
-					}
-					else
-					{
-						value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote, getEscapeType());
-					}
-				}
-				if (this.quoteEscape != QuoteEscapeType.none && hasQuoteChar && value.indexOf(this.quoteCharacter) > -1)
-				{
-					switch (quoteEscape)
-					{
-						case duplicate:
-							value = StringUtil.replace(value, this.quoteCharacter, this.quoteCharacter + this.quoteCharacter);
-							break;
-						case escape:
-							value = StringUtil.replace(value, this.quoteCharacter, "\\" + this.quoteCharacter);
-							break;
-					}
-				}
-			}
+        if (this.escapeRange != CharacterRange.RANGE_NONE)
+        {
+          if (addQuote)
+          {
+            value = StringUtil.escapeText(value, this.escapeRange, this.quoteCharacter, getEscapeType());
+          }
+          else
+          {
+            value = StringUtil.escapeText(value, this.escapeRange, this.delimiterAndQuote, getEscapeType());
+          }
+        }
+        if (this.quoteEscape != QuoteEscapeType.none && hasQuoteChar && value.indexOf(this.quoteCharacter) > -1)
+        {
+          switch (quoteEscape)
+          {
+            case duplicate:
+              value = StringUtil.replace(value, this.quoteCharacter, this.quoteCharacter + this.quoteCharacter);
+              break;
+            case escape:
+              value = StringUtil.replace(value, this.quoteCharacter, "\\" + this.quoteCharacter);
+              break;
+          }
+        }
+      }
 
-			if (addQuote) result.append(this.quoteCharacter);
-			result.append(value);
-			if (addQuote) result.append(this.quoteCharacter);
+      if (addQuote) result.append(this.quoteCharacter);
+      result.append(value);
+      if (addQuote) result.append(this.quoteCharacter);
 
-			currentColIndex ++;
-		}
-		result.append(lineEnding);
-		return result;
-	}
+      currentColIndex ++;
+    }
+    result.append(lineEnding);
+    return result;
+  }
 
   private boolean needsQuotes(String value)
   {
@@ -275,49 +275,49 @@ public class TextRowDataConverter
     return containsDelimiter || containsLineFeed;
   }
 
-	public void setLineEnding(String ending)
-	{
-		if (ending != null) this.lineEnding = ending;
-	}
+  public void setLineEnding(String ending)
+  {
+    if (ending != null) this.lineEnding = ending;
+  }
 
-	@Override
-	public StringBuilder getStart()
-	{
-		return getStart(null);
-	}
+  @Override
+  public StringBuilder getStart()
+  {
+    return getStart(null);
+  }
 
-	public StringBuilder getStart(int[] colMap)
-	{
-		this.setAdditionalEncodeCharacters();
+  public StringBuilder getStart(int[] colMap)
+  {
+    this.setAdditionalEncodeCharacters();
 
-		if (!this.writeHeader) return null;
+    if (!this.writeHeader) return null;
 
     boolean quoteHeader = exporter != null ? exporter.getQuoteHeader() : false;
 
-		int colCount = this.metaData.getColumnCount();
-		StringBuilder result = new StringBuilder(colCount * 10);
+    int colCount = this.metaData.getColumnCount();
+    StringBuilder result = new StringBuilder(colCount * 10);
 
-		boolean first = true;
-		if (rowIndexColumnName != null)
-		{
-			result.append(rowIndexColumnName);
-			first = false;
-		}
+    boolean first = true;
+    if (rowIndexColumnName != null)
+    {
+      result.append(rowIndexColumnName);
+      first = false;
+    }
 
-		for (int c=0; c < colCount; c ++)
-		{
-			int colIndex = getRealIndex(c, colMap);
-			if (!this.includeColumnInExport(colIndex)) continue;
-			String name = SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(colIndex));
+    for (int c=0; c < colCount; c ++)
+    {
+      int colIndex = getRealIndex(c, colMap);
+      if (!this.includeColumnInExport(colIndex)) continue;
+      String name = SqlUtil.removeObjectQuotes(this.metaData.getColumnDisplayName(colIndex));
 
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				result.append(delimiter);
-			}
+      if (first)
+      {
+        first = false;
+      }
+      else
+      {
+        result.append(delimiter);
+      }
 
       boolean addQuotes = false;
       if (quoteHeader)
@@ -325,90 +325,90 @@ public class TextRowDataConverter
         addQuotes = needsQuotes(name);
       }
       if (addQuotes) result.append(quoteCharacter);
-			result.append(name);
+      result.append(name);
       if (addQuotes) result.append(quoteCharacter);
-		}
-		result.append(lineEnding);
-		return result;
-	}
+    }
+    result.append(lineEnding);
+    return result;
+  }
 
-	private int getRealIndex(int colIndex, int[] colMap)
-	{
-		if (colMap == null) return colIndex;
-		if (colIndex >= colMap.length) return -1;
-		return colMap[colIndex];
-	}
+  private int getRealIndex(int colIndex, int[] colMap)
+  {
+    if (colMap == null) return colIndex;
+    if (colIndex >= colMap.length) return -1;
+    return colMap[colIndex];
+  }
 
-	public void setDelimiter(String delimit)
-	{
-		if (StringUtil.isBlank(delimit)) return;
+  public void setDelimiter(String delimit)
+  {
+    if (StringUtil.isBlank(delimit)) return;
 
-		if (delimit.contains("\\t"))
-		{
-			this.delimiter = delimit.replace("\\t", "\t");
-		}
-		else
-		{
-			this.delimiter = delimit;
-		}
-		setAdditionalEncodeCharacters();
-	}
+    if (delimit.contains("\\t"))
+    {
+      this.delimiter = delimit.replace("\\t", "\t");
+    }
+    else
+    {
+      this.delimiter = delimit;
+    }
+    setAdditionalEncodeCharacters();
+  }
 
-	private void setAdditionalEncodeCharacters()
-	{
-		if (this.escapeRange == CharacterRange.RANGE_NONE) return;
-		if (this.quoteCharacter == null && this.delimiter == null) return;
+  private void setAdditionalEncodeCharacters()
+  {
+    if (this.escapeRange == CharacterRange.RANGE_NONE) return;
+    if (this.quoteCharacter == null && this.delimiter == null) return;
 
-		this.delimiterAndQuote = this.delimiter;
+    this.delimiterAndQuote = this.delimiter;
 
-		// Make sure we have a quote character if quoteAlways was requested
-		if (quoteAlways && this.quoteCharacter == null) quoteCharacter="\"";
+    // Make sure we have a quote character if quoteAlways was requested
+    if (quoteAlways && this.quoteCharacter == null) quoteCharacter="\"";
 
-		// If values should always be quoted, then we need to
-		// escape the quote character in values
-		if (this.quoteCharacter != null)
-		{
-			this.delimiterAndQuote += this.quoteCharacter;
-		}
-	}
+    // If values should always be quoted, then we need to
+    // escape the quote character in values
+    if (this.quoteCharacter != null)
+    {
+      this.delimiterAndQuote += this.quoteCharacter;
+    }
+  }
 
-	public void setQuoteCharacter(String quote)
-	{
-		if (StringUtil.isNonBlank(quote))
-		{
-			this.quoteCharacter = quote;
-			setAdditionalEncodeCharacters();
-		}
-	}
+  public void setQuoteCharacter(String quote)
+  {
+    if (StringUtil.isNonBlank(quote))
+    {
+      this.quoteCharacter = quote;
+      setAdditionalEncodeCharacters();
+    }
+  }
 
-	public void setQuoteAlways(boolean flag)
-	{
-		this.quoteAlways = flag;
-	}
+  public void setQuoteAlways(boolean flag)
+  {
+    this.quoteAlways = flag;
+  }
 
-	/**
-	 *	Define the range of characters to be escaped
-	 *  @see workbench.util.StringUtil
-	 */
-	public void setEscapeRange(CharacterRange range)
-	{
-		if (range != null)
-		{
-			this.escapeRange = range;
-		}
-	}
+  /**
+   *  Define the range of characters to be escaped
+   *  @see workbench.util.StringUtil
+   */
+  public void setEscapeRange(CharacterRange range)
+  {
+    if (range != null)
+    {
+      this.escapeRange = range;
+    }
+  }
 
-	public void setEscapeType(CharacterEscapeType type)
-	{
-		this.escapeType = type;
-	}
+  public void setEscapeType(CharacterEscapeType type)
+  {
+    this.escapeType = type;
+  }
 
-	public CharacterEscapeType getEscapeType()
-	{
-		if (this.escapeType == null && exporter != null)
-		{
-			return exporter.getEscapeType();
-		}
-		return escapeType;
-	}
+  public CharacterEscapeType getEscapeType()
+  {
+    if (this.escapeType == null && exporter != null)
+    {
+      return exporter.getEscapeType();
+    }
+    return escapeType;
+  }
 }

@@ -59,308 +59,308 @@ import workbench.util.WbFile;
  */
 public abstract class ExportWriter
 {
-	protected DataExporter exporter;
-	protected boolean cancel = false;
-	protected long rows;
-	protected String tableToUse;
-	protected RowActionMonitor rowMonitor;
-	protected RowDataConverter converter;
-	protected Writer outputWriter;
-	protected WbFile outputFile;
-	protected boolean canAppendStart;
+  protected DataExporter exporter;
+  protected boolean cancel = false;
+  protected long rows;
+  protected String tableToUse;
+  protected RowActionMonitor rowMonitor;
+  protected RowDataConverter converter;
+  protected Writer outputWriter;
+  protected WbFile outputFile;
+  protected boolean canAppendStart;
   protected boolean trimCharData;
-	protected boolean useStreamsForBlobs;
-	protected boolean useStreamsForClobs;
+  protected boolean useStreamsForBlobs;
+  protected boolean useStreamsForClobs;
 
-	private int progressInterval = 10;
+  private int progressInterval = 10;
 
-	public ExportWriter(DataExporter exp)
-	{
-		this.exporter = exp;
-		converter = createConverter();
+  public ExportWriter(DataExporter exp)
+  {
+    this.exporter = exp;
+    converter = createConverter();
 
-		WbConnection con = exporter.getConnection();
+    WbConnection con = exporter.getConnection();
 
-		// configureConverter() might be called more than once!
-		// To prevent connection dependent information to be read
-		// more than once, call setOriginalConnection() only here and now
-		converter.setOriginalConnection(con);
-		configureConverter();
+    // configureConverter() might be called more than once!
+    // To prevent connection dependent information to be read
+    // more than once, call setOriginalConnection() only here and now
+    converter.setOriginalConnection(con);
+    configureConverter();
 
-		if (con != null)
-		{
-			useStreamsForBlobs = con.getDbSettings().getUseStreamsForBlobExport();
-			useStreamsForClobs = con.getDbSettings().getUseStreamsForClobExport();
-		}
-	}
+    if (con != null)
+    {
+      useStreamsForBlobs = con.getDbSettings().getUseStreamsForBlobExport();
+      useStreamsForClobs = con.getDbSettings().getUseStreamsForClobExport();
+    }
+  }
 
-	public void configureConverter()
-	{
-		converter.setErrorReporter(exporter);
-		converter.setExporter(exporter);
+  public void configureConverter()
+  {
+    converter.setErrorReporter(exporter);
+    converter.setExporter(exporter);
 
-		converter.setEncoding(exporter.getEncoding());
-		converter.setDefaultDateFormatter(exporter.getDateFormatter());
-		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
-		converter.setDefaultTimeFormatter(exporter.getTimeFormatter());
-		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
-		converter.setColumnsToExport(this.exporter.getColumnsToExport());
-		converter.setCompressExternalFiles(exporter.getCompressOutput());
-		converter.setBlobIdColumns(exporter.getBlobIdColumns());
-		converter.setFilenameColumn(exporter.getFilenameColumn());
-		converter.setPageTitle(exporter.getPageTitle());
-		converter.setWriteHeader(exporter.getExportHeaders());
-		converter.setAppendInfoSheet(exporter.getAppendInfoSheet());
-		converter.setEnableAutoFilter(exporter.getEnableAutoFilter());
-		converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
-		converter.setDataModifier(exporter.getDataModifier());
-		converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
-		converter.setMaxLobFilesPerDirectory(exporter.getMaxLobFilesPerDirectory());
-		converter.setInfinityLiterals(exporter.getInfinityLiterals());
+    converter.setEncoding(exporter.getEncoding());
+    converter.setDefaultDateFormatter(exporter.getDateFormatter());
+    converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
+    converter.setDefaultTimeFormatter(exporter.getTimeFormatter());
+    converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
+    converter.setColumnsToExport(this.exporter.getColumnsToExport());
+    converter.setCompressExternalFiles(exporter.getCompressOutput());
+    converter.setBlobIdColumns(exporter.getBlobIdColumns());
+    converter.setFilenameColumn(exporter.getFilenameColumn());
+    converter.setPageTitle(exporter.getPageTitle());
+    converter.setWriteHeader(exporter.getExportHeaders());
+    converter.setAppendInfoSheet(exporter.getAppendInfoSheet());
+    converter.setEnableAutoFilter(exporter.getEnableAutoFilter());
+    converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
+    converter.setDataModifier(exporter.getDataModifier());
+    converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
+    converter.setMaxLobFilesPerDirectory(exporter.getMaxLobFilesPerDirectory());
+    converter.setInfinityLiterals(exporter.getInfinityLiterals());
     trimCharData = exporter.getTrimCharData();
-	}
+  }
 
-	public abstract RowDataConverter createConverter();
+  public abstract RowDataConverter createConverter();
 
-	public void setProgressInterval(int interval)
-	{
-		if (interval <= 0)
-		{
-			this.progressInterval = 0;
-		}
-		else
-		{
-			this.progressInterval = interval;
-		}
-	}
+  public void setProgressInterval(int interval)
+  {
+    if (interval <= 0)
+    {
+      this.progressInterval = 0;
+    }
+    else
+    {
+      this.progressInterval = interval;
+    }
+  }
 
-	public void setRowMonitor(RowActionMonitor monitor)
-	{
-		this.rowMonitor = monitor;
-	}
+  public void setRowMonitor(RowActionMonitor monitor)
+  {
+    this.rowMonitor = monitor;
+  }
 
-	public long getNumberOfRecords()
-	{
-		return rows;
-	}
+  public long getNumberOfRecords()
+  {
+    return rows;
+  }
 
-	public void writeExport(DataStore ds, List<ColumnIdentifier> columnsToExport)
-		throws SQLException, IOException
-	{
-		ResultInfo info = ds.getResultInfo();
-		this.converter.setGeneratingSql(ds.getGeneratingSql());
-		this.converter.setResultInfo(info);
-		converter.setColumnsToExport(columnsToExport);
+  public void writeExport(DataStore ds, List<ColumnIdentifier> columnsToExport)
+    throws SQLException, IOException
+  {
+    ResultInfo info = ds.getResultInfo();
+    this.converter.setGeneratingSql(ds.getGeneratingSql());
+    this.converter.setResultInfo(info);
+    converter.setColumnsToExport(columnsToExport);
 
-		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
-		{
-			ds.checkUpdateTable();
-		}
+    if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
+    {
+      ds.checkUpdateTable();
+    }
 
-		this.cancel = false;
-		this.rows = 0;
+    this.cancel = false;
+    this.rows = 0;
 
-		startProgress();
+    startProgress();
 
-		writeStart();
+    writeStart();
 
-		int rowCount = ds.getRowCount();
-		for (int i=0; i < rowCount; i++)
-		{
-			if (this.cancel) break;
+    int rowCount = ds.getRowCount();
+    for (int i=0; i < rowCount; i++)
+    {
+      if (this.cancel) break;
 
-			updateProgress(rows);
-			RowData row = ds.getRow(i);
-			writeRow(row, rows);
-			rows ++;
-		}
-		writeEnd(rows);
-	}
+      updateProgress(rows);
+      RowData row = ds.getRow(i);
+      writeRow(row, rows);
+      rows ++;
+    }
+    writeEnd(rows);
+  }
 
-	public boolean managesOutput()
-	{
-		return false;
-	}
+  public boolean managesOutput()
+  {
+    return false;
+  }
 
-	public void setOutputFile(WbFile out)
-	{
-		this.outputFile = out;
-		this.converter.setOutputFile(out);
-	}
+  public void setOutputFile(WbFile out)
+  {
+    this.outputFile = out;
+    this.converter.setOutputFile(out);
+  }
 
-	public void setOutputWriter(Writer out)
-	{
-		this.outputWriter = out;
-	}
+  public void setOutputWriter(Writer out)
+  {
+    this.outputWriter = out;
+  }
 
-	public void writeExport(ResultSet rs, ResultInfo info, String query)
-		throws SQLException, IOException
-	{
-		this.converter.setResultInfo(info);
-		this.converter.setGeneratingSql(query);
+  public void writeExport(ResultSet rs, ResultInfo info, String query)
+    throws SQLException, IOException
+  {
+    this.converter.setResultInfo(info);
+    this.converter.setGeneratingSql(query);
 
-		this.cancel = false;
-		this.rows = 0;
+    this.cancel = false;
+    this.rows = 0;
 
-		if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
-		{
-			List<Alias> tables = SqlUtil.getTables(query, false, this.exporter.getConnection());
-			if (tables.size() > 0)
-			{
-				info.setUpdateTable(new TableIdentifier(tables.get(0).getObjectName(), exporter.getConnection()));
-			}
-		}
+    if (this.converter.needsUpdateTable() || !exporter.getControlFileFormats().isEmpty())
+    {
+      List<Alias> tables = SqlUtil.getTables(query, false, this.exporter.getConnection());
+      if (tables.size() > 0)
+      {
+        info.setUpdateTable(new TableIdentifier(tables.get(0).getObjectName(), exporter.getConnection()));
+      }
+    }
 
-		startProgress();
+    startProgress();
 
-		boolean first = true;
-		if (this.exporter.writeEmptyResults())
-		{
-			writeStart();
-		}
+    boolean first = true;
+    if (this.exporter.writeEmptyResults())
+    {
+      writeStart();
+    }
 
-		RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
-		reader.setUseStreamsForBlobs(useStreamsForBlobs);
-		reader.setUseStreamsForClobs(useStreamsForClobs);
+    RowDataReader reader = RowDataReaderFactory.createReader(info, exporter.getConnection());
+    reader.setUseStreamsForBlobs(useStreamsForBlobs);
+    reader.setUseStreamsForClobs(useStreamsForClobs);
 
-		while (rs.next())
-		{
-			if (this.cancel) break;
+    while (rs.next())
+    {
+      if (this.cancel) break;
 
-			if (first)
-			{
-				first = false;
-				if (!this.exporter.writeEmptyResults())
-				{
-					writeStart();
-				}
-			}
-			updateProgress(rows);
+      if (first)
+      {
+        first = false;
+        if (!this.exporter.writeEmptyResults())
+        {
+          writeStart();
+        }
+      }
+      updateProgress(rows);
 
-			RowData row = reader.read(rs, trimCharData);
-			writeRow(row, rows);
-			reader.closeStreams();
-			rows ++;
-		}
+      RowData row = reader.read(rs, trimCharData);
+      writeRow(row, rows);
+      reader.closeStreams();
+      rows ++;
+    }
 
-		if (rows > 0 || this.exporter.writeEmptyResults())
-		{
-			writeEnd(rows);
-		}
-	}
+    if (rows > 0 || this.exporter.writeEmptyResults())
+    {
+      writeEnd(rows);
+    }
+  }
 
-	protected void startProgress()
-	{
-		if (this.rowMonitor != null && this.progressInterval > 0)
-		{
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
-		}
-	}
+  protected void startProgress()
+  {
+    if (this.rowMonitor != null && this.progressInterval > 0)
+    {
+      this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
+    }
+  }
 
-	protected void updateProgress(long currentRow)
-	{
-		if (this.rowMonitor != null && this.progressInterval > 0 &&
-				(currentRow == 1 || this.rows % this.progressInterval == 0))
-		{
-			this.rowMonitor.setCurrentRow((int)currentRow, -1);
-		}
-	}
+  protected void updateProgress(long currentRow)
+  {
+    if (this.rowMonitor != null && this.progressInterval > 0 &&
+        (currentRow == 1 || this.rows % this.progressInterval == 0))
+    {
+      this.rowMonitor.setCurrentRow((int)currentRow, -1);
+    }
+  }
 
-	protected void writeRow(RowData row, long numRows)
-		throws IOException
-	{
-		converter.applyDataModifier(row, numRows);
-		CharSequence data = converter.convertRowData(row, numRows);
-		if (data != null && outputWriter != null)
-		{
-			this.outputWriter.append(data);
-		}
-	}
+  protected void writeRow(RowData row, long numRows)
+    throws IOException
+  {
+    converter.applyDataModifier(row, numRows);
+    CharSequence data = converter.convertRowData(row, numRows);
+    if (data != null && outputWriter != null)
+    {
+      this.outputWriter.append(data);
+    }
+  }
 
-	protected void writeStart()
-		throws IOException
-	{
-		boolean doWriteStart = true;
-		if (exporter.getAppendToFile())
-		{
-			doWriteStart = canAppendStart;
-			// If the header can be appended anyway, then there is no need
-			// to check if the file is empty
-			if (this.outputFile != null && !canAppendStart)
-			{
-				doWriteStart = !outputFile.exists() || (outputFile.length() == 0);
-			}
-		}
+  protected void writeStart()
+    throws IOException
+  {
+    boolean doWriteStart = true;
+    if (exporter.getAppendToFile())
+    {
+      doWriteStart = canAppendStart;
+      // If the header can be appended anyway, then there is no need
+      // to check if the file is empty
+      if (this.outputFile != null && !canAppendStart)
+      {
+        doWriteStart = !outputFile.exists() || (outputFile.length() == 0);
+      }
+    }
 
-		if (!doWriteStart) return;
+    if (!doWriteStart) return;
 
-		writeFormatFile();
-		CharSequence data = converter.getStart();
-		if (data != null && outputWriter != null)
-		{
-			this.outputWriter.append(data);
-		}
-	}
+    writeFormatFile();
+    CharSequence data = converter.getStart();
+    if (data != null && outputWriter != null)
+    {
+      this.outputWriter.append(data);
+    }
+  }
 
-	protected void writeEnd(long totalRows)
-		throws IOException
-	{
-		CharSequence data = converter.getEnd(totalRows);
-		if (data != null && outputWriter != null)
-		{
-			this.outputWriter.append(data);
-		}
-	}
+  protected void writeEnd(long totalRows)
+    throws IOException
+  {
+    CharSequence data = converter.getEnd(totalRows);
+    if (data != null && outputWriter != null)
+    {
+      this.outputWriter.append(data);
+    }
+  }
 
-	public void exportStarting()
-		throws IOException
-	{
+  public void exportStarting()
+    throws IOException
+  {
 
-	}
+  }
 
-	public long exportFinished()
-	{
-		FileUtil.closeQuietely(outputWriter);
-		try
-		{
-			if (this.converter != null) this.converter.exportFinished();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("ExportWriter.exportFinished()", "Error closing output stream", e);
-			return -1;
-		}
-		return this.rows;
-	}
+  public long exportFinished()
+  {
+    FileUtil.closeQuietely(outputWriter);
+    try
+    {
+      if (this.converter != null) this.converter.exportFinished();
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("ExportWriter.exportFinished()", "Error closing output stream", e);
+      return -1;
+    }
+    return this.rows;
+  }
 
-	public void cancel()
-	{
-		this.cancel = true;
-	}
+  public void cancel()
+  {
+    this.cancel = true;
+  }
 
-	/**
-	 * Setter for property tableToUse.
-	 * @param tableName New value of property tableToUse.
-	 */
-	public void setTableToUse(String tableName)
-	{
-		this.tableToUse = tableName;
-	}
+  /**
+   * Setter for property tableToUse.
+   * @param tableName New value of property tableToUse.
+   */
+  public void setTableToUse(String tableName)
+  {
+    this.tableToUse = tableName;
+  }
 
-	protected void writeFormatFile()
-	{
-		Set<ControlFileFormat> formats = exporter.getControlFileFormats();
-		for (ControlFileFormat format : formats)
-		{
-			FormatFileWriter writer = ControlFileFormat.createFormatWriter(format);
+  protected void writeFormatFile()
+  {
+    Set<ControlFileFormat> formats = exporter.getControlFileFormats();
+    for (ControlFileFormat format : formats)
+    {
+      FormatFileWriter writer = ControlFileFormat.createFormatWriter(format);
       boolean useFullpath = Settings.getInstance().getBoolProperty("workbench.db.exporter.formatfile." + format.name() + ".fullpath", false);
       writer.setUseFullFilepath(useFullpath);
-			writer.writeFormatFile(exporter, converter);
-		}
-	}
+      writer.writeFormatFile(exporter, converter);
+    }
+  }
 
-	public RowDataConverter getConverter()
-	{
-		return converter;
-	}
+  public RowDataConverter getConverter()
+  {
+    return converter;
+  }
 }

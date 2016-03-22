@@ -62,31 +62,31 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
   private Map<String, String> defaultCollations = new HashMap<>();
 
-	@Override
-	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
-	{
-		if (SqlServerUtil.isSqlServer2000(conn))
-		{
-			updateColumnInformation(table, conn);
-		}
+  @Override
+  public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+  {
+    if (SqlServerUtil.isSqlServer2000(conn))
+    {
+      updateColumnInformation(table, conn);
+    }
 
-		if (conn.getDbSettings().getBoolProperty("remarks.column.retrieve", true))
-		{
-			updateColumnRemarks(table, conn);
-		}
-	}
+    if (conn.getDbSettings().getBoolProperty("remarks.column.retrieve", true))
+    {
+      updateColumnRemarks(table, conn);
+    }
+  }
 
-	private void updateColumnInformation(TableDefinition table, WbConnection conn)
-	{
-		String tablename;
-		String sql;
+  private void updateColumnInformation(TableDefinition table, WbConnection conn)
+  {
+    String tablename;
+    String sql;
 
-		if (SqlServerUtil.isSqlServer2005(conn))
-		{
+    if (SqlServerUtil.isSqlServer2005(conn))
+    {
       sql =
         "select c.name as column_name,  \n" +
         "       cc.definition,  \n" +
@@ -98,29 +98,29 @@ public class SqlServerColumnEnhancer
         "  left join sys.computed_columns cc on cc.column_id = c.column_id and cc.object_id = c.object_id \n" +
         "where c.object_id = object_id(?)";
 
-			tablename = table.getTable().getTableExpression(conn);
-		}
-		else
-		{
-			// This is for Server 2000
-			sql =
-				"select c.name, t.[text], 0 as is_persisted, null as data_type, c.collation \n" +
-				"from sysobjects o with (nolock) \n" +
-				"  join syscolumns c with (nolock) on o.id = c.id \n" +
-				"  left join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
-				"where o.xtype = 'U' \n" +
-				"  and o.name = ?";
-			tablename = table.getTable().getRawTableName();
-		}
+      tablename = table.getTable().getTableExpression(conn);
+    }
+    else
+    {
+      // This is for Server 2000
+      sql =
+        "select c.name, t.[text], 0 as is_persisted, null as data_type, c.collation \n" +
+        "from sysobjects o with (nolock) \n" +
+        "  join syscolumns c with (nolock) on o.id = c.id \n" +
+        "  left join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
+        "where o.xtype = 'U' \n" +
+        "  and o.name = ?";
+      tablename = table.getTable().getRawTableName();
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnInformation()",
-				"Retrieving additional column information using:\n" + SqlUtil.replaceParameters(sql, tablename));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnInformation()",
+        "Retrieving additional column information using:\n" + SqlUtil.replaceParameters(sql, tablename));
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
     String defaultCollation = getDatabaseCollation(table.getTable().getRawCatalog(), conn);
 
@@ -131,16 +131,16 @@ public class SqlServerColumnEnhancer
 
     List<ColumnIdentifier> columns = table.getColumns();
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tablename);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String colname = rs.getString(1);
-				String def = StringUtil.trim(rs.getString(2));
-				boolean isPersisted = rs.getBoolean(3);
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, tablename);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String colname = rs.getString(1);
+        String def = StringUtil.trim(rs.getString(2));
+        boolean isPersisted = rs.getBoolean(3);
         String dataType = rs.getString(4);
         String collation = rs.getString(5);
 
@@ -161,12 +161,12 @@ public class SqlServerColumnEnhancer
           col.setComputedColumnExpression(def);
         }
 
-				if (isNonDefault(collation, defaultCollation))
-				{
-  				String fullType = col.getDbmsType() + " COLLATE " + collation;
+        if (isNonDefault(collation, defaultCollation))
+        {
+          String fullType = col.getDbmsType() + " COLLATE " + collation;
           col.setDbmsType(fullType);
           col.setCollation(collation);
-				}
+        }
 
         // the JDBC driver returns geometry and geography as "VARBINAR"
         // which is incorrect and breaks many things
@@ -175,17 +175,17 @@ public class SqlServerColumnEnhancer
           col.setDbmsType(dataType);
           col.setDataType(Types.OTHER);
         }
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateColumnInformation()", "Error retrieving computed columns using:\n" + SqlUtil.replaceParameters(sql, tablename), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("SqlServerColumnEnhancer.updateColumnInformation()", "Error retrieving computed columns using:\n" + SqlUtil.replaceParameters(sql, tablename), e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
   private String getDatabaseCollation(String database, WbConnection conn)
   {
@@ -227,72 +227,72 @@ public class SqlServerColumnEnhancer
   }
 
 
-	private void updateColumnRemarks(TableDefinition table, WbConnection conn)
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+  private void updateColumnRemarks(TableDefinition table, WbConnection conn)
+  {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
-		String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
+    String tablename = SqlUtil.removeObjectQuotes(table.getTable().getTableName());
+    String schema = SqlUtil.removeObjectQuotes(table.getTable().getSchema());
 
-		String propName = conn.getDbSettings().getProperty(SqlServerObjectListEnhancer.REMARKS_PROP_NAME, SqlServerObjectListEnhancer.REMARKS_PROP_DEFAULT);
+    String propName = conn.getDbSettings().getProperty(SqlServerObjectListEnhancer.REMARKS_PROP_NAME, SqlServerObjectListEnhancer.REMARKS_PROP_DEFAULT);
 
-		// I have to cast to a varchar with a specified length otherwise
-		// the remarks will be truncated at 31 characters for some strange reason
-		// varchar(8000) character should work on any sensible SQL Server version  (varchar(max) wouldn't work on SQL Server 2000)
-		String sql = "SELECT objname, cast(value as varchar(8000)) as value \nFROM ";
+    // I have to cast to a varchar with a specified length otherwise
+    // the remarks will be truncated at 31 characters for some strange reason
+    // varchar(8000) character should work on any sensible SQL Server version  (varchar(max) wouldn't work on SQL Server 2000)
+    String sql = "SELECT objname, cast(value as varchar(8000)) as value \nFROM ";
 
-		if (SqlServerUtil.isSqlServer2005(conn))
-		{
-			sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
-		}
-		else
-		{
-			// SQL Server 2000 (and probably before) uses a different function name and parameters
-			sql += "::fn_listextendedproperty ('" + propName + "','user', ?, 'table', ?, 'column', null)";
-		}
+    if (SqlServerUtil.isSqlServer2005(conn))
+    {
+      sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
+    }
+    else
+    {
+      // SQL Server 2000 (and probably before) uses a different function name and parameters
+      sql += "::fn_listextendedproperty ('" + propName + "','user', ?, 'table', ?, 'column', null)";
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()",
-				"Retrieving column remarks using query:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()",
+        "Retrieving column remarks using query:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+    }
 
     List<ColumnIdentifier> columns = table.getColumns();
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, tablename);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String colname = StringUtil.trim(rs.getString(1));
-				String remark = rs.getString(2);
-				if (colname != null && remark != null)
-				{
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, schema);
+      stmt.setString(2, tablename);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String colname = StringUtil.trim(rs.getString(1));
+        String remark = rs.getString(2);
+        if (colname != null && remark != null)
+        {
           ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
           if (col != null)
           {
             col.setComment(remark);
           }
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("SqlServerColumnEnhancer.updateColumnRemarks()", "Error retrieving remarks using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
-	private boolean isNonDefault(String value, String defaultValue)
-	{
-		if (StringUtil.isEmptyString(value)) return false;
-		return !value.equals(defaultValue);
-	}
+  private boolean isNonDefault(String value, String defaultValue)
+  {
+    if (StringUtil.isEmptyString(value)) return false;
+    return !value.equals(defaultValue);
+  }
 }

@@ -38,33 +38,33 @@ import workbench.util.StringUtil;
  */
 public class DependencyTreeDumper
 {
-	public static void dumpTree(TableIdentifier rootTable, Map<Integer, Set<DependencyNode>> levels, String fname)
-	{
-		FileWriter writer = null;
-		try
-		{
-			writer = new FileWriter(new File(fname));
-			writer.append(rootTable.getTableExpression() + "\n");
+  public static void dumpTree(TableIdentifier rootTable, Map<Integer, Set<DependencyNode>> levels, String fname)
+  {
+    FileWriter writer = null;
+    try
+    {
+      writer = new FileWriter(new File(fname));
+      writer.append(rootTable.getTableExpression() + "\n");
 
-			for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
-			{
-				int level = entry.getKey();
-				for (DependencyNode node : entry.getValue())
-				{
-					writer.append(StringUtil.padRight("", level*2));
-					writer.append(node.getTable() + " (" + node.getFkName() + ")\n");
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logDebug("dumpTree()", "error writing tree", ex);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
-	}
+      for (Map.Entry<Integer, Set<DependencyNode>> entry : levels.entrySet())
+      {
+        int level = entry.getKey();
+        for (DependencyNode node : entry.getValue())
+        {
+          writer.append(StringUtil.padRight("", level*2));
+          writer.append(node.getTable() + " (" + node.getFkName() + ")\n");
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logDebug("dumpTree()", "error writing tree", ex);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(writer);
+    }
+  }
 
 
 }

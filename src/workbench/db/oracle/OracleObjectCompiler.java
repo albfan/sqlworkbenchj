@@ -47,41 +47,41 @@ import workbench.util.SqlUtil;
  */
 public class OracleObjectCompiler
 {
-	private WbConnection dbConnection;
-	private OracleErrorInformationReader errorReader;
+  private WbConnection dbConnection;
+  private OracleErrorInformationReader errorReader;
 
-	private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
-		"VIEW", "MATERIALIZED VIEW", "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER", "TYPE");
+  private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
+    "VIEW", "MATERIALIZED VIEW", "PROCEDURE", "FUNCTION", "PACKAGE", "TRIGGER", "TYPE");
 
-	public OracleObjectCompiler(WbConnection conn)
-		throws SQLException
-	{
-		dbConnection = conn;
-		errorReader = new OracleErrorInformationReader(dbConnection);
-	}
+  public OracleObjectCompiler(WbConnection conn)
+    throws SQLException
+  {
+    dbConnection = conn;
+    errorReader = new OracleErrorInformationReader(dbConnection);
+  }
 
-	/**
-	 * Recompile the given object.
-	 *
-	 * @param object the object to recompile
-	 * @return the error message if the compile was not successful
-	 *         null if the compile was ok.
-	 */
-	public String compileObject(DbObject object)
-	{
-		String sql = createCompileStatement(object);
+  /**
+   * Recompile the given object.
+   *
+   * @param object the object to recompile
+   * @return the error message if the compile was not successful
+   *         null if the compile was ok.
+   */
+  public String compileObject(DbObject object)
+  {
+    String sql = createCompileStatement(object);
 
-		if (Settings.getInstance().getLogAllStatements())
-		{
-			LogMgr.logInfo("OracleObjectCompiler.compileObject()", "Compiling " + object.getObjectType() + " " + object.getObjectName() + " using: " + sql);
-		}
+    if (Settings.getInstance().getLogAllStatements())
+    {
+      LogMgr.logInfo("OracleObjectCompiler.compileObject()", "Compiling " + object.getObjectType() + " " + object.getObjectName() + " using: " + sql);
+    }
 
-		Statement stmt = null;
-		try
-		{
-			stmt = dbConnection.createStatement();
-			this.dbConnection.setBusy(true);
-			stmt.executeUpdate(sql);
+    Statement stmt = null;
+    try
+    {
+      stmt = dbConnection.createStatement();
+      this.dbConnection.setBusy(true);
+      stmt.executeUpdate(sql);
       String type = object.getObjectType();
       String name = object.getObjectName();
 
@@ -97,58 +97,58 @@ public class OracleObjectCompiler
         type = "PACKAGE BODY";
       }
       ErrorDescriptor error = errorReader.getErrorInfo(null, null, name, type, false);
-			if (error == null)
-			{
-				return null;
-			}
-			return error.getErrorMessage();
-		}
-		catch (SQLException e)
-		{
-			return e.getMessage();
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-			this.dbConnection.setBusy(false);
-		}
-	}
+      if (error == null)
+      {
+        return null;
+      }
+      return error.getErrorMessage();
+    }
+    catch (SQLException e)
+    {
+      return e.getMessage();
+    }
+    finally
+    {
+      SqlUtil.closeStatement(stmt);
+      this.dbConnection.setBusy(false);
+    }
+  }
 
-	String createCompileStatement(DbObject object)
-	{
-		StringBuilder sql = new StringBuilder(50);
-		sql.append("ALTER ");
+  String createCompileStatement(DbObject object)
+  {
+    StringBuilder sql = new StringBuilder(50);
+    sql.append("ALTER ");
 
-		if (object instanceof ProcedureDefinition && ((ProcedureDefinition)object).isPackageProcedure())
-		{
-			// If it's a package, compile the whole package.
+    if (object instanceof ProcedureDefinition && ((ProcedureDefinition)object).isPackageProcedure())
+    {
+      // If it's a package, compile the whole package.
       ProcedureDefinition proc = (ProcedureDefinition)object;
       sql.append("PACKAGE ");
       sql.append(dbConnection.getMetadata().quoteObjectname(proc.getSchema()));
       sql.append('.');
       sql.append(dbConnection.getMetadata().quoteObjectname(proc.getPackageName()));
-		}
+    }
     else if (object instanceof PackageDefinition)
     {
       PackageDefinition pkg = (PackageDefinition)object;
       sql.append("PACKAGE ");
       sql.append(pkg.getFullyQualifiedName(dbConnection));
     }
-		else
-		{
-			sql.append(object.getObjectType());
-			sql.append(' ');
-			sql.append(object.getFullyQualifiedName(dbConnection));
-		}
-		sql.append(" COMPILE");
-		return sql.toString();
-	}
+    else
+    {
+      sql.append(object.getObjectType());
+      sql.append(' ');
+      sql.append(object.getFullyQualifiedName(dbConnection));
+    }
+    sql.append(" COMPILE");
+    return sql.toString();
+  }
 
-	public static boolean canCompile(DbObject object)
-	{
-		if (object == null) return false;
-		String type = object.getObjectType();
-		return COMPILABLE_TYPES.contains(type);
-	}
+  public static boolean canCompile(DbObject object)
+  {
+    if (object == null) return false;
+    String type = object.getObjectType();
+    return COMPILABLE_TYPES.contains(type);
+  }
 
 }

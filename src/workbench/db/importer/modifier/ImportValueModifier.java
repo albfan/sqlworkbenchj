@@ -33,6 +33,6 @@ import workbench.db.ColumnIdentifier;
  */
 public interface ImportValueModifier
 {
-	int getSize();
-	String modifyValue(ColumnIdentifier column, String value);
+  int getSize();
+  String modifyValue(ColumnIdentifier column, String value);
 }

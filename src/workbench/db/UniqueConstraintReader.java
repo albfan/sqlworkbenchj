@@ -31,5 +31,5 @@ import java.util.List;
  */
 public interface UniqueConstraintReader
 {
-	void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con);
+  void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con);
 }

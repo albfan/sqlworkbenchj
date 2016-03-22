@@ -45,114 +45,114 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class Db2SynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
 
-	/**
-	 * Returns an empty list, as the standard JDBC driver
-	 * alread returns synonyms in the getObjects() method.
-	 *
-	 * @return an empty list
-	 */
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		return Collections.emptyList();
-	}
+  /**
+   * Returns an empty list, as the standard JDBC driver
+   * alread returns synonyms in the getObjects() method.
+   *
+   * @return an empty list
+   */
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    return Collections.emptyList();
+  }
 
-	@Override
-	public String getSynonymTypeName()
-	{
-		return "ALIAS";
-	}
+  @Override
+  public String getSynonymTypeName()
+  {
+    return "ALIAS";
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schemaPattern, String namePattern)
-		throws SQLException
-	{
-		String sql = "";
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schemaPattern, String namePattern)
+    throws SQLException
+  {
+    String sql = "";
 
-		boolean isHostDB2 = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS);
+    boolean isHostDB2 = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS);
     boolean isISeries = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES);
 
-		if (isISeries)
-		{
-			char catalogSeparator = con.getMetadata().getCatalogSeparator();
+    if (isISeries)
+    {
+      char catalogSeparator = con.getMetadata().getCatalogSeparator();
       sql =
         "SELECT base_table_schema, base_table_name \n" +
         "FROM qsys2" + catalogSeparator + "systables \n" +
         " WHERE table_type = 'A' \n" +
         "   AND table_name = ? \n" +
         "   AND table_owner = ?";
-		}
-		else if (isHostDB2)
-		{
+    }
+    else if (isHostDB2)
+    {
       sql =
         "SELECT tbcreator, tbname \n" +
         "FROM sysibm.syssynonyms \n" +
         "WHERE name = ? \n" +
         "  AND creator = ?";
-		}
-		else
-		{
+    }
+    else
+    {
       sql =
         "SELECT base_tabschema, base_tabname \n" +
         "FROM syscat.tables \n" +
         "WHERE type = 'A' \n" +
         "  and tabname = ? \n" +
         "  and tabschema = ?";
-		}
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
       LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Query to retrieve synonyms:\n" + SqlUtil.replaceParameters(sql, namePattern, schemaPattern));
-		}
+    }
 
-		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
-		stmt.setString(1, namePattern);
-		stmt.setString(2, schemaPattern);
+    PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
+    stmt.setString(1, namePattern);
+    stmt.setString(2, schemaPattern);
 
-		ResultSet rs = stmt.executeQuery();
-		String table = null;
-		String owner = null;
-		TableIdentifier result = null;
-		try
-		{
-			if (rs.next())
-			{
-				owner = rs.getString(1);
-				table = rs.getString(2);
-				if (table != null)
-				{
-					result = new TableIdentifier(null, owner, table, false);
+    ResultSet rs = stmt.executeQuery();
+    String table = null;
+    String owner = null;
+    TableIdentifier result = null;
+    try
+    {
+      if (rs.next())
+      {
+        owner = rs.getString(1);
+        table = rs.getString(2);
+        if (table != null)
+        {
+          result = new TableIdentifier(null, owner, table, false);
           result.setNeverAdjustCase(true);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public String getSynonymSource(WbConnection con, String catalog, String synonymSchema, String synonymName)
-		throws SQLException
-	{
-		TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
-		StringBuilder result = new StringBuilder(00);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE OR REPLACE ALIAS ");
-		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
-		result.append(nl + "   FOR ");
-		result.append(id.getTableExpression());
-		result.append(';');
-		result.append(nl);
+  @Override
+  public String getSynonymSource(WbConnection con, String catalog, String synonymSchema, String synonymName)
+    throws SQLException
+  {
+    TableIdentifier id = getSynonymTable(con, catalog, synonymSchema, synonymName);
+    StringBuilder result = new StringBuilder(00);
+    String nl = Settings.getInstance().getInternalEditorLineEnding();
+    result.append("CREATE OR REPLACE ALIAS ");
+    result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
+    result.append(nl + "   FOR ");
+    result.append(id.getTableExpression());
+    result.append(';');
+    result.append(nl);
 
-		return result.toString();
+    return result.toString();
 }
 
   @Override

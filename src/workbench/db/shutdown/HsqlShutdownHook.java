@@ -36,43 +36,43 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class HsqlShutdownHook
-	implements DbShutdownHook
+  implements DbShutdownHook
 {
 
-	private boolean canShutdown(WbConnection con)
-	{
-		String url = con.getUrl();
-		if (url == null) return true;
+  private boolean canShutdown(WbConnection con)
+  {
+    String url = con.getUrl();
+    if (url == null) return true;
 
-		// this is a HSQL server connection. Do not shut down this!
-		if (url.startsWith("jdbc:hsqldb:hsql:")) return false;
+    // this is a HSQL server connection. Do not shut down this!
+    if (url.startsWith("jdbc:hsqldb:hsql:")) return false;
 
-		return true;
-	}
+    return true;
+  }
 
-	@Override
-	public void shutdown(WbConnection con)
-		throws SQLException
-	{
-		if (con == null) return;
+  @Override
+  public void shutdown(WbConnection con)
+    throws SQLException
+  {
+    if (con == null) return;
 
-		boolean otherActive = ConnectionMgr.getInstance().isActive(con);
-		if (otherActive) return;
+    boolean otherActive = ConnectionMgr.getInstance().isActive(con);
+    if (otherActive) return;
 
-		if (canShutdown(con))
-		{
-			Statement stmt = null;
-			try
-			{
-				stmt = con.createStatement();
-				LogMgr.logInfo("HsqlShutdownHook.shutdown()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting");
-				stmt.executeUpdate("SHUTDOWN");
-			}
-			finally
-			{
-				SqlUtil.closeStatement(stmt);
-			}
-		}
-		con.shutdown();
-	}
+    if (canShutdown(con))
+    {
+      Statement stmt = null;
+      try
+      {
+        stmt = con.createStatement();
+        LogMgr.logInfo("HsqlShutdownHook.shutdown()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting");
+        stmt.executeUpdate("SHUTDOWN");
+      }
+      finally
+      {
+        SqlUtil.closeStatement(stmt);
+      }
+    }
+    con.shutdown();
+  }
 }

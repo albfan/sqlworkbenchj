@@ -48,25 +48,25 @@ import workbench.util.StringUtil;
  * @see MySQLColumnCollationReader
  */
 public class MySQLColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition tbl, WbConnection connection)
-	{
-		MySQLColumnCollationReader collationReader = new MySQLColumnCollationReader();
-		collationReader.readCollations(tbl, connection);
+  @Override
+  public void updateColumnDefinition(TableDefinition tbl, WbConnection connection)
+  {
+    MySQLColumnCollationReader collationReader = new MySQLColumnCollationReader();
+    collationReader.readCollations(tbl, connection);
 
-		MySQLEnumReader enumReader = new MySQLEnumReader();
-		enumReader.readEnums(tbl, connection);
+    MySQLEnumReader enumReader = new MySQLEnumReader();
+    enumReader.readEnums(tbl, connection);
 
     updateComputedColumns(tbl, connection);
-	}
+  }
 
   private void updateComputedColumns(TableDefinition tbl, WbConnection connection)
   {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
     boolean is57 = JdbcUtils.hasMinimumServerVersion(connection, "5.7") && !connection.getMetadata().isMariaDB();
 
@@ -76,10 +76,10 @@ public class MySQLColumnEnhancer
       "where table_schema = ?\n" +
       "  and table_name = ? \n ";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
       LogMgr.logDebug("MySQLColumnEnhancer.updateComputedColumns()", "Retrieving column information using:\n" + SqlUtil.replaceParameters(sql, tbl.getTable().getRawCatalog(), tbl.getTable().getRawTableName()));
-		}
+    }
 
     try
     {

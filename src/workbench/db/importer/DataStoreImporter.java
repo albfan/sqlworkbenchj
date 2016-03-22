@@ -52,216 +52,216 @@ import workbench.util.MessageBuffer;
  * @author Thomas Kellerer
  */
 public class DataStoreImporter
-	implements DataReceiver, Interruptable
+  implements DataReceiver, Interruptable
 {
-	private DataStore target;
-	private RowDataProducer source;
-	private RowActionMonitor rowMonitor;
-	private JobErrorHandler errorHandler;
-	private int currentRowNumber;
+  private DataStore target;
+  private RowDataProducer source;
+  private RowActionMonitor rowMonitor;
+  private JobErrorHandler errorHandler;
+  private int currentRowNumber;
 
-	public DataStoreImporter(DataStore data, RowActionMonitor monitor, JobErrorHandler handler)
-	{
-		this.target = data;
-		this.rowMonitor = monitor;
-		if (this.rowMonitor != null)
-		{
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
-		}
-		this.errorHandler = handler;
-	}
+  public DataStoreImporter(DataStore data, RowActionMonitor monitor, JobErrorHandler handler)
+  {
+    this.target = data;
+    this.rowMonitor = monitor;
+    if (this.rowMonitor != null)
+    {
+      this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_INSERT);
+    }
+    this.errorHandler = handler;
+  }
 
-	@Override
-	public void processFile(StreamImporter stream)
-		throws SQLException, IOException
-	{
-	}
+  @Override
+  public void processFile(StreamImporter stream)
+    throws SQLException, IOException
+  {
+  }
 
-	public void startImport()
-	{
-		try
-		{
-			this.currentRowNumber = 0;
-			this.source.start();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStoreImporter.startImport()", "Error ocurred during import", e);
-		}
-	}
+  public void startImport()
+  {
+    try
+    {
+      this.currentRowNumber = 0;
+      this.source.start();
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("DataStoreImporter.startImport()", "Error ocurred during import", e);
+    }
+  }
 
-	@Override
-	public boolean isTransactionControlEnabled()
-	{
-		return true;
-	}
+  @Override
+  public boolean isTransactionControlEnabled()
+  {
+    return true;
+  }
 
-	@Override
-	public void setTableList(List<TableIdentifier> targetTables)
-	{
-		// Nothing to do as only one table can be imported
-	}
+  @Override
+  public void setTableList(List<TableIdentifier> targetTables)
+  {
+    // Nothing to do as only one table can be imported
+  }
 
-	@Override
-	public void deleteTargetTables()
-		throws SQLException
-	{
-		// Nothing to do as only one table can be imported
-	}
+  @Override
+  public void deleteTargetTables()
+    throws SQLException
+  {
+    // Nothing to do as only one table can be imported
+  }
 
-	@Override
-	public void beginMultiTable()
-		throws SQLException
-	{
-		// Nothing to do as only one table can be imported
-	}
+  @Override
+  public void beginMultiTable()
+    throws SQLException
+  {
+    // Nothing to do as only one table can be imported
+  }
 
-	@Override
-	public void endMultiTable()
-	{
-		// Nothing to do as only one table can be imported
-	}
+  @Override
+  public void endMultiTable()
+  {
+    // Nothing to do as only one table can be imported
+  }
 
-	@Override
-	public boolean getCreateTarget()
-	{
-		return false;
-	}
+  @Override
+  public boolean getCreateTarget()
+  {
+    return false;
+  }
 
-	@Override
-	public boolean shouldProcessNextRow()
-	{
-		return true;
-	}
+  @Override
+  public boolean shouldProcessNextRow()
+  {
+    return true;
+  }
 
-	@Override
-	public void nextRowSkipped()
-	{
-	}
+  @Override
+  public void nextRowSkipped()
+  {
+  }
 
-	public void importString(String contents)
-	{
-		importString(contents, "\t", "\"");
-	}
+  public void importString(String contents)
+  {
+    importString(contents, "\t", "\"");
+  }
 
-	public void importString(String contents, String delimiter, String quoteChar)
-	{
-		ClipboardFile file = new ClipboardFile(contents);
-		setImportOptions(file, ProducerFactory.ImportType.Text, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar));
-	}
+  public void importString(String contents, String delimiter, String quoteChar)
+  {
+    ClipboardFile file = new ClipboardFile(contents);
+    setImportOptions(file, ProducerFactory.ImportType.Text, new DefaultImportOptions(), new DefaultTextImportOptions(delimiter, quoteChar));
+  }
 
-	public void importString(String content, ImportOptions options, TextImportOptions textOptions)
-	{
-		ClipboardFile file = new ClipboardFile(content);
-		setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions);
-	}
+  public void importString(String content, ImportOptions options, TextImportOptions textOptions)
+  {
+    ClipboardFile file = new ClipboardFile(content);
+    setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions);
+  }
 
-	public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions)
-	{
-		ResultInfo info = target.getResultInfo();
+  public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions)
+  {
+    ResultInfo info = target.getResultInfo();
 
-		ProducerFactory factory = new ProducerFactory(file);
-		factory.setTextOptions(textOptions);
-		factory.setGeneralOptions(generalOptions);
-		factory.setType(type);
-		factory.setTargetTable(info.getUpdateTable());
-		factory.setConnection(target.getOriginalConnection());
+    ProducerFactory factory = new ProducerFactory(file);
+    factory.setTextOptions(textOptions);
+    factory.setGeneralOptions(generalOptions);
+    factory.setType(type);
+    factory.setTargetTable(info.getUpdateTable());
+    factory.setConnection(target.getOriginalConnection());
 
-		this.source = factory.getProducer();
-		((ImportFileParser)source).setIgnoreMissingColumns(true);
+    this.source = factory.getProducer();
+    ((ImportFileParser)source).setIgnoreMissingColumns(true);
 
-		try
-		{
-			List<ColumnIdentifier> targetColumns = Arrays.asList(info.getColumns());
-			List<ColumnIdentifier> fileColumns = factory.getFileColumns();
-			factory.setColumnMap(fileColumns, targetColumns);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DataStoreImporter.setImportOptions()", "Error setting import columns", e);
-		}
-		this.source.setReceiver(this);
-		this.source.setAbortOnError(false);
-		this.source.setErrorHandler(this.errorHandler);
-	}
+    try
+    {
+      List<ColumnIdentifier> targetColumns = Arrays.asList(info.getColumns());
+      List<ColumnIdentifier> fileColumns = factory.getFileColumns();
+      factory.setColumnMap(fileColumns, targetColumns);
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("DataStoreImporter.setImportOptions()", "Error setting import columns", e);
+    }
+    this.source.setReceiver(this);
+    this.source.setAbortOnError(false);
+    this.source.setErrorHandler(this.errorHandler);
+  }
 
-	public MessageBuffer getMessage()
-	{
-		return this.source.getMessages();
-	}
+  public MessageBuffer getMessage()
+  {
+    return this.source.getMessages();
+  }
 
-	@Override
-	public void processRow(Object[] row) throws SQLException
-	{
-		RowData data = new RowData(row.length);
-		for (int i = 0; i < row.length; i++)
-		{
-			data.setValue(i, row[i]);
-		}
-		target.addRow(data);
-		currentRowNumber ++;
-		if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);
-	}
+  @Override
+  public void processRow(Object[] row) throws SQLException
+  {
+    RowData data = new RowData(row.length);
+    for (int i = 0; i < row.length; i++)
+    {
+      data.setValue(i, row[i]);
+    }
+    target.addRow(data);
+    currentRowNumber ++;
+    if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);
+  }
 
-	@Override
-	public void recordRejected(String record, long importRow, Throwable error)
-	{
+  @Override
+  public void recordRejected(String record, long importRow, Throwable error)
+  {
 
-	}
+  }
 
-	@Override
-	public void setTableCount(int total)
-	{
-	}
+  @Override
+  public void setTableCount(int total)
+  {
+  }
 
-	@Override
-	public void setCurrentTable(int current)
-	{
-	}
+  @Override
+  public void setCurrentTable(int current)
+  {
+  }
 
-	@Override
-	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns, File currentFile)
-		throws SQLException
-	{
-		if (columns.size() != this.target.getColumnCount())
-		{
-			if (errorHandler != null) errorHandler.fatalError(ResourceMgr.getString("ErrImportInvalidColumnStructure"));
-			throw new SQLException("Invalid column count");
-		}
-	}
+  @Override
+  public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns, File currentFile)
+    throws SQLException
+  {
+    if (columns.size() != this.target.getColumnCount())
+    {
+      if (errorHandler != null) errorHandler.fatalError(ResourceMgr.getString("ErrImportInvalidColumnStructure"));
+      throw new SQLException("Invalid column count");
+    }
+  }
 
-	@Override
-	public void tableImportFinished()
-		throws SQLException
-	{
+  @Override
+  public void tableImportFinished()
+    throws SQLException
+  {
 
-	}
+  }
 
-	@Override
-	public void importFinished()
-	{
-	}
+  @Override
+  public void importFinished()
+  {
+  }
 
-	@Override
-	public void importCancelled()
-	{
-	}
+  @Override
+  public void importCancelled()
+  {
+  }
 
-	@Override
-	public void tableImportError()
-	{
-	}
+  @Override
+  public void tableImportError()
+  {
+  }
 
-	@Override
-	public void cancelExecution()
-	{
-		this.source.cancel();
-	}
+  @Override
+  public void cancelExecution()
+  {
+    this.source.cancel();
+  }
 
-	@Override
-	public boolean confirmCancel()
-	{
-		return true;
-	}
+  @Override
+  public boolean confirmCancel()
+  {
+    return true;
+  }
 
 }

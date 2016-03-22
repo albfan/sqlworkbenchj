@@ -53,59 +53,59 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class Db2ProcedureReader
-	extends JdbcProcedureReader
+  extends JdbcProcedureReader
 {
 
   private boolean forceJDBC = false;
 
-	public Db2ProcedureReader(WbConnection conn, String dbID)
-	{
-		super(conn);
-	}
+  public Db2ProcedureReader(WbConnection conn, String dbID)
+  {
+    super(conn);
+  }
 
-	@Override
-	public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
-		throws SQLException
-	{
-		if (useJDBC())
-		{
-			return super.getProcedures(catalog, schemaPattern, namePattern);
-		}
+  @Override
+  public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
+    throws SQLException
+  {
+    if (useJDBC())
+    {
+      return super.getProcedures(catalog, schemaPattern, namePattern);
+    }
 
-		catalog = DbMetadata.cleanupWildcards(catalog);
-		schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);
-		namePattern = DbMetadata.cleanupWildcards(namePattern);
+    catalog = DbMetadata.cleanupWildcards(catalog);
+    schemaPattern = DbMetadata.cleanupWildcards(schemaPattern);
+    namePattern = DbMetadata.cleanupWildcards(namePattern);
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		String sql = getSQL(schemaPattern, namePattern);
-		try
-		{
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("Db2ProcedureReader.getProcedures()", "Query to retrieve procedurelist:\n" + sql);
-			}
-			stmt = connection.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
-			DataStore ds = fillProcedureListDataStore(rs);
+    Statement stmt = null;
+    ResultSet rs = null;
+    String sql = getSQL(schemaPattern, namePattern);
+    try
+    {
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("Db2ProcedureReader.getProcedures()", "Query to retrieve procedurelist:\n" + sql);
+      }
+      stmt = connection.createStatementForQuery();
+      rs = stmt.executeQuery(sql);
+      DataStore ds = fillProcedureListDataStore(rs);
       if (connection.getDbSettings().showProcedureParameters())
       {
         updateDisplayNames(ds);
       }
-			return ds;
-		}
-		catch (Exception e)
-		{
+      return ds;
+    }
+    catch (Exception e)
+    {
       forceJDBC = true;
-			LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
-			return super.getProcedures(catalog, schemaPattern, namePattern);
-		}
-		finally
-		{
-			// The resultSet is already closed by fillProcedureListDataStore
-			SqlUtil.closeStatement(stmt);
-		}
-	}
+      LogMgr.logError("Db2ProcedureReader.getProcedures()", "Error retrieving procedures using query:\n" + sql, e);
+      return super.getProcedures(catalog, schemaPattern, namePattern);
+    }
+    finally
+    {
+      // The resultSet is already closed by fillProcedureListDataStore
+      SqlUtil.closeStatement(stmt);
+    }
+  }
 
   private void updateDisplayNames(DataStore procs)
   {
@@ -131,14 +131,14 @@ public class Db2ProcedureReader
     }
   }
 
-	private String getSQL(String schemaPattern, String namePattern)
-	{
-		StringBuilder sql = new StringBuilder(100);
+  private String getSQL(String schemaPattern, String namePattern)
+  {
+    StringBuilder sql = new StringBuilder(100);
 
-		if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
-		{
+    if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+    {
       // DB2 iSeries, AS/400
-			sql.append(
+      sql.append(
         "SELECT '' as PROCEDURE_CAT,  \n" +
          "      ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
          "      ROUTINE_NAME as PROCEDURE_NAME, \n" +
@@ -153,13 +153,13 @@ public class Db2ProcedureReader
          "WHERE function_origin <> ('B')"
       );
 
-			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
-			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
-		}
+      SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
+      SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
+    }
     else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS))
-		{
-			// DB Host, z/OS
-			sql.append(
+    {
+      // DB Host, z/OS
+      sql.append(
         "SELECT '' as PROCEDURE_CAT,  \n" +
         "       schema as PROCEDURE_SCHEM, \n" +
         "       name as PROCEDURE_NAME, \n" +
@@ -173,13 +173,13 @@ public class Db2ProcedureReader
         "WHERE routinetype in ('F', 'P') \n" +
         "  AND origin in ('Q', 'U') \n");
 
-			SqlUtil.appendAndCondition(sql, "schema", schemaPattern, this.connection);
-			SqlUtil.appendAndCondition(sql, "name", namePattern, this.connection);
-		}
-		else
-		{
-			// DB LUW
-			sql.append(
+      SqlUtil.appendAndCondition(sql, "schema", schemaPattern, this.connection);
+      SqlUtil.appendAndCondition(sql, "name", namePattern, this.connection);
+    }
+    else
+    {
+      // DB LUW
+      sql.append(
         "SELECT '' as PROCEDURE_CAT,  \n" +
         "       routineschema as PROCEDURE_SCHEM, \n" +
         "       routinename as PROCEDURE_NAME, \n" +
@@ -193,11 +193,11 @@ public class Db2ProcedureReader
         "WHERE routinetype in ('F', 'P') \n" +
         "  AND origin in ('Q', 'U') \n");
 
-			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern, this.connection);
-			SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
-		}
-		return sql.toString();
-	}
+      SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern, this.connection);
+      SqlUtil.appendAndCondition(sql, "routinename", namePattern, this.connection);
+    }
+    return sql.toString();
+  }
 
   @Override
   public void readProcedureParameters(ProcedureDefinition def)
@@ -218,70 +218,70 @@ public class Db2ProcedureReader
     return super.getProcedureColumns(def);
   }
 
-	/**
-	 * Retrieve parameters for a stored function.
-	 *
-	 * The DB2 JDBC driver does not return parameters for functions, only for stored procedures.
-	 * This method uses SYSIBM.SQLFUNCTIONCOLS() to retrieve the parameters for the given stored function
-	 *
-	 * @param def  the stored function
-	 * @return the parameters defined
-	 *
-	 * @throws SQLException
-	 */
-	public DataStore getFunctionParameters(ProcedureDefinition def)
-		throws SQLException
-	{
-		DataStore ds = createProcColsDataStore();
+  /**
+   * Retrieve parameters for a stored function.
+   *
+   * The DB2 JDBC driver does not return parameters for functions, only for stored procedures.
+   * This method uses SYSIBM.SQLFUNCTIONCOLS() to retrieve the parameters for the given stored function
+   *
+   * @param def  the stored function
+   * @return the parameters defined
+   *
+   * @throws SQLException
+   */
+  public DataStore getFunctionParameters(ProcedureDefinition def)
+    throws SQLException
+  {
+    DataStore ds = createProcColsDataStore();
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		String procSchema = connection.getDbSettings().getProperty("functionparams.procschema", "SYSIBM");
-		String options = connection.getDbSettings().getProperty("functionparams.options", "UNDERSCORE=0");
+    String procSchema = connection.getDbSettings().getProperty("functionparams.procschema", "SYSIBM");
+    String options = connection.getDbSettings().getProperty("functionparams.options", "UNDERSCORE=0");
 
-		String sql = "call " + procSchema + ".SQLFUNCTIONCOLS(?, ?, ?, '%', '" +  options + "')";
+    String sql = "call " + procSchema + ".SQLFUNCTIONCOLS(?, ?, ?, '%', '" +  options + "')";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("Db2ProcedureReader.getFunctionParameters()", "Query to retrieve function parameters: " + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("Db2ProcedureReader.getFunctionParameters()", "Query to retrieve function parameters: " + sql);
+    }
 
-		try
-		{
-			stmt = connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, def.getCatalog());
-			stmt.setString(2, def.getSchema());
-			stmt.setString(3, def.getProcedureName());
-			rs = stmt.executeQuery();
+    try
+    {
+      stmt = connection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, def.getCatalog());
+      stmt.setString(2, def.getSchema());
+      stmt.setString(3, def.getProcedureName());
+      rs = stmt.executeQuery();
 
-			int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
-			if (specIndex < 0)
-			{
-				specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFICNAME");
-			}
-			String specificName = def.getSpecificName();
+      int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
+      if (specIndex < 0)
+      {
+        specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFICNAME");
+      }
+      String specificName = def.getSpecificName();
 
-			while (rs.next())
-			{
-				String procSpecName = specIndex  > -1 ? rs.getString(specIndex) : null;
-				if (!StringUtil.equalString(procSpecName, specificName)) continue;
-				processProcedureColumnResultRow(ds, rs, true);
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logWarning("Db2ProcedureReader.getFunctionParams()", "Could not retrieve function parameters using: " + sql, ex);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
+      while (rs.next())
+      {
+        String procSpecName = specIndex  > -1 ? rs.getString(specIndex) : null;
+        if (!StringUtil.equalString(procSpecName, specificName)) continue;
+        processProcedureColumnResultRow(ds, rs, true);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("Db2ProcedureReader.getFunctionParams()", "Could not retrieve function parameters using: " + sql, ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeResult(rs);
+    }
 
-		return ds;
+    return ds;
 
-	}
+  }
 
   private boolean useJDBC()
   {

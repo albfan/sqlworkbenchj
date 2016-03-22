@@ -43,56 +43,56 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class HanaTableSourceBuilder
-	extends TableSourceBuilder
+  extends TableSourceBuilder
 {
 
-	public HanaTableSourceBuilder(WbConnection con)
-	{
-		super(con);
-	}
+  public HanaTableSourceBuilder(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
-	{
-		if (tbl == null) return;
-		if (tbl.getSourceOptions().isInitialized()) return;
+  @Override
+  public void readTableOptions(TableIdentifier tbl, List<ColumnIdentifier> columns)
+  {
+    if (tbl == null) return;
+    if (tbl.getSourceOptions().isInitialized()) return;
 
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String sql =
-			"select table_type \n" +
-			"from sys.tables\n" +
-			"where table_name = ? \n" +
-			"and schema_name = ?";
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql =
+      "select table_type \n" +
+      "from sys.tables\n" +
+      "where table_name = ? \n" +
+      "and schema_name = ?";
 
     long start = System.currentTimeMillis();
-		try
-		{
-			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			pstmt.setString(1, tbl.getRawTableName());
-			pstmt.setString(2, tbl.getRawSchema());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type using SQL: " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
-			}
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String type = rs.getString(1);
+    try
+    {
+      pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, tbl.getRawTableName());
+      pstmt.setString(2, tbl.getRawSchema());
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type using SQL: " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+      }
+      rs = pstmt.executeQuery();
+      if (rs.next())
+      {
+        String type = rs.getString(1);
         tbl.getSourceOptions().setTypeModifier(type);
-			}
+      }
       long duration = System.currentTimeMillis() - start;
       LogMgr.logDebug("HanaTableSourceBuilder.readTableConfigOptions()", "Retrieving table type took: " + duration + "ms");
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("HanaTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		tbl.getSourceOptions().setInitialized();
-	}
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("HanaTableSourceBuilder.readTableConfigOptions()", "Error retrieving table options", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    tbl.getSourceOptions().setInitialized();
+  }
 
 }

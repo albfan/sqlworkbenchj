@@ -39,17 +39,17 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerSchemaInfoReader
-	implements SchemaInformationReader
+  implements SchemaInformationReader
 {
   private final WbConnection dbConnection;
-	private String defaultSchema;
+  private String defaultSchema;
   private boolean schemaRetrieved;
 
-	public SqlServerSchemaInfoReader(WbConnection con)
-	{
+  public SqlServerSchemaInfoReader(WbConnection con)
+  {
     dbConnection = con;
     retrieveCurrentSchema();
-	}
+  }
 
   private void retrieveCurrentSchema()
   {
@@ -109,27 +109,27 @@ public class SqlServerSchemaInfoReader
     return schema;
   }
 
-	@Override
-	public boolean isSupported()
-	{
-		return true;
-	}
+  @Override
+  public boolean isSupported()
+  {
+    return true;
+  }
 
-	@Override
-	public void clearCache()
-	{
-		this.defaultSchema = null;
-	}
+  @Override
+  public void clearCache()
+  {
+    this.defaultSchema = null;
+  }
 
-	@Override
-	public String getCachedSchema()
-	{
-		return defaultSchema;
-	}
+  @Override
+  public String getCachedSchema()
+  {
+    return defaultSchema;
+  }
 
-	@Override
-	public String getCurrentSchema()
-	{
+  @Override
+  public String getCurrentSchema()
+  {
     if (!schemaRetrieved)
     {
       synchronized (dbConnection)
@@ -137,13 +137,13 @@ public class SqlServerSchemaInfoReader
         retrieveCurrentSchema();
       }
     }
-		return defaultSchema;
-	}
+    return defaultSchema;
+  }
 
-	@Override
-	public void dispose()
-	{
-		// nothing to do
-	}
+  @Override
+  public void dispose()
+  {
+    // nothing to do
+  }
 
 }

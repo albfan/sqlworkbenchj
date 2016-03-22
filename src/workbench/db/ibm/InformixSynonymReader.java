@@ -44,81 +44,81 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class InformixSynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
 
-	/**
-	 * Returns an empty list, as the standard JDBC driver
-	 * alread returns synonyms in the getObjects() method.
-	 *
-	 * @return an empty list
-	 */
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		return Collections.emptyList();
-	}
+  /**
+   * Returns an empty list, as the standard JDBC driver
+   * alread returns synonyms in the getObjects() method.
+   *
+   * @return an empty list
+   */
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    return Collections.emptyList();
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
-		throws SQLException
-	{
-		String systemSchema = con.getDbSettings().getProperty("systemschema", "informix");
-		TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
-		TableIdentifier synTabs = new TableIdentifier(catalog, systemSchema, "syssyntable");
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonymName)
+    throws SQLException
+  {
+    String systemSchema = con.getDbSettings().getProperty("systemschema", "informix");
+    TableIdentifier sysTabs = new TableIdentifier(catalog, systemSchema, "systables");
+    TableIdentifier synTabs = new TableIdentifier(catalog, systemSchema, "syssyntable");
 
-		String systables = sysTabs.getFullyQualifiedName(con);
-		String syntable = synTabs.getFullyQualifiedName(con);
+    String systables = sysTabs.getFullyQualifiedName(con);
+    String syntable = synTabs.getFullyQualifiedName(con);
 
-		String sql =
-			"select bt.owner as table_schema, \n" +
-			"       bt.tabname as table_name \n" +
-			"from " + systables + " syn \n" +
-			"  join " + syntable + " lnk on lnk.tabid = syn.tabid \n" +
-			"  join " + systables + " bt on bt.tabid = lnk.btabid \n" +
-			"and syn.tabname = ? \n" +
-			"and syn.owner = ?";
+    String sql =
+      "select bt.owner as table_schema, \n" +
+      "       bt.tabname as table_name \n" +
+      "from " + systables + " syn \n" +
+      "  join " + syntable + " lnk on lnk.tabid = syn.tabid \n" +
+      "  join " + systables + " bt on bt.tabid = lnk.btabid \n" +
+      "and syn.tabname = ? \n" +
+      "and syn.owner = ?";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Query to retrieve synonym:\n" + SqlUtil.replaceParameters(sql, synonymName, schema));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("InformixSynonymReader.getSynonymTable()", "Query to retrieve synonym:\n" + SqlUtil.replaceParameters(sql, synonymName, schema));
+    }
 
-		TableIdentifier result = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, synonymName);
-			stmt.setString(2, schema);
+    TableIdentifier result = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, synonymName);
+      stmt.setString(2, schema);
 
-			rs = stmt.executeQuery();
-			String table = null;
-			String owner = null;
-			if (rs.next())
-			{
-				owner = rs.getString(1);
-				table = rs.getString(2);
-				if (table != null)
-				{
-					result = new TableIdentifier(null, owner, table, false);
+      rs = stmt.executeQuery();
+      String table = null;
+      String owner = null;
+      if (rs.next())
+      {
+        owner = rs.getString(1);
+        table = rs.getString(2);
+        if (table != null)
+        {
+          result = new TableIdentifier(null, owner, table, false);
           result.setNeverAdjustCase(true);
-				}
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("InformixSynonymReader.getSynonymTable()", "Could not retrieve synonym table using:\n + sql", ex);
-			throw ex;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+        }
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("InformixSynonymReader.getSynonymTable()", "Could not retrieve synonym table using:\n + sql", ex);
+      throw ex;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
 }

@@ -34,124 +34,124 @@ import workbench.db.WbConnection;
  */
 public class ReportPackage
 {
-	public static final String TAG_PKG_DEF = "package-def";
-	public static final String TAG_PKG_NAME = "package-name";
-	public static final String TAG_PKG_SCHEMA = "package-schema";
-	public static final String TAG_PKG_SOURCE = "package-source";
+  public static final String TAG_PKG_DEF = "package-def";
+  public static final String TAG_PKG_NAME = "package-name";
+  public static final String TAG_PKG_SCHEMA = "package-schema";
+  public static final String TAG_PKG_SOURCE = "package-source";
 
-	private String owner;
-	private String name;
-	private CharSequence source;
-	private StringBuilder indent = new StringBuilder("  ");
-	private StringBuilder indent2 = new StringBuilder("    ");
-	private String schemaToUse;
+  private String owner;
+  private String name;
+  private CharSequence source;
+  private StringBuilder indent = new StringBuilder("  ");
+  private StringBuilder indent2 = new StringBuilder("    ");
+  private String schemaToUse;
 
-	public ReportPackage(ProcedureDefinition proc)
-	{
-		if (proc.isPackageProcedure())
-		{
-			this.owner = proc.getSchema();
-			this.name = proc.getPackageName();
-		}
-		else
-		{
-			throw new IllegalArgumentException(proc.getProcedureName() + " is not an Oracle package!");
-		}
-	}
+  public ReportPackage(ProcedureDefinition proc)
+  {
+    if (proc.isPackageProcedure())
+    {
+      this.owner = proc.getSchema();
+      this.name = proc.getPackageName();
+    }
+    else
+    {
+      throw new IllegalArgumentException(proc.getProcedureName() + " is not an Oracle package!");
+    }
+  }
 
-	public void setSchemaToUse(String targetSchema)
-	{
-		this.schemaToUse = targetSchema;
-	}
+  public void setSchemaToUse(String targetSchema)
+  {
+    this.schemaToUse = targetSchema;
+  }
 
-	private String getSchema()
-	{
-		return schemaToUse == null ? owner : schemaToUse;
-	}
+  private String getSchema()
+  {
+    return schemaToUse == null ? owner : schemaToUse;
+  }
 
-	public ReportPackage(String owner, String name)
-	{
-		this.owner = owner;
-		this.name = name;
-	}
+  public ReportPackage(String owner, String name)
+  {
+    this.owner = owner;
+    this.name = name;
+  }
 
-	public String getPackageName()
-	{
-		return name;
-	}
-	public CharSequence getSource()
-	{
-		return source;
-	}
+  public String getPackageName()
+  {
+    return name;
+  }
+  public CharSequence getSource()
+  {
+    return source;
+  }
 
-	public void setSource(CharSequence sql)
-	{
-		source = sql;
-	}
+  public void setSource(CharSequence sql)
+  {
+    source = sql;
+  }
 
-	public void readSource(WbConnection conn)
-	{
+  public void readSource(WbConnection conn)
+  {
     ProcedureReader reader = ReaderFactory.getProcedureReader(conn.getMetadata());
     source = reader.getPackageSource(null, owner, name);
-	}
+  }
 
-	public void setIndent(StringBuilder ind)
-	{
-		this.indent = ind == null ? new StringBuilder(0) : ind;
-		this.indent2 = new StringBuilder(indent);
-		this.indent2.append("  ");
-	}
+  public void setIndent(StringBuilder ind)
+  {
+    this.indent = ind == null ? new StringBuilder(0) : ind;
+    this.indent2 = new StringBuilder(indent);
+    this.indent2.append("  ");
+  }
 
-	public StringBuilder getXml(boolean includeSource)
-	{
-		StringBuilder result = new StringBuilder(500);
-		TagWriter tagWriter = new TagWriter();
+  public StringBuilder getXml(boolean includeSource)
+  {
+    StringBuilder result = new StringBuilder(500);
+    TagWriter tagWriter = new TagWriter();
 
-		String schema = getSchema();
-		tagWriter.appendOpenTag(result, indent, TAG_PKG_DEF, new String[]{"schema", "packageName"}, new String[] {schema, name});
+    String schema = getSchema();
+    tagWriter.appendOpenTag(result, indent, TAG_PKG_DEF, new String[]{"schema", "packageName"}, new String[] {schema, name});
 
-		result.append('\n');
-		tagWriter.appendTag(result, indent2, TAG_PKG_SCHEMA, schema);
-		tagWriter.appendTag(result, indent2, TAG_PKG_NAME, name);
+    result.append('\n');
+    tagWriter.appendTag(result, indent2, TAG_PKG_SCHEMA, schema);
+    tagWriter.appendTag(result, indent2, TAG_PKG_NAME, name);
 
-		if (includeSource)
-		{
-			tagWriter.appendTag(result, indent2, TAG_PKG_SOURCE, source, true);
-		}
-		tagWriter.appendCloseTag(result, indent, TAG_PKG_DEF);
-		return result;
-	}
+    if (includeSource)
+    {
+      tagWriter.appendTag(result, indent2, TAG_PKG_SOURCE, source, true);
+    }
+    tagWriter.appendCloseTag(result, indent, TAG_PKG_DEF);
+    return result;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 7;
-		hash = 61 * hash + (this.owner != null ? this.owner.hashCode() : 0);
-		hash = 61 * hash + (this.name != null ? this.name.hashCode() : 0);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 61 * hash + (this.owner != null ? this.owner.hashCode() : 0);
+    hash = 61 * hash + (this.name != null ? this.name.hashCode() : 0);
+    return hash;
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj == null)
-		{
-			return false;
-		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final ReportPackage other = (ReportPackage) obj;
-		if ((this.owner == null) ? (other.owner != null) : !this.owner.equals(other.owner))
-		{
-			return false;
-		}
-		if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name))
-		{
-			return false;
-		}
-		return true;
-	}
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    final ReportPackage other = (ReportPackage) obj;
+    if ((this.owner == null) ? (other.owner != null) : !this.owner.equals(other.owner))
+    {
+      return false;
+    }
+    if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name))
+    {
+      return false;
+    }
+    return true;
+  }
 
 }

@@ -30,96 +30,96 @@ import workbench.util.QuoteEscapeType;
  * @author Thomas Kellerer
  */
 public class DefaultTextImportOptions
-	implements TextImportOptions
+  implements TextImportOptions
 {
 
-	private String delimiter;
-	private String quoteChar;
-	private boolean containsHeader = true;
+  private String delimiter;
+  private String quoteChar;
+  private boolean containsHeader = true;
 
-	public DefaultTextImportOptions(String delim, String quote)
-	{
-		this.delimiter = delim;
-		this.quoteChar = quote;
-	}
+  public DefaultTextImportOptions(String delim, String quote)
+  {
+    this.delimiter = delim;
+    this.quoteChar = quote;
+  }
 
-	@Override
-	public String getTextDelimiter()
-	{
-		return delimiter;
-	}
+  @Override
+  public String getTextDelimiter()
+  {
+    return delimiter;
+  }
 
-	@Override
-	public boolean getContainsHeader()
-	{
-		return containsHeader;
-	}
+  @Override
+  public boolean getContainsHeader()
+  {
+    return containsHeader;
+  }
 
-	@Override
-	public boolean getQuoteAlways()
-	{
-		return false;
-	}
+  @Override
+  public boolean getQuoteAlways()
+  {
+    return false;
+  }
 
-	@Override
-	public String getTextQuoteChar()
-	{
-		return quoteChar;
-	}
+  @Override
+  public String getTextQuoteChar()
+  {
+    return quoteChar;
+  }
 
-	@Override
-	public QuoteEscapeType getQuoteEscaping()
-	{
-		return QuoteEscapeType.none;
-	}
+  @Override
+  public QuoteEscapeType getQuoteEscaping()
+  {
+    return QuoteEscapeType.none;
+  }
 
-	@Override
-	public boolean getDecode()
-	{
-		return false;
-	}
+  @Override
+  public boolean getDecode()
+  {
+    return false;
+  }
 
-	@Override
-	public String getDecimalChar()
-	{
-		return Settings.getInstance().getDecimalSymbol();
-	}
+  @Override
+  public String getDecimalChar()
+  {
+    return Settings.getInstance().getDecimalSymbol();
+  }
 
-	@Override
-	public void setTextDelimiter(String delim)
-	{
-	}
+  @Override
+  public void setTextDelimiter(String delim)
+  {
+  }
 
-	@Override
-	public void setContainsHeader(boolean flag)
-	{
-		containsHeader = flag;
-	}
+  @Override
+  public void setContainsHeader(boolean flag)
+  {
+    containsHeader = flag;
+  }
 
-	@Override
-	public void setTextQuoteChar(String quote)
-	{
-	}
+  @Override
+  public void setTextQuoteChar(String quote)
+  {
+  }
 
-	@Override
-	public void setDecode(boolean flag)
-	{
-	}
+  @Override
+  public void setDecode(boolean flag)
+  {
+  }
 
-	@Override
-	public void setDecimalChar(String s)
-	{
-	}
+  @Override
+  public void setDecimalChar(String s)
+  {
+  }
 
-	@Override
-	public String getNullString()
-	{
-		return null;
-	}
+  @Override
+  public String getNullString()
+  {
+    return null;
+  }
 
-	@Override
-	public void setNullString(String nullString)
-	{
-	}
+  @Override
+  public void setNullString(String nullString)
+  {
+  }
 
 }

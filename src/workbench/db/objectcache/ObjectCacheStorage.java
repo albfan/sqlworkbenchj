@@ -29,31 +29,31 @@ import workbench.resource.ResourceMgr;
  */
 public enum ObjectCacheStorage
 {
-	/**
-	 * Always create a local storage for the completion cache.
-	 */
-	always("TxtObjCacheAlways"),
+  /**
+   * Always create a local storage for the completion cache.
+   */
+  always("TxtObjCacheAlways"),
 
-	/**
-	 * Never create a local storage for the completion cache.
-	 */
-	never("TxtObjCacheNever"),
+  /**
+   * Never create a local storage for the completion cache.
+   */
+  never("TxtObjCacheNever"),
 
-	/**
-	 * The connection profile defines whether or not to create a local storage for the completion cache.
-	 */
-	profile("TxtObjCacheProfile");
+  /**
+   * The connection profile defines whether or not to create a local storage for the completion cache.
+   */
+  profile("TxtObjCacheProfile");
 
-	private String label;
+  private String label;
 
-	private ObjectCacheStorage(String resourceKey)
-	{
-		this.label = ResourceMgr.getString(resourceKey);
-	}
+  private ObjectCacheStorage(String resourceKey)
+  {
+    this.label = ResourceMgr.getString(resourceKey);
+  }
 
-	@Override
-	public String toString()
-	{
-		return label;
-	}
+  @Override
+  public String toString()
+  {
+    return label;
+  }
 }

@@ -58,459 +58,459 @@ import static workbench.db.exporter.ExportType.*;
  * @author Thomas Kellerer
  */
 public class SqlRowDataConverter
-	extends RowDataConverter
+  extends RowDataConverter
 {
-	// This instance can be re-used for several
-	// table exports from DataExporter, to prevent
-	// that one failed export for the requested type
-	// resets the export type for subsequent tables
-	// the requested sqlType is stored in sqlType
-	// Upon setting the ResultInfo in setResultInfo()
-	// the sqlTypeToUse is set accordingly and then
-	// used in convertRowData()
-	private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
-	private ExportType sqlType = ExportType.SQL_INSERT;
+  // This instance can be re-used for several
+  // table exports from DataExporter, to prevent
+  // that one failed export for the requested type
+  // resets the export type for subsequent tables
+  // the requested sqlType is stored in sqlType
+  // Upon setting the ResultInfo in setResultInfo()
+  // the sqlTypeToUse is set accordingly and then
+  // used in convertRowData()
+  private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
+  private ExportType sqlType = ExportType.SQL_INSERT;
 
-	private boolean createTable;
-	private TableIdentifier alternateUpdateTable;
-	private int commitEvery;
-	private String concatString;
-	private String chrFunction;
-	private String concatFunction;
-	private StatementFactory statementFactory;
-	private String lineTerminator = "\n";
-	private String doubleLineTerminator = "\n\n";
-	private boolean includeOwner = true;
-	private boolean doFormatting = true;
-	private SqlLiteralFormatter literalFormatter;
-	private boolean ignoreRowStatus = true;
-	private String mergeType;
-	private MergeGenerator mergeGenerator;
-	private boolean transactionControl = true;
-	private boolean includeIdentityCols;
-	private boolean includeReadOnlyCols;
+  private boolean createTable;
+  private TableIdentifier alternateUpdateTable;
+  private int commitEvery;
+  private String concatString;
+  private String chrFunction;
+  private String concatFunction;
+  private StatementFactory statementFactory;
+  private String lineTerminator = "\n";
+  private String doubleLineTerminator = "\n\n";
+  private boolean includeOwner = true;
+  private boolean doFormatting = true;
+  private SqlLiteralFormatter literalFormatter;
+  private boolean ignoreRowStatus = true;
+  private String mergeType;
+  private MergeGenerator mergeGenerator;
+  private boolean transactionControl = true;
+  private boolean includeIdentityCols;
+  private boolean includeReadOnlyCols;
 
-	public SqlRowDataConverter(WbConnection con)
-	{
-		super();
-		setOriginalConnection(con);
-		includeIdentityCols = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
-		includeReadOnlyCols = !Settings.getInstance().getCheckEditableColumns();
-	}
+  public SqlRowDataConverter(WbConnection con)
+  {
+    super();
+    setOriginalConnection(con);
+    includeIdentityCols = !Settings.getInstance().getGenerateInsertIgnoreIdentity();
+    includeReadOnlyCols = !Settings.getInstance().getCheckEditableColumns();
+  }
 
-	@Override
-	public final void setOriginalConnection(WbConnection con)
-	{
-		super.setOriginalConnection(con);
-		this.literalFormatter = new SqlLiteralFormatter(con);
-	}
+  @Override
+  public final void setOriginalConnection(WbConnection con)
+  {
+    super.setOriginalConnection(con);
+    this.literalFormatter = new SqlLiteralFormatter(con);
+  }
 
-	@Override
-	public void setInfinityLiterals(InfinityLiterals literals)
-	{
-		super.setInfinityLiterals(literals);
-		this.literalFormatter.setInfinityLiterals(literals);
-	}
+  @Override
+  public void setInfinityLiterals(InfinityLiterals literals)
+  {
+    super.setInfinityLiterals(literals);
+    this.literalFormatter.setInfinityLiterals(literals);
+  }
 
-	public void setTransactionControl(boolean flag)
-	{
-		this.transactionControl = flag;
-	}
+  public void setTransactionControl(boolean flag)
+  {
+    this.transactionControl = flag;
+  }
 
-	public void setIncludeIdentityColumns(boolean flag)
-	{
-		includeIdentityCols = flag;
-		if (statementFactory != null)
-		{
-			statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
-		}
-	}
+  public void setIncludeIdentityColumns(boolean flag)
+  {
+    includeIdentityCols = flag;
+    if (statementFactory != null)
+    {
+      statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+    }
+  }
 
-	public void setIncludeReadOnlyColumns(boolean flag)
-	{
-		includeReadOnlyCols = flag;
-		if (statementFactory != null)
-		{
-			statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols );
-		}
-	}
+  public void setIncludeReadOnlyColumns(boolean flag)
+  {
+    includeReadOnlyCols = flag;
+    if (statementFactory != null)
+    {
+      statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols );
+    }
+  }
 
-	private boolean needPrimaryKey()
-	{
-		return this.sqlType == ExportType.SQL_DELETE_INSERT
-				|| this.sqlType == ExportType.SQL_UPDATE
-				|| this.sqlType == ExportType.SQL_MERGE
-				|| this.sqlType == ExportType.SQL_DELETE;
-	}
+  private boolean needPrimaryKey()
+  {
+    return this.sqlType == ExportType.SQL_DELETE_INSERT
+        || this.sqlType == ExportType.SQL_UPDATE
+        || this.sqlType == ExportType.SQL_MERGE
+        || this.sqlType == ExportType.SQL_DELETE;
+  }
 
-	@Override
-	public void setResultInfo(ResultInfo meta)
-	{
-		super.setResultInfo(meta);
-		this.statementFactory = new StatementFactory(meta, this.originalConnection);
-		this.statementFactory.setUseColumnLabel(true);
-		this.needsUpdateTable = meta.getUpdateTable() == null;
-		this.statementFactory.setIncludeTableOwner(this.includeOwner);
-		this.statementFactory.setTableToUse(this.alternateUpdateTable);
-		this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
-		this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
+  @Override
+  public void setResultInfo(ResultInfo meta)
+  {
+    super.setResultInfo(meta);
+    this.statementFactory = new StatementFactory(meta, this.originalConnection);
+    this.statementFactory.setUseColumnLabel(true);
+    this.needsUpdateTable = meta.getUpdateTable() == null;
+    this.statementFactory.setIncludeTableOwner(this.includeOwner);
+    this.statementFactory.setTableToUse(this.alternateUpdateTable);
+    this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+    this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
 
-		boolean keysPresent = this.checkKeyColumns();
-		this.sqlTypeToUse = this.sqlType;
-		if (!keysPresent && needPrimaryKey())
-		{
-			String tbl = "";
-			if (meta.getUpdateTable() != null)
-			{
-				tbl = " (" + meta.getUpdateTable().getTableName() + ")";
-			}
+    boolean keysPresent = this.checkKeyColumns();
+    this.sqlTypeToUse = this.sqlType;
+    if (!keysPresent && needPrimaryKey())
+    {
+      String tbl = "";
+      if (meta.getUpdateTable() != null)
+      {
+        tbl = " (" + meta.getUpdateTable().getTableName() + ")";
+      }
 
-			if (this.errorReporter != null)
-			{
-				String msg = ResourceMgr.getString("ErrExportNoKeys") + tbl;
-				this.errorReporter.addWarning(msg);
-			}
+      if (this.errorReporter != null)
+      {
+        String msg = ResourceMgr.getString("ErrExportNoKeys") + tbl;
+        this.errorReporter.addWarning(msg);
+      }
 
-			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
-			this.sqlTypeToUse = ExportType.SQL_INSERT;
-		}
-	}
+      LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
+      this.sqlTypeToUse = ExportType.SQL_INSERT;
+    }
+  }
 
-	@Override
-	public void setExporter(DataExporter exporter)
-	{
-		super.setExporter(exporter);
-		if (exporter != null)
-		{
-			this.includeReadOnlyCols = exporter.getIncludeReadOnlyCols();
-			this.includeIdentityCols = exporter.getIncludeIdentityCols();
-		}
-	}
+  @Override
+  public void setExporter(DataExporter exporter)
+  {
+    super.setExporter(exporter);
+    if (exporter != null)
+    {
+      this.includeReadOnlyCols = exporter.getIncludeReadOnlyCols();
+      this.includeIdentityCols = exporter.getIncludeIdentityCols();
+    }
+  }
 
-	public void setMergeType(String type)
-	{
-		this.mergeType = type;
-	}
+  public void setMergeType(String type)
+  {
+    this.mergeType = type;
+  }
 
-	public void setDateLiteralType(String type)
-	{
-		if (this.literalFormatter != null)
-		{
-			this.literalFormatter.setDateLiteralType(type);
-			this.literalFormatter.setInfinityLiterals(infinityLiterals);
-		}
-	}
+  public void setDateLiteralType(String type)
+  {
+    if (this.literalFormatter != null)
+    {
+      this.literalFormatter.setDateLiteralType(type);
+      this.literalFormatter.setInfinityLiterals(infinityLiterals);
+    }
+  }
 
-	@Override
-	public StringBuilder getEnd(long totalRows)
-	{
-		StringBuilder end = null;
-		if (sqlTypeToUse == ExportType.SQL_MERGE)
-		{
-			end = new StringBuilder(100);
-			end.append(getMergeEnd());
-			end.append(lineTerminator);
-		}
+  @Override
+  public StringBuilder getEnd(long totalRows)
+  {
+    StringBuilder end = null;
+    if (sqlTypeToUse == ExportType.SQL_MERGE)
+    {
+      end = new StringBuilder(100);
+      end.append(getMergeEnd());
+      end.append(lineTerminator);
+    }
 
-		if (!transactionControl) return end;
+    if (!transactionControl) return end;
 
-		boolean writeCommit = true;
-		if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
-		{
-			writeCommit = false;
-		}
+    boolean writeCommit = true;
+    if ( (commitEvery == Committer.NO_COMMIT_FLAG) || (commitEvery > 0 && (totalRows % commitEvery == 0)))
+    {
+      writeCommit = false;
+    }
 
-		if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
-		{
-			if (end == null) end = new StringBuilder(12);
-			end.append(lineTerminator);
-			end.append("COMMIT;");
-			end.append(lineTerminator);
-		}
-		return end;
-	}
+    if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
+    {
+      if (end == null) end = new StringBuilder(12);
+      end.append(lineTerminator);
+      end.append("COMMIT;");
+      end.append(lineTerminator);
+    }
+    return end;
+  }
 
-	public void setIgnoreColumnStatus(boolean flag)
-	{
-		this.ignoreRowStatus = flag;
-	}
+  public void setIgnoreColumnStatus(boolean flag)
+  {
+    this.ignoreRowStatus = flag;
+  }
 
-	public void setType(ExportType type)
-	{
-		switch (type)
-		{
-			case SQL_INSERT:
-				setCreateInsert();
-				break;
-			case SQL_UPDATE:
-				this.setCreateUpdate();
-				break;
-			case SQL_DELETE_INSERT:
-				this.setCreateInsertDelete();
-				break;
-			case SQL_DELETE:
-				this.setCreateDelete();
-				break;
-			case SQL_MERGE:
-				this.setCreateMerge();
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid type specified");
-		}
-	}
+  public void setType(ExportType type)
+  {
+    switch (type)
+    {
+      case SQL_INSERT:
+        setCreateInsert();
+        break;
+      case SQL_UPDATE:
+        this.setCreateUpdate();
+        break;
+      case SQL_DELETE_INSERT:
+        this.setCreateInsertDelete();
+        break;
+      case SQL_DELETE:
+        this.setCreateDelete();
+        break;
+      case SQL_MERGE:
+        this.setCreateMerge();
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid type specified");
+    }
+  }
 
-	@Override
-	public StringBuilder convertRowData(RowData row, long rowIndex)
-	{
-		if (sqlTypeToUse == ExportType.SQL_MERGE)
-		{
-			return appendMergeRow(row, rowIndex);
-		}
+  @Override
+  public StringBuilder convertRowData(RowData row, long rowIndex)
+  {
+    if (sqlTypeToUse == ExportType.SQL_MERGE)
+    {
+      return appendMergeRow(row, rowIndex);
+    }
 
-		StringBuilder result = new StringBuilder();
-		DmlStatement dml = null;
+    StringBuilder result = new StringBuilder();
+    DmlStatement dml = null;
 
-		this.statementFactory.setIncludeTableOwner(includeOwner);
-		this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
-		this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
-		this.statementFactory.setTableToUse(alternateUpdateTable);
+    this.statementFactory.setIncludeTableOwner(includeOwner);
+    this.statementFactory.setIncludeIdentiyColumns(includeIdentityCols);
+    this.statementFactory.setIncludeReadOnlyColumns(includeReadOnlyCols);
+    this.statementFactory.setTableToUse(alternateUpdateTable);
 
-		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT)
-		{
-			dml = this.statementFactory.createDeleteStatement(row, true);
-			result.append(dml.getExecutableStatement(this.literalFormatter, this.originalConnection));
-			result.append(';');
-			result.append(lineTerminator);
-		}
+    if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT)
+    {
+      dml = this.statementFactory.createDeleteStatement(row, true);
+      result.append(dml.getExecutableStatement(this.literalFormatter, this.originalConnection));
+      result.append(';');
+      result.append(lineTerminator);
+    }
 
-		if (this.sqlTypeToUse == ExportType.SQL_DELETE)
-		{
-			dml = this.statementFactory.createDeleteStatement(row, true);
-		}
+    if (this.sqlTypeToUse == ExportType.SQL_DELETE)
+    {
+      dml = this.statementFactory.createDeleteStatement(row, true);
+    }
 
-		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_INSERT)
-		{
-			dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
-		}
+    if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_INSERT)
+    {
+      dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
+    }
 
-		if (sqlType == ExportType.SQL_UPDATE)
-		{
-			dml = this.statementFactory.createUpdateStatement(row, ignoreRowStatus, "\n", this.exportColumns);
-		}
+    if (sqlType == ExportType.SQL_UPDATE)
+    {
+      dml = this.statementFactory.createUpdateStatement(row, ignoreRowStatus, "\n", this.exportColumns);
+    }
 
-		if (dml == null) return null;
+    if (dml == null) return null;
 
-		dml.setChrFunction(this.chrFunction);
-		dml.setConcatString(this.concatString);
-		dml.setConcatFunction(this.concatFunction);
+    dml.setChrFunction(this.chrFunction);
+    dml.setConcatString(this.concatString);
+    dml.setConcatFunction(this.concatFunction);
 
-		// Needed for formatting BLOBs in the literalFormatter
-		this.currentRow = rowIndex;
-		this.currentRowData = row;
+    // Needed for formatting BLOBs in the literalFormatter
+    this.currentRow = rowIndex;
+    this.currentRowData = row;
 
-		result.append(dml.getExecutableStatement(this.literalFormatter, this.originalConnection));
-		result.append(';');
+    result.append(dml.getExecutableStatement(this.literalFormatter, this.originalConnection));
+    result.append(';');
 
-		if (doFormatting)
-		{
-			result.append(doubleLineTerminator);
-		}
-		else
-		{
-			result.append(lineTerminator);
-		}
+    if (doFormatting)
+    {
+      result.append(doubleLineTerminator);
+    }
+    else
+    {
+      result.append(lineTerminator);
+    }
 
-		if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
-		{
-			result.append("COMMIT;");
-			result.append(doubleLineTerminator);
-		}
-		return result;
-	}
+    if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
+    {
+      result.append("COMMIT;");
+      result.append(doubleLineTerminator);
+    }
+    return result;
+  }
 
-	private MergeGenerator getMergeGenerator()
-	{
-		if (this.mergeGenerator == null)
-		{
-			if (mergeType != null)
-			{
-				mergeGenerator = MergeGenerator.Factory.createGenerator(mergeType);
-			}
-			else
-			{
-				mergeGenerator = MergeGenerator.Factory.createGenerator(originalConnection);
-			}
-		}
-		return mergeGenerator;
-	}
+  private MergeGenerator getMergeGenerator()
+  {
+    if (this.mergeGenerator == null)
+    {
+      if (mergeType != null)
+      {
+        mergeGenerator = MergeGenerator.Factory.createGenerator(mergeType);
+      }
+      else
+      {
+        mergeGenerator = MergeGenerator.Factory.createGenerator(originalConnection);
+      }
+    }
+    return mergeGenerator;
+  }
 
-	private StringBuilder appendMergeRow(RowData row, long rowIndex)
-	{
-		MergeGenerator generator = getMergeGenerator();
-		if (generator != null)
-		{
-			String merge = generator.addRow(metaData, row, rowIndex);
-			StringBuilder result = new StringBuilder(merge);
-			return result;
-		}
-		return null;
-	}
+  private StringBuilder appendMergeRow(RowData row, long rowIndex)
+  {
+    MergeGenerator generator = getMergeGenerator();
+    if (generator != null)
+    {
+      String merge = generator.addRow(metaData, row, rowIndex);
+      StringBuilder result = new StringBuilder(merge);
+      return result;
+    }
+    return null;
+  }
 
-	private String getMergeEnd()
-	{
-		MergeGenerator generator = getMergeGenerator();
-		if (generator == null) return null;
-		RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
-		return generator.generateMergeEnd(data);
-	}
+  private String getMergeEnd()
+  {
+    MergeGenerator generator = getMergeGenerator();
+    if (generator == null) return null;
+    RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
+    return generator.generateMergeEnd(data);
+  }
 
-	private StringBuilder getMergeStart()
-	{
-		MergeGenerator generator = getMergeGenerator();
-		if (generator == null) return null;
-		RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
-		return new StringBuilder(generator.generateMergeStart(data));
-	}
+  private StringBuilder getMergeStart()
+  {
+    MergeGenerator generator = getMergeGenerator();
+    if (generator == null) return null;
+    RowDataContainer data = RowDataContainer.Factory.createContainer(originalConnection, currentRowData, metaData);
+    return new StringBuilder(generator.generateMergeStart(data));
+  }
 
-	@Override
-	public StringBuilder getStart()
-	{
-		if (sqlTypeToUse == ExportType.SQL_MERGE)
-		{
-			return getMergeStart();
-		}
+  @Override
+  public StringBuilder getStart()
+  {
+    if (sqlTypeToUse == ExportType.SQL_MERGE)
+    {
+      return getMergeStart();
+    }
 
-		if (!this.createTable) return null;
+    if (!this.createTable) return null;
 
-		TableIdentifier tableName = alternateUpdateTable != null ? alternateUpdateTable : this.metaData.getUpdateTable();
-		if (tableName == null)
-		{
-			LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
-			return null;
-		}
+    TableIdentifier tableName = alternateUpdateTable != null ? alternateUpdateTable : this.metaData.getUpdateTable();
+    if (tableName == null)
+    {
+      LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
+      return null;
+    }
 
-		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
-		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
+    List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
+    TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
 
-		TableIdentifier toUse = tableName.createCopy();
-		boolean useSchema = exporter == null ? true : exporter.getUseSchemaInSql();
+    TableIdentifier toUse = tableName.createCopy();
+    boolean useSchema = exporter == null ? true : exporter.getUseSchemaInSql();
 
-		if (useSchema)
-		{
-			if (toUse.getSchema() == null)
-			{
-				toUse.setSchema(toUse.getSchemaToUse(originalConnection));
-			}
-			if (toUse.getCatalog() == null)
-			{
-				toUse.setCatalog(toUse.getCatalogToUse(originalConnection));
-			}
-		}
-		else
-		{
-			toUse.setUseNameOnly(true);
-		}
-		boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
+    if (useSchema)
+    {
+      if (toUse.getSchema() == null)
+      {
+        toUse.setSchema(toUse.getSchemaToUse(originalConnection));
+      }
+      if (toUse.getCatalog() == null)
+      {
+        toUse.setCatalog(toUse.getCatalogToUse(originalConnection));
+      }
+    }
+    else
+    {
+      toUse.setUseNameOnly(true);
+    }
+    boolean includePK = Settings.getInstance().getBoolProperty("workbench.sql.export.createtable.pk", true);
 
-		CharSequence create = builder.getCreateTable(toUse, cols, null, null, DropType.none, false, includePK, useSchema);
-		String source = create.toString();
-		StringBuilder createSql = new StringBuilder(source);
-		createSql.append(doubleLineTerminator);
-		return createSql;
-	}
+    CharSequence create = builder.getCreateTable(toUse, cols, null, null, DropType.none, false, includePK, useSchema);
+    String source = create.toString();
+    StringBuilder createSql = new StringBuilder(source);
+    createSql.append(doubleLineTerminator);
+    return createSql;
+  }
 
-	public void setCreateInsert()
-	{
-		this.sqlType = ExportType.SQL_INSERT;
-		this.sqlTypeToUse = this.sqlType;
-		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
-	}
+  public void setCreateInsert()
+  {
+    this.sqlType = ExportType.SQL_INSERT;
+    this.sqlTypeToUse = this.sqlType;
+    this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
+  }
 
-	public void setCreateMerge()
-	{
-		this.sqlType = ExportType.SQL_MERGE;
-		this.sqlTypeToUse = this.sqlType;
-		this.doFormatting = false;
-	}
+  public void setCreateMerge()
+  {
+    this.sqlType = ExportType.SQL_MERGE;
+    this.sqlTypeToUse = this.sqlType;
+    this.doFormatting = false;
+  }
 
-	public void setCreateUpdate()
-	{
-		this.sqlType = ExportType.SQL_UPDATE;
-		this.sqlTypeToUse = this.sqlType;
-		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
-	}
+  public void setCreateUpdate()
+  {
+    this.sqlType = ExportType.SQL_UPDATE;
+    this.sqlTypeToUse = this.sqlType;
+    this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
+  }
 
-	public void setCreateInsertDelete()
-	{
-		this.sqlType = ExportType.SQL_DELETE_INSERT;
-		this.sqlTypeToUse = this.sqlType;
-		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
-	}
+  public void setCreateInsertDelete()
+  {
+    this.sqlType = ExportType.SQL_DELETE_INSERT;
+    this.sqlTypeToUse = this.sqlType;
+    this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
+  }
 
-	public void setCreateDelete()
-	{
-		this.sqlType = ExportType.SQL_DELETE;
-		this.sqlTypeToUse = this.sqlType;
-		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.delete.doformat",true);
-	}
+  public void setCreateDelete()
+  {
+    this.sqlType = ExportType.SQL_DELETE;
+    this.sqlTypeToUse = this.sqlType;
+    this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.delete.doformat",true);
+  }
 
-	public void setCommitEvery(int interval)
-	{
-		this.commitEvery = interval;
-	}
+  public void setCommitEvery(int interval)
+  {
+    this.commitEvery = interval;
+  }
 
-	public void setConcatString(String concat)
-	{
-		if (concat == null) return;
-		this.concatString = concat;
-		this.concatFunction = null;
-	}
+  public void setConcatString(String concat)
+  {
+    if (concat == null) return;
+    this.concatString = concat;
+    this.concatFunction = null;
+  }
 
-	public void setConcatFunction(String func)
-	{
-		if (func == null) return;
-		this.concatFunction = func;
-		this.concatString = null;
-	}
+  public void setConcatFunction(String func)
+  {
+    if (func == null) return;
+    this.concatFunction = func;
+    this.concatString = null;
+  }
 
-	public void setChrFunction(String function)
-	{
-		this.chrFunction = function;
-	}
+  public void setChrFunction(String function)
+  {
+    this.chrFunction = function;
+  }
 
-	/**
-	 * Setter for property createTable.
-	 * @param flag New value of property createTable.
-	 */
-	public void setCreateTable(boolean flag)
-	{
-		this.createTable = flag;
-	}
+  /**
+   * Setter for property createTable.
+   * @param flag New value of property createTable.
+   */
+  public void setCreateTable(boolean flag)
+  {
+    this.createTable = flag;
+  }
 
-	/**
-	 * Setter for property alternateUpdateTable.
-	 * @param table New value of property alternateUpdateTable.
-	 */
-	public void setAlternateUpdateTable(TableIdentifier table)
-	{
-		if (table != null)
-		{
-			this.alternateUpdateTable = table;
-			this.needsUpdateTable = false;
-		}
-		else
-		{
-			this.alternateUpdateTable = null;
-			this.needsUpdateTable = true;
-		}
-	}
+  /**
+   * Setter for property alternateUpdateTable.
+   * @param table New value of property alternateUpdateTable.
+   */
+  public void setAlternateUpdateTable(TableIdentifier table)
+  {
+    if (table != null)
+    {
+      this.alternateUpdateTable = table;
+      this.needsUpdateTable = false;
+    }
+    else
+    {
+      this.alternateUpdateTable = null;
+      this.needsUpdateTable = true;
+    }
+  }
 
-	/**
-	 * Setter for property keyColumnsToUse.
-	 * @param cols New value of property keyColumnsToUse.
-	 */
-	public void setKeyColumnsToUse(List<String> keyCols)
-	{
+  /**
+   * Setter for property keyColumnsToUse.
+   * @param cols New value of property keyColumnsToUse.
+   */
+  public void setKeyColumnsToUse(List<String> keyCols)
+  {
     if (keyCols == null)
     {
       this.keyColumnsToUse = null;
@@ -521,48 +521,48 @@ public class SqlRowDataConverter
     }
   }
 
-	public void setIncludeTableOwner(boolean flag)
-	{
-		this.includeOwner = flag;
-	}
+  public void setIncludeTableOwner(boolean flag)
+  {
+    this.includeOwner = flag;
+  }
 
-	public void setBlobMode(BlobMode type)
-	{
-		if (this.literalFormatter == null) return;
+  public void setBlobMode(BlobMode type)
+  {
+    if (this.literalFormatter == null) return;
 
-		if (type == BlobMode.DbmsLiteral)
-		{
-			literalFormatter.createDbmsBlobLiterals(originalConnection);
-		}
-		else if (type == BlobMode.AnsiLiteral)
-		{
-			literalFormatter.createAnsiBlobLiterals();
-		}
-		else if (type == BlobMode.SaveToFile)
-		{
-			literalFormatter.createBlobFiles(this);
-		}
-		else if (type == BlobMode.pgDecode)
-		{
-			literalFormatter.setBlobFormat(BlobLiteralType.pgDecode);
-		}
-		else if (type == BlobMode.pgEscape)
-		{
-			literalFormatter.setBlobFormat(BlobLiteralType.pgEscape);
-		}
-		else
-		{
-			literalFormatter.noBlobHandling();
-		}
-	}
+    if (type == BlobMode.DbmsLiteral)
+    {
+      literalFormatter.createDbmsBlobLiterals(originalConnection);
+    }
+    else if (type == BlobMode.AnsiLiteral)
+    {
+      literalFormatter.createAnsiBlobLiterals();
+    }
+    else if (type == BlobMode.SaveToFile)
+    {
+      literalFormatter.createBlobFiles(this);
+    }
+    else if (type == BlobMode.pgDecode)
+    {
+      literalFormatter.setBlobFormat(BlobLiteralType.pgDecode);
+    }
+    else if (type == BlobMode.pgEscape)
+    {
+      literalFormatter.setBlobFormat(BlobLiteralType.pgEscape);
+    }
+    else
+    {
+      literalFormatter.noBlobHandling();
+    }
+  }
 
-	public void setClobAsFile(String encoding)
-	{
-		if (StringUtil.isEmptyString(encoding)) return;
-		if (literalFormatter != null)
-		{
-			literalFormatter.setTreatClobAsFile(this, encoding);
-		}
-	}
+  public void setClobAsFile(String encoding)
+  {
+    if (StringUtil.isEmptyString(encoding)) return;
+    if (literalFormatter != null)
+    {
+      literalFormatter.setTreatClobAsFile(this, encoding);
+    }
+  }
 
 }

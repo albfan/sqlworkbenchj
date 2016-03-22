@@ -128,8 +128,8 @@ public class PostgresTableSourceBuilder
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String sql =
-      "select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname, own.rolname as owner \n" +
+    String sql
+      = "select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname, own.rolname as owner \n" +
       "from pg_catalog.pg_class ct \n" +
       "  join pg_catalog.pg_namespace cns on ct.relnamespace = cns.oid \n " +
       "  join pg_catalog.pg_roles own on ct.relowner = own.oid \n " +
@@ -146,8 +146,8 @@ public class PostgresTableSourceBuilder
       pstmt.setString(2, tbl.getRawTableName());
       if (Settings.getInstance().getDebugMetadataSql())
       {
-        LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Retrieving table options using:\n"
-          + SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
+        LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Retrieving table options using:\n" +
+           SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
       }
       rs = pstmt.executeQuery();
       if (rs.next())
@@ -231,7 +231,7 @@ public class PostgresTableSourceBuilder
     result = new StringBuilder(parents.size() * 30);
     result.append("INHERITS (");
 
-    for (int i=0; i < parents.size(); i++)
+    for (int i = 0; i < parents.size(); i++)
     {
       TableIdentifier tbl = parents.get(i);
       table.getSourceOptions().addConfigSetting("inherits", tbl.getTableName());
@@ -247,8 +247,8 @@ public class PostgresTableSourceBuilder
   {
     ObjectSourceOptions option = table.getSourceOptions();
 
-    String sql =
-      "select ft.ftoptions, fs.srvname \n" +
+    String sql
+      = "select ft.ftoptions, fs.srvname \n" +
       "from pg_foreign_table ft \n" +
       "  join pg_class tbl on tbl.oid = ft.ftrelid  \n" +
       "  join pg_namespace ns on tbl.relnamespace = ns.oid  \n" +
@@ -317,7 +317,6 @@ public class PostgresTableSourceBuilder
 
   /**
    * Return domain information for columns in the specified table.
-   *
    */
   @Override
   public String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)

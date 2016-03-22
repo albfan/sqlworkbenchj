@@ -48,109 +48,109 @@ import workbench.util.SqlUtil;
  * @author Tatiana Saltykova
  */
 public class VerticaTableReader
-	implements ObjectListExtender
+  implements ObjectListExtender
 {
-	private String sql =
-			"SELECT table_name as name, \n" +
-			"       decode(is_view,true,'SYSTEM VIEW',false,'SYSTEM TABLE') as type, \n" +
-			"       'v_internal' as schema, \n" +
-			"       current_database as catalog, \n" +
-			"       table_description as remarks \n" +
-			"FROM v_internal.vs_system_tables \n" +
-			"WHERE table_schema = 'v_internal' \n" +
-			"ORDER BY table_name";
+  private String sql =
+      "SELECT table_name as name, \n" +
+      "       decode(is_view,true,'SYSTEM VIEW',false,'SYSTEM TABLE') as type, \n" +
+      "       'v_internal' as schema, \n" +
+      "       current_database as catalog, \n" +
+      "       table_description as remarks \n" +
+      "FROM v_internal.vs_system_tables \n" +
+      "WHERE table_schema = 'v_internal' \n" +
+      "ORDER BY table_name";
 
 
-	@Override
-	public boolean extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects,String[] requestedTypes)
-	{
-		if (!handlesType(requestedTypes)) return false;
-		if (!DbMetadata.typeIncluded("SYSTEM TABLE", requestedTypes)) return false;
-		if (aSchema == null || !aSchema.equals("v_internal")) return false;
+  @Override
+  public boolean extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects,String[] requestedTypes)
+  {
+    if (!handlesType(requestedTypes)) return false;
+    if (!DbMetadata.typeIncluded("SYSTEM TABLE", requestedTypes)) return false;
+    if (aSchema == null || !aSchema.equals("v_internal")) return false;
 
-		Statement stmt = null;
-		ResultSet tableRs = null;
+    Statement stmt = null;
+    ResultSet tableRs = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("VerticaTableReader.getInternalTables()", "Query to retrieve tables in v_internal schema:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("VerticaTableReader.getInternalTables()", "Query to retrieve tables in v_internal schema:\n" + sql);
+    }
 
-		try
-		{
-			stmt = con.createStatementForQuery();
-			tableRs = stmt.executeQuery(sql);
-			while (tableRs.next())
-			{
-				int row = result.addRow();
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, tableRs.getString("catalog"));
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, tableRs.getString("schema"));
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, tableRs.getString("name"));
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, tableRs.getString("remarks"));
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, tableRs.getString("type"));
-			}
-			return true;
-		}
-		catch (SQLException se)
-		{
-			LogMgr.logError("VerticaTableReader.extendObjectList()", "Could not retrieve internal tables", se);
-		}
-		finally
-		{
-			SqlUtil.closeAll(tableRs, stmt);
-		}
-		return false;
-	}
+    try
+    {
+      stmt = con.createStatementForQuery();
+      tableRs = stmt.executeQuery(sql);
+      while (tableRs.next())
+      {
+        int row = result.addRow();
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, tableRs.getString("catalog"));
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, tableRs.getString("schema"));
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, tableRs.getString("name"));
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, tableRs.getString("remarks"));
+        result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, tableRs.getString("type"));
+      }
+      return true;
+    }
+    catch (SQLException se)
+    {
+      LogMgr.logError("VerticaTableReader.extendObjectList()", "Could not retrieve internal tables", se);
+    }
+    finally
+    {
+      SqlUtil.closeAll(tableRs, stmt);
+    }
+    return false;
+  }
 
-	@Override
-	public List<String> supportedTypes()
-	{
-		return CollectionUtil.arrayList("SYSTEM TABLE", "SYSTEM VIEW");
-	}
+  @Override
+  public List<String> supportedTypes()
+  {
+    return CollectionUtil.arrayList("SYSTEM TABLE", "SYSTEM VIEW");
+  }
 
-	@Override
-	public boolean isDerivedType()
-	{
-		return false;
-	}
+  @Override
+  public boolean isDerivedType()
+  {
+    return false;
+  }
 
-	@Override
-	public boolean handlesType(String type)
-	{
-		return supportedTypes().contains(type);
-	}
+  @Override
+  public boolean handlesType(String type)
+  {
+    return supportedTypes().contains(type);
+  }
 
-	@Override
-	public boolean handlesType(String[] types)
-	{
-		if (types == null) return true;
-		for (String type : types)
-		{
-			if (handlesType(type))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+  @Override
+  public boolean handlesType(String[] types)
+  {
+    if (types == null) return true;
+    for (String type : types)
+    {
+      if (handlesType(type))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	@Override
-	public DataStore getObjectDetails(WbConnection con, DbObject object)
-	{
-		return null;
-	}
+  @Override
+  public DataStore getObjectDetails(WbConnection con, DbObject object)
+  {
+    return null;
+  }
 
-	@Override
-	public DbObject getObjectDefinition(WbConnection con, DbObject name)
-	{
-		return null;
-	}
+  @Override
+  public DbObject getObjectDefinition(WbConnection con, DbObject name)
+  {
+    return null;
+  }
 
-	@Override
-	public String getObjectSource(WbConnection con, DbObject object)
-	{
-		return null;
-	}
+  @Override
+  public String getObjectSource(WbConnection con, DbObject object)
+  {
+    return null;
+  }
 
 
   @Override

@@ -30,29 +30,29 @@ package workbench.db.exporter;
  * @see HtmlRowDataConverter
  */
 public class HtmlExportWriter
-	extends ExportWriter
+  extends ExportWriter
 {
 
-	public HtmlExportWriter(DataExporter exp)
-	{
-		super(exp);
-	}
+  public HtmlExportWriter(DataExporter exp)
+  {
+    super(exp);
+  }
 
-	@Override
-	public RowDataConverter createConverter()
-	{
-		return new HtmlRowDataConverter();
-	}
+  @Override
+  public RowDataConverter createConverter()
+  {
+    return new HtmlRowDataConverter();
+  }
 
-	@Override
-	public void configureConverter()
-	{
-		super.configureConverter();
-		HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
-		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
-		conv.setEscapeHtml(exporter.getEscapeHtml());
-		conv.setHeading(exporter.getHtmlHeading());
-		conv.setTrailer(exporter.getHtmlTrailer());
-		conv.setNullString(exporter.getNullString());
-	}
+  @Override
+  public void configureConverter()
+  {
+    super.configureConverter();
+    HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
+    conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
+    conv.setEscapeHtml(exporter.getEscapeHtml());
+    conv.setHeading(exporter.getHtmlHeading());
+    conv.setTrailer(exporter.getHtmlTrailer());
+    conv.setNullString(exporter.getNullString());
+  }
 }

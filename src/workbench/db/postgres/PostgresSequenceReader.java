@@ -135,9 +135,9 @@ public class PostgresSequenceReader
   }
 
   /**
-   *	Return the source SQL for a PostgreSQL sequence definition.
+   *  Return the source SQL for a PostgreSQL sequence definition.
    *
-   *	@return The SQL to recreate the given sequence
+   *  @return The SQL to recreate the given sequence
    */
   @Override
   public CharSequence getSequenceSource(String catalog, String schema, String aSequence)

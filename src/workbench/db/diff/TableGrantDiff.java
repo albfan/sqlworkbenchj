@@ -38,74 +38,74 @@ import workbench.util.StringUtil;
  */
 public class TableGrantDiff
 {
-	public static final String TAG_ADD_GRANTS = "add-grants";
-	public static final String TAG_REVOKE_GRANTS = "revoke-grants";
+  public static final String TAG_ADD_GRANTS = "add-grants";
+  public static final String TAG_REVOKE_GRANTS = "revoke-grants";
 
-	private Collection<TableGrant> referenceGrants;
-	private Collection<TableGrant> targetGrants;
+  private Collection<TableGrant> referenceGrants;
+  private Collection<TableGrant> targetGrants;
 
-	public TableGrantDiff(ReportTableGrants reference, ReportTableGrants target)
-	{
-		if (reference != null)
-		{
-			this.referenceGrants = reference.getGrants();
-		}
+  public TableGrantDiff(ReportTableGrants reference, ReportTableGrants target)
+  {
+    if (reference != null)
+    {
+      this.referenceGrants = reference.getGrants();
+    }
 
-		if (target != null)
-		{
-			this.targetGrants = target.getGrants();
-		}
-	}
+    if (target != null)
+    {
+      this.targetGrants = target.getGrants();
+    }
+  }
 
-	public StringBuilder getMigrateTargetXml(TagWriter writer, StringBuilder indent)
-	{
-		Collection<TableGrant> grantsToAdd = new LinkedList<>();
-		if (this.referenceGrants != null)
-		{
-			grantsToAdd.addAll(this.referenceGrants);
-		}
-		if (this.targetGrants != null)
-		{
-			grantsToAdd.removeAll(targetGrants);
-		}
+  public StringBuilder getMigrateTargetXml(TagWriter writer, StringBuilder indent)
+  {
+    Collection<TableGrant> grantsToAdd = new LinkedList<>();
+    if (this.referenceGrants != null)
+    {
+      grantsToAdd.addAll(this.referenceGrants);
+    }
+    if (this.targetGrants != null)
+    {
+      grantsToAdd.removeAll(targetGrants);
+    }
 
-		Collection<TableGrant> grantsToRemove = new LinkedList<>();
-		if (this.targetGrants != null)
-		{
-			grantsToRemove.addAll(targetGrants);
-		}
-		if (this.referenceGrants != null)
-		{
-			grantsToRemove.removeAll(referenceGrants);
-		}
+    Collection<TableGrant> grantsToRemove = new LinkedList<>();
+    if (this.targetGrants != null)
+    {
+      grantsToRemove.addAll(targetGrants);
+    }
+    if (this.referenceGrants != null)
+    {
+      grantsToRemove.removeAll(referenceGrants);
+    }
 
-		if (grantsToAdd.isEmpty() && grantsToRemove.isEmpty()) return StringUtil.emptyBuilder();
+    if (grantsToAdd.isEmpty() && grantsToRemove.isEmpty()) return StringUtil.emptyBuilder();
 
-		StringBuilder result = new StringBuilder(grantsToAdd.size() * 50 + grantsToRemove.size() * 50);
-		StringBuilder indent2 = new StringBuilder(indent);
-		indent2.append("  ");
-		StringBuilder indent3 = new StringBuilder(indent2);
-		indent3.append("  ");
-		if (grantsToAdd.size() > 0)
-		{
-			ReportTableGrants report = new ReportTableGrants(grantsToAdd);
-			writer.appendOpenTag(result, indent2, TAG_ADD_GRANTS);
-			result.append('\n');
-			report.appendXml(result, indent3);
-			writer.appendCloseTag(result, indent2, TAG_ADD_GRANTS);
-			result.append('\n');
-		}
+    StringBuilder result = new StringBuilder(grantsToAdd.size() * 50 + grantsToRemove.size() * 50);
+    StringBuilder indent2 = new StringBuilder(indent);
+    indent2.append("  ");
+    StringBuilder indent3 = new StringBuilder(indent2);
+    indent3.append("  ");
+    if (grantsToAdd.size() > 0)
+    {
+      ReportTableGrants report = new ReportTableGrants(grantsToAdd);
+      writer.appendOpenTag(result, indent2, TAG_ADD_GRANTS);
+      result.append('\n');
+      report.appendXml(result, indent3);
+      writer.appendCloseTag(result, indent2, TAG_ADD_GRANTS);
+      result.append('\n');
+    }
 
-		if (grantsToRemove.size() > 0)
-		{
-			ReportTableGrants report = new ReportTableGrants(grantsToRemove);
-			writer.appendOpenTag(result, indent2, TAG_REVOKE_GRANTS);
-			result.append('\n');
-			report.appendXml(result, indent3);
-			writer.appendCloseTag(result, indent2, TAG_REVOKE_GRANTS);
-			result.append('\n');
-		}
-		return result;
-	}
+    if (grantsToRemove.size() > 0)
+    {
+      ReportTableGrants report = new ReportTableGrants(grantsToRemove);
+      writer.appendOpenTag(result, indent2, TAG_REVOKE_GRANTS);
+      result.append('\n');
+      report.appendXml(result, indent3);
+      writer.appendCloseTag(result, indent2, TAG_REVOKE_GRANTS);
+      result.append('\n');
+    }
+    return result;
+  }
 
 }

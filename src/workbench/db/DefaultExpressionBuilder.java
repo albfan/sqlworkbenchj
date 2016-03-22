@@ -26,47 +26,47 @@ package workbench.db;
  * @author Thomas Kellerer
  */
 public class DefaultExpressionBuilder
-	implements DmlExpressionBuilder
+  implements DmlExpressionBuilder
 {
-	protected DbSettings settings;
+  protected DbSettings settings;
 
-	public DefaultExpressionBuilder(WbConnection conn)
-	{
-		if (conn != null)
-		{
-			setDbSettings(conn.getDbSettings());
-		}
-	}
+  public DefaultExpressionBuilder(WbConnection conn)
+  {
+    if (conn != null)
+    {
+      setDbSettings(conn.getDbSettings());
+    }
+  }
 
-	/**
-	 * Use a different instance of DbSettings
-	 * @param dbSettings
-	 */
-	public final void setDbSettings(DbSettings dbSettings)
-	{
-		settings = dbSettings;
-	}
+  /**
+   * Use a different instance of DbSettings
+   * @param dbSettings
+   */
+  public final void setDbSettings(DbSettings dbSettings)
+  {
+    settings = dbSettings;
+  }
 
-	@Override
-	public String getDmlExpression(ColumnIdentifier column)
-	{
-		if (settings == null)
-		{
-			return "?";
-		}
-		String expression = settings.getDmlExpressionValue(column.getDbmsType());
-		if (expression == null)
-		{
-			return "?";
-		}
-		return expression;
-	}
+  @Override
+  public String getDmlExpression(ColumnIdentifier column)
+  {
+    if (settings == null)
+    {
+      return "?";
+    }
+    String expression = settings.getDmlExpressionValue(column.getDbmsType());
+    if (expression == null)
+    {
+      return "?";
+    }
+    return expression;
+  }
 
-	@Override
-	public boolean isDmlExpressionDefined(String baseType)
-	{
-		if (settings == null) return false;
-		return settings.isDmlExpressionDefined(baseType);
-	}
+  @Override
+  public boolean isDmlExpressionDefined(String baseType)
+  {
+    if (settings == null) return false;
+    return settings.isDmlExpressionDefined(baseType);
+  }
 
 }

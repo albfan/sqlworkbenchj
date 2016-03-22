@@ -56,71 +56,71 @@ import workbench.util.CollectionUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerStatementHook
-	implements StatementHook
+  implements StatementHook
 {
 
-	private final Set<String> verbsWithSemicolon;
+  private final Set<String> verbsWithSemicolon;
 
-	public SqlServerStatementHook()
-	{
-		List<String> verbsToFix = Settings.getInstance().getListProperty("workbench.db.microsoft_sql_server.semicolon.bug", false);
-		if (verbsToFix.isEmpty())
-		{
-			verbsWithSemicolon = null;
-		}
-		else
-		{
-			verbsWithSemicolon = CollectionUtil.caseInsensitiveSet();
-			verbsWithSemicolon.addAll(verbsToFix);
-		}
-	}
+  public SqlServerStatementHook()
+  {
+    List<String> verbsToFix = Settings.getInstance().getListProperty("workbench.db.microsoft_sql_server.semicolon.bug", false);
+    if (verbsToFix.isEmpty())
+    {
+      verbsWithSemicolon = null;
+    }
+    else
+    {
+      verbsWithSemicolon = CollectionUtil.caseInsensitiveSet();
+      verbsWithSemicolon.addAll(verbsToFix);
+    }
+  }
 
 
-	@Override
-	public String preExec(StatementRunner runner, String sql)
-	{
-		// if no verb was defined to apply the workaround for the broken semicolon handling
-		// then add the semicolon to all statements.
-		if (verbsWithSemicolon == null)
-		{
-			return sql + ";";
-		}
+  @Override
+  public String preExec(StatementRunner runner, String sql)
+  {
+    // if no verb was defined to apply the workaround for the broken semicolon handling
+    // then add the semicolon to all statements.
+    if (verbsWithSemicolon == null)
+    {
+      return sql + ";";
+    }
 
-		// If verbs were defined, only append the (unnecessary) semicolon to those
-		String verb = runner.getConnection().getParsingUtil().getSqlVerb(sql);
-		if (verbsWithSemicolon.contains(verb))
-		{
-			return sql + ";";
-		}
-		return sql;
-	}
+    // If verbs were defined, only append the (unnecessary) semicolon to those
+    String verb = runner.getConnection().getParsingUtil().getSqlVerb(sql);
+    if (verbsWithSemicolon.contains(verb))
+    {
+      return sql + ";";
+    }
+    return sql;
+  }
 
-	@Override
-	public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
-	{
-	}
+  @Override
+  public void postExec(StatementRunner runner, String sql, StatementRunnerResult result)
+  {
+  }
 
-	@Override
-	public boolean isPending()
-	{
-		return false;
-	}
+  @Override
+  public boolean isPending()
+  {
+    return false;
+  }
 
-	@Override
-	public boolean displayResults()
-	{
-		return true;
-	}
+  @Override
+  public boolean displayResults()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean fetchResults()
-	{
-		return true;
-	}
+  @Override
+  public boolean fetchResults()
+  {
+    return true;
+  }
 
-	@Override
-	public void close(WbConnection conn)
-	{
-	}
+  @Override
+  public void close(WbConnection conn)
+  {
+  }
 
 }

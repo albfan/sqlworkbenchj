@@ -39,7 +39,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class DummyDML
-	implements DbObject
+  implements DbObject
 {
   public static final String PROP_CONFIG_PREFIX = "workbench.sql.generate.dummydml.";
   public static final String PROP_CONFIG_MAKE_PREPARED = PROP_CONFIG_PREFIX + "prepared";
@@ -48,96 +48,96 @@ public class DummyDML
   public static final String PLACEHOLDER_TABLE_NAME = "${table_name}";
 
   protected boolean doFormat;
-	protected final TableIdentifier table;
-	private List<ColumnIdentifier> columns;
+  protected final TableIdentifier table;
+  private List<ColumnIdentifier> columns;
 
-	protected DummyDML(TableIdentifier tbl)
-	{
-		this.table = tbl;
-	}
+  protected DummyDML(TableIdentifier tbl)
+  {
+    this.table = tbl;
+  }
 
-	public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols)
-	{
-		this.table = tbl;
-		this.columns = new ArrayList<>(cols);
-	}
+  public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols)
+  {
+    this.table = tbl;
+    this.columns = new ArrayList<>(cols);
+  }
 
   public void setDoFormatSql(boolean flag)
   {
     doFormat = flag;
   }
 
-	@Override
-	public String getComment()
-	{
-		return null;
-	}
+  @Override
+  public String getComment()
+  {
+    return null;
+  }
 
-	@Override
-	public void setComment(String c)
-	{
-	}
+  @Override
+  public void setComment(String c)
+  {
+  }
 
-	@Override
-	public String getCatalog()
-	{
-		return null;
-	}
+  @Override
+  public String getCatalog()
+  {
+    return null;
+  }
 
-	@Override
-	public String getFullyQualifiedName(WbConnection conn)
-	{
-		return getObjectExpression(conn);
-	}
+  @Override
+  public String getFullyQualifiedName(WbConnection conn)
+  {
+    return getObjectExpression(conn);
+  }
 
-	@Override
-	public String getObjectExpression(WbConnection conn)
-	{
-		return null;
-	}
+  @Override
+  public String getObjectExpression(WbConnection conn)
+  {
+    return null;
+  }
 
-	@Override
-	public String getObjectName()
-	{
+  @Override
+  public String getObjectName()
+  {
     if (table == null) return getObjectType(); // make sure something is returned to avoid "null" labels in the UI
-		return table.getTableName();
-	}
+    return table.getTableName();
+  }
 
-	@Override
-	public String getObjectName(WbConnection conn)
-	{
-		return null;
-	}
+  @Override
+  public String getObjectName(WbConnection conn)
+  {
+    return null;
+  }
 
-	@Override
-	public String getDropStatement(WbConnection con, boolean cascade)
-	{
-		return null;
-	}
+  @Override
+  public String getDropStatement(WbConnection con, boolean cascade)
+  {
+    return null;
+  }
 
-	@Override
-	public String getObjectNameForDrop(WbConnection con)
-	{
-		return null;
-	}
+  @Override
+  public String getObjectNameForDrop(WbConnection con)
+  {
+    return null;
+  }
 
-	@Override
-	public String getObjectType()
-	{
-		throw new UnsupportedOperationException("Must be implemented in a descendant");
-	}
+  @Override
+  public String getObjectType()
+  {
+    throw new UnsupportedOperationException("Must be implemented in a descendant");
+  }
 
-	@Override
-	public String getSchema()
-	{
-		return null;
-	}
+  @Override
+  public String getSchema()
+  {
+    return null;
+  }
 
   @Override
   public CharSequence getSource(WbConnection con)
     throws SQLException
   {
-		throw new UnsupportedOperationException("Must be implemented in a descendant");
+    throw new UnsupportedOperationException("Must be implemented in a descendant");
   }
 
   protected List<ColumnIdentifier> getColumns(WbConnection con)
@@ -200,21 +200,21 @@ public class DummyDML
 
   protected String getColumnName(ColumnIdentifier col, WbConnection dbConnection)
   {
-		String name = dbConnection.getMetadata().quoteObjectname(col.getColumnName());
+    String name = dbConnection.getMetadata().quoteObjectname(col.getColumnName());
     return FormatterUtil.getIdentifier(name);
   }
 
   protected String formatSql(String sql, WbConnection con)
   {
-		if (doFormat)
-		{
-			WbSqlFormatter f = new WbSqlFormatter(sql, con == null ? null : con.getDbId());
-			if (con != null)
-			{
-				f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());
-			}
-			return f.getFormattedSql();
-		}
+    if (doFormat)
+    {
+      WbSqlFormatter f = new WbSqlFormatter(sql, con == null ? null : con.getDbId());
+      if (con != null)
+      {
+        f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());
+      }
+      return f.getFormattedSql();
+    }
     return sql;
   }
 

@@ -30,11 +30,11 @@ import org.xml.sax.SAXException;
  * @author  Thomas Kellerer
  */
 public class ParsingConverterException
-	extends SAXException
+  extends SAXException
 {
-	public ParsingConverterException()
-	{
-		super("Error when converting data");
-	}
+  public ParsingConverterException()
+  {
+    super("Error when converting data");
+  }
 
 }

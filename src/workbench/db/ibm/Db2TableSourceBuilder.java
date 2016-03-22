@@ -44,80 +44,80 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class Db2TableSourceBuilder
-	extends TableSourceBuilder
+  extends TableSourceBuilder
 {
-	private boolean checkHistoryTable;
+  private boolean checkHistoryTable;
 
-	public Db2TableSourceBuilder(WbConnection con)
-	{
-		super(con);
-		checkHistoryTable = JdbcUtils.hasMinimumServerVersion(con, "10.1");
-	}
+  public Db2TableSourceBuilder(WbConnection con)
+  {
+    super(con);
+    checkHistoryTable = JdbcUtils.hasMinimumServerVersion(con, "10.1");
+  }
 
-	@Override
-	public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		if (!checkHistoryTable)	return;
-		if (table == null) return;
-		if (table.getSourceOptions().isInitialized()) return;
+  @Override
+  public void readTableOptions(TableIdentifier table, List<ColumnIdentifier> columns)
+  {
+    if (!checkHistoryTable) return;
+    if (table == null) return;
+    if (table.getSourceOptions().isInitialized()) return;
 
-		String sql =
-			"select periodname, \n" +
-			"       begincolname, \n" +
-			"       endcolname, \n" +
-			"       historytabschema, \n" +
-			"       historytabname \n " +
-			"from syscat.periods \n" +
-			"where tabschema = ? \n" +
-			"  and tabname = ? ";
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    String sql =
+      "select periodname, \n" +
+      "       begincolname, \n" +
+      "       endcolname, \n" +
+      "       historytabschema, \n" +
+      "       historytabname \n " +
+      "from syscat.periods \n" +
+      "where tabschema = ? \n" +
+      "  and tabname = ? ";
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		String tablename = table.getTableName();
-		String schema = table.getSchema();
+    String tablename = table.getTableName();
+    String schema = table.getSchema();
 
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("Db2TableSourceBuilder.readTableOptions()", "Query to retrieve table options:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("Db2TableSourceBuilder.readTableOptions()", "Query to retrieve table options:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+    }
 
-		try
-		{
-			stmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, tablename);
-			rs = stmt.executeQuery();
+    try
+    {
+      stmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, schema);
+      stmt.setString(2, tablename);
+      rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
-				String period = rs.getString(1);
-				String begin = rs.getString(2);
-				String end = rs.getString(3);
-				String histSchema = rs.getString(4);
-				String histTab = rs.getString(5);
-				TableIdentifier histTable = new TableIdentifier(histSchema, histTab);
+      if (rs.next())
+      {
+        String period = rs.getString(1);
+        String begin = rs.getString(2);
+        String end = rs.getString(3);
+        String histSchema = rs.getString(4);
+        String histTab = rs.getString(5);
+        TableIdentifier histTable = new TableIdentifier(histSchema, histTab);
 
-				ObjectSourceOptions options = table.getSourceOptions();
+        ObjectSourceOptions options = table.getSourceOptions();
 
-				String inline = "PERIOD " + period + " (" + begin + ", " + end + ")";
-				options.setInlineOption(inline);
+        String inline = "PERIOD " + period + " (" + begin + ", " + end + ")";
+        options.setInlineOption(inline);
 
-				String addSql =
-					"ALTER TABLE " + table.getTableExpression(dbConnection) + "\n" +
-					"  ADD VERSIONING USE HISTORY TABLE " + histTable.getTableExpression(dbConnection)  + ";\n";
-				options.setAdditionalSql(addSql);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("Db2TableSourceBuilder.readTableOptions()", "Could not retrieve history table", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		table.getSourceOptions().setInitialized();
-	}
+        String addSql =
+          "ALTER TABLE " + table.getTableExpression(dbConnection) + "\n" +
+          "  ADD VERSIONING USE HISTORY TABLE " + histTable.getTableExpression(dbConnection)  + ";\n";
+        options.setAdditionalSql(addSql);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logWarning("Db2TableSourceBuilder.readTableOptions()", "Could not retrieve history table", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    table.getSourceOptions().setInitialized();
+  }
 
 }

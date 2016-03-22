@@ -33,52 +33,52 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class RegexReplacingModifier
-	implements ExportDataModifier
+  implements ExportDataModifier
 {
-	private Pattern searchPattern;
-	private String replacement;
+  private Pattern searchPattern;
+  private String replacement;
 
-	public RegexReplacingModifier(String searchRegex, String replaceWith)
-	{
-		searchPattern = Pattern.compile(searchRegex);
-		replacement = replaceWith;
-	}
+  public RegexReplacingModifier(String searchRegex, String replaceWith)
+  {
+    searchPattern = Pattern.compile(searchRegex);
+    replacement = replaceWith;
+  }
 
-	public String getRegex()
-	{
-		return searchPattern.pattern();
-	}
+  public String getRegex()
+  {
+    return searchPattern.pattern();
+  }
 
-	public String getReplacement()
-	{
-		return replacement;
-	}
+  public String getReplacement()
+  {
+    return replacement;
+  }
 
-	@Override
-	public void modifyData(RowDataConverter converter, RowData row, long currentRowNumber)
-	{
-		int colCount = row.getColumnCount();
+  @Override
+  public void modifyData(RowDataConverter converter, RowData row, long currentRowNumber)
+  {
+    int colCount = row.getColumnCount();
 
-		for (int col=0; col < colCount; col ++)
-		{
-			ColumnIdentifier column = converter.getResultInfo().getColumn(col);
-			if (converter.includeColumnInExport(col) && SqlUtil.isCharacterType(column.getDataType()))
-			{
-				String value = (String)row.getValue(col);
-				if (value != null)
-				{
-					row.setValue(col, replacePattern(value));
-				}
-			}
-		}
-	}
+    for (int col=0; col < colCount; col ++)
+    {
+      ColumnIdentifier column = converter.getResultInfo().getColumn(col);
+      if (converter.includeColumnInExport(col) && SqlUtil.isCharacterType(column.getDataType()))
+      {
+        String value = (String)row.getValue(col);
+        if (value != null)
+        {
+          row.setValue(col, replacePattern(value));
+        }
+      }
+    }
+  }
 
-	public String replacePattern(String value)
-	{
-		if (value == null) return null;
-		if (searchPattern == null) return value;
-		if (replacement == null) return value;
+  public String replacePattern(String value)
+  {
+    if (value == null) return null;
+    if (searchPattern == null) return value;
+    if (replacement == null) return value;
 
-		return searchPattern.matcher(value).replaceAll(replacement);
-	}
+    return searchPattern.matcher(value).replaceAll(replacement);
+  }
 }

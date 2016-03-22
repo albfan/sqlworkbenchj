@@ -30,13 +30,13 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class DefaultTablenameResolver
-	implements TablenameResolver
+  implements TablenameResolver
 {
 
-	@Override
-	public String getTableName(WbFile f)
-	{
-		return f.getFileName();
-	}
+  @Override
+  public String getTableName(WbFile f)
+  {
+    return f.getFileName();
+  }
 
 }

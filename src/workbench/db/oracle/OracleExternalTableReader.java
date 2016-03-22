@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
  */
 public class OracleExternalTableReader
 {
-	private String baseSql =
+  private String baseSql =
       "-- SQL Workbench \n" +
       "select et.owner,  \n" +
       "       et.table_name,  \n" +
@@ -59,110 +59,110 @@ public class OracleExternalTableReader
       " where et.owner = ? \n" +
       "   and et.table_name = ?";
 
-	public CharSequence getDefinition(TableIdentifier table, WbConnection conn)
-	{
-		StringBuilder options = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+  public CharSequence getDefinition(TableIdentifier table, WbConnection conn)
+  {
+    StringBuilder options = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("OracleExternalTableReader.getDefinition()", "Retrieving external table definition using:\n" + SqlUtil.replaceParameters(baseSql, table.getRawSchema(), table.getRawTableName()));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleExternalTableReader.getDefinition()", "Retrieving external table definition using:\n" + SqlUtil.replaceParameters(baseSql, table.getRawSchema(), table.getRawTableName()));
+    }
 
-		try
-		{
-			pstmt = conn.getSqlConnection().prepareStatement(baseSql);
-			pstmt.setString(1, table.getRawSchema());
-			pstmt.setString(2, table.getRawTableName());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				String tableType = rs.getString("type_name");
-				String defDir = rs.getString("default_directory_name");
-				String limit = rs.getString("reject_limit");
-				String access = rs.getString("access_parameters");
-				String location = rs.getString("location");
-				String dir = rs.getString("directory_name");
-				options = new StringBuilder(100);
-				options.append("ORGANIZATION EXTERNAL\n(\n");
-				options.append("  TYPE ");
-				options.append(tableType);
-				options.append('\n');
-				options.append("  DEFAULT DIRECTORY ");
-				options.append(defDir);
-				options.append('\n');
-				options.append("  ACCESS PARAMETERS\n  (\n");
-				options.append(fixIndention(access.trim(), "    "));
-				options.append("\n  )\n");
-				options.append("  LOCATION ('");
-				if (!StringUtil.equalStringIgnoreCase(defDir, dir))
-				{
-					options.append(dir);
-					options.append(':');
-				}
-				options.append(location);
-				options.append("')\n");
-				options.append(")\n");
-				options.append("REJECT LIMIT ");
-				options.append(limit);
-			}
-		}
-		catch (SQLException sql)
-		{
-			LogMgr.logError("OracleExternalTableReader.getDefinition()","Error retrieving external table options using:\n" + baseSql, sql);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return options;
-	}
+    try
+    {
+      pstmt = conn.getSqlConnection().prepareStatement(baseSql);
+      pstmt.setString(1, table.getRawSchema());
+      pstmt.setString(2, table.getRawTableName());
+      rs = pstmt.executeQuery();
+      if (rs.next())
+      {
+        String tableType = rs.getString("type_name");
+        String defDir = rs.getString("default_directory_name");
+        String limit = rs.getString("reject_limit");
+        String access = rs.getString("access_parameters");
+        String location = rs.getString("location");
+        String dir = rs.getString("directory_name");
+        options = new StringBuilder(100);
+        options.append("ORGANIZATION EXTERNAL\n(\n");
+        options.append("  TYPE ");
+        options.append(tableType);
+        options.append('\n');
+        options.append("  DEFAULT DIRECTORY ");
+        options.append(defDir);
+        options.append('\n');
+        options.append("  ACCESS PARAMETERS\n  (\n");
+        options.append(fixIndention(access.trim(), "    "));
+        options.append("\n  )\n");
+        options.append("  LOCATION ('");
+        if (!StringUtil.equalStringIgnoreCase(defDir, dir))
+        {
+          options.append(dir);
+          options.append(':');
+        }
+        options.append(location);
+        options.append("')\n");
+        options.append(")\n");
+        options.append("REJECT LIMIT ");
+        options.append(limit);
+      }
+    }
+    catch (SQLException sql)
+    {
+      LogMgr.logError("OracleExternalTableReader.getDefinition()","Error retrieving external table options using:\n" + baseSql, sql);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return options;
+  }
 
-	/**
-	 * This method tries to merge our own indention and the one originally used
-	 * in the access parameters.
-	 *
-	 * @param parameter
-	 * @param baseIndent
-	 */
-	private StringBuilder fixIndention(String parameter, String baseIndent)
-	{
-		List<String> lines = StringUtil.getLines(parameter);
-		StringBuilder result = new StringBuilder(lines.size() * 50);
+  /**
+   * This method tries to merge our own indention and the one originally used
+   * in the access parameters.
+   *
+   * @param parameter
+   * @param baseIndent
+   */
+  private StringBuilder fixIndention(String parameter, String baseIndent)
+  {
+    List<String> lines = StringUtil.getLines(parameter);
+    StringBuilder result = new StringBuilder(lines.size() * 50);
 
-		String indent = null;
-		for (int i=0; i < lines.size(); i++)
-		{
-			if (lines.get(i).trim().startsWith(")"))
-			{
-				indent = null;
-			}
-			else if (i > 1 && lines.get(i-1).trim().startsWith("("))
-			{
-				String prevLine = lines.get(i-1);
-				int pos = prevLine.indexOf('(');
-				int start = StringUtil.findFirstNonWhitespace(lines.get(i));
-				if (start > pos)
-				{
-					int numIndent = start - pos;
-					indent = StringUtil.padRight(" ", numIndent);
-				}
-				else
-				{
-					indent = null;
-				}
-			}
+    String indent = null;
+    for (int i=0; i < lines.size(); i++)
+    {
+      if (lines.get(i).trim().startsWith(")"))
+      {
+        indent = null;
+      }
+      else if (i > 1 && lines.get(i-1).trim().startsWith("("))
+      {
+        String prevLine = lines.get(i-1);
+        int pos = prevLine.indexOf('(');
+        int start = StringUtil.findFirstNonWhitespace(lines.get(i));
+        if (start > pos)
+        {
+          int numIndent = start - pos;
+          indent = StringUtil.padRight(" ", numIndent);
+        }
+        else
+        {
+          indent = null;
+        }
+      }
 
-			result.append(baseIndent);
-			if (indent != null)
-			{
-				result.append(indent);
-			}
-			result.append(lines.get(i).trim());
-			if (i < lines.size() - 1) result.append('\n');
+      result.append(baseIndent);
+      if (indent != null)
+      {
+        result.append(indent);
+      }
+      result.append(lines.get(i).trim());
+      if (i < lines.size() - 1) result.append('\n');
 
-		}
-		return result;
-	}
+    }
+    return result;
+  }
 }

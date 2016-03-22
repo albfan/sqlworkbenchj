@@ -388,7 +388,7 @@ public class PostgresProcedureReader
       sql += "       null::text as formatted_return_type, \n" +
              "       null::text as formatted_parameters, \n";
     }
-    sql +=	"       p.prorettype as return_type_oid, \n" +
+    sql +=  "       p.prorettype as return_type_oid, \n" +
             "       coalesce(array_to_string(p.proallargtypes, ';'), array_to_string(p.proargtypes, ';')) as argtypes, \n" +
             "       array_to_string(p.proargnames, ';') as argnames, \n" +
             "       array_to_string(p.proargmodes, ';') as argmodes, \n" +
@@ -654,7 +654,7 @@ public class PostgresProcedureReader
         {
           source = new StringBuilder(s.length() + 50);
           source.append(s);
-          if (!s.endsWith("\n"))	source.append('\n');
+          if (!s.endsWith("\n"))  source.append('\n');
 
           source.append(";\n");
 

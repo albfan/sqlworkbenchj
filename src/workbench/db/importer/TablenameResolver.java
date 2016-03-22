@@ -31,5 +31,5 @@ import workbench.util.WbFile;
  */
 public interface TablenameResolver
 {
-	String getTableName(WbFile f);
+  String getTableName(WbFile f);
 }

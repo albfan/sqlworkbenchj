@@ -32,6 +32,6 @@ import workbench.db.WbConnection;
  */
 public interface DbShutdownHook
 {
-	void shutdown(WbConnection con)
-		throws SQLException;
+  void shutdown(WbConnection con)
+    throws SQLException;
 }

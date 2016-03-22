@@ -45,22 +45,22 @@ import workbench.util.WbFile;
  */
 public class ExportJobEntry
 {
-	private WbFile outputFile;
-	private String query;
-	private TableIdentifier baseTable;
-	private ResultInfo resultInfo;
+  private WbFile outputFile;
+  private String query;
+  private TableIdentifier baseTable;
+  private ResultInfo resultInfo;
 
-	public ExportJobEntry(File file, String sql, String where, WbConnection conn)
-	{
-		outputFile = new WbFile(file);
-		query = sql;
-		List<Alias> tables = SqlUtil.getTables(query, false, conn);
-		if (tables.size() == 1)
-		{
-			this.baseTable = new TableIdentifier(tables.get(0).getObjectName(), conn);
-		}
-		appendWhere(where);
-	}
+  public ExportJobEntry(File file, String sql, String where, WbConnection conn)
+  {
+    outputFile = new WbFile(file);
+    query = sql;
+    List<Alias> tables = SqlUtil.getTables(query, false, conn);
+    if (tables.size() == 1)
+    {
+      this.baseTable = new TableIdentifier(tables.get(0).getObjectName(), conn);
+    }
+    appendWhere(where);
+  }
 
   /**
    * Create an export job for the given table.
@@ -74,53 +74,53 @@ public class ExportJobEntry
    * @throws SQLException
    * @see TableSelectBuilder#getSelectForColumns(workbench.db.TableIdentifier, java.util.List, int)
    */
-	public ExportJobEntry(File file, TableIdentifier table, String where, WbConnection con)
-		throws SQLException
-	{
-		resultInfo = new ResultInfo(table, con);
-		outputFile = new WbFile(file);
-		baseTable = resultInfo.getUpdateTable();
-		TableSelectBuilder builder = new TableSelectBuilder(con, "export");
-		query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()), -1);
-		resultInfo.setUpdateTable(baseTable);
-		appendWhere(where);
-	}
+  public ExportJobEntry(File file, TableIdentifier table, String where, WbConnection con)
+    throws SQLException
+  {
+    resultInfo = new ResultInfo(table, con);
+    outputFile = new WbFile(file);
+    baseTable = resultInfo.getUpdateTable();
+    TableSelectBuilder builder = new TableSelectBuilder(con, "export");
+    query = builder.getSelectForColumns(table, Arrays.asList(resultInfo.getColumns()), -1);
+    resultInfo.setUpdateTable(baseTable);
+    appendWhere(where);
+  }
 
-	private void appendWhere(String where)
-	{
-		if (StringUtil.isNonBlank(where))
-		{
-			if (!where.trim().toLowerCase().startsWith("where"))
-			{
-				query += " WHERE";
-			}
-			query += " ";
-			query += SqlUtil.trimSemicolon(where);
-		}
-	}
+  private void appendWhere(String where)
+  {
+    if (StringUtil.isNonBlank(where))
+    {
+      if (!where.trim().toLowerCase().startsWith("where"))
+      {
+        query += " WHERE";
+      }
+      query += " ";
+      query += SqlUtil.trimSemicolon(where);
+    }
+  }
 
-	public WbFile getOutputFile()
-	{
-		return outputFile;
-	}
+  public WbFile getOutputFile()
+  {
+    return outputFile;
+  }
 
-	public ResultInfo getResultInfo()
-	{
-		return resultInfo;
-	}
+  public ResultInfo getResultInfo()
+  {
+    return resultInfo;
+  }
 
-	public TableIdentifier getTable()
-	{
-		if (resultInfo != null)
-		{
-			return resultInfo.getUpdateTable();
-		}
-		return baseTable;
-	}
+  public TableIdentifier getTable()
+  {
+    if (resultInfo != null)
+    {
+      return resultInfo.getUpdateTable();
+    }
+    return baseTable;
+  }
 
-	public String getQuerySql()
-	{
-		return query;
-	}
+  public String getQuerySql()
+  {
+    return query;
+  }
 
 }

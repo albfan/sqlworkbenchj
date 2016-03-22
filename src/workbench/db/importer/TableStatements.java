@@ -48,181 +48,181 @@ import workbench.util.StringUtil;
  */
 public class TableStatements
 {
-	private String preStatement;
-	private String postStatement;
-	private boolean ignoreErrors;
-	private boolean success;
-	private boolean runPostStatementAfterError;
+  private String preStatement;
+  private String postStatement;
+  private boolean ignoreErrors;
+  private boolean success;
+  private boolean runPostStatementAfterError;
 
-	public TableStatements(String pre, String post)
-	{
-		this.preStatement = pre;
-		this.postStatement = post;
-		runPostStatementAfterError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
-	}
+  public TableStatements(String pre, String post)
+  {
+    this.preStatement = pre;
+    this.postStatement = post;
+    runPostStatementAfterError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
+  }
 
-	/**
-	 * Initialize this TableStatement using the given commandline
-	 * @param cmdLine
-	 * @see workbench.sql.wbcommands.CommonArgs#ARG_PRE_TABLE_STMT
-	 */
-	public TableStatements(ArgumentParser cmdLine)
-	{
-		String sql = cmdLine.getValue(CommonArgs.ARG_PRE_TABLE_STMT);
-		if (!StringUtil.isBlank(sql))
-		{
-			this.preStatement = sql;
-		}
+  /**
+   * Initialize this TableStatement using the given commandline
+   * @param cmdLine
+   * @see workbench.sql.wbcommands.CommonArgs#ARG_PRE_TABLE_STMT
+   */
+  public TableStatements(ArgumentParser cmdLine)
+  {
+    String sql = cmdLine.getValue(CommonArgs.ARG_PRE_TABLE_STMT);
+    if (!StringUtil.isBlank(sql))
+    {
+      this.preStatement = sql;
+    }
 
-		sql = cmdLine.getValue(CommonArgs.ARG_POST_TABLE_STMT);
-		if (!StringUtil.isBlank(sql))
-		{
-			this.postStatement = sql;
-		}
-		boolean defaultRunOnError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
-		this.ignoreErrors = cmdLine.getBoolean(CommonArgs.ARG_IGNORE_TABLE_STMT_ERRORS, true);
-		this.runPostStatementAfterError = cmdLine.getBoolean(CommonArgs.ARG_RUN_POST_STMT_ON_ERROR, defaultRunOnError);
-	}
+    sql = cmdLine.getValue(CommonArgs.ARG_POST_TABLE_STMT);
+    if (!StringUtil.isBlank(sql))
+    {
+      this.postStatement = sql;
+    }
+    boolean defaultRunOnError = Settings.getInstance().getBoolProperty("workbench.sql.tablestatements.on.error", true);
+    this.ignoreErrors = cmdLine.getBoolean(CommonArgs.ARG_IGNORE_TABLE_STMT_ERRORS, true);
+    this.runPostStatementAfterError = cmdLine.getBoolean(CommonArgs.ARG_RUN_POST_STMT_ON_ERROR, defaultRunOnError);
+  }
 
-	public boolean getRunPostStatementAfterError()
-	{
-		return runPostStatementAfterError;
-	}
+  public boolean getRunPostStatementAfterError()
+  {
+    return runPostStatementAfterError;
+  }
 
-	public boolean hasStatements()
-	{
-		return (this.preStatement != null || this.postStatement != null);
-	}
+  public boolean hasStatements()
+  {
+    return (this.preStatement != null || this.postStatement != null);
+  }
 
-	/**
-	 * Run the statement that is defined as the pre-processing statement
-	 *
-	 * @param con the connection on which to run the statement
-	 * @param tbl the table for which to run the statement
-	 * @throws java.sql.SQLException
-	 * @see #getPreStatement(TableIdentifier)
-	 */
-	public void runPreTableStatement(WbConnection con, TableIdentifier tbl)
-		throws SQLException
-	{
-		runStatement(con, tbl, getPreStatement(tbl));
-	}
+  /**
+   * Run the statement that is defined as the pre-processing statement
+   *
+   * @param con the connection on which to run the statement
+   * @param tbl the table for which to run the statement
+   * @throws java.sql.SQLException
+   * @see #getPreStatement(TableIdentifier)
+   */
+  public void runPreTableStatement(WbConnection con, TableIdentifier tbl)
+    throws SQLException
+  {
+    runStatement(con, tbl, getPreStatement(tbl));
+  }
 
-	/**
-	 * Run the statement that is defined as the post-processing statement
-	 *
-	 * @param con the connection on which to run the statement
-	 * @param tbl the table for which to run the statement
-	 * @throws java.sql.SQLException
-	 * @see #getPostStatement(TableIdentifier)
-	 */
-	public void runPostTableStatement(WbConnection con, TableIdentifier tbl)
-		throws SQLException
-	{
-		runStatement(con, tbl, getPostStatement(tbl));
-	}
+  /**
+   * Run the statement that is defined as the post-processing statement
+   *
+   * @param con the connection on which to run the statement
+   * @param tbl the table for which to run the statement
+   * @throws java.sql.SQLException
+   * @see #getPostStatement(TableIdentifier)
+   */
+  public void runPostTableStatement(WbConnection con, TableIdentifier tbl)
+    throws SQLException
+  {
+    runStatement(con, tbl, getPostStatement(tbl));
+  }
 
-	/**
-	 * Runs the given SQL for the given Table.
-	 *
-	 * @param con the connection to be used when running the statement
-	 * @param tbl the table for which to run the statement
-	 * @param sql
-	 * @throws java.sql.SQLException
-	 * @see #getPreStatement(TableIdentifier)
-	 * @see #getPostStatement(TableIdentifier)
-	 */
-	protected void runStatement(WbConnection con, TableIdentifier tbl, String sql)
-		throws SQLException
-	{
-		if (StringUtil.isBlank(sql))
-		{
-			success = true;
-			return;
-		}
+  /**
+   * Runs the given SQL for the given Table.
+   *
+   * @param con the connection to be used when running the statement
+   * @param tbl the table for which to run the statement
+   * @param sql
+   * @throws java.sql.SQLException
+   * @see #getPreStatement(TableIdentifier)
+   * @see #getPostStatement(TableIdentifier)
+   */
+  protected void runStatement(WbConnection con, TableIdentifier tbl, String sql)
+    throws SQLException
+  {
+    if (StringUtil.isBlank(sql))
+    {
+      success = true;
+      return;
+    }
 
-		Savepoint sp = null;
-		Statement stmt = null;
-		boolean useSavepoint = con.getDbSettings().useSavepointForTableStatements() && con.supportsSavepoints();
+    Savepoint sp = null;
+    Statement stmt = null;
+    boolean useSavepoint = con.getDbSettings().useSavepointForTableStatements() && con.supportsSavepoints();
 
-		success = false;
-		try
-		{
-			if (useSavepoint) sp = con.setSavepoint();
-			stmt = con.createStatement();
-			LogMgr.logDebug("TableStatements.runStatement", "Executing statement: " + sql);
-			stmt.execute(sql);
-			con.releaseSavepoint(sp);
-			success = true;
-		}
-		catch (SQLException e)
-		{
-			con.rollback(sp);
-			String errMsg = "Error running statement: [" + sql + "] for table: " + tbl.getFullyQualifiedName(con);
-			if (ignoreErrors)
-			{
-				LogMgr.logWarning("TableStatements.runStatement", errMsg + ": " + e.getMessage());
-			}
-			else
-			{
-				LogMgr.logError("TableStatements.runStatement", errMsg + sql, e);
-				throw new TableStatementError(e, tbl);
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("TableStatements.runStatement", "Error running statement: " + sql, th);
-			con.rollback(sp);
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
-	}
+    success = false;
+    try
+    {
+      if (useSavepoint) sp = con.setSavepoint();
+      stmt = con.createStatement();
+      LogMgr.logDebug("TableStatements.runStatement", "Executing statement: " + sql);
+      stmt.execute(sql);
+      con.releaseSavepoint(sp);
+      success = true;
+    }
+    catch (SQLException e)
+    {
+      con.rollback(sp);
+      String errMsg = "Error running statement: [" + sql + "] for table: " + tbl.getFullyQualifiedName(con);
+      if (ignoreErrors)
+      {
+        LogMgr.logWarning("TableStatements.runStatement", errMsg + ": " + e.getMessage());
+      }
+      else
+      {
+        LogMgr.logError("TableStatements.runStatement", errMsg + sql, e);
+        throw new TableStatementError(e, tbl);
+      }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("TableStatements.runStatement", "Error running statement: " + sql, th);
+      con.rollback(sp);
+    }
+    finally
+    {
+      SqlUtil.closeStatement(stmt);
+    }
+  }
 
-	public boolean wasSuccess()
-	{
-		return success;
-	}
+  public boolean wasSuccess()
+  {
+    return success;
+  }
 
-	/**
-	 * Return the post-processing SQL for the passed table.
-	 *
-	 * Placeholders ${table.name} and ${table.expression} are replaced
-	 * before running the statement.
-	 *
-	 * @param tbl the table for which the statement should be returned.
-	 *
-	 * @see workbench.db.TableIdentifier#getTableName()
-	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
-	 */
-	public String getPostStatement(TableIdentifier tbl)
-	{
-		return getTableStatement(postStatement, tbl);
-	}
+  /**
+   * Return the post-processing SQL for the passed table.
+   *
+   * Placeholders ${table.name} and ${table.expression} are replaced
+   * before running the statement.
+   *
+   * @param tbl the table for which the statement should be returned.
+   *
+   * @see workbench.db.TableIdentifier#getTableName()
+   * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
+   */
+  public String getPostStatement(TableIdentifier tbl)
+  {
+    return getTableStatement(postStatement, tbl);
+  }
 
-	/**
-	 * Return the post-processing SQL for the passed table.
-	 *
-	 * Placeholders ${table.name} and ${table.expression} are replaced
-	 * before running the statement.
-	 *
-	 * @param tbl the table for which the statement should be returned.
-	 *
-	 * @see workbench.db.TableIdentifier#getTableName()
-	 * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
-	 */
-	public String getPreStatement(TableIdentifier tbl)
-	{
-		return getTableStatement(preStatement, tbl);
-	}
+  /**
+   * Return the post-processing SQL for the passed table.
+   *
+   * Placeholders ${table.name} and ${table.expression} are replaced
+   * before running the statement.
+   *
+   * @param tbl the table for which the statement should be returned.
+   *
+   * @see workbench.db.TableIdentifier#getTableName()
+   * @see workbench.db.TableIdentifier#getTableExpression(workbench.db.WbConnection)
+   */
+  public String getPreStatement(TableIdentifier tbl)
+  {
+    return getTableStatement(preStatement, tbl);
+  }
 
-	private String getTableStatement(String source, TableIdentifier tbl)
-	{
-		if (source == null) return null;
-		if (tbl == null) return source;
-		String sql = StringUtil.replace(source, "${table.name}", tbl.getTableName());
-		sql = StringUtil.replace(sql, "${table.expression}", tbl.getTableExpression());
-		return sql;
-	}
+  private String getTableStatement(String source, TableIdentifier tbl)
+  {
+    if (source == null) return null;
+    if (tbl == null) return source;
+    String sql = StringUtil.replace(source, "${table.name}", tbl.getTableName());
+    sql = StringUtil.replace(sql, "${table.expression}", tbl.getTableExpression());
+    return sql;
+  }
 }

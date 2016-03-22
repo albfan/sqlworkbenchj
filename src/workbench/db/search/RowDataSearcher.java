@@ -50,63 +50,63 @@ import workbench.util.SqlUtil;
  */
 public class RowDataSearcher
 {
-	private ColumnExpression filterExpression;
-	private TextRowDataConverter converter;
-	private final Set<String> columns = CollectionUtil.caseInsensitiveSet();
-	private String blobEncoding;
+  private ColumnExpression filterExpression;
+  private TextRowDataConverter converter;
+  private final Set<String> columns = CollectionUtil.caseInsensitiveSet();
+  private String blobEncoding;
 
-	public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
-	{
-		if (comp == null)
-		{
-			comp = new ContainsComparator();
-		}
-		filterExpression = new ColumnExpression(comp, searchValue);
-		filterExpression.setIgnoreCase(ignoreCase);
-		converter = new TextRowDataConverter();
-	}
+  public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
+  {
+    if (comp == null)
+    {
+      comp = new ContainsComparator();
+    }
+    filterExpression = new ColumnExpression(comp, searchValue);
+    filterExpression.setIgnoreCase(ignoreCase);
+    converter = new TextRowDataConverter();
+  }
 
-	public void setBlobTextEncoding(String encoding)
-	{
-		this.blobEncoding = encoding;
-	}
+  public void setBlobTextEncoding(String encoding)
+  {
+    this.blobEncoding = encoding;
+  }
 
-	public ColumnExpression getExpression()
-	{
-		ColumnExpression expr = new ColumnExpression(filterExpression.getComparator(), filterExpression.getFilterValue());
-		expr.setIgnoreCase(filterExpression.isIgnoreCase());
-		return expr;
-	}
+  public ColumnExpression getExpression()
+  {
+    ColumnExpression expr = new ColumnExpression(filterExpression.getComparator(), filterExpression.getFilterValue());
+    expr.setIgnoreCase(filterExpression.isIgnoreCase());
+    return expr;
+  }
 
-	public boolean isSearchStringContained(RowData row, ResultInfo metaData, boolean showOnlyMatchedColumns)
-	{
-		for (int c = 0; c < row.getColumnCount(); c++)
-		{
-			if (searchColumn(metaData.getColumnName(c)))
-			{
-				boolean isBlob = SqlUtil.isBlobType(metaData.getColumnType(c));
-				String value = null;
-				if (blobEncoding != null && isBlob)
-				{
-					Object data = row.getValue(c);
-					if (data instanceof byte[])
-					{
-						byte[] blob = (byte[])data;
-						try
-						{
-							value = new String(blob, blobEncoding);
-						}
-						catch (UnsupportedEncodingException ex)
-						{
-							value = null;
-						}
-					}
-				}
-				else if (!isBlob)
-				{
-					value = converter.getValueAsFormattedString(row, c);
-				}
-				if (filterExpression.evaluate(value))
+  public boolean isSearchStringContained(RowData row, ResultInfo metaData, boolean showOnlyMatchedColumns)
+  {
+    for (int c = 0; c < row.getColumnCount(); c++)
+    {
+      if (searchColumn(metaData.getColumnName(c)))
+      {
+        boolean isBlob = SqlUtil.isBlobType(metaData.getColumnType(c));
+        String value = null;
+        if (blobEncoding != null && isBlob)
+        {
+          Object data = row.getValue(c);
+          if (data instanceof byte[])
+          {
+            byte[] blob = (byte[])data;
+            try
+            {
+              value = new String(blob, blobEncoding);
+            }
+            catch (UnsupportedEncodingException ex)
+            {
+              value = null;
+            }
+          }
+        }
+        else if (!isBlob)
+        {
+          value = converter.getValueAsFormattedString(row, c);
+        }
+        if (filterExpression.evaluate(value))
         {
           return true;
         }
@@ -114,27 +114,27 @@ public class RowDataSearcher
         {
           row.setValue(c, null);
         }
-			}
-		}
-		return false;
-	}
+      }
+    }
+    return false;
+  }
 
-	public void setColumnsToSearch(Collection<String> toSearch)
-	{
-		if (CollectionUtil.isEmpty(toSearch))
-		{
-			columns.clear();
-		}
-		else
-		{
+  public void setColumnsToSearch(Collection<String> toSearch)
+  {
+    if (CollectionUtil.isEmpty(toSearch))
+    {
+      columns.clear();
+    }
+    else
+    {
 
-			columns.addAll(toSearch);
-		}
-	}
+      columns.addAll(toSearch);
+    }
+  }
 
-	private boolean searchColumn(String columnName)
-	{
-		if (columns.isEmpty()) return true;
-		return columns.contains(columnName);
-	}
+  private boolean searchColumn(String columnName)
+  {
+    if (columns.isEmpty()) return true;
+    return columns.contains(columnName);
+  }
 }

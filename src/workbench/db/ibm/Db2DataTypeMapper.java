@@ -61,16 +61,16 @@ public class Db2DataTypeMapper
     typeMap.put("BINARY", Types.BINARY);
   }
 
-	public int getJDBCTypeName(String db2Name)
-	{
-		if (db2Name == null) return Types.OTHER;
-		Integer type = typeMap.get(db2Name);
-		if (type == null)
-		{
-			return Types.OTHER;
-		}
-		return type.intValue();
-	}
+  public int getJDBCTypeName(String db2Name)
+  {
+    if (db2Name == null) return Types.OTHER;
+    Integer type = typeMap.get(db2Name);
+    if (type == null)
+    {
+      return Types.OTHER;
+    }
+    return type.intValue();
+  }
 
   public String getDisplayType(String db2Type, int jdbcType, int length, int scale)
   {

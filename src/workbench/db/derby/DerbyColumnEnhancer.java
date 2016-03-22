@@ -34,27 +34,27 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DerbyColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
-	{
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String defaultValue = col.getDefaultValue();
-			if (StringUtil.isNonBlank(defaultValue))
-			{
-				if (defaultValue.startsWith("GENERATED ALWAYS AS"))
-				{
-					col.setComputedColumnExpression(defaultValue);
-				}
-				if (defaultValue.startsWith("AUTOINCREMENT:") || defaultValue.equals("GENERATED_BY_DEFAULT"))
-				{
-					col.setIsAutoincrement(true);
-				}
-			}
-		}
-	}
+  @Override
+  public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+  {
+    for (ColumnIdentifier col : table.getColumns())
+    {
+      String defaultValue = col.getDefaultValue();
+      if (StringUtil.isNonBlank(defaultValue))
+      {
+        if (defaultValue.startsWith("GENERATED ALWAYS AS"))
+        {
+          col.setComputedColumnExpression(defaultValue);
+        }
+        if (defaultValue.startsWith("AUTOINCREMENT:") || defaultValue.equals("GENERATED_BY_DEFAULT"))
+        {
+          col.setIsAutoincrement(true);
+        }
+      }
+    }
+  }
 
 }

@@ -79,9 +79,9 @@ public class ProcDiff
     return result;
   }
 
-	/**
-	 *	Set an indent for generating the XML
-	 */
+  /**
+   *  Set an indent for generating the XML
+   */
   public void setIndent(StringBuilder ind)
   {
     if (ind == null)

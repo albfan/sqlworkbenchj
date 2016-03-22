@@ -35,28 +35,28 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerViewReader
-	extends DefaultViewReader
+  extends DefaultViewReader
 {
 
-	public SqlServerViewReader(WbConnection con)
-	{
-		super(con);
-	}
+  public SqlServerViewReader(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	public CharSequence getViewSource(TableIdentifier viewId)
-		throws NoConfigException
-	{
-		SpHelpTextRunner runner = new SpHelpTextRunner();
-		CharSequence sql = runner.getSource(connection, viewId.getRawCatalog(), viewId.getRawSchema(), viewId.getRawTableName());
-		if (!StringUtil.endsWith(sql, ';'))
-		{
-			StringBuilder full = new StringBuilder(sql.length() + 1);
-			full.append(sql);
-			full.append(';');
-			return full;
-		}
-		return sql;
-	}
+  @Override
+  public CharSequence getViewSource(TableIdentifier viewId)
+    throws NoConfigException
+  {
+    SpHelpTextRunner runner = new SpHelpTextRunner();
+    CharSequence sql = runner.getSource(connection, viewId.getRawCatalog(), viewId.getRawSchema(), viewId.getRawTableName());
+    if (!StringUtil.endsWith(sql, ';'))
+    {
+      StringBuilder full = new StringBuilder(sql.length() + 1);
+      full.append(sql);
+      full.append(';');
+      return full;
+    }
+    return sql;
+  }
 
 }

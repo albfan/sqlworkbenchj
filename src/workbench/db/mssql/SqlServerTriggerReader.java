@@ -42,91 +42,91 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerTriggerReader
-	extends DefaultTriggerReader
+  extends DefaultTriggerReader
 {
 
-	public SqlServerTriggerReader(WbConnection conn)
-	{
-		super(conn);
-	}
+  public SqlServerTriggerReader(WbConnection conn)
+  {
+    super(conn);
+  }
 
-	@Override
-	public DataStore getTriggers(String catalog, String schema)
-		throws SQLException
-	{
-		DataStore result = super.getTriggers(catalog, schema);
-		if (SqlServerUtil.isSqlServer2005(dbConnection))
-		{
-			readDDLTriggers(result);
-		}
-		return result;
-	}
+  @Override
+  public DataStore getTriggers(String catalog, String schema)
+    throws SQLException
+  {
+    DataStore result = super.getTriggers(catalog, schema);
+    if (SqlServerUtil.isSqlServer2005(dbConnection))
+    {
+      readDDLTriggers(result);
+    }
+    return result;
+  }
 
-	private void readDDLTriggers(DataStore triggers)
-	{
-		String sql =
-			"select tr.name as trigger_name, \n" +
-			"       'ON DATABASE' as trigger_type, \n" +
-			"       te.type_desc as trigger_event, " +
-			"       db_name() as db_name \n" +
-			"from sys.triggers tr with (nolock) \n" +
-			"  join sys.trigger_events te with (nolock) on te.object_id = tr.object_id \n" +
-			"where tr.is_ms_shipped = 0 \n" +
-			"  and tr.parent_class_desc = 'DATABASE' \n" +
-			"union all \n" +
-			"select tr.name, \n" +
-			"       'ON SERVER' as trigger_type, \n" +
-			"       te.type_desc as trigger_event, " +
-			"       null as db_name \n" +
-			"from sys.server_triggers tr with (nolock)  \n" +
-			"  join sys.server_trigger_events te with (nolock) on te.object_id = tr.object_id \n" +
-			"where is_ms_shipped = 0" +
-			"  and tr.parent_class_desc = 'SERVER'";
+  private void readDDLTriggers(DataStore triggers)
+  {
+    String sql =
+      "select tr.name as trigger_name, \n" +
+      "       'ON DATABASE' as trigger_type, \n" +
+      "       te.type_desc as trigger_event, " +
+      "       db_name() as db_name \n" +
+      "from sys.triggers tr with (nolock) \n" +
+      "  join sys.trigger_events te with (nolock) on te.object_id = tr.object_id \n" +
+      "where tr.is_ms_shipped = 0 \n" +
+      "  and tr.parent_class_desc = 'DATABASE' \n" +
+      "union all \n" +
+      "select tr.name, \n" +
+      "       'ON SERVER' as trigger_type, \n" +
+      "       te.type_desc as trigger_event, " +
+      "       null as db_name \n" +
+      "from sys.server_triggers tr with (nolock)  \n" +
+      "  join sys.server_trigger_events te with (nolock) on te.object_id = tr.object_id \n" +
+      "where is_ms_shipped = 0" +
+      "  and tr.parent_class_desc = 'SERVER'";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("SqlServerTriggerReader.readDDLTriggers()", "Query to retrieve DDL triggers:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("SqlServerTriggerReader.readDDLTriggers()", "Query to retrieve DDL triggers:\n" + sql);
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
+    Statement stmt = null;
+    ResultSet rs = null;
 
-		int triggerCount = 0;
-		try
-		{
-			stmt = dbConnection.createStatementForQuery();
-			rs = stmt.executeQuery(sql);
+    int triggerCount = 0;
+    try
+    {
+      stmt = dbConnection.createStatementForQuery();
+      rs = stmt.executeQuery(sql);
 
-			while (rs.next())
-			{
-				triggerCount ++;
-				String name = rs.getString(1);
-				String type = rs.getString(2);
-				String event = rs.getString(3);
-				int row = triggers.addRow();
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, name);
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, type);
-				triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, event);
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logWarning("SqlServerTriggerReader.readDDLTriggers()", "Couldn not retrieve event triggers", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      while (rs.next())
+      {
+        triggerCount ++;
+        String name = rs.getString(1);
+        String type = rs.getString(2);
+        String event = rs.getString(3);
+        int row = triggers.addRow();
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, name);
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, type);
+        triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, event);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("SqlServerTriggerReader.readDDLTriggers()", "Couldn not retrieve event triggers", ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		if (triggerCount > 0)
-		{
-			// sort the datastore again
-			SortDefinition def = new SortDefinition();
-			def.addSortColumn(0, true);
-			triggers.sort(def);
-		}
-		triggers.resetStatus();
+    if (triggerCount > 0)
+    {
+      // sort the datastore again
+      SortDefinition def = new SortDefinition();
+      def.addSortColumn(0, true);
+      triggers.sort(def);
+    }
+    triggers.resetStatus();
 
-	}
+  }
 
 }

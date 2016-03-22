@@ -38,60 +38,60 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerTableSourceBuilder
-	extends TableSourceBuilder
+  extends TableSourceBuilder
 {
-	public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
+  public static final String CLUSTERED_PLACEHOLDER = "%clustered_attribute%";
 
-	public SqlServerTableSourceBuilder(WbConnection con)
-	{
-		super(con);
-	}
+  public SqlServerTableSourceBuilder(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse, boolean useFQN)
-	{
-		CharSequence pkSource = super.getPkSource(table, pk, forInlineUse, useFQN);
-		if (StringUtil.isEmptyString(pkSource))
-		{
-			return pkSource;
-		}
-		String sql = pkSource.toString();
+  @Override
+  public CharSequence getPkSource(TableIdentifier table, PkDefinition pk, boolean forInlineUse, boolean useFQN)
+  {
+    CharSequence pkSource = super.getPkSource(table, pk, forInlineUse, useFQN);
+    if (StringUtil.isEmptyString(pkSource))
+    {
+      return pkSource;
+    }
+    String sql = pkSource.toString();
 
-		String type = pk.getPkIndexDefinition().getIndexType();
-		String clustered = "CLUSTERED";
-		if ("NORMAL".equals(type))
-		{
-			clustered = "NONCLUSTERED";
-		}
+    String type = pk.getPkIndexDefinition().getIndexType();
+    String clustered = "CLUSTERED";
+    if ("NORMAL".equals(type))
+    {
+      clustered = "NONCLUSTERED";
+    }
 
-		if (StringUtil.isBlank(clustered))
-		{
-			sql = TemplateHandler.removePlaceholder(sql, CLUSTERED_PLACEHOLDER, true);
-		}
-		else
-		{
-			sql = TemplateHandler.replacePlaceholder(sql, CLUSTERED_PLACEHOLDER, clustered, true);
-		}
-		return sql;
-	}
+    if (StringUtil.isBlank(clustered))
+    {
+      sql = TemplateHandler.removePlaceholder(sql, CLUSTERED_PLACEHOLDER, true);
+    }
+    else
+    {
+      sql = TemplateHandler.replacePlaceholder(sql, CLUSTERED_PLACEHOLDER, clustered, true);
+    }
+    return sql;
+  }
 
-	@Override
-	protected String getAdditionalFkSql(TableIdentifier table, DependencyNode fk, String template)
-	{
-		if (!fk.isValidated())
-		{
-			template = template.replace("%nocheck%", "WITH NOCHECK ");
-		}
-		else
-		{
-			template = template.replace("%nocheck%", "");
-		}
+  @Override
+  protected String getAdditionalFkSql(TableIdentifier table, DependencyNode fk, String template)
+  {
+    if (!fk.isValidated())
+    {
+      template = template.replace("%nocheck%", "WITH NOCHECK ");
+    }
+    else
+    {
+      template = template.replace("%nocheck%", "");
+    }
 
-		if (!fk.isEnabled())
-		{
-			template += "\nALTER TABLE " + table.getObjectExpression(dbConnection) + " NOCHECK CONSTRAINT " + dbConnection.getMetadata().quoteObjectname(fk.getFkName());
-		}
-		return template;
-	}
+    if (!fk.isEnabled())
+    {
+      template += "\nALTER TABLE " + table.getObjectExpression(dbConnection) + " NOCHECK CONSTRAINT " + dbConnection.getMetadata().quoteObjectname(fk.getFkName());
+    }
+    return template;
+  }
 
 }

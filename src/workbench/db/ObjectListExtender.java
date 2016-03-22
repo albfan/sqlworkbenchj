@@ -35,59 +35,59 @@ import workbench.storage.DataStore;
 public interface ObjectListExtender
   extends ObjectListAppender
 {
-	/**
-	 * Return a list of object types that this extender handles
-	 */
-	List<String> supportedTypes();
+  /**
+   * Return a list of object types that this extender handles
+   */
+  List<String> supportedTypes();
 
-	/**
-	 * Returns if the type is a type derived from some other type.
-	 *
-	 * This is currently only used in the DbExplorer to hide some types from the "Type dropdown"
-	 *
-	 * @return true if this type is derived from an existing one.
-	 * @see DbMetadata#getObjectTypes()
-	 */
-	boolean isDerivedType();
+  /**
+   * Returns if the type is a type derived from some other type.
+   *
+   * This is currently only used in the DbExplorer to hide some types from the "Type dropdown"
+   *
+   * @return true if this type is derived from an existing one.
+   * @see DbMetadata#getObjectTypes()
+   */
+  boolean isDerivedType();
 
-	/**
-	 * Checks if the extender handles the given type
-	 * @param type
-	 * @return true if the type is handled by the extender
-	 * @see #handlesType(java.lang.String[])
-	 */
-	boolean handlesType(String type);
+  /**
+   * Checks if the extender handles the given type
+   * @param type
+   * @return true if the type is handled by the extender
+   * @see #handlesType(java.lang.String[])
+   */
+  boolean handlesType(String type);
 
-	/**
-	 * Checks if at least one of the types is handled by this extender
-	 *
-	 * @param types
-	 * @see #handlesType(java.lang.String)
-	 */
-	boolean handlesType(String[] types);
+  /**
+   * Checks if at least one of the types is handled by this extender
+   *
+   * @param types
+   * @see #handlesType(java.lang.String)
+   */
+  boolean handlesType(String[] types);
 
-	/**
-	 * Retrieve a definition of the object so that it can be displayed
-	 * in the DbExplorer's TableListPanel
-	 *
-	 * @param con the database connection to be used
-	 * @param object the object to be retrieved
-	 * @return a DataStore containing detailed information about the object
-	 * @see DbMetadata#getObjectDetails(workbench.db.TableIdentifier)
-	 */
-	DataStore getObjectDetails(WbConnection con, DbObject object);
+  /**
+   * Retrieve a definition of the object so that it can be displayed
+   * in the DbExplorer's TableListPanel
+   *
+   * @param con the database connection to be used
+   * @param object the object to be retrieved
+   * @return a DataStore containing detailed information about the object
+   * @see DbMetadata#getObjectDetails(workbench.db.TableIdentifier)
+   */
+  DataStore getObjectDetails(WbConnection con, DbObject object);
 
-	/**
-	 * Retrieves the "native" DbObject that is identified by
-	 * the object name and type passed.
-	 *
-	 * @param con
-	 * @param name
-	 * @return a concrete DbObject
-	 */
-	DbObject getObjectDefinition(WbConnection con, DbObject name);
+  /**
+   * Retrieves the "native" DbObject that is identified by
+   * the object name and type passed.
+   *
+   * @param con
+   * @param name
+   * @return a concrete DbObject
+   */
+  DbObject getObjectDefinition(WbConnection con, DbObject name);
 
-	String getObjectSource(WbConnection con, DbObject object);
+  String getObjectSource(WbConnection con, DbObject object);
 
   /**
    * Return a list of columns if this object type supports them.

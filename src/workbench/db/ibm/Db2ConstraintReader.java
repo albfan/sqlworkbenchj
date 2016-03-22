@@ -35,74 +35,74 @@ import workbench.db.WbConnection;
  * @author  Thomas Kellerer
  */
 public class Db2ConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private final String HOST_TABLE_SQL =
-		"select checkname, '('||checkcondition||')' \n" +
-		"from  sysibm.syschecks \n" +
-		"where tbname = ? " +
-		"  and tbowner = ?";
+  private final String HOST_TABLE_SQL =
+    "select checkname, '('||checkcondition||')' \n" +
+    "from  sysibm.syschecks \n" +
+    "where tbname = ? " +
+    "  and tbowner = ?";
 
-	private final String AS400_TABLE_SQL =
-		"select chk.constraint_name, '('||chk.check_clause||')' \n" +
-		"from  qsys2.syschkcst chk \n" +
-		"  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
-		"where cons.table_name = ? " +
-		"  and cons.table_schema = ?";
+  private final String AS400_TABLE_SQL =
+    "select chk.constraint_name, '('||chk.check_clause||')' \n" +
+    "from  qsys2.syschkcst chk \n" +
+    "  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
+    "where cons.table_name = ? " +
+    "  and cons.table_schema = ?";
 
-	private final String LUW_TABLE_SQL =
-		"select cons.constname, '('||cons.text||')' \n" +
-		"from syscat.checks cons \n" +
-		"where type <> 'S' " +
-		"  AND tabname = ? " +
-		"  and tabschema = ?";
+  private final String LUW_TABLE_SQL =
+    "select cons.constname, '('||cons.text||')' \n" +
+    "from syscat.checks cons \n" +
+    "where type <> 'S' " +
+    "  AND tabname = ? " +
+    "  and tabschema = ?";
 
-	private final boolean isHostDB2;
-	private final boolean isAS400; // aka iSeries
+  private final boolean isHostDB2;
+  private final boolean isAS400; // aka iSeries
 
-	private Pattern sysname = Pattern.compile("^SQL[0-9]+");
-	private char catalogSeparator;
+  private Pattern sysname = Pattern.compile("^SQL[0-9]+");
+  private char catalogSeparator;
 
-	public Db2ConstraintReader(WbConnection conn)
-	{
-		super(conn.getDbId());
-		String dbid = conn.getDbId();
+  public Db2ConstraintReader(WbConnection conn)
+  {
+    super(conn.getDbId());
+    String dbid = conn.getDbId();
     isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
-		isAS400 = dbid.equals(DbMetadata.DBID_DB2_ISERIES);
-		catalogSeparator = conn.getMetadata().getCatalogSeparator();
-	}
+    isAS400 = dbid.equals(DbMetadata.DBID_DB2_ISERIES);
+    catalogSeparator = conn.getMetadata().getCatalogSeparator();
+  }
 
-	@Override
-	public boolean isSystemConstraintName(String name)
-	{
-		if (name == null) return false;
-		Matcher m = sysname.matcher(name);
-		return m.matches();
-	}
+  @Override
+  public boolean isSystemConstraintName(String name)
+  {
+    if (name == null) return false;
+    Matcher m = sysname.matcher(name);
+    return m.matches();
+  }
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		if (isHostDB2) return HOST_TABLE_SQL;
-		if (isAS400) return AS400_TABLE_SQL.replace("qsys2.", "qsys2" + catalogSeparator);
-		return LUW_TABLE_SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    if (isHostDB2) return HOST_TABLE_SQL;
+    if (isAS400) return AS400_TABLE_SQL.replace("qsys2.", "qsys2" + catalogSeparator);
+    return LUW_TABLE_SQL;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 }

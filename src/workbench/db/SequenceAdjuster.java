@@ -34,37 +34,37 @@ import workbench.db.postgres.PostgresSequenceAdjuster;
  */
 public interface SequenceAdjuster
 {
-	int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
-		throws SQLException;
+  int adjustTableSequences(WbConnection connection, TableIdentifier table, boolean includeCommit)
+    throws SQLException;
 
-	public static class Factory
-	{
-		public static SequenceAdjuster getSequenceAdjuster(WbConnection conn)
-		{
-			if (conn == null) return null;
-			if (conn.getMetadata().isPostgres())
-			{
-				return new PostgresSequenceAdjuster();
-			}
-			if (conn.getMetadata().isH2())
-			{
-				return new H2SequenceAdjuster();
-			}
-			if (conn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
-			{
-				return new HsqlSequenceAdjuster();
-			}
-			if (conn.getDbId().equals("db2"))
-			{
-				return new Db2SequenceAdjuster();
-			}
-			if (conn.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(conn, "3.0"))
-			{
-				return new FirebirdSequenceAdjuster();
-			}
-			return null;
-		}
-	}
+  public static class Factory
+  {
+    public static SequenceAdjuster getSequenceAdjuster(WbConnection conn)
+    {
+      if (conn == null) return null;
+      if (conn.getMetadata().isPostgres())
+      {
+        return new PostgresSequenceAdjuster();
+      }
+      if (conn.getMetadata().isH2())
+      {
+        return new H2SequenceAdjuster();
+      }
+      if (conn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
+      {
+        return new HsqlSequenceAdjuster();
+      }
+      if (conn.getDbId().equals("db2"))
+      {
+        return new Db2SequenceAdjuster();
+      }
+      if (conn.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(conn, "3.0"))
+      {
+        return new FirebirdSequenceAdjuster();
+      }
+      return null;
+    }
+  }
 
 
 }

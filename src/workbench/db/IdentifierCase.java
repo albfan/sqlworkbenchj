@@ -29,8 +29,8 @@ package workbench.db;
  */
 public enum IdentifierCase
 {
-	lower,
-	upper,
-	mixed,
-	unknown;
+  lower,
+  upper,
+  mixed,
+  unknown;
 }

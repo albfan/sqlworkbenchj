@@ -28,18 +28,18 @@ package workbench.db.exporter;
  * @author Thomas Kellerer
  */
 public class WrongFormatFileException
-	extends Exception
+  extends Exception
 {
-	private String format;
+  private String format;
 
-	public WrongFormatFileException(String inputFormat)
-	{
-		super("Illegal format " + inputFormat + " specified");
-		format = inputFormat;
-	}
+  public WrongFormatFileException(String inputFormat)
+  {
+    super("Illegal format " + inputFormat + " specified");
+    format = inputFormat;
+  }
 
-	public String getFormat()
-	{
-		return format;
-	}
+  public String getFormat()
+  {
+    return format;
+  }
 }

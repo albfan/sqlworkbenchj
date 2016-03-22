@@ -29,7 +29,7 @@ import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 
 public class HsqlIndexReader
-	extends JdbcIndexReader
+  extends JdbcIndexReader
 {
   public HsqlIndexReader(DbMetadata meta)
   {

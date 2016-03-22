@@ -34,118 +34,118 @@ import workbench.util.HtmlUtil;
  */
 public class OdsDateStyleBuilder
 {
-	private String formatString;
-	private List<String> elements = new ArrayList<>(5);
+  private String formatString;
+  private List<String> elements = new ArrayList<>(5);
 
-	public OdsDateStyleBuilder(String format)
-	{
-		this.formatString = format;
-		parseFormat();
-	}
+  public OdsDateStyleBuilder(String format)
+  {
+    this.formatString = format;
+    parseFormat();
+  }
 
-	public OdsDateStyleBuilder(SimpleDateFormat formatter)
-	{
-		formatString = formatter.toPattern();
-		parseFormat();
-	}
+  public OdsDateStyleBuilder(SimpleDateFormat formatter)
+  {
+    formatString = formatter.toPattern();
+    parseFormat();
+  }
 
-	public String getXML(String indent)
-	{
-		StringBuilder result = new StringBuilder(elements.size() * 10);
-		for (String element : elements)
-		{
-			result.append(indent);
-			result.append(element);
-			result.append('\n');
-		}
-		return result.toString();
-	}
+  public String getXML(String indent)
+  {
+    StringBuilder result = new StringBuilder(elements.size() * 10);
+    for (String element : elements)
+    {
+      result.append(indent);
+      result.append(element);
+      result.append('\n');
+    }
+    return result.toString();
+  }
 
-	private void parseFormat()
-	{
-		String formatterChars = "GyMwWdDFEaKkHhmsSzZ";
-		StringBuilder currentText = new StringBuilder();
-		int len = formatString.length();
-		for (int pos=0; pos < len;)
-		{
-			char current = formatString.charAt(pos);
-			if (formatterChars.indexOf(current) > -1)
-			{
-				if (currentText.length() > 0)
-				{
-					elements.add("<number:text>" + HtmlUtil.escapeXML(currentText.toString()) + "</number:text>");
-					currentText = new StringBuilder();
-				}
-				int charCount = getCharacterCount(formatString, pos);
-				String tag = getStyleFormat(current, charCount);
-				if (tag != null)
-				{
-					elements.add(tag);
-				}
-				pos += charCount;
-			}
-			else
-			{
-				currentText.append(current);
-				pos ++;
-			}
-		}
-	}
+  private void parseFormat()
+  {
+    String formatterChars = "GyMwWdDFEaKkHhmsSzZ";
+    StringBuilder currentText = new StringBuilder();
+    int len = formatString.length();
+    for (int pos=0; pos < len;)
+    {
+      char current = formatString.charAt(pos);
+      if (formatterChars.indexOf(current) > -1)
+      {
+        if (currentText.length() > 0)
+        {
+          elements.add("<number:text>" + HtmlUtil.escapeXML(currentText.toString()) + "</number:text>");
+          currentText = new StringBuilder();
+        }
+        int charCount = getCharacterCount(formatString, pos);
+        String tag = getStyleFormat(current, charCount);
+        if (tag != null)
+        {
+          elements.add(tag);
+        }
+        pos += charCount;
+      }
+      else
+      {
+        currentText.append(current);
+        pos ++;
+      }
+    }
+  }
 
 
-	/**
-	 * Counts the number of times the character at the position startAt is repeated in the input string.
-	 *
-	 * @param input    the string to check
-	 * @param startAt  the starting position
-	 * @return the number of times the character appears. At least 1 (the one at startAt)
-	 */
-	private int getCharacterCount(String input, int startAt)
-	{
-		char current = input.charAt(startAt);
-		int pos = startAt;
-		while (pos < input.length() && input.charAt(pos) == current)
-		{
-			pos ++;
-		}
-		return pos - startAt;
-	}
+  /**
+   * Counts the number of times the character at the position startAt is repeated in the input string.
+   *
+   * @param input    the string to check
+   * @param startAt  the starting position
+   * @return the number of times the character appears. At least 1 (the one at startAt)
+   */
+  private int getCharacterCount(String input, int startAt)
+  {
+    char current = input.charAt(startAt);
+    int pos = startAt;
+    while (pos < input.length() && input.charAt(pos) == current)
+    {
+      pos ++;
+    }
+    return pos - startAt;
+  }
 
-	private String getStyleFormat(char formatChar, int count)
-	{
-		switch (formatChar)
-		{
-			case 'a':
-				return "<number:am-pm />";
-			case 'y':
-				return getNumberTag("year", count > 3, false);
-			case 'M':
-				return getNumberTag("month", count > 3, count > 2);
-			case 'd':
-				return getNumberTag("day", count > 2, false);
-			case 'h':
-			case 'H':
-				return getNumberTag("hours", true, false);
-			case 'm':
-				return getNumberTag("minutes", count > 2, false);
-			case 'S':
-			case 's':
-				return getNumberTag("seconds", true, false);
-		}
-		return null;
-	}
+  private String getStyleFormat(char formatChar, int count)
+  {
+    switch (formatChar)
+    {
+      case 'a':
+        return "<number:am-pm />";
+      case 'y':
+        return getNumberTag("year", count > 3, false);
+      case 'M':
+        return getNumberTag("month", count > 3, count > 2);
+      case 'd':
+        return getNumberTag("day", count > 2, false);
+      case 'h':
+      case 'H':
+        return getNumberTag("hours", true, false);
+      case 'm':
+        return getNumberTag("minutes", count > 2, false);
+      case 'S':
+      case 's':
+        return getNumberTag("seconds", true, false);
+    }
+    return null;
+  }
 
-	private String getNumberTag(String type, boolean longStyle, boolean textStyle)
-	{
-		String result = "<number:" + type;
-		if (textStyle)
-		{
-			result += " number:textual=\"true\"";
-		}
-		if (longStyle)
-		{
-			result += " number:style=\"long\"";
-		}
-		return result + "/>";
-	}
+  private String getNumberTag(String type, boolean longStyle, boolean textStyle)
+  {
+    String result = "<number:" + type;
+    if (textStyle)
+    {
+      result += " number:textual=\"true\"";
+    }
+    if (longStyle)
+    {
+      result += " number:style=\"long\"";
+    }
+    return result + "/>";
+  }
 }

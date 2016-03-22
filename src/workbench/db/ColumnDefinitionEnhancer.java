@@ -29,5 +29,5 @@ package workbench.db;
  */
 public interface ColumnDefinitionEnhancer
 {
-	void updateColumnDefinition(TableDefinition table, WbConnection conn);
+  void updateColumnDefinition(TableDefinition table, WbConnection conn);
 }

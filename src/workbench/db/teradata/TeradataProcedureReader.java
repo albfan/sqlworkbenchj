@@ -37,46 +37,46 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class TeradataProcedureReader
-	extends JdbcProcedureReader
+  extends JdbcProcedureReader
 {
 
-	public TeradataProcedureReader(WbConnection conn)
-	{
-		super(conn);
-	}
+  public TeradataProcedureReader(WbConnection conn)
+  {
+    super(conn);
+  }
 
-	@Override
-	public CharSequence retrieveProcedureSource(ProcedureDefinition def)
-		throws NoConfigException
-	{
+  @Override
+  public CharSequence retrieveProcedureSource(ProcedureDefinition def)
+    throws NoConfigException
+  {
 
-		String query = "show procedure " + SqlUtil.buildExpression(connection, def);
+    String query = "show procedure " + SqlUtil.buildExpression(connection, def);
 
-		LogMgr.logDebug("TeradataProcedureReader.retrieveProcedureSource", "Query to retrieve procedure source: " + query);
+    LogMgr.logDebug("TeradataProcedureReader.retrieveProcedureSource", "Query to retrieve procedure source: " + query);
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		StringBuilder source = new StringBuilder(100);
+    Statement stmt = null;
+    ResultSet rs = null;
+    StringBuilder source = new StringBuilder(100);
 
-		try
-		{
-			stmt = connection.createStatementForQuery();
-			rs = stmt.executeQuery(query);
-			while (rs.next())
-			{
-				if (source.length() > 0) source.append('\n');
-				source.append(rs.getString(1));
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logDebug("TeradataProcedureReader.retrieveProcedureSource()", "Error retrieving procedure source using: \n" + query, ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return source;
-	}
+    try
+    {
+      stmt = connection.createStatementForQuery();
+      rs = stmt.executeQuery(query);
+      while (rs.next())
+      {
+        if (source.length() > 0) source.append('\n');
+        source.append(rs.getString(1));
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logDebug("TeradataProcedureReader.retrieveProcedureSource()", "Error retrieving procedure source using: \n" + query, ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return source;
+  }
 
 }

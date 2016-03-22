@@ -46,18 +46,18 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class OpenEdgeSynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
-	public OpenEdgeSynonymReader()
-	{
-	}
+  public OpenEdgeSynonymReader()
+  {
+  }
 
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		List<TableIdentifier> result = new ArrayList<>();
-		String sql =
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    List<TableIdentifier> result = new ArrayList<>();
+    String sql =
       "SELECT sowner,\n" +
       "       sname \n" +
       "FROM sysprogress.syssynonyms \n";
@@ -67,8 +67,8 @@ public class OpenEdgeSynonymReader
 
     boolean whereAdded = false;
 
-		if (StringUtil.isNonBlank(namePattern))
-		{
+    if (StringUtil.isNonBlank(namePattern))
+    {
       if (namePattern.contains("%"))
       {
         sql += " WHERE sname LIKE '";
@@ -80,10 +80,10 @@ public class OpenEdgeSynonymReader
       sql += SqlUtil.escapeQuotes(namePattern);
       sql += "' \n";
       whereAdded = true;
-		}
+    }
 
-		if (StringUtil.isNonBlank(owner))
-		{
+    if (StringUtil.isNonBlank(owner))
+    {
       if (whereAdded)
       {
         sql += " AND sowner = '" + owner + "'";
@@ -92,89 +92,89 @@ public class OpenEdgeSynonymReader
       {
         sql += "WHERE sowner = '" + owner + "'";
       }
-		}
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonym list using:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonym list using:\n" + sql);
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, owner);
-			if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, owner);
+      if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
 
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String schema = rs.getString(1);
-				String synonym = rs.getString(2);
-				if (!rs.wasNull())
-				{
-					TableIdentifier tbl = new TableIdentifier(null, schema, synonym, false);
-					tbl.setType(SYN_TYPE_NAME);
-					tbl.setNeverAdjustCase(true);
-					result.add(tbl);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String schema = rs.getString(1);
+        String synonym = rs.getString(2);
+        if (!rs.wasNull())
+        {
+          TableIdentifier tbl = new TableIdentifier(null, schema, synonym, false);
+          tbl.setType(SYN_TYPE_NAME);
+          tbl.setNeverAdjustCase(true);
+          result.add(tbl);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
-		throws SQLException
-	{
-		String sql =
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
+    throws SQLException
+  {
+    String sql =
       "SELECT stbl,\n" +
       "       stblowner\n" +
       "FROM sysprogress.syssynonyms \n" +
       "WHERE sname = ?\n" +
       "  AND sowner = ?";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" + SqlUtil.replaceParameters(sql, synonym, owner));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" + SqlUtil.replaceParameters(sql, synonym, owner));
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		TableIdentifier result = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    TableIdentifier result = null;
 
-		try
-		{
+    try
+    {
       stmt = con.getSqlConnection().prepareStatement(sql);
       stmt.setString(1, synonym);
       stmt.setString(2, owner);
       rs = stmt.executeQuery();
 
-			if (rs.next())
-			{
-				String targetTable = rs.getString(1);
+      if (rs.next())
+      {
+        String targetTable = rs.getString(1);
         String targetSchema = rs.getString(2);
-				if (targetTable != null)
-				{
-					result = new TableIdentifier(null, targetSchema, targetTable, false);
+        if (targetTable != null)
+        {
+          result = new TableIdentifier(null, targetSchema, targetTable, false);
           result.setNeverAdjustCase(true);
           result.setType(SYN_TYPE_NAME);
-				}
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs,stmt);
-		}
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs,stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
   @Override
   public boolean supportsReplace(WbConnection con)

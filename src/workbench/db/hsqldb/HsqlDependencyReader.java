@@ -102,11 +102,11 @@ public class HsqlDependencyReader
 
     List<DbObject> result = new ArrayList<>();
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("HsqlDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+      LogMgr.logDebug("HsqlDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
+    }
 
     try
     {
@@ -130,7 +130,7 @@ public class HsqlDependencyReader
     }
     catch (Exception ex)
     {
-			String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
+      String s = SqlUtil.replaceParameters(sql, base.getCatalog(), base.getSchema(), base.getObjectName(), base.getObjectType());
       LogMgr.logError("HsqlDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally

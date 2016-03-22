@@ -33,33 +33,33 @@ import workbench.util.SqlUtil;
  */
 public interface QuoteHandler
 {
-	/**
-	 * Check if the given name is already quoted.
-	 * @param name  the SQL name to check
-	 * @return true if it's quoted, false otherwise
-	 */
-	boolean isQuoted(String name);
+  /**
+   * Check if the given name is already quoted.
+   * @param name  the SQL name to check
+   * @return true if it's quoted, false otherwise
+   */
+  boolean isQuoted(String name);
 
-	/**
-	 * Removes the quotes from the SQL name if any are present.
-	 * @param name  the SQL name to change
-	 * @return the SQL name without quotes
-	 */
-	String removeQuotes(String name);
+  /**
+   * Removes the quotes from the SQL name if any are present.
+   * @param name  the SQL name to change
+   * @return the SQL name without quotes
+   */
+  String removeQuotes(String name);
 
-	/**
-	 * Encloses the given object name in double quotes if necessary.
-	 * @param name the SQL name to quote
-	 */
-	String quoteObjectname(String name);
+  /**
+   * Encloses the given object name in double quotes if necessary.
+   * @param name the SQL name to quote
+   */
+  String quoteObjectname(String name);
 
-	/**
-	 * Checks if the given SQL name needs quoting.
-	 *
-	 * @param name  the SQL name to check
-	 * @return true if it needs quoting, false otherwise
-	 */
-	boolean needsQuotes(String name);
+  /**
+   * Checks if the given SQL name needs quoting.
+   *
+   * @param name  the SQL name to check
+   * @return true if it needs quoting, false otherwise
+   */
+  boolean needsQuotes(String name);
 
   boolean isLegalIdentifier(String name);
 
@@ -70,46 +70,46 @@ public interface QuoteHandler
 
 
   /**
-	 * A QuoteHandler implementing ANSI quoting.
-	 *
-	 * @see SqlUtil#SQL_IDENTIFIER
-	 * @see SqlUtil#quoteObjectname(java.lang.String)
-	 * @see SqlUtil#removeObjectQuotes(java.lang.String)
-	 */
-	QuoteHandler STANDARD_HANDLER = new QuoteHandler()
-	{
-		@Override
-		public boolean isQuoted(String name)
-		{
-			if (name == null) return false;
-			name = name.trim();
-			if (name.isEmpty()) return false;
-			return name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"';
-		}
+   * A QuoteHandler implementing ANSI quoting.
+   *
+   * @see SqlUtil#SQL_IDENTIFIER
+   * @see SqlUtil#quoteObjectname(java.lang.String)
+   * @see SqlUtil#removeObjectQuotes(java.lang.String)
+   */
+  QuoteHandler STANDARD_HANDLER = new QuoteHandler()
+  {
+    @Override
+    public boolean isQuoted(String name)
+    {
+      if (name == null) return false;
+      name = name.trim();
+      if (name.isEmpty()) return false;
+      return name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"';
+    }
 
-		@Override
-		public String removeQuotes(String name)
-		{
-			return SqlUtil.removeObjectQuotes(name);
-		}
+    @Override
+    public String removeQuotes(String name)
+    {
+      return SqlUtil.removeObjectQuotes(name);
+    }
 
-		@Override
-		public String quoteObjectname(String name)
-		{
-			return SqlUtil.quoteObjectname(name, false, true, '"');
-		}
+    @Override
+    public String quoteObjectname(String name)
+    {
+      return SqlUtil.quoteObjectname(name, false, true, '"');
+    }
 
     @Override
     public boolean isLegalIdentifier(String name)
     {
-			Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
-			return m.matches();
+      Matcher m = SqlUtil.SQL_IDENTIFIER.matcher(name);
+      return m.matches();
     }
 
-		@Override
-		public boolean needsQuotes(String name)
-		{
-			return !isLegalIdentifier(name);
-		}
-	};
+    @Override
+    public boolean needsQuotes(String name)
+    {
+      return !isLegalIdentifier(name);
+    }
+  };
 }

@@ -93,11 +93,11 @@ public class FirebirdDependencyReader
 
     List<DbObject> result = new ArrayList<>();
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getObjectName());
-			LogMgr.logDebug("FirebirdDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      String s = SqlUtil.replaceParameters(sql, base.getObjectName());
+      LogMgr.logDebug("FirebirdDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + s);
+    }
 
     Savepoint sp = null;
     try
@@ -119,7 +119,7 @@ public class FirebirdDependencyReader
     }
     catch (Exception ex)
     {
-			String s = SqlUtil.replaceParameters(sql, base.getObjectName());
+      String s = SqlUtil.replaceParameters(sql, base.getObjectName());
       LogMgr.logError("FirebirdDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally

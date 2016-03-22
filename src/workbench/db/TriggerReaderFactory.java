@@ -37,23 +37,23 @@ import workbench.db.postgres.PostgresTriggerReader;
  */
 public class TriggerReaderFactory
 {
-	public static TriggerReader createReader(WbConnection con)
-	{
-		if (con == null) return null;
-		if (con.getMetadata() == null) return null;
+  public static TriggerReader createReader(WbConnection con)
+  {
+    if (con == null) return null;
+    if (con.getMetadata() == null) return null;
 
-		if (con.getMetadata().isPostgres())
-		{
-			return new PostgresTriggerReader(con);
-		}
-		if (con.getMetadata().isOracle())
-		{
-			return new OracleTriggerReader(con);
-		}
-		if (con.getMetadata().isSqlServer())
-		{
-			return new SqlServerTriggerReader(con);
-		}
-		return new DefaultTriggerReader(con);
-	}
+    if (con.getMetadata().isPostgres())
+    {
+      return new PostgresTriggerReader(con);
+    }
+    if (con.getMetadata().isOracle())
+    {
+      return new OracleTriggerReader(con);
+    }
+    if (con.getMetadata().isSqlServer())
+    {
+      return new SqlServerTriggerReader(con);
+    }
+    return new DefaultTriggerReader(con);
+  }
 }

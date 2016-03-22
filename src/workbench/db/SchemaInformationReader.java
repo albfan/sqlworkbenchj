@@ -29,9 +29,9 @@ package workbench.db;
  */
 public interface SchemaInformationReader
 {
-	String getCurrentSchema();
-	String getCachedSchema();
-	void dispose();
-	void clearCache();
-	boolean isSupported();
+  String getCurrentSchema();
+  String getCachedSchema();
+  void dispose();
+  void clearCache();
+  boolean isSupported();
 }

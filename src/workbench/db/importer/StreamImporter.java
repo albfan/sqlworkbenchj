@@ -37,22 +37,22 @@ import workbench.db.TableIdentifier;
 public interface StreamImporter
 {
 
-	/**
-	 * Import a complete file in a single operation into the specified table.
-	 *
-	 * This is intended for importers that can send a whole file to the database
-	 * rather than using a row-by-row strategy.
-	 *
-	 * @param table     the table to import
-	 * @param columns   the columns to be used
-	 * @param options   the import options
-	 *
-	 * @throws SQLException
-	 * @throws IOException
-	 */
-	void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding);
+  /**
+   * Import a complete file in a single operation into the specified table.
+   *
+   * This is intended for importers that can send a whole file to the database
+   * rather than using a row-by-row strategy.
+   *
+   * @param table     the table to import
+   * @param columns   the columns to be used
+   * @param options   the import options
+   *
+   * @throws SQLException
+   * @throws IOException
+   */
+  void setup(TableIdentifier table, List<ColumnIdentifier> columns, Reader in, TextImportOptions options, String encoding);
 
-	long processStreamData()
-		throws SQLException, IOException;
+  long processStreamData()
+    throws SQLException, IOException;
 
 }

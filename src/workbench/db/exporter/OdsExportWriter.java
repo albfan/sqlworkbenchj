@@ -30,30 +30,30 @@ package workbench.db.exporter;
  * @see OdsRowDataConverter
  */
 public class OdsExportWriter
-	extends ExportWriter
+  extends ExportWriter
 {
-	public OdsExportWriter(DataExporter exp)
-	{
-		super(exp);
-	}
+  public OdsExportWriter(DataExporter exp)
+  {
+    super(exp);
+  }
 
-	@Override
-	public void configureConverter()
-	{
-		super.configureConverter();
-		converter.setNullString(exporter.getNullString());
-	}
+  @Override
+  public void configureConverter()
+  {
+    super.configureConverter();
+    converter.setNullString(exporter.getNullString());
+  }
 
-	@Override
-	public RowDataConverter createConverter()
-	{
-		return new OdsRowDataConverter();
-	}
+  @Override
+  public RowDataConverter createConverter()
+  {
+    return new OdsRowDataConverter();
+  }
 
-	@Override
-	public boolean managesOutput()
-	{
-		return true;
-	}
+  @Override
+  public boolean managesOutput()
+  {
+    return true;
+  }
 
 }

@@ -49,230 +49,230 @@ import workbench.util.StringUtil;
  *
  */
 public class ColumnDropper
-	implements ObjectDropper
+  implements ObjectDropper
 {
-	private WbConnection conn;
-	private List<ColumnIdentifier> columns;
-	private TableIdentifier table;
-	private boolean cancelDrop = false;
-	private Statement currentStatement;
+  private WbConnection conn;
+  private List<ColumnIdentifier> columns;
+  private TableIdentifier table;
+  private boolean cancelDrop = false;
+  private Statement currentStatement;
 
-	public ColumnDropper()
-	{
-	}
+  public ColumnDropper()
+  {
+  }
 
-	public ColumnDropper(WbConnection db, TableIdentifier tbl, List<ColumnIdentifier> toDrop)
-	{
-		this.conn = db;
-		this.columns = toDrop;
-		this.table = tbl;
-	}
+  public ColumnDropper(WbConnection db, TableIdentifier tbl, List<ColumnIdentifier> toDrop)
+  {
+    this.conn = db;
+    this.columns = toDrop;
+    this.table = tbl;
+  }
 
-	@Override
-	public void setRowActionMonitor(RowActionMonitor mon)
-	{
-	}
+  @Override
+  public void setRowActionMonitor(RowActionMonitor mon)
+  {
+  }
 
-	@Override
-	public boolean supportsCascade()
-	{
-		return false;
-	}
+  @Override
+  public boolean supportsCascade()
+  {
+    return false;
+  }
 
-	@Override
-	public void setCascade(boolean flag)
-	{
-	}
+  @Override
+  public void setCascade(boolean flag)
+  {
+  }
 
-	@Override
-	public boolean supportsFKSorting()
-	{
-		return false;
-	}
+  @Override
+  public boolean supportsFKSorting()
+  {
+    return false;
+  }
 
-	@Override
-	public void cancel()
-		throws SQLException
-	{
-		cancelDrop = true;
-		if (this.currentStatement != null)
-		{
-			this.currentStatement.cancel();
-		}
-	}
+  @Override
+  public void cancel()
+    throws SQLException
+  {
+    cancelDrop = true;
+    if (this.currentStatement != null)
+    {
+      this.currentStatement.cancel();
+    }
+  }
 
-	@Override
-	public WbConnection getConnection()
-	{
-		return this.conn;
-	}
+  @Override
+  public WbConnection getConnection()
+  {
+    return this.conn;
+  }
 
-	@Override
-	public void setConnection(WbConnection con)
-	{
-		this.conn = con;
-	}
+  @Override
+  public void setConnection(WbConnection con)
+  {
+    this.conn = con;
+  }
 
-	@Override
-	public void setObjectTable(TableIdentifier tbl)
-	{
-		this.table = tbl;
-	}
+  @Override
+  public void setObjectTable(TableIdentifier tbl)
+  {
+    this.table = tbl;
+  }
 
-	@Override
-	public List<? extends DbObject> getObjects()
-	{
-		return columns;
-	}
+  @Override
+  public List<? extends DbObject> getObjects()
+  {
+    return columns;
+  }
 
-	@Override
-	public void setObjects(List<? extends DbObject> toDrop)
-	{
-		this.columns = new ArrayList<>();
-		if (toDrop == null) return;
-		for (DbObject dbo : toDrop)
-		{
-			if (dbo instanceof ColumnIdentifier)
-			{
-				columns.add((ColumnIdentifier)dbo);
-			}
-		}
-	}
+  @Override
+  public void setObjects(List<? extends DbObject> toDrop)
+  {
+    this.columns = new ArrayList<>();
+    if (toDrop == null) return;
+    for (DbObject dbo : toDrop)
+    {
+      if (dbo instanceof ColumnIdentifier)
+      {
+        columns.add((ColumnIdentifier)dbo);
+      }
+    }
+  }
 
-	@Override
-	public CharSequence getScript()
-	{
-		List<String> statements = getSql(table, columns, conn);
-		StringBuffer result = new StringBuffer(statements.size() * 40);
-		boolean needCommit = (conn != null ? conn.shouldCommitDDL() : false);
+  @Override
+  public CharSequence getScript()
+  {
+    List<String> statements = getSql(table, columns, conn);
+    StringBuffer result = new StringBuffer(statements.size() * 40);
+    boolean needCommit = (conn != null ? conn.shouldCommitDDL() : false);
 
-		for (String sql : statements)
-		{
-			result.append(sql);
-			result.append(";\n");
-		}
+    for (String sql : statements)
+    {
+      result.append(sql);
+      result.append(";\n");
+    }
     if (needCommit) result.append("COMMIT;\n");
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public void dropObjects()
-		throws SQLException
-	{
-		if (this.conn == null) return;
-		if (this.table == null)
-		{
-			return;
-		}
+  @Override
+  public void dropObjects()
+    throws SQLException
+  {
+    if (this.conn == null) return;
+    if (this.table == null)
+    {
+      return;
+    }
 
-		if (this.columns == null || this.columns.isEmpty())
-		{
-			LogMgr.logWarning("ColumnDropper.dropObjects()", "No columns to drop!");
-			return;
-		}
+    if (this.columns == null || this.columns.isEmpty())
+    {
+      LogMgr.logWarning("ColumnDropper.dropObjects()", "No columns to drop!");
+      return;
+    }
 
-		List<String> statements = getSql(table, columns, conn);
-		if (statements.isEmpty())
-		{
-			LogMgr.logWarning("ColumnDropper.dropObjects()", "No statements generated!");
-			return;
-		}
+    List<String> statements = getSql(table, columns, conn);
+    if (statements.isEmpty())
+    {
+      LogMgr.logWarning("ColumnDropper.dropObjects()", "No statements generated!");
+      return;
+    }
 
-		try
-		{
-			this.currentStatement = this.conn.createStatement();
+    try
+    {
+      this.currentStatement = this.conn.createStatement();
 
-			for (String sql : statements)
-			{
-				if (cancelDrop) break;
-				LogMgr.logDebug("ColumnDropper.dropObjects()", "Statement to drop column(s): " + sql);
-				this.currentStatement.executeUpdate(sql);
-			}
+      for (String sql : statements)
+      {
+        if (cancelDrop) break;
+        LogMgr.logDebug("ColumnDropper.dropObjects()", "Statement to drop column(s): " + sql);
+        this.currentStatement.executeUpdate(sql);
+      }
 
-			if (conn.shouldCommitDDL())
-			{
-				if (cancelDrop)
-				{
-					conn.rollback();
-				}
-				else
-				{
-					conn.commit();
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			if (conn.shouldCommitDDL())
-			{
-				conn.rollback();
-			}
-			throw e;
-		}
-		finally
-		{
-			SqlUtil.closeStatement(currentStatement);
-			currentStatement = null;
-		}
-	}
+      if (conn.shouldCommitDDL())
+      {
+        if (cancelDrop)
+        {
+          conn.rollback();
+        }
+        else
+        {
+          conn.commit();
+        }
+      }
+    }
+    catch (SQLException e)
+    {
+      if (conn.shouldCommitDDL())
+      {
+        conn.rollback();
+      }
+      throw e;
+    }
+    finally
+    {
+      SqlUtil.closeStatement(currentStatement);
+      currentStatement = null;
+    }
+  }
 
-	/**
-	 * Not implemented.
-	 *
-	 * @param toDrop
+  /**
+   * Not implemented.
+   *
+   * @param toDrop
    * @param cascade
    *
-	 * @return always null
-	 */
-	@Override
-	public CharSequence getDropForObject(DbObject toDrop, boolean cascade)
-	{
-		return null;
-	}
+   * @return always null
+   */
+  @Override
+  public CharSequence getDropForObject(DbObject toDrop, boolean cascade)
+  {
+    return null;
+  }
 
-	/**
-	 * Not implemented.
-	 *
-	 * @param toDrop
-	 * @return always null
-	 */
-	@Override
-	public CharSequence getDropForObject(DbObject toDrop)
-	{
-		return null;
-	}
+  /**
+   * Not implemented.
+   *
+   * @param toDrop
+   * @return always null
+   */
+  @Override
+  public CharSequence getDropForObject(DbObject toDrop)
+  {
+    return null;
+  }
 
-	public static List<String> getSql(TableIdentifier table, List<ColumnIdentifier> columns, WbConnection conn)
-	{
-		String multiSql = conn.getDbSettings().getDropMultipleColumnSql();
-		String singleSql = conn.getDbSettings().getDropSingleColumnSql();
-		List<String> result = new ArrayList<>(columns.size());
+  public static List<String> getSql(TableIdentifier table, List<ColumnIdentifier> columns, WbConnection conn)
+  {
+    String multiSql = conn.getDbSettings().getDropMultipleColumnSql();
+    String singleSql = conn.getDbSettings().getDropSingleColumnSql();
+    List<String> result = new ArrayList<>(columns.size());
 
-		if (columns.size() == 1 || StringUtil.isEmptyString(multiSql))
-		{
+    if (columns.size() == 1 || StringUtil.isEmptyString(multiSql))
+    {
       singleSql = TemplateHandler.replaceTablePlaceholder(singleSql, table, conn);
-			for (ColumnIdentifier col : columns)
-			{
-				result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(conn)));
-			}
-		}
-		else
-		{
-			multiSql = TemplateHandler.replaceTablePlaceholder(multiSql, table, conn);
+      for (ColumnIdentifier col : columns)
+      {
+        result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(conn)));
+      }
+    }
+    else
+    {
+      multiSql = TemplateHandler.replaceTablePlaceholder(multiSql, table, conn);
 
-			StringBuilder cols = new StringBuilder(columns.size());
-			int nr = 0;
-			for (ColumnIdentifier col : columns)
-			{
-				if (nr > 0) cols.append(", ");
-				cols.append(col.getColumnName(conn));
-				nr ++;
-			}
-			result.add(StringUtil.replace(multiSql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols.toString()));
-		}
+      StringBuilder cols = new StringBuilder(columns.size());
+      int nr = 0;
+      for (ColumnIdentifier col : columns)
+      {
+        if (nr > 0) cols.append(", ");
+        cols.append(col.getColumnName(conn));
+        nr ++;
+      }
+      result.add(StringUtil.replace(multiSql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols.toString()));
+    }
 
-		return result;
-	}
+    return result;
+  }
 
   @Override
   public boolean supportsObject(DbObject object)

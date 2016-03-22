@@ -29,44 +29,44 @@ package workbench.db.exporter;
  */
 public class InfinityLiterals
 {
-	public static final String PG_POSITIVE_LITERAL = "infinity";
-	public static final String PG_NEGATIVE_LITERAL = "-infinity";
+  public static final String PG_POSITIVE_LITERAL = "infinity";
+  public static final String PG_NEGATIVE_LITERAL = "-infinity";
 
-	private String positiveInfinity;
-	private String negativeInfinity;
+  private String positiveInfinity;
+  private String negativeInfinity;
 
-	public static final InfinityLiterals PG_LITERALS = new InfinityLiterals(PG_POSITIVE_LITERAL, PG_NEGATIVE_LITERAL);
+  public static final InfinityLiterals PG_LITERALS = new InfinityLiterals(PG_POSITIVE_LITERAL, PG_NEGATIVE_LITERAL);
 
-	public InfinityLiterals(String postiveLiteral, String negativeLiteral)
-	{
-		this.positiveInfinity = postiveLiteral;
-		this.negativeInfinity = negativeLiteral;
-	}
+  public InfinityLiterals(String postiveLiteral, String negativeLiteral)
+  {
+    this.positiveInfinity = postiveLiteral;
+    this.negativeInfinity = negativeLiteral;
+  }
 
-	public static boolean isPGLiteral(String literal)
-	{
-		if (literal == null) return false;
-		if (literal.equalsIgnoreCase(PG_POSITIVE_LITERAL)) return true;
-		if (literal.equalsIgnoreCase(PG_NEGATIVE_LITERAL)) return true;
-		return false;
-	}
+  public static boolean isPGLiteral(String literal)
+  {
+    if (literal == null) return false;
+    if (literal.equalsIgnoreCase(PG_POSITIVE_LITERAL)) return true;
+    if (literal.equalsIgnoreCase(PG_NEGATIVE_LITERAL)) return true;
+    return false;
+  }
 
-	public String getNegativeInfinity()
-	{
-		if (negativeInfinity == null) return "";
-		return negativeInfinity;
-	}
+  public String getNegativeInfinity()
+  {
+    if (negativeInfinity == null) return "";
+    return negativeInfinity;
+  }
 
-	public String getPositiveInfinity()
-	{
-		if (positiveInfinity == null) return "";
-		return positiveInfinity;
-	}
+  public String getPositiveInfinity()
+  {
+    if (positiveInfinity == null) return "";
+    return positiveInfinity;
+  }
 
-	public void setInfinityLiterals(String positive, String negative)
-	{
-		this.positiveInfinity = negative;
-		this.negativeInfinity = positive;
-	}
+  public void setInfinityLiterals(String positive, String negative)
+  {
+    this.positiveInfinity = negative;
+    this.negativeInfinity = positive;
+  }
 
 }

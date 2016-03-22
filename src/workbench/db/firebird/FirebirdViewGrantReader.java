@@ -30,13 +30,13 @@ import workbench.db.ViewGrantReader;
  * @author Thomas Kellerer
  */
 public class FirebirdViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
 
-	@Override
-	public String getViewGrantSql()
-	{
-		String sql = "select trim(p.rdb$user) as grantee,  \n" +
+  @Override
+  public String getViewGrantSql()
+  {
+    String sql = "select trim(p.rdb$user) as grantee,  \n" +
              "case p.rdb$privilege \n" +
              "  when 'S' then 'SELECT'  \n" +
              "  when 'U' then 'UPDATE'  \n" +
@@ -52,13 +52,13 @@ public class FirebirdViewGrantReader
              "and p.rdb$user <> r.rdb$owner_name \n" +
              "AND  p.rdb$relation_name = ? ";
 
-		return sql;
-	}
+    return sql;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
 }

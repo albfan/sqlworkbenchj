@@ -44,91 +44,91 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class Db2SearchPath
-	implements DbSearchPath
+  implements DbSearchPath
 {
-	/**
-	 * Returns the current search path defined in the session (or the user).
-	 * <br/>
-	 * @param con the connection for which the search path should be retrieved
-	 * @return the list of schemas (libraries) in the search path.
-	 */
-	@Override
-	public List<String> getSearchPath(WbConnection con, String defaultSchema)
-	{
-		if (con == null) return Collections.emptyList();
+  /**
+   * Returns the current search path defined in the session (or the user).
+   * <br/>
+   * @param con the connection for which the search path should be retrieved
+   * @return the list of schemas (libraries) in the search path.
+   */
+  @Override
+  public List<String> getSearchPath(WbConnection con, String defaultSchema)
+  {
+    if (con == null) return Collections.emptyList();
 
-		if (defaultSchema != null)
-		{
-			return Collections.singletonList(con.getMetadata().adjustSchemaNameCase(defaultSchema));
-		}
+    if (defaultSchema != null)
+    {
+      return Collections.singletonList(con.getMetadata().adjustSchemaNameCase(defaultSchema));
+    }
 
-		List<String> result = new ArrayList<>();
+    List<String> result = new ArrayList<>();
 
-		ResultSet rs = null;
-		Statement stmt = null;
-		String sql = getSQL(con);
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Query to retrieve search path: " + sql);
+    ResultSet rs = null;
+    Statement stmt = null;
+    String sql = getSQL(con);
+    LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Query to retrieve search path: " + sql);
 
-		try
-		{
-			stmt = con.createStatementForQuery();
+    try
+    {
+      stmt = con.createStatementForQuery();
 
-			rs = stmt.executeQuery(sql);
-			while (rs.next())
-			{
-				String row = rs.getString(1);
-				if (StringUtil.isNonBlank(row))
-				{
-					result.add(row.trim());
-				}
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logError("Db2SearchPath.getSearchPath()", "Could not read search path", ex);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      rs = stmt.executeQuery(sql);
+      while (rs.next())
+      {
+        String row = rs.getString(1);
+        if (StringUtil.isNonBlank(row))
+        {
+          result.add(row.trim());
+        }
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logError("Db2SearchPath.getSearchPath()", "Could not read search path", ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		List<String> searchPath = parseResult(result);
+    List<String> searchPath = parseResult(result);
 
-		LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + searchPath.toString());
-		return searchPath;
-	}
+    LogMgr.logDebug("Db2SearchPath.getSearchPath()", "Using path: " + searchPath.toString());
+    return searchPath;
+  }
 
-	private String getSQL(WbConnection con)
-	{
-		String sql = Settings.getInstance().getProperty("workbench.db." + con.getDbId() + "searchpath.sql", null);
-		if (sql == null)
-		{
-			StringBuilder result = new StringBuilder(50);
-			result.append("select current_path from SYSIBM");
-			result.append(con.getMetadata().getSchemaSeparator());
-			result.append("SYSDUMMY1");
-			sql = result.toString();
-		}
-		return sql;
-	}
+  private String getSQL(WbConnection con)
+  {
+    String sql = Settings.getInstance().getProperty("workbench.db." + con.getDbId() + "searchpath.sql", null);
+    if (sql == null)
+    {
+      StringBuilder result = new StringBuilder(50);
+      result.append("select current_path from SYSIBM");
+      result.append(con.getMetadata().getSchemaSeparator());
+      result.append("SYSDUMMY1");
+      sql = result.toString();
+    }
+    return sql;
+  }
 
-	List<String> parseResult(List<String> entries)
-	{
-		List<String> searchPath = new ArrayList<>(entries.size());
-		for (String line : entries)
-		{
-			if (line.charAt(0) != '*')
-			{
-				searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
-			}
-		}
-		return searchPath;
-	}
+  List<String> parseResult(List<String> entries)
+  {
+    List<String> searchPath = new ArrayList<>(entries.size());
+    for (String line : entries)
+    {
+      if (line.charAt(0) != '*')
+      {
+        searchPath.addAll(StringUtil.stringToList(line, ",", true, true, false, false));
+      }
+    }
+    return searchPath;
+  }
 
-	@Override
-	public boolean isRealSearchPath()
-	{
-		return true;
-	}
+  @Override
+  public boolean isRealSearchPath()
+  {
+    return true;
+  }
 
 }

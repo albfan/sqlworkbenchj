@@ -146,11 +146,11 @@ public class OracleDependencyReader
 
     List<DbObject> result = new ArrayList<>();
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
-			LogMgr.logDebug("OracleDependencyReader.retrieveObjects()", "Retrieving object dependency using query:\n" + s);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+      LogMgr.logDebug("OracleDependencyReader.retrieveObjects()", "Retrieving object dependency using query:\n" + s);
+    }
 
     try
     {
@@ -200,7 +200,7 @@ public class OracleDependencyReader
     }
     catch (Exception ex)
     {
-			String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
+      String s = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName(), base.getObjectType());
       LogMgr.logError("OracleDependencyReader.retrieveObjects()", "Could not read object dependency using:\n" + s, ex);
     }
     finally

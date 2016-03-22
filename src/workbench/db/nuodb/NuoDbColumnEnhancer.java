@@ -44,59 +44,59 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class NuoDbColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
-	{
-		readIdentityColumns(table, conn);
-	}
+  @Override
+  public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+  {
+    readIdentityColumns(table, conn);
+  }
 
-	private void readIdentityColumns(TableDefinition table, WbConnection conn)
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+  private void readIdentityColumns(TableDefinition table, WbConnection conn)
+  {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		TableIdentifier tblId = table.getTable();
+    TableIdentifier tblId = table.getTable();
 
-		String sql =
-			"select field \n" +
-			"from system.fields \n " +
-			"where tablename = ? \n" +
-			"and schema = ? \n" +
-			"and generator_sequence is not null ";
+    String sql =
+      "select field \n" +
+      "from system.fields \n " +
+      "where tablename = ? \n" +
+      "and schema = ? \n" +
+      "and generator_sequence is not null ";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("NuoDbColumnEnhancer.readIdentityColumns()", "Query to retrieve identity columns:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("NuoDbColumnEnhancer.readIdentityColumns()", "Query to retrieve identity columns:\n" + sql);
+    }
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tblId.getRawTableName());
-			stmt.setString(2, tblId.getRawSchema());
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, tblId.getRawTableName());
+      stmt.setString(2, tblId.getRawSchema());
 
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String colname = rs.getString(1);
-				ColumnIdentifier col = table.findColumn(colname);
-				if (col != null)
-				{
-					col.setIsAutoincrement(true);
-					col.setComputedColumnExpression("GENERATED ALWAYS AS IDENTITY");
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("NuoDbColumnEnhancer.readIdentityColumns()", "Error retrieving computed columns", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String colname = rs.getString(1);
+        ColumnIdentifier col = table.findColumn(colname);
+        if (col != null)
+        {
+          col.setIsAutoincrement(true);
+          col.setComputedColumnExpression("GENERATED ALWAYS AS IDENTITY");
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("NuoDbColumnEnhancer.readIdentityColumns()", "Error retrieving computed columns", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 }

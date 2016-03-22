@@ -29,9 +29,9 @@ package workbench.db.compare;
  */
 public enum TableDiffStatus
 {
-	OK,
-	ColumnMismatch,
-	ReferenceNotFound,
-	TargetNotFound,
-	NoPK
+  OK,
+  ColumnMismatch,
+  ReferenceNotFound,
+  TargetNotFound,
+  NoPK
 }

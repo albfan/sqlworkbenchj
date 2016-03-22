@@ -43,159 +43,159 @@ import workbench.util.StringUtil;
  */
 public class IndexDiff
 {
-	public static final String TAG_MODIFY_INDEX = "modify-index";
-	public static final String TAG_RENAME_INDEX = "rename-index";
-	public static final String TAG_ADD_INDEX = "add-index";
-	public static final String TAG_DROP_INDEX = "drop-index";
+  public static final String TAG_MODIFY_INDEX = "modify-index";
+  public static final String TAG_RENAME_INDEX = "rename-index";
+  public static final String TAG_ADD_INDEX = "add-index";
+  public static final String TAG_DROP_INDEX = "drop-index";
 
-	private Collection<IndexDefinition> reference = Collections.emptyList();
-	private Collection<IndexDefinition> target = Collections.emptyList();
-	private final TagWriter writer = new TagWriter();
-	private StringBuilder indent = StringUtil.emptyBuilder();
+  private Collection<IndexDefinition> reference = Collections.emptyList();
+  private Collection<IndexDefinition> target = Collections.emptyList();
+  private final TagWriter writer = new TagWriter();
+  private StringBuilder indent = StringUtil.emptyBuilder();
 
-	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
-	{
-		if (ref != null) this.reference = ref;
-		if (targ != null) this.target = targ;
-	}
+  public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
+  {
+    if (ref != null) this.reference = ref;
+    if (targ != null) this.target = targ;
+  }
 
-	public void setIndent(StringBuilder ind)
-	{
-		if (indent == null)
-		{
-			this.indent = StringUtil.emptyBuilder();
-		}
-		else
-		{
-			this.indent = ind;
-		}
-	}
+  public void setIndent(StringBuilder ind)
+  {
+    if (indent == null)
+    {
+      this.indent = StringUtil.emptyBuilder();
+    }
+    else
+    {
+      this.indent = ind;
+    }
+  }
 
-	public StringBuilder getMigrateTargetXml()
-	{
-		StringBuilder result = new StringBuilder();
-		List<IndexDefinition> indexToAdd = new LinkedList<>();
-		List<IndexDefinition> indexToDrop = new LinkedList<>();
+  public StringBuilder getMigrateTargetXml()
+  {
+    StringBuilder result = new StringBuilder();
+    List<IndexDefinition> indexToAdd = new LinkedList<>();
+    List<IndexDefinition> indexToDrop = new LinkedList<>();
 
-		StringBuilder myindent = new StringBuilder(indent);
-		myindent.append("  ");
+    StringBuilder myindent = new StringBuilder(indent);
+    myindent.append("  ");
 
-		StringBuilder idxIndent = new StringBuilder(myindent);
-		idxIndent.append("  ");
+    StringBuilder idxIndent = new StringBuilder(myindent);
+    idxIndent.append("  ");
 
-		for (IndexDefinition refIndex : reference)
-		{
-			IndexDefinition ind = this.findIndexInTarget(refIndex);
-			if (ind == null)
-			{
-				indexToAdd.add(refIndex);
-			}
-			else
-			{
-				boolean uniqueDiff = ind.isUnique() != refIndex.isUnique();
-				boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
-				boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
-				boolean nameDiff = !(ind.getName().equalsIgnoreCase(refIndex.getName()));
+    for (IndexDefinition refIndex : reference)
+    {
+      IndexDefinition ind = this.findIndexInTarget(refIndex);
+      if (ind == null)
+      {
+        indexToAdd.add(refIndex);
+      }
+      else
+      {
+        boolean uniqueDiff = ind.isUnique() != refIndex.isUnique();
+        boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
+        boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
+        boolean nameDiff = !(ind.getName().equalsIgnoreCase(refIndex.getName()));
 
-				if (uniqueDiff || pkDiff || typeDiff || nameDiff)
-				{
-					writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
-					result.append('\n');
+        if (uniqueDiff || pkDiff || typeDiff || nameDiff)
+        {
+          writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
+          result.append('\n');
 
-					// In order to completely create the correct SQL for the index change,
-					// the full definition of the reference index needs to be included in the XML
-					IndexReporter rep = new IndexReporter(refIndex);
-					rep.setMainTagToUse("reference-index");
-					rep.appendXml(result, idxIndent);
+          // In order to completely create the correct SQL for the index change,
+          // the full definition of the reference index needs to be included in the XML
+          IndexReporter rep = new IndexReporter(refIndex);
+          rep.setMainTagToUse("reference-index");
+          rep.appendXml(result, idxIndent);
 
-					StringBuilder changedIndent = new StringBuilder(idxIndent);
-					changedIndent.append("  ");
-					writer.appendOpenTag(result, idxIndent, "modified");
-					result.append('\n');
+          StringBuilder changedIndent = new StringBuilder(idxIndent);
+          changedIndent.append("  ");
+          writer.appendOpenTag(result, idxIndent, "modified");
+          result.append('\n');
 
-					if (nameDiff)
-					{
-						TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getName());
-						TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getName());
-						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_NAME, false, oldAtt, newAtt);
-						result.append("/>\n");
-					}
+          if (nameDiff)
+          {
+            TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getName());
+            TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getName());
+            writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_NAME, false, oldAtt, newAtt);
+            result.append("/>\n");
+          }
 
-					if (uniqueDiff)
-					{
-						TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isUnique()));
-						TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isUnique()));
-						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_UNIQUE, false, oldAtt, newAtt);
-						result.append("/>\n");
-					}
-					if (pkDiff)
-					{
-						TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isPrimaryKeyIndex()));
-						TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isPrimaryKeyIndex()));
-						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_PK, false, oldAtt, newAtt);
-						result.append("/>\n");
-					}
-					if (typeDiff)
-					{
-						TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getIndexType());
-						TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getIndexType());
-						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_TYPE, false, oldAtt, newAtt);
-						result.append("/>\n");
-					}
+          if (uniqueDiff)
+          {
+            TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isUnique()));
+            TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isUnique()));
+            writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_UNIQUE, false, oldAtt, newAtt);
+            result.append("/>\n");
+          }
+          if (pkDiff)
+          {
+            TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isPrimaryKeyIndex()));
+            TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isPrimaryKeyIndex()));
+            writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_PK, false, oldAtt, newAtt);
+            result.append("/>\n");
+          }
+          if (typeDiff)
+          {
+            TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getIndexType());
+            TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getIndexType());
+            writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_TYPE, false, oldAtt, newAtt);
+            result.append("/>\n");
+          }
 
-					writer.appendCloseTag(result, idxIndent, "modified");
-					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
-				}
-			}
-		}
+          writer.appendCloseTag(result, idxIndent, "modified");
+          writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
+        }
+      }
+    }
 
-		for (IndexDefinition targetIndex : target)
-		{
-			IndexDefinition ind = this.findIndexInReference(targetIndex);
-			if (ind == null)
-			{
-				indexToDrop.add(targetIndex);
-			}
-		}
+    for (IndexDefinition targetIndex : target)
+    {
+      IndexDefinition ind = this.findIndexInReference(targetIndex);
+      if (ind == null)
+      {
+        indexToDrop.add(targetIndex);
+      }
+    }
 
-		if (indexToAdd.size() > 0)
-		{
-			writer.appendOpenTag(result, myindent, TAG_ADD_INDEX);
-			result.append('\n');
-			for (IndexDefinition idx : indexToAdd)
-			{
-				IndexReporter rep = new IndexReporter(idx);
-				rep.appendXml(result, idxIndent);
-			}
-			writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
-		}
+    if (indexToAdd.size() > 0)
+    {
+      writer.appendOpenTag(result, myindent, TAG_ADD_INDEX);
+      result.append('\n');
+      for (IndexDefinition idx : indexToAdd)
+      {
+        IndexReporter rep = new IndexReporter(idx);
+        rep.appendXml(result, idxIndent);
+      }
+      writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
+    }
 
-		if (indexToDrop.size() > 0)
-		{
-			for (IndexDefinition idx : indexToDrop)
-			{
-				writer.appendTag(result, myindent, TAG_DROP_INDEX, idx.getName());
-			}
-		}
-		return result;
-	}
+    if (indexToDrop.size() > 0)
+    {
+      for (IndexDefinition idx : indexToDrop)
+      {
+        writer.appendTag(result, myindent, TAG_DROP_INDEX, idx.getName());
+      }
+    }
+    return result;
+  }
 
-	private IndexDefinition findIndexInTarget(IndexDefinition toCheck)
-	{
-		return findIndex(target, toCheck);
-	}
+  private IndexDefinition findIndexInTarget(IndexDefinition toCheck)
+  {
+    return findIndex(target, toCheck);
+  }
 
-	private IndexDefinition findIndexInReference(IndexDefinition toCheck)
-	{
-		return findIndex(reference, toCheck);
-	}
+  private IndexDefinition findIndexInReference(IndexDefinition toCheck)
+  {
+    return findIndex(reference, toCheck);
+  }
 
-	private IndexDefinition findIndex(Collection<IndexDefinition> defs, IndexDefinition toCheck)
-	{
-		for (IndexDefinition idx : defs)
-		{
-			if (idx.equals(toCheck)) return idx;
-		}
-		return null;
-	}
+  private IndexDefinition findIndex(Collection<IndexDefinition> defs, IndexDefinition toCheck)
+  {
+    for (IndexDefinition idx : defs)
+    {
+      if (idx.equals(toCheck)) return idx;
+    }
+    return null;
+  }
 }

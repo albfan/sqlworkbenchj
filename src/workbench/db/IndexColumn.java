@@ -35,96 +35,96 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class IndexColumn
-	implements Serializable
+  implements Serializable
 {
-	private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
+  private static final long serialVersionUID = DbObjectCacheFactory.CACHE_VERSION_UID;
 
-	private String column;
-	private String direction;
+  private String column;
+  private String direction;
   private int sequence;
 
   public IndexColumn(String col, int colSequence)
   {
-		this.column = col;
-		this.sequence = colSequence;
+    this.column = col;
+    this.sequence = colSequence;
   }
 
   public IndexColumn(String col, String dir)
   {
-		this.column = StringUtil.trim(col);
-		this.direction = dir;
+    this.column = StringUtil.trim(col);
+    this.direction = dir;
   }
 
-	public void setColumn(String newName)
-	{
-		this.column = StringUtil.trim(newName);
-	}
+  public void setColumn(String newName)
+  {
+    this.column = StringUtil.trim(newName);
+  }
 
-	public String getColumn()
-	{
-		return this.column;
-	}
+  public String getColumn()
+  {
+    return this.column;
+  }
 
-	public void setDirection(String dir)
-	{
-		this.direction = dir;
-	}
+  public void setDirection(String dir)
+  {
+    this.direction = dir;
+  }
 
-	public String getDirection()
-	{
-		if (this.direction == null) return null;
+  public String getDirection()
+  {
+    if (this.direction == null) return null;
 
-		// Map JDBC direction info to SQL standard
-		if (direction.equalsIgnoreCase("a")) return "ASC";
-		if (direction.equalsIgnoreCase("d")) return "DESC";
+    // Map JDBC direction info to SQL standard
+    if (direction.equalsIgnoreCase("a")) return "ASC";
+    if (direction.equalsIgnoreCase("d")) return "DESC";
 
-		return this.direction;
-	}
+    return this.direction;
+  }
 
-	public String getExpression()
-	{
-		if (StringUtil.isEmptyString(direction))
-		{
-			return column;
-		}
-		else
-		{
-			return column+ " " + getDirection();
-		}
-	}
+  public String getExpression()
+  {
+    if (StringUtil.isEmptyString(direction))
+    {
+      return column;
+    }
+    else
+    {
+      return column+ " " + getDirection();
+    }
+  }
 
-	@Override
-	public boolean equals(Object other)
-	{
-		if (other instanceof IndexColumn)
-		{
-			IndexColumn otherCol = (IndexColumn)other;
-			return StringUtil.equalString(column, otherCol.column) && StringUtil.equalStringIgnoreCase(getDirection(), otherCol.getDirection());
-		}
-		else
-		{
-			return false;
-		}
-	}
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other instanceof IndexColumn)
+    {
+      IndexColumn otherCol = (IndexColumn)other;
+      return StringUtil.equalString(column, otherCol.column) && StringUtil.equalStringIgnoreCase(getDirection(), otherCol.getDirection());
+    }
+    else
+    {
+      return false;
+    }
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 7;
-		hash = 73 * hash + (this.column != null ? this.column.hashCode() : 0);
-		hash = 73 * hash + (this.direction != null ? this.direction.hashCode() : 0);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 73 * hash + (this.column != null ? this.column.hashCode() : 0);
+    hash = 73 * hash + (this.direction != null ? this.direction.hashCode() : 0);
+    return hash;
+  }
 
-	public static Comparator<IndexColumn> getSequenceSorter()
-	{
-		return (IndexColumn o1, IndexColumn o2) -> o1.sequence - o2.sequence;
-	}
+  public static Comparator<IndexColumn> getSequenceSorter()
+  {
+    return (IndexColumn o1, IndexColumn o2) -> o1.sequence - o2.sequence;
+  }
 
-	@Override
-	public String toString()
-	{
-		return column;
-	}
+  @Override
+  public String toString()
+  {
+    return column;
+  }
 
 }

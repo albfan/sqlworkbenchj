@@ -35,26 +35,26 @@ import workbench.sql.formatter.FormatterUtil;
  * @author Thomas Kellerer
  */
 public class DummyInsert
-	extends DummyDML
-	implements DbObject
+  extends DummyDML
+  implements DbObject
 {
-	public DummyInsert(TableIdentifier tbl)
-	{
-		super(tbl);
+  public DummyInsert(TableIdentifier tbl)
+  {
+    super(tbl);
     doFormat = Settings.getInstance().getDoFormatInserts();
-	}
+  }
 
-	public DummyInsert(TableIdentifier tbl, List<ColumnIdentifier> cols)
-	{
-		super(tbl, cols);
+  public DummyInsert(TableIdentifier tbl, List<ColumnIdentifier> cols)
+  {
+    super(tbl, cols);
     doFormat = Settings.getInstance().getDoFormatInserts();
-	}
+  }
 
-	@Override
-	public String getObjectType()
-	{
-		return "INSERT";
-	}
+  @Override
+  public String getObjectType()
+  {
+    return "INSERT";
+  }
 
   @Override
   public CharSequence getSource(WbConnection con)

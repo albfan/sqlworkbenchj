@@ -48,7 +48,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class HanaTableDefinitionReader
-	extends JdbcTableDefinitionReader
+  extends JdbcTableDefinitionReader
 {
   public static final String PROP_USE_JDBC_GETCOLUMNS = "tabledefinition.usejdbc";
 
@@ -59,10 +59,10 @@ public class HanaTableDefinitionReader
     super(conn);
   }
 
-	@Override
-	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
-		throws SQLException
-	{
+  @Override
+  public List<ColumnIdentifier> getTableColumns(TableIdentifier table, DataTypeResolver typeResolver)
+    throws SQLException
+  {
     try
     {
       List<ColumnIdentifier> columns = super.getTableColumns(table, typeResolver);
@@ -101,10 +101,10 @@ public class HanaTableDefinitionReader
   protected ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern, String type)
     throws SQLException
   {
-		if (useJDBC())
-		{
-			return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern, type);
-		}
+    if (useJDBC())
+    {
+      return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern, type);
+    }
 
     String baseTable = "sys.table_columns";
     String nameColumn = "table_name";
@@ -169,10 +169,10 @@ public class HanaTableDefinitionReader
     columnsStatement.setString(1, tableNamePattern);
     columnsStatement.setString(2, schemaPattern);
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("HanaTableDefinitionReader.prepareColumnsStatement()", "Query to retrieve column information: " + SqlUtil.replaceParameters(sql, tableNamePattern, schemaPattern));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("HanaTableDefinitionReader.prepareColumnsStatement()", "Query to retrieve column information: " + SqlUtil.replaceParameters(sql, tableNamePattern, schemaPattern));
+    }
 
     return columnsStatement.executeQuery();
   }

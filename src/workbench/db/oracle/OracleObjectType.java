@@ -33,57 +33,57 @@ import workbench.util.CollectionUtil;
  * @author Thomas Kellerer
  */
 public class OracleObjectType
-	extends BaseObjectType
+  extends BaseObjectType
 {
-	private int numMethods;
-	private int numAttributes;
+  private int numMethods;
+  private int numAttributes;
 
-	public OracleObjectType(String owner, String objectName)
-	{
-		super(owner, objectName);
-	}
+  public OracleObjectType(String owner, String objectName)
+  {
+    super(owner, objectName);
+  }
 
-	@Override
-	public String getDropStatement(WbConnection con, boolean cascade)
-	{
-		return null;
-	}
+  @Override
+  public String getDropStatement(WbConnection con, boolean cascade)
+  {
+    return null;
+  }
 
-	public void setNumberOfMethods(int count)
-	{
-		this.numMethods = count;
-	}
+  public void setNumberOfMethods(int count)
+  {
+    this.numMethods = count;
+  }
 
-	public int getNumberOfMethods()
-	{
-		return numMethods;
-	}
+  public int getNumberOfMethods()
+  {
+    return numMethods;
+  }
 
-	public void setNumberOfAttributes(int count)
-	{
-		this.numAttributes = count;
-	}
+  public void setNumberOfAttributes(int count)
+  {
+    this.numAttributes = count;
+  }
 
-	@Override
-	public int getNumberOfAttributes()
-	{
-		if (CollectionUtil.isEmpty(getAttributes()))
-		{
-			return numAttributes;
-		}
-		return getAttributes().size();
-	}
+  @Override
+  public int getNumberOfAttributes()
+  {
+    if (CollectionUtil.isEmpty(getAttributes()))
+    {
+      return numAttributes;
+    }
+    return getAttributes().size();
+  }
 
-	@Override
-	public boolean isEqualTo(DbObject other)
-	{
-		boolean isEqual = super.isEqualTo(other);
-		if (isEqual && (other instanceof OracleObjectType))
-		{
-			OracleObjectType otherType = (OracleObjectType)other;
-			isEqual = this.getNumberOfMethods() == otherType.getNumberOfMethods();
-		}
-		return isEqual;
-	}
+  @Override
+  public boolean isEqualTo(DbObject other)
+  {
+    boolean isEqual = super.isEqualTo(other);
+    if (isEqual && (other instanceof OracleObjectType))
+    {
+      OracleObjectType otherType = (OracleObjectType)other;
+      isEqual = this.getNumberOfMethods() == otherType.getNumberOfMethods();
+    }
+    return isEqual;
+  }
 
 }

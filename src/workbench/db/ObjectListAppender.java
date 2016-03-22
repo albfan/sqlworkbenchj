@@ -37,18 +37,18 @@ import workbench.storage.DataStore;
  */
 public interface ObjectListAppender
 {
-	/**
-	 * Adds the objects managed by this extender to the existing result.
-	 *
-	 * The DataStore's structure is the one created by DbMetadata.getObjects()
-	 *
-	 * @param con the database connection to be used
-	 * @param result the DataStore containing the objects already returned by the driver
-	 * @param requestedTypes the object types as passed to DbMetadata.getObjects()
-	 * @return true if the list was changed
-	 * @see DbMetadata#getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
-	 *
-	 */
-	boolean extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
+  /**
+   * Adds the objects managed by this extender to the existing result.
+   *
+   * The DataStore's structure is the one created by DbMetadata.getObjects()
+   *
+   * @param con the database connection to be used
+   * @param result the DataStore containing the objects already returned by the driver
+   * @param requestedTypes the object types as passed to DbMetadata.getObjects()
+   * @return true if the list was changed
+   * @see DbMetadata#getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+   *
+   */
+  boolean extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
 
 }

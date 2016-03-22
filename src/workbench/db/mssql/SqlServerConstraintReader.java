@@ -32,89 +32,89 @@ import workbench.db.WbConnection;
  * @author  Thomas Kellerer
  */
 public class SqlServerConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
 
-	private boolean is2000;
+  private boolean is2000;
 
-	public SqlServerConstraintReader(WbConnection con)
-	{
-		super(con.getDbId());
-		if (!SqlServerUtil.isSqlServer2005(con))
-		{
-			is2000 = true;
-		}
-	}
+  public SqlServerConstraintReader(WbConnection con)
+  {
+    super(con.getDbId());
+    if (!SqlServerUtil.isSqlServer2005(con))
+    {
+      is2000 = true;
+    }
+  }
 
-	/**
-	 * The SQL to retrieve check constraints for SQL Server 2000 and earlier
-	 */
-	private final String OLD_TABLE_SQL =
-		 "select cons.name, c.text \n" +
-		 "from sysobjects cons, \n" +
-		 "     syscomments c, \n" +
-		 "     sysobjects tab \n" +
-		 "where cons.xtype = 'C' \n" +
-		 "and   cons.id = c.id \n" +
-		 "and   cons.parent_obj = tab.id \n" +
-		 "and   tab.name = ? \n";
+  /**
+   * The SQL to retrieve check constraints for SQL Server 2000 and earlier
+   */
+  private final String OLD_TABLE_SQL =
+     "select cons.name, c.text \n" +
+     "from sysobjects cons, \n" +
+     "     syscomments c, \n" +
+     "     sysobjects tab \n" +
+     "where cons.xtype = 'C' \n" +
+     "and   cons.id = c.id \n" +
+     "and   cons.parent_obj = tab.id \n" +
+     "and   tab.name = ? \n";
 
-	private final String TABLE_SQL =
-		"select cons.name, cons.definition \n" +
-		"from sys.check_constraints cons with (nolock) \n" +
-		"  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
-		"  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
-		"where tab.name = ?  \n" +
-		"  and s.name = ?";
+  private final String TABLE_SQL =
+    "select cons.name, cons.definition \n" +
+    "from sys.check_constraints cons with (nolock) \n" +
+    "  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
+    "  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
+    "where tab.name = ?  \n" +
+    "  and s.name = ?";
 
-	private final String DEFAULT_CONSTRAINTS_SQL =
-		"select col.name, \n" +
-		"       case  \n" +
-		"          when is_system_named = 1 then 'DEFAULT ' + cons.definition \n" +
-		"          else 'CONSTRAINT ' + cons.name + ' DEFAULT ' + cons.definition \n" +
-		"       end as value \n" +
-		"from sys.default_constraints cons with (nolock) \n" +
-		"  join sys.columns col with (nolock) on cons.object_id = col.default_object_id and cons.parent_column_id = col.column_id \n" +
-		"  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
-		"  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
-		"where cons.type = 'D' \n" +
-		"  and tab.name = ? \n" +
-		"  and s.name = ? ";
+  private final String DEFAULT_CONSTRAINTS_SQL =
+    "select col.name, \n" +
+    "       case  \n" +
+    "          when is_system_named = 1 then 'DEFAULT ' + cons.definition \n" +
+    "          else 'CONSTRAINT ' + cons.name + ' DEFAULT ' + cons.definition \n" +
+    "       end as value \n" +
+    "from sys.default_constraints cons with (nolock) \n" +
+    "  join sys.columns col with (nolock) on cons.object_id = col.default_object_id and cons.parent_column_id = col.column_id \n" +
+    "  join sys.tables tab with (nolock) on cons.parent_object_id = tab.object_id \n" +
+    "  join sys.schemas s with (nolock) on s.schema_id = tab.schema_id \n" +
+    "where cons.type = 'D' \n" +
+    "  and tab.name = ? \n" +
+    "  and s.name = ? ";
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		if (is2000)
-		{
-			return null;
-		}
-		return DEFAULT_CONSTRAINTS_SQL;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    if (is2000)
+    {
+      return null;
+    }
+    return DEFAULT_CONSTRAINTS_SQL;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		if (is2000)
-		{
-			return OLD_TABLE_SQL;
-		}
-		return TABLE_SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    if (is2000)
+    {
+      return OLD_TABLE_SQL;
+    }
+    return TABLE_SQL;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		if (is2000)
-		{
-			return -1;
-		}
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    if (is2000)
+    {
+      return -1;
+    }
+    return 2;
+  }
 
 }

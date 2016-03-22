@@ -30,27 +30,27 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class PkTemplate
-	extends TemplateHandler
+  extends TemplateHandler
 {
-	private final String defaultInlineSQL =	"CONSTRAINT %constraint_name% PRIMARY KEY (%columnlist%)";
+  private final String defaultInlineSQL = "CONSTRAINT %constraint_name% PRIMARY KEY (%columnlist%)";
 
-	private String sql;
+  private String sql;
 
-	public PkTemplate(WbConnection conn, boolean forInlineUse)
-	{
-		if (forInlineUse)
-		{
-			this.sql = getStringProperty("workbench.db." + conn.getDbId() + ".pk.inline.sql", defaultInlineSQL);
-		}
-		else
-		{
-			sql = conn.getDbSettings().getAddPK("table", true);
-		}
-	}
+  public PkTemplate(WbConnection conn, boolean forInlineUse)
+  {
+    if (forInlineUse)
+    {
+      this.sql = getStringProperty("workbench.db." + conn.getDbId() + ".pk.inline.sql", defaultInlineSQL);
+    }
+    else
+    {
+      sql = conn.getDbSettings().getAddPK("table", true);
+    }
+  }
 
-	public String getSQLTemplate()
-	{
-		return sql;
-	}
+  public String getSQLTemplate()
+  {
+    return sql;
+  }
 
 }

@@ -50,94 +50,94 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class MySQLIndexReader
-	extends JdbcIndexReader
+  extends JdbcIndexReader
 {
 
-	public MySQLIndexReader(DbMetadata meta)
-	{
-		super(meta);
-	}
+  public MySQLIndexReader(DbMetadata meta)
+  {
+    super(meta);
+  }
 
-	@Override
-	public void processIndexList(Collection<IndexDefinition> indexList)
-	{
-		if (indexList.isEmpty()) return;
+  @Override
+  public void processIndexList(Collection<IndexDefinition> indexList)
+  {
+    if (indexList.isEmpty()) return;
 
-		ResultSet rs = null;
-		Statement stmt = null;
-		WbConnection conn = this.metaData.getWbConnection();
+    ResultSet rs = null;
+    Statement stmt = null;
+    WbConnection conn = this.metaData.getWbConnection();
 
-		Set<TableIdentifier> tables = getIndexTables(indexList);
+    Set<TableIdentifier> tables = getIndexTables(indexList);
 
-		try
-		{
-			stmt = conn.createStatementForQuery();
+    try
+    {
+      stmt = conn.createStatementForQuery();
 
-			for (TableIdentifier table : tables)
-			{
-				String sql =
-					"show index from " + SqlUtil.fullyQualifiedName(conn, table) +
-					" where sub_part is not null";
+      for (TableIdentifier table : tables)
+      {
+        String sql =
+          "show index from " + SqlUtil.fullyQualifiedName(conn, table) +
+          " where sub_part is not null";
 
-				rs = stmt.executeQuery(sql);
+        rs = stmt.executeQuery(sql);
 
-				while (rs.next())
-				{
-					String indexName = rs.getString("Key_name");
-					String col = rs.getString("Column_name");
-					int part = rs.getInt("Sub_part");
-					IndexDefinition def = findIndex(indexList, indexName);
-					IndexColumn iCol = findColumn(def, col);
-					if (iCol != null)
-					{
-						iCol.setColumn(col + "(" + Integer.toString(part) + ")");
-					}
-				}
-			}
-		}
-		catch (SQLException sql)
-		{
-			LogMgr.logError("MySQLIndexReader.processIndexList()", "Could not read indexed definition", sql);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+        while (rs.next())
+        {
+          String indexName = rs.getString("Key_name");
+          String col = rs.getString("Column_name");
+          int part = rs.getInt("Sub_part");
+          IndexDefinition def = findIndex(indexList, indexName);
+          IndexColumn iCol = findColumn(def, col);
+          if (iCol != null)
+          {
+            iCol.setColumn(col + "(" + Integer.toString(part) + ")");
+          }
+        }
+      }
+    }
+    catch (SQLException sql)
+    {
+      LogMgr.logError("MySQLIndexReader.processIndexList()", "Could not read indexed definition", sql);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
-	private Set<TableIdentifier> getIndexTables(Collection<IndexDefinition> indexList)
-	{
-		Set<TableIdentifier> result = new HashSet<>();
-		for (IndexDefinition def : indexList)
-		{
-			if (def.getBaseTable() != null)
-			{
-				result.add(def.getBaseTable());
-			}
-		}
-		return result;
-	}
+  private Set<TableIdentifier> getIndexTables(Collection<IndexDefinition> indexList)
+  {
+    Set<TableIdentifier> result = new HashSet<>();
+    for (IndexDefinition def : indexList)
+    {
+      if (def.getBaseTable() != null)
+      {
+        result.add(def.getBaseTable());
+      }
+    }
+    return result;
+  }
 
-	private IndexColumn findColumn(IndexDefinition index, String colName)
-	{
-		if (index == null) return null;
-		for (IndexColumn col : index.getColumns())
-		{
-			if (col.getColumn().equals(colName))
-			{
-				return col;
-			}
-		}
-		return null;
-	}
+  private IndexColumn findColumn(IndexDefinition index, String colName)
+  {
+    if (index == null) return null;
+    for (IndexColumn col : index.getColumns())
+    {
+      if (col.getColumn().equals(colName))
+      {
+        return col;
+      }
+    }
+    return null;
+  }
 
-	private IndexDefinition findIndex(Collection<IndexDefinition> indexes, String toFind)
-	{
-		for (IndexDefinition ind : indexes)
-		{
-			if (ind.getName().equals(toFind)) return ind;
-		}
-		return null;
-	}
+  private IndexDefinition findIndex(Collection<IndexDefinition> indexes, String toFind)
+  {
+    for (IndexDefinition ind : indexes)
+    {
+      if (ind.getName().equals(toFind)) return ind;
+    }
+    return null;
+  }
 
 }

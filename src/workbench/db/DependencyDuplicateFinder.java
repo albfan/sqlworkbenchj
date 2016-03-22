@@ -44,106 +44,106 @@ import workbench.util.StringUtil;
  */
 class DependencyDuplicateFinder
 {
-	private final DependencyNode root;
-	private final Map<TableIdentifier, Integer> tableLevels = new HashMap<>();
+  private final DependencyNode root;
+  private final Map<TableIdentifier, Integer> tableLevels = new HashMap<>();
 
-	DependencyDuplicateFinder(DependencyNode rootNode)
-	{
-		this.root = rootNode;
-	}
+  DependencyDuplicateFinder(DependencyNode rootNode)
+  {
+    this.root = rootNode;
+  }
 
-	Set<String> getDuplicates()
-	{
-		Set<String> result = new HashSet<>();
-		List<NodeInformation> tree = buildTree(root, 0);
-		for (NodeInformation info : tree)
-		{
-			if (info.level > getHighestLevel(info.node.getTable()))
-			{
-				String path = getNodePath(info.node);
-				if (LogMgr.isTraceEnabled())
-				{
-					LogMgr.logTrace("DependencyDuplicateFinder.getDuplicates()", "Node " + path + " is redundant");
-				}
-				result.add(path);
-			}
-		}
-		return result;
-	}
+  Set<String> getDuplicates()
+  {
+    Set<String> result = new HashSet<>();
+    List<NodeInformation> tree = buildTree(root, 0);
+    for (NodeInformation info : tree)
+    {
+      if (info.level > getHighestLevel(info.node.getTable()))
+      {
+        String path = getNodePath(info.node);
+        if (LogMgr.isTraceEnabled())
+        {
+          LogMgr.logTrace("DependencyDuplicateFinder.getDuplicates()", "Node " + path + " is redundant");
+        }
+        result.add(path);
+      }
+    }
+    return result;
+  }
 
-	static String getNodePath(DependencyNode node)
-	{
-		StringBuilder path = new StringBuilder(10);
-		path.append('/');
-		path.append(node.getTable().getTableExpression());
-		DependencyNode parent = node.getParent();
-		while (parent != null)
-		{
-			path.insert(0, "/" + parent.getTable().getTableExpression());
-			parent = parent.getParent();
-		}
-		return path.toString();
-	}
+  static String getNodePath(DependencyNode node)
+  {
+    StringBuilder path = new StringBuilder(10);
+    path.append('/');
+    path.append(node.getTable().getTableExpression());
+    DependencyNode parent = node.getParent();
+    while (parent != null)
+    {
+      path.insert(0, "/" + parent.getTable().getTableExpression());
+      parent = parent.getParent();
+    }
+    return path.toString();
+  }
 
-	void dumpTree(List<NodeInformation> tree, String fname)
-	{
-		FileWriter writer = null;
-		try
-		{
-			writer = new FileWriter(new File("c:/temp", fname));
-			writer.append(this.root.getTable().toString() + "\n");
-			for (NodeInformation infoNode : tree)
-			{
-				String indent = StringUtil.padRight("", (infoNode.level + 1) * 4);
-				writer.append(indent);
-				writer.append(infoNode.node.getTable().toString());
-				String cols = StringUtil.listToString(infoNode.node.getColumns().keySet(), ',');
-				writer.append(" (").append(cols).append(')');
-				writer.append('\n');
-			}
-		}
-		catch (IOException io)
-		{
-			//ignore
-		}
-		finally
-		{
-			FileUtil.closeQuietely(writer);
-		}
-	}
+  void dumpTree(List<NodeInformation> tree, String fname)
+  {
+    FileWriter writer = null;
+    try
+    {
+      writer = new FileWriter(new File("c:/temp", fname));
+      writer.append(this.root.getTable().toString() + "\n");
+      for (NodeInformation infoNode : tree)
+      {
+        String indent = StringUtil.padRight("", (infoNode.level + 1) * 4);
+        writer.append(indent);
+        writer.append(infoNode.node.getTable().toString());
+        String cols = StringUtil.listToString(infoNode.node.getColumns().keySet(), ',');
+        writer.append(" (").append(cols).append(')');
+        writer.append('\n');
+      }
+    }
+    catch (IOException io)
+    {
+      //ignore
+    }
+    finally
+    {
+      FileUtil.closeQuietely(writer);
+    }
+  }
 
-	private int getHighestLevel(TableIdentifier table)
-	{
-		Integer lvl = tableLevels.get(table);
-		if (lvl == null) return 0;
-		return lvl.intValue();
-	}
+  private int getHighestLevel(TableIdentifier table)
+  {
+    Integer lvl = tableLevels.get(table);
+    if (lvl == null) return 0;
+    return lvl.intValue();
+  }
 
-	List<NodeInformation> buildTree(DependencyNode root, int level)
-	{
-		List<NodeInformation> result = new ArrayList<>();
-		List<DependencyNode> children = root.getChildren();
-		if (children.isEmpty()) return result;
+  List<NodeInformation> buildTree(DependencyNode root, int level)
+  {
+    List<NodeInformation> result = new ArrayList<>();
+    List<DependencyNode> children = root.getChildren();
+    if (children.isEmpty()) return result;
 
-		for (DependencyNode child : children)
-		{
-			NodeInformation info = new NodeInformation();
-			info.node = child;
-			info.level = level;
-			if (!tableLevels.containsKey(child.getTable()))
-			{
-				tableLevels.put(child.getTable(), Integer.valueOf(level));
-			}
-			result.add(info);
-			result.addAll(buildTree(child, level + 1));
-		}
-		return result;
-	}
+    for (DependencyNode child : children)
+    {
+      NodeInformation info = new NodeInformation();
+      info.node = child;
+      info.level = level;
+      if (!tableLevels.containsKey(child.getTable()))
+      {
+        tableLevels.put(child.getTable(), Integer.valueOf(level));
+      }
+      result.add(info);
+      result.addAll(buildTree(child, level + 1));
+    }
+    return result;
+  }
 
-	class NodeInformation
-	{
-		DependencyNode node;
-		int level;
-	}
+  class NodeInformation
+  {
+    DependencyNode node;
+    int level;
+  }
 
 }

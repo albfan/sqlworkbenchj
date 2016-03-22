@@ -50,48 +50,48 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class OracleFKHandler
-	extends DefaultFKHandler
+  extends DefaultFKHandler
 {
-	final String baseSql;
+  final String baseSql;
 
-	private PreparedStatement retrievalStatement;
-	private final String currentUser;
+  private PreparedStatement retrievalStatement;
+  private final String currentUser;
 
-	public OracleFKHandler(WbConnection conn)
-	{
-		super(conn);
-		currentUser = conn.getCurrentUser();
-		containsStatusCol = true;
+  public OracleFKHandler(WbConnection conn)
+  {
+    super(conn);
+    currentUser = conn.getCurrentUser();
+    containsStatusCol = true;
 
-		// This is essentially a copy of the Statement used by the Oracle driver
-		// the driver does not take unique constraints into account, and this statement does.
-		// Otherwise foreign keys referencing unique constraints (rather than primary keys) would
-		// not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
-		baseSql =
+    // This is essentially a copy of the Statement used by the Oracle driver
+    // the driver does not take unique constraints into account, and this statement does.
+    // Otherwise foreign keys referencing unique constraints (rather than primary keys) would
+    // not be displayed (DbExplorer, WbSchemaReport) or correctly processed (TableDependency)
+    baseSql =
       "-- SQLWorkbench \n" +
-			"SELECT " + OracleUtils.getCacheHint() + " NULL AS pktable_cat, \n" +
-			"       p.owner AS pktable_schem, \n" +
-			"       p.table_name AS pktable_name, \n" +
-			"       pc.column_name AS pkcolumn_name, \n" +
-			"       NULL AS fktable_cat, \n" +
-			"       f.owner AS fktable_schem, \n" +
-			"       f.table_name AS fktable_name, \n" +
-			"       fc.column_name AS fkcolumn_name, \n" +
-			"       fc.position AS key_seq, \n" +
-			"       3 AS update_rule, \n" +
-			"       decode (f.delete_rule, \n" +
-			"              'CASCADE', 0, \n" +
-			"              'SET NULL', 2, \n" +
-			"              1 \n" +
-			"       ) AS delete_rule, \n" +
-			"       f.constraint_name AS fk_name, \n" +
-			"       p.constraint_name AS pk_name, \n" +
-			"       decode(f.deferrable, \n" +
-			"             'DEFERRABLE', decode(f.deferred, 'IMMEDIATE', " + DatabaseMetaData.importedKeyInitiallyImmediate + ", " + DatabaseMetaData.importedKeyInitiallyDeferred + ") , \n" +
-			"             'NOT DEFERRABLE'," + DatabaseMetaData.importedKeyNotDeferrable + " \n" +
-			"       ) deferrability, \n" +
-			"       case when f.status = 'ENABLED' then 'YES' else 'NO' end as enabled, \n" +
-			"       case when f.validated = 'VALIDATED' then 'YES' else 'NO' end as validated \n " +
+      "SELECT " + OracleUtils.getCacheHint() + " NULL AS pktable_cat, \n" +
+      "       p.owner AS pktable_schem, \n" +
+      "       p.table_name AS pktable_name, \n" +
+      "       pc.column_name AS pkcolumn_name, \n" +
+      "       NULL AS fktable_cat, \n" +
+      "       f.owner AS fktable_schem, \n" +
+      "       f.table_name AS fktable_name, \n" +
+      "       fc.column_name AS fkcolumn_name, \n" +
+      "       fc.position AS key_seq, \n" +
+      "       3 AS update_rule, \n" +
+      "       decode (f.delete_rule, \n" +
+      "              'CASCADE', 0, \n" +
+      "              'SET NULL', 2, \n" +
+      "              1 \n" +
+      "       ) AS delete_rule, \n" +
+      "       f.constraint_name AS fk_name, \n" +
+      "       p.constraint_name AS pk_name, \n" +
+      "       decode(f.deferrable, \n" +
+      "             'DEFERRABLE', decode(f.deferred, 'IMMEDIATE', " + DatabaseMetaData.importedKeyInitiallyImmediate + ", " + DatabaseMetaData.importedKeyInitiallyDeferred + ") , \n" +
+      "             'NOT DEFERRABLE'," + DatabaseMetaData.importedKeyNotDeferrable + " \n" +
+      "       ) deferrability, \n" +
+      "       case when f.status = 'ENABLED' then 'YES' else 'NO' end as enabled, \n" +
+      "       case when f.validated = 'VALIDATED' then 'YES' else 'NO' end as validated \n " +
       "FROM all_constraints p\n" +
       "  JOIN all_cons_columns pc ON pc.owner = p.owner AND pc.constraint_name = p.constraint_name AND pc.table_name = p.table_name \n" +
       "  JOIN all_constraints f ON p.owner = f.r_owner AND p.constraint_name = f.r_constraint_name \n" +
@@ -99,155 +99,155 @@ public class OracleFKHandler
       "WHERE p.constraint_type in ('P', 'U') \n" +
       "  AND f.constraint_type = 'R' \n";
 
-	}
+  }
 
-	@Override
-	protected DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
-		throws SQLException
-	{
-		try
-		{
-			if (exported)
-			{
-				return getExportedKeyList(tbl);
-			}
-			else
-			{
-				return getImportedKeyList(tbl);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("OracleFKHandler.getRawKeyList()", "Could not retrieve foreign keys", e);
-		}
-		// something went wrong, use the driver's implementation
-		return super.getRawKeyList(tbl, exported);
-	}
+  @Override
+  protected DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
+    throws SQLException
+  {
+    try
+    {
+      if (exported)
+      {
+        return getExportedKeyList(tbl);
+      }
+      else
+      {
+        return getImportedKeyList(tbl);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("OracleFKHandler.getRawKeyList()", "Could not retrieve foreign keys", e);
+    }
+    // something went wrong, use the driver's implementation
+    return super.getRawKeyList(tbl, exported);
+  }
 
-	/**
-	 * Adjust the baseSql query to reflect if a table for the current user is queried.
-	 *
-	 * If the table belongs to the current user, the user_XXX views can be used
-	 * instead of the all_XXX views. Using the user_XXX views is faster (at least on my system) than the all_XXX
-	 * views - although it  is still an awfully slow statement...
-	 * <br>
-	 * Querying user_constraints instead of all_constraints means that constraints between two schemas
-	 * will not be shown. In order to still enable this, the config property:
-	 * <br>
-	 * <code>workbench.db.oracle.optimize_fk_query</code>
-	 * <br>
-	 * can be set to false, if all_constraints should always be queried.
-	 *
-	 * @param tbl the table for which the query should be generated
-	 * @return the query to use
-	 * @see OracleUtils#optimizeCatalogQueries()
-	 */
-	private String getQuery(TableIdentifier tbl)
-	{
-		if (OracleUtils.optimizeCatalogQueries())
-		{
-			String schema = tbl.getRawSchema();
-			if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
-			{
-				return baseSql.replace(" all_c", " user_c");
-			}
-		}
-		return baseSql;
-	}
+  /**
+   * Adjust the baseSql query to reflect if a table for the current user is queried.
+   *
+   * If the table belongs to the current user, the user_XXX views can be used
+   * instead of the all_XXX views. Using the user_XXX views is faster (at least on my system) than the all_XXX
+   * views - although it  is still an awfully slow statement...
+   * <br>
+   * Querying user_constraints instead of all_constraints means that constraints between two schemas
+   * will not be shown. In order to still enable this, the config property:
+   * <br>
+   * <code>workbench.db.oracle.optimize_fk_query</code>
+   * <br>
+   * can be set to false, if all_constraints should always be queried.
+   *
+   * @param tbl the table for which the query should be generated
+   * @return the query to use
+   * @see OracleUtils#optimizeCatalogQueries()
+   */
+  private String getQuery(TableIdentifier tbl)
+  {
+    if (OracleUtils.optimizeCatalogQueries())
+    {
+      String schema = tbl.getRawSchema();
+      if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(currentUser))
+      {
+        return baseSql.replace(" all_c", " user_c");
+      }
+    }
+    return baseSql;
+  }
 
-	private DataStore getExportedKeyList(TableIdentifier tbl)
-		throws SQLException
-	{
-		// I'm not adding an ORDER BY because the statement is terribly slow anyway
-		// and an ORDER BY makes it even slower for large results
-		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
-		sql.append(getQuery(tbl));
-		sql.append("AND p.table_name = ? \n");
-		sql.append("AND p.owner = ? \n");
+  private DataStore getExportedKeyList(TableIdentifier tbl)
+    throws SQLException
+  {
+    // I'm not adding an ORDER BY because the statement is terribly slow anyway
+    // and an ORDER BY makes it even slower for large results
+    StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+    sql.append(getQuery(tbl));
+    sql.append("AND p.table_name = ? \n");
+    sql.append("AND p.owner = ? \n");
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Retrieving exported foreign keys using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleFKHandler.getExportedKeyList()", "Retrieving exported foreign keys using:\n " + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+    }
 
-		ResultSet rs;
-		DataStore result = null;
-		try
-		{
-			retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
-			retrievalStatement.setString(1, tbl.getRawTableName());
-			retrievalStatement.setString(2, tbl.getRawSchema());
-			rs = retrievalStatement.executeQuery();
-			result = processResult(rs);
-		}
-		finally
-		{
-			// the result set is closed by processResult
-			SqlUtil.closeStatement(retrievalStatement);
-			retrievalStatement = null;
-		}
-		sortResult(result);
-		return result;
-	}
+    ResultSet rs;
+    DataStore result = null;
+    try
+    {
+      retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+      retrievalStatement.setString(1, tbl.getRawTableName());
+      retrievalStatement.setString(2, tbl.getRawSchema());
+      rs = retrievalStatement.executeQuery();
+      result = processResult(rs);
+    }
+    finally
+    {
+      // the result set is closed by processResult
+      SqlUtil.closeStatement(retrievalStatement);
+      retrievalStatement = null;
+    }
+    sortResult(result);
+    return result;
+  }
 
-	private void sortResult(DataStore ds)
-	{
-		if (ds == null) return;
-		// sort by the second and third column
-		SortDefinition def = new SortDefinition(new int[] {1,2}, new boolean[] {true, true});
-		ds.sort(def);
-	}
+  private void sortResult(DataStore ds)
+  {
+    if (ds == null) return;
+    // sort by the second and third column
+    SortDefinition def = new SortDefinition(new int[] {1,2}, new boolean[] {true, true});
+    ds.sort(def);
+  }
 
-	private DataStore getImportedKeyList(TableIdentifier tbl)
-		throws SQLException
-	{
-		// I'm not adding an ORDER BY because the statement is terribly slow anyway
-		// and an ORDER BY makes it even slower for large results
-		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
-		sql.append(getQuery(tbl));
-		sql.append("AND f.table_name = ? \n");
-		sql.append("AND f.owner = ? \n");
+  private DataStore getImportedKeyList(TableIdentifier tbl)
+    throws SQLException
+  {
+    // I'm not adding an ORDER BY because the statement is terribly slow anyway
+    // and an ORDER BY makes it even slower for large results
+    StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+    sql.append(getQuery(tbl));
+    sql.append("AND f.table_name = ? \n");
+    sql.append("AND f.owner = ? \n");
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Retrieving imported foreign keys using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleFKHandler.getImportedKeyList()", "Retrieving imported foreign keys using:\n" + SqlUtil.replaceParameters(sql, tbl.getRawTableName(), tbl.getRawSchema()));
+    }
 
-		ResultSet rs;
-		DataStore result = null;
-		try
-		{
-			retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
-			retrievalStatement.setString(1, tbl.getRawTableName());
-			retrievalStatement.setString(2, tbl.getRawSchema());
-			rs = retrievalStatement.executeQuery();
-			result = processResult(rs);
-		}
-		finally
-		{
-			// the result set is closed by processResult
-			SqlUtil.closeStatement(retrievalStatement);
-			retrievalStatement = null;
-		}
-		sortResult(result);
-		return result;
-	}
+    ResultSet rs;
+    DataStore result = null;
+    try
+    {
+      retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+      retrievalStatement.setString(1, tbl.getRawTableName());
+      retrievalStatement.setString(2, tbl.getRawSchema());
+      rs = retrievalStatement.executeQuery();
+      result = processResult(rs);
+    }
+    finally
+    {
+      // the result set is closed by processResult
+      SqlUtil.closeStatement(retrievalStatement);
+      retrievalStatement = null;
+    }
+    sortResult(result);
+    return result;
+  }
 
-	@Override
-	public void cancel()
-	{
-		super.cancel();
-		if (retrievalStatement != null)
-		{
-			try
-			{
-				retrievalStatement.cancel();
-			}
-			catch (Exception sql)
-			{
-				// nothing to do
-			}
-		}
-	}
+  @Override
+  public void cancel()
+  {
+    super.cancel();
+    if (retrievalStatement != null)
+    {
+      try
+      {
+        retrievalStatement.cancel();
+      }
+      catch (Exception sql)
+      {
+        // nothing to do
+      }
+    }
+  }
 
 }

@@ -46,68 +46,68 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class FirstSqlConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private final String SQL =
-		"select ch.check_clause, ch.constraint_name \n" +
-		"from definition_schema.syschecks ch,  \n" +
-		"     definition_schema.sysconstraints cons \n" +
-		"where cons.constraint_type = 'check' \n" +
-		"  and cons.constraint_name = ch.constraint_name" +
-		"  and cons.table_schema = ? \n" +
-		"  and cons.table_name = ? ";
+  private final String SQL =
+    "select ch.check_clause, ch.constraint_name \n" +
+    "from definition_schema.syschecks ch,  \n" +
+    "     definition_schema.sysconstraints cons \n" +
+    "where cons.constraint_type = 'check' \n" +
+    "  and cons.constraint_name = ch.constraint_name" +
+    "  and cons.table_schema = ? \n" +
+    "  and cons.table_name = ? ";
 
-	public FirstSqlConstraintReader()
-	{
-		super("firstsqlj");
-	}
+  public FirstSqlConstraintReader()
+  {
+    super("firstsqlj");
+  }
 
-	@Override
-	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
-	{
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
+  @Override
+  public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableDefinition def)
+  {
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("FirstSqlConstraintReader.getTableConstraints()", "Using query=\n" + SQL);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("FirstSqlConstraintReader.getTableConstraints()", "Using query=\n" + SQL);
+    }
 
-		List<TableConstraint> result = CollectionUtil.arrayList();
-		TableIdentifier table = def.getTable();
-		try
-		{
-			pstmt = dbConnection.getSqlConnection().prepareStatement(SQL);
-			pstmt.setString(1, table.getSchema());
-			pstmt.setString(2, table.getTableName());
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String constraint = rs.getString(1);
-				String name = rs.getString(2);
-				result.add(new TableConstraint(name, "(" + constraint + ")"));
-			}
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("FirstSqlMetadata.getTableConstraints()", "Could not retrieve table constraints for " + table.getTableExpression(), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, pstmt);
-		}
-		return result;
-	}
+    List<TableConstraint> result = CollectionUtil.arrayList();
+    TableIdentifier table = def.getTable();
+    try
+    {
+      pstmt = dbConnection.getSqlConnection().prepareStatement(SQL);
+      pstmt.setString(1, table.getSchema());
+      pstmt.setString(2, table.getTableName());
+      rs = pstmt.executeQuery();
+      while (rs.next())
+      {
+        String constraint = rs.getString(1);
+        String name = rs.getString(2);
+        result.add(new TableConstraint(name, "(" + constraint + ")"));
+      }
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("FirstSqlMetadata.getTableConstraints()", "Could not retrieve table constraints for " + table.getTableExpression(), e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return result;
+  }
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		return SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    return SQL;
+  }
 }

@@ -47,73 +47,73 @@ import workbench.util.SqlUtil;
 public class MySQLEnumReader
 {
 
-	/**
-	 * Update the passed TableDefinition with information about the enums used in the columns.
-	 *
-	 * For each ColumnIdentier in the table that is defined as an enum the dbms type is updated
-	 * with the enum name.
-	 *
-	 * @param tbl  the table definition to check
-	 * @param connection the connection to use
-	 */
-	public void readEnums(TableDefinition tbl, WbConnection connection)
-	{
-		if (!hasEnums(tbl)) return;
+  /**
+   * Update the passed TableDefinition with information about the enums used in the columns.
+   *
+   * For each ColumnIdentier in the table that is defined as an enum the dbms type is updated
+   * with the enum name.
+   *
+   * @param tbl  the table definition to check
+   * @param connection the connection to use
+   */
+  public void readEnums(TableDefinition tbl, WbConnection connection)
+  {
+    if (!hasEnums(tbl)) return;
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		HashMap<String, String> defs = new HashMap<>(17);
+    Statement stmt = null;
+    ResultSet rs = null;
+    HashMap<String, String> defs = new HashMap<>(17);
 
-		try
-		{
-			stmt = connection.createStatement();
-			rs = stmt.executeQuery("SHOW COLUMNS FROM " + tbl.getTable().getTableExpression(connection));
-			while (rs.next())
-			{
-				String column = rs.getString(1);
-				if (column == null)	continue;
+    try
+    {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SHOW COLUMNS FROM " + tbl.getTable().getTableExpression(connection));
+      while (rs.next())
+      {
+        String column = rs.getString(1);
+        if (column == null) continue;
 
-				String type = rs.getString(2);
-				if (type == null)	continue;
+        String type = rs.getString(2);
+        if (type == null) continue;
 
-				String ltype = type.toLowerCase();
-				if (ltype.startsWith("enum") || ltype.startsWith("set"))
-				{
-					defs.put(column, type);
-				}
-			}
+        String ltype = type.toLowerCase();
+        if (ltype.startsWith("enum") || ltype.startsWith("set"))
+        {
+          defs.put(column, type);
+        }
+      }
 
-			List<ColumnIdentifier> columns = tbl.getColumns();
-			for (ColumnIdentifier col : columns)
-			{
-				String name = col.getColumnName();
-				String type = defs.get(name);
-				if (type != null)
-				{
-					col.setDbmsType(type);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("MySQLEnumReader.updateEnumDefinition()", "Could not read enum definition", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      List<ColumnIdentifier> columns = tbl.getColumns();
+      for (ColumnIdentifier col : columns)
+      {
+        String name = col.getColumnName();
+        String type = defs.get(name);
+        if (type != null)
+        {
+          col.setDbmsType(type);
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("MySQLEnumReader.updateEnumDefinition()", "Could not read enum definition", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
-	private boolean hasEnums(TableDefinition tbl)
-	{
-		for (ColumnIdentifier col : tbl.getColumns())
-		{
-			String typeName = col.getDbmsType();
-			if (typeName.toLowerCase().startsWith("enum") || typeName.toLowerCase().startsWith("set"))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+  private boolean hasEnums(TableDefinition tbl)
+  {
+    for (ColumnIdentifier col : tbl.getColumns())
+    {
+      String typeName = col.getDbmsType();
+      if (typeName.toLowerCase().startsWith("enum") || typeName.toLowerCase().startsWith("set"))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 }

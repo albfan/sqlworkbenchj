@@ -29,23 +29,23 @@ package workbench.db.importer.modifier;
  */
 public class ColumnValueSubstring
 {
-	private int start;
-	private int end;
+  private int start;
+  private int end;
 
-	public ColumnValueSubstring(int s, int e)
-	{
-		start = s;
-		end = e;
-	}
+  public ColumnValueSubstring(int s, int e)
+  {
+    start = s;
+    end = e;
+  }
 
-	public String getSubstring(String input)
-	{
-		if (input == null) return null;
-		if (start > input.length()) return input;
-		if (end > input.length()) return input.substring(start);
-		return input.substring(start, end);
-	}
+  public String getSubstring(String input)
+  {
+    if (input == null) return null;
+    if (start > input.length()) return input;
+    if (end > input.length()) return input.substring(start);
+    return input.substring(start, end);
+  }
 
-	public int getStart() { return start; }
-	public int getEnd() { return end; }
+  public int getStart() { return start; }
+  public int getEnd() { return end; }
 }

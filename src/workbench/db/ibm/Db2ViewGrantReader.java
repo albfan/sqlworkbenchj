@@ -31,28 +31,28 @@ import workbench.db.ViewGrantReader;
  * @author Thomas Kellerer
  */
 public class Db2ViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
-	private final boolean isHostDB2;
+  private final boolean isHostDB2;
 
-	public Db2ViewGrantReader(String dbid)
-	{
+  public Db2ViewGrantReader(String dbid)
+  {
     isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
-	}
+  }
 
-	@Override
-	public String getViewGrantSql()
-	{
-		if (isHostDB2)
-		{
-			return getHostSQL();
-		}
-		return getLUWSql();
-	}
+  @Override
+  public String getViewGrantSql()
+  {
+    if (isHostDB2)
+    {
+      return getHostSQL();
+    }
+    return getLUWSql();
+  }
 
-	private String getHostSQL()
-	{
-		return
+  private String getHostSQL()
+  {
+    return
       "select rtrim(grantee) as grantee, privilege, is_grantable  \n" +
       "from ( \n" +
       "select grantee,  \n" +
@@ -100,10 +100,10 @@ public class Db2ViewGrantReader
       "where insertauth in ('Y', 'G') \n" +
       ") t \n" +
       "where ttname = ? and tcreator = ? ";
-	}
+  }
 
-	private String getLUWSql()
-	{
+  private String getLUWSql()
+  {
 
     return
       "select trim(grantee) as grantee, privilege, is_grantable  \n" +
@@ -153,19 +153,19 @@ public class Db2ViewGrantReader
       "where insertauth = 'Y' \n" +
       ") t \n" +
       "where tabname = ? and tabschema = ? ";
-	}
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 
 
 }

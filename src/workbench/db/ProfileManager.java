@@ -55,25 +55,25 @@ public class ProfileManager
     currentFile = new WbFile(file);
   }
 
-	/**
-	 * Find a connection profile identified by the given key.
-	 *
-	 * @param key the key of the profile
-	 * @return a connection profile with that name or null if none was found.
-	 */
-	public ConnectionProfile getProfile(ProfileKey key)
-	{
+  /**
+   * Find a connection profile identified by the given key.
+   *
+   * @param key the key of the profile
+   * @return a connection profile with that name or null if none was found.
+   */
+  public ConnectionProfile getProfile(ProfileKey key)
+  {
     if (key == null) return null;
     return findProfile(profiles, key);
-	}
+  }
 
-	/**
-	 * Return a list with profile keys that can be displayed to the user.
-	 *
-	 * @return all profiles keys (sorted).
-	 */
-	public List<String> getProfileKeys()
-	{
+  /**
+   * Return a list with profile keys that can be displayed to the user.
+   *
+   * @return all profiles keys (sorted).
+   */
+  public List<String> getProfileKeys()
+  {
     List<String> result = new ArrayList(profiles.size());
     for (ConnectionProfile profile : profiles)
     {
@@ -81,7 +81,7 @@ public class ProfileManager
     }
     Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
     return result;
-	}
+  }
 
 
   public List<ConnectionProfile> getProfiles()
@@ -102,17 +102,17 @@ public class ProfileManager
     readProfiles();
   }
 
-	/**
-	 * Save the connectioin profiles to an external file.
-	 *
-	 * This will also resetChangedFlags the changed flag for any modified or new
+  /**
+   * Save the connectioin profiles to an external file.
+   *
+   * This will also resetChangedFlags the changed flag for any modified or new
  profiles. The name of the file defaults to <tt>WbProfiles.xml</tt>, but
-	 * can be defined in the configuration properties.
-	 *
-	 * @see workbench.resource.Settings#getProfileStorage()
+   * can be defined in the configuration properties.
+   *
+   * @see workbench.resource.Settings#getProfileStorage()
    * @see #getFile()
-	 * @see ProfileStorage#saveProfiles(java.util.List, workbench.util.WbFile)
-	 */
+   * @see ProfileStorage#saveProfiles(java.util.List, workbench.util.WbFile)
+   */
   public void save()
   {
     if (Settings.getInstance().getCreateProfileBackup())
@@ -125,8 +125,8 @@ public class ProfileManager
   }
 
 
-	private void readProfiles()
-	{
+  private void readProfiles()
+  {
     ProfileStorage reader = getStorageHandler();
     WbFile f = getFile();
 
@@ -153,22 +153,22 @@ public class ProfileManager
 
     resetChangedFlags();
     loaded = true;
-	}
+  }
 
 
-	/**
-	 * Reset the changed status on the profiles.
-	 *
-	 * Called after saving the profiles.
-	 */
-	private void resetChangedFlags()
-	{
+  /**
+   * Reset the changed status on the profiles.
+   *
+   * Called after saving the profiles.
+   */
+  private void resetChangedFlags()
+  {
     for (ConnectionProfile profile : this.profiles)
     {
       profile.resetChangedFlags();
     }
     profilesDeleted = false;
-	}
+  }
 
   public void reset(String newStorageFile)
   {
@@ -184,10 +184,10 @@ public class ProfileManager
     return getFile().getFullPath();
   }
 
-	public WbFile getFile()
-	{
-		return currentFile;
-	}
+  public WbFile getFile()
+  {
+    return currentFile;
+  }
 
   private ProfileStorage getStorageHandler()
   {
@@ -199,14 +199,14 @@ public class ProfileManager
     return loaded;
   }
 
-	/**
-	 * Returns true if any of the profile definitions has changed.
-	 * (Or if a profile has been deleted or added)
-	 *
-	 * @return true if at least one profile has been changed, deleted or added
-	 */
-	public boolean profilesAreModified()
-	{
+  /**
+   * Returns true if any of the profile definitions has changed.
+   * (Or if a profile has been deleted or added)
+   *
+   * @return true if at least one profile has been changed, deleted or added
+   */
+  public boolean profilesAreModified()
+  {
     if (profiles == null) return false;
     if (profilesDeleted) return true;
 
@@ -218,11 +218,11 @@ public class ProfileManager
       }
     }
     return false;
-	}
+  }
 
-	public void applyProfiles(List<ConnectionProfile> newProfiles)
-	{
-		if (newProfiles == null) return;
+  public void applyProfiles(List<ConnectionProfile> newProfiles)
+  {
+    if (newProfiles == null) return;
 
     for (ConnectionProfile profile : profiles)
     {
@@ -239,16 +239,16 @@ public class ProfileManager
     {
       this.profiles.add(profile.createStatefulCopy());
     }
-	}
+  }
 
-	public void addProfile(ConnectionProfile aProfile)
-	{
+  public void addProfile(ConnectionProfile aProfile)
+  {
     this.profiles.remove(aProfile);
     this.profiles.add(aProfile);
-	}
+  }
 
-	public void removeProfile(ConnectionProfile aProfile)
-	{
+  public void removeProfile(ConnectionProfile aProfile)
+  {
     this.profiles.remove(aProfile);
 
     // deleting a new profile should not change the status to "modified"
@@ -256,33 +256,33 @@ public class ProfileManager
     {
       this.profilesDeleted = true;
     }
-	}
+  }
 
-	public static ConnectionProfile findProfile(List<ConnectionProfile> list, ProfileKey key)
-	{
-		if (key == null) return null;
-		if (list == null) return null;
+  public static ConnectionProfile findProfile(List<ConnectionProfile> list, ProfileKey key)
+  {
+    if (key == null) return null;
+    if (list == null) return null;
 
-		String name = key.getName();
-		String group = key.getGroup();
+    String name = key.getName();
+    String group = key.getGroup();
 
-		ConnectionProfile firstMatch = null;
-		for (ConnectionProfile prof : list)
-		{
-			if (name.equalsIgnoreCase(prof.getName().trim()))
-			{
-				if (firstMatch == null) firstMatch = prof;
-				if (group == null)
-				{
-					return prof;
-				}
-				else if (group.equalsIgnoreCase(prof.getGroup().trim()))
-				{
-					return prof;
-				}
-			}
-		}
-		return firstMatch;
-	}
+    ConnectionProfile firstMatch = null;
+    for (ConnectionProfile prof : list)
+    {
+      if (name.equalsIgnoreCase(prof.getName().trim()))
+      {
+        if (firstMatch == null) firstMatch = prof;
+        if (group == null)
+        {
+          return prof;
+        }
+        else if (group.equalsIgnoreCase(prof.getGroup().trim()))
+        {
+          return prof;
+        }
+      }
+    }
+    return firstMatch;
+  }
 
 }

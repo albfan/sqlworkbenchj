@@ -38,7 +38,7 @@ import workbench.util.WbFile;
  */
 public class PgPassReader
 {
-  private	String host;
+  private String host;
   private String port;
   private String database;
   private String pwd;

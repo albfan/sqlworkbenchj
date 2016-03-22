@@ -94,10 +94,10 @@ public class HanaDependencyReader
     List<DbObject> result = new ArrayList<>();
 
     String debugSql = SqlUtil.replaceParameters(sql, base.getSchema(), base.getObjectName());
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("HanaDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + debugSql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("HanaDependencyReader.retrieveObjects()", "Retrieving dependent objects using query:\n" + debugSql);
+    }
 
     boolean isTable = connection.getMetadata().isTableType(base.getObjectType());
 

@@ -34,42 +34,42 @@ import workbench.storage.DataStore;
  */
 public interface SequenceReader
 {
-	/**
-	 * The property name for the sequence increment.
-	 */
-	public static final String PROP_INCREMENT = "increment";
-	public static final String PROP_CACHE_SIZE = "cache";
-	public static final String PROP_IS_CACHED = "is_cached";
-	public static final String PROP_IS_GENERATED = "is_generated";
-	public static final String PROP_CYCLE = "cycle";
-	public static final String PROP_MIN_VALUE = "min_value";
-	public static final String PROP_MAX_VALUE = "max_value";
-	public static final String PROP_OWNED_BY = "owned_by";
-	public static final String PROP_ORDERED = "ordered";
-	public static final String PROP_START_VALUE = "start_value";
-	public static final String PROP_DATA_TYPE = "data_type";
-	public static final String PROP_USER_DATA_TYPE = "user_data_type";
-	public static final String PROP_CURRENT_VALUE = "current_value";
-	public static final String PROP_PRECISION = "precision";
-	public static final String PROP_LAST_VALUE = "last_value";
+  /**
+   * The property name for the sequence increment.
+   */
+  public static final String PROP_INCREMENT = "increment";
+  public static final String PROP_CACHE_SIZE = "cache";
+  public static final String PROP_IS_CACHED = "is_cached";
+  public static final String PROP_IS_GENERATED = "is_generated";
+  public static final String PROP_CYCLE = "cycle";
+  public static final String PROP_MIN_VALUE = "min_value";
+  public static final String PROP_MAX_VALUE = "max_value";
+  public static final String PROP_OWNED_BY = "owned_by";
+  public static final String PROP_ORDERED = "ordered";
+  public static final String PROP_START_VALUE = "start_value";
+  public static final String PROP_DATA_TYPE = "data_type";
+  public static final String PROP_USER_DATA_TYPE = "user_data_type";
+  public static final String PROP_CURRENT_VALUE = "current_value";
+  public static final String PROP_PRECISION = "precision";
+  public static final String PROP_LAST_VALUE = "last_value";
 
-	String DEFAULT_TYPE_NAME = "SEQUENCE";
+  String DEFAULT_TYPE_NAME = "SEQUENCE";
 
-	/**
-	 *	Return a SQL String to recreate the given sequence
-	 */
-	CharSequence getSequenceSource(String catalog, String schema, String sequence);
-	void readSequenceSource(SequenceDefinition def);
+  /**
+   *  Return a SQL String to recreate the given sequence
+   */
+  CharSequence getSequenceSource(String catalog, String schema, String sequence);
+  void readSequenceSource(SequenceDefinition def);
 
-	/**
-	 * 	Get a list of sequences for the given owner.
-	 */
-	List<SequenceDefinition> getSequences(String catalogPattern, String schemaPattern, String namePattern)
-		throws SQLException;
+  /**
+   *  Get a list of sequences for the given owner.
+   */
+  List<SequenceDefinition> getSequences(String catalogPattern, String schemaPattern, String namePattern)
+    throws SQLException;
 
-	SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence);
-	DataStore getRawSequenceDefinition(String catalog, String schema, String sequence);
+  SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence);
+  DataStore getRawSequenceDefinition(String catalog, String schema, String sequence);
 
-	String getSequenceTypeName();
+  String getSequenceTypeName();
 
 }

@@ -45,92 +45,92 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class SqlServerUniqueConstraintReader
-	implements UniqueConstraintReader
+  implements UniqueConstraintReader
 {
 
-	@Override
-	public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
-	{
-		if (!SqlServerUtil.isSqlServer2005(con)) return;
+  @Override
+  public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
+  {
+    if (!SqlServerUtil.isSqlServer2005(con)) return;
 
-		if (CollectionUtil.isEmpty(indexList))  return;
-		if (con == null) return;
+    if (CollectionUtil.isEmpty(indexList))  return;
+    if (con == null) return;
 
-		StringBuilder sql = new StringBuilder(500);
-		sql.append(
-			"select ind.name as indname, sch.name as indschema, cons.name as consname \n" +
-			"from sys.indexes ind with (nolock) \n" +
-			"  join sys.objects obj with (nolock) on ind.object_id = obj.object_id \n" +
-			"  join sys.schemas sch with (nolock) on sch.schema_id = obj.schema_id \n" +
-			"  join sys.key_constraints cons with (nolock) on ind.object_id = cons.parent_object_id and ind.index_id = cons.unique_index_id \n" +
-			"where is_unique = 1  \n" +
-			"and is_unique_constraint = 1 \n" +
-			"and (");
+    StringBuilder sql = new StringBuilder(500);
+    sql.append(
+      "select ind.name as indname, sch.name as indschema, cons.name as consname \n" +
+      "from sys.indexes ind with (nolock) \n" +
+      "  join sys.objects obj with (nolock) on ind.object_id = obj.object_id \n" +
+      "  join sys.schemas sch with (nolock) on sch.schema_id = obj.schema_id \n" +
+      "  join sys.key_constraints cons with (nolock) on ind.object_id = cons.parent_object_id and ind.index_id = cons.unique_index_id \n" +
+      "where is_unique = 1  \n" +
+      "and is_unique_constraint = 1 \n" +
+      "and (");
 
-		boolean first = true;
-		int idxCount = 0;
+    boolean first = true;
+    int idxCount = 0;
 
-		for (IndexDefinition idx : indexList)
-		{
-			if (!idx.isUnique() || idx.isPrimaryKeyIndex())
-			{
-				continue;
-			}
-			if (first)
-			{
-				first = false;
-			}
-			else
-			{
-				sql.append(" OR ");
-			}
-			idxCount ++;
-			String schema = con.getMetadata().removeQuotes(idx.getSchema());
-			String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
-			sql.append(" (sch.name = '");
-			sql.append(schema);
-			sql.append("' AND ind.name = '");
-			sql.append(idxName);
-			sql.append("') ");
-		}
-		sql.append(')');
-		if (idxCount == 0)
-		{
-			return;
-		}
+    for (IndexDefinition idx : indexList)
+    {
+      if (!idx.isUnique() || idx.isPrimaryKeyIndex())
+      {
+        continue;
+      }
+      if (first)
+      {
+        first = false;
+      }
+      else
+      {
+        sql.append(" OR ");
+      }
+      idxCount ++;
+      String schema = con.getMetadata().removeQuotes(idx.getSchema());
+      String idxName = con.getMetadata().removeQuotes(idx.getObjectName());
+      sql.append(" (sch.name = '");
+      sql.append(schema);
+      sql.append("' AND ind.name = '");
+      sql.append(idxName);
+      sql.append("') ");
+    }
+    sql.append(')');
+    if (idxCount == 0)
+    {
+      return;
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("SqlServerUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("SqlServerUniqueConstraintReader.processIndexList()", "Using:\n" + sql);
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql.toString());
-			while (rs.next())
-			{
-				String idxName = rs.getString(1);
-				String idxSchema = rs.getString(2);
-				String consName = rs.getString(3);
-				IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
-				if (def != null)
-				{
-					ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
-					def.setUniqueConstraint(cons);
-				}
-			}
-		}
-		catch (SQLException se)
-		{
-			LogMgr.logError("SqlServerUniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.createStatement();
+      rs = stmt.executeQuery(sql.toString());
+      while (rs.next())
+      {
+        String idxName = rs.getString(1);
+        String idxSchema = rs.getString(2);
+        String consName = rs.getString(3);
+        IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, idxSchema);
+        if (def != null)
+        {
+          ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+          def.setUniqueConstraint(cons);
+        }
+      }
+    }
+    catch (SQLException se)
+    {
+      LogMgr.logError("SqlServerUniqueConstraintReader.processIndexList()", "Could not retrieve definition", se);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
 }

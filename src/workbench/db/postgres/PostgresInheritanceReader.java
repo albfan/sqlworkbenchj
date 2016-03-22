@@ -76,7 +76,7 @@ public class PostgresInheritanceReader
       "select pg_class.relname as table_name, pg_namespace.nspname as table_schema, inh.level \n" +
       "from inh \n" +
       "  join pg_catalog.pg_class on (inh.inhrelid = pg_class.oid) \n" +
-      "	 join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
+      "  join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
       "order by path";
 
     final boolean is84 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4");

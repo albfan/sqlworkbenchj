@@ -37,44 +37,44 @@ import workbench.util.StringUtil;
  */
 public class TableCommentReader
 {
-	public TableCommentReader()
-	{
-	}
+  public TableCommentReader()
+  {
+  }
 
-	/**
-	 * Return the SQL that is needed to re-create the comment on the given table.
-	 * The syntax to be used, can be configured in the workbench.settings file.
-	 */
-	public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
-	{
-		return getTableCommentSql(dbConnection.getDbSettings().getDbId(), dbConnection, table);
-	}
+  /**
+   * Return the SQL that is needed to re-create the comment on the given table.
+   * The syntax to be used, can be configured in the workbench.settings file.
+   */
+  public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
+  {
+    return getTableCommentSql(dbConnection.getDbSettings().getDbId(), dbConnection, table);
+  }
 
-	String getTableCommentSql(String dbId, WbConnection dbConnection, TableIdentifier table)
-	{
-		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
+  String getTableCommentSql(String dbId, WbConnection dbConnection, TableIdentifier table)
+  {
+    CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
 
-		String commentStatement = mgr.getCommentSqlTemplate(table.getType(), CommentSqlManager.COMMENT_ACTION_SET);
+    String commentStatement = mgr.getCommentSqlTemplate(table.getType(), CommentSqlManager.COMMENT_ACTION_SET);
 
-		if (StringUtil.isBlank(commentStatement))
-		{
-			return null;
-		}
+    if (StringUtil.isBlank(commentStatement))
+    {
+      return null;
+    }
 
-		String comment = null;
+    String comment = null;
 
-		if (table.commentIsDefined())
-		{
-			comment = table.getComment();
-		}
-		else
-		{
-			comment = getTableComment(dbConnection, table);
-		}
+    if (table.commentIsDefined())
+    {
+      comment = table.getComment();
+    }
+    else
+    {
+      comment = getTableComment(dbConnection, table);
+    }
 
-		String result = null;
-		if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
-		{
+    String result = null;
+    if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
+    {
       String fqn = table.getFullyQualifiedName(dbConnection);
 
       result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, fqn);
@@ -89,71 +89,71 @@ public class TableCommentReader
       result = replaceObjectNamePlaceholder(result, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getTableName()));
       result = replaceObjectNamePlaceholder(result, TableSourceBuilder.SCHEMA_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getSchema()));
       result = replaceObjectNamePlaceholder(result, TableSourceBuilder.CATALOG_PLACEHOLDER, dbConnection.getMetadata().quoteObjectname(table.getCatalog()));
-			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
-			result += ";";
-		}
+      result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
+      result += ";";
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	public String getTableComment(WbConnection dbConnection, TableIdentifier tbl)
-	{
-		TableIdentifier id = dbConnection.getMetadata().findObject(tbl);
-		if (id == null) return null;
-		return id.getComment();
-	}
+  public String getTableComment(WbConnection dbConnection, TableIdentifier tbl)
+  {
+    TableIdentifier id = dbConnection.getMetadata().findObject(tbl);
+    if (id == null) return null;
+    return id.getComment();
+  }
 
-	/**
-	 * Return the SQL that is needed to re-create the comment on the given columns.
-	 *
-	 * The syntax to be used, can be configured in the workbench.settings file.
-	 *
-	 * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String, java.lang.String)
-	 */
-	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		return getTableColumnCommentsSql(con.getMetadata().getDbId(), con, table, columns);
-	}
+  /**
+   * Return the SQL that is needed to re-create the comment on the given columns.
+   *
+   * The syntax to be used, can be configured in the workbench.settings file.
+   *
+   * @see CommentSqlManager#getCommentSqlTemplate(java.lang.String, java.lang.String)
+   */
+  public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
+  {
+    return getTableColumnCommentsSql(con.getMetadata().getDbId(), con, table, columns);
+  }
 
-	/**
-	 * For Unit-Testing only
-	 */
-	StringBuilder getTableColumnCommentsSql(String dbId, WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
-	{
-		CommentSqlManager mgr = new CommentSqlManager(dbId);
+  /**
+   * For Unit-Testing only
+   */
+  StringBuilder getTableColumnCommentsSql(String dbId, WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
+  {
+    CommentSqlManager mgr = new CommentSqlManager(dbId);
 
-		String columnStatement = mgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
-		if (StringUtil.isBlank(columnStatement)) return null;
-		StringBuilder result = new StringBuilder(columns.size() * 25);
-		ColumnChanger colChanger = new ColumnChanger(con);
+    String columnStatement = mgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
+    if (StringUtil.isBlank(columnStatement)) return null;
+    StringBuilder result = new StringBuilder(columns.size() * 25);
+    ColumnChanger colChanger = new ColumnChanger(con);
 
-		for (ColumnIdentifier col : columns)
-		{
-			String comment = col.getComment();
-			if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
-			{
-				try
-				{
-					String commentSql = colChanger.getColumnCommentSql(table, col);
-					result.append(commentSql);
-					result.append(";\n");
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("TableCommentReader.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + comment, e);
-				}
-			}
-		}
-		return result;
-	}
+    for (ColumnIdentifier col : columns)
+    {
+      String comment = col.getComment();
+      if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
+      {
+        try
+        {
+          String commentSql = colChanger.getColumnCommentSql(table, col);
+          result.append(commentSql);
+          result.append(";\n");
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("TableCommentReader.getTableColumnCommentsSql()", "Error creating comments SQL for remark=" + comment, e);
+        }
+      }
+    }
+    return result;
+  }
 
-	private String replaceObjectNamePlaceholder(String source, String placeHolder, String replacement)
-	{
-		if (StringUtil.isBlank(replacement))
-		{
-			return source.replace(placeHolder + ".", "");
-		}
-		return source.replace(placeHolder, replacement);
-	}
+  private String replaceObjectNamePlaceholder(String source, String placeHolder, String replacement)
+  {
+    if (StringUtil.isBlank(replacement))
+    {
+      return source.replace(placeHolder + ".", "");
+    }
+    return source.replace(placeHolder, replacement);
+  }
 
 }

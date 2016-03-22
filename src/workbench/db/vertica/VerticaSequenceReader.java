@@ -46,12 +46,12 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class VerticaSequenceReader
-	implements SequenceReader
+  implements SequenceReader
 {
-	private WbConnection dbConnection;
-	private final String baseSql =
+  private WbConnection dbConnection;
+  private final String baseSql =
               "select current_database as sequence_catalog, \n" +
-						  "       sequence_schema,  \n" +
+              "       sequence_schema,  \n" +
               "       sequence_name, \n" +
               "       minimum, \n" +
               "       maximum, \n" +
@@ -60,212 +60,212 @@ public class VerticaSequenceReader
               "       allow_cycle \n" +
               "from v_catalog.sequences";
 
-	public VerticaSequenceReader(WbConnection conn)
-	{
-		this.dbConnection = conn;
-	}
+  public VerticaSequenceReader(WbConnection conn)
+  {
+    this.dbConnection = conn;
+  }
 
-	@Override
-	public void readSequenceSource(SequenceDefinition def)
-	{
-		if (def == null) return;
+  @Override
+  public void readSequenceSource(SequenceDefinition def)
+  {
+    if (def == null) return;
 
-		StringBuilder buf = new StringBuilder(250);
+    StringBuilder buf = new StringBuilder(250);
 
-		try
-		{
-			String name = def.getSequenceName();
-			Long maxO = (Long) def.getSequenceProperty(PROP_MAX_VALUE);
-			Long minO = (Long) def.getSequenceProperty(PROP_MIN_VALUE);
-			Long incO = (Long) def.getSequenceProperty(PROP_INCREMENT);
-			Long cacheO = (Long) def.getSequenceProperty(PROP_CACHE_SIZE);
-			Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
-			if (cycle == null) cycle = Boolean.FALSE;
+    try
+    {
+      String name = def.getSequenceName();
+      Long maxO = (Long) def.getSequenceProperty(PROP_MAX_VALUE);
+      Long minO = (Long) def.getSequenceProperty(PROP_MIN_VALUE);
+      Long incO = (Long) def.getSequenceProperty(PROP_INCREMENT);
+      Long cacheO = (Long) def.getSequenceProperty(PROP_CACHE_SIZE);
+      Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
+      if (cycle == null) cycle = Boolean.FALSE;
 
-			long max = (maxO == null ? Long.MAX_VALUE : maxO.longValue());
-			long min = (minO == null ? 1 : minO.longValue());
-			long inc = (incO == null ? 1 : incO.longValue());
-			long cache = (cacheO == null ? 250000 : cacheO.longValue());
+      long max = (maxO == null ? Long.MAX_VALUE : maxO.longValue());
+      long min = (minO == null ? 1 : minO.longValue());
+      long inc = (incO == null ? 1 : incO.longValue());
+      long cache = (cacheO == null ? 250000 : cacheO.longValue());
 
-			buf.append("CREATE SEQUENCE ");
-			buf.append(name);
-			buf.append("\n       INCREMENT BY ");
-			buf.append(inc);
+      buf.append("CREATE SEQUENCE ");
+      buf.append(name);
+      buf.append("\n       INCREMENT BY ");
+      buf.append(inc);
 
-			buf.append("\n       MINVALUE ");
-			buf.append(min);
+      buf.append("\n       MINVALUE ");
+      buf.append(min);
 
-			if (max != Long.MAX_VALUE)
-			{
-				buf.append("\n       MAXVALUE ");
-				buf.append(Long.toString(max));
-			}
+      if (max != Long.MAX_VALUE)
+      {
+        buf.append("\n       MAXVALUE ");
+        buf.append(Long.toString(max));
+      }
 
-			if (cache != 250000)
-			{
-				buf.append("\n       CACHE ");
-				buf.append(cache);
-			}
-			buf.append("\n       ");
-			if (!cycle.booleanValue())
-			{
-				buf.append("NO");
-			}
-			buf.append(" CYCLE");
-			buf.append(";\n");
+      if (cache != 250000)
+      {
+        buf.append("\n       CACHE ");
+        buf.append(cache);
+      }
+      buf.append("\n       ");
+      if (!cycle.booleanValue())
+      {
+        buf.append("NO");
+      }
+      buf.append(" CYCLE");
+      buf.append(";\n");
 
-			if (StringUtil.isNonBlank(def.getComment()))
-			{
-				buf.append('\n');
-				buf.append("COMMENT ON SEQUENCE ").append(def.getSequenceName()).append(" IS '").append(def.getComment().replace("'", "''")).append("';");
-			}
+      if (StringUtil.isNonBlank(def.getComment()))
+      {
+        buf.append('\n');
+        buf.append("COMMENT ON SEQUENCE ").append(def.getSequenceName()).append(" IS '").append(def.getComment().replace("'", "''")).append("';");
+      }
 
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("VerticaSequenceReader.getSequenceSource()", "Error reading sequence definition", e);
-		}
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("VerticaSequenceReader.getSequenceSource()", "Error reading sequence definition", e);
+    }
 
-		def.setSource(buf);
-	}
+    def.setSource(buf);
+  }
 
-	/**
-	 *	Return the source SQL for a PostgreSQL sequence definition.
-	 *
-	 *	@return The SQL to recreate the given sequence
-	 */
-	@Override
-	public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
-	{
-		SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
-		return def.getSource();
-	}
+  /**
+   *  Return the source SQL for a PostgreSQL sequence definition.
+   *
+   *  @return The SQL to recreate the given sequence
+   */
+  @Override
+  public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
+  {
+    SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
+    return def.getSource();
+  }
 
-	/**
-	 * Retrieve the list of full SequenceDefinitions from the database.
-	 */
-	@Override
-	public List<SequenceDefinition> getSequences(String catalog, String schema, String namePattern)
-	{
-		List<SequenceDefinition> result = new ArrayList<>();
+  /**
+   * Retrieve the list of full SequenceDefinitions from the database.
+   */
+  @Override
+  public List<SequenceDefinition> getSequences(String catalog, String schema, String namePattern)
+  {
+    List<SequenceDefinition> result = new ArrayList<>();
 
-		ResultSet rs = null;
-		Statement stmt = null;
-		Savepoint sp = null;
-		if (namePattern == null) namePattern = "%";
+    ResultSet rs = null;
+    Statement stmt = null;
+    Savepoint sp = null;
+    if (namePattern == null) namePattern = "%";
 
-		String sql = buildSql(schema, null);
-		try
-		{
-			stmt = dbConnection.createStatementForQuery();
+    String sql = buildSql(schema, null);
+    try
+    {
+      stmt = dbConnection.createStatementForQuery();
 
-			rs = stmt.executeQuery(sql);
-			DataStore ds = new DataStore(rs, dbConnection, true);
-			for (int row=0; row < ds.getRowCount(); row++)
-			{
-				result.add(createDefinition(ds, row));
-			}
-			this.dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			this.dbConnection.rollback(sp);
-			LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql:\n" + sql, e);
-			return result;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+      rs = stmt.executeQuery(sql);
+      DataStore ds = new DataStore(rs, dbConnection, true);
+      for (int row=0; row < ds.getRowCount(); row++)
+      {
+        result.add(createDefinition(ds, row));
+      }
+      this.dbConnection.releaseSavepoint(sp);
+    }
+    catch (SQLException e)
+    {
+      this.dbConnection.rollback(sp);
+      LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql:\n" + sql, e);
+      return result;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	private SequenceDefinition createDefinition(DataStore ds, int row)
-	{
-		String catalog = ds.getValueAsString(row, "sequence_catalog");
-		String name = ds.getValueAsString(row, "sequence_name");
-		String schema = ds.getValueAsString(row, "sequence_schema");
-		SequenceDefinition def = new SequenceDefinition(catalog, schema, name);
-		def.setSequenceProperty(PROP_INCREMENT, ds.getValue(0, "increment_by"));
-		def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(0, "maximum"));
-		def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "minimum"));
-		def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "session_cache_count"));
-		def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "allow_cycle"));
-		return def;
-	}
+  private SequenceDefinition createDefinition(DataStore ds, int row)
+  {
+    String catalog = ds.getValueAsString(row, "sequence_catalog");
+    String name = ds.getValueAsString(row, "sequence_name");
+    String schema = ds.getValueAsString(row, "sequence_schema");
+    SequenceDefinition def = new SequenceDefinition(catalog, schema, name);
+    def.setSequenceProperty(PROP_INCREMENT, ds.getValue(0, "increment_by"));
+    def.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(0, "maximum"));
+    def.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(0, "minimum"));
+    def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "session_cache_count"));
+    def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "allow_cycle"));
+    return def;
+  }
 
-	private SequenceDefinition retrieveSequenceDetails(String catalog, String schema, String sequence)
-	{
-		DataStore ds = getRawSequenceDefinition(catalog, schema, sequence);
-		if (ds.getRowCount() == 0)
-		{
-			return null;
-		}
-		SequenceDefinition result = createDefinition(ds, 0);
-		readSequenceSource(result);
-		return result;
-	}
+  private SequenceDefinition retrieveSequenceDetails(String catalog, String schema, String sequence)
+  {
+    DataStore ds = getRawSequenceDefinition(catalog, schema, sequence);
+    if (ds.getRowCount() == 0)
+    {
+      return null;
+    }
+    SequenceDefinition result = createDefinition(ds, 0);
+    readSequenceSource(result);
+    return result;
+  }
 
-	@Override
-	public SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence)
-	{
-		return retrieveSequenceDetails(catalog, schema, sequence);
-	}
+  @Override
+  public SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence)
+  {
+    return retrieveSequenceDetails(catalog, schema, sequence);
+  }
 
-	@Override
-	public DataStore getRawSequenceDefinition(String catalog, String schema, String sequence)
-	{
-		if (sequence == null) return null;
+  @Override
+  public DataStore getRawSequenceDefinition(String catalog, String schema, String sequence)
+  {
+    if (sequence == null) return null;
 
-		DataStore result = null;
-		try
-		{
-			String sql = buildSql(schema, sequence);
-			result = SqlUtil.getResultData(dbConnection, sql, true);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logDebug("VerticaSequenceReader.getSequenceDefinition()", "Error reading sequence definition", e);
-		}
-		return result;
-	}
+    DataStore result = null;
+    try
+    {
+      String sql = buildSql(schema, sequence);
+      result = SqlUtil.getResultData(dbConnection, sql, true);
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logDebug("VerticaSequenceReader.getSequenceDefinition()", "Error reading sequence definition", e);
+    }
+    return result;
+  }
 
-	private String buildSql(String schema, String sequence)
-	{
-		StringBuilder sql = new StringBuilder(100);
-		sql.append(baseSql);
+  private String buildSql(String schema, String sequence)
+  {
+    StringBuilder sql = new StringBuilder(100);
+    sql.append(baseSql);
 
-		if (schema != null || sequence != null)
-		{
-			sql.append(" WHERE ");
-			boolean needAnd = false;
+    if (schema != null || sequence != null)
+    {
+      sql.append(" WHERE ");
+      boolean needAnd = false;
 
-			if (sequence != null)
-			{
-				SqlUtil.appendExpression(sql, "sequence_name", sequence, dbConnection);
-				needAnd = true;
-			}
+      if (sequence != null)
+      {
+        SqlUtil.appendExpression(sql, "sequence_name", sequence, dbConnection);
+        needAnd = true;
+      }
 
-			if (needAnd)
-			{
-				SqlUtil.appendAndCondition(sql, "sequence_schema", schema, dbConnection);
-			}
-			else
-			{
-				SqlUtil.appendExpression(sql, "sequence_schema", schema, dbConnection);
-				needAnd = true;
-			}
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logDebug("VerticaSequenceReader.buildSql()", "Using SQL=\n" + sql);
-			}
-		}
-		return sql.toString();
-	}
+      if (needAnd)
+      {
+        SqlUtil.appendAndCondition(sql, "sequence_schema", schema, dbConnection);
+      }
+      else
+      {
+        SqlUtil.appendExpression(sql, "sequence_schema", schema, dbConnection);
+        needAnd = true;
+      }
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("VerticaSequenceReader.buildSql()", "Using SQL=\n" + sql);
+      }
+    }
+    return sql.toString();
+  }
 
-	@Override
-	public String getSequenceTypeName()
-	{
-		return SequenceReader.DEFAULT_TYPE_NAME;
-	}
+  @Override
+  public String getSequenceTypeName()
+  {
+    return SequenceReader.DEFAULT_TYPE_NAME;
+  }
 }

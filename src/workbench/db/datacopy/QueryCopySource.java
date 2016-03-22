@@ -57,7 +57,7 @@ import workbench.util.ValueConverter;
  * @author  Thomas Kellerer
  */
 public class QueryCopySource
-	implements RowDataProducer
+  implements RowDataProducer
 {
   private DataReceiver receiver;
   private volatile boolean keepRunning = true;
@@ -72,169 +72,169 @@ public class QueryCopySource
 
   private boolean trimCharData;
 
-	public QueryCopySource(WbConnection source, String sql)
-	{
-		this.sourceConnection = source;
-		this.retrieveSql = SqlUtil.trimSemicolon(sql);
-	}
+  public QueryCopySource(WbConnection source, String sql)
+  {
+    this.sourceConnection = source;
+    this.retrieveSql = SqlUtil.trimSemicolon(sql);
+  }
 
-	public void setTrimCharData(boolean trim)
-	{
-		this.trimCharData = trim;
-	}
+  public void setTrimCharData(boolean trim)
+  {
+    this.trimCharData = trim;
+  }
 
   @Override
   public void setMessageBuffer(MessageBuffer messages)
   {
   }
 
-	@Override
-	public boolean hasErrors()
-	{
-		return this.hasErrors;
-	}
+  @Override
+  public boolean hasErrors()
+  {
+    return this.hasErrors;
+  }
 
-	@Override
-	public boolean hasWarnings()
-	{
-		return this.hasWarnings;
-	}
+  @Override
+  public boolean hasWarnings()
+  {
+    return this.hasWarnings;
+  }
 
-	@Override
-	public void setValueConverter(ValueConverter converter)
-	{
-	}
+  @Override
+  public void setValueConverter(ValueConverter converter)
+  {
+  }
 
-	@Override
-	public void setReceiver(DataReceiver rec)
-	{
-		this.receiver = rec;
-	}
+  @Override
+  public void setReceiver(DataReceiver rec)
+  {
+    this.receiver = rec;
+  }
 
-	@Override
-	public void start()
-		throws Exception
-	{
-		LogMgr.logDebug("QueryCopySource.start()", "Using SQL: " + this.retrieveSql);
+  @Override
+  public void start()
+    throws Exception
+  {
+    LogMgr.logDebug("QueryCopySource.start()", "Using SQL: " + this.retrieveSql);
 
-		ResultSet rs = null;
-		this.keepRunning = true;
-		this.regularStop = false;
-		Savepoint sp = null;
-		RowDataReader reader = null;
-		try
-		{
-			if (receiver.isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
-			{
-				sp = sourceConnection.setSavepoint();
-			}
-			this.retrieveStatement = this.sourceConnection.createStatementForQuery();
-			rs = this.retrieveStatement.executeQuery(this.retrieveSql);
-			ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
-			reader = RowDataReaderFactory.createReader(info, sourceConnection);
+    ResultSet rs = null;
+    this.keepRunning = true;
+    this.regularStop = false;
+    Savepoint sp = null;
+    RowDataReader reader = null;
+    try
+    {
+      if (receiver.isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
+      {
+        sp = sourceConnection.setSavepoint();
+      }
+      this.retrieveStatement = this.sourceConnection.createStatementForQuery();
+      rs = this.retrieveStatement.executeQuery(this.retrieveSql);
+      ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);
+      reader = RowDataReaderFactory.createReader(info, sourceConnection);
 
-			// make sure the data is retrieved "as is" from the source. Do not convert it to something readable.
-			reader.setConverter(null);
+      // make sure the data is retrieved "as is" from the source. Do not convert it to something readable.
+      reader.setConverter(null);
 
-			while (this.keepRunning && rs.next())
-			{
-				// RowDataReader will make some transformation
-				// on the data read from the database
-				// which works around some bugs in the Oracle
-				// JDBC driver. Especially it will supply
-				// CLOB data as a String which I hope will be
-				// more flexible when copying from Oracle
-				// to other systems
-				// That's why I'm reading the result set into a RowData object
-			  currentRow = reader.read(rs, trimCharData);
-				if (!keepRunning) break;
+      while (this.keepRunning && rs.next())
+      {
+        // RowDataReader will make some transformation
+        // on the data read from the database
+        // which works around some bugs in the Oracle
+        // JDBC driver. Especially it will supply
+        // CLOB data as a String which I hope will be
+        // more flexible when copying from Oracle
+        // to other systems
+        // That's why I'm reading the result set into a RowData object
+        currentRow = reader.read(rs, trimCharData);
+        if (!keepRunning) break;
 
-				try
-				{
-					this.receiver.processRow(currentRow.getData());
-				}
-				catch (SQLException e)
-				{
-					if (abortOnError) throw e;
-				}
-				reader.closeStreams();
-			}
+        try
+        {
+          this.receiver.processRow(currentRow.getData());
+        }
+        catch (SQLException e)
+        {
+          if (abortOnError) throw e;
+        }
+        reader.closeStreams();
+      }
 
-			// if keepRunning == false, cancel() was
-			// called and we have to tell that the Importer
-			// in order to do a rollback
-			if (this.keepRunning || regularStop)
-			{
-				// When copying a schema, we should not send an importFinished()
-				// so that the DataImporter reports the table counts correctly
-				this.receiver.importFinished();
-			}
-			else
-			{
-				this.receiver.importCancelled();
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, retrieveStatement);
-			sourceConnection.rollback(sp);
-			if (reader != null)
-			{
-				reader.closeStreams();
-			}
+      // if keepRunning == false, cancel() was
+      // called and we have to tell that the Importer
+      // in order to do a rollback
+      if (this.keepRunning || regularStop)
+      {
+        // When copying a schema, we should not send an importFinished()
+        // so that the DataImporter reports the table counts correctly
+        this.receiver.importFinished();
+      }
+      else
+      {
+        this.receiver.importCancelled();
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, retrieveStatement);
+      sourceConnection.rollback(sp);
+      if (reader != null)
+      {
+        reader.closeStreams();
+      }
 
-		}
-	}
+    }
+  }
 
-	@Override
-	public String getLastRecord()
-	{
-		if (currentRow == null) return null;
-		return currentRow.toString();
-	}
+  @Override
+  public String getLastRecord()
+  {
+    if (currentRow == null) return null;
+    return currentRow.toString();
+  }
 
-	@Override
-	public void stop()
-	{
-		this.regularStop = true;
-		cancel();
-	}
+  @Override
+  public void stop()
+  {
+    this.regularStop = true;
+    cancel();
+  }
 
-	@Override
-	public void cancel()
-	{
-		this.keepRunning = false;
-		try
-		{
-			this.retrieveStatement.cancel();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("QueryCopySource.cancel()", "Error when cancelling retrieve", e);
-		}
+  @Override
+  public void cancel()
+  {
+    this.keepRunning = false;
+    try
+    {
+      this.retrieveStatement.cancel();
+    }
+    catch (Exception e)
+    {
+      LogMgr.logWarning("QueryCopySource.cancel()", "Error when cancelling retrieve", e);
+    }
 
-	}
+  }
 
-	@Override
-	public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
-	{
-		return null;
-	}
+  @Override
+  public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
+  {
+    return null;
+  }
 
-	@Override
-	public MessageBuffer getMessages()
-	{
-		return null;
-	}
+  @Override
+  public MessageBuffer getMessages()
+  {
+    return null;
+  }
 
-	@Override
-	public void setAbortOnError(boolean flag)
-	{
-		this.abortOnError = flag;
-	}
+  @Override
+  public void setAbortOnError(boolean flag)
+  {
+    this.abortOnError = flag;
+  }
 
-	@Override
-	public void setErrorHandler(JobErrorHandler handler)
-	{
-	}
+  @Override
+  public void setErrorHandler(JobErrorHandler handler)
+  {
+  }
 }

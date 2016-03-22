@@ -30,12 +30,12 @@ import org.xml.sax.SAXException;
  * @author  Thomas Kellerer
  */
 public class ParsingEndedException
-	extends SAXException
+  extends SAXException
 {
 
-	public ParsingEndedException()
-	{
-		super("Parsing ended");
-	}
+  public ParsingEndedException()
+  {
+    super("Parsing ended");
+  }
 
 }

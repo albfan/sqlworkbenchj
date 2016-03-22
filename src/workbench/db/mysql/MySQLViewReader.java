@@ -40,44 +40,44 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class MySQLViewReader
-	extends DefaultViewReader
+  extends DefaultViewReader
 {
 
-	public MySQLViewReader(WbConnection con)
-	{
-		super(con);
-	}
+  public MySQLViewReader(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	protected CharSequence createFullViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
-		throws SQLException, NoConfigException
-	{
-		if (!this.connection.getDbSettings().getUseMySQLShowCreate("view"))
-		{
-			return super.createFullViewSource(view, dropType, includeCommit);
-		}
+  @Override
+  protected CharSequence createFullViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
+    throws SQLException, NoConfigException
+  {
+    if (!this.connection.getDbSettings().getUseMySQLShowCreate("view"))
+    {
+      return super.createFullViewSource(view, dropType, includeCommit);
+    }
 
-		String source = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			String viewName = view.getTable().getFullyQualifiedName(connection);
-			stmt = connection.createStatementForQuery();
-			rs = stmt.executeQuery("show create view " + viewName);
-			if (rs.next())
-			{
-				source = rs.getString(2);
-			}
-			if (dropType != DropType.none && source != null)
-			{
-				source  = "drop view " + viewName + ";\n\n" + source;
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return source;
-	}
+    String source = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      String viewName = view.getTable().getFullyQualifiedName(connection);
+      stmt = connection.createStatementForQuery();
+      rs = stmt.executeQuery("show create view " + viewName);
+      if (rs.next())
+      {
+        source = rs.getString(2);
+      }
+      if (dropType != DropType.none && source != null)
+      {
+        source  = "drop view " + viewName + ";\n\n" + source;
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return source;
+  }
 }

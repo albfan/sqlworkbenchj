@@ -29,10 +29,10 @@ package workbench.db;
  */
 public enum ConstraintType
 {
-	Check,
-	Unique,
-	ForeignKey,
-	PrimaryKey,
-	/** Postgres only */
-	Exclusion;
+  Check,
+  Unique,
+  ForeignKey,
+  PrimaryKey,
+  /** Postgres only */
+  Exclusion;
 }

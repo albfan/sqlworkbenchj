@@ -30,7 +30,7 @@ import workbench.db.ViewGrantReader;
  * This will work for the following DBMS
  *
  * <ul>
- *	<li>PostgreSQL</li>
+ *  <li>PostgreSQL</li>
  *  <li>H2 Database</li>
  *  <li>MySQL</li>
  *  <li>Microsoft SQL Server 2000</li>

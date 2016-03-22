@@ -36,56 +36,56 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class TableListSorter
-	extends RowDataListSorter
+  extends RowDataListSorter
 {
-	private static final String TABLE_TYPE = "TABLE";
-	private boolean mviewAsTable = false;
+  private static final String TABLE_TYPE = "TABLE";
+  private boolean mviewAsTable = false;
 
-	public TableListSorter(SortDefinition sortDef)
-	{
-		super(sortDef);
-	}
+  public TableListSorter(SortDefinition sortDef)
+  {
+    super(sortDef);
+  }
 
-	public TableListSorter(int column, boolean ascending)
-	{
-		super(column, ascending);
-	}
+  public TableListSorter(int column, boolean ascending)
+  {
+    super(column, ascending);
+  }
 
-	public TableListSorter(int[] columns, boolean[] order)
-	{
-		super(columns, order);
-	}
+  public TableListSorter(int[] columns, boolean[] order)
+  {
+    super(columns, order);
+  }
 
-	public void setSortMViewAsTable(boolean flag)
-	{
-		this.mviewAsTable = flag;
-	}
+  public void setSortMViewAsTable(boolean flag)
+  {
+    this.mviewAsTable = flag;
+  }
 
-	@Override
-	protected int compareColumn(int column, RowData row1, RowData row2)
-	{
-		if (column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
-		{
-			String value1 = getType(row1);
-			String value2 = getType(row2);
-			return value1.compareTo(value2);
-		}
-		return super.compareColumn(column, row1, row2);
-	}
+  @Override
+  protected int compareColumn(int column, RowData row1, RowData row2)
+  {
+    if (column == DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE)
+    {
+      String value1 = getType(row1);
+      String value2 = getType(row2);
+      return value1.compareTo(value2);
+    }
+    return super.compareColumn(column, row1, row2);
+  }
 
-	private String getType(RowData row)
-	{
-		String value = (String)row.getValue(DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-		if (value == null) return StringUtil.EMPTY_STRING;
-		if (mviewAsTable)
-		{
-			if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
-		}
+  private String getType(RowData row)
+  {
+    String value = (String)row.getValue(DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+    if (value == null) return StringUtil.EMPTY_STRING;
+    if (mviewAsTable)
+    {
+      if (DbMetadata.MVIEW_NAME.equals(value)) return TABLE_TYPE;
+    }
 
-		// Always sort "RANGE TYPE" as "TYPE"
-		if (PgRangeType.RANGE_TYPE_NAME.equals(value)) return "TYPE";
+    // Always sort "RANGE TYPE" as "TYPE"
+    if (PgRangeType.RANGE_TYPE_NAME.equals(value)) return "TYPE";
 
-		return value;
-	}
+    return value;
+  }
 
 }

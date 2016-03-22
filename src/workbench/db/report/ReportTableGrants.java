@@ -40,47 +40,47 @@ import workbench.db.WbConnection;
  */
 public class ReportTableGrants
 {
-	public static final String TAG_GRANT = "grant";
-	public static final String TAG_GRANT_GRANTEE = "grantee";
-	public static final String TAG_GRANT_PRIV = "privilege";
-	public static final String TAG_GRANT_GRANTABLE = "grantable";
-	private Collection<TableGrant> grants;
+  public static final String TAG_GRANT = "grant";
+  public static final String TAG_GRANT_GRANTEE = "grantee";
+  public static final String TAG_GRANT_PRIV = "privilege";
+  public static final String TAG_GRANT_GRANTABLE = "grantable";
+  private Collection<TableGrant> grants;
 
-	public ReportTableGrants(WbConnection con, TableIdentifier tbl)
-	{
+  public ReportTableGrants(WbConnection con, TableIdentifier tbl)
+  {
     TableGrantReader reader = TableGrantReader.createReader(con);
-		grants = reader.getTableGrants(con, tbl);
-	}
+    grants = reader.getTableGrants(con, tbl);
+  }
 
-	public ReportTableGrants(Collection<TableGrant> tableGrants)
-	{
-		this.grants = tableGrants;
-	}
+  public ReportTableGrants(Collection<TableGrant> tableGrants)
+  {
+    this.grants = tableGrants;
+  }
 
-	public void appendXml(StringBuilder result, StringBuilder indent)
-	{
-		if (grants.isEmpty()) return;
+  public void appendXml(StringBuilder result, StringBuilder indent)
+  {
+    if (grants.isEmpty()) return;
 
-		TagWriter tagWriter = new TagWriter();
+    TagWriter tagWriter = new TagWriter();
 
-		StringBuilder indent1 = new StringBuilder(indent);
-		indent1.append("  ");
+    StringBuilder indent1 = new StringBuilder(indent);
+    indent1.append("  ");
 
-		for (TableGrant grant : grants)
-		{
-			tagWriter.appendOpenTag(result, indent, TAG_GRANT);
-			result.append('\n');
-			tagWriter.appendTag(result, indent1, TAG_GRANT_PRIV, grant.getPrivilege());
-			tagWriter.appendTag(result, indent1, TAG_GRANT_GRANTEE, grant.getGrantee());
-			tagWriter.appendTag(result, indent1, TAG_GRANT_GRANTABLE, grant.isGrantable());
-			tagWriter.appendCloseTag(result, indent, TAG_GRANT);
-		}
-	}
+    for (TableGrant grant : grants)
+    {
+      tagWriter.appendOpenTag(result, indent, TAG_GRANT);
+      result.append('\n');
+      tagWriter.appendTag(result, indent1, TAG_GRANT_PRIV, grant.getPrivilege());
+      tagWriter.appendTag(result, indent1, TAG_GRANT_GRANTEE, grant.getGrantee());
+      tagWriter.appendTag(result, indent1, TAG_GRANT_GRANTABLE, grant.isGrantable());
+      tagWriter.appendCloseTag(result, indent, TAG_GRANT);
+    }
+  }
 
-	public Collection<TableGrant> getGrants()
-	{
-		return Collections.unmodifiableCollection(grants);
-	}
+  public Collection<TableGrant> getGrants()
+  {
+    return Collections.unmodifiableCollection(grants);
+  }
 
 }
 

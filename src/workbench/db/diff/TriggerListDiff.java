@@ -35,71 +35,71 @@ import workbench.db.report.TagWriter;
  */
 public class TriggerListDiff
 {
-	public static final String TAG_DROP_TRIGGER = "drop-trigger";
+  public static final String TAG_DROP_TRIGGER = "drop-trigger";
 
-	private List<TriggerDefinition> referenceTriggers;
-	private List<TriggerDefinition> targetTriggers;
+  private List<TriggerDefinition> referenceTriggers;
+  private List<TriggerDefinition> targetTriggers;
 
-	public TriggerListDiff(List<TriggerDefinition> refTriggers, List<TriggerDefinition> toCompare)
-	{
-		this.referenceTriggers = refTriggers;
-		this.targetTriggers = toCompare;
-	}
+  public TriggerListDiff(List<TriggerDefinition> refTriggers, List<TriggerDefinition> toCompare)
+  {
+    this.referenceTriggers = refTriggers;
+    this.targetTriggers = toCompare;
+  }
 
-	public boolean hasChanges()
-	{
-		for (TriggerDefinition cmp : targetTriggers)
-		{
-			TriggerDefinition ref = findTrigger(cmp.getObjectName(), referenceTriggers);
-			if (ref == null)
-			{
-				return true;
-			}
-		}
-		for (TriggerDefinition ref : referenceTriggers)
-		{
-			TriggerDefinition cmp = findTrigger(ref.getObjectName(), targetTriggers);
-			ReportTrigger rref = new ReportTrigger(ref);
-			ReportTrigger rcmp = (cmp == null ? null : new ReportTrigger(cmp));
-			TriggerDiff trgDiff = new TriggerDiff(rref, rcmp);
-			if (trgDiff.isDifferent()) return true;
-		}
-		return false;
-	}
+  public boolean hasChanges()
+  {
+    for (TriggerDefinition cmp : targetTriggers)
+    {
+      TriggerDefinition ref = findTrigger(cmp.getObjectName(), referenceTriggers);
+      if (ref == null)
+      {
+        return true;
+      }
+    }
+    for (TriggerDefinition ref : referenceTriggers)
+    {
+      TriggerDefinition cmp = findTrigger(ref.getObjectName(), targetTriggers);
+      ReportTrigger rref = new ReportTrigger(ref);
+      ReportTrigger rcmp = (cmp == null ? null : new ReportTrigger(cmp));
+      TriggerDiff trgDiff = new TriggerDiff(rref, rcmp);
+      if (trgDiff.isDifferent()) return true;
+    }
+    return false;
+  }
 
-	private TriggerDefinition findTrigger(String name, List<TriggerDefinition> toSearch)
-	{
-		for (TriggerDefinition def : toSearch)
-		{
-			if (def.getObjectName().equals(name)) return def;
-		}
-		return null;
-	}
+  private TriggerDefinition findTrigger(String name, List<TriggerDefinition> toSearch)
+  {
+    for (TriggerDefinition def : toSearch)
+    {
+      if (def.getObjectName().equals(name)) return def;
+    }
+    return null;
+  }
 
-	public void writeXml(StringBuilder indent, StringBuilder buffer)
-	{
-		TagWriter writer = new TagWriter();
-		// Check triggers that need to be dropped
-		for (TriggerDefinition cmp : targetTriggers)
-		{
-			TriggerDefinition ref = findTrigger(cmp.getObjectName(), referenceTriggers);
-			if (ref == null)
-			{
-				writer.appendEmptyTag(buffer, indent, TAG_DROP_TRIGGER, "name", cmp.getObjectName());
-				buffer.append("\n");
-			}
-		}
+  public void writeXml(StringBuilder indent, StringBuilder buffer)
+  {
+    TagWriter writer = new TagWriter();
+    // Check triggers that need to be dropped
+    for (TriggerDefinition cmp : targetTriggers)
+    {
+      TriggerDefinition ref = findTrigger(cmp.getObjectName(), referenceTriggers);
+      if (ref == null)
+      {
+        writer.appendEmptyTag(buffer, indent, TAG_DROP_TRIGGER, "name", cmp.getObjectName());
+        buffer.append("\n");
+      }
+    }
 
-		// Check triggers that need to be added or updated
-		for (TriggerDefinition ref : referenceTriggers)
-		{
-			TriggerDefinition cmp = findTrigger(ref.getObjectName(), targetTriggers);
-			ReportTrigger rref = new ReportTrigger(ref);
-			ReportTrigger rcmp = (cmp == null ? null : new ReportTrigger(cmp));
-			TriggerDiff trgDiff = new TriggerDiff(rref, rcmp);
-			buffer.append(trgDiff.getMigrateTargetXml(indent));
-		}
+    // Check triggers that need to be added or updated
+    for (TriggerDefinition ref : referenceTriggers)
+    {
+      TriggerDefinition cmp = findTrigger(ref.getObjectName(), targetTriggers);
+      ReportTrigger rref = new ReportTrigger(ref);
+      ReportTrigger rcmp = (cmp == null ? null : new ReportTrigger(cmp));
+      TriggerDiff trgDiff = new TriggerDiff(rref, rcmp);
+      buffer.append(trgDiff.getMigrateTargetXml(indent));
+    }
 
-	}
+  }
 
 }

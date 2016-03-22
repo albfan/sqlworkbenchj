@@ -32,25 +32,25 @@ import java.util.List;
  */
 public interface TableDefinitionReader
 {
-	/**
-	 * Return the definition of the given table.
-	 * <br/>
-	 * To display the columns for a table in a DataStore create an
-	 * instance of {@link TableColumnsDatastore}.
-	 *
-	 * @param toRead The table for which the definition should be retrieved (it should have a PK assigned)
-	 * @param typeResolver the data type resolver that should be used to "clean up" data types returned from the driver
-	 *
-	 * @throws SQLException
-	 * @return the definition of the table. If toRead was null, null is returned
-	 *
-	 * @see TableColumnsDatastore
-	 * @see TableIdentifier#getPrimaryKey()
-	 */
-	List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, DataTypeResolver typeResolver)
-		throws SQLException;
+  /**
+   * Return the definition of the given table.
+   * <br/>
+   * To display the columns for a table in a DataStore create an
+   * instance of {@link TableColumnsDatastore}.
+   *
+   * @param toRead The table for which the definition should be retrieved (it should have a PK assigned)
+   * @param typeResolver the data type resolver that should be used to "clean up" data types returned from the driver
+   *
+   * @throws SQLException
+   * @return the definition of the table. If toRead was null, null is returned
+   *
+   * @see TableColumnsDatastore
+   * @see TableIdentifier#getPrimaryKey()
+   */
+  List<ColumnIdentifier> getTableColumns(TableIdentifier toRead, DataTypeResolver typeResolver)
+    throws SQLException;
 
-	TableDefinition getTableDefinition(TableIdentifier toRead, boolean includePkInformation)
-		throws SQLException;
+  TableDefinition getTableDefinition(TableIdentifier toRead, boolean includePkInformation)
+    throws SQLException;
 
 }

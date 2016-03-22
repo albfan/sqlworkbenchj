@@ -40,48 +40,48 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class Db2iColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
-	{
+  @Override
+  public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+  {
     if (conn.getDbSettings().getBoolProperty("remarks.columns.use_columntext", false))
     {
       readColumnComments(table, conn);
     }
-	}
+  }
 
-	public void readColumnComments(TableDefinition table, WbConnection conn)
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+  public void readColumnComments(TableDefinition table, WbConnection conn)
+  {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
     String tablename = conn.getMetadata().removeQuotes(table.getTable().getTableName());
-		String schema = conn.getMetadata().removeQuotes(table.getTable().getSchema());
+    String schema = conn.getMetadata().removeQuotes(table.getTable().getSchema());
 
-		String sql =
+    String sql =
       "select column_name, \n" +
       "       column_text \n" +
       "from qsys2.syscolumns \n" +
       "where table_schema = ? \n" +
       "  and table_name  = ?";
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column comments:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column comments:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+    }
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, tablename);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String colname = rs.getString(1);
-				String comment = rs.getString(2);
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, schema);
+      stmt.setString(2, tablename);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String colname = rs.getString(1);
+        String comment = rs.getString(2);
         if (StringUtil.isNonEmpty(comment))
         {
           ColumnIdentifier col = ColumnIdentifier.findColumnInList(table.getColumns(), colname);
@@ -90,16 +90,16 @@ public class Db2iColumnEnhancer
             col.setComment(comment);
           }
         }
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving column comments using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-	}
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving column comments using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
 }

@@ -44,32 +44,32 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class SqlServerProcedureReader
-	extends JdbcProcedureReader
+  extends JdbcProcedureReader
 {
 
-	public SqlServerProcedureReader(WbConnection db)
-	{
-		super(db);
-	}
+  public SqlServerProcedureReader(WbConnection db)
+  {
+    super(db);
+  }
 
-	/**
-	 * The MS JDBC driver does not return the PROCEDURE_TYPE column correctly so we implement it ourselves by looking at the "group number".
-	 * procedures and functions we need to return this correctly.
-	 * <br/>
-	 * The correct "type" is important because e.g. a DROP from within the DbExplorer
-	 * relies on the correct type returned by getProcedures()
-	 * <br/>
+  /**
+   * The MS JDBC driver does not return the PROCEDURE_TYPE column correctly so we implement it ourselves by looking at the "group number".
+   * procedures and functions we need to return this correctly.
+   * <br/>
+   * The correct "type" is important because e.g. a DROP from within the DbExplorer
+   * relies on the correct type returned by getProcedures()
+   * <br/>
    * Functions seem to always have a "procedure group" 0
    * and "real" procedures always have a group number greater than zero
-	 */
-	@Override
-	public DataStore getProcedures(String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		DataStore ds = super.getProcedures(catalog, owner, namePattern);
-		updateRemarks(ds, owner);
-		return ds;
-	}
+   */
+  @Override
+  public DataStore getProcedures(String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    DataStore ds = super.getProcedures(catalog, owner, namePattern);
+    updateRemarks(ds, owner);
+    return ds;
+  }
 
   @Override
   protected Integer getProcedureType(ResultSet rs)
@@ -107,40 +107,40 @@ public class SqlServerProcedureReader
     return StringUtil.getIntValue(procname.substring(pos + 1), -1);
   }
 
-	protected void updateRemarks(DataStore ds, String owner)
-	{
-		if (!connection.getDbSettings().getBoolProperty("remarks.procedure.retrieve", false)) return;
+  protected void updateRemarks(DataStore ds, String owner)
+  {
+    if (!connection.getDbSettings().getBoolProperty("remarks.procedure.retrieve", false)) return;
 
-		if (ds == null || ds.getRowCount() == 0) return;
+    if (ds == null || ds.getRowCount() == 0) return;
 
-		String object = null;
-		if (ds.getRowCount() == 1)
-		{
-			object = ds.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-		}
+    String object = null;
+    if (ds.getRowCount() == 1)
+    {
+      object = ds.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+    }
 
-		SqlServerObjectListEnhancer reader = new SqlServerObjectListEnhancer();
-		Map<String, String> remarks = reader.readRemarks(connection, owner, object, new String[] { "procedure"});
+    SqlServerObjectListEnhancer reader = new SqlServerObjectListEnhancer();
+    Map<String, String> remarks = reader.readRemarks(connection, owner, object, new String[] { "procedure"});
 
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
+    for (int row = 0; row < ds.getRowCount(); row ++)
+    {
       String schema = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String name = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String remark = remarks.get(schema + "." + name);
-			if (remark != null)
-			{
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
-			}
-		}
-	}
+      String name = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+      String remark = remarks.get(schema + "." + name);
+      if (remark != null)
+      {
+        ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+      }
+    }
+  }
 
-	@Override
-	public CharSequence retrieveProcedureSource(ProcedureDefinition def)
-		throws NoConfigException
-	{
-		SpHelpTextRunner runner = new SpHelpTextRunner();
-		String procName = stripProcGroupInfo(def.getProcedureName());
-		CharSequence sql = runner.getSource(connection, def.getCatalog(), def.getSchema(), procName);
-		return sql;
-	}
+  @Override
+  public CharSequence retrieveProcedureSource(ProcedureDefinition def)
+    throws NoConfigException
+  {
+    SpHelpTextRunner runner = new SpHelpTextRunner();
+    String procName = stripProcGroupInfo(def.getProcedureName());
+    CharSequence sql = runner.getSource(connection, def.getCatalog(), def.getSchema(), procName);
+    return sql;
+  }
 }

@@ -31,17 +31,17 @@ import workbench.db.JdbcIndexReader;
  * @author Thomas Kellerer
  */
 public class MonetDbIndexReader
-	extends JdbcIndexReader
+  extends JdbcIndexReader
 {
 
-	public MonetDbIndexReader(DbMetadata meta)
-	{
-		super(meta);
-	}
+  public MonetDbIndexReader(DbMetadata meta)
+  {
+    super(meta);
+  }
 
-	@Override
-	public String getSQLKeywordForType(String type)
-	{
-		return null;
-	}
+  @Override
+  public String getSQLKeywordForType(String type)
+  {
+    return null;
+  }
 }

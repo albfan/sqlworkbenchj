@@ -32,44 +32,44 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class HsqlViewGrantReader
-	extends ViewGrantReader
+  extends ViewGrantReader
 {
-	private String sql;
+  private String sql;
 
-	public HsqlViewGrantReader(WbConnection con)
-	{
-		if (JdbcUtils.hasMinimumServerVersion(con, "2.0"))
-		{
-			sql = "select grantee, privilege_type, is_grantable  \n" +
+  public HsqlViewGrantReader(WbConnection con)
+  {
+    if (JdbcUtils.hasMinimumServerVersion(con, "2.0"))
+    {
+      sql = "select grantee, privilege_type, is_grantable  \n" +
             "from information_schema.TABLE_PRIVILEGES \n" +
             "where table_name = ? \n" +
             " and table_schema = ? ";
-		}
-		else
-		{
-			sql = "select grantee, privilege, is_grantable  \n" +
-						"from information_schema.SYSTEM_TABLEPRIVILEGES \n" +
-						"where table_name = ? \n" +
-						"  and table_schem = ? ";
-		}
-	}
+    }
+    else
+    {
+      sql = "select grantee, privilege, is_grantable  \n" +
+            "from information_schema.SYSTEM_TABLEPRIVILEGES \n" +
+            "where table_name = ? \n" +
+            "  and table_schem = ? ";
+    }
+  }
 
-	@Override
-	public String getViewGrantSql()
-	{
-		return sql;
-	}
+  @Override
+  public String getViewGrantSql()
+  {
+    return sql;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 
-	@Override
-	public int getIndexForSchemaParameter()
-	{
-		return 2;
-	}
+  @Override
+  public int getIndexForSchemaParameter()
+  {
+    return 2;
+  }
 
 }

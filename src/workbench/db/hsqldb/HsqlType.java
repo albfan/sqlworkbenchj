@@ -34,33 +34,33 @@ import workbench.db.ColumnIdentifier;
  * @author Thomas Kellerer
  */
 public class HsqlType
-	extends BaseObjectType
+  extends BaseObjectType
 {
-	private String dataType;
+  private String dataType;
 
-	public HsqlType(String schema, String typeName)
-	{
-		super(schema, typeName);
-	}
+  public HsqlType(String schema, String typeName)
+  {
+    super(schema, typeName);
+  }
 
-	public void setDataTypeName(String typeName)
-	{
-		dataType = typeName;
-	}
+  public void setDataTypeName(String typeName)
+  {
+    dataType = typeName;
+  }
 
-	public String getDataTypeName()
-	{
-		return dataType;
-	}
+  public String getDataTypeName()
+  {
+    return dataType;
+  }
 
-	@Override
-	public List<ColumnIdentifier> getAttributes()
-	{
-		return Collections.emptyList();
-	}
+  @Override
+  public List<ColumnIdentifier> getAttributes()
+  {
+    return Collections.emptyList();
+  }
 
-	@Override
-	public void setAttributes(List<ColumnIdentifier> attr)
-	{
-	}
+  @Override
+  public void setAttributes(List<ColumnIdentifier> attr)
+  {
+  }
 }

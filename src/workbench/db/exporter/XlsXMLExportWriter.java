@@ -29,25 +29,25 @@ package workbench.db.exporter;
  * @author  Thomas Kellerer
  */
 public class XlsXMLExportWriter
-	extends ExportWriter
+  extends ExportWriter
 {
 
-	public XlsXMLExportWriter(DataExporter exp)
-	{
-		super(exp);
-	}
+  public XlsXMLExportWriter(DataExporter exp)
+  {
+    super(exp);
+  }
 
-	@Override
-	public RowDataConverter createConverter()
-	{
-		return new XlsXMLRowDataConverter();
-	}
+  @Override
+  public RowDataConverter createConverter()
+  {
+    return new XlsXMLRowDataConverter();
+  }
 
-	@Override
-	public void configureConverter()
-	{
-		super.configureConverter();
-		converter.setNullString(exporter.getNullString());
-	}
+  @Override
+  public void configureConverter()
+  {
+    super.configureConverter();
+    converter.setNullString(exporter.getNullString());
+  }
 
 }

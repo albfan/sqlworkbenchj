@@ -29,36 +29,36 @@ package workbench.db;
  * @author  Thomas Kellerer
  */
 public class SybaseConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private final String TABLE_SQL =
-			"select chk.check_defn \n" +
-			"from syscheck chk, sysconstraint cons, systable tbl \n" +
-			"where chk.check_id = cons.constraint_id \n" +
-			"and   cons.constraint_type = 'T' \n" +
-			"and   cons.table_id = tbl.table_id \n" +
-			"and   tbl.table_name = ? \n";
+  private final String TABLE_SQL =
+      "select chk.check_defn \n" +
+      "from syscheck chk, sysconstraint cons, systable tbl \n" +
+      "where chk.check_id = cons.constraint_id \n" +
+      "and   cons.constraint_type = 'T' \n" +
+      "and   cons.table_id = tbl.table_id \n" +
+      "and   tbl.table_name = ? \n";
 
-	public SybaseConstraintReader(WbConnection conn)
-	{
-		super(conn.getDbId());
-	}
+  public SybaseConstraintReader(WbConnection conn)
+  {
+    super(conn.getDbId());
+  }
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		return TABLE_SQL;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    return TABLE_SQL;
+  }
 
-	@Override
-	public int getIndexForTableNameParameter()
-	{
-		return 1;
-	}
+  @Override
+  public int getIndexForTableNameParameter()
+  {
+    return 1;
+  }
 }

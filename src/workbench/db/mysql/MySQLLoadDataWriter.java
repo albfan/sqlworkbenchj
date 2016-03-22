@@ -46,7 +46,7 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class MySQLLoadDataWriter
-	implements FormatFileWriter
+  implements FormatFileWriter
 {
 
   private boolean useFullFilepath;
@@ -57,56 +57,56 @@ public class MySQLLoadDataWriter
     useFullFilepath = flag;
   }
 
-	@Override
-	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
-	{
-		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
-		String dir = baseFile.getParent();
+  @Override
+  public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
+  {
+    WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
+    String dir = baseFile.getParent();
 
-		String tableName = exporter.getTableNameToUse();
-		WbFile ctl = new WbFile(dir, "load_" + tableName + ".sql");
-		PrintWriter out = null;
-		try
-		{
-			out = new PrintWriter(new FileWriter(ctl));
-			out.print("load data infile '");
-			out.print(useFullFilepath ? baseFile.getFullPath() : baseFile.getName());
-			out.print("'\n");
-			out.print("  into table ");
-			out.println(tableName);
+    String tableName = exporter.getTableNameToUse();
+    WbFile ctl = new WbFile(dir, "load_" + tableName + ".sql");
+    PrintWriter out = null;
+    try
+    {
+      out = new PrintWriter(new FileWriter(ctl));
+      out.print("load data infile '");
+      out.print(useFullFilepath ? baseFile.getFullPath() : baseFile.getName());
+      out.print("'\n");
+      out.print("  into table ");
+      out.println(tableName);
 
-			String encoding = exporter.getEncoding();
-			if (encoding != null)
-			{
-				out.print("  character set " + encoding + "\n");
-			}
-			String delim = StringUtil.escapeText(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
-			out.print("  columns\n");
-			out.print("    terminated by '" + delim + "'\n");
-			String quote = exporter.getTextQuoteChar();
+      String encoding = exporter.getEncoding();
+      if (encoding != null)
+      {
+        out.print("  character set " + encoding + "\n");
+      }
+      String delim = StringUtil.escapeText(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL);
+      out.print("  columns\n");
+      out.print("    terminated by '" + delim + "'\n");
+      String quote = exporter.getTextQuoteChar();
 
-			if (quote != null)
-			{
-				out.print("    ");
-				if (!exporter.getQuoteAlways())
-				{
-					out.print("optionally ");
-				}
-				out.print("enclosed by '" + quote + "'\n");
-			}
+      if (quote != null)
+      {
+        out.print("    ");
+        if (!exporter.getQuoteAlways())
+        {
+          out.print("optionally ");
+        }
+        out.print("enclosed by '" + quote + "'\n");
+      }
 
-			if (exporter.getExportHeaders())
-			{
-				out.print("  ignore 1 lines\n");
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("PostgresCopyStatementWriter.writeFormatFile()", "Could not write format file", e);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(out);
-		}	}
+      if (exporter.getExportHeaders())
+      {
+        out.print("  ignore 1 lines\n");
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("PostgresCopyStatementWriter.writeFormatFile()", "Could not write format file", e);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(out);
+    } }
 
 }

@@ -33,49 +33,49 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class TriggerDefinition
-	implements DbObject
+  implements DbObject
 {
   public static final String TRIGGER_TYPE_NAME = "TRIGGER";
 
-	public static final String PLACEHOLDER_TRIGGER_NAME = "%trigger_name%";
-	public static final String PLACEHOLDER_TRIGGER_SCHEMA = "%trigger_schema%";
-	public static final String PLACEHOLDER_TRIGGER_CATALOG = "%trigger_catalog%";
-	public static final String PLACEHOLDER_TRIGGER_TABLE = "%trigger_table%";
+  public static final String PLACEHOLDER_TRIGGER_NAME = "%trigger_name%";
+  public static final String PLACEHOLDER_TRIGGER_SCHEMA = "%trigger_schema%";
+  public static final String PLACEHOLDER_TRIGGER_CATALOG = "%trigger_catalog%";
+  public static final String PLACEHOLDER_TRIGGER_TABLE = "%trigger_table%";
 
-	private String schema;
-	private String catalog;
-	private String triggerName;
-	private String comment;
-	private String type;
-	private String event;
-	private TableIdentifier table;
-	private CharSequence source;
-	private String status;
+  private String schema;
+  private String catalog;
+  private String triggerName;
+  private String comment;
+  private String type;
+  private String event;
+  private TableIdentifier table;
+  private CharSequence source;
+  private String status;
   private TriggerLevel level;
 
-	public TriggerDefinition(String cat, String schem, String name)
-	{
-		schema = schem;
-		catalog = cat;
-		triggerName = name;
-	}
+  public TriggerDefinition(String cat, String schem, String name)
+  {
+    schema = schem;
+    catalog = cat;
+    triggerName = name;
+  }
 
-	@Override
-	public String getComment()
-	{
-		return comment;
-	}
+  @Override
+  public String getComment()
+  {
+    return comment;
+  }
 
-	@Override
-	public void setComment(String c)
-	{
-		comment = c;
-	}
+  @Override
+  public void setComment(String c)
+  {
+    comment = c;
+  }
 
-	public String getStatus()
-	{
-		return status;
-	}
+  public String getStatus()
+  {
+    return status;
+  }
 
   public TriggerLevel getLevel()
   {
@@ -87,68 +87,68 @@ public class TriggerDefinition
     this.level = triggerLevel;
   }
 
-	public void setStatus(String statusText)
-	{
-		this.status = statusText;
-	}
+  public void setStatus(String statusText)
+  {
+    this.status = statusText;
+  }
 
-	/**
-	 * Define the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
-	 * @param evt
-	 */
-	public void setTriggerEvent(String evt)
-	{
-		event = evt;
-	}
+  /**
+   * Define the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
+   * @param evt
+   */
+  public void setTriggerEvent(String evt)
+  {
+    event = evt;
+  }
 
-	/**
-	 * Returns the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
-	 */
-	public String getTriggerEvent()
-	{
-		return event;
-	}
+  /**
+   * Returns the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
+   */
+  public String getTriggerEvent()
+  {
+    return event;
+  }
 
-	/**
-	 * Define the type of trigger (BEFORE/AFTER)
-	 * @param trgType
-	 */
-	public void setTriggerType(String trgType)
-	{
-		type = trgType;
-	}
+  /**
+   * Define the type of trigger (BEFORE/AFTER)
+   * @param trgType
+   */
+  public void setTriggerType(String trgType)
+  {
+    type = trgType;
+  }
 
-	/**
-	 * Return the type of the trigger (BEFORE/AFTER)
-	 */
-	public String getTriggerType()
-	{
-		return type;
-	}
+  /**
+   * Return the type of the trigger (BEFORE/AFTER)
+   */
+  public String getTriggerType()
+  {
+    return type;
+  }
 
-	public void setRelatedTable(TableIdentifier tbl)
-	{
-		table = tbl;
-	}
+  public void setRelatedTable(TableIdentifier tbl)
+  {
+    table = tbl;
+  }
 
-	public TableIdentifier getRelatedTable()
-	{
-		return table;
-	}
+  public TableIdentifier getRelatedTable()
+  {
+    return table;
+  }
 
-	@Override
-	public String getDropStatement(WbConnection con, boolean cascade)
-	{
-		String ddl = con.getDbSettings().getDropDDL(getObjectType(), cascade);
-		if (ddl == null) return null;
+  @Override
+  public String getDropStatement(WbConnection con, boolean cascade)
+  {
+    String ddl = con.getDbSettings().getDropDDL(getObjectType(), cascade);
+    if (ddl == null) return null;
 
-		// getDropDDL can also return a generic DROP statement that only
-		// includes the %name% placeholder (because it's not based on a configured
-		// property, but is created dynamically)
+    // getDropDDL can also return a generic DROP statement that only
+    // includes the %name% placeholder (because it's not based on a configured
+    // property, but is created dynamically)
     ddl = ddl.replace(MetaDataSqlManager.NAME_PLACEHOLDER, getObjectNameForDrop(con));
 
-		// specialized statements have different placeholders
-		ddl = ddl.replace(PLACEHOLDER_TRIGGER_NAME, triggerName);
+    // specialized statements have different placeholders
+    ddl = ddl.replace(PLACEHOLDER_TRIGGER_NAME, triggerName);
     if (schema != null)
     {
       ddl = ddl.replace(PLACEHOLDER_TRIGGER_SCHEMA, schema);
@@ -159,92 +159,92 @@ public class TriggerDefinition
       ddl = ddl.replace(PLACEHOLDER_TRIGGER_CATALOG, catalog);
     }
 
-		if (table != null)
-		{
-			ddl = ddl.replace(PLACEHOLDER_TRIGGER_TABLE, table.getTableExpression(con));
-		}
+    if (table != null)
+    {
+      ddl = ddl.replace(PLACEHOLDER_TRIGGER_TABLE, table.getTableExpression(con));
+    }
 
-		return ddl;
-	}
+    return ddl;
+  }
 
-	public void setSource(CharSequence src)
-	{
-		source = src;
-	}
+  public void setSource(CharSequence src)
+  {
+    source = src;
+  }
 
-	public CharSequence getSource()
-	{
-		return source;
-	}
+  public CharSequence getSource()
+  {
+    return source;
+  }
 
-	@Override
-	public CharSequence getSource(WbConnection con)
-		throws SQLException
-	{
-		return getSource(con, true);
-	}
+  @Override
+  public CharSequence getSource(WbConnection con)
+    throws SQLException
+  {
+    return getSource(con, true);
+  }
 
-	public CharSequence getSource(WbConnection con, boolean includeDependencies)
-		throws SQLException
-	{
-		if (con == null) return null;
-		TriggerReader reader = TriggerReaderFactory.createReader(con);
-		return reader.getTriggerSource(catalog, schema, triggerName, table, comment, includeDependencies);
-	}
+  public CharSequence getSource(WbConnection con, boolean includeDependencies)
+    throws SQLException
+  {
+    if (con == null) return null;
+    TriggerReader reader = TriggerReaderFactory.createReader(con);
+    return reader.getTriggerSource(catalog, schema, triggerName, table, comment, includeDependencies);
+  }
 
-	@Override
-	public String getSchema()
-	{
-		return schema;
-	}
+  @Override
+  public String getSchema()
+  {
+    return schema;
+  }
 
-	@Override
-	public String getCatalog()
-	{
-		return catalog;
-	}
+  @Override
+  public String getCatalog()
+  {
+    return catalog;
+  }
 
-	@Override
-	public String getObjectNameForDrop(WbConnection con)
-	{
-		return getFullyQualifiedName(con);
-	}
+  @Override
+  public String getObjectNameForDrop(WbConnection con)
+  {
+    return getFullyQualifiedName(con);
+  }
 
-	@Override
-	public String getObjectName(WbConnection conn)
-	{
-		return conn.getMetadata().quoteObjectname(this.triggerName);
-	}
+  @Override
+  public String getObjectName(WbConnection conn)
+  {
+    return conn.getMetadata().quoteObjectname(this.triggerName);
+  }
 
-	@Override
-	public String getFullyQualifiedName(WbConnection conn)
-	{
-		return getObjectExpression(null);
-	}
+  @Override
+  public String getFullyQualifiedName(WbConnection conn)
+  {
+    return getObjectExpression(null);
+  }
 
-	@Override
-	public String getObjectExpression(WbConnection conn)
-	{
-		return SqlUtil.buildExpression(conn, catalog, schema, triggerName);
-	}
+  @Override
+  public String getObjectExpression(WbConnection conn)
+  {
+    return SqlUtil.buildExpression(conn, catalog, schema, triggerName);
+  }
 
-	@Override
-	public String getObjectName()
-	{
-		return triggerName;
-	}
+  @Override
+  public String getObjectName()
+  {
+    return triggerName;
+  }
 
-	@Override
-	public String getObjectType()
-	{
-		return TRIGGER_TYPE_NAME;
-	}
+  @Override
+  public String getObjectType()
+  {
+    return TRIGGER_TYPE_NAME;
+  }
 
-	@Override
-	public String toString()
-	{
-		return triggerName;
-	}
+  @Override
+  public String toString()
+  {
+    return triggerName;
+  }
 
   @Override
   public boolean supportsGetSource()

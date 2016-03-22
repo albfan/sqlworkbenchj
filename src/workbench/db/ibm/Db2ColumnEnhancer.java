@@ -48,24 +48,24 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class Db2ColumnEnhancer
-	implements ColumnDefinitionEnhancer
+  implements ColumnDefinitionEnhancer
 {
 
-	@Override
-	public void updateColumnDefinition(TableDefinition table, WbConnection conn)
-	{
-		updateComputedColumns(table, conn);
-	}
+  @Override
+  public void updateColumnDefinition(TableDefinition table, WbConnection conn)
+  {
+    updateComputedColumns(table, conn);
+  }
 
-	private void updateComputedColumns(TableDefinition table, WbConnection conn)
-	{
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+  private void updateComputedColumns(TableDefinition table, WbConnection conn)
+  {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		String tablename = table.getTable().getTableName();
-		String schema = table.getTable().getSchema();
+    String tablename = table.getTable().getTableName();
+    String schema = table.getTable().getSchema();
 
-		String columns =
+    String columns =
       "SELECT c.colname, \n" +
       "       c.hidden, \n" +
       "       c.generated, \n" +
@@ -78,63 +78,63 @@ public class Db2ColumnEnhancer
       "       a.cache, \n" +
       "       a.order";
 
-		String from =
+    String from =
       "\nFROM syscat.columns c  \n" +
       "     LEFT JOIN syscat.colidentattributes a ON c.tabname = a.tabname AND c.tabschema = a.tabschema AND c.colname = a.colname \n" +
       "WHERE (c.generated <> ' ' or c.hidden <> ' ') \n" +
       "AND   c.tabname = ? \n" +
       "AND   c.tabschema = ? ";
 
-		boolean checkHistory = false;
+    boolean checkHistory = false;
 
-		if (JdbcUtils.hasMinimumServerVersion(conn, "10.1"))
-		{
-				columns += ", \n" +
-					"       c.rowbegin, \n" +
-					"       c.rowend, \n" +
-					"       c.transactionstartid";
-				checkHistory = true;
-		}
+    if (JdbcUtils.hasMinimumServerVersion(conn, "10.1"))
+    {
+        columns += ", \n" +
+          "       c.rowbegin, \n" +
+          "       c.rowend, \n" +
+          "       c.transactionstartid";
+        checkHistory = true;
+    }
 
-		String sql = columns + from;
+    String sql = columns + from;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, tablename, schema));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, tablename, schema));
+    }
 
-		Map<String, String> expressions = new HashMap<>();
+    Map<String, String> expressions = new HashMap<>();
     Set<String> hiddenCols = CollectionUtil.caseInsensitiveSet();
 
-		try
-		{
-			stmt = conn.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, tablename);
-			stmt.setString(2, schema);
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String colname = rs.getString(1);
-				String hidden = rs.getString(2);
-				String gentype = rs.getString(3);
-				String computedCol = rs.getString(4);
-				BigDecimal start = rs.getBigDecimal(5);
-				BigDecimal inc = rs.getBigDecimal(6);
-				BigDecimal min = rs.getBigDecimal(7);
-				BigDecimal max = rs.getBigDecimal(8);
-				boolean cycle = StringUtil.stringToBool(rs.getString(9));
-				Integer cache = rs.getInt(10);
-				boolean order = StringUtil.stringToBool(rs.getString(11));
+    try
+    {
+      stmt = conn.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, tablename);
+      stmt.setString(2, schema);
+      rs = stmt.executeQuery();
+      while (rs.next())
+      {
+        String colname = rs.getString(1);
+        String hidden = rs.getString(2);
+        String gentype = rs.getString(3);
+        String computedCol = rs.getString(4);
+        BigDecimal start = rs.getBigDecimal(5);
+        BigDecimal inc = rs.getBigDecimal(6);
+        BigDecimal min = rs.getBigDecimal(7);
+        BigDecimal max = rs.getBigDecimal(8);
+        boolean cycle = StringUtil.stringToBool(rs.getString(9));
+        Integer cache = rs.getInt(10);
+        boolean order = StringUtil.stringToBool(rs.getString(11));
 
-				String rowbegin = "N";
-				String rowend = "N";
-				String transid = "N";
-				if (checkHistory)
-				{
-					rowbegin = rs.getString(12);
-					rowend = rs.getString(13);
-					transid = rs.getString(14);
-				}
+        String rowbegin = "N";
+        String rowend = "N";
+        String transid = "N";
+        if (checkHistory)
+        {
+          rowbegin = rs.getString(12);
+          rowend = rs.getString(13);
+          transid = rs.getString(14);
+        }
 
         if (!gentype.equals(" "))
         {
@@ -182,41 +182,41 @@ public class Db2ColumnEnhancer
         {
           hiddenCols.add(colname);
         }
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving generated column info using:\n" + SqlUtil.replaceParameters(sql, tablename, schema), e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving generated column info using:\n" + SqlUtil.replaceParameters(sql, tablename, schema), e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			String expr = expressions.get(col.getColumnName());
-			if (StringUtil.isNonBlank(expr))
-			{
-				if (expr.contains("AS ROW") || expr.contains("AS TRANSACTION"))
-				{
-					col.setGeneratorExpression(expr);
-				}
-				else
-				{
-					col.setComputedColumnExpression(expr);
-				}
+    for (ColumnIdentifier col : table.getColumns())
+    {
+      String expr = expressions.get(col.getColumnName());
+      if (StringUtil.isNonBlank(expr))
+      {
+        if (expr.contains("AS ROW") || expr.contains("AS TRANSACTION"))
+        {
+          col.setGeneratorExpression(expr);
+        }
+        else
+        {
+          col.setComputedColumnExpression(expr);
+        }
 
-				if (expr.indexOf("IDENTITY") > -1)
-				{
-					col.setIsAutoincrement(true);
-				}
-			}
+        if (expr.indexOf("IDENTITY") > -1)
+        {
+          col.setIsAutoincrement(true);
+        }
+      }
       if (hiddenCols.contains(col.getColumnName()))
       {
         col.setSQLOption("IMPLICITLY HIDDEN");
       }
-		}
-	}
+    }
+  }
 
 }

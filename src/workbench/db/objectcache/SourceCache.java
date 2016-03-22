@@ -35,47 +35,47 @@ import workbench.util.CaseInsensitiveComparator;
  */
 public class SourceCache
 {
-	private Map<String, CharSequence> cachedSources = Collections.synchronizedMap(new TreeMap<String, CharSequence>(CaseInsensitiveComparator.INSTANCE));
-	private String dbid;
+  private Map<String, CharSequence> cachedSources = Collections.synchronizedMap(new TreeMap<String, CharSequence>(CaseInsensitiveComparator.INSTANCE));
+  private String dbid;
 
-	public SourceCache(String id)
-	{
-		this.dbid = id;
-	}
+  public SourceCache(String id)
+  {
+    this.dbid = id;
+  }
 
-	public CharSequence getSource(String type, String key)
-	{
-		if (shouldCache(type))
-		{
-			return cachedSources.get(getRealKey(type, key));
-		}
-		return null;
-	}
+  public CharSequence getSource(String type, String key)
+  {
+    if (shouldCache(type))
+    {
+      return cachedSources.get(getRealKey(type, key));
+    }
+    return null;
+  }
 
-	public boolean addSource(String type, String key, CharSequence source)
-	{
-		if (shouldCache(type))
-		{
-			cachedSources.put(getRealKey(type, key), source);
-			return true;
-		}
-		return false;
-	}
+  public boolean addSource(String type, String key, CharSequence source)
+  {
+    if (shouldCache(type))
+    {
+      cachedSources.put(getRealKey(type, key), source);
+      return true;
+    }
+    return false;
+  }
 
-	private String getRealKey(String type, String key)
-	{
-		if (type == null) return key;
-		return "$" + type.toLowerCase() + "$/" + key;
-	}
+  private String getRealKey(String type, String key)
+  {
+    if (type == null) return key;
+    return "$" + type.toLowerCase() + "$/" + key;
+  }
 
-	public boolean shouldCache(String type)
-	{
-		if (type == null) return false;
-		return Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".source.cache." + type.toLowerCase(), false);
-	}
+  public boolean shouldCache(String type)
+  {
+    if (type == null) return false;
+    return Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".source.cache." + type.toLowerCase(), false);
+  }
 
-	public void clear()
-	{
-		cachedSources.clear();
-	}
+  public void clear()
+  {
+    cachedSources.clear();
+  }
 }

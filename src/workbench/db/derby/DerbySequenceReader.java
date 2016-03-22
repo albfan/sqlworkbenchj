@@ -48,15 +48,15 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class DerbySequenceReader
-	implements SequenceReader
+  implements SequenceReader
 {
-	private WbConnection dbConn;
-	private String baseQuery;
+  private WbConnection dbConn;
+  private String baseQuery;
 
-	public DerbySequenceReader(WbConnection conn)
-	{
-		dbConn = conn;
-		baseQuery = "SELECT sch.schemaname,  \n" +
+  public DerbySequenceReader(WbConnection conn)
+  {
+    dbConn = conn;
+    baseQuery = "SELECT sch.schemaname,  \n" +
              "       seq.sequencename, \n" +
              "       seq.sequencedatatype, \n" +
              "       seq.currentvalue, \n" +
@@ -67,199 +67,199 @@ public class DerbySequenceReader
              "       seq.cycleoption \n" +
              "FROM sys.syssequences seq \n" +
              "  JOIN sys.sysschemas sch ON sch.schemaid = seq.schemaid";
-	}
+  }
 
-	@Override
-	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
-	{
-		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
-		if (ds == null) return Collections.emptyList();
-		List<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
-			result.add(createSequenceDefinition(ds, row));
-		}
-		return result;
-	}
+  @Override
+  public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
+  {
+    DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
+    if (ds == null) return Collections.emptyList();
+    List<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
+    for (int row = 0; row < ds.getRowCount(); row ++)
+    {
+      result.add(createSequenceDefinition(ds, row));
+    }
+    return result;
+  }
 
-	@Override
-	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
-	{
-		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
-		if (ds == null || ds.getRowCount() != 1) return null;
-		return createSequenceDefinition(ds, 0);
-	}
+  @Override
+  public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
+  {
+    DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
+    if (ds == null || ds.getRowCount() != 1) return null;
+    return createSequenceDefinition(ds, 0);
+  }
 
-	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
-	{
-		String name = ds.getValueAsString(row, "sequencename");
-		String schema = ds.getValueAsString(row, "schemaname");
-		SequenceDefinition result = new SequenceDefinition(schema, name);
-		result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "startvalue"));
-		result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "minimumvalue"));
-		result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "maximumvalue"));
-		result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "increment"));
-		result.setSequenceProperty(PROP_CYCLE, Boolean.valueOf(StringUtil.stringToBool(ds.getValueAsString(row, "cycleoption"))));
-		result.setSequenceProperty(PROP_DATA_TYPE, ds.getValueAsString(row, "sequencedatatype"));
-		readSequenceSource(result);
-		return result;
-	}
+  private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
+  {
+    String name = ds.getValueAsString(row, "sequencename");
+    String schema = ds.getValueAsString(row, "schemaname");
+    SequenceDefinition result = new SequenceDefinition(schema, name);
+    result.setSequenceProperty(PROP_START_VALUE, ds.getValue(row, "startvalue"));
+    result.setSequenceProperty(PROP_MIN_VALUE, ds.getValue(row, "minimumvalue"));
+    result.setSequenceProperty(PROP_MAX_VALUE, ds.getValue(row, "maximumvalue"));
+    result.setSequenceProperty(PROP_INCREMENT, ds.getValue(row, "increment"));
+    result.setSequenceProperty(PROP_CYCLE, Boolean.valueOf(StringUtil.stringToBool(ds.getValueAsString(row, "cycleoption"))));
+    result.setSequenceProperty(PROP_DATA_TYPE, ds.getValueAsString(row, "sequencedatatype"));
+    readSequenceSource(result);
+    return result;
+  }
 
-	@Override
-	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
-	{
-		StringBuilder sql = new StringBuilder(baseQuery.length() + 50);
-		sql.append(baseQuery);
+  @Override
+  public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
+  {
+    StringBuilder sql = new StringBuilder(baseQuery.length() + 50);
+    sql.append(baseQuery);
 
-		boolean whereAdded = false;
-		if (StringUtil.isNonBlank(schema))
-		{
-			sql.append(" WHERE sch.schemaname = '").append(schema).append('\'');
-			whereAdded = true;
-		}
+    boolean whereAdded = false;
+    if (StringUtil.isNonBlank(schema))
+    {
+      sql.append(" WHERE sch.schemaname = '").append(schema).append('\'');
+      whereAdded = true;
+    }
 
-		if (StringUtil.isNonBlank(namePattern))
-		{
-			if (whereAdded)
-			{
-				sql.append(" AND ");
-			}
-			else
-			{
-				sql.append(" WHERE ");
-			}
-			SqlUtil.appendExpression(sql, "seq.sequencename", namePattern, null);
-		}
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      if (whereAdded)
+      {
+        sql.append(" AND ");
+      }
+      else
+      {
+        sql.append(" WHERE ");
+      }
+      SqlUtil.appendExpression(sql, "seq.sequencename", namePattern, null);
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("DerbySequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("DerbySequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		DataStore result = null;
-		try
-		{
-			stmt = dbConn.createStatementForQuery();
-			rs = stmt.executeQuery(sql.toString());
-			result = new DataStore(rs, dbConn, true);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DerbySequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs,stmt);
-		}
+    Statement stmt = null;
+    ResultSet rs = null;
+    DataStore result = null;
+    try
+    {
+      stmt = dbConn.createStatementForQuery();
+      rs = stmt.executeQuery(sql.toString());
+      result = new DataStore(rs, dbConn, true);
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("DerbySequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs,stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public CharSequence getSequenceSource(String catalog, String schema, String sequence)
-	{
-		SequenceDefinition def = getSequenceDefinition(catalog, schema, sequence);
-		if (def == null) return null;
-		return def.getSource();
-	}
+  @Override
+  public CharSequence getSequenceSource(String catalog, String schema, String sequence)
+  {
+    SequenceDefinition def = getSequenceDefinition(catalog, schema, sequence);
+    if (def == null) return null;
+    return def.getSource();
+  }
 
-	@Override
-	public void readSequenceSource(SequenceDefinition def)
-	{
-		StringBuilder result = new StringBuilder(100);
+  @Override
+  public void readSequenceSource(SequenceDefinition def)
+  {
+    StringBuilder result = new StringBuilder(100);
 
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
+    String nl = Settings.getInstance().getInternalEditorLineEnding();
 
-		result.append("CREATE SEQUENCE ");
-		result.append(def.getSequenceName());
+    result.append("CREATE SEQUENCE ");
+    result.append(def.getSequenceName());
 
-		Number start = (Number) def.getSequenceProperty(PROP_START_VALUE);
-		Number minvalue = (Number) def.getSequenceProperty(PROP_MIN_VALUE);
-		Number maxvalue = (Number) def.getSequenceProperty(PROP_MAX_VALUE);
-		Number increment = (Number) def.getSequenceProperty(PROP_INCREMENT);
-		Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
-		String type = (String) def.getSequenceProperty(PROP_DATA_TYPE);
+    Number start = (Number) def.getSequenceProperty(PROP_START_VALUE);
+    Number minvalue = (Number) def.getSequenceProperty(PROP_MIN_VALUE);
+    Number maxvalue = (Number) def.getSequenceProperty(PROP_MAX_VALUE);
+    Number increment = (Number) def.getSequenceProperty(PROP_INCREMENT);
+    Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
+    String type = (String) def.getSequenceProperty(PROP_DATA_TYPE);
 
     result.append(" AS ");
-		result.append(type);
-		result.append(buildSequenceDetails(type, start, minvalue, maxvalue, increment, cycle));
+    result.append(type);
+    result.append(buildSequenceDetails(type, start, minvalue, maxvalue, increment, cycle));
 
-		result.append(';');
-		result.append(nl);
-		def.setSource(result);
-	}
+    result.append(';');
+    result.append(nl);
+    def.setSource(result);
+  }
 
-	private CharSequence buildSequenceDetails(String type, Number start, Number minvalue, Number maxvalue, Number increment, boolean cycle)
-	{
-		StringBuilder result = new StringBuilder(30);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
+  private CharSequence buildSequenceDetails(String type, Number start, Number minvalue, Number maxvalue, Number increment, boolean cycle)
+  {
+    StringBuilder result = new StringBuilder(30);
+    String nl = Settings.getInstance().getInternalEditorLineEnding();
 
-		String indent = nl + "       ";
-		if (start.longValue() > 0)
-		{
-			result.append(indent);
-			result.append("START WITH ");
-			result.append(start);
-		}
+    String indent = nl + "       ";
+    if (start.longValue() > 0)
+    {
+      result.append(indent);
+      result.append("START WITH ");
+      result.append(start);
+    }
 
-		result.append(indent);
-		result.append(" INCREMENT BY ");
-		result.append(increment);
+    result.append(indent);
+    result.append(" INCREMENT BY ");
+    result.append(increment);
 
-		result.append(indent);
+    result.append(indent);
 
-		boolean hasMinValue = false;
-		if ("integer".equalsIgnoreCase(type))
-		{
-			hasMinValue = minvalue != null && minvalue.intValue() != Integer.MIN_VALUE;
-		}
-		else if ("bigint".equalsIgnoreCase(type))
-		{
-			hasMinValue = minvalue != null && minvalue.longValue() != Long.MIN_VALUE;
-		}
+    boolean hasMinValue = false;
+    if ("integer".equalsIgnoreCase(type))
+    {
+      hasMinValue = minvalue != null && minvalue.intValue() != Integer.MIN_VALUE;
+    }
+    else if ("bigint".equalsIgnoreCase(type))
+    {
+      hasMinValue = minvalue != null && minvalue.longValue() != Long.MIN_VALUE;
+    }
 
-		if (hasMinValue)
-		{
-			result.append(" MINVALUE ");
-			result.append(minvalue);
-		}
-		else
-		{
-			result.append(" NO MINVALUE");
-		}
+    if (hasMinValue)
+    {
+      result.append(" MINVALUE ");
+      result.append(minvalue);
+    }
+    else
+    {
+      result.append(" NO MINVALUE");
+    }
 
-		result.append(indent);
-		if (maxvalue != null && maxvalue.longValue() == -1)
-		{
-			if (maxvalue.longValue() != Long.MAX_VALUE)
-			{
-				result.append(" MAXVALUE ");
-				result.append(maxvalue);
-			}
-		}
-		else
-		{
-			result.append(" NO MAXVALUE");
-		}
+    result.append(indent);
+    if (maxvalue != null && maxvalue.longValue() == -1)
+    {
+      if (maxvalue.longValue() != Long.MAX_VALUE)
+      {
+        result.append(" MAXVALUE ");
+        result.append(maxvalue);
+      }
+    }
+    else
+    {
+      result.append(" NO MAXVALUE");
+    }
 
-		result.append(indent);
-		if (cycle)
-		{
-			result.append(" CYCLE");
-		}
-		else
-		{
-			result.append(" NO CYCLE");
-		}
+    result.append(indent);
+    if (cycle)
+    {
+      result.append(" CYCLE");
+    }
+    else
+    {
+      result.append(" NO CYCLE");
+    }
 
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public String getSequenceTypeName()
-	{
-		return SequenceReader.DEFAULT_TYPE_NAME;
-	}
+  @Override
+  public String getSequenceTypeName()
+  {
+    return SequenceReader.DEFAULT_TYPE_NAME;
+  }
 }

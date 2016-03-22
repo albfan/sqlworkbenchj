@@ -30,12 +30,12 @@ import org.xml.sax.SAXException;
  * @author  Thomas Kellerer
  */
 public class ParsingInterruptedException
-	extends SAXException
+  extends SAXException
 {
 
-	public ParsingInterruptedException()
-	{
-		super("Parsing cancelled");
-	}
+  public ParsingInterruptedException()
+  {
+    super("Parsing cancelled");
+  }
 
 }

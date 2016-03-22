@@ -30,27 +30,27 @@ package workbench.db.exporter;
  */
 public class OdfHelper
 {
-	private static boolean tested;
-	private static boolean available;
+  private static boolean tested;
+  private static boolean available;
 
-	public static boolean isSimpleODFAvailable()
-	{
-		if (tested)
-		{
-			return available;
-		}
+  public static boolean isSimpleODFAvailable()
+  {
+    if (tested)
+    {
+      return available;
+    }
 
-		try
-		{
-			tested = true;
-			Class.forName("org.odftoolkit.simple.SpreadsheetDocument");
-			available = true;
-		}
-		catch (Throwable th)
-		{
-			available = false;
-		}
-		return available;
-	}
+    try
+    {
+      tested = true;
+      Class.forName("org.odftoolkit.simple.SpreadsheetDocument");
+      available = true;
+    }
+    catch (Throwable th)
+    {
+      available = false;
+    }
+    return available;
+  }
 
 }

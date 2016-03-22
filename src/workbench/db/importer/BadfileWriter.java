@@ -39,74 +39,74 @@ import workbench.util.WbFile;
  */
 public class BadfileWriter
 {
-	private WbFile badFile;
-	private int badRows = 0;
-	private String encoding = null;
+  private WbFile badFile;
+  private int badRows = 0;
+  private String encoding = null;
 
-	/**
-	 * Create a new BadFileWriter.
-	 *
-	 * If fname indicates a directory, the resulting bad file will be name after
-	 * the name of the supplied table (@link TableIdentifier#getTableName()} with
-	 * the extendsion ".bad" and will be created in specified directory.
-	 *
-	 * The file will be deleted upon creation of this BadFileWriter but will
-	 * not be created unless at leas one rejected row is written.
-	 *
-	 * @param fname the name of the bad file to be created
-	 * @param table the table for which the import is currently running
-	 * @param enc the encoding for the output file
-	 *
-	 * @see #recordRejected(String)
-	 */
-	public BadfileWriter(String fname, TableIdentifier table, String enc)
-	{
-		WbFile f = new WbFile(fname);
-		if (f.isDirectory())
-		{
-			String tname = StringUtil.makeFilename(table.getTableName()) + ".bad";
-			this.badFile = new WbFile(fname, tname);
-		}
-		else
-		{
-			this.badFile = f;
-		}
-		this.encoding = enc;
-		this.badFile.delete();
-	}
+  /**
+   * Create a new BadFileWriter.
+   *
+   * If fname indicates a directory, the resulting bad file will be name after
+   * the name of the supplied table (@link TableIdentifier#getTableName()} with
+   * the extendsion ".bad" and will be created in specified directory.
+   *
+   * The file will be deleted upon creation of this BadFileWriter but will
+   * not be created unless at leas one rejected row is written.
+   *
+   * @param fname the name of the bad file to be created
+   * @param table the table for which the import is currently running
+   * @param enc the encoding for the output file
+   *
+   * @see #recordRejected(String)
+   */
+  public BadfileWriter(String fname, TableIdentifier table, String enc)
+  {
+    WbFile f = new WbFile(fname);
+    if (f.isDirectory())
+    {
+      String tname = StringUtil.makeFilename(table.getTableName()) + ".bad";
+      this.badFile = new WbFile(fname, tname);
+    }
+    else
+    {
+      this.badFile = f;
+    }
+    this.encoding = enc;
+    this.badFile.delete();
+  }
 
-	public synchronized void recordRejected(String record)
-	{
-		Writer w = null;
-		try
-		{
-			w = EncodingUtil.createWriter(badFile, encoding, true);
-			w.write(record);
-			w.write(StringUtil.LINE_TERMINATOR);
-			badRows ++;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("BadFileWriter.recordRejected()", "Could not write record", e);
-		}
-		finally
-		{
-			FileUtil.closeQuietely(w);
-		}
-	}
+  public synchronized void recordRejected(String record)
+  {
+    Writer w = null;
+    try
+    {
+      w = EncodingUtil.createWriter(badFile, encoding, true);
+      w.write(record);
+      w.write(StringUtil.LINE_TERMINATOR);
+      badRows ++;
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("BadFileWriter.recordRejected()", "Could not write record", e);
+    }
+    finally
+    {
+      FileUtil.closeQuietely(w);
+    }
+  }
 
-	public synchronized int getRows()
-	{
-		return badRows;
-	}
+  public synchronized int getRows()
+  {
+    return badRows;
+  }
 
-	public CharSequence getMessage()
-	{
-		StringBuilder b = new StringBuilder(50);
-		b.append(this.badRows);
-		b.append(' ');
-		b.append(ResourceMgr.getString("MsgCopyNumRowsRejected") + "\n");
-		b.append(ResourceMgr.getFormattedString("MsgCopyBadFile", this.badFile.getFullPath()));
-		return b;
-	}
+  public CharSequence getMessage()
+  {
+    StringBuilder b = new StringBuilder(50);
+    b.append(this.badRows);
+    b.append(' ');
+    b.append(ResourceMgr.getString("MsgCopyNumRowsRejected") + "\n");
+    b.append(ResourceMgr.getFormattedString("MsgCopyBadFile", this.badFile.getFullPath()));
+    return b;
+  }
 }

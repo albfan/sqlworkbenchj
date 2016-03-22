@@ -44,28 +44,28 @@ import workbench.db.progress.OpenEdgeSynonymReader;
  */
 public interface SynonymReader
 {
-	String SYN_TYPE_NAME = "SYNONYM";
+  String SYN_TYPE_NAME = "SYNONYM";
 
-	TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String aSynonym)
-			throws SQLException;
+  TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String aSynonym)
+      throws SQLException;
 
-	List<TableIdentifier> getSynonymList(WbConnection con, String catalogPattern, String schemaPattern, String namePattern)
-		throws SQLException;
+  List<TableIdentifier> getSynonymList(WbConnection con, String catalogPattern, String schemaPattern, String namePattern)
+    throws SQLException;
 
   default String getSynonymSource(WbConnection con, String catalog, String schema, String synonym)
-			throws SQLException
+      throws SQLException
   {
     TableIdentifier targetTable = getSynonymTable(con, catalog, schema, synonym);
-		StringBuilder result = new StringBuilder(200);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		result.append("CREATE SYNONYM ");
-		TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
-		result.append(syn.getTableExpression(con));
-		result.append(nl + "   FOR ");
-		result.append(targetTable.getTableExpression(con));
-		result.append(';');
-		result.append(nl);
-		return result.toString();
+    StringBuilder result = new StringBuilder(200);
+    String nl = Settings.getInstance().getInternalEditorLineEnding();
+    result.append("CREATE SYNONYM ");
+    TableIdentifier syn = new TableIdentifier(catalog, schema, synonym);
+    result.append(syn.getTableExpression(con));
+    result.append(nl + "   FOR ");
+    result.append(targetTable.getTableExpression(con));
+    result.append(';');
+    result.append(nl);
+    return result.toString();
   }
 
   default String getSynonymTypeName()
@@ -78,36 +78,36 @@ public interface SynonymReader
     return false;
   }
 
-	class Factory
-	{
-		public static SynonymReader getSynonymReader(WbConnection conn)
-		{
-			if (conn == null) return null;
-			DbMetadata meta = conn.getMetadata();
-			if (meta.isOracle())
-			{
-				return new OracleSynonymReader();
-			}
-			if (meta.isApacheDerby())
-			{
-				return new DerbySynonymReader();
-			}
-			if (meta.isSqlServer() && SqlServerSynonymReader.supportsSynonyms(conn))
-			{
-				return new SqlServerSynonymReader(meta);
-			}
-			if (conn.getDbId().startsWith("db2"))
-			{
-				return new Db2SynonymReader();
-			}
-			if (conn.getDbId().equals("informix_dynamic_server"))
-			{
-				return new InformixSynonymReader();
-			}
-			if (conn.getDbId().equals("ingres"))
-			{
-				return new IngresSynonymReader();
-			}
+  class Factory
+  {
+    public static SynonymReader getSynonymReader(WbConnection conn)
+    {
+      if (conn == null) return null;
+      DbMetadata meta = conn.getMetadata();
+      if (meta.isOracle())
+      {
+        return new OracleSynonymReader();
+      }
+      if (meta.isApacheDerby())
+      {
+        return new DerbySynonymReader();
+      }
+      if (meta.isSqlServer() && SqlServerSynonymReader.supportsSynonyms(conn))
+      {
+        return new SqlServerSynonymReader(meta);
+      }
+      if (conn.getDbId().startsWith("db2"))
+      {
+        return new Db2SynonymReader();
+      }
+      if (conn.getDbId().equals("informix_dynamic_server"))
+      {
+        return new InformixSynonymReader();
+      }
+      if (conn.getDbId().equals("ingres"))
+      {
+        return new IngresSynonymReader();
+      }
       if (conn.getDbId().equals(DbMetadata.DBID_HANA))
       {
         return new HanaSynonymReader();
@@ -116,7 +116,7 @@ public interface SynonymReader
       {
         return new OpenEdgeSynonymReader();
       }
-			return null;
-		}
-	}
+      return null;
+    }
+  }
 }

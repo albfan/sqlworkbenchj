@@ -37,124 +37,124 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class EnumIdentifier
-	implements ComparableDbObject
+  implements ComparableDbObject
 {
-	private String catalog;
-	private String schema;
-	private String enumName;
-	private String remarks;
-	private List<String> values;
+  private String catalog;
+  private String schema;
+  private String enumName;
+  private String remarks;
+  private List<String> values;
 
-	public EnumIdentifier(String dcatalog, String dschema, String name)
-	{
-		catalog = dcatalog;
-		schema = dschema;
-		enumName = name;
-	}
+  public EnumIdentifier(String dcatalog, String dschema, String name)
+  {
+    catalog = dcatalog;
+    schema = dschema;
+    enumName = name;
+  }
 
-	public void addEnumValue(String value)
-	{
-		if (this.values == null) values = new ArrayList<>();
-		values.add(value);
-	}
+  public void addEnumValue(String value)
+  {
+    if (this.values == null) values = new ArrayList<>();
+    values.add(value);
+  }
 
-	public List<String> getValues()
-	{
-		return values;
-	}
+  public List<String> getValues()
+  {
+    return values;
+  }
 
-	@Override
-	public String getCatalog()
-	{
-		return catalog;
-	}
+  @Override
+  public String getCatalog()
+  {
+    return catalog;
+  }
 
-	@Override
-	public String getSchema()
-	{
-		return schema;
-	}
+  @Override
+  public String getSchema()
+  {
+    return schema;
+  }
 
-	@Override
-	public String getObjectType()
-	{
-		return "ENUM";
-	}
+  @Override
+  public String getObjectType()
+  {
+    return "ENUM";
+  }
 
-	@Override
-	public String getObjectName()
-	{
-		return enumName;
-	}
+  @Override
+  public String getObjectName()
+  {
+    return enumName;
+  }
 
-	@Override
-	public String getObjectName(WbConnection conn)
-	{
-		return enumName;
-	}
+  @Override
+  public String getObjectName(WbConnection conn)
+  {
+    return enumName;
+  }
 
-	@Override
-	public String getFullyQualifiedName(WbConnection conn)
-	{
-		return SqlUtil.fullyQualifiedName(conn, this);
-	}
+  @Override
+  public String getFullyQualifiedName(WbConnection conn)
+  {
+    return SqlUtil.fullyQualifiedName(conn, this);
+  }
 
-	@Override
-	public String getObjectExpression(WbConnection conn)
-	{
-		return enumName;
-	}
+  @Override
+  public String getObjectExpression(WbConnection conn)
+  {
+    return enumName;
+  }
 
-	@Override
-	public CharSequence getSource(WbConnection con)
-		throws SQLException
-	{
-		return con.getMetadata().getObjectSource(this);
-	}
+  @Override
+  public CharSequence getSource(WbConnection con)
+    throws SQLException
+  {
+    return con.getMetadata().getObjectSource(this);
+  }
 
-	@Override
-	public String getDropStatement(WbConnection con, boolean cascade)
-	{
-		return null;
-	}
+  @Override
+  public String getDropStatement(WbConnection con, boolean cascade)
+  {
+    return null;
+  }
 
-	@Override
-	public String getObjectNameForDrop(WbConnection con)
-	{
-		return getFullyQualifiedName(con);
-	}
+  @Override
+  public String getObjectNameForDrop(WbConnection con)
+  {
+    return getFullyQualifiedName(con);
+  }
 
-	@Override
-	public String getComment()
-	{
-		return remarks;
-	}
+  @Override
+  public String getComment()
+  {
+    return remarks;
+  }
 
-	@Override
-	public void setComment(String cmt)
-	{
-		remarks = cmt;
-	}
+  @Override
+  public void setComment(String cmt)
+  {
+    remarks = cmt;
+  }
 
-	@Override
-	public boolean isComparableWith(DbObject other)
-	{
-		return (other instanceof EnumIdentifier);
-	}
+  @Override
+  public boolean isComparableWith(DbObject other)
+  {
+    return (other instanceof EnumIdentifier);
+  }
 
-	@Override
-	public boolean isEqualTo(DbObject other)
-	{
-		if (other instanceof EnumIdentifier)
-		{
-			EnumIdentifier id = (EnumIdentifier)other;
-			int mySize = values == null ? 0 : values.size();
-			int otherSize = id.values == null ? 0 : id.values.size();
-			if (mySize != otherSize) return false;
-			return values.equals(id.values);
-		}
-		return false;
-	}
+  @Override
+  public boolean isEqualTo(DbObject other)
+  {
+    if (other instanceof EnumIdentifier)
+    {
+      EnumIdentifier id = (EnumIdentifier)other;
+      int mySize = values == null ? 0 : values.size();
+      int otherSize = id.values == null ? 0 : id.values.size();
+      if (mySize != otherSize) return false;
+      return values.equals(id.values);
+    }
+    return false;
+  }
 
   @Override
   public boolean supportsGetSource()

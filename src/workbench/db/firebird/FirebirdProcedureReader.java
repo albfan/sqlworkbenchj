@@ -60,19 +60,19 @@ import static workbench.db.ProcedureReader.*;
  * @author  Thomas Kellerer
  */
 public class FirebirdProcedureReader
-	extends JdbcProcedureReader
+  extends JdbcProcedureReader
 {
   private boolean is30;
 
-	public FirebirdProcedureReader(WbConnection conn)
-	{
-		super(conn);
+  public FirebirdProcedureReader(WbConnection conn)
+  {
+    super(conn);
     is30 = JdbcUtils.hasMinimumServerVersion(conn, "3.0");
-	}
+  }
 
-	@Override
-	public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
-		throws NoConfigException
+  @Override
+  public void readProcedureSource(ProcedureDefinition def, String catalogForSource, String schemaForSource)
+    throws NoConfigException
   {
     if (is30 && def.isPackageProcedure())
     {
@@ -85,16 +85,16 @@ public class FirebirdProcedureReader
     }
   }
 
-	@Override
-	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
-	{
+  @Override
+  public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
+  {
     DataStore ds = super.buildProcedureListDataStore(meta, addSpecificName);
     if (supportsPackages())
     {
       ds.getResultInfo().getColumn(COLUMN_IDX_PROC_LIST_CATALOG).setColumnName("PACKAGE");
     }
     return ds;
-	}
+  }
 
   @Override
   public boolean supportsPackages()
@@ -102,10 +102,10 @@ public class FirebirdProcedureReader
     return is30;
   }
 
-	@Override
-	public DataStore getProcedures(String catalog, String schema, String name)
-		throws SQLException
-	{
+  @Override
+  public DataStore getProcedures(String catalog, String schema, String name)
+    throws SQLException
+  {
     if (!supportsPackages())
     {
       return super.getProcedures(catalog, schema, name);
@@ -140,27 +140,27 @@ public class FirebirdProcedureReader
       ") t \n");
 
 
-		schema = DbMetadata.cleanupWildcards(schema);
-		name = DbMetadata.cleanupWildcards(name);
+    schema = DbMetadata.cleanupWildcards(schema);
+    name = DbMetadata.cleanupWildcards(name);
 
     if (StringUtil.isNonEmpty(name))
     {
       SqlUtil.appendAndCondition(sql, "procedure_name", name, connection);
     }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logDebug("FirebirdProcedureReader.getProceduresAndPackages()", "Retrieving procedures using:\n" + sql.toString());
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("FirebirdProcedureReader.getProceduresAndPackages()", "Retrieving procedures using:\n" + sql.toString());
+    }
 
     Statement stmt = null;
     ResultSet rs = null;
-		try
-		{
+    try
+    {
       stmt = connection.createStatementForQuery();
       rs = stmt.executeQuery(sql.toString());
 
-			DataStore ds = fillProcedureListDataStore(rs);
+      DataStore ds = fillProcedureListDataStore(rs);
 
       for (int row=0; row < ds.getRowCount(); row++)
       {
@@ -177,22 +177,22 @@ public class FirebirdProcedureReader
       // sort the complete combined result according to the JDBC API
       ds.sort(getProcedureListSort());
 
-			ds.resetStatus();
-			return ds;
-		}
-		catch (SQLException ex)
-		{
-			throw ex;
-		}
+      ds.resetStatus();
+      return ds;
+    }
+    catch (SQLException ex)
+    {
+      throw ex;
+    }
   }
 
-	@Override
-	public StringBuilder getProcedureHeader(ProcedureDefinition def)
-	{
-		StringBuilder source = new StringBuilder(100);
-		try
-		{
-			DataStore ds = this.getProcedureColumns(def);
+  @Override
+  public StringBuilder getProcedureHeader(ProcedureDefinition def)
+  {
+    StringBuilder source = new StringBuilder(100);
+    try
+    {
+      DataStore ds = this.getProcedureColumns(def);
       source.append("CREATE OR ALTER ");
 
       boolean isFunction = false;
@@ -206,17 +206,17 @@ public class FirebirdProcedureReader
         source.append("PROCEDURE ");
       }
 
-			source.append(def.getProcedureName());
-			String retType = null;
-			int count = ds.getRowCount();
-			int added = 0;
-			for (int i=0; i < count; i++)
-			{
-				String vartype = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-				String name = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-				String ret = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				if ("OUT".equals(ret))
-				{
+      source.append(def.getProcedureName());
+      String retType = null;
+      int count = ds.getRowCount();
+      int added = 0;
+      for (int i=0; i < count; i++)
+      {
+        String vartype = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+        String name = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+        String ret = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+        if ("OUT".equals(ret))
+        {
           if (retType == null)
           {
             retType = "(" + name + " " + vartype;
@@ -225,42 +225,42 @@ public class FirebirdProcedureReader
           {
             retType += ", " + name + " " + vartype;
           }
-				}
+        }
         else if ("RETURN".equals(ret))
         {
           retType = vartype;
         }
-				else
-				{
-					if (added > 0)
-					{
-						source.append(", ");
-					}
-					else
-					{
-						source.append(" (");
-					}
-					source.append(name);
-					source.append(' ');
-					source.append(vartype);
-					added ++;
-				}
-			}
-			if (added > 0) source.append(')');
-			if (retType != null)
-			{
-				source.append("\n  RETURNS ");
-				source.append(retType);
+        else
+        {
+          if (added > 0)
+          {
+            source.append(", ");
+          }
+          else
+          {
+            source.append(" (");
+          }
+          source.append(name);
+          source.append(' ');
+          source.append(vartype);
+          added ++;
+        }
+      }
+      if (added > 0) source.append(')');
+      if (retType != null)
+      {
+        source.append("\n  RETURNS ");
+        source.append(retType);
         if (!isFunction) source.append(")");
-			}
-			source.append("\nAS\n");
-		}
-		catch (Exception e)
-		{
-			source = StringUtil.emptyBuilder();
-		}
-		return source;
-	}
+      }
+      source.append("\nAS\n");
+    }
+    catch (Exception e)
+    {
+      source = StringUtil.emptyBuilder();
+    }
+    return source;
+  }
 
   @Override
   public CharSequence getPackageSource(String catalog, String schema, String packageName)
@@ -308,9 +308,9 @@ public class FirebirdProcedureReader
     return result;
   }
 
-	@Override
-	public DataStore getProcedureColumns(ProcedureDefinition def)
-		throws SQLException
+  @Override
+  public DataStore getProcedureColumns(ProcedureDefinition def)
+    throws SQLException
   {
     if (is30)
     {
@@ -319,8 +319,8 @@ public class FirebirdProcedureReader
     return super.getProcedureColumns(def);
   }
 
-	public DataStore retrieveProcedureColumns(ProcedureDefinition def)
-		throws SQLException
+  public DataStore retrieveProcedureColumns(ProcedureDefinition def)
+    throws SQLException
   {
     // for Firebird 30 we need to use our own statement
     // as the JDBC driver does not return any information about packages
@@ -385,10 +385,10 @@ public class FirebirdProcedureReader
       type = "procedure";
     }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
       LogMgr.logDebug("FirebirdProcedureReader.retrieveProcedureColumns()", "Retrieving procedure parameters using:\n" + SqlUtil.replaceParameters(sql, def.getProcedureName(), type, def.getPackageName()));
-		}
+    }
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;

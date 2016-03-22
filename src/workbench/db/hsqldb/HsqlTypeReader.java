@@ -52,181 +52,181 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class HsqlTypeReader
-	implements ObjectListExtender
+  implements ObjectListExtender
 {
 
-	@Override
-	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schemaPattern, String objectPattern, String[] requestedTypes)
-	{
-		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
+  @Override
+  public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schemaPattern, String objectPattern, String[] requestedTypes)
+  {
+    if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
-		List<HsqlType> types = getTypes(con, schemaPattern, objectPattern);
-		if (types.isEmpty()) return false;
+    List<HsqlType> types = getTypes(con, schemaPattern, objectPattern);
+    if (types.isEmpty()) return false;
 
-		for (BaseObjectType type : types)
-		{
-			int row = result.addRow();
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, type.getCatalog());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
-			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
-			result.getRow(row).setUserObject(type);
-		}
-		return true;
-	}
+    for (BaseObjectType type : types)
+    {
+      int row = result.addRow();
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, type.getCatalog());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
+      result.getRow(row).setUserObject(type);
+    }
+    return true;
+  }
 
-	public List<HsqlType> getTypes(WbConnection con, String schemaPattern, String objectPattern)
-	{
-		List<HsqlType> result = new ArrayList<>();
+  public List<HsqlType> getTypes(WbConnection con, String schemaPattern, String objectPattern)
+  {
+    List<HsqlType> result = new ArrayList<>();
 
     StringBuilder select = new StringBuilder(100);
 
-		String baseSelect =
-			"SELECT user_defined_type_catalog, user_defined_type_schema, user_defined_type_name, source_dtd_identifier \n" +
-			"FROM information_schema.user_defined_types";
+    String baseSelect =
+      "SELECT user_defined_type_catalog, user_defined_type_schema, user_defined_type_name, source_dtd_identifier \n" +
+      "FROM information_schema.user_defined_types";
 
-		select.append(baseSelect);
-		boolean whereAdded = false;
-		if (StringUtil.isNonBlank(schemaPattern))
-		{
-			select.append("\n WHERE ");
-			SqlUtil.appendExpression(select, "user_defined_type_schema", schemaPattern, con);
-			whereAdded = true;
-		}
+    select.append(baseSelect);
+    boolean whereAdded = false;
+    if (StringUtil.isNonBlank(schemaPattern))
+    {
+      select.append("\n WHERE ");
+      SqlUtil.appendExpression(select, "user_defined_type_schema", schemaPattern, con);
+      whereAdded = true;
+    }
 
-		if (StringUtil.isNonEmpty(objectPattern))
-		{
-			if (whereAdded)
-			{
-				select.append(" AND ");
-			}
-			else
-			{
-				select.append("\n WHERE ");
-			}
-			SqlUtil.appendExpression(select, "user_defined_type_name", objectPattern, con);
-		}
+    if (StringUtil.isNonEmpty(objectPattern))
+    {
+      if (whereAdded)
+      {
+        select.append(" AND ");
+      }
+      else
+      {
+        select.append("\n WHERE ");
+      }
+      SqlUtil.appendExpression(select, "user_defined_type_name", objectPattern, con);
+    }
 
-		select.append("\n ORDER BY 2,3 ");
+    select.append("\n ORDER BY 2,3 ");
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("HsqlTypeReader.extendObjectList()", "Using SQL: " + select);
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("HsqlTypeReader.extendObjectList()", "Using SQL: " + select);
+    }
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(select.toString());
-			while (rs.next())
-			{
-				String catalog = rs.getString("user_defined_type_catalog");
-				String schema = rs.getString("user_defined_type_schema");
-				String name = rs.getString("user_defined_type_name");
-				String datatype = rs.getString("source_dtd_identifier");
-				HsqlType type = new HsqlType(schema, name);
-				type.setCatalog(catalog);
-				type.setDataTypeName(datatype);
-				result.add(type);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("HsqlTypeReader.getTypes()", "Error retrieving object types", e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result;
-	}
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = con.createStatementForQuery();
+      rs = stmt.executeQuery(select.toString());
+      while (rs.next())
+      {
+        String catalog = rs.getString("user_defined_type_catalog");
+        String schema = rs.getString("user_defined_type_schema");
+        String name = rs.getString("user_defined_type_name");
+        String datatype = rs.getString("source_dtd_identifier");
+        HsqlType type = new HsqlType(schema, name);
+        type.setCatalog(catalog);
+        type.setDataTypeName(datatype);
+        result.add(type);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("HsqlTypeReader.getTypes()", "Error retrieving object types", e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
 
-	@Override
-	public boolean isDerivedType()
-	{
-		return false;
-	}
+  @Override
+  public boolean isDerivedType()
+  {
+    return false;
+  }
 
-	@Override
-	public List<String> supportedTypes()
-	{
-		return CollectionUtil.arrayList("TYPE");
-	}
+  @Override
+  public List<String> supportedTypes()
+  {
+    return CollectionUtil.arrayList("TYPE");
+  }
 
-	@Override
-	public boolean handlesType(String type)
-	{
-		return "TYPE".equalsIgnoreCase(type);
-	}
+  @Override
+  public boolean handlesType(String type)
+  {
+    return "TYPE".equalsIgnoreCase(type);
+  }
 
-	@Override
-	public boolean handlesType(String[] types)
-	{
-		if (types == null) return true;
-		for (String type : types)
-		{
-			if (handlesType(type)) return true;
-		}
-		return false;
-	}
+  @Override
+  public boolean handlesType(String[] types)
+  {
+    if (types == null) return true;
+    for (String type : types)
+    {
+      if (handlesType(type)) return true;
+    }
+    return false;
+  }
 
-	@Override
-	public DataStore getObjectDetails(WbConnection con, DbObject object)
-	{
-		try
-		{
-			HsqlType type = getObjectDefinition(con, object);
-			if (type != null)
-			{
-				DataStore details = new DataStore(new String[] {"TYPE_NAME", "DATA_TYPE"}, new int[] { Types.VARCHAR, Types.VARCHAR } );
-				details.addRow();
-				details.setValue(0, 0, type.getObjectName());
-				details.setValue(0, 1, type.getDataTypeName());
-				return details;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("HsqlTypeReader.getObjectDetails()", "Cannot retrieve type columns", e);
-		}
-		return null;
-	}
+  @Override
+  public DataStore getObjectDetails(WbConnection con, DbObject object)
+  {
+    try
+    {
+      HsqlType type = getObjectDefinition(con, object);
+      if (type != null)
+      {
+        DataStore details = new DataStore(new String[] {"TYPE_NAME", "DATA_TYPE"}, new int[] { Types.VARCHAR, Types.VARCHAR } );
+        details.addRow();
+        details.setValue(0, 0, type.getObjectName());
+        details.setValue(0, 1, type.getDataTypeName());
+        return details;
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("HsqlTypeReader.getObjectDetails()", "Cannot retrieve type columns", e);
+    }
+    return null;
+  }
 
-	@Override
-	public HsqlType getObjectDefinition(WbConnection con, DbObject name)
-	{
-		try
-		{
-			List<HsqlType> types = getTypes(con, name.getSchema(), name.getObjectName());
-			if (types.size() == 1)
-			{
-				return types.get(0);
-			}
-			return null;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("HsqlTypeReader.getObjectDetails()", "Cannot retrieve type columns", e);
-		}
-		return null;
-	}
+  @Override
+  public HsqlType getObjectDefinition(WbConnection con, DbObject name)
+  {
+    try
+    {
+      List<HsqlType> types = getTypes(con, name.getSchema(), name.getObjectName());
+      if (types.size() == 1)
+      {
+        return types.get(0);
+      }
+      return null;
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("HsqlTypeReader.getObjectDetails()", "Cannot retrieve type columns", e);
+    }
+    return null;
+  }
 
-	@Override
-	public String getObjectSource(WbConnection con, DbObject object)
-	{
-		HsqlType type = getObjectDefinition(con, object);
-		if (type == null) return null;
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("CREATE TYPE ");
-		sql.append(type.getObjectName());
-		sql.append(" AS ");
-		sql.append(type.getDataTypeName());
-		sql.append(";\n");
-		return sql.toString();
-	}
+  @Override
+  public String getObjectSource(WbConnection con, DbObject object)
+  {
+    HsqlType type = getObjectDefinition(con, object);
+    if (type == null) return null;
+    StringBuilder sql = new StringBuilder(100);
+    sql.append("CREATE TYPE ");
+    sql.append(type.getObjectName());
+    sql.append(" AS ");
+    sql.append(type.getDataTypeName());
+    sql.append(";\n");
+    return sql.toString();
+  }
 
   @Override
   public List<ColumnIdentifier> getColumns(WbConnection con, DbObject object)

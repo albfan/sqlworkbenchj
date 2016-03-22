@@ -44,65 +44,65 @@ import workbench.util.SqlUtil;
  * @author  Thomas Kellerer
  */
 public class HanaSynonymReader
-	implements SynonymReader
+  implements SynonymReader
 {
 
-	@Override
-	public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
-		throws SQLException
-	{
-		// Nothing to do. The HANA driver already returns the SYNONYMs in the getTables() call
-		return Collections.emptyList();
-	}
+  @Override
+  public List<TableIdentifier> getSynonymList(WbConnection con, String catalog, String owner, String namePattern)
+    throws SQLException
+  {
+    // Nothing to do. The HANA driver already returns the SYNONYMs in the getTables() call
+    return Collections.emptyList();
+  }
 
-	@Override
-	public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonym)
-		throws SQLException
-	{
-		String sql =
+  @Override
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonym)
+    throws SQLException
+  {
+    String sql =
       "-- SQL Workbench \n" +
       "SELECT object_schema, object_name, object_type \n" +
       "FROM sys.synonyms \n" +
       "WHERE schema_name = ? \n" +
       "  AND synonym_name = ? ";
 
-		if (schema == null)
-		{
-			schema = con.getCurrentSchema();
-		}
+    if (schema == null)
+    {
+      schema = con.getCurrentSchema();
+    }
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo("HanaSynonymReader.getSynonymTable()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schema, synonym));
-		}
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("HanaSynonymReader.getSynonymTable()", "Retrieving synonyms using:\n" + SqlUtil.replaceParameters(sql, schema, synonym));
+    }
 
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-		TableIdentifier result = null;
-		try
-		{
-			stmt = con.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			stmt.setString(2, synonym);
+    TableIdentifier result = null;
+    try
+    {
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, schema);
+      stmt.setString(2, synonym);
 
-			rs = stmt.executeQuery();
-			if (rs.next())
-			{
-				String targetSchema = rs.getString(1);
-				String targetTable = rs.getString(2);
+      rs = stmt.executeQuery();
+      if (rs.next())
+      {
+        String targetSchema = rs.getString(1);
+        String targetTable = rs.getString(2);
         String type = rs.getString(3);
-				result = new TableIdentifier(null, targetSchema, targetTable, false);
+        result = new TableIdentifier(null, targetSchema, targetTable, false);
         result.setNeverAdjustCase(true);
-				result.setType(type);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+        result.setType(type);
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-		return result;
-	}
+    return result;
+  }
 
 }

@@ -38,38 +38,38 @@ import workbench.db.WbConnection;
  * @author Thomas Kellerer
  */
 public class OracleViewReader
-	extends DefaultViewReader
+  extends DefaultViewReader
 {
 
-	public OracleViewReader(WbConnection con)
-	{
-		super(con);
-	}
+  public OracleViewReader(WbConnection con)
+  {
+    super(con);
+  }
 
-	@Override
-	public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
-		throws SQLException
-	{
-		String type = view.getTable().getType();
-		if (DbMetadata.MVIEW_NAME.equals(type))
-		{
-			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, view, null, dropType, true);
-			return sql;
-		}
-		return super.getExtendedViewSource(view, dropType, includeCommit);
-	}
+  @Override
+  public CharSequence getExtendedViewSource(TableDefinition view, DropType dropType, boolean includeCommit)
+    throws SQLException
+  {
+    String type = view.getTable().getType();
+    if (DbMetadata.MVIEW_NAME.equals(type))
+    {
+      OracleMViewReader reader = new OracleMViewReader();
+      CharSequence sql = reader.getMViewSource(this.connection, view, null, dropType, true);
+      return sql;
+    }
+    return super.getExtendedViewSource(view, dropType, includeCommit);
+  }
 
-	@Override
-	public CharSequence getViewSource(TableIdentifier viewId)
-		throws NoConfigException
-	{
-		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
-		{
-			OracleMViewReader reader = new OracleMViewReader();
-			CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, DropType.none, false);
-			return sql;
-		}
+  @Override
+  public CharSequence getViewSource(TableIdentifier viewId)
+    throws NoConfigException
+  {
+    if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
+    {
+      OracleMViewReader reader = new OracleMViewReader();
+      CharSequence sql = reader.getMViewSource(this.connection, new TableDefinition(viewId), null, DropType.none, false);
+      return sql;
+    }
 
     if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.view))
     {
@@ -83,7 +83,7 @@ public class OracleViewReader
       }
     }
 
-		return super.getViewSource(viewId);
-	}
+    return super.getViewSource(viewId);
+  }
 
 }

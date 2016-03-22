@@ -31,18 +31,18 @@ import workbench.util.QuoteEscapeType;
  */
 public interface TextImportOptions
 {
-	String getTextDelimiter();
-	void setTextDelimiter(String delim);
-	boolean getContainsHeader();
-	void setContainsHeader(boolean flag);
-	String getTextQuoteChar();
-	void setTextQuoteChar(String quote);
-	boolean getDecode();
-	void setDecode(boolean flag);
-	String getDecimalChar();
-	void setDecimalChar(String s);
-	QuoteEscapeType getQuoteEscaping();
-	boolean getQuoteAlways();
-	String getNullString();
-	void setNullString(String nullString);
+  String getTextDelimiter();
+  void setTextDelimiter(String delim);
+  boolean getContainsHeader();
+  void setContainsHeader(boolean flag);
+  String getTextQuoteChar();
+  void setTextQuoteChar(String quote);
+  boolean getDecode();
+  void setDecode(boolean flag);
+  String getDecimalChar();
+  void setDecimalChar(String s);
+  QuoteEscapeType getQuoteEscaping();
+  boolean getQuoteAlways();
+  String getNullString();
+  void setNullString(String nullString);
 }

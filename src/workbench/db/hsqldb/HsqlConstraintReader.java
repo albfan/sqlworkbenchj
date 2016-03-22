@@ -36,85 +36,85 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  */
 public class HsqlConstraintReader
-	extends AbstractConstraintReader
+  extends AbstractConstraintReader
 {
-	private String sql;
+  private String sql;
 
-	public HsqlConstraintReader(WbConnection dbConnection)
-	{
-		super(dbConnection.getDbId());
+  public HsqlConstraintReader(WbConnection dbConnection)
+  {
+    super(dbConnection.getDbId());
 
-		this.sql =
-			"select chk.constraint_name, chk.check_clause \n" +
-			"from information_schema.system_check_constraints chk" +
-			"  join  information_schema.system_table_constraints cons on chk.constraint_name = cons.constraint_name  \n" +
-			"where cons.constraint_type = 'CHECK' \n" +
-			"and cons.table_name = ?; \n";
+    this.sql =
+      "select chk.constraint_name, chk.check_clause \n" +
+      "from information_schema.system_check_constraints chk" +
+      "  join  information_schema.system_table_constraints cons on chk.constraint_name = cons.constraint_name  \n" +
+      "where cons.constraint_type = 'CHECK' \n" +
+      "and cons.table_name = ?; \n";
 
-		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
-		{
-			this.sql = sql.replace("system_check_constraints", "check_constraints");
-			this.sql = sql.replace("system_table_constraints", "table_constraints");
-		}
-	}
+    if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
+    {
+      this.sql = sql.replace("system_check_constraints", "check_constraints");
+      this.sql = sql.replace("system_table_constraints", "table_constraints");
+    }
+  }
 
-	@Override
-	public String getColumnConstraintSql()
-	{
-		return null;
-	}
+  @Override
+  public String getColumnConstraintSql()
+  {
+    return null;
+  }
 
-	@Override
-	public String getTableConstraintSql()
-	{
-		return this.sql;
-	}
+  @Override
+  public String getTableConstraintSql()
+  {
+    return this.sql;
+  }
 
-	@Override
-	public boolean isSystemConstraintName(String name)
-	{
-		if (StringUtil.isBlank(name))	return false;
-		return name.startsWith("SYS_");
-	}
+  @Override
+  public boolean isSystemConstraintName(String name)
+  {
+    if (StringUtil.isBlank(name)) return false;
+    return name.startsWith("SYS_");
+  }
 
-	@Override
-	protected boolean shouldIncludeTableConstraint(String constraintName, String constraint, TableDefinition table)
-	{
-		if (constraint == null) return false;
-		if (!constraint.toUpperCase().endsWith("IS NOT NULL")) return true;
+  @Override
+  protected boolean shouldIncludeTableConstraint(String constraintName, String constraint, TableDefinition table)
+  {
+    if (constraint == null) return false;
+    if (!constraint.toUpperCase().endsWith("IS NOT NULL")) return true;
 
-		int pos = constraint.indexOf(' ');
-		if (pos < 0) return true;
+    int pos = constraint.indexOf(' ');
+    if (pos < 0) return true;
 
-		String colname = constraint.substring(0,pos);
-		int pos2 = colname.lastIndexOf('.');
-		if (pos2 < 0) return true;
+    String colname = constraint.substring(0,pos);
+    int pos2 = colname.lastIndexOf('.');
+    if (pos2 < 0) return true;
 
-		colname = colname.substring(pos2 + 1);
-		ColumnIdentifier col = findColumn(table, colname);
-		if (col != null && !col.isNullable())
-		{
-			if (isSystemConstraintName(constraintName))
-			{
-				// the constraint name is system generated and the column is already marked
-				// as NOT NULL, so there is no need to include this constraint here
-				return false;
-			}
-		}
+    colname = colname.substring(pos2 + 1);
+    ColumnIdentifier col = findColumn(table, colname);
+    if (col != null && !col.isNullable())
+    {
+      if (isSystemConstraintName(constraintName))
+      {
+        // the constraint name is system generated and the column is already marked
+        // as NOT NULL, so there is no need to include this constraint here
+        return false;
+      }
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	private ColumnIdentifier findColumn(TableDefinition table, String columnName)
-	{
-		for (ColumnIdentifier col : table.getColumns())
-		{
-			if (col.getColumnName().equalsIgnoreCase(columnName))
-			{
-				return col;
-			}
-		}
-		return null;
-	}
+  private ColumnIdentifier findColumn(TableDefinition table, String columnName)
+  {
+    for (ColumnIdentifier col : table.getColumns())
+    {
+      if (col.getColumnName().equalsIgnoreCase(columnName))
+      {
+        return col;
+      }
+    }
+    return null;
+  }
 
 }
