@@ -360,6 +360,7 @@ public class SqlPanel
   private final AutomaticRefreshMgr refreshMgr;
   private final Highlighter highlighter;
   private ResultTabDropHandler tabDropHandler;
+	private boolean macroExecution = false;
 
 //</editor-fold>
 
@@ -2271,24 +2272,30 @@ public class SqlPanel
 		}
 	}
 
-	private boolean macroExecution = false;
-
-  public void showData(TableIdentifier table)
+  public void showData(TableIdentifier table, List<ColumnIdentifier> toSelect)
   {
 		if (isBusy()) return;
     if (table == null) return;
 
     String sql = null;
 
-    if (DbTreeSettings.useColumnListForTableDataDisplay(dbConnection.getDbId()))
+    if (toSelect != null)
     {
-      List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
       TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
-      sql = builder.getSelectForColumns(table, columns, statusBar.getMaxRows());
+      sql = builder.getSelectForColumns(table, toSelect, statusBar.getMaxRows());
     }
     else
     {
-      sql = "select * from " + table.getTableExpression(dbConnection);
+      if (DbTreeSettings.useColumnListForTableDataDisplay(dbConnection.getDbId()))
+      {
+        List<ColumnIdentifier> columns = dbConnection.getObjectCache().getColumns(table);
+        TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+        sql = builder.getSelectForColumns(table, columns, statusBar.getMaxRows());
+      }
+      else
+      {
+        sql = "select * from " + table.getTableExpression(dbConnection);
+      }
     }
     this.startExecution(sql, 0, false, true, RunType.RunAll);
   }

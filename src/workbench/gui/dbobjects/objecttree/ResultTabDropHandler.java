@@ -24,15 +24,19 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JComponent;
 
+import workbench.db.ColumnIdentifier;
 import workbench.log.LogMgr;
 
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.util.CollectionUtil;
 
 
 /**
@@ -59,14 +63,84 @@ public class ResultTabDropHandler
     if (selection == null) return;
 
     ObjectTreeNode[] nodes = selection.getSelectedNodes();
-    if (nodes == null || nodes.length != 1) return;
+    if (nodes == null) return;
 
-    DbObject dbo = nodes[0].getDbObject();
-    if (dbo instanceof TableIdentifier)
+    List<ColumnIdentifier> selectedColumns = getSelectedColumns(nodes);
+    TableIdentifier tbl = null;
+
+    if (CollectionUtil.isNonEmpty(selectedColumns))
     {
-      TableIdentifier tbl = (TableIdentifier)dbo;
-      sqlPanel.showData(tbl);
+      // the direct parent of a column is the "Columns" node.
+      // the parent of that is the table to which the columns belong
+      DbObject dbo = nodes[0].getParent().getParent().getDbObject();
+      if (dbo instanceof TableIdentifier)
+      {
+        tbl = (TableIdentifier)dbo;
+      }
     }
+    else if (nodes.length == 1)
+    {
+      // only a single node selected, this must to be a table
+      DbObject dbo = nodes[0].getDbObject();
+      if (dbo instanceof TableIdentifier)
+      {
+        tbl = (TableIdentifier)dbo;
+      }
+    }
+    if (tbl != null)
+    {
+      sqlPanel.showData(tbl, selectedColumns);
+    }
+  }
+
+  private List<ColumnIdentifier> getSelectedColumns(ObjectTreeNode[] nodes)
+  {
+    if (nodes == null) return null;
+    List<ColumnIdentifier> cols = new ArrayList<>(nodes.length);
+    for (ObjectTreeNode node : nodes)
+    {
+      DbObject dbo = node.getDbObject();
+      if (dbo instanceof ColumnIdentifier)
+      {
+        cols.add((ColumnIdentifier)dbo);
+      }
+      else
+      {
+        // if something else than a column was selected, we can't handle that
+        return null;
+      }
+    }
+    return cols;
+  }
+
+  private boolean canHandleSelection(ObjectTreeNode[] nodes)
+  {
+    if (nodes == null) return false;
+
+    // we can only handle a single table
+    if (nodes.length == 1)
+    {
+      return nodes[0].getDbObject() instanceof TableIdentifier;
+    }
+
+    ObjectTreeNode firstParent = nodes[0].getParent();
+
+    // check if all selected nodes are columns
+    // and belong to the same table
+    for (ObjectTreeNode node : nodes)
+    {
+      DbObject dbo = node.getDbObject();
+      if (!(dbo instanceof ColumnIdentifier))
+      {
+        return false;
+      }
+      if (node.getParent() != firstParent)
+      {
+        // we can't handle columns from different tables
+        return false;
+      }
+    }
+    return true;
   }
 
 	public void dispose()
@@ -97,7 +171,7 @@ public class ResultTabDropHandler
       {
         ObjectTreeTransferable selection = (ObjectTreeTransferable)tr.getTransferData(ObjectTreeTransferable.DATA_FLAVOR);
         ObjectTreeNode[] nodes = selection.getSelectedNodes();
-        if (nodes != null && nodes.length == 1)
+        if (canHandleSelection(nodes))
         {
           dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
           return;
