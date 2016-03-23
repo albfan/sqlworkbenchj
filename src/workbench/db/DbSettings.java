@@ -1152,6 +1152,12 @@ public class DbSettings
     return getBoolProperty("generate.tablesource.include.grants", defaultFlag);
   }
 
+  public boolean needTableDefinitionForTableSource()
+  {
+    boolean useCustomQuery = isTableSourceRetrievalCustomized();
+    return getBoolProperty("retrieve.create.table.needs_definition", useCustomQuery == false);
+  }
+
   public boolean isTableSourceRetrievalCustomized()
   {
     if (getDbId().equals(DbMetadata.DBID_ORA))

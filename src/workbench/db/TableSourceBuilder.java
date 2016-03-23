@@ -128,7 +128,7 @@ public class TableSourceBuilder
     TableIdentifier toShow = tbl;
     List<DependencyNode> fkDef = null;
 
-    if (dbConnection.getDbSettings().isTableSourceRetrievalCustomized() == false)
+    if (dbConnection.getDbSettings().needTableDefinitionForTableSource())
     {
       TableDefinition def = meta.getTableDefinition(tbl);
       cols = def.getColumns();
