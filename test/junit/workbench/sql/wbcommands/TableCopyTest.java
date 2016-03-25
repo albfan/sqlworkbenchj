@@ -35,21 +35,21 @@ import org.junit.Test;
 public class TableCopyTest
 {
 
-	@Test
-	public void testParseMapping()
-	{
-		TableCopy copy = new TableCopy();
-		String cmdline = "-columns='Time/\"Time\", Intrvl/\"Intrvl\"'";
+  @Test
+  public void testParseMapping()
+  {
+    TableCopy copy = new TableCopy();
+    String cmdline = "-columns='Time/\"Time\", Intrvl/\"Intrvl\"'";
 
-		ArgumentParser parser = new ArgumentParser();
-		parser.addArgument(WbCopy.PARAM_COLUMNS);
-		parser.parse(cmdline);
+    ArgumentParser parser = new ArgumentParser();
+    parser.addArgument(WbCopy.PARAM_COLUMNS);
+    parser.parse(cmdline);
 
-		Map<String, String> map = copy.parseMapping(parser);
-		for (Map.Entry<String, String> entry : map.entrySet())
-		{
-			assertEquals("\"" + entry.getKey() + "\"", entry.getValue());
-		}
+    Map<String, String> map = copy.parseMapping(parser);
+    for (Map.Entry<String, String> entry : map.entrySet())
+    {
+      assertEquals("\"" + entry.getKey() + "\"", entry.getValue());
+    }
 
-	}
+  }
 }

@@ -37,29 +37,29 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbTableSourceTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbTableSourceTest()
-	{
-		super("WbTableSourceTest");
-	}
+  public WbTableSourceTest()
+  {
+    super("WbTableSourceTest");
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbConnection conn = util.getConnection();
-		TestUtil.executeScript(conn, "create table foo (id integer not null primary key);");
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    WbConnection conn = util.getConnection();
+    TestUtil.executeScript(conn, "create table foo (id integer not null primary key);");
 
-		WbTableSource stmt = new WbTableSource();
-		stmt.setConnection(conn);
-		StatementRunnerResult result = stmt.execute("wbtablesource foo");
-		assertTrue(result.isSuccess());
-		String sql = result.getMessages().toString();
-		assertTrue(sql.contains("CREATE TABLE FOO"));
-		assertTrue(sql.contains("PRIMARY KEY (ID);"));
-	}
+    WbTableSource stmt = new WbTableSource();
+    stmt.setConnection(conn);
+    StatementRunnerResult result = stmt.execute("wbtablesource foo");
+    assertTrue(result.isSuccess());
+    String sql = result.getMessages().toString();
+    assertTrue(sql.contains("CREATE TABLE FOO"));
+    assertTrue(sql.contains("PRIMARY KEY (ID);"));
+  }
 
 }

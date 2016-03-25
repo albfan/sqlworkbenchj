@@ -34,21 +34,21 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class MySQLShowTest
-	extends WbTestCase
+  extends WbTestCase
 {
-	public MySQLShowTest()
-	{
-		super("MySQLShowTest");
-	}
+  public MySQLShowTest()
+  {
+    super("MySQLShowTest");
+  }
 
-	@Test
-	public void testCheckSyntax()
-		throws Exception
-	{
-		MySQLShow show = new MySQLShow();
-		assertTrue(show.isInnoDBStatus("show engine innodb status"));
-		assertFalse(show.isInnoDBStatus("show engine innodb mutex"));
-		assertFalse(show.isInnoDBStatus("show create table foobar"));
-	}
+  @Test
+  public void testCheckSyntax()
+    throws Exception
+  {
+    MySQLShow show = new MySQLShow();
+    assertTrue(show.isInnoDBStatus("show engine innodb status"));
+    assertFalse(show.isInnoDBStatus("show engine innodb mutex"));
+    assertFalse(show.isInnoDBStatus("show create table foobar"));
+  }
 
 }

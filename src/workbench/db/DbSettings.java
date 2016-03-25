@@ -2149,4 +2149,9 @@ public class DbSettings
   {
     return getBoolProperty("index.columns.quote", true);
   }
+
+  public boolean databaseProductVersionReturnsRealVersion()
+  {
+    return getBoolProperty("databaseproductversion.realversion", false);
+  }
 }

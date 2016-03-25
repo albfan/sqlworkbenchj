@@ -37,46 +37,46 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class ConnectionDescriptorTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public ConnectionDescriptorTest()
-	{
-		super("ConnectionDescriptorTest");
-	}
+  public ConnectionDescriptorTest()
+  {
+    super("ConnectionDescriptorTest");
+  }
 
-	@Before
-	public void setUp()
-	{
-	}
+  @Before
+  public void setUp()
+  {
+  }
 
-	@After
-	public void tearDown()
-	{
-	}
+  @After
+  public void tearDown()
+  {
+  }
 
-	@Test
-	public void testParseDefinition()
-		throws Exception
-	{
-		ConnectionDescriptor def = new ConnectionDescriptor(null);
-		ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'", null);
-		assertNotNull(profile);
-		assertEquals("thomas", profile.getUsername());
-		assertEquals("secret", profile.getLoginPassword());
-		assertEquals("jdbc:postgresql://localhost/thomas", profile.getUrl());
-		assertEquals("org.postgresql.Driver", profile.getDriverclass());
+  @Test
+  public void testParseDefinition()
+    throws Exception
+  {
+    ConnectionDescriptor def = new ConnectionDescriptor(null);
+    ConnectionProfile profile = def.parseDefinition("username=\"thomas\", url=jdbc:postgresql://localhost/thomas, password='secret'", null);
+    assertNotNull(profile);
+    assertEquals("thomas", profile.getUsername());
+    assertEquals("secret", profile.getLoginPassword());
+    assertEquals("jdbc:postgresql://localhost/thomas", profile.getUrl());
+    assertEquals("org.postgresql.Driver", profile.getDriverclass());
 
-		profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver", null);
-		assertNotNull(profile);
-		assertEquals("Arthur", profile.getUsername());
-		assertEquals("MyPassword", profile.getLoginPassword());
-		assertEquals("jdbc:somedb:someparameter", profile.getUrl());
-		assertEquals("com.foobar.Driver", profile.getDriverclass());
-		String jarPath = def.getJarPath();
-		assertNotNull(jarPath);
-		WbFile f = new WbFile(jarPath);
-		assertEquals("xyz.jar", f.getName());
-	}
+    profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver", null);
+    assertNotNull(profile);
+    assertEquals("Arthur", profile.getUsername());
+    assertEquals("MyPassword", profile.getLoginPassword());
+    assertEquals("jdbc:somedb:someparameter", profile.getUrl());
+    assertEquals("com.foobar.Driver", profile.getDriverclass());
+    String jarPath = def.getJarPath();
+    assertNotNull(jarPath);
+    WbFile f = new WbFile(jarPath);
+    assertEquals("xyz.jar", f.getName());
+  }
 
 }

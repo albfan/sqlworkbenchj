@@ -38,36 +38,36 @@ import workbench.WbTestCase;
  * @author Thomas Kellerer
  */
 public class WbDefinePkTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbDefinePkTest()
-	{
-		super("WbDefinePkTest");
-	}
+  public WbDefinePkTest()
+  {
+    super("WbDefinePkTest");
+  }
 
-	@AfterClass
-	public static void tearDown()
-	{
-		PkMapping.getInstance().clear();
-	}
+  @AfterClass
+  public static void tearDown()
+  {
+    PkMapping.getInstance().clear();
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		TestUtil util = new TestUtil(getClass().getName() + "_testExecute");
-		util.prepareEnvironment();
-		StatementRunner runner = util.createConnectedStatementRunner();
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    TestUtil util = new TestUtil(getClass().getName() + "_testExecute");
+    util.prepareEnvironment();
+    StatementRunner runner = util.createConnectedStatementRunner();
 
-		String sql = "--define a new PK for a view\nwbdefinepk junitpk=id,name";
-		SqlCommand command = runner.getCommandToUse(sql);
-		assertTrue(command instanceof WbDefinePk);
-		runner.runStatement(sql);
+    String sql = "--define a new PK for a view\nwbdefinepk junitpk=id,name";
+    SqlCommand command = runner.getCommandToUse(sql);
+    assertTrue(command instanceof WbDefinePk);
+    runner.runStatement(sql);
 
-		Map mapping = PkMapping.getInstance().getMapping();
-		String cols = (String) mapping.get("junitpk");
-		assertEquals("Wrong pk mapping stored", "id,name", cols);
+    Map mapping = PkMapping.getInstance().getMapping();
+    String cols = (String) mapping.get("junitpk");
+    assertEquals("Wrong pk mapping stored", "id,name", cols);
 
-	}
+  }
 }

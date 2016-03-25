@@ -40,34 +40,34 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbSavePkMappingTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbSavePkMappingTest()
-	{
-		super("WbSavePkMappingTest");
-	}
+  public WbSavePkMappingTest()
+  {
+    super("WbSavePkMappingTest");
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbFile f = new WbFile(util.getBaseDir(), "pkmapping.properties");
-		PkMapping.getInstance().clear();
-		PkMapping.getInstance().addMapping("person", "id");
-		PkMapping.getInstance().addMapping("v_person", "id");
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    WbFile f = new WbFile(util.getBaseDir(), "pkmapping.properties");
+    PkMapping.getInstance().clear();
+    PkMapping.getInstance().addMapping("person", "id");
+    PkMapping.getInstance().addMapping("v_person", "id");
 
-		WbSavePkMapping save = new WbSavePkMapping();
+    WbSavePkMapping save = new WbSavePkMapping();
 
-		StatementRunnerResult result = save.execute(save.getVerb() + "-file=" + f.getFullPath());
-		assertNotNull(result);
-		assertTrue(result.isSuccess());
+    StatementRunnerResult result = save.execute(save.getVerb() + "-file=" + f.getFullPath());
+    assertNotNull(result);
+    assertTrue(result.isSuccess());
 
-		BufferedReader in = EncodingUtil.createBufferedReader(f, "ISO-8859-1");
-		String lines = FileUtil.readCharacters(in);
-		assertTrue(lines.contains("# Primary key mapping for SQL Workbench/J"));
-		assertTrue(lines.contains("person=id"));
-		assertTrue(lines.contains("v_person=id"));
-	}
+    BufferedReader in = EncodingUtil.createBufferedReader(f, "ISO-8859-1");
+    String lines = FileUtil.readCharacters(in);
+    assertTrue(lines.contains("# Primary key mapping for SQL Workbench/J"));
+    assertTrue(lines.contains("person=id"));
+    assertTrue(lines.contains("v_person=id"));
+  }
 }

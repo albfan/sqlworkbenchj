@@ -37,32 +37,32 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbViewSourceTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbViewSourceTest()
-	{
-		super("WbViewSourceTest");
-	}
+  public WbViewSourceTest()
+  {
+    super("WbViewSourceTest");
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbConnection conn = util.getConnection();
-		TestUtil.executeScript(conn,
-			"create table foo (id integer not null primary key);\n" +
-			"create view v_foo as select id, id * 42 as id2 from foo;\n" +
-			"commit;");
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    WbConnection conn = util.getConnection();
+    TestUtil.executeScript(conn,
+      "create table foo (id integer not null primary key);\n" +
+      "create view v_foo as select id, id * 42 as id2 from foo;\n" +
+      "commit;");
 
-		WbViewSource stmt = new WbViewSource();
-		stmt.setConnection(conn);
-		StatementRunnerResult result = stmt.execute("WbViewSource v_foo");
-		assertTrue(result.isSuccess());
-		String sql = result.getMessages().toString();
-		assertTrue(sql.contains("VIEW PUBLIC.V_FOO"));
-		assertTrue(sql.contains("ID * 42"));
-	}
+    WbViewSource stmt = new WbViewSource();
+    stmt.setConnection(conn);
+    StatementRunnerResult result = stmt.execute("WbViewSource v_foo");
+    assertTrue(result.isSuccess());
+    String sql = result.getMessages().toString();
+    assertTrue(sql.contains("VIEW PUBLIC.V_FOO"));
+    assertTrue(sql.contains("ID * 42"));
+  }
 
 }

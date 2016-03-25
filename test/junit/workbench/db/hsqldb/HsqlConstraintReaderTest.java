@@ -47,47 +47,47 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class HsqlConstraintReaderTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public HsqlConstraintReaderTest()
-	{
-		super("HsqlConstraintReaderTest");
-	}
+  public HsqlConstraintReaderTest()
+  {
+    super("HsqlConstraintReaderTest");
+  }
 
-	@BeforeClass
-	public static void setUpClass()
-		throws Exception
-	{
-	}
+  @BeforeClass
+  public static void setUpClass()
+    throws Exception
+  {
+  }
 
-	@AfterClass
-	public static void tearDownClass()
-		throws Exception
-	{
-		ConnectionMgr.getInstance().disconnectAll();
-	}
+  @AfterClass
+  public static void tearDownClass()
+    throws Exception
+  {
+    ConnectionMgr.getInstance().disconnectAll();
+  }
 
-	@Test
-	public void testReader()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbConnection conn = util.getHSQLConnection("constraintreader");
-		TestUtil.executeScript(conn, "create table cons_test (id integer, nr integer, constraint min_value check (id > 42), check (nr < 100));");
-		ConstraintReader reader = ReaderFactory.getConstraintReader(conn.getMetadata());
-		assertTrue(reader instanceof HsqlConstraintReader);
-		HsqlConstraintReader hsqlReader = (HsqlConstraintReader)reader;
-		TableDefinition tbl = conn.getMetadata().getTableDefinition(new TableIdentifier("CONS_TEST"));
-		List<TableConstraint> constraints = reader.getTableConstraints(conn, tbl);
-		assertEquals(2, constraints.size());
-		TableConstraint minValue = constraints.get(0);
-		// HSQLDB 2.0 includes the table's schema
-		assertEquals("(PUBLIC.CONS_TEST.ID>42)", minValue.getExpression());
+  @Test
+  public void testReader()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    WbConnection conn = util.getHSQLConnection("constraintreader");
+    TestUtil.executeScript(conn, "create table cons_test (id integer, nr integer, constraint min_value check (id > 42), check (nr < 100));");
+    ConstraintReader reader = ReaderFactory.getConstraintReader(conn.getMetadata());
+    assertTrue(reader instanceof HsqlConstraintReader);
+    HsqlConstraintReader hsqlReader = (HsqlConstraintReader)reader;
+    TableDefinition tbl = conn.getMetadata().getTableDefinition(new TableIdentifier("CONS_TEST"));
+    List<TableConstraint> constraints = reader.getTableConstraints(conn, tbl);
+    assertEquals(2, constraints.size());
+    TableConstraint minValue = constraints.get(0);
+    // HSQLDB 2.0 includes the table's schema
+    assertEquals("(PUBLIC.CONS_TEST.ID>42)", minValue.getExpression());
 
-		TableConstraint maxValue = constraints.get(1);
-		assertEquals("(PUBLIC.CONS_TEST.NR<100)", maxValue.getExpression());
-		assertTrue(hsqlReader.isSystemConstraintName(maxValue.getConstraintName()));
-	}
+    TableConstraint maxValue = constraints.get(1);
+    assertEquals("(PUBLIC.CONS_TEST.NR<100)", maxValue.getExpression());
+    assertTrue(hsqlReader.isSystemConstraintName(maxValue.getConstraintName()));
+  }
 
 }

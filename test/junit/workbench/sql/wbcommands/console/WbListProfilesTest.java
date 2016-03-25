@@ -41,41 +41,41 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbListProfilesTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbListProfilesTest()
-	{
-		super("WbListProfilesTest");
-	}
+  public WbListProfilesTest()
+  {
+    super("WbListProfilesTest");
+  }
 
-	@Test
-	public void testNeedsConnection()
-	{
-		WbListProfiles list = new WbListProfiles();
-		assertFalse(list.isConnectionRequired());
-	}
+  @Test
+  public void testNeedsConnection()
+  {
+    WbListProfiles list = new WbListProfiles();
+    assertFalse(list.isConnectionRequired());
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		String sql = "WbListProfiles";
-		WbListProfiles list = new WbListProfiles();
-		StatementRunnerResult result = list.execute(sql);
-		assertTrue(result.isSuccess());
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    String sql = "WbListProfiles";
+    WbListProfiles list = new WbListProfiles();
+    StatementRunnerResult result = list.execute(sql);
+    assertTrue(result.isSuccess());
 
-		ConnectionProfile prof = new ConnectionProfile("TestProfile", "dummy.class", "jdbc:test", "user", "pwd");
-		ConnectionMgr.getInstance().clearProfiles();
-		ConnectionMgr.getInstance().addProfile(prof);
-		result = list.execute(sql);
-		assertTrue(result.isSuccess());
+    ConnectionProfile prof = new ConnectionProfile("TestProfile", "dummy.class", "jdbc:test", "user", "pwd");
+    ConnectionMgr.getInstance().clearProfiles();
+    ConnectionMgr.getInstance().addProfile(prof);
+    result = list.execute(sql);
+    assertTrue(result.isSuccess());
 
-		String msg = result.getMessages().toString();
-//		System.out.println("****\n" + msg);
-		String[] lines = msg.split(StringUtil.REGEX_CRLF);
-		assertEquals(2, lines.length);
-		assertEquals("Default group", lines[0]);
-		assertEquals("  TestProfile, Username=user, URL=jdbc:test", lines[1]);
-	}
+    String msg = result.getMessages().toString();
+//    System.out.println("****\n" + msg);
+    String[] lines = msg.split(StringUtil.REGEX_CRLF);
+    assertEquals(2, lines.length);
+    assertEquals("Default group", lines[0]);
+    assertEquals("  TestProfile, Username=user, URL=jdbc:test", lines[1]);
+  }
 }

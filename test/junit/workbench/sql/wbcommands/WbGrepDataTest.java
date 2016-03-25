@@ -46,118 +46,118 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbGrepDataTest
-	extends WbTestCase
+  extends WbTestCase
 {
-	private WbConnection con;
+  private WbConnection con;
 
-	public WbGrepDataTest()
-	{
-		super("WbGrepDataTest");
-	}
+  public WbGrepDataTest()
+  {
+    super("WbGrepDataTest");
+  }
 
-	@Before
-	public void setUp()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		con = util.getConnection();
-		TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
-			"insert into person values (1, 'Arthur', 'Dent');\n" +
-			"insert into person values (2, 'Ford', 'Prefect');\n" +
-			"commit;" +
-			"create table address (nr integer, person_id integer, address_info varchar(100));" +
-			"insert into address values (1, 1, 'Arthur''s Address');\n" +
-			"insert into address values (2, 1, 'His old address');\n" +
-			"insert into address values (3, 2, 'Ford''s Address');\n" +
-			"insert into address values (4, 2, null);\n" +
-			"commit;\n" +
-			"create view v_person as select nr * 10, firstname, lastname from person;" +
-			"commit;");
-	}
+  @Before
+  public void setUp()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    con = util.getConnection();
+    TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+      "insert into person values (1, 'Arthur', 'Dent');\n" +
+      "insert into person values (2, 'Ford', 'Prefect');\n" +
+      "commit;" +
+      "create table address (nr integer, person_id integer, address_info varchar(100));" +
+      "insert into address values (1, 1, 'Arthur''s Address');\n" +
+      "insert into address values (2, 1, 'His old address');\n" +
+      "insert into address values (3, 2, 'Ford''s Address');\n" +
+      "insert into address values (4, 2, null);\n" +
+      "commit;\n" +
+      "create view v_person as select nr * 10, firstname, lastname from person;" +
+      "commit;");
+  }
 
-	@After
-	public void tearDown()
-		throws Exception
-	{
-		ConnectionMgr.getInstance().disconnectAll();
-	}
+  @After
+  public void tearDown()
+    throws Exception
+  {
+    ConnectionMgr.getInstance().disconnectAll();
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		String sql = "WbGrepData -tables=person -searchValue=arthur";
-		WbGrepData instance = new WbGrepData();
-		instance.setConnection(con);
-		StatementRunnerResult result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		List<DataStore> data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(1, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		assertEquals(1, data.get(0).getValueAsInt(0, 0, -1));
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    String sql = "WbGrepData -tables=person -searchValue=arthur";
+    WbGrepData instance = new WbGrepData();
+    instance.setConnection(con);
+    StatementRunnerResult result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    List<DataStore> data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    assertEquals(1, data.get(0).getValueAsInt(0, 0, -1));
 
-		sql = "WbGrepData -tables=person, address -searchValue=arthur";
-		result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(2, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		assertEquals(1, data.get(1).getRowCount());
+    sql = "WbGrepData -tables=person, address -searchValue=arthur";
+    result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(2, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    assertEquals(1, data.get(1).getRowCount());
 
-		sql = "WbGrepData -tables=person,address -compareType=isnull";
-		result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(1, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		DataStore ds = data.get(0);
-		assertEquals(4, ds.getValueAsInt(0, 0, -1));
+    sql = "WbGrepData -tables=person,address -compareType=isnull";
+    result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    DataStore ds = data.get(0);
+    assertEquals(4, ds.getValueAsInt(0, 0, -1));
 
-		sql = "WbGrepData -tables=%person% -searchValue=arthur -types=table,view";
-		result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(2, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		assertEquals(1, data.get(1).getRowCount());
+    sql = "WbGrepData -tables=%person% -searchValue=arthur -types=table,view";
+    result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(2, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    assertEquals(1, data.get(1).getRowCount());
 
-		sql = "WbGrepData -tables=%person% -searchValue=arthur -types=view";
-		result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(1, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		assertEquals(10, data.get(0).getValueAsInt(0, 0, -1));
+    sql = "WbGrepData -tables=%person% -searchValue=arthur -types=view";
+    result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    assertEquals(10, data.get(0).getValueAsInt(0, 0, -1));
 
-		sql = "WbGrepData -searchValue=arthur -types=view";
-		result = instance.execute(sql);
-		assertTrue(result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(1, data.size());
-		assertEquals(1, data.get(0).getRowCount());
-		assertEquals(10, data.get(0).getValueAsInt(0, 0, -1));
+    sql = "WbGrepData -searchValue=arthur -types=view";
+    result = instance.execute(sql);
+    assertTrue(result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    assertEquals(1, data.get(0).getRowCount());
+    assertEquals(10, data.get(0).getValueAsInt(0, 0, -1));
 
-		sql = "WbGrepData -searchValue=arthur -tables=person -columns=lastname";
-		result = instance.execute(sql);
-		String msg = result.getMessages().toString();
-		System.out.println(msg);
-		assertTrue(msg, result.isSuccess());
-		data = result.getDataStores();
-		assertNull(data);
+    sql = "WbGrepData -searchValue=arthur -tables=person -columns=lastname";
+    result = instance.execute(sql);
+    String msg = result.getMessages().toString();
+    System.out.println(msg);
+    assertTrue(msg, result.isSuccess());
+    data = result.getDataStores();
+    assertNull(data);
 
-		sql = "WbGrepData -searchValue=arthur -tables=person -columns=firstname";
-		result = instance.execute(sql);
-		msg = result.getMessages().toString();
-		assertTrue(msg, result.isSuccess());
-		data = result.getDataStores();
-		assertNotNull(data);
-		assertEquals(1, data.size());
-	}
+    sql = "WbGrepData -searchValue=arthur -tables=person -columns=firstname";
+    result = instance.execute(sql);
+    msg = result.getMessages().toString();
+    assertTrue(msg, result.isSuccess());
+    data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+  }
 
 }

@@ -1321,6 +1321,15 @@ public class WbConnection
     return dbProductVersion;
   }
 
+  private boolean useDatabaseProductVersion()
+  {
+    String url = getUrl();
+    if (StringUtil.isEmptyString(url)) return false;
+    // HSQLDB and Postgres return a full version (including path level) from DatabaseMetaData.getDatabaseProductVersion()
+    // so for those DBMS use that version because it's more accurate.
+    return url.startsWith("jdbc:postgresql") || url.startsWith("jdbc:hsqldb");
+  }
+
   /**
    * Return the database version as reported by DatabaseMetaData.getDatabaseMajorVersion() and getDatabaseMinorVersion()
    *
@@ -1333,9 +1342,17 @@ public class WbConnection
       try
       {
         DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
-        int major = jdbcmeta.getDatabaseMajorVersion();
-        int minor = jdbcmeta.getDatabaseMinorVersion();
-        dbVersion = new VersionNumber(major, minor);
+        if (useDatabaseProductVersion())
+        {
+          String version = jdbcmeta.getDatabaseProductVersion();
+          dbVersion = new VersionNumber(version);
+        }
+        else
+        {
+          int major = jdbcmeta.getDatabaseMajorVersion();
+          int minor = jdbcmeta.getDatabaseMinorVersion();
+          dbVersion = new VersionNumber(major, minor);
+        }
       }
       catch (Throwable e)
       {

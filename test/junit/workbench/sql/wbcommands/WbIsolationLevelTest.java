@@ -34,35 +34,35 @@ import static org.junit.Assert.*;
 public class WbIsolationLevelTest
 {
 
-	public WbIsolationLevelTest()
-	{
-	}
+  public WbIsolationLevelTest()
+  {
+  }
 
-	@Test
-	public void testLevelMap()
-		throws Exception
-	{
-		WbIsolationLevel cmd = new WbIsolationLevel();
+  @Test
+  public void testLevelMap()
+    throws Exception
+  {
+    WbIsolationLevel cmd = new WbIsolationLevel();
 
-		int level = cmd.stringToLevel(" read  committed ");
-		assertEquals(Connection.TRANSACTION_READ_COMMITTED, level);
+    int level = cmd.stringToLevel(" read  committed ");
+    assertEquals(Connection.TRANSACTION_READ_COMMITTED, level);
 
-		level = cmd.stringToLevel(" Serializable");
-		assertEquals(Connection.TRANSACTION_SERIALIZABLE, level);
+    level = cmd.stringToLevel(" Serializable");
+    assertEquals(Connection.TRANSACTION_SERIALIZABLE, level);
 
-		level = cmd.stringToLevel(" repeatable READ");
-		assertEquals(Connection.TRANSACTION_REPEATABLE_READ, level);
+    level = cmd.stringToLevel(" repeatable READ");
+    assertEquals(Connection.TRANSACTION_REPEATABLE_READ, level);
 
-		level = cmd.stringToLevel(" repeatable_READ");
-		assertEquals(Connection.TRANSACTION_REPEATABLE_READ, level);
+    level = cmd.stringToLevel(" repeatable_READ");
+    assertEquals(Connection.TRANSACTION_REPEATABLE_READ, level);
 
-		level = cmd.stringToLevel(" read \nUNcommitted ");
-		assertEquals(Connection.TRANSACTION_READ_UNCOMMITTED, level);
+    level = cmd.stringToLevel(" read \nUNcommitted ");
+    assertEquals(Connection.TRANSACTION_READ_UNCOMMITTED, level);
 
-		level = cmd.stringToLevel(" not known");
-		assertEquals(-1, level);
+    level = cmd.stringToLevel(" not known");
+    assertEquals(-1, level);
 
-	}
+  }
 
 
 }

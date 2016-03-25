@@ -30,6 +30,7 @@ import workbench.resource.Settings;
 
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.hana.HanaSynonymReader;
+import workbench.db.hsqldb.HsqlSynonymReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ibm.InformixSynonymReader;
 import workbench.db.ingres.IngresSynonymReader;
@@ -115,6 +116,10 @@ public interface SynonymReader
       if (conn.getDbId().equals(DbMetadata.DBID_OPENEDGE))
       {
         return new OpenEdgeSynonymReader();
+      }
+      if (conn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(conn, "2.3.4"))
+      {
+        return new HsqlSynonymReader();
       }
       return null;
     }

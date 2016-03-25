@@ -21,7 +21,8 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.derby;
+package workbench.db.hsqldb;
+
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,14 +41,14 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * Retrieve synonyms and their definition from a Derby database.
+ * Retrieve synonyms and their definition from a HSQLDB database.
  *
  * @author Thomas Kellerer
  */
-public class DerbySynonymReader
+public class HsqlSynonymReader
   implements SynonymReader
 {
-  public DerbySynonymReader()
+  public HsqlSynonymReader()
   {
   }
 
@@ -57,20 +58,20 @@ public class DerbySynonymReader
   {
     List<TableIdentifier> result = new ArrayList<>();
     String sql =
-      "SELECT s.schemaname, a.alias \n" +
-      "FROM sys.sysaliases a \n" +
-      "  JOIN sys.sysschemas s ON a.schemaid = s.schemaid \n" +
-      "WHERE a.aliastype = 'S'\n" +
-      "  AND s.schemaname = ? \n";
+      "SELECT synonym_catalog, \n" +
+      "       synonym_schema, \n" +
+      "       synonym_name \n " +
+      "FROM information_schema.system_synonyms \n" +
+      "WHERE synonym_schema = ? \n";
 
     if (StringUtil.isNonBlank(namePattern))
     {
-      sql += " AND a.alias LIKE ?";
+      sql += " AND synonym_name LIKE ?";
     }
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
-      LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonym list using:\n" +
+      LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Retrieving synonyms using:\n" +
         SqlUtil.replaceParameters(sql, schema, namePattern));
     }
 
@@ -85,11 +86,12 @@ public class DerbySynonymReader
       rs = stmt.executeQuery();
       while (rs.next())
       {
-        String synSchema = rs.getString(1);
-        String alias = rs.getString(2);
+        String synCat = rs.getString(1);
+        String synSchema = rs.getString(2);
+        String syn = rs.getString(3);
         if (!rs.wasNull())
         {
-          TableIdentifier tbl = new TableIdentifier(null, synSchema, alias, false);
+          TableIdentifier tbl = new TableIdentifier(synCat, synSchema, syn, false);
           tbl.setType(SYN_TYPE_NAME);
           tbl.setNeverAdjustCase(true);
           result.add(tbl);
@@ -105,50 +107,47 @@ public class DerbySynonymReader
   }
 
   @Override
-  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String owner, String synonym)
+  public TableIdentifier getSynonymTable(WbConnection con, String catalog, String schema, String synonym)
     throws SQLException
   {
     String sql =
-      "select a.aliasinfo \n" +
-      "from sys.sysaliases a" +
-      "  join sys.sysschemas s on a.schemaid = s.schemaid \n" +
-      "where a.alias = ?" +
-      "  and s.schemaname = ?";
+      "SELECT object_catalog, \n" +
+      "       object_schema, \n" +
+      "       object_name, \n" +
+      "       object_type \n" +
+      "FROM information_schema.system_synonyms \n" +
+      "WHERE synonym_schema = ? \n" +
+      "  AND synonym_name = ?";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
       LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Retrieving synonym table using:\n" +
-        SqlUtil.replaceParameters(sql, synonym, owner));
+        SqlUtil.replaceParameters(sql, schema, synonym));
     }
 
-    PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
-    stmt.setString(1, synonym);
-    stmt.setString(2, owner);
-    ResultSet rs = stmt.executeQuery();
-    String table = null;
+    ResultSet rs = null;
+    PreparedStatement stmt = null;
     TableIdentifier result = null;
     try
     {
+      stmt = con.getSqlConnection().prepareStatement(sql);
+      stmt.setString(1, schema);
+      stmt.setString(2, synonym);
+      rs = stmt.executeQuery();
       if (rs.next())
       {
-        table = rs.getString(1);
-        if (table != null)
-        {
-          result = new TableIdentifier(table);
-        }
+        String targetCatalog = rs.getString(1);
+        String targetSchema = rs.getString(2);
+        String targetName = rs.getString(3);
+        String type = rs.getString(4);
+        result = new TableIdentifier(targetCatalog, targetSchema, targetName, false);
+        result.setType(type);
       }
     }
     finally
     {
       SqlUtil.closeAll(rs,stmt);
     }
-
-    if (result != null)
-    {
-      String type = con.getMetadata().getObjectType(result);
-      result.setType(type);
-    }
-
     return result;
   }
 

@@ -34,32 +34,32 @@ import org.junit.Test;
  * @author Thomas Kellerer
  */
 public class RegexModifierParameterTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public RegexModifierParameterTest()
-	{
-		super("RegexModifierParameterTest");
-	}
+  public RegexModifierParameterTest()
+  {
+    super("RegexModifierParameterTest");
+  }
 
-	@Test
-	public void testParseParameterValue()
-	{
-		ArgumentParser cmdLine = new ArgumentParser();
-		RegexModifierParameter.addArguments(cmdLine);
-		cmdLine.parse("-"+ RegexModifierParameter.ARG_REPLACE_REGEX + "=[\\r\\n]+ -" + RegexModifierParameter.ARG_REPLACE_WITH + "=' ' ");
+  @Test
+  public void testParseParameterValue()
+  {
+    ArgumentParser cmdLine = new ArgumentParser();
+    RegexModifierParameter.addArguments(cmdLine);
+    cmdLine.parse("-"+ RegexModifierParameter.ARG_REPLACE_REGEX + "=[\\r\\n]+ -" + RegexModifierParameter.ARG_REPLACE_WITH + "=' ' ");
 
-		RegexReplacingModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
-		assertNotNull(modifier);
-		String result = modifier.replacePattern("this\r\nis\ra\ntest");
-		assertEquals("this is a test", result);
+    RegexReplacingModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
+    assertNotNull(modifier);
+    String result = modifier.replacePattern("this\r\nis\ra\ntest");
+    assertEquals("this is a test", result);
 
-		cmdLine.parse("-"+ RegexModifierParameter.ARG_REPLACE_REGEX + "=[\\r\\n]+ " +
-			"-" + RegexModifierParameter.ARG_REPLACE_WITH + "='*'");
+    cmdLine.parse("-"+ RegexModifierParameter.ARG_REPLACE_REGEX + "=[\\r\\n]+ " +
+      "-" + RegexModifierParameter.ARG_REPLACE_WITH + "='*'");
 
-		modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
-		assertNotNull(modifier);
-		result = modifier.replacePattern("this\r\nis\ra\ntest");
-		assertEquals("this*is*a*test", result);
-	}
+    modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
+    assertNotNull(modifier);
+    result = modifier.replacePattern("this\r\nis\ra\ntest");
+    assertEquals("this*is*a*test", result);
+  }
 }

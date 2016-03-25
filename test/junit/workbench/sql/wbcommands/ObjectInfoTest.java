@@ -47,28 +47,28 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class ObjectInfoTest
-	extends WbTestCase
+  extends WbTestCase
 {
-	private WbConnection db;
+  private WbConnection db;
 
-	public ObjectInfoTest()
-	{
-		super("ObjectInfoTest");
-	}
+  public ObjectInfoTest()
+  {
+    super("ObjectInfoTest");
+  }
 
-	@Before
-	public void setUp()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		db = util.getConnection();
-		TestUtil.executeScript(db,
-			"CREATE TABLE person (nr integer primary key, person_name varchar(100)); \n" +
+  @Before
+  public void setUp()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    db = util.getConnection();
+    TestUtil.executeScript(db,
+      "CREATE TABLE person (nr integer primary key, person_name varchar(100)); \n" +
       "CREATE TABLE person_group (person_nr integer, group_nr integer); \n" +
-			"ALTER TABLE person_group ADD CONSTRAINT fk_pg_p FOREIGN KEY (person_nr) REFERENCES person (nr); \n" +
-			"CREATE VIEW v_person (pnr, pname) AS SELECT nr, person_name FROM PERSON; \n" +
-			"create sequence seq_id; \n" +
-			"commit;");
+      "ALTER TABLE person_group ADD CONSTRAINT fk_pg_p FOREIGN KEY (person_nr) REFERENCES person (nr); \n" +
+      "CREATE VIEW v_person (pnr, pname) AS SELECT nr, person_name FROM PERSON; \n" +
+      "create sequence seq_id; \n" +
+      "commit;");
   }
 
   @After
@@ -77,11 +77,11 @@ public class ObjectInfoTest
     db.disconnect();
   }
 
-	@Test
-	public void testSynonym()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
+  @Test
+  public void testSynonym()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
     WbConnection connection = DerbyTestUtil.getDerbyConnection(util.getBaseDir());
 
     try
@@ -136,82 +136,82 @@ public class ObjectInfoTest
     }
   }
 
-	@Test
-	public void testGetFullObjectInfo()
-		throws Exception
-	{
-		String objectName = "person";
-		ObjectInfo info = new ObjectInfo();
-		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", true);
-		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false,false);
-		assertTrue(tableInfo.hasDataStores());
-		DataStore ds = tableInfo.getDataStores().get(0);
-		assertEquals(2, ds.getRowCount());
-		assertEquals("NR", ds.getValueAsString(0, 0));
-		assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
+  @Test
+  public void testGetFullObjectInfo()
+    throws Exception
+  {
+    String objectName = "person";
+    ObjectInfo info = new ObjectInfo();
+    Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", true);
+    StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false,false);
+    assertTrue(tableInfo.hasDataStores());
+    DataStore ds = tableInfo.getDataStores().get(0);
+    assertEquals(2, ds.getRowCount());
+    assertEquals("NR", ds.getValueAsString(0, 0));
+    assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
 
-		tableInfo = info.getObjectInfo(db, objectName, true, false);
-		assertTrue(tableInfo.hasDataStores());
-		assertEquals(3, tableInfo.getDataStores().size());
+    tableInfo = info.getObjectInfo(db, objectName, true, false);
+    assertTrue(tableInfo.hasDataStores());
+    assertEquals(3, tableInfo.getDataStores().size());
 
-		DataStore indexes = tableInfo.getDataStores().get(1);
-		assertEquals("PERSON - Indexes", indexes.getResultName());
-		assertEquals(1, indexes.getRowCount());
+    DataStore indexes = tableInfo.getDataStores().get(1);
+    assertEquals("PERSON - Indexes", indexes.getResultName());
+    assertEquals(1, indexes.getRowCount());
 
-		DataStore fk = tableInfo.getDataStores().get(2);
-		assertEquals("PERSON - Referenced by", fk.getResultName());
-		assertEquals(1, fk.getRowCount());
+    DataStore fk = tableInfo.getDataStores().get(2);
+    assertEquals("PERSON - Referenced by", fk.getResultName());
+    assertEquals(1, fk.getRowCount());
 
-		tableInfo = info.getObjectInfo(db, "PERSON_GROUP", true, false);
-		assertTrue(tableInfo.hasDataStores());
-		assertEquals(3, tableInfo.getDataStores().size());
+    tableInfo = info.getObjectInfo(db, "PERSON_GROUP", true, false);
+    assertTrue(tableInfo.hasDataStores());
+    assertEquals(3, tableInfo.getDataStores().size());
 
-		indexes = tableInfo.getDataStores().get(1);
-		assertEquals("PERSON_GROUP - Indexes", indexes.getResultName());
-		assertEquals(1, indexes.getRowCount());
+    indexes = tableInfo.getDataStores().get(1);
+    assertEquals("PERSON_GROUP - Indexes", indexes.getResultName());
+    assertEquals(1, indexes.getRowCount());
 
-		fk = tableInfo.getDataStores().get(2);
-		assertEquals("PERSON_GROUP - References", fk.getResultName());
-		assertEquals(1, fk.getRowCount());
+    fk = tableInfo.getDataStores().get(2);
+    assertEquals("PERSON_GROUP - References", fk.getResultName());
+    assertEquals(1, fk.getRowCount());
 
-		StatementRunnerResult viewInfo = info.getObjectInfo(db, "v_person", false, true);
-//		System.out.println(viewInfo.getSourceCommand());
-		assertTrue(viewInfo.getSourceCommand().startsWith("CREATE FORCE VIEW"));
-		assertTrue(viewInfo.hasDataStores());
+    StatementRunnerResult viewInfo = info.getObjectInfo(db, "v_person", false, true);
+//    System.out.println(viewInfo.getSourceCommand());
+    assertTrue(viewInfo.getSourceCommand().startsWith("CREATE FORCE VIEW"));
+    assertTrue(viewInfo.hasDataStores());
 
-		DataStore viewDs = viewInfo.getDataStores().get(0);
-		assertEquals(2, viewDs.getRowCount());
-		assertEquals("PNR", viewDs.getValueAsString(0, 0));
-		assertEquals("PNAME", viewDs.getValueAsString(1, 0));
+    DataStore viewDs = viewInfo.getDataStores().get(0);
+    assertEquals(2, viewDs.getRowCount());
+    assertEquals("PNR", viewDs.getValueAsString(0, 0));
+    assertEquals("PNAME", viewDs.getValueAsString(1, 0));
 
-		StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false, true);
-//		System.out.println(seqInfo.getSourceCommand());
-		assertTrue(seqInfo.hasDataStores());
-		assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
+    StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false, true);
+//    System.out.println(seqInfo.getSourceCommand());
+    assertTrue(seqInfo.hasDataStores());
+    assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
 
 
-	}
+  }
 
-	@Test
-	public void testGetPartialObjectInfo()
-		throws Exception
-	{
-		String objectName = "person";
-		ObjectInfo info = new ObjectInfo();
-		Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", false);
-		StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false, true);
-		assertTrue(tableInfo.hasDataStores());
-		DataStore ds = tableInfo.getDataStores().get(0);
-		assertEquals(2, ds.getRowCount());
-		assertEquals("NR", ds.getValueAsString(0, 0));
-		assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
+  @Test
+  public void testGetPartialObjectInfo()
+    throws Exception
+  {
+    String objectName = "person";
+    ObjectInfo info = new ObjectInfo();
+    Settings.getInstance().setProperty("workbench.db.objectinfo.includefk", false);
+    StatementRunnerResult tableInfo = info.getObjectInfo(db, objectName, false, true);
+    assertTrue(tableInfo.hasDataStores());
+    DataStore ds = tableInfo.getDataStores().get(0);
+    assertEquals(2, ds.getRowCount());
+    assertEquals("NR", ds.getValueAsString(0, 0));
+    assertEquals("PERSON_NAME", ds.getValueAsString(1, 0));
 
-		tableInfo = info.getObjectInfo(db, objectName, true, true);
-		assertTrue(tableInfo.hasDataStores());
-		assertEquals(2, tableInfo.getDataStores().size());
+    tableInfo = info.getObjectInfo(db, objectName, true, true);
+    assertTrue(tableInfo.hasDataStores());
+    assertEquals(2, tableInfo.getDataStores().size());
 
-		DataStore indexes = tableInfo.getDataStores().get(1);
-		assertEquals("PERSON - Indexes", indexes.getResultName());
-		assertEquals(1, indexes.getRowCount());
-	}
+    DataStore indexes = tableInfo.getDataStores().get(1);
+    assertEquals("PERSON - Indexes", indexes.getResultName());
+    assertEquals(1, indexes.getRowCount());
+  }
 }

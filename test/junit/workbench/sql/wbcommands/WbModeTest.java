@@ -47,128 +47,128 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbModeTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public WbModeTest()
-	{
-		super("WbModeTest");
-	}
+  public WbModeTest()
+  {
+    super("WbModeTest");
+  }
 
-	@Test
-	public void testExecute()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
+  @Test
+  public void testExecute()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
 
-		try
-		{
-			WbConnection con = util.getConnection();
-			TestUtil.executeScript(con,
-				"create table mode_test (id integer primary key, some_value varchar(100));\n" +
-				"insert into mode_test values (1, 'one');\n" +
-				"insert into mode_test values (2, 'two');\n" +
-				"commit;\n"
-			);
+    try
+    {
+      WbConnection con = util.getConnection();
+      TestUtil.executeScript(con,
+        "create table mode_test (id integer primary key, some_value varchar(100));\n" +
+        "insert into mode_test values (1, 'one');\n" +
+        "insert into mode_test values (2, 'two');\n" +
+        "commit;\n"
+      );
 
-			BatchRunner runner = new BatchRunner();
-			runner.setConnection(con);
-			runner.setVerboseLogging(false);
-			runner.runScript(
-				"WbMode readonly;\n" +
-				"delete from mode_test;\n" +
-				"commit;\n"
-			);
+      BatchRunner runner = new BatchRunner();
+      runner.setConnection(con);
+      runner.setVerboseLogging(false);
+      runner.runScript(
+        "WbMode readonly;\n" +
+        "delete from mode_test;\n" +
+        "commit;\n"
+      );
 
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from mode_test");
-			assertTrue(rs.next());
-			int count = rs.getInt(1);
-			assertEquals(count, 2);
-			SqlUtil.closeResult(rs);
+      Statement stmt = con.createStatement();
+      ResultSet rs = stmt.executeQuery("select count(*) from mode_test");
+      assertTrue(rs.next());
+      int count = rs.getInt(1);
+      assertEquals(count, 2);
+      SqlUtil.closeResult(rs);
 
-			Controller controll = new Controller();
-			runner.setExecutionController(controll);
+      Controller controll = new Controller();
+      runner.setExecutionController(controll);
 
-			runner.runScript(
-				"WbMode confirm;\n" +
-				"delete from mode_test;\n" +
-				"commit;\n"
-			);
+      runner.runScript(
+        "WbMode confirm;\n" +
+        "delete from mode_test;\n" +
+        "commit;\n"
+      );
 
-			assertEquals(2, controll.confirmStatementCalled);
+      assertEquals(2, controll.confirmStatementCalled);
 
-			rs = stmt.executeQuery("select count(*) from mode_test");
-			assertTrue(rs.next());
-			count = rs.getInt(1);
-			assertEquals(count, 0);
-			SqlUtil.closeResult(rs);
-			SqlUtil.closeStatement(stmt);
+      rs = stmt.executeQuery("select count(*) from mode_test");
+      assertTrue(rs.next());
+      count = rs.getInt(1);
+      assertEquals(count, 0);
+      SqlUtil.closeResult(rs);
+      SqlUtil.closeStatement(stmt);
 
-			con.getProfile().setReadOnly(true);
-			con.getProfile().setConfirmUpdates(false);
+      con.getProfile().setReadOnly(true);
+      con.getProfile().setConfirmUpdates(false);
 
-			runner.runScript(
-				"WbMode confirm;\n"
-			);
-			assertTrue(con.confirmUpdatesInSession());
-			assertFalse(con.isSessionReadOnly());
+      runner.runScript(
+        "WbMode confirm;\n"
+      );
+      assertTrue(con.confirmUpdatesInSession());
+      assertFalse(con.isSessionReadOnly());
 
-			runner.runScript(
-				"WbMode normal;\n"
-			);
-			assertFalse(con.confirmUpdatesInSession());
-			assertFalse(con.isSessionReadOnly());
+      runner.runScript(
+        "WbMode normal;\n"
+      );
+      assertFalse(con.confirmUpdatesInSession());
+      assertFalse(con.isSessionReadOnly());
 
-			runner.runScript(
-				"WbMode reset;\n"
-			);
-			assertFalse(con.confirmUpdatesInSession());
-			assertTrue(con.isSessionReadOnly());
-		}
-		finally
-		{
-			ConnectionMgr.getInstance().disconnectAll();
-		}
-	}
+      runner.runScript(
+        "WbMode reset;\n"
+      );
+      assertFalse(con.confirmUpdatesInSession());
+      assertTrue(con.isSessionReadOnly());
+    }
+    finally
+    {
+      ConnectionMgr.getInstance().disconnectAll();
+    }
+  }
 
-	private class Controller
-		implements ExecutionController
-	{
-		public int confirmStatementCalled;
-		public int confirmCalled;
+  private class Controller
+    implements ExecutionController
+  {
+    public int confirmStatementCalled;
+    public int confirmCalled;
 
-		Controller()
-		{
-			confirmStatementCalled = 0;
-			confirmCalled = 0;
-		}
+    Controller()
+    {
+      confirmStatementCalled = 0;
+      confirmCalled = 0;
+    }
 
-		@Override
-		public boolean confirmStatementExecution(String command)
-		{
-			confirmStatementCalled ++;
-			return true;
-		}
+    @Override
+    public boolean confirmStatementExecution(String command)
+    {
+      confirmStatementCalled ++;
+      return true;
+    }
 
-		@Override
-		public boolean confirmExecution(String prompt, String yes, String no)
-		{
-			confirmCalled ++;
-			return true;
-		}
+    @Override
+    public boolean confirmExecution(String prompt, String yes, String no)
+    {
+      confirmCalled ++;
+      return true;
+    }
 
-		@Override
-		public String getPassword(String prompt)
-		{
-			return "";
-		}
+    @Override
+    public String getPassword(String prompt)
+    {
+      return "";
+    }
 
-		@Override
-		public String getInput(String prompt)
-		{
-			return "";
-		}
+    @Override
+    public String getInput(String prompt)
+    {
+      return "";
+    }
 
-	}
+  }
 }

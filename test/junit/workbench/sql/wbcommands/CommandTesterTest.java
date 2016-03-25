@@ -40,44 +40,44 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class CommandTesterTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public CommandTesterTest()
-	{
-		super("CommandTesterTest");
-	}
+  public CommandTesterTest()
+  {
+    super("CommandTesterTest");
+  }
 
-	@Test
-	public void testFormat()
-	{
-		// Test if the mapping of formatted words is initialized correctly
-		CommandTester tester = new CommandTester();
-		assertEquals("WbSchemaDiff", tester.formatVerb("wbschemadiff"));
-		assertEquals("WbGrepData", tester.formatVerb("wbgrepdata"));
-		assertEquals("WbCopy", tester.formatVerb("WBCOPY"));
-	}
+  @Test
+  public void testFormat()
+  {
+    // Test if the mapping of formatted words is initialized correctly
+    CommandTester tester = new CommandTester();
+    assertEquals("WbSchemaDiff", tester.formatVerb("wbschemadiff"));
+    assertEquals("WbGrepData", tester.formatVerb("wbgrepdata"));
+    assertEquals("WbCopy", tester.formatVerb("WBCOPY"));
+  }
 
 
-	@Test
-	public void testIsWbCommand()
-		throws Exception
-	{
-		// Test if all WbXXX classes are registered with the CommandTester
-		List<Class> commands = ClassFinder.getClasses("workbench.sql.wbcommands");
-		CommandTester tester = new CommandTester();
+  @Test
+  public void testIsWbCommand()
+    throws Exception
+  {
+    // Test if all WbXXX classes are registered with the CommandTester
+    List<Class> commands = ClassFinder.getClasses("workbench.sql.wbcommands");
+    CommandTester tester = new CommandTester();
 
-		for (Class cls : commands)
-		{
-			String clsName = cls.getName().replace("workbench.sql.wbcommands.", "");
-			if (clsName.startsWith("Wb") && !cls.isInterface() && !clsName.endsWith("Test"))
-			{
-				SqlCommand cmd = (SqlCommand)cls.newInstance();
+    for (Class cls : commands)
+    {
+      String clsName = cls.getName().replace("workbench.sql.wbcommands.", "");
+      if (clsName.startsWith("Wb") && !cls.isInterface() && !clsName.endsWith("Test"))
+      {
+        SqlCommand cmd = (SqlCommand)cls.newInstance();
         if (!(cmd instanceof WbOraShow))
         {
           assertTrue(clsName + " is not registered!", tester.isWbCommand(cmd.getVerb()));
         }
-			}
-		}
-	}
+      }
+    }
+  }
 }

@@ -46,26 +46,26 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class HsqlUniqueConstraintReaderTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	public HsqlUniqueConstraintReaderTest()
-	{
-		super("HsqlUniqueConstraintReaderTest");
-	}
+  public HsqlUniqueConstraintReaderTest()
+  {
+    super("HsqlUniqueConstraintReaderTest");
+  }
 
-	@AfterClass
-	public static void tearDown()
-		throws Exception
-	{
-    ConnectionMgr.getInstance().disconnectAll();
-	}
-
-	@Test
-	public void testProcessIndexList()
+  @AfterClass
+  public static void tearDown()
     throws Exception
-	{
-		String sql =
+  {
+    ConnectionMgr.getInstance().disconnectAll();
+  }
+
+  @Test
+  public void testProcessIndexList()
+    throws Exception
+  {
+    String sql =
       "CREATE TABLE utest\n" +
       "(\n" +
       "   id  integer   NOT NULL\n" +
@@ -76,21 +76,21 @@ public class HsqlUniqueConstraintReaderTest
       "commit;";
 
     WbConnection con = getTestUtil().getHSQLConnection("unique_test");
-		TestUtil.executeScript(con, sql);
+    TestUtil.executeScript(con, sql);
 
-		TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("UTEST"));
-		List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent, true);
+    TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("UTEST"));
+    List<IndexDefinition> indexList = con.getMetadata().getIndexReader().getTableIndexList(parent, true);
 
     assertEquals(1, indexList.size());
     assertTrue(indexList.get(0).isUniqueConstraint());
     assertEquals("UNIQUE_ID", indexList.get(0).getUniqueConstraintName());
-	}
+  }
 
   @Test
   public void testSchemaReport()
     throws Exception
   {
-		String sql =
+    String sql =
       "CREATE TABLE utest\n" +
       "(\n" +
       "   id  integer   NOT NULL\n" +
@@ -101,7 +101,7 @@ public class HsqlUniqueConstraintReaderTest
       "commit;";
 
     WbConnection con = getTestUtil().getHSQLConnection("unique_test");
-		TestUtil.executeScript(con, sql);
+    TestUtil.executeScript(con, sql);
 
     SchemaReporter reporter = new SchemaReporter(con);
     TableIdentifier parent = con.getMetadata().findObject(new TableIdentifier("UTEST"));

@@ -35,36 +35,36 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class HsqlSequenceAdjusterTest
-	extends WbTestCase
+  extends WbTestCase
 {
-	public HsqlSequenceAdjusterTest()
-	{
-		super("SequenceSync");
-	}
+  public HsqlSequenceAdjusterTest()
+  {
+    super("SequenceSync");
+  }
 
-	@Test
-	public void testIdentitySync()
-		throws Exception
-	{
-		TestUtil util = getTestUtil();
-		WbConnection con = util.getHSQLConnection("seq_test");
+  @Test
+  public void testIdentitySync()
+    throws Exception
+  {
+    TestUtil util = getTestUtil();
+    WbConnection con = util.getHSQLConnection("seq_test");
 
-		TestUtil.executeScript(con,
-			"create table table_one (id identity not null);\n" +
-			"insert into table_one (id) values (1), (2), (7), (41);\n" +
-			"commit;" );
+    TestUtil.executeScript(con,
+      "create table table_one (id identity not null);\n" +
+      "insert into table_one (id) values (1), (2), (7), (41);\n" +
+      "commit;" );
 
-		TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("table_one"));
+    TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("table_one"));
 
-		HsqlSequenceAdjuster sync = new HsqlSequenceAdjuster();
-		sync.adjustTableSequences(con, tbl, true);
+    HsqlSequenceAdjuster sync = new HsqlSequenceAdjuster();
+    sync.adjustTableSequences(con, tbl, true);
 
-		TestUtil.executeScript(con,
-			"insert into table_one (id) values (default);\n" +
-			"commit;" );
+    TestUtil.executeScript(con,
+      "insert into table_one (id) values (default);\n" +
+      "commit;" );
 
-		Number value = (Number)TestUtil.getSingleQueryValue(con, "select max(id) from table_one");
-		assertEquals(42, value.intValue());
-	}
+    Number value = (Number)TestUtil.getSingleQueryValue(con, "select max(id) from table_one");
+    assertEquals(42, value.intValue());
+  }
 
 }
