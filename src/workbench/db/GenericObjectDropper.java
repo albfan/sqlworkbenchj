@@ -234,22 +234,16 @@ public class GenericObjectDropper
         DbObject object = objects.get(i);
 
         String sql = SqlUtil.trimSemicolon(getDropStatement(i).toString());
-        LogMgr.logDebug("GenericObjectDropper.execute()", "Using SQL: " + sql);
+        LogMgr.logDebug("GenericObjectDropper.execute()", "Dropping object using: " + sql);
         if (monitor != null)
         {
           String name = object.getObjectName();
           monitor.setCurrentObject(name, i + 1, count);
         }
-        currentStatement.execute(sql);
 
-        try
-        {
-          connection.getObjectCache().removeEntry(object);
-        }
-        catch (ClassCastException cce)
-        {
-          LogMgr.logWarning("GenericObjectDropper.dropObjects()", "Could not cast a table type to a TableIdentifier!", cce);
-        }
+        currentStatement.execute(sql);
+        connection.getObjectCache().removeEntry(object);
+
         if (this.cancel) break;
       }
 
