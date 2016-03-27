@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
@@ -37,26 +36,32 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class LoadMacrosAction
-	extends WbAction
+  extends WbAction
 {
-	private final int macroClientId;
+  private final int macroClientId;
 
-	public LoadMacrosAction(int clientId)
-	{
-		super();
-		this.macroClientId = clientId;
-		this.initMenuDefinition("MnuTxtLoadMacros");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		this.setIcon(null);
-	}
+  public LoadMacrosAction(int clientId)
+  {
+    super();
+    this.macroClientId = clientId;
+    this.initMenuDefinition("MnuTxtLoadMacros");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		MacroFileSelector selector = new MacroFileSelector();
-		WbFile f = selector.selectStorageForLoad(macroClientId);
-		if (f == null) return;
-		RecentFileManager.getInstance().macrosLoaded(f);
-		MacroManager.getInstance().loadMacros(macroClientId, f);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    MacroFileSelector selector = new MacroFileSelector();
+    WbFile f = selector.selectStorageForLoad(macroClientId);
+    if (f == null) return;
+    RecentFileManager.getInstance().macrosLoaded(f);
+    MacroManager.getInstance().loadMacros(macroClientId, f);
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

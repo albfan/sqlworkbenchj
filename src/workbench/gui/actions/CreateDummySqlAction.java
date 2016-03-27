@@ -188,4 +188,9 @@ public class CreateDummySqlAction
     }
   }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

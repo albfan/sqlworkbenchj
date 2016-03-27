@@ -246,4 +246,10 @@ public class ColumnAlterAction
 		col.setComment(comment);
 		return col;
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

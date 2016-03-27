@@ -57,6 +57,11 @@ public class CopyProfileAction
 		{
 			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
 		}
-
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

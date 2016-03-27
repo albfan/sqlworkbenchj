@@ -25,13 +25,15 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
+import workbench.interfaces.MainPanel;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.profiles.DriverEditorDialog;
-import workbench.interfaces.MainPanel;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  Thomas Kellerer
@@ -69,4 +71,9 @@ public class ManageDriversAction extends WbAction
     DriverEditorDialog.showDriverDialog(mainWin, currentDrv);
   }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

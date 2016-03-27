@@ -31,19 +31,24 @@ import workbench.gui.help.HelpManager;
  * @author Thomas Kellerer
  */
 public class ShowManualAction
-	extends WbAction
+  extends WbAction
 {
-	public ShowManualAction()
-	{
-		super();
-		initMenuDefinition("MnuTxtHelpManual");
-		setIcon("pdf");
-	}
+  public ShowManualAction()
+  {
+    super();
+    initMenuDefinition("MnuTxtHelpManual");
+    setIcon("pdf");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		HelpManager.showPdfHelp();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    HelpManager.showPdfHelp();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

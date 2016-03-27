@@ -18,42 +18,38 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.gui.actions;
+package workbench.gui.toolbar;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-
-import workbench.gui.MainWindow;
-import workbench.gui.tabhistory.ClosedTabManager;
+import workbench.gui.components.ConnectionInfo;
+import workbench.gui.components.WbToolbar;
 
 /**
- * @author Andreas Krist
+ * The toolbar of the main window.
+ *
+ * @author Thomas Kellerer
  */
-public class RestoreClosedTabAction
-  extends WbAction
+public class MainToolbar
+  extends WbToolbar
 {
-  private MainWindow client;
-
-  public RestoreClosedTabAction(MainWindow aClient)
+  private ConnectionInfo connectionInfo;
+  public MainToolbar()
   {
     super();
-
-    this.client = aClient;
-    this.initMenuDefinition("MnuTxtTabHistory");
+    addDefaultBorder();
   }
 
-  @Override
-  public JMenuItem getMenuItem()
+  public void addConnectionInfo()
   {
-    JMenu menu = new JMenu(getMenuLabel());
-    ClosedTabManager closedTabHistory = this.client.getClosedTabHistory();
-    closedTabHistory.updateMenu(menu);
-    return menu;
+    if (connectionInfo == null)
+    {
+      connectionInfo = new ConnectionInfo(getBackground());
+    }
+    add(connectionInfo);
   }
 
-  @Override
-  public boolean useInToolbar()
+  public ConnectionInfo getConnectionInfo()
   {
-    return false;
+    return connectionInfo;
   }
+
 }

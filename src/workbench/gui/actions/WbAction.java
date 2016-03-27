@@ -65,7 +65,6 @@ public class WbAction
 {
 	private static final String MAIN_MENU_ITEM = "MainMenuItem";
 	private static final String MENU_SEPARATOR = "MenuSep";
-	private static final String TBAR_SEPARATOR = "TbarSep";
 	private static final String ALTERNATE_ACCELERATOR = "AltAcc";
 	private static final String DEFAULT_ACCELERATOR = "DefaultAcc";
 	private static final String MNEMONIC_INDEX = "MnemonicIndex";
@@ -443,21 +442,6 @@ public class WbAction
 		putValue(WbAction.MAIN_MENU_ITEM, aKey);
 	}
 
-	public boolean getCreateToolbarSeparator()
-	{
-		Boolean flag = (Boolean) getValue(WbAction.TBAR_SEPARATOR);
-		if (flag == null)
-		{
-			return false;
-		}
-		return flag.booleanValue();
-	}
-
-	public void setCreateToolbarSeparator(boolean flag)
-	{
-		putValue(WbAction.TBAR_SEPARATOR, (flag ? Boolean.TRUE : Boolean.FALSE));
-	}
-
 	public boolean getCreateMenuSeparator()
 	{
 		Boolean flag = (Boolean) getValue(WbAction.MENU_SEPARATOR);
@@ -582,6 +566,16 @@ public class WbAction
 		return super.getValue(key);
 	}
 
+
+  public boolean useInToolbar()
+  {
+    return true;
+  }
+
+  public boolean hasIcon()
+  {
+    return iconKey != null;
+  }
 
 	private ImageIcon getIcon(String key, int size)
 	{

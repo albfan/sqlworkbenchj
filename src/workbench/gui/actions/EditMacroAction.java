@@ -81,4 +81,10 @@ public class EditMacroAction
 			editMacro.copyTo(macro);
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

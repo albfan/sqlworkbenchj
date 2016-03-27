@@ -222,37 +222,33 @@ public class OpenFileAction
 					final WbFile f = new WbFile(sf);
 
 					final String fname = f.getFullPath();
-					EventQueue.invokeLater(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							SqlPanel sql;
-							String encodingToUse = encoding;
-							if (StringUtil.isEmptyString(encodingToUse))
-							{
-								encodingToUse = FileUtil.detectFileEncoding(f);
-							}
+					EventQueue.invokeLater(() ->
+          {
+            SqlPanel sql;
+            String encodingToUse = encoding;
+            if (StringUtil.isEmptyString(encodingToUse))
+            {
+              encodingToUse = FileUtil.detectFileEncoding(f);
+            }
 
-							if (openInNewTab)
-							{
-								sql = (SqlPanel) window.addTab();
-							}
-							else
-							{
-								sql = currentPanel;
-							}
+            if (openInNewTab)
+            {
+              sql = (SqlPanel) window.addTab();
+            }
+            else
+            {
+              sql = currentPanel;
+            }
 
-							if (sql != null)
-							{
-								sql.readFile(fname, encodingToUse);
-							}
-							window.invalidate();
-							// this is necessary to update all menus and toolbars
-							// even if the current tab didn't really change
-							window.currentTabChanged();
-						}
-					});
+            if (sql != null)
+            {
+              sql.readFile(fname, encodingToUse);
+            }
+            window.invalidate();
+            // this is necessary to update all menus and toolbars
+            // even if the current tab didn't really change
+            window.currentTabChanged();
+          });
 				}
 			}
 		}
@@ -282,5 +278,10 @@ public class OpenFileAction
 		return null;
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 
 }

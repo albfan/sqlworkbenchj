@@ -24,14 +24,11 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-import workbench.gui.components.ClipBoardCopier;
-
-import workbench.gui.components.WbTable;
-import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the contents of a table to the clipboard as DBUNIT XML statements
@@ -75,4 +72,9 @@ public class CopyAsDbUnitXMLAction extends WbAction
 		copier.copyAsDbUnit(false, selectColumns);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

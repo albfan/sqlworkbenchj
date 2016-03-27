@@ -24,6 +24,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.NullableEditor;
 
 /**
@@ -31,33 +32,38 @@ import workbench.interfaces.NullableEditor;
  * @author Thomas Kellerer
  */
 public class SetNullAction
-	extends WbAction
+  extends WbAction
 {
-	private NullableEditor client;
+  private NullableEditor client;
 
-	public SetNullAction(NullableEditor editor)
-	{
-		initMenuDefinition("MnuTxtSetNull");
-		client = editor;
-		if (client != null && client.getEditor() != null)
-		{
-			addToInputMap(client.getEditor());
-		}
-	}
+  public SetNullAction(NullableEditor editor)
+  {
+    initMenuDefinition("MnuTxtSetNull");
+    client = editor;
+    if (client != null && client.getEditor() != null)
+    {
+      addToInputMap(client.getEditor());
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (client != null)
-		{
-			client.setNull(true);
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client != null)
+    {
+      client.setNull(true);
+    }
+  }
 
-	@Override
-	public boolean allowDuplicate()
-	{
-		return true;
-	}
+  @Override
+  public boolean allowDuplicate()
+  {
+    return true;
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

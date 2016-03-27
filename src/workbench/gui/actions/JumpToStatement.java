@@ -46,55 +46,48 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class JumpToStatement
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public JumpToStatement(SqlPanel panel)
-	{
-		super();
-		initMenuDefinition("MnuTxtJumpToStatementNr", KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
-		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		client = panel;
-	}
+  public JumpToStatement(SqlPanel panel)
+  {
+    super();
+    initMenuDefinition("MnuTxtJumpToStatementNr", KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
+    setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    client = panel;
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent evt)
-	{
-		ScriptParser p = ScriptParser.createScriptParser(client.getConnection());
-		p.setScript(client.getText());
-		int count = p.getSize();
+  @Override
+  public void actionPerformed(ActionEvent evt)
+  {
+    ScriptParser p = ScriptParser.createScriptParser(client.getConnection());
+    p.setScript(client.getText());
+    int count = p.getSize();
 
-		JComboBox input = new JComboBox();
-		input.setEditable(true);
-		for (int i=0; i < count; i++)
-		{
-			input.addItem(Integer.toString(i + 1));
-		}
+    JComboBox input = new JComboBox();
+    input.setEditable(true);
+    for (int i = 0; i < count; i++)
+    {
+      input.addItem(Integer.toString(i + 1));
+    }
 
-		int current = p.getCommandIndexAtCursorPos(client.getEditor().getCaretPosition());
-		input.setSelectedItem(Integer.toString(current+1));
+    int current = p.getCommandIndexAtCursorPos(client.getEditor().getCaretPosition());
+    input.setSelectedItem(Integer.toString(current + 1));
 
-		input.setMinimumSize(new Dimension(50, 24));
-		boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(client), input, ResourceMgr.getString("TxtJumpTo"));
-		if (!ok)
-		{
-			return;
-		}
-		String value = input.getSelectedItem().toString();
-		if (StringUtil.isBlank(value)) return;
+    input.setMinimumSize(new Dimension(50, 24));
+    boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(client), input, ResourceMgr.getString("TxtJumpTo"));
+    if (!ok)
+    {
+      return;
+    }
+    String value = input.getSelectedItem().toString();
+    if (StringUtil.isBlank(value)) return;
 
-		int stmt = Integer.valueOf(value);
-		final int pos = p.getStartPosForCommand(stmt - 1);
-		EventQueue.invokeLater( new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				client.getEditor().setCaretPosition(pos);
-			}
-		});
+    int stmt = Integer.valueOf(value);
+    final int pos = p.getStartPosForCommand(stmt - 1);
+    EventQueue.invokeLater(() -> { client.getEditor().setCaretPosition(pos); });
 
-	}
+  }
 
 }

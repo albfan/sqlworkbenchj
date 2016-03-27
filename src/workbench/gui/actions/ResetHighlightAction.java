@@ -24,54 +24,57 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import workbench.gui.components.WbTable;
+
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.components.WbTable;
+
 /**
- *	Reset the filter defined on a WbTable
- *	@author  Thomas Kellerer
+ * Reset the filter defined on a WbTable
+ *
+ * @author Thomas Kellerer
  */
 public class ResetHighlightAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable client;
+  private WbTable client;
 
-	public ResetHighlightAction(WbTable aClient)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtResetHighlight");
-		this.setClient(aClient);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(false);
-		this.setEnabled(false);
-	}
+  public ResetHighlightAction(WbTable aClient)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtResetHighlight");
+    this.setClient(aClient);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.clearHighlightExpression();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.clearHighlightExpression();
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent tableModelEvent)
-	{
-		this.setEnabled(this.client.isHighlightEnabled());
-	}
+  @Override
+  public void tableChanged(TableModelEvent tableModelEvent)
+  {
+    this.setEnabled(this.client.isHighlightEnabled());
+  }
 
-	public void setClient(WbTable c)
-	{
-		if (this.client != null)
-		{
-			this.client.removeTableModelListener(this);
-		}
-		this.client = c;
-		if (this.client != null)
-		{
-			this.client.addTableModelListener(this);
-		}
-	}
+  public void setClient(WbTable c)
+  {
+    if (this.client != null)
+    {
+      this.client.removeTableModelListener(this);
+    }
+    this.client = c;
+    if (this.client != null)
+    {
+      this.client.addTableModelListener(this);
+    }
+  }
 
 }

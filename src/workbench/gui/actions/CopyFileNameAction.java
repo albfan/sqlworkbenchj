@@ -23,14 +23,14 @@
  */
 package workbench.gui.actions;
 
-import java.io.File;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import workbench.interfaces.TextFileContainer;
+
 import workbench.util.WbFile;
 
 /**
@@ -81,4 +81,9 @@ public class CopyFileNameAction
 		clipboard.setContents(new StringSelection(toCopy),null);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

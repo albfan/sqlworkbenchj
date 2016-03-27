@@ -66,4 +66,10 @@ public class DeleteListEntryAction extends WbAction
 			LogMgr.logError(this, "Error saving profiles", ex);
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

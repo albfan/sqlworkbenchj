@@ -24,31 +24,38 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.gui.help.HelpManager;
 
 /**
  * @author Thomas Kellerer
  */
 public class WhatsNewAction
-	extends WbAction
+  extends WbAction
 {
-	private static WhatsNewAction instance = new WhatsNewAction();
-	public static WhatsNewAction getInstance()
-	{
-		return instance;
-	}
+  private static WhatsNewAction instance = new WhatsNewAction();
 
-	private WhatsNewAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtWhatsNew");
-		this.removeIcon();
-	}
+  public static WhatsNewAction getInstance()
+  {
+    return instance;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		HelpManager.showHistory();
-	}
+  private WhatsNewAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtWhatsNew");
+    this.removeIcon();
+  }
 
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    HelpManager.showHistory();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

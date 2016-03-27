@@ -50,120 +50,120 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class ShowObjectInfoAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel display;
+  private SqlPanel display;
 
-	public ShowObjectInfoAction(SqlPanel panel)
-	{
-		display = panel;
-		setIcon(null);
-		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		initMenuDefinition("MnuTxtShowObjectDef", KeyStroke.getKeyStroke(KeyEvent.VK_I, PlatformShortcuts.getDefaultModifier()));
-		checkEnabled();
-	}
+  public ShowObjectInfoAction(SqlPanel panel)
+  {
+    display = panel;
+    setIcon(null);
+    setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    initMenuDefinition("MnuTxtShowObjectDef", KeyStroke.getKeyStroke(KeyEvent.VK_I, PlatformShortcuts.getDefaultModifier()));
+    checkEnabled();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (display.isBusy()) return;
-		final boolean includeDependencies;
-		if (invokedByMouse(e))
-		{
-			includeDependencies = isCtrlPressed(e);
-		}
-		else
-		{
-			includeDependencies = false;
-		}
-		WbThread t = new WbThread("ObjectInfoThread")
-		{
-			@Override
-			public void run()
-			{
-				showInfo(includeDependencies);
-			}
-		};
-		t.start();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (display.isBusy()) return;
+    final boolean includeDependencies;
+    if (invokedByMouse(e))
+    {
+      includeDependencies = isCtrlPressed(e);
+    }
+    else
+    {
+      includeDependencies = false;
+    }
+    WbThread t = new WbThread("ObjectInfoThread")
+    {
+      @Override
+      public void run()
+      {
+        showInfo(includeDependencies);
+      }
+    };
+    t.start();
+  }
 
-	protected void showInfo(boolean includeDependencies)
-	{
-		if (display.isBusy()) return;
-		WbConnection conn = display.getConnection();
-		if (conn == null)	return;
+  protected void showInfo(boolean includeDependencies)
+  {
+    if (display.isBusy()) return;
+    WbConnection conn = display.getConnection();
+    if (conn == null) return;
 
-		try
-		{
-			display.setBusy(true);
-			display.fireDbExecStart();
-			setEnabled(false);
+    try
+    {
+      display.setBusy(true);
+      display.fireDbExecStart();
+      setEnabled(false);
 
-			ObjectInfo info = new ObjectInfo();
+      ObjectInfo info = new ObjectInfo();
 
-			boolean deps = conn.getDbSettings().objectInfoWithDependencies();
+      boolean deps = conn.getDbSettings().objectInfoWithDependencies();
       String text = SqlUtil.getIdentifierAtCursor(display.getEditor(), conn);
 
-			if (StringUtil.isNonBlank(text))
-			{
-				display.setStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
-				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps, true);
+      if (StringUtil.isNonBlank(text))
+      {
+        display.setStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
+        StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies || deps, true);
 
-				if (result != null)
-				{
-					int count = display.getResultTabCount();
+        if (result != null)
+        {
+          int count = display.getResultTabCount();
 
-					// if the display is "kept busy" the current "data" will not be recognized
-					// when switching panels
-					display.setBusy(false);
+          // if the display is "kept busy" the current "data" will not be recognized
+          // when switching panels
+          display.setBusy(false);
 
-					// Retrieving the messages will reset the hasMessages() flag...
-					boolean hasMessages = result.hasMessages();
+          // Retrieving the messages will reset the hasMessages() flag...
+          boolean hasMessages = result.hasMessages();
 
-					if (hasMessages)
-					{
-						display.appendToLog("\n");
-						display.appendToLog(result.getMessages().toString());
-					}
+          if (hasMessages)
+          {
+            display.appendToLog("\n");
+            display.appendToLog(result.getMessages().toString());
+          }
 
-					if (result.hasDataStores())
-					{
-						for (DataStore data : result.getDataStores())
-						{
-							data.resetStatus();
-						}
-						display.addResult(result);
-						display.setSelectedResultTab(count - 1);
-					}
-					else if (hasMessages)
-					{
-						display.showLogPanel();
-					}
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("ShowObjectInfoAction.executeAcion()", "Error retrieving object info", ex);
-		}
-		finally
-		{
-			display.fireDbExecEnd();
-			display.clearStatusMessage();
+          if (result.hasDataStores())
+          {
+            for (DataStore data : result.getDataStores())
+            {
+              data.resetStatus();
+            }
+            display.addResult(result);
+            display.setSelectedResultTab(count - 1);
+          }
+          else if (hasMessages)
+          {
+            display.showLogPanel();
+          }
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ShowObjectInfoAction.executeAcion()", "Error retrieving object info", ex);
+    }
+    finally
+    {
+      display.fireDbExecEnd();
+      display.clearStatusMessage();
 
-			// just in case...
-			if (display.isBusy())
-			{
-				display.setBusy(false);
-			}
+      // just in case...
+      if (display.isBusy())
+      {
+        display.setBusy(false);
+      }
 
-			checkEnabled();
-		}
-	}
+      checkEnabled();
+    }
+  }
 
-	public void checkEnabled()
-	{
-		setEnabled(display != null && display.isConnected());
-	}
+  public void checkEnabled()
+  {
+    setEnabled(display != null && display.isConnected());
+  }
 
 }

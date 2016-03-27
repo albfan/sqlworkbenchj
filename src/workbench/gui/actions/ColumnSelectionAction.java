@@ -28,8 +28,9 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.EditorPanel;
 
 /**
  *	Action to enable column selection for the next selection in the editor
@@ -54,5 +55,10 @@ public class ColumnSelectionAction extends WbAction
 		this.client.setSelectionRectangular(true);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 
 }

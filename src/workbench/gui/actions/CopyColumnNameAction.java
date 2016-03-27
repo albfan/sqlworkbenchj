@@ -26,7 +26,9 @@ package workbench.gui.actions;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+
 import workbench.gui.components.WbTable;
+
 import workbench.util.StringUtil;
 
 /**
@@ -62,4 +64,10 @@ public class CopyColumnNameAction
 			}
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

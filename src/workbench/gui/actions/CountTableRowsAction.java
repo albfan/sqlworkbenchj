@@ -144,13 +144,12 @@ public class CountTableRowsAction
 	@Override
 	public void selectionChanged(WbSelectionModel model)
 	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				checkState();
-			}
-		});
+		EventQueue.invokeLater(this::checkState);
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

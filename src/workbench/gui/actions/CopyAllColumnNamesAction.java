@@ -28,8 +28,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
+
+import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the names of all columns into the clipboard
@@ -79,4 +80,10 @@ public class CopyAllColumnNamesAction
 			clipboard.setContents(new StringSelection(columnNames.toString()),null);
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

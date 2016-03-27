@@ -34,73 +34,74 @@ import workbench.db.WbConnection;
 /**
  * An action to toggle the auto commit attribute of the
  * given {@link workbench.db.WbConnection}
- * @author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
 public class ToggleAutoCommitAction
-	extends CheckBoxAction
-	implements PropertyChangeListener
+  extends CheckBoxAction
+  implements PropertyChangeListener
 {
-	private WbConnection connection;
+  private WbConnection connection;
 
-	public ToggleAutoCommitAction()
-	{
-		super("MnuTxtToggleAutoCommit", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-	}
+  public ToggleAutoCommitAction()
+  {
+    super("MnuTxtToggleAutoCommit", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  }
 
-	public void setConnection(WbConnection conn)
-	{
-		if (this.connection != null)
-		{
-			this.connection.removeChangeListener(this);
-		}
-		this.connection = conn;
-		if (this.connection != null)
-		{
-			this.connection.addChangeListener(this);
-		}
-		this.checkState();
-	}
+  public void setConnection(WbConnection conn)
+  {
+    if (this.connection != null)
+    {
+      this.connection.removeChangeListener(this);
+    }
+    this.connection = conn;
+    if (this.connection != null)
+    {
+      this.connection.addChangeListener(this);
+    }
+    this.checkState();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.connection != null && this.isEnabled())
-		{
-			this.connection.toggleAutoCommit();
-			checkState();
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.connection != null && this.isEnabled())
+    {
+      this.connection.toggleAutoCommit();
+      checkState();
+    }
+  }
 
-	private void checkState()
-	{
-		if (this.connection != null)
-		{
-			this.setEnabled(true);
-			this.setSwitchedOn(this.connection.getAutoCommit());
-		}
-		else
-		{
-			this.setEnabled(false);
-		}
-	}
+  private void checkState()
+  {
+    if (this.connection != null)
+    {
+      this.setEnabled(true);
+      this.setSwitchedOn(this.connection.getAutoCommit());
+    }
+    else
+    {
+      this.setEnabled(false);
+    }
+  }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		if (evt.getSource() == this.connection && WbConnection.PROP_AUTOCOMMIT.equals(evt.getPropertyName()))
-		{
-			this.checkState();
-		}
-	}
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    if (evt.getSource() == this.connection && WbConnection.PROP_AUTOCOMMIT.equals(evt.getPropertyName()))
+    {
+      this.checkState();
+    }
+  }
 
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		if (this.connection != null)
-		{
-			this.connection.removeChangeListener(this);
-		}
-	}
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (this.connection != null)
+    {
+      this.connection.removeChangeListener(this);
+    }
+  }
 }

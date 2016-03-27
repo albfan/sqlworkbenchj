@@ -26,12 +26,16 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.Map;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.DbObjectChanger;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.gui.dbobjects.FkDisplayPanel;
 import workbench.gui.dbobjects.RunScriptPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -79,4 +83,9 @@ public class DropForeignKeyAction
 		}
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -25,41 +25,46 @@ package workbench.gui.actions;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JFrame;
+
 import workbench.WbManager;
-import workbench.gui.settings.SettingsPanel;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.settings.SettingsPanel;
 
 /**
  * @author Thomas Kellerer
  */
 public class OptionsDialogAction
-	extends WbAction
+  extends WbAction
 {
-	public OptionsDialogAction()
-	{
-		super();
-		initMenuDefinition(ResourceMgr.MNU_TXT_OPTIONS);
-		this.removeIcon();
-	}
+  public OptionsDialogAction()
+  {
+    super();
+    initMenuDefinition(ResourceMgr.MNU_TXT_OPTIONS);
+    this.removeIcon();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		showOptionsDialog();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    showOptionsDialog();
+  }
 
-	public static void showOptionsDialog()
-	{
-		final JFrame parent = WbManager.getInstance().getCurrentWindow();
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				SettingsPanel panel = new SettingsPanel();
-				panel.showSettingsDialog(parent);
-			}
-		});
-	}
+  public static void showOptionsDialog()
+  {
+    final JFrame parent = WbManager.getInstance().getCurrentWindow();
+    EventQueue.invokeLater(() ->
+    {
+      SettingsPanel panel = new SettingsPanel();
+      panel.showSettingsDialog(parent);
+    });
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

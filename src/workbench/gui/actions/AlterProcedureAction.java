@@ -156,4 +156,10 @@ public class AlterProcedureAction
 			checkEnabled();
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

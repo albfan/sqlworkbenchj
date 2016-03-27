@@ -29,31 +29,40 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.dbobjects.TableListPanel;
 import workbench.resource.PlatformShortcuts;
 
+import workbench.gui.dbobjects.TableListPanel;
+
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class ToggleTableSourceAction extends WbAction
+public class ToggleTableSourceAction
+  extends WbAction
 {
-	private TableListPanel client;
+  private TableListPanel client;
 
-	public ToggleTableSourceAction(TableListPanel client)
-	{
-		this(client, "MnuTxtToggleTableSource");
-	}
-	public ToggleTableSourceAction(TableListPanel aClient, String resourceKey)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setIcon(null);
-	}
+  public ToggleTableSourceAction(TableListPanel client)
+  {
+    this(client, "MnuTxtToggleTableSource");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.toggleExpandSource();
-	}
+  public ToggleTableSourceAction(TableListPanel aClient, String resourceKey)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setIcon(null);
+  }
+
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.toggleExpandSource();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

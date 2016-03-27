@@ -34,19 +34,24 @@ import workbench.gui.help.HelpManager;
  * @author Thomas Kellerer
  */
 public class ShowHelpAction
-	extends WbAction
+  extends WbAction
 {
-	public ShowHelpAction()
-	{
-		super();
-		initMenuDefinition("MnuTxtHelpContents",KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
-		setIcon("help");
-	}
+  public ShowHelpAction()
+  {
+    super();
+    initMenuDefinition("MnuTxtHelpContents", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+    setIcon("help");
+  }
 
-	@Override
-	public synchronized void executeAction(ActionEvent e)
-	{
-		HelpManager.showHelpIndex();
-	}
+  @Override
+  public synchronized void executeAction(ActionEvent e)
+  {
+    HelpManager.showHelpIndex();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

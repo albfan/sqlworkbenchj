@@ -25,7 +25,9 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
+
 import workbench.gui.editor.LineScroller;
 
 /**
@@ -33,27 +35,32 @@ import workbench.gui.editor.LineScroller;
  * @author Thomas Kellerer
  */
 public class ScrollDownAction
-	extends WbAction
+  extends WbAction
 {
-	private LineScroller client;
+  private LineScroller client;
 
-	public ScrollDownAction(LineScroller scroller)
-	{
-		super();
-		client = scroller;
-		initMenuDefinition("MnuTxtScrollDown", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.CTRL_MASK));
-	}
+  public ScrollDownAction(LineScroller scroller)
+  {
+    super();
+    client = scroller;
+    initMenuDefinition("MnuTxtScrollDown", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.CTRL_MASK));
+  }
 
-	@Override
-	public boolean isEnabled()
-	{
-		return client != null && client.canScrollDown();
-	}
+  @Override
+  public boolean isEnabled()
+  {
+    return client != null && client.canScrollDown();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		client.scrollDown();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    client.scrollDown();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

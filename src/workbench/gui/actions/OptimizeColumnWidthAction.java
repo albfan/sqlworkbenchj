@@ -24,43 +24,51 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.ColumnWidthOptimizer;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.GuiSettings;
+
+import workbench.gui.components.ColumnWidthOptimizer;
+import workbench.gui.components.WbTable;
+
 import workbench.util.WbThread;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class OptimizeColumnWidthAction
-	extends WbAction
+  extends WbAction
 {
-	protected WbTable client;
-	protected ColumnWidthOptimizer optimizer;
+  protected WbTable client;
+  protected ColumnWidthOptimizer optimizer;
 
-	public OptimizeColumnWidthAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.optimizer = new ColumnWidthOptimizer(client);
-		this.setMenuTextByKey("MnuTxtOptimizeCol");
-	}
+  public OptimizeColumnWidthAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.optimizer = new ColumnWidthOptimizer(client);
+    this.setMenuTextByKey("MnuTxtOptimizeCol");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (client == null) return;
-		final boolean respectColName = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK) || GuiSettings.getIncludeHeaderInOptimalWidth();
-		final int column = client.getPopupColumnIndex();
-		Thread t = new WbThread("OptimizeCol Thread")
-		{
-			@Override
-			public void run()
-			{
-				optimizer.optimizeColWidth(column, respectColName);
-			}
-		};
-		t.start();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client == null) return;
+    final boolean respectColName = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK) || GuiSettings.getIncludeHeaderInOptimalWidth();
+    final int column = client.getPopupColumnIndex();
+    Thread t = new WbThread("OptimizeCol Thread")
+    {
+      @Override
+      public void run()
+      {
+        optimizer.optimizeColWidth(column, respectColName);
+      }
+    };
+    t.start();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -27,56 +27,68 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.components.ColumnWidthOptimizer;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
+
+import workbench.gui.components.ColumnWidthOptimizer;
+import workbench.gui.components.WbTable;
+
 import workbench.util.WbThread;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class OptimizeAllColumnsAction
-	extends WbAction
+  extends WbAction
 {
-	protected ColumnWidthOptimizer optimizer;
+  protected ColumnWidthOptimizer optimizer;
 
-	public OptimizeAllColumnsAction(WbTable client)
-	{
-		super();
-		this.setClient(client);
-		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, PlatformShortcuts.getDefaultModifier()));
-		this.setEnabled(false);
-	}
+  public OptimizeAllColumnsAction(WbTable client)
+  {
+    super();
+    this.setClient(client);
+    this.initMenuDefinition("MnuTxtOptimizeAllCol", KeyStroke.getKeyStroke(KeyEvent.VK_W, PlatformShortcuts.getDefaultModifier()));
+    this.setEnabled(false);
+  }
 
-	public void disableShortcut()
-	{
-		this.setAccelerator(null);
-	}
+  public void disableShortcut()
+  {
+    this.setAccelerator(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (optimizer == null) return;
-		final boolean shiftPressed = isShiftPressed(e);
-		Thread t = new WbThread("OptimizeAllCols Thread")
-		{
-			@Override
-			public void run()
-			{
-				optimizer.optimizeAllColWidth(shiftPressed || GuiSettings.getIncludeHeaderInOptimalWidth());
-			}
-		};
-		t.start();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (optimizer == null) return;
+    final boolean shiftPressed = isShiftPressed(e);
+    Thread t = new WbThread("OptimizeAllCols Thread")
+    {
+      @Override
+      public void run()
+      {
+        optimizer.optimizeAllColWidth(shiftPressed || GuiSettings.getIncludeHeaderInOptimalWidth());
+      }
+    };
+    t.start();
+  }
 
-	@Override
-	public boolean hasShiftModifier() { return true; }
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	public void setClient(WbTable client)
-	{
-		this.optimizer = (client != null ? new ColumnWidthOptimizer(client) : null);
-		this.setEnabled(client != null);
-	}
+  public void setClient(WbTable client)
+  {
+    this.optimizer = (client != null ? new ColumnWidthOptimizer(client) : null);
+    this.setEnabled(client != null);
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
 }

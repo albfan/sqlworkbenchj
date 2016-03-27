@@ -65,20 +65,21 @@ public class DetachResultTabAction
 		panel.removeCurrentResult();
 		final Window parent = SwingUtilities.getWindowAncestor(panel);
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
-        if (timer > 0)
-        {
-          window.refreshAutomatically(timer);
-        }
-				window.showWindow();
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
+      if (timer > 0)
+      {
+        window.refreshAutomatically(timer);
+      }
+      window.showWindow();
+    });
 
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

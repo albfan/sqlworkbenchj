@@ -61,4 +61,10 @@ public class CutAction extends WbAction
 	{
 		this.client.cut();
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

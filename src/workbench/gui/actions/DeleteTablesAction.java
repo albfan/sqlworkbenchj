@@ -145,4 +145,9 @@ public class DeleteTablesAction
 		}
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

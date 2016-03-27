@@ -216,4 +216,9 @@ public class RunMacroAction
 		setEnabled(dataTable.getSelectedRowCount() == 1);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

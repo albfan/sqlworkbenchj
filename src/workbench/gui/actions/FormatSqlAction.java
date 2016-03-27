@@ -33,28 +33,27 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Reformat the currently selected SQL statement
+ * Reformat the currently selected SQL statement.
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class FormatSqlAction
-	extends WbAction
+  extends WbAction
 {
-	private FormattableSql client;
+  private FormattableSql client;
 
-	public FormatSqlAction(FormattableSql aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReformatSql",KeyStroke.getKeyStroke(KeyEvent.VK_R, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("format");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateToolbarSeparator(true);
-	}
+  public FormatSqlAction(FormattableSql aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtReformatSql", KeyStroke.getKeyStroke(KeyEvent.VK_R, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon("format");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.reformatSql();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.reformatSql();
+  }
 }

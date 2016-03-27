@@ -34,27 +34,27 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Search inside the result set
+ * Search inside the result set.
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class FindDataAction extends WbAction
+public class FindDataAction
+  extends WbAction
 {
-	private Searchable client;
+  private Searchable client;
 
-	public FindDataAction(Searchable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setIcon("find-data");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(true);
-	}
+  public FindDataAction(Searchable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setIcon("find-data");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.find();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.find();
+  }
 }

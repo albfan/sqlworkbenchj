@@ -208,23 +208,6 @@ public class MainWindow
 	private ConnectionProfile currentProfile;
 	protected ConnectionSelector connectionSelector;
 
-  private HelpConnectionInfoAction connectionInfoAction;
-	private ShowDbmsManualAction showDbmsManual;
-	private FileDisconnectAction disconnectAction;
-	private FileReconnectAction reconnectAction;
-	private CreateNewConnection createNewConnection;
-	private DisconnectTabAction disconnectTab;
-	private ShowDbExplorerAction dbExplorerAction;
-	private NewDbExplorerPanelAction newDbExplorerPanel;
-	private NewDbExplorerWindowAction newDbExplorerWindow;
-  private ShowDbTreeAction showDbTree;
-	private final WbTabbedPane sqlTab;
-	private final TabbedPaneHistory tabHistory;
-	private WbToolbar currentToolbar;
-	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
-
-	private WbWorkspace currentWorkspace;
-
   private EditWorkspaceVarsAction editWorkspaceVariables;
 	private CloseWorkspaceAction closeWorkspaceAction;
 	private SaveWorkspaceAction saveWorkspaceAction;
@@ -232,6 +215,29 @@ public class MainWindow
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
 	private ReloadProfileWkspAction reloadWorkspace;
+  private HelpConnectionInfoAction connectionInfoAction;
+	private ShowDbmsManualAction showDbmsManual;
+	private FileDisconnectAction disconnectAction;
+	private FileConnectAction connectAction;
+	private FileReconnectAction reconnectAction;
+	private CreateNewConnection createNewConnection;
+	private DisconnectTabAction disconnectTab;
+	private ShowDbExplorerAction dbExplorerAction;
+	private NewDbExplorerPanelAction newDbExplorerPanel;
+	private NewDbExplorerWindowAction newDbExplorerWindow;
+  private FileSaveProfiles saveProfilesAction;
+  private FileNewWindowAction newWindowAction;
+  private ShowDbTreeAction showDbTree;
+  private FileCloseAction fileCloseAction;
+  private OpenFileAction fileOpenAction;
+  private FileExitAction fileExitAction;
+	private final WbTabbedPane sqlTab;
+	private final TabbedPaneHistory tabHistory;
+	private WbToolbar currentToolbar;
+	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
+
+	private WbWorkspace currentWorkspace;
+
 	private final NextTabAction nextTab;
 	private final PrevTabAction prevTab;
 
@@ -637,28 +643,26 @@ public class MainWindow
 		menuBar.add(menu);
 		menus.put(ResourceMgr.MNU_TXT_FILE, menu);
 
-		WbAction action;
-
-		action = new FileConnectAction(this);
-		action.addToMenu(menu);
-		this.disconnectAction.addToMenu(menu);
-		this.reconnectAction.addToMenu(menu);
-		FileCloseAction close = new FileCloseAction(this);
-		close.addToMenu(menu);
+		connectAction = new FileConnectAction(this);
+		connectAction.addToMenu(menu);
+		disconnectAction.addToMenu(menu);
+		reconnectAction.addToMenu(menu);
+		fileCloseAction = new FileCloseAction(this);
+		fileCloseAction.addToMenu(menu);
 		menu.addSeparator();
 		this.createNewConnection.addToMenu(menu);
 		this.disconnectTab.addToMenu(menu);
 		menu.addSeparator();
 
-		action = new FileSaveProfiles();
-		action.addToMenu(menu);
+		saveProfilesAction = new FileSaveProfiles();
+		saveProfilesAction.addToMenu(menu);
 
-		action = new FileNewWindowAction();
-		action.addToMenu(menu);
+		newWindowAction = new FileNewWindowAction();
+		newWindowAction.addToMenu(menu);
 
-		OpenFileAction open = new OpenFileAction(this);
+		fileOpenAction = new OpenFileAction(this);
 		menu.addSeparator();
-		open.addToMenu(menu);
+		fileOpenAction.addToMenu(menu);
 
 		// now create the menus for the current tab
 		List menuItems = panel.getMenuItems();
@@ -682,8 +686,7 @@ public class MainWindow
 		int tabCount = this.sqlTab.getTabCount();
 		for (int i=0; i < tabCount; i ++)
 		{
-			action = new SelectTabAction(this.sqlTab, i);
-			menu.add(action);
+			menu.add(new SelectTabAction(this.sqlTab, i));
 		}
 		menu.addSeparator();
 		menu.add(nextTab.getMenuItem());
@@ -784,8 +787,8 @@ public class MainWindow
     filemenu.add(new ImportProfilesAction());
 		filemenu.addSeparator();
 
-		action = new FileExitAction();
-		filemenu.add(action);
+		fileExitAction = new FileExitAction();
+		filemenu.add(fileExitAction);
 
 		final JMenu viewMenu = menus.get(workbench.resource.ResourceMgr.MNU_TXT_VIEW);
 		AddTabAction add = new AddTabAction(this);
@@ -825,11 +828,38 @@ public class MainWindow
 		menuBar.add(this.buildToolsMenu());
 		menuBar.add(this.buildHelpMenu());
 
-		panel.addToToolbar(dbExplorerAction, false);
-    panel.addToToolbar(showDbTree, true);
 		adjustMenuHeight(menuBar);
 		return menuBar;
 	}
+
+  private List<WbAction> getGlobalActions()
+  {
+    List<WbAction> actions = new ArrayList<>(15);
+    actions.add(editWorkspaceVariables);
+    actions.add(closeWorkspaceAction);
+    actions.add(saveWorkspaceAction);
+    actions.add(saveAsWorkspaceAction);
+    actions.add(loadWorkspaceAction);
+    actions.add(assignWorkspaceAction);
+    actions.add(reloadWorkspace);
+    actions.add(connectionInfoAction);
+    actions.add(showDbmsManual);
+    actions.add(disconnectAction);
+    actions.add(connectAction);
+    actions.add(reconnectAction);
+    actions.add(createNewConnection);
+    actions.add(disconnectTab);
+    actions.add(dbExplorerAction);
+    actions.add(newDbExplorerPanel);
+    actions.add(newDbExplorerWindow);
+    actions.add(showDbTree);
+    actions.add(fileCloseAction);
+    actions.add(fileOpenAction);
+    actions.add(newWindowAction);
+    actions.add(saveProfilesAction);
+    actions.add(fileExitAction);
+    return actions;
+  }
 
 	/**
 	 * Removes or makes the toolbar visible depending on
@@ -855,7 +885,7 @@ public class MainWindow
 			final MainPanel curPanel = this.getCurrentPanel();
 			if (curPanel != null)
 			{
-				this.currentToolbar = curPanel.getToolbar();
+				this.currentToolbar = curPanel.getToolbar(getGlobalActions());
 				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}

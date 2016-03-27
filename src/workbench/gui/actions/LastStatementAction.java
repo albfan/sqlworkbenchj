@@ -30,27 +30,28 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.SqlHistory;
 
 /**
- *	Jump to the last statement in the SQL History
- *	@author  Thomas Kellerer
+ * Jump to the last statement in the SQL History.
+ *
+ * @author Thomas Kellerer
  */
-public class LastStatementAction extends WbAction
+public class LastStatementAction
+  extends WbAction
 {
-	private SqlHistory history;
+  private SqlHistory history;
 
-	public LastStatementAction(SqlHistory aHistory)
-	{
-		super();
-		this.history = aHistory;
-		this.initMenuDefinition("MnuTxtLastStatement");
-		this.setIcon("Last");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(false);
-		this.setCreateToolbarSeparator(false);
-	}
+  public LastStatementAction(SqlHistory aHistory)
+  {
+    super();
+    this.history = aHistory;
+    this.initMenuDefinition("MnuTxtLastStatement");
+    this.setIcon("Last");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setCreateMenuSeparator(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.history.showLastStatement();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.history.showLastStatement();
+  }
 }

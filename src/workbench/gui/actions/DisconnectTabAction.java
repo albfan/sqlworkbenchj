@@ -24,9 +24,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.db.ConnectionProfile;
-import workbench.gui.MainWindow;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ConnectionProfile;
+
+import workbench.gui.MainWindow;
 
 /**
  *
@@ -68,5 +71,9 @@ public class DisconnectTabAction
 		}
 	}
 
-
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

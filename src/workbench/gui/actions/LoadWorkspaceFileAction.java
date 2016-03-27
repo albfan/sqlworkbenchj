@@ -30,30 +30,37 @@ import workbench.gui.MainWindow;
 import workbench.util.WbFile;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class LoadWorkspaceFileAction extends WbAction
+public class LoadWorkspaceFileAction
+  extends WbAction
 {
-	private MainWindow client;
-	private WbFile workspace;
+  private MainWindow client;
+  private WbFile workspace;
 
-	public LoadWorkspaceFileAction(MainWindow aClient, WbFile file)
-	{
-		super();
-		client = aClient;
-		workspace = file;
-		this.setMenuText(workspace.getFileName());
-		this.setTooltip(workspace.getFullPath());
-		this.setIcon(null);
-	}
+  public LoadWorkspaceFileAction(MainWindow aClient, WbFile file)
+  {
+    super();
+    client = aClient;
+    workspace = file;
+    this.setMenuText(workspace.getFileName());
+    this.setTooltip(workspace.getFullPath());
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		boolean canLoad = client.saveWorkspace(true);
-		if (canLoad)
-		{
-			this.client.loadWorkspace(workspace.getFullPath(), true);
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    boolean canLoad = client.saveWorkspace(true);
+    if (canLoad)
+    {
+      this.client.loadWorkspace(workspace.getFullPath(), true);
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

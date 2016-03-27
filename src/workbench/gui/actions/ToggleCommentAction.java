@@ -37,30 +37,37 @@ import workbench.gui.sql.EditorPanel;
 
 /**
  * Action to toggle the "comment" for the currently selected text in the SQL editor.
- *
+ * <p>
  * This is done by adding or removing single line comments to each line.
  *
  * @see workbench.gui.editor.TextCommenter#toggleComment()
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ToggleCommentAction
-	extends WbAction
+  extends WbAction
 {
-	private EditorPanel client;
+  private EditorPanel client;
 
-	public ToggleCommentAction(EditorPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtToggleCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier() + InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public ToggleCommentAction(EditorPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtToggleCommentSelection", KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier() + InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		TextCommenter commenter = new TextCommenter(client);
-		commenter.toggleComment();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    TextCommenter commenter = new TextCommenter(client);
+    commenter.toggleComment();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
 }

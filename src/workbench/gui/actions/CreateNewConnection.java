@@ -24,8 +24,10 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.MainWindow;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.MainWindow;
 
 /**
  *
@@ -66,4 +68,9 @@ public class CreateNewConnection
 		}
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

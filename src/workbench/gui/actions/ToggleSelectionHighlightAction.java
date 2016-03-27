@@ -25,30 +25,32 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.gui.sql.EditorPanel;
 
 /**
  * Action to toggle the highlighting of the selected text for the current editor.
  *
  * @see Settings#getHighlightCurrentSelection()
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ToggleSelectionHighlightAction
-	extends CheckBoxAction
-	implements PropertyChangeListener
+  extends CheckBoxAction
+  implements PropertyChangeListener
 {
-	private final EditorPanel editor;
-	public ToggleSelectionHighlightAction(EditorPanel panel)
-	{
-		super("MnuTxtHiliteSel");
-		this.editor = panel;
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
+  private final EditorPanel editor;
+
+  public ToggleSelectionHighlightAction(EditorPanel panel)
+  {
+    super("MnuTxtHiliteSel");
+    this.editor = panel;
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+    Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_OCCURANCE_HIGHLIGHT);
     checkSwitchedOn();
-	}
+  }
 
   private void checkSwitchedOn()
   {
@@ -58,24 +60,29 @@ public class ToggleSelectionHighlightAction
     }
   }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		super.executeAction(e);
-		editor.setHighlightSelection(this.isSwitchedOn());
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    super.executeAction(e);
+    editor.setHighlightSelection(this.isSwitchedOn());
+  }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
     checkSwitchedOn();
-	}
+  }
 
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		Settings.getInstance().removePropertyChangeListener(this);
-	}
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    Settings.getInstance().removePropertyChangeListener(this);
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

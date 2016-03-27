@@ -47,33 +47,33 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class ViewLogfileAction
-	extends WbAction
+  extends WbAction
   implements WindowListener
 {
-	private static ViewLogfileAction instance = new ViewLogfileAction();
-	private LogFileViewer viewer = null;
+  private static ViewLogfileAction instance = new ViewLogfileAction();
+  private LogFileViewer viewer = null;
 
-	public static ViewLogfileAction getInstance()
-	{
-		return instance;
-	}
+  public static ViewLogfileAction getInstance()
+  {
+    return instance;
+  }
 
-	private ViewLogfileAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtViewLogfile");
+  private ViewLogfileAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtViewLogfile");
     String tip = ResourceMgr.getFormattedString("d_MnuTxtViewLogfile", Integer.toString(LogFileViewer.getMaxLines()));
     setTooltip(tip);
-		this.removeIcon();
-		WbFile logFile = LogMgr.getLogfile();
-		this.setEnabled(logFile != null);
-	}
+    this.removeIcon();
+    WbFile logFile = LogMgr.getLogfile();
+    this.setEnabled(logFile != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		WbFile logFile = LogMgr.getLogfile();
-		if (logFile == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    WbFile logFile = LogMgr.getLogfile();
+    if (logFile == null) return;
 
     String viewType = Settings.getInstance().getOpenLogFileTool();
 
@@ -137,34 +137,34 @@ public class ViewLogfileAction
 
   private void openInteralViewer(final WbFile logfile)
   {
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (viewer == null)
-				{
-					try
-					{
-						viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
+    EventQueue.invokeLater(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (viewer == null)
+        {
+          try
+          {
+            viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
             viewer.addWindowListener(ViewLogfileAction.this);
-						viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
-						viewer.setVisible(true);
-						viewer.showFile(logfile);
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("ViewLogFileAction.executeAction()", "Error displaying the log file", e);
-						WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
-					}
-				}
-				else
-				{
-					viewer.toFront();
-				}
-			}
-		});
-	}
+            viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
+            viewer.setVisible(true);
+            viewer.showFile(logfile);
+          }
+          catch (Exception e)
+          {
+            LogMgr.logError("ViewLogFileAction.executeAction()", "Error displaying the log file", e);
+            WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+          }
+        }
+        else
+        {
+          viewer.toFront();
+        }
+      }
+    });
+  }
 
   @Override
   public void windowOpened(WindowEvent e)
@@ -200,5 +200,11 @@ public class ViewLogfileAction
   @Override
   public void windowDeactivated(WindowEvent e)
   {
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
   }
 }

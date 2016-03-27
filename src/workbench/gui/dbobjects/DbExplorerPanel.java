@@ -981,7 +981,7 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public WbToolbar getToolbar()
+	public WbToolbar getToolbar(List<WbAction> globalActions)
 	{
 		return this.toolbar;
 	}
@@ -1008,11 +1008,6 @@ public class DbExplorerPanel
 
 	@Override
 	public void showResultPanel()
-	{
-	}
-
-	@Override
-	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
 

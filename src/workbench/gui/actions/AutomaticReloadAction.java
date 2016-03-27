@@ -84,4 +84,9 @@ public class AutomaticReloadAction
     }
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

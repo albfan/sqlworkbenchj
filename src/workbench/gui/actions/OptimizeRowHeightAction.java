@@ -33,63 +33,69 @@ import workbench.gui.components.WbTable;
 import workbench.util.WbThread;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class OptimizeRowHeightAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	protected WbTable client;
+  protected WbTable client;
 
-	public OptimizeRowHeightAction()
-	{
-		super();
-		initMenuDefinition("LblRowHeightOpt");
-		this.setEnabled(false);
-	}
+  public OptimizeRowHeightAction()
+  {
+    super();
+    initMenuDefinition("LblRowHeightOpt");
+    this.setEnabled(false);
+  }
 
-	public OptimizeRowHeightAction(WbTable table)
-	{
-		this();
-		setClient(table);
-	}
+  public OptimizeRowHeightAction(WbTable table)
+  {
+    this();
+    setClient(table);
+  }
 
-	public void setClient(WbTable table)
-	{
-		this.client = table;
-		checkEnabled();
-	}
+  public void setClient(WbTable table)
+  {
+    this.client = table;
+    checkEnabled();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (client == null) return;
-		Thread t = new WbThread("OptimizeRows Thread")
-		{
-			@Override
-			public void run()
-			{
-				client.optimizeRowHeight();
-			}
-		};
-		t.start();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client == null) return;
+    Thread t = new WbThread("OptimizeRows Thread")
+    {
+      @Override
+      public void run()
+      {
+        client.optimizeRowHeight();
+      }
+    };
+    t.start();
+  }
 
-	private void checkEnabled()
-	{
-		if (this.client != null)
-		{
-			this.setEnabled(client.getRowCount() > 0);
-		}
-		else
-		{
-			setEnabled(false);
-		}
-	}
+  private void checkEnabled()
+  {
+    if (this.client != null)
+    {
+      this.setEnabled(client.getRowCount() > 0);
+    }
+    else
+    {
+      setEnabled(false);
+    }
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent e)
-	{
-		checkEnabled();
-	}
+  @Override
+  public void tableChanged(TableModelEvent e)
+  {
+    checkEnabled();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -43,28 +43,28 @@ import workbench.gui.dbobjects.ObjectScripterUI;
  * @author Thomas Kellerer
  */
 public class ScriptDbObjectAction
-	extends WbAction
+  extends WbAction
   implements WbSelectionListener
 {
-	private DbObjectList source;
-	private final WbSelectionModel selection;
+  private DbObjectList source;
+  private final WbSelectionModel selection;
   private boolean showSinglePackageProcedure;
 
-	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list)
-	{
+  public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list)
+  {
     this(client, list, "MnuTxtCreateScript");
-	}
+  }
 
-	public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list, String labelKey)
-	{
-		super();
-		this.initMenuDefinition(labelKey);
-		this.source = client;
-		this.selection = list;
-		checkEnabled();
-		setIcon("script");
+  public ScriptDbObjectAction(DbObjectList client, WbSelectionModel list, String labelKey)
+  {
+    super();
+    this.initMenuDefinition(labelKey);
+    this.source = client;
+    this.selection = list;
+    checkEnabled();
+    setIcon("script");
     selection.addSelectionListener(this);
-	}
+  }
 
   @Override
   public void dispose()
@@ -83,26 +83,26 @@ public class ScriptDbObjectAction
     this.showSinglePackageProcedure = showPackageProcOnly;
   }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
-		List<? extends DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.isEmpty()) return;
+    List<? extends DbObject> objects = source.getSelectedObjects();
+    if (objects == null || objects.isEmpty()) return;
 
-		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
+    ObjectScripter s = new ObjectScripter(objects, source.getConnection());
     s.setShowPackageProcedureOnly(showSinglePackageProcedure);
     s.setIncludeForeignKeys(source.getConnection().getDbSettings().getGenerateTableFKSource());
     s.setIncludeGrants(DbExplorerSettings.getGenerateTableGrants());
-		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+    ObjectScripterUI scripterUI = new ObjectScripterUI(s);
     if (objects.size() == 1)
     {
       scripterUI.setScriptObjectName(objects.get(0).getObjectExpression(source.getConnection()));
     }
-		scripterUI.setDbConnection(source.getConnection());
-		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
-	}
+    scripterUI.setDbConnection(source.getConnection());
+    scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
+  }
 
   private void checkEnabled()
   {
@@ -129,5 +129,11 @@ public class ScriptDbObjectAction
   public void selectionChanged(WbSelectionModel source)
   {
     checkEnabled();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
   }
 }

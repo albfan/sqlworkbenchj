@@ -46,13 +46,12 @@ public interface MainPanel
 	extends ResultLogger
 {
 	List getMenuItems();
-	WbToolbar getToolbar();
+	WbToolbar getToolbar(List<WbAction> globalActions);
 	void showLogPanel();
 	void showResultPanel();
 	void setConnectionClient(Connectable client);
 	void setConnection(WbConnection aConnection);
 	WbConnection getConnection();
-	void addToToolbar(WbAction anAction, boolean withSeperator);
 	void setFont(Font aFont);
 	void disconnect();
 	String getTabTitle();

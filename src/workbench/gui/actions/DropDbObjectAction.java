@@ -254,4 +254,9 @@ public class DropDbObjectAction
 		}
   }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

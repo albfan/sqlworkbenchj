@@ -24,32 +24,35 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.sql.SqlHistory;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlHistory;
 
 /**
  * Action to remove all entries from the SQL history
+ *
  * @see workbench.gui.sql.SqlHistory
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class ClearStatementHistoryAction extends WbAction
+public class ClearStatementHistoryAction
+  extends WbAction
 {
-	private SqlHistory history;
+  private SqlHistory history;
 
-	public ClearStatementHistoryAction(SqlHistory aHistory)
-	{
-		super();
-		this.history = aHistory;
-		this.initMenuDefinition("MnuTxtClearSqlHistory");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(false);
-		this.setCreateToolbarSeparator(false);
-	}
+  public ClearStatementHistoryAction(SqlHistory aHistory)
+  {
+    super();
+    this.history = aHistory;
+    this.initMenuDefinition("MnuTxtClearSqlHistory");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setCreateMenuSeparator(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.history.clear();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.history.clear();
+  }
 }

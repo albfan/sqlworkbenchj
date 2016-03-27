@@ -62,4 +62,9 @@ public class EscAction
 		super.addToInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

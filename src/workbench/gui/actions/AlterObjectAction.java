@@ -188,4 +188,11 @@ public class AlterObjectAction
 			checkEnabled();
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
 }

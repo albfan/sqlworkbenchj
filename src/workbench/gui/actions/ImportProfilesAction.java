@@ -67,4 +67,9 @@ public class ImportProfilesAction
     dialog.setVisible(true);
   }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

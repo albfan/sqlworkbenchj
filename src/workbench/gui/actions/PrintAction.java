@@ -34,47 +34,53 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.components.WbTable;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class PrintAction
-		extends WbAction
-		implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable client;
+  private WbTable client;
 
-	public PrintAction(WbTable aClient)
-	{
-		super();
-		this.setClient(aClient);
-		this.initMenuDefinition("MnuTxtPrint");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setIcon("print");
-		this.setEnabled(false);
-	}
+  public PrintAction(WbTable aClient)
+  {
+    super();
+    this.setClient(aClient);
+    this.initMenuDefinition("MnuTxtPrint");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setIcon("print");
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		TablePrinter printer = new TablePrinter(this.client);
-		printer.startPrint();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    TablePrinter printer = new TablePrinter(this.client);
+    printer.startPrint();
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent tableModelEvent)
-	{
-		this.setEnabled(this.client.getRowCount() > 0);
-	}
+  @Override
+  public void tableChanged(TableModelEvent tableModelEvent)
+  {
+    this.setEnabled(this.client.getRowCount() > 0);
+  }
 
-	public void setClient(WbTable c)
-	{
-		if (this.client != null)
-		{
-			this.client.removeTableModelListener(this);
-		}
-		this.client = c;
-		if (this.client != null)
-		{
-			this.client.addTableModelListener(this);
-		}
-	}
+  public void setClient(WbTable c)
+  {
+    if (this.client != null)
+    {
+      this.client.removeTableModelListener(this);
+    }
+    this.client = c;
+    if (this.client != null)
+    {
+      this.client.addTableModelListener(this);
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

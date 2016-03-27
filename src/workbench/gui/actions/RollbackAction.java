@@ -33,28 +33,34 @@ import workbench.interfaces.Commitable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Send a rollback() to the client
- *	@author  Thomas Kellerer
+ * Send a rollback() to the client
+ *
+ * @author Thomas Kellerer
  */
 public class RollbackAction
-	extends WbAction
+  extends WbAction
 {
-	private Commitable client;
+  private Commitable client;
 
-	public RollbackAction(Commitable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon("Rollback");
-		this.setEnabled(false);
-	}
+  public RollbackAction(Commitable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setIcon("Rollback");
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.client != null) this.client.rollback();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.client != null) this.client.rollback();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

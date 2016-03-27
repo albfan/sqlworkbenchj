@@ -29,26 +29,26 @@ import workbench.interfaces.Interruptable;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class StopAction
-	extends WbAction
+  extends WbAction
 {
-	private Interruptable panel;
+  private Interruptable panel;
 
-	public StopAction(Interruptable aPanel)
-	{
-		super();
-		this.panel = aPanel;
-		this.initMenuDefinition("MnuTxtStopStmt");
-		this.setIcon("Stop");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(true);
-	}
+  public StopAction(Interruptable aPanel)
+  {
+    super();
+    this.panel = aPanel;
+    this.initMenuDefinition("MnuTxtStopStmt");
+    this.setIcon("Stop");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setCreateMenuSeparator(true);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.panel.cancelExecution();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.panel.cancelExecution();
+  }
 }

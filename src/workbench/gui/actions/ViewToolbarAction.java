@@ -37,4 +37,9 @@ public class ViewToolbarAction
 		super("MnuTxtShowToolbar", Settings.PROPERTY_SHOW_TOOLBAR);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

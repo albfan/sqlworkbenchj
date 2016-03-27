@@ -37,54 +37,54 @@ import workbench.storage.DataStore;
  * @author Thomas Kellerer
  */
 public class SqlPanelReloadAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public SqlPanelReloadAction(SqlPanel panel)
-	{
-		initMenuDefinition("TxtReloadResult");
-		setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		setIcon("refresh");
-		setClient(panel);
-	}
+  public SqlPanelReloadAction(SqlPanel panel)
+  {
+    initMenuDefinition("TxtReloadResult");
+    setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    setIcon("refresh");
+    setClient(panel);
+  }
 
-	public final void setClient(SqlPanel panel)
-	{
-		client = panel;
-		checkEnabled();
-	}
+  public final void setClient(SqlPanel panel)
+  {
+    client = panel;
+    checkEnabled();
+  }
 
-	public void checkEnabled()
-	{
-		boolean enable = false;
-		if (getSql() != null)
-		{
-			DwPanel dw =  client.getCurrentResult();
-			if (dw != null)
-			{
-				DataStore ds = dw.getDataStore();
-				enable = (ds != null ? ds.getOriginalConnection() != null : false);
-			}
-		}
-		setEnabled(enable);
-	}
+  public void checkEnabled()
+  {
+    boolean enable = false;
+    if (getSql() != null)
+    {
+      DwPanel dw = client.getCurrentResult();
+      if (dw != null)
+      {
+        DataStore ds = dw.getDataStore();
+        enable = (ds != null ? ds.getOriginalConnection() != null : false);
+      }
+    }
+    setEnabled(enable);
+  }
 
-	protected String getSql()
-	{
-		if (client == null) return null;
-		if (client.getCurrentResult() == null) return null;
-		DataStore ds = client.getCurrentResult().getDataStore();
-		if (ds == null) return null;
+  protected String getSql()
+  {
+    if (client == null) return null;
+    if (client.getCurrentResult() == null) return null;
+    DataStore ds = client.getCurrentResult().getDataStore();
+    if (ds == null) return null;
 
-		String sql = ds.getGeneratingSql();
-		return sql;
-	}
+    String sql = ds.getGeneratingSql();
+    return sql;
+  }
 
-	@Override
-	public void executeAction(ActionEvent evt)
-	{
-		client.reloadCurrent();
-	}
+  @Override
+  public void executeAction(ActionEvent evt)
+  {
+    client.reloadCurrent();
+  }
 
 }

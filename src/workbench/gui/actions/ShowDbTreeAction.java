@@ -27,25 +27,25 @@ import workbench.gui.MainWindow;
 import workbench.gui.dbobjects.objecttree.DbTreePanel;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ShowDbTreeAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWin;
+  private MainWindow mainWin;
 
-	public ShowDbTreeAction(MainWindow aWindow)
-	{
-		super();
-		mainWin = aWindow;
-		initMenuDefinition("MnuTxtNewDbTreeWindow");
+  public ShowDbTreeAction(MainWindow aWindow)
+  {
+    super();
+    mainWin = aWindow;
+    initMenuDefinition("MnuTxtNewDbTreeWindow");
     setIcon("dbtree");
     setEnabled(false);
-	}
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     if (mainWin.isDbTreeVisible())
     {
       DbTreePanel dbTree = mainWin.getDbTree();
@@ -55,5 +55,11 @@ public class ShowDbTreeAction
     {
       mainWin.showDbTree();
     }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
   }
 }

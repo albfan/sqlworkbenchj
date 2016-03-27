@@ -50,44 +50,44 @@ import workbench.storage.ResultInfoDisplayBuilder;
  * @author Thomas Kellerer
  */
 public class ResultSetInfoPanel
-	extends JPanel
+  extends JPanel
 {
-	private WbTable display;
+  private WbTable display;
 
-	public ResultSetInfoPanel(DwPanel data)
-	{
-		super(new BorderLayout());
-		JScrollPane scroll = new javax.swing.JScrollPane();
-		display = new WbTable(false, false, false);
-		display.setRendererSetup(new RendererSetup(false));
-		scroll.setViewportView(display);
+  public ResultSetInfoPanel(DwPanel data)
+  {
+    super(new BorderLayout());
+    JScrollPane scroll = new javax.swing.JScrollPane();
+    display = new WbTable(false, false, false);
+    display.setRendererSetup(new RendererSetup(false));
+    scroll.setViewportView(display);
 
-		add(scroll, BorderLayout.CENTER);
-		DataStore ds = data.getDataStore();
+    add(scroll, BorderLayout.CENTER);
+    DataStore ds = data.getDataStore();
 
-		if (ds != null)
-		{
-			ResultInfo info = ds.getResultInfo();
-			boolean showComments = GuiSettings.getRetrieveQueryComments();
-			WbConnection conn = ds.getOriginalConnection();
-			boolean showTablename = false;
-			if (conn != null)
-			{
-				showTablename = conn.getDbSettings().supportsResultMetaGetTable();
-			}
+    if (ds != null)
+    {
+      ResultInfo info = ds.getResultInfo();
+      boolean showComments = GuiSettings.getRetrieveQueryComments();
+      WbConnection conn = ds.getOriginalConnection();
+      boolean showTablename = false;
+      if (conn != null)
+      {
+        showTablename = conn.getDbSettings().supportsResultMetaGetTable();
+      }
 
-			DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, showComments, showTablename);
-			DataStoreTableModel model = new DataStoreTableModel(infoDs);
-			display.setAutoCreateColumnsFromModel(true);
-			display.setModel(model);
+      DataStore infoDs = ResultInfoDisplayBuilder.getDataStore(info, showComments, showTablename);
+      DataStoreTableModel model = new DataStoreTableModel(infoDs);
+      display.setAutoCreateColumnsFromModel(true);
+      display.setModel(model);
 
-			TableColumnModel colmod = display.getColumnModel();
-			int index = colmod.getColumnIndex("JDBC Type");
-			TableColumn col = colmod.getColumn(index);
-			col.setCellRenderer(new SqlTypeRenderer(true));
+      TableColumnModel colmod = display.getColumnModel();
+      int index = colmod.getColumnIndex("JDBC Type");
+      TableColumn col = colmod.getColumn(index);
+      col.setCellRenderer(new SqlTypeRenderer(true));
 
-			ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(display);
-			optimizer.optimizeAllColWidth(true);
-		}
-	}
+      ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(display);
+      optimizer.optimizeAllColWidth(true);
+    }
+  }
 }

@@ -28,28 +28,35 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.sql.SqlPanel;
+
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class SelectEditorAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public SelectEditorAction(SqlPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSelectEditor",KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public SelectEditorAction(SqlPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtSelectEditor", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.selectEditor();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.selectEditor();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

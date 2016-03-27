@@ -36,50 +36,56 @@ import workbench.resource.PlatformShortcuts;
 import workbench.gui.MainWindow;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ShowDbExplorerAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWin;
-	public ShowDbExplorerAction(MainWindow aWindow)
-	{
-		super();
-		mainWin = aWindow;
-		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("database");
-		setEnabled(false);
-	}
+  private MainWindow mainWin;
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		boolean useTab = DbExplorerSettings.getShowDbExplorerInMainWindow();
-		if (useTab)
-		{
-			int index = mainWin.findFirstExplorerTab();
-			if (index > -1)
-			{
-				mainWin.selectTab(index);
-			}
-			else
-			{
-				mainWin.newDbExplorerPanel(true);
-			}
-		}
-		else
-		{
-			List<ToolWindow> windows = mainWin.getExplorerWindows();
-			if (windows.size() > 0)
-			{
-				ToolWindow w = windows.get(0);
-				w.activate();
-			}
-			else
-			{
-				mainWin.newDbExplorerWindow();
-			}
-		}
-	}
+  public ShowDbExplorerAction(MainWindow aWindow)
+  {
+    super();
+    mainWin = aWindow;
+    this.initMenuDefinition("MnuTxtShowDbExplorer", KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon("database");
+    setEnabled(false);
+  }
 
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    boolean useTab = DbExplorerSettings.getShowDbExplorerInMainWindow();
+    if (useTab)
+    {
+      int index = mainWin.findFirstExplorerTab();
+      if (index > -1)
+      {
+        mainWin.selectTab(index);
+      }
+      else
+      {
+        mainWin.newDbExplorerPanel(true);
+      }
+    }
+    else
+    {
+      List<ToolWindow> windows = mainWin.getExplorerWindows();
+      if (windows.size() > 0)
+      {
+        ToolWindow w = windows.get(0);
+        w.activate();
+      }
+      else
+      {
+        mainWin.newDbExplorerWindow();
+      }
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -31,27 +31,28 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.SqlHistory;
 
 /**
- *	Display the previous statement from the SQL History
- *	@author  Thomas Kellerer
+ * Display the previous statement from the SQL History
+ *
+ * @author Thomas Kellerer
  */
 public class PrevStatementAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlHistory history;
-	public PrevStatementAction(SqlHistory aHistory)
-	{
-		super();
-		this.history = aHistory;
-		this.initMenuDefinition("MnuTxtPrevStatement", PlatformShortcuts.getDefaultPrevStatement());
-		this.setIcon("Back");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(false);
-		this.setCreateToolbarSeparator(false);
-	}
+  private SqlHistory history;
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.history.showPreviousStatement();
-	}
+  public PrevStatementAction(SqlHistory aHistory)
+  {
+    super();
+    this.history = aHistory;
+    this.initMenuDefinition("MnuTxtPrevStatement", PlatformShortcuts.getDefaultPrevStatement());
+    this.setIcon("Back");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setCreateMenuSeparator(false);
+  }
+
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.history.showPreviousStatement();
+  }
 }

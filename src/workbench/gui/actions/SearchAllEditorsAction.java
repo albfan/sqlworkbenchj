@@ -48,15 +48,16 @@ public class SearchAllEditorsAction
   {
     if (window == null) return;
 
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
-      {
-        GlobalSearch search = new GlobalSearch(window);
-        search.displaySearchDialog();
-      }
+      GlobalSearch search = new GlobalSearch(window);
+      search.displaySearchDialog();
     });
   }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

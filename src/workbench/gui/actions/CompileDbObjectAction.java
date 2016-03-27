@@ -45,6 +45,7 @@ import workbench.db.oracle.OracleObjectCompiler;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectCompilerUI;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -159,5 +160,11 @@ public class CompileDbObjectAction
   public void selectionChanged(WbSelectionModel source)
   {
 		EventQueue.invokeLater(this::checkState);
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
   }
 }

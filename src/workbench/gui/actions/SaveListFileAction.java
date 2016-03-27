@@ -30,36 +30,42 @@ import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class SaveListFileAction
-	extends WbAction
+  extends WbAction
 {
-	private FileActions client;
+  private FileActions client;
 
-	public SaveListFileAction(FileActions aClient)
-	{
-		this(aClient, "LblSaveProfiles");
-	}
+  public SaveListFileAction(FileActions aClient)
+  {
+    this(aClient, "LblSaveProfiles");
+  }
 
-	public SaveListFileAction(FileActions aClient, String labelKey)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuTextByKey(labelKey);
-		this.setIcon(IconMgr.IMG_SAVE);
-	}
+  public SaveListFileAction(FileActions aClient, String labelKey)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuTextByKey(labelKey);
+    this.setIcon(IconMgr.IMG_SAVE);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		try
-		{
-			this.client.saveItem();
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError(this, "Error saving profiles", ex);
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    try
+    {
+      this.client.saveItem();
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError(this, "Error saving profiles", ex);
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

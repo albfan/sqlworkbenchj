@@ -38,35 +38,28 @@ import workbench.util.EncodingUtil;
  * Save the content of the ResultSet as an external file.
  *
  * @see workbench.gui.dialogs.export.DataStoreExporter
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class SaveDataAsAction
-	extends WbAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public SaveDataAsAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSaveDataAs");
-		this.setIcon("save-as");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
-	}
+  public SaveDataAsAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtSaveDataAs");
+    this.setIcon("save-as");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		EncodingUtil.fetchEncodings();
-		final DataStoreExporter exporter = new DataStoreExporter(client.getDataStore(), client);
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				exporter.saveAs();
-			}
-		});
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    EncodingUtil.fetchEncodings();
+    final DataStoreExporter exporter = new DataStoreExporter(client.getDataStore(), client);
+    SwingUtilities.invokeLater(exporter::saveAs);
+  }
 }

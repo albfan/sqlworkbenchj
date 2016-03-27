@@ -27,11 +27,7 @@ import java.awt.event.ActionEvent;
 
 import workbench.resource.ResourceMgr;
 
-import workbench.db.ConnectionProfile;
-
 import workbench.gui.MainWindow;
-
-import workbench.util.StringUtil;
 
 /**
  * Action to (re)load the workspace assigned to the current connection profile
@@ -40,33 +36,38 @@ import workbench.util.StringUtil;
  * @see workbench.db.ConnectionProfile
  * @see workbench.util.WbWorkspace
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ReloadProfileWkspAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public ReloadProfileWkspAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtLoadProfileWksp", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
-		this.setIcon(null);
-	}
+  public ReloadProfileWkspAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtLoadProfileWksp", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (client.hasProfileWorkspace())
-		{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client.hasProfileWorkspace())
+    {
       boolean canSwitch = client.saveWorkspace();
-			if (canSwitch)
+      if (canSwitch)
       {
         client.loadCurrentProfileWorkspace();
       }
-		}
-	}
+    }
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

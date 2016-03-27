@@ -38,54 +38,60 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.components.WbTable;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class PrintPreviewAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable client;
+  private WbTable client;
 
-	public PrintPreviewAction(WbTable aClient)
-	{
-		super();
-		this.setClient(aClient);
-		this.initMenuDefinition("MnuTxtPrintPreview");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setEnabled(false);
-	}
+  public PrintPreviewAction(WbTable aClient)
+  {
+    super();
+    this.setClient(aClient);
+    this.initMenuDefinition("MnuTxtPrintPreview");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		Window w = SwingUtilities.getWindowAncestor(this.client);
-		JFrame parent = null;
-		if (w instanceof JFrame)
-		{
-			parent = (JFrame) w;
-		}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    Window w = SwingUtilities.getWindowAncestor(this.client);
+    JFrame parent = null;
+    if (w instanceof JFrame)
+    {
+      parent = (JFrame)w;
+    }
 
-		TablePrinter printer = new TablePrinter(this.client);
-		PrintPreview preview = new PrintPreview(parent, printer);
-		preview.setVisible(true);
-	}
+    TablePrinter printer = new TablePrinter(this.client);
+    PrintPreview preview = new PrintPreview(parent, printer);
+    preview.setVisible(true);
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent tableModelEvent)
-	{
-		this.setEnabled(this.client.getRowCount() > 0);
-	}
+  @Override
+  public void tableChanged(TableModelEvent tableModelEvent)
+  {
+    this.setEnabled(this.client.getRowCount() > 0);
+  }
 
-	public void setClient(WbTable c)
-	{
-		if (this.client != null)
-		{
-			this.client.removeTableModelListener(this);
-		}
-		this.client = c;
-		if (this.client != null)
-		{
-			this.client.addTableModelListener(this);
-		}
-	}
+  public void setClient(WbTable c)
+  {
+    if (this.client != null)
+    {
+      this.client.removeTableModelListener(this);
+    }
+    this.client = c;
+    if (this.client != null)
+    {
+      this.client.addTableModelListener(this);
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -34,27 +34,26 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Search and replace inside the result set
+ * Search and replace inside the result set
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ReplaceDataAction
-	extends WbAction
+  extends WbAction
 {
-	private Replaceable client;
+  private Replaceable client;
 
-	public ReplaceDataAction(Replaceable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setCreateToolbarSeparator(false);
-	}
+  public ReplaceDataAction(Replaceable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.replace();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.replace();
+  }
 }

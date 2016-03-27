@@ -33,26 +33,26 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class FindAction extends WbAction
+public class FindAction
+  extends WbAction
 {
-	private Searchable client;
+  private Searchable client;
 
-	public FindAction(Searchable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFind", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("find");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setCreateToolbarSeparator(true);
-		this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
-	}
+  public FindAction(Searchable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtFind", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon("find");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+    this.setDescriptiveName(ResourceMgr.getString("TxtEdPrefix") + " " + getMenuLabel());
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.find();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.find();
+  }
 }

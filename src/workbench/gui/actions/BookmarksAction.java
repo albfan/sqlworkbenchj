@@ -27,7 +27,8 @@ import workbench.gui.MainWindow;
 import workbench.gui.bookmarks.BookmarkSelector;
 
 /**
- * Action to display program version information
+ * Action to display the bookmarks window.
+ *
  * @see workbench.gui.dialogs.WbAboutDialog
  * @author Thomas Kellerer
  */

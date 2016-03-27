@@ -53,4 +53,9 @@ public class HighlightErrorLineAction
 		this.setSwitchedOn(Settings.getInstance().getBoolProperty(GuiSettings.PROPERTY_HILITE_ERROR_LINE, false));
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

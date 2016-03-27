@@ -26,13 +26,17 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.util.List;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.DbObjectChanger;
 import workbench.db.TableIdentifier;
+
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.RunScriptPanel;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -76,16 +80,14 @@ public class CreatePKAction
 
 		if (panel.wasRun() && columns != null)
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					columns.reload();
-				}
-			});
+			EventQueue.invokeLater(columns::reload);
 		}
 
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

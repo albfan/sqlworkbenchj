@@ -74,4 +74,9 @@ public class CopyAsSqlDeleteAction extends WbAction
 		copier.copyAsSqlDelete(false, selectColumns);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

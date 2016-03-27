@@ -27,8 +27,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.sql.EditorPanel;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.EditorPanel;
 
 /**
  * Reload the currently loaded file in the SQL Editor
@@ -53,4 +55,10 @@ public class FileReloadAction
 	{
 		this.client.reloadFile();
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

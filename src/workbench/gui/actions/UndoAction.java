@@ -33,24 +33,31 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class UndoAction extends WbAction
+public class UndoAction
+  extends WbAction
 {
-	private Undoable client;
+  private Undoable client;
 
-	public UndoAction(Undoable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtUndo",KeyStroke.getKeyStroke(KeyEvent.VK_Z, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Undo");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public UndoAction(Undoable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtUndo", KeyStroke.getKeyStroke(KeyEvent.VK_Z, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon("Undo");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.undo();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.undo();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

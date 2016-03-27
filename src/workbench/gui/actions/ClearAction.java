@@ -50,4 +50,10 @@ public class ClearAction
 	{
 		this.client.clear();
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

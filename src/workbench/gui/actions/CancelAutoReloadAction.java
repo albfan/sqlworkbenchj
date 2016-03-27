@@ -68,4 +68,9 @@ public class CancelAutoReloadAction
     client.checkAutoRefreshIndicator(dw);
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

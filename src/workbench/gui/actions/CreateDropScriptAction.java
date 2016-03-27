@@ -130,4 +130,9 @@ public class CreateDropScriptAction
     }
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

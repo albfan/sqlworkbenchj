@@ -28,13 +28,13 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
 
 /**
  *	@author  Thomas Kellerer
@@ -56,7 +56,6 @@ public class ManageMacroAction
 	@Override
 	public void actionPerformed(final ActionEvent e)
 	{
-    LogMgr.logTrace("ManageMacroAction.actionPerformed()", "ationPerformed() called");
 		showDialog();
 	}
 
@@ -65,15 +64,19 @@ public class ManageMacroAction
     try
     {
       SqlPanel sql = this.client.getCurrentSqlPanel();
-      LogMgr.logDebug("ManageMacroAction.executeAction()", "Creating macro manager dialog for MainWindow: " + client.getTitle() + ", current panel: " + sql == null ? "<null>" : sql.getRealTabTitle());
       MacroManagerDialog d = new MacroManagerDialog(client, sql, client.getMacroClientId());
-      LogMgr.logTrace("ManageMacroAction.executeAction()", "Opening macro manager dialog...");
       d.setVisible(true);
     }
     catch (Throwable th)
     {
       LogMgr.logError("ManageMacroAction.executeAction()", "Could not open MacroManagerDialog", th);
     }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
   }
 
 }

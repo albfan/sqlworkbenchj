@@ -44,51 +44,51 @@ import workbench.gui.sql.EditorPanel;
 import workbench.util.CollectionUtil;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class SpoolDataAction
-	extends WbAction
-	implements TextSelectionListener
+  extends WbAction
+  implements TextSelectionListener
 {
-	private EditorPanel editor;
-	private boolean canExport = false;
+  private EditorPanel editor;
+  private boolean canExport = false;
   private DbObjectList objects;
   private Exporter dataExporter;
 
   public SpoolDataAction(DbObjectList list)
-	{
-		this(list, "MnuTxtSpoolData");
-	}
+  {
+    this(list, "MnuTxtSpoolData");
+  }
 
-	public SpoolDataAction(DbObjectList list, String msgKey)
-	{
-		super();
-		this.objects = list;
-		this.initMenuDefinition(msgKey);
-		this.setIcon("spool-data");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  public SpoolDataAction(DbObjectList list, String msgKey)
+  {
+    super();
+    this.objects = list;
+    this.initMenuDefinition(msgKey);
+    this.setIcon("spool-data");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
     setEnabled(DbObjectList.Util.getSelectedTableObjects(list).size() > 0);
-	}
+  }
 
-	public SpoolDataAction(Exporter exporter, String msgKey)
-	{
-		super();
-		dataExporter = exporter;
-		this.initMenuDefinition(msgKey);
-		this.setIcon("spool-data");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		setEnabled(false);
-	}
+  public SpoolDataAction(Exporter exporter, String msgKey)
+  {
+    super();
+    dataExporter = exporter;
+    this.initMenuDefinition(msgKey);
+    this.setIcon("spool-data");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    setEnabled(false);
+  }
 
-	public void canExport(boolean flag)
-	{
-		this.canExport = flag;
-		checkEnabled();
-	}
+  public void canExport(boolean flag)
+  {
+    this.canExport = flag;
+    checkEnabled();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     if (objects != null)
     {
       exportData();
@@ -97,29 +97,29 @@ public class SpoolDataAction
     {
       dataExporter.exportData();
     }
-	}
+  }
 
   private void exportData()
   {
- 		if (!WbSwingUtilities.isConnectionIdle(objects.getComponent(), objects.getConnection())) return;
+    if (!WbSwingUtilities.isConnectionIdle(objects.getComponent(), objects.getConnection())) return;
 
     List<? extends DbObject> tables = objects.getSelectedObjects();
     if (CollectionUtil.isEmpty(tables)) return;
 
-		final TableExporter exporter = new TableExporter(objects.getConnection());
-		final Frame f = (Frame)SwingUtilities.getWindowAncestor(objects.getComponent());
+    final TableExporter exporter = new TableExporter(objects.getConnection());
+    final Frame f = (Frame)SwingUtilities.getWindowAncestor(objects.getComponent());
 
-		if (exporter.selectTables(tables, f))
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					exporter.startExport(f);
-				}
-			});
-		}
+    if (exporter.selectTables(tables, f))
+    {
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          exporter.startExport(f);
+        }
+      });
+    }
   }
 
   @Override
@@ -132,29 +132,34 @@ public class SpoolDataAction
     }
   }
 
-	public void setEditor(EditorPanel ed)
-	{
-		this.editor = ed;
-		this.editor.addSelectionListener(this);
-		checkEnabled();
-	}
+  public void setEditor(EditorPanel ed)
+  {
+    this.editor = ed;
+    this.editor.addSelectionListener(this);
+    checkEnabled();
+  }
 
-	private void checkEnabled()
-	{
-		if (this.editor != null)
-		{
-			this.setEnabled(canExport && editor.isTextSelected());
-		}
-		else
-		{
-			this.setEnabled(false);
-		}
-	}
+  private void checkEnabled()
+  {
+    if (this.editor != null)
+    {
+      this.setEnabled(canExport && editor.isTextSelected());
+    }
+    else
+    {
+      this.setEnabled(false);
+    }
+  }
 
-	@Override
-	public void selectionChanged(int newStart, int newEnd)
-	{
-		checkEnabled();
-	}
+  @Override
+  public void selectionChanged(int newStart, int newEnd)
+  {
+    checkEnabled();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

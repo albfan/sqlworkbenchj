@@ -50,4 +50,10 @@ public class ExpandTreeAction
 	{
 		this.client.expandAll();
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

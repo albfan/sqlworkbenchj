@@ -31,28 +31,34 @@ import workbench.gui.sql.SqlPanel;
 
 /**
  * Select the messages panel of the SqlPanel
+ *
  * @author Thomas Kellerer
  */
 public class ViewMessageLogAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel panel;
+  private SqlPanel panel;
 
-	/**
-	 * Creates a new instance of ViewMessageLogAction
-	 */
-	public ViewMessageLogAction(SqlPanel p)
-	{
-		super();
-		this.panel = p;
-		this.initMenuDefinition("MnuTxtSelectMsgLog");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-	}
+  /**
+   * Creates a new instance of ViewMessageLogAction
+   */
+  public ViewMessageLogAction(SqlPanel p)
+  {
+    super();
+    this.panel = p;
+    this.initMenuDefinition("MnuTxtSelectMsgLog");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		panel.showLogPanel();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    panel.showLogPanel();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

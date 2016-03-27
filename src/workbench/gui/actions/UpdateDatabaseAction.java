@@ -47,7 +47,6 @@ public class UpdateDatabaseAction
     this.initMenuDefinition("MnuTxtUpdateDatabase");
     this.setIcon(IconMgr.IMG_SAVE);
     this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-    this.setCreateToolbarSeparator(true);
     this.setEnabled(false);
   }
 

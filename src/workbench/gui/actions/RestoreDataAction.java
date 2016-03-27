@@ -24,6 +24,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+
 import workbench.interfaces.NullableEditor;
 
 /**
@@ -60,4 +61,9 @@ public class RestoreDataAction
 		return true;
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -23,14 +23,14 @@
  */
 package workbench.gui.actions;
 
-import java.io.File;
-
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
-import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -80,5 +80,11 @@ public class OpenFileDirAction
 			}
 		}
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 
 }

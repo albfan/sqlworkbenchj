@@ -31,26 +31,28 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.SqlHistory;
 
 /**
- *	Display the next statement from the SQL History.
- *	@author  Thomas Kellerer
+ * Display the next statement from the SQL History.
+ *
+ * @author Thomas Kellerer
  */
-public class NextStatementAction extends WbAction
+public class NextStatementAction
+  extends WbAction
 {
-	private SqlHistory history;
-	public NextStatementAction(SqlHistory aHistory)
-	{
-		super();
-		this.history = aHistory;
-		this.initMenuDefinition("MnuTxtNextStatement", PlatformShortcuts.getDefaultNextStatement());
-		this.setIcon("Forward");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setCreateMenuSeparator(false);
-		this.setCreateToolbarSeparator(false);
- 	}
+  private SqlHistory history;
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.history.showNextStatement();
-	}
+  public NextStatementAction(SqlHistory aHistory)
+  {
+    super();
+    this.history = aHistory;
+    this.initMenuDefinition("MnuTxtNextStatement", PlatformShortcuts.getDefaultNextStatement());
+    this.setIcon("Forward");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setCreateMenuSeparator(false);
+  }
+
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.history.showNextStatement();
+  }
 }

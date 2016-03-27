@@ -51,4 +51,9 @@ public class HighlightCurrentStatement
 		this.setSwitchedOn(Settings.getInstance().getBoolProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, false));
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

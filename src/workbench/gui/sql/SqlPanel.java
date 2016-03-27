@@ -178,7 +178,6 @@ import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.bookmarks.BookmarkAnnotation;
 import workbench.gui.bookmarks.NamedScriptLocation;
-import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DbUnitHelper;
 import workbench.gui.components.EtchedBorderTop;
@@ -190,7 +189,6 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.dbobjects.objecttree.DbTreeSettings;
 import workbench.gui.dbobjects.objecttree.FindObjectAction;
 import workbench.gui.dbobjects.objecttree.ObjectFinder;
@@ -204,6 +202,8 @@ import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
+import workbench.gui.toolbar.MainToolbar;
+import workbench.gui.toolbar.ToolbarBuilder;
 
 import workbench.storage.DataStore;
 
@@ -262,9 +262,7 @@ public class SqlPanel
 	protected boolean threadBusy;
 	protected volatile boolean cancelExecution;
 
-	private final List actions = new LinkedList();
-	private final List<WbAction> toolbarActions = new LinkedList<>();
-
+	private final List actions = new ArrayList(50);
 	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
 
 	protected StopAction stopAction;
@@ -333,9 +331,7 @@ public class SqlPanel
 
   protected FindObjectAction findInDbTree;
 
-	protected WbToolbar toolbar;
-	protected ConnectionInfo connectionInfo;
-
+	protected MainToolbar toolbar;
 	protected WbConnection dbConnection;
 
 	protected boolean importRunning;
@@ -425,7 +421,6 @@ public class SqlPanel
 
 		this.initActions();
 		this.setupActionMap();
-		this.initToolbar();
 
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
@@ -591,48 +586,29 @@ public class SqlPanel
 	}
 
 	@Override
-	public WbToolbar getToolbar()
+	public WbToolbar getToolbar(List<WbAction> globalActions)
 	{
+    if (this.toolbar == null)
+    {
+      ToolbarBuilder builder = new ToolbarBuilder(globalActions);
+      toolbar = builder.createToolbar(getAllActions());
+    }
 		return this.toolbar;
 	}
 
-	private void initToolbar()
-	{
-		if (!SwingUtilities.isEventDispatchThread())
-		{
-
-			Exception e = new Exception("initToolbar() not called on EDT");
-			e.printStackTrace();
-		}
-
-		toolbar = new WbToolbar();
-		toolbar.addDefaultBorder();
-
-		for (WbAction action : toolbarActions)
-		{
-			boolean toolbarSep = action.getCreateToolbarSeparator();
-			if (toolbarSep)
-			{
-				toolbar.addSeparator();
-			}
-			action.addToToolbar(toolbar);
-		}
-		toolbar.addSeparator();
-		connectionInfo = new ConnectionInfo(toolbar.getBackground());
-		toolbar.add(connectionInfo);
-	}
-
-	@Override
-	public void addToToolbar(WbAction anAction, boolean withSeperator)
-	{
-		if (!SwingUtilities.isEventDispatchThread())
-		{
-			Exception e = new Exception("addToToolbar() not called on EDT");
-			e.printStackTrace();
-		}
-		this.toolbar.add(anAction.getToolbarButton(true), this.toolbar.getComponentCount() - 1);
-		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
-	}
+  public List<WbAction> getAllActions()
+  {
+    List<WbAction> result = new ArrayList<>(actions.size());
+    for (Object obj : actions)
+    {
+      // the list of actions also contains menus
+      if (obj instanceof WbAction )
+      {
+        result.add((WbAction)obj);
+      }
+    }
+    return result;
+  }
 
 	public boolean readFile(String aFilename, String encoding)
 	{
@@ -959,45 +935,16 @@ public class SqlPanel
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
 
-		this.toolbarActions.add(this.executeSelected);
-		this.toolbarActions.add(this.executeCurrent);
-
-		this.stopAction.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(this.stopAction);
-		this.toolbarActions.add(this.sqlHistory.getShowFirstStatementAction());
-		this.toolbarActions.add(this.sqlHistory.getShowPreviousStatementAction());
-		this.toolbarActions.add(this.sqlHistory.getShowNextStatementAction());
-		this.toolbarActions.add(this.sqlHistory.getShowLastStatementAction());
-
-		this.toolbarActions.add(this.updateAction);
-		this.toolbarActions.add(this.insertRow);
-		this.toolbarActions.add(this.duplicateRow);
-		this.toolbarActions.add(this.deleteRow);
-
 		this.filterAction = new FilterDataAction(null);
 		this.selectionFilterAction = new SelectionFilterAction();
 		this.filterPicker = new FilterPickerAction(null);
 
-		filterAction.setCreateToolbarSeparator(true);
 		filterAction.setCreateMenuSeparator(true);
-		this.selectionFilterAction.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(selectionFilterAction);
-		this.toolbarActions.add(filterAction);
-		this.toolbarActions.add(filterPicker);
 		this.resetFilterAction = new ResetFilterAction(null);
-		this.resetFilterAction.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(this.resetFilterAction);
 
-		this.commitAction.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(this.commitAction);
-		this.toolbarActions.add(this.rollbackAction);
     ignoreErrors = new IgnoreErrorsAction();
-    ignoreErrors.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(ignoreErrors);
 		this.appendResultsAction = new AppendResultsAction(this);
 		this.appendResultsAction.setEnabled(false);
-		appendResultsAction.setCreateToolbarSeparator(true);
-		this.toolbarActions.add(appendResultsAction);
 		this.findDataAction = new FindDataAction(null);
 		this.findDataAction.setMenuTextByKey("MnuTxtFindData");
 		this.findDataAction.setEnabled(false);
@@ -1734,7 +1681,7 @@ public class SqlPanel
 				{
 					try
 					{
-						connectionInfo.setConnection(dbConnection);
+						toolbar.getConnectionInfo().setConnection(dbConnection);
 
 						// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
 						// the second check for isBusy() is to prevent the situation where the user manages
@@ -1755,7 +1702,7 @@ public class SqlPanel
 		}
 		else
 		{
-			connectionInfo.setConnection(null);
+			toolbar.getConnectionInfo().setConnection(null);
 		}
 	}
 
@@ -4055,7 +4002,6 @@ public class SqlPanel
 		throws SQLException
 	{
 		if (result == null) return 0;
-//		if (!result.isSuccess()) return 0;
 		final String sql = result.getSourceCommand();
 		final long time = result.getExecutionDuration();
 
@@ -4364,18 +4310,6 @@ public class SqlPanel
 			this.actions.clear();
 		}
 
-		if (this.toolbarActions != null)
-		{
-			for (WbAction action : toolbarActions)
-			{
-				if (action != null)
-				{
-					action.dispose();
-				}
-			}
-			this.toolbarActions.clear();
-		}
-
 		if (this.filenameChangeListeners != null)
 		{
 			this.filenameChangeListeners.clear();
@@ -4388,7 +4322,6 @@ public class SqlPanel
 		}
 		this.forceAbort();
 		this.executionThread = null;
-		this.connectionInfo = null;
 		if (this.log != null)
 		{
 			log.dispose();

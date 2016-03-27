@@ -27,28 +27,36 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.sql.DwStatusBar;
+
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.sql.DwStatusBar;
+
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class SelectMaxRowsAction
-	extends WbAction
+  extends WbAction
 {
-	private DwStatusBar client;
+  private DwStatusBar client;
 
-	public SelectMaxRowsAction(DwStatusBar aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSelectMaxRows", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public SelectMaxRowsAction(DwStatusBar aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtSelectMaxRows", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		client.selectMaxRowsField();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    client.selectMaxRowsField();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

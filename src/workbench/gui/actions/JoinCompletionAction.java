@@ -52,115 +52,114 @@ import workbench.util.TableAlias;
  * @author Thomas Kellerer
  */
 public class JoinCompletionAction
-	extends WbAction
+  extends WbAction
 {
-	protected SqlPanel client;
+  protected SqlPanel client;
 
-	public JoinCompletionAction(SqlPanel panel)
-	{
-		super();
-		this.client = panel;
-		this.initMenuDefinition("MnuTxtAutoCompleteJoin", KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.ALT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		setEnabled(false);
-	}
+  public JoinCompletionAction(SqlPanel panel)
+  {
+    super();
+    this.client = panel;
+    this.initMenuDefinition("MnuTxtAutoCompleteJoin", KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.ALT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		WbConnection conn = client.getConnection();
-		if (conn == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    WbConnection conn = client.getConnection();
+    if (conn == null) return;
 
-		ScriptParser parser = ScriptParser.createScriptParser(client.getConnection());
+    ScriptParser parser = ScriptParser.createScriptParser(client.getConnection());
 
-		EditorPanel editor = client.getEditor();
-		parser.setScript(editor.getText());
-		int cursorPos = editor.getCaretPosition();
+    EditorPanel editor = client.getEditor();
+    parser.setScript(editor.getText());
+    int cursorPos = editor.getCaretPosition();
 
-		int index = parser.getCommandIndexAtCursorPos(cursorPos);
-		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
-		String sql = parser.getCommand(index, false);
+    int index = parser.getCommandIndexAtCursorPos(cursorPos);
+    int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
+    String sql = parser.getCommand(index, false);
 
-		if (sql == null)
-		{
-			LogMgr.logWarning("JoinCompletionAction.executeAction()", "No SQL found!");
-			return;
-		}
+    if (sql == null)
+    {
+      LogMgr.logWarning("JoinCompletionAction.executeAction()", "No SQL found!");
+      return;
+    }
 
-		String verb = conn.getParsingUtil().getSqlVerb(sql);
-		if (!"SELECT".equalsIgnoreCase(verb))
-		{
-			String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
-			setStatusMessage(msg, 2500);
-			return;
-		}
+    String verb = conn.getParsingUtil().getSqlVerb(sql);
+    if (!"SELECT".equalsIgnoreCase(verb))
+    {
+      String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
+      setStatusMessage(msg, 2500);
+      return;
+    }
 
-		try
-		{
-			setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"), 0);
-			JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
-			String condition = creator.getJoinCondition();
-			List<TableAlias> tables = creator.getPossibleJoinTables();
+    try
+    {
+      setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"), 0);
+      JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
+      String condition = creator.getJoinCondition();
+      List<TableAlias> tables = creator.getPossibleJoinTables();
 
-			if (StringUtil.isBlank(condition) && tables.size() == 1)
-			{
-				condition = creator.getJoinCondition(tables.get(0));
-			}
+      if (StringUtil.isBlank(condition) && tables.size() == 1)
+      {
+        condition = creator.getJoinCondition(tables.get(0));
+      }
 
-			if (StringUtil.isNonBlank(condition))
-			{
-				editor.insertText(condition + " ");
-				setStatusMessage("", 0);
-			}
-			else
-			{
-				if (tables.size() > 1)
-				{
-					setStatusMessage("", 0);
-					JoinCompletionPopup popup = new JoinCompletionPopup(editor, tables, creator);
-					popup.setStatusBar(client.getStatusBar());
-					popup.showPopup();
-				}
-				else
-				{
-					setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
-				}
-			}
-		}
-		catch (SQLException ex)
-		{
-			LogMgr.logWarning("JoinCompletionAction.executeAction()", "Error retrieving condition", ex);
-			setStatusMessage("", 0);
-		}
-	}
+      if (StringUtil.isNonBlank(condition))
+      {
+        editor.insertText(condition + " ");
+        setStatusMessage("", 0);
+      }
+      else if (tables.size() > 1)
+      {
+        setStatusMessage("", 0);
+        JoinCompletionPopup popup = new JoinCompletionPopup(editor, tables, creator);
+        popup.setStatusBar(client.getStatusBar());
+        popup.showPopup();
+      }
+      else
+      {
+        setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
+      }
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("JoinCompletionAction.executeAction()", "Error retrieving condition", ex);
+      setStatusMessage("", 0);
+    }
+  }
 
-	private void setStatusMessage(final String msg, final int duration)
-	{
-		final StatusBar statusbar = client.getStatusBar();
-		if (statusbar == null)
-		{
-			return;
-		}
+  private void setStatusMessage(final String msg, final int duration)
+  {
+    final StatusBar statusbar = client.getStatusBar();
+    if (statusbar == null)
+    {
+      return;
+    }
 
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (StringUtil.isEmptyString(msg))
-				{
-					statusbar.clearStatusMessage();
-				}
-				else if (duration > 0)
-				{
-					statusbar.setStatusMessage(msg, duration);
-				}
-				else
-				{
-					statusbar.setStatusMessage(msg);
-				}
-				statusbar.doRepaint();
-			}
-		});
-	}
+    WbSwingUtilities.invoke(() ->
+    {
+      if (StringUtil.isEmptyString(msg))
+      {
+        statusbar.clearStatusMessage();
+      }
+      else if (duration > 0)
+      {
+        statusbar.setStatusMessage(msg, duration);
+      }
+      else
+      {
+        statusbar.setStatusMessage(msg);
+      }
+      statusbar.doRepaint();
+    });
+  }
+  
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

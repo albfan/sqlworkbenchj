@@ -36,32 +36,32 @@ import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroPopup;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ShowMacroPopupAction
-	extends WbAction
-	implements WindowFocusListener, WindowListener
+  extends WbAction
+  implements WindowFocusListener, WindowListener
 {
-	private MainWindow client;
-	private MacroPopup macroWindow;
+  private MainWindow client;
+  private MacroPopup macroWindow;
 
-	public ShowMacroPopupAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtMacroPopup");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon(null);
-		setEnabled(true);
-	}
+  public ShowMacroPopupAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtMacroPopup");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setIcon(null);
+    setEnabled(true);
+  }
 
-	public boolean isPopupVisible()
-	{
-		return (macroWindow != null && macroWindow.isVisible());
-	}
+  public boolean isPopupVisible()
+  {
+    return (macroWindow != null && macroWindow.isVisible());
+  }
 
-	public void showPopup()
-	{
+  public void showPopup()
+  {
     try
     {
       createPopup();
@@ -71,118 +71,124 @@ public class ShowMacroPopupAction
     {
       LogMgr.logError("ShowMacroPopupAction.showPopup()", "Could not display macro popup", th);
     }
-	}
+  }
 
-	public void saveWorkspaceSettings()
-	{
-		if (this.macroWindow != null)
-		{
-			macroWindow.saveWorkspaceSettings();
-		}
-	}
+  public void saveWorkspaceSettings()
+  {
+    if (this.macroWindow != null)
+    {
+      macroWindow.saveWorkspaceSettings();
+    }
+  }
 
-	public void workspaceChanged()
-	{
-		if (this.macroWindow != null)
-		{
-			macroWindow.workspaceChanged();
-		}
-	}
+  public void workspaceChanged()
+  {
+    if (this.macroWindow != null)
+    {
+      macroWindow.workspaceChanged();
+    }
+  }
 
-	private void createPopup()
-	{
-		if (this.macroWindow == null)
-		{
-			macroWindow = new MacroPopup(client);
+  private void createPopup()
+  {
+    if (this.macroWindow == null)
+    {
+      macroWindow = new MacroPopup(client);
       client.addWindowFocusListener(ShowMacroPopupAction.this);
       macroWindow.addWindowListener(ShowMacroPopupAction.this);
       LogMgr.logDebug("ShowMacroPopupAction.createPopup()", "MacroPopup created.");
-		}
-	}
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		showPopup();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    showPopup();
+  }
 
-	@Override
-	public void windowGainedFocus(WindowEvent e)
-	{
-		if (macroWindow != null && e.getWindow() == client && !macroWindow.isShowing() && !macroWindow.isClosing())
-		{
-			macroWindow.setVisible(true);
-			client.requestFocus();
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.requestEditorFocus();
-				}
-			});
-		}
-	}
+  @Override
+  public void windowGainedFocus(WindowEvent e)
+  {
+    if (macroWindow != null && e.getWindow() == client && !macroWindow.isShowing() && !macroWindow.isClosing())
+    {
+      macroWindow.setVisible(true);
+      client.requestFocus();
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          client.requestEditorFocus();
+        }
+      });
+    }
+  }
 
-	@Override
-	public void windowLostFocus(WindowEvent e)
-	{
-		if (macroWindow != null
-				&& e.getOppositeWindow() != macroWindow
-				&& (e.getOppositeWindow() == null || e.getOppositeWindow() != null && e.getOppositeWindow().getOwner() != client)
-				&& !macroWindow.isClosing())
-		{
-			macroWindow.setVisible(false);
-		}
-	}
+  @Override
+  public void windowLostFocus(WindowEvent e)
+  {
+    if (macroWindow != null &&
+       e.getOppositeWindow() != macroWindow &&
+       (e.getOppositeWindow() == null || e.getOppositeWindow() != null && e.getOppositeWindow().getOwner() != client) &&
+       !macroWindow.isClosing())
+    {
+      macroWindow.setVisible(false);
+    }
+  }
 
-	@Override
-	public void windowOpened(WindowEvent e)
-	{
+  @Override
+  public void windowOpened(WindowEvent e)
+  {
     LogMgr.logDebug("ShowMacroPopupAction.showPopup()", "MacroPopup displayed.");
-	}
+  }
 
-	@Override
-	public void windowClosing(WindowEvent e)
-	{
-		if (e.getWindow() == macroWindow)
-		{
-			client.removeWindowFocusListener(this);
-		}
-	}
+  @Override
+  public void windowClosing(WindowEvent e)
+  {
+    if (e.getWindow() == macroWindow)
+    {
+      client.removeWindowFocusListener(this);
+    }
+  }
 
-	@Override
-	public void windowClosed(WindowEvent e)
-	{
-		if (e.getWindow() == macroWindow)
-		{
-			macroWindow.removeWindowListener(this);
-			macroWindow = null;
-		}
-	}
+  @Override
+  public void windowClosed(WindowEvent e)
+  {
+    if (e.getWindow() == macroWindow)
+    {
+      macroWindow.removeWindowListener(this);
+      macroWindow = null;
+    }
+  }
 
-	@Override
-	public void windowIconified(WindowEvent e)
-	{
-	}
+  @Override
+  public void windowIconified(WindowEvent e)
+  {
+  }
 
-	@Override
-	public void windowDeiconified(WindowEvent e)
-	{
-	}
+  @Override
+  public void windowDeiconified(WindowEvent e)
+  {
+  }
 
-	@Override
-	public void windowActivated(WindowEvent e)
-	{
-	}
+  @Override
+  public void windowActivated(WindowEvent e)
+  {
+  }
 
-	@Override
-	public void windowDeactivated(WindowEvent e)
-	{
-		if (e.getWindow() == macroWindow && e.getOppositeWindow() != client
-				&& macroWindow.isShowing() && !macroWindow.isClosing())
-		{
-			macroWindow.setVisible(false);
-		}
-	}
+  @Override
+  public void windowDeactivated(WindowEvent e)
+  {
+    if (e.getWindow() == macroWindow && e.getOppositeWindow() != client &&
+       macroWindow.isShowing() && !macroWindow.isClosing())
+    {
+      macroWindow.setVisible(false);
+    }
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

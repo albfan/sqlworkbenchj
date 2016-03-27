@@ -28,28 +28,37 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.sql.SplitPaneExpander;
+
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.sql.SplitPaneExpander;
+
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class UndoExpandAction extends WbAction
+public class UndoExpandAction
+  extends WbAction
 {
-	private SplitPaneExpander client;
+  private SplitPaneExpander client;
 
-	public UndoExpandAction(SplitPaneExpander aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtUndoExpand", KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.setIcon(null);
-	}
+  public UndoExpandAction(SplitPaneExpander aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtUndoExpand", KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.undoExpand();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.undoExpand();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

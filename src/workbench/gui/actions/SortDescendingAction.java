@@ -26,25 +26,31 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class SortDescendingAction extends WbAction
+public class SortDescendingAction
+  extends WbAction
 {
-	private ActionListener client;
+  private ActionListener client;
 
-	public SortDescendingAction(ActionListener aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtSortDescending");
-	}
+  public SortDescendingAction(ActionListener aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuTextByKey("MnuTxtSortDescending");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		e.setSource(this);
-		this.client.actionPerformed(e);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    e.setSource(this);
+    this.client.actionPerformed(e);
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

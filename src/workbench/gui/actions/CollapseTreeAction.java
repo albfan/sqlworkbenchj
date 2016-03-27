@@ -50,4 +50,10 @@ public class CollapseTreeAction
 	{
 		this.client.collapseAll();
 	}
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

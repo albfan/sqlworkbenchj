@@ -46,8 +46,8 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.util.DurationFormatter;
 
+import workbench.util.DurationFormatter;
 import workbench.util.StringUtil;
 
 /**
@@ -55,80 +55,86 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ShowSourceQueryAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel panel;
+  private SqlPanel panel;
 
-	public ShowSourceQueryAction(SqlPanel handler)
-	{
-		panel = handler;
-		isConfigurable = false;
-		initMenuDefinition("MnuTxtShowQuery");
-	}
+  public ShowSourceQueryAction(SqlPanel handler)
+  {
+    panel = handler;
+    isConfigurable = false;
+    initMenuDefinition("MnuTxtShowQuery");
+  }
 
-	@Override
-	public boolean isEnabled()
-	{
-		return (panel != null && panel.getSourceQuery() != null);
-	}
+  @Override
+  public boolean isEnabled()
+  {
+    return (panel != null && panel.getSourceQuery() != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		showQuery();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    showQuery();
+  }
 
-	public void showQuery()
-	{
-		EditorPanel editor = EditorPanel.createSqlEditor();
-		WbTabbedPane tab = new WbTabbedPane();
+  public void showQuery()
+  {
+    EditorPanel editor = EditorPanel.createSqlEditor();
+    WbTabbedPane tab = new WbTabbedPane();
 
-		String sql = panel.getSourceQuery();
+    String sql = panel.getSourceQuery();
 
-		JPanel display = new JPanel(new BorderLayout(0,5));
+    JPanel display = new JPanel(new BorderLayout(0, 5));
 
-		editor.setText(sql);
-		editor.setCaretPosition(0);
-		editor.setEditable(false);
-		Window w = SwingUtilities.getWindowAncestor(panel);
-		Frame f = null;
-		if (w instanceof Frame)
-		{
-			f = (Frame)w;
-		}
-		else
-		{
-			f = WbManager.getInstance().getCurrentWindow();
-		}
+    editor.setText(sql);
+    editor.setCaretPosition(0);
+    editor.setEditable(false);
+    Window w = SwingUtilities.getWindowAncestor(panel);
+    Frame f = null;
+    if (w instanceof Frame)
+    {
+      f = (Frame)w;
+    }
+    else
+    {
+      f = WbManager.getInstance().getCurrentWindow();
+    }
 
-		String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
+    String loadedAt = StringUtil.formatIsoTimestamp(panel.getLoadedAt());
 
     DwPanel result = panel.getCurrentResult();
     DurationFormatter formatter = new DurationFormatter();
     long millis = result.getLastExecutionTime();
-		String duration = formatter.formatDuration(millis);
+    String duration = formatter.formatDuration(millis);
 
-		String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt) + " (" + duration + ")";
-		JLabel lbl = new JLabel(msg);
-		Border etched = new EtchedBorder(EtchedBorder.LOWERED);
-		lbl.setBorder(new CompoundBorder(etched, new EmptyBorder(3, 2, 2, 0)));
+    String msg = ResourceMgr.getFormattedString("TxtLastExec", loadedAt) + " (" + duration + ")";
+    JLabel lbl = new JLabel(msg);
+    Border etched = new EtchedBorder(EtchedBorder.LOWERED);
+    lbl.setBorder(new CompoundBorder(etched, new EmptyBorder(3, 2, 2, 0)));
 
-		display.add(editor, BorderLayout.CENTER);
-		display.add(lbl, BorderLayout.NORTH);
+    display.add(editor, BorderLayout.CENTER);
+    display.add(lbl, BorderLayout.NORTH);
 
-		ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(result);
+    ResultSetInfoPanel resultInfo = new ResultSetInfoPanel(result);
 
-		tab.addTab("SQL", display);
-		tab.addTab(ResourceMgr.getString("LblResultMeta"), resultInfo);
+    tab.addTab("SQL", display);
+    tab.addTab(ResourceMgr.getString("LblResultMeta"), resultInfo);
 
-		ValidatingDialog d = new ValidatingDialog(f, panel.getCurrentResultTitle(), tab, false);
-		if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))
-		{
-			d.setSize(500,350);
-		}
-		WbSwingUtilities.center(d, f);
-		WbSwingUtilities.repaintLater(editor);
-		d.setVisible(true);
-		Settings.getInstance().storeWindowSize(d,"workbench.resultquery.display");
-	}
+    ValidatingDialog d = new ValidatingDialog(f, panel.getCurrentResultTitle(), tab, false);
+    if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))
+    {
+      d.setSize(500, 350);
+    }
+    WbSwingUtilities.center(d, f);
+    WbSwingUtilities.repaintLater(editor);
+    d.setVisible(true);
+    Settings.getInstance().storeWindowSize(d, "workbench.resultquery.display");
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -35,26 +35,31 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.MainWindow;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class LoadWorkspaceAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public LoadWorkspaceAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
-		this.setIcon(null);
-	}
+  public LoadWorkspaceAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.loadWorkspace();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.loadWorkspace();
+  }
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }
