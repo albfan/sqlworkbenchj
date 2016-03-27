@@ -32,41 +32,43 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.sql.SqlPanel;
+
 /**
- * Discard the file currently loaded in the SQL Editor
+ * Discard the file currently loaded in the SQL Editor.
+ *
  * @author Thomas Kellerer
  */
 public class FileDiscardAction
-	extends WbAction
+  extends WbAction
 {
 
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public FileDiscardAction(SqlPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		String desc = ResourceMgr.getDescription("MnuTxtFileDiscard", true);
-		this.putValue(Action.SHORT_DESCRIPTION, desc);
-		this.initMenuDefinition(ResourceMgr.getString("MnuTxtFileDiscard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_F4, PlatformShortcuts.getDefaultModifier()));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setEnabled(aClient.hasFileLoaded());
-	}
+  public FileDiscardAction(SqlPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    String desc = ResourceMgr.getDescription("MnuTxtFileDiscard", true);
+    this.putValue(Action.SHORT_DESCRIPTION, desc);
+    this.initMenuDefinition(ResourceMgr.getString("MnuTxtFileDiscard"), desc, KeyStroke.getKeyStroke(KeyEvent.VK_F4, PlatformShortcuts.getDefaultModifier()));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setEnabled(aClient.hasFileLoaded());
+  }
 
-	@Override
-	public void addToInputMap(InputMap im, ActionMap am)
-	{
-		super.addToInputMap(im, am);
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F4, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK), this.getActionName());
-	}
+  @Override
+  public void addToInputMap(InputMap im, ActionMap am)
+  {
+    super.addToInputMap(im, am);
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F4, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK), this.getActionName());
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.closeFile(!isShiftPressed(e));
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.closeFile(!isShiftPressed(e));
+  }
 }

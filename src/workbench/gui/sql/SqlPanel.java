@@ -592,6 +592,7 @@ public class SqlPanel
     {
       ToolbarBuilder builder = new ToolbarBuilder(globalActions);
       toolbar = builder.createToolbar(getAllActions());
+      updateConnectionInfo();
     }
 		return this.toolbar;
 	}
@@ -601,12 +602,19 @@ public class SqlPanel
     List<WbAction> result = new ArrayList<>(actions.size());
     for (Object obj : actions)
     {
-      // the list of actions also contains menus
       if (obj instanceof WbAction )
       {
         result.add((WbAction)obj);
       }
+      else if (obj instanceof WbMenu)
+      {
+        WbMenu menu = (WbMenu)obj;
+        result.addAll(menu.getAllActions());
+      }
     }
+    result.add(ignoreErrors);
+    result.add(filterPicker);
+    result.add(appendResultsAction);
     return result;
   }
 
@@ -966,7 +974,7 @@ public class SqlPanel
 		this.actions.add(showTip);
 
 		this.clearCompletionCache = new ClearCompletionCacheAction();
-		this.actions.add(this.clearCompletionCache);
+		this.actions.add(clearCompletionCache);
 		this.actions.add(showObjectInfoAction);
 
 		this.formatSql = this.editor.getFormatSqlAction();
@@ -1671,40 +1679,43 @@ public class SqlPanel
 		if (this.dbConnection != null)
 		{
 			dbConnection.addChangeListener(this);
-
-			// ConnectionInfo.setConnection() might access the database (to retrieve the current schema, database and user)
-			// In order to not block the GUI this is done in a separate thread.
-			WbThread info = new WbThread("Update connection info " + this.getId() )
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						toolbar.getConnectionInfo().setConnection(dbConnection);
-
-						// avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
-						// the second check for isBusy() is to prevent the situation where the user manages
-						// to manually run a statement between the above setBusy(false) and this point)
-						if (doRollbackOnSetConnection())
-						{
-							LogMgr.logDebug("SqlPanel.setConnection()", "Sending a rollback to end the current transaction");
-							dbConnection.rollbackSilently();
-						}
-					}
-					finally
-					{
-						setConnActionsState(true);
-					}
-				}
-			};
-			info.start();
 		}
-		else
-		{
-			toolbar.getConnectionInfo().setConnection(null);
-		}
+    updateConnectionInfo();
 	}
+
+  private void updateConnectionInfo()
+  {
+    // ConnectionInfo.setConnection() might access the database (to retrieve the current schema, database and user)
+    // In order to not block the GUI this is done in a separate thread.
+    WbThread info = new WbThread("Update connection info " + this.getId())
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          if (toolbar != null)
+          {
+            toolbar.setConnection(dbConnection);
+          }
+
+          // avoid the <IDLE> in transaction for Postgres that is caused by retrieving the current schema.
+          // the second check for isBusy() is to prevent the situation where the user manages
+          // to manually run a statement between the above setBusy(false) and this point)
+          if (dbConnection != null && doRollbackOnSetConnection())
+          {
+            LogMgr.logDebug("SqlPanel.updateConnectionInfo()", "Sending a rollback to end the current transaction");
+            dbConnection.rollbackSilently();
+          }
+        }
+        finally
+        {
+          setConnActionsState(dbConnection != null);
+        }
+      }
+    };
+    info.start();
+  }
 
 	private boolean doRollbackOnSetConnection()
 	{

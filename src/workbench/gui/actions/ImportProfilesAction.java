@@ -34,30 +34,32 @@ import workbench.resource.Settings;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.profiles.ProfileImporterPanel;
 
-
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ImportProfilesAction
   extends WbAction
 {
-	public ImportProfilesAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtImportProfiles");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-	}
+  public ImportProfilesAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtImportProfiles");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     JFrame window = WbManager.getInstance().getCurrentWindow();
 
     ProfileImporterPanel panel = new ProfileImporterPanel();
 
     String title = ResourceMgr.getString("MnuTxtImportProfiles").replace("...", "");
 
-    ValidatingDialog dialog = new ValidatingDialog(window, title, panel, new String[] { ResourceMgr.getString("LblClose") }, false);
+    ValidatingDialog dialog = new ValidatingDialog(window, title, panel, new String[]
+    {
+      ResourceMgr.getString("LblClose")
+    }, false);
 
     if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.import.profiles"))
     {
@@ -72,4 +74,5 @@ public class ImportProfilesAction
   {
     return false;
   }
+
 }

@@ -37,27 +37,27 @@ import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ManageMacroAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public ManageMacroAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtManageMacros",KeyStroke.getKeyStroke(KeyEvent.VK_M, PlatformShortcuts.getDefaultModifier()));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon(null);
-	}
+  public ManageMacroAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtManageMacros", KeyStroke.getKeyStroke(KeyEvent.VK_M, PlatformShortcuts.getDefaultModifier()));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void actionPerformed(final ActionEvent e)
-	{
-		showDialog();
-	}
+  @Override
+  public void actionPerformed(final ActionEvent e)
+  {
+    showDialog();
+  }
 
   private void showDialog()
   {
@@ -71,12 +71,6 @@ public class ManageMacroAction
     {
       LogMgr.logError("ManageMacroAction.executeAction()", "Could not open MacroManagerDialog", th);
     }
-  }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
   }
 
 }

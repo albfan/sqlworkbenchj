@@ -20,6 +20,8 @@
  */
 package workbench.gui.toolbar;
 
+import workbench.db.WbConnection;
+
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.WbToolbar;
 
@@ -50,6 +52,12 @@ public class MainToolbar
   public ConnectionInfo getConnectionInfo()
   {
     return connectionInfo;
+  }
+
+  public void setConnection(WbConnection conn)
+  {
+    if (connectionInfo == null) return;
+    connectionInfo.setConnection(conn);
   }
 
 }

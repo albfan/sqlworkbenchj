@@ -25,29 +25,38 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SqlPanel;
 
 /**
  * Import a file into the current result set
- *	@author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
-public class ImportFileAction extends WbAction
+public class ImportFileAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public ImportFileAction(SqlPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtImportFile");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
-	}
+  public ImportFileAction(SqlPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtImportFile");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.importFile();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.importFile();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

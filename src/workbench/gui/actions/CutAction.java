@@ -35,32 +35,33 @@ import workbench.resource.ResourceMgr;
 import workbench.util.MacOSHelper;
 
 /**
- *	Action to cut  the contents of an entry field
+ * Action to cut the contents of an entry field
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class CutAction extends WbAction
+public class CutAction
+  extends WbAction
 {
-	private ClipboardSupport client;
+  private ClipboardSupport client;
 
-	public CutAction(ClipboardSupport aClient)
-	{
-		super();
-		this.client = aClient;
-		initMenuDefinition("MnuTxtCut", PlatformShortcuts.getDefaultCutShortcut());
-		if (!MacOSHelper.isMacOS())
-		{
-			setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK));
-		}
-		this.setIcon("cut");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public CutAction(ClipboardSupport aClient)
+  {
+    super();
+    this.client = aClient;
+    initMenuDefinition("MnuTxtCut", PlatformShortcuts.getDefaultCutShortcut());
+    if (!MacOSHelper.isMacOS())
+    {
+      setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK));
+    }
+    this.setIcon("cut");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.cut();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.cut();
+  }
 
   @Override
   public boolean useInToolbar()

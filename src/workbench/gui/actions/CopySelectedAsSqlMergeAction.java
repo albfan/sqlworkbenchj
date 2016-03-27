@@ -24,53 +24,56 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.db.exporter.ExportType;
-import workbench.gui.components.ClipBoardCopier;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.exporter.ExportType;
+
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the selected content of a table to the clipboard as SQL INSERT statements
+ *
  * @see workbench.gui.components.ClipBoardCopier
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CopySelectedAsSqlMergeAction
-	extends WbAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public CopySelectedAsSqlMergeAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopySelectedAsSqlMerge", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		this.setEnabled(false);
-	}
+  public CopySelectedAsSqlMergeAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtCopySelectedAsSqlMerge", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean hasShiftModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		boolean selectColumns = false;
-		if (invokedByMouse(e))
-		{
-			selectColumns = isCtrlPressed(e);
-		}
-		copier.copyAsSql(ExportType.SQL_MERGE, true, selectColumns);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    ClipBoardCopier copier = new ClipBoardCopier(this.client);
+    boolean selectColumns = false;
+    if (invokedByMouse(e))
+    {
+      selectColumns = isCtrlPressed(e);
+    }
+    copier.copyAsSql(ExportType.SQL_MERGE, true, selectColumns);
+  }
 
 }

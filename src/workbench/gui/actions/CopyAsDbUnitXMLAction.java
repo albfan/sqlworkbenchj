@@ -32,45 +32,47 @@ import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the contents of a table to the clipboard as DBUNIT XML statements
+ *
  * @see workbench.gui.components.ClipBoardCopier
- * @author  Brian Bonner
+ * @author Brian Bonner
  */
-public class CopyAsDbUnitXMLAction extends WbAction
+public class CopyAsDbUnitXMLAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public CopyAsDbUnitXMLAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopyAsDBUnitXML", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(true);
-	}
+  public CopyAsDbUnitXMLAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtCopyAsDBUnitXML", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(true);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean hasShiftModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		boolean selectColumns = false;
-		if (invokedByMouse(e))
-		{
-			selectColumns = isCtrlPressed(e) ;
-		}
-		copier.copyAsDbUnit(false, selectColumns);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    ClipBoardCopier copier = new ClipBoardCopier(this.client);
+    boolean selectColumns = false;
+    if (invokedByMouse(e))
+    {
+      selectColumns = isCtrlPressed(e);
+    }
+    copier.copyAsDbUnit(false, selectColumns);
+  }
 
   @Override
   public boolean useInToolbar()

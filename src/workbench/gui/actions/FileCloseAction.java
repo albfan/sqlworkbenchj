@@ -30,26 +30,30 @@ import workbench.WbManager;
 import workbench.gui.MainWindow;
 
 /**
- * Exit and close the application
- * @see workbench.WbManager#closeMainWindow(workbench.gui.MainWindow)
+ * Close the current main window.
  *
- * @author  Thomas Kellerer
+ * If the last window is closed, the application is terminated.
+ *
+ * @see WbManager#closeMainWindow(workbench.gui.MainWindow)
+ * @see FileExitAction
+ *
+ * @author Thomas Kellerer
  */
 public class FileCloseAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow window;
+  private MainWindow window;
 
-	public FileCloseAction(MainWindow toClose)
-	{
-		super();
-		window = toClose;
-		this.initMenuDefinition("MnuTxtFileCloseWin");
-	}
+  public FileCloseAction(MainWindow toClose)
+  {
+    super();
+    window = toClose;
+    this.initMenuDefinition("MnuTxtFileCloseWin");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		WbManager.getInstance().closeMainWindow(window);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    WbManager.getInstance().closeMainWindow(window);
+  }
 }

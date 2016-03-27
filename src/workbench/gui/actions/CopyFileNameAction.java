@@ -38,48 +38,48 @@ import workbench.util.WbFile;
  * @author Thomas Kellerer
  */
 public class CopyFileNameAction
-	extends WbAction
+  extends WbAction
 {
-	private TextFileContainer editor;
-	private boolean copyPathName;
+  private TextFileContainer editor;
+  private boolean copyPathName;
 
-	public CopyFileNameAction(TextFileContainer textContainer, boolean copyFullPath)
-	{
-		this.editor = textContainer;
-		copyPathName = copyFullPath;
-		if (copyPathName)
-		{
-			this.initMenuDefinition("MnuTxtCpyFilePath");
-		}
-		else
-		{
-			this.initMenuDefinition("MnuTxtCpyFileName");
-		}
-		this.setEnabled(this.editor.getCurrentFile() != null);
-	}
+  public CopyFileNameAction(TextFileContainer textContainer, boolean copyFullPath)
+  {
+    this.editor = textContainer;
+    copyPathName = copyFullPath;
+    if (copyPathName)
+    {
+      this.initMenuDefinition("MnuTxtCpyFilePath");
+    }
+    else
+    {
+      this.initMenuDefinition("MnuTxtCpyFileName");
+    }
+    this.setEnabled(this.editor.getCurrentFile() != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (editor == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (editor == null) return;
 
-		File file = editor.getCurrentFile();
-		if (file == null) return;
+    File file = editor.getCurrentFile();
+    if (file == null) return;
 
-		WbFile wfile = new WbFile(file);
+    WbFile wfile = new WbFile(file);
 
-		String toCopy = null;
-		if (copyPathName)
-		{
-			toCopy = wfile.getFullPath();
-		}
-		else
-		{
-			toCopy = wfile.getName();
-		}
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		clipboard.setContents(new StringSelection(toCopy),null);
-	}
+    String toCopy = null;
+    if (copyPathName)
+    {
+      toCopy = wfile.getFullPath();
+    }
+    else
+    {
+      toCopy = wfile.getName();
+    }
+    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    clipboard.setContents(new StringSelection(toCopy), null);
+  }
 
   @Override
   public boolean useInToolbar()

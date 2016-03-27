@@ -48,20 +48,21 @@ import static workbench.gui.actions.WbAction.*;
  * @author Thomas Kellerer
  */
 public class CreateDropScriptAction
-	extends WbAction
-	implements WbSelectionListener
+  extends WbAction
+  implements WbSelectionListener
 {
-	private DbObjectList source;
+  private DbObjectList source;
   private WbSelectionModel selection;
-	public CreateDropScriptAction(DbObjectList client, WbSelectionModel list)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtGenerateDrop");
-		this.source = client;
+
+  public CreateDropScriptAction(DbObjectList client, WbSelectionModel list)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtGenerateDrop");
+    this.source = client;
     selectionChanged(list);
     selection = list;
-		selection.addSelectionListener(this);
-	}
+    selection.addSelectionListener(this);
+  }
 
   @Override
   public void dispose()
@@ -73,62 +74,62 @@ public class CreateDropScriptAction
     }
   }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		List<? extends DbObject> objects = source.getSelectedObjects();
-		List<TableIdentifier> tables = new ArrayList<>(objects.size());
-		DbMetadata meta = source.getConnection().getMetadata();
-		Set<String> types = CollectionUtil.caseInsensitiveSet();
-		types.addAll(meta.getTableTypes());
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    List<? extends DbObject> objects = source.getSelectedObjects();
+    List<TableIdentifier> tables = new ArrayList<>(objects.size());
+    DbMetadata meta = source.getConnection().getMetadata();
+    Set<String> types = CollectionUtil.caseInsensitiveSet();
+    types.addAll(meta.getTableTypes());
 
-		for (DbObject dbo : objects)
-		{
-			if (types.contains(dbo.getObjectType()))
-			{
-				tables.add((TableIdentifier)dbo);
-			}
-		}
-		DropScriptGenerator generator = new DropScriptGenerator(source.getConnection());
-		if (isCtrlPressed(e))
-		{
-			generator.setIncludeRecreateStatements(false);
-		}
+    for (DbObject dbo : objects)
+    {
+      if (types.contains(dbo.getObjectType()))
+      {
+        tables.add((TableIdentifier)dbo);
+      }
+    }
+    DropScriptGenerator generator = new DropScriptGenerator(source.getConnection());
+    if (isCtrlPressed(e))
+    {
+      generator.setIncludeRecreateStatements(false);
+    }
 
-		if (isAltPressed(e))
-		{
-			generator.setIncludeDropTable(false);
-		}
+    if (isAltPressed(e))
+    {
+      generator.setIncludeDropTable(false);
+    }
 
-		generator.setTables(tables);
-		ObjectScripterUI ui = new ObjectScripterUI(generator);
-		ui.show(WbManager.getInstance().getCurrentWindow());
-	}
+    generator.setTables(tables);
+    ObjectScripterUI ui = new ObjectScripterUI(generator);
+    ui.show(WbManager.getInstance().getCurrentWindow());
+  }
 
-	@Override
-	public void selectionChanged(WbSelectionModel selection)
-	{
-		if (selection.hasSelection())
-		{
+  @Override
+  public void selectionChanged(WbSelectionModel selection)
+  {
+    if (selection.hasSelection())
+    {
       List<? extends DbObject> objects = source.getSelectedObjects();
-			DbMetadata meta = source.getConnection().getMetadata();
-			Set<String> types = CollectionUtil.caseInsensitiveSet();
-			types.addAll(meta.getTableTypes());
-			for (DbObject dbo : objects)
-			{
-				if (!types.contains(dbo.getObjectType()))
-				{
-					setEnabled(false);
-					return;
-				}
-				setEnabled(true);
-			}
-		}
+      DbMetadata meta = source.getConnection().getMetadata();
+      Set<String> types = CollectionUtil.caseInsensitiveSet();
+      types.addAll(meta.getTableTypes());
+      for (DbObject dbo : objects)
+      {
+        if (!types.contains(dbo.getObjectType()))
+        {
+          setEnabled(false);
+          return;
+        }
+        setEnabled(true);
+      }
+    }
     else
     {
       setEnabled(false);
     }
-	}
+  }
 
   @Override
   public boolean useInToolbar()

@@ -23,6 +23,7 @@ package workbench.gui.toolbar;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -34,7 +35,7 @@ import workbench.gui.actions.WbAction;
  */
 public class ToolbarBuilder
 {
-  private final String separator = "wb-toolbar-separator";
+  private final String separator = "wb-sep";
   private final String defaultActions =
     "wb-ExecuteSelAction,wb-ExecuteCurrentAction," +
     separator +
@@ -69,6 +70,7 @@ public class ToolbarBuilder
     toolbar = new MainToolbar();
     List<String> commands = Settings.getInstance().getListProperty("workbench.gui.toolbar.actions", false, defaultActions);
 
+    LogMgr.logDebug("ToolbarBuilder.createToolbar()", "Using toolbar list: " + commands);
     for (String cmd : commands)
     {
       if (cmd.equals(separator))
@@ -77,10 +79,22 @@ public class ToolbarBuilder
       }
       else
       {
-        WbAction action = findAction(panelActions, cmd);
+        WbAction action = getPanelAction(panelActions, cmd);
         if (action != null)
         {
           action.addToToolbar(toolbar);
+        }
+        else
+        {
+          action = getGlobalAction(cmd);
+          if (action != null)
+          {
+            toolbar.add(action.getToolbarButton(true));
+          }
+          else
+          {
+            LogMgr.logWarning("ToolbarBuilder.createToolbar()", "Action: " + cmd + " not found!");
+          }
         }
       }
     }
@@ -88,12 +102,17 @@ public class ToolbarBuilder
     toolbar.addConnectionInfo();
   }
 
-  private WbAction findAction(List<WbAction> actions, String actionCommand)
+  private WbAction getPanelAction(List<WbAction> actions, String actionCommand)
   {
     for (WbAction action : actions)
     {
       if (action.getActionCommand().equals(actionCommand)) return action;
     }
+    return null;
+  }
+
+  private WbAction getGlobalAction(String actionCommand)
+  {
     for (WbAction action : mainActions)
     {
       if (action.getActionCommand().equals(actionCommand)) return action;

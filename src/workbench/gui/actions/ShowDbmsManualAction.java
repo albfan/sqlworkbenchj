@@ -48,7 +48,7 @@ public class ShowDbmsManualAction
   {
     super();
     initMenuDefinition("MnuTxtDbmsHelp");
-    removeIcon();
+    setIcon("dbms-manual");
     setEnabled(false);
   }
 

@@ -55,41 +55,41 @@ import workbench.util.CollectionUtil;
  * @author Thomas Kellerer
  */
 public class DropDbObjectAction
-	extends WbAction
-	implements WbSelectionListener
+  extends WbAction
+  implements WbSelectionListener
 {
-	private DbObjectList source;
-	private ObjectDropper dropper;
+  private DbObjectList source;
+  private ObjectDropper dropper;
   private ObjectDropListener dropListener;
-	private Reloadable data;
-	private boolean available = true;
+  private Reloadable data;
+  private boolean available = true;
   private WbSelectionModel selection;
 
-	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
-	{
+  public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
+  {
     this("MnuTxtDropDbObject", client, WbSelectionModel.Factory.createFacade(list), r);
-	}
+  }
 
-	public DropDbObjectAction(DbObjectList client, WbSelectionModel list, Reloadable r)
-	{
-		this("MnuTxtDropDbObject", client, list, r);
-	}
+  public DropDbObjectAction(DbObjectList client, WbSelectionModel list, Reloadable r)
+  {
+    this("MnuTxtDropDbObject", client, list, r);
+  }
 
-	public DropDbObjectAction(DbObjectList client, WbSelectionModel list)
-	{
-		this("MnuTxtDropDbObject", client, list, null);
-	}
+  public DropDbObjectAction(DbObjectList client, WbSelectionModel list)
+  {
+    this("MnuTxtDropDbObject", client, list, null);
+  }
 
-	public DropDbObjectAction(String labelKey, DbObjectList client, WbSelectionModel list, Reloadable r)
-	{
-		super();
-		this.initMenuDefinition(labelKey);
-		this.source = client;
-		this.data = r;
+  public DropDbObjectAction(String labelKey, DbObjectList client, WbSelectionModel list, Reloadable r)
+  {
+    super();
+    this.initMenuDefinition(labelKey);
+    this.source = client;
+    this.data = r;
     selection = list;
-		selectionChanged(list);
-		selection.addSelectionListener(this);
-	}
+    selectionChanged(list);
+    selection.addSelectionListener(this);
+  }
 
   @Override
   public void dispose()
@@ -106,22 +106,22 @@ public class DropDbObjectAction
     dropListener = listener;
   }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		dropObjects();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    dropObjects();
+  }
 
-	public void setAvailable(boolean flag)
-	{
-		this.available = flag;
-		if (!available) this.setEnabled(false);
-	}
+  public void setAvailable(boolean flag)
+  {
+    this.available = flag;
+    if (!available) this.setEnabled(false);
+  }
 
-	public void setDropper(ObjectDropper dropperToUse)
-	{
-		this.dropper = dropperToUse;
-	}
+  public void setDropper(ObjectDropper dropperToUse)
+  {
+    this.dropper = dropperToUse;
+  }
 
   private boolean needAutoCommit(List<DbObject> objects)
   {
@@ -136,12 +136,12 @@ public class DropDbObjectAction
     return false;
   }
 
-	private void dropObjects()
-	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
+  private void dropObjects()
+  {
+    if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
-		final List<DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.isEmpty()) return;
+    final List<DbObject> objects = source.getSelectedObjects();
+    if (objects == null || objects.isEmpty()) return;
 
     boolean autoCommitChanged = false;
     boolean autoCommit = source.getConnection().getAutoCommit();
@@ -193,14 +193,14 @@ public class DropDbObjectAction
       }
     }
 
-		if (dropperUI.success() && !dropperUI.dialogWasCancelled())
-		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (data != null)
+    if (dropperUI.success() && !dropperUI.dialogWasCancelled())
+    {
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          if (data != null)
           {
             data.reload();
           }
@@ -208,22 +208,22 @@ public class DropDbObjectAction
           {
             dropListener.objectsDropped(objects);
           }
-				}
-			});
-		}
-	}
+        }
+      });
+    }
+  }
 
   @Override
-    public void selectionChanged(WbSelectionModel list)
+  public void selectionChanged(WbSelectionModel list)
   {
-		WbConnection conn = this.source.getConnection();
+    WbConnection conn = this.source.getConnection();
 
-		if (conn == null || conn.isSessionReadOnly())
-		{
-			setEnabled(false);
-		}
-		else
-		{
+    if (conn == null || conn.isSessionReadOnly())
+    {
+      setEnabled(false);
+    }
+    else
+    {
       List<DbObject> objects = source.getSelectedObjects();
       if (CollectionUtil.isEmpty(objects))
       {
@@ -238,7 +238,7 @@ public class DropDbObjectAction
       {
         if (dbo instanceof ColumnIdentifier)
         {
-          colCount ++;
+          colCount++;
         }
       }
 
@@ -251,7 +251,7 @@ public class DropDbObjectAction
       {
         setEnabled(this.available && (colCount == 0 && selCount > 0));
       }
-		}
+    }
   }
 
   @Override

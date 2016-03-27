@@ -33,118 +33,122 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.RecordFormPanel;
-import workbench.resource.ResourceMgr;
 
 /**
- * Delete the currently highlighted row(s) from a table
+ * Display a modal dialog showing a single row in a form, rather then a table.
+ *
  * @see workbench.interfaces.DbData
  * @see workbench.gui.sql.DwPanel
- * @author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
 public class DisplayDataFormAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable client;
+  private WbTable client;
 
-	public DisplayDataFormAction(WbTable aClient)
-	{
-		super();
-		this.setEnabled(false);
-		this.initMenuDefinition("MnuTxtShowRecord");
-		this.removeIcon();
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		setTable(aClient);
-	}
+  public DisplayDataFormAction(WbTable aClient)
+  {
+    super();
+    this.setEnabled(false);
+    this.initMenuDefinition("MnuTxtShowRecord");
+    this.removeIcon();
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    setTable(aClient);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if(client.getRowCount() == 0) return;
-		int row = client.getEditingRow();
-		if (row < 0) row = client.getSelectedRow();
-		if (row < 0) row = 0;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client.getRowCount() == 0) return;
+    int row = client.getEditingRow();
+    if (row < 0) row = client.getSelectedRow();
+    if (row < 0) row = 0;
 
-		int col = client.getEditingColumn();
-		if (client.isStatusColumnVisible()) col --;
-		if (col < 0) col = 0;
+    int col = client.getEditingColumn();
+    if (client.isStatusColumnVisible()) col--;
+    if (col < 0) col = 0;
 
-		RecordFormPanel panel = new RecordFormPanel(client, row, col);
+    RecordFormPanel panel = new RecordFormPanel(client, row, col);
 
-		Frame window = (Frame)SwingUtilities.getWindowAncestor(client);
+    Frame window = (Frame)SwingUtilities.getWindowAncestor(client);
 
-		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWindowTitleForm"), panel);
-		Dimension d = dialog.getPreferredSize();
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+    ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWindowTitleForm"), panel);
+    Dimension d = dialog.getPreferredSize();
+    Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-		int maxWidth = (int)(screen.width * 0.6);
-		int maxHeight = (int)(screen.height * 0.6);
+    int maxWidth = (int)(screen.width * 0.6);
+    int maxHeight = (int)(screen.height * 0.6);
 
-		Dimension maxSize = new Dimension(maxWidth, maxHeight);
+    Dimension maxSize = new Dimension(maxWidth, maxHeight);
 
-		panel.setMaximumSize(maxSize);
-		dialog.setMaximumSize(maxSize);
+    panel.setMaximumSize(maxSize);
+    dialog.setMaximumSize(maxSize);
 
-		boolean doLimit = false;
+    boolean doLimit = false;
 
-		if (d.height > maxSize.height)
-		{
-			doLimit = true;
+    if (d.height > maxSize.height)
+    {
+      doLimit = true;
 
-			// make the form wider, so that the vertical scrollbar does not
-			// force a horizontal scrollbar to appear because the vertical space is now smaller
-			UIDefaults def = UIManager.getDefaults();
-			int scrollwidth = def.getInt("ScrollBar.width");
-			if (scrollwidth <= 0) scrollwidth = 32; // this should leave enough room...
-			d.width += scrollwidth + 2;
-		}
+      // make the form wider, so that the vertical scrollbar does not
+      // force a horizontal scrollbar to appear because the vertical space is now smaller
+      UIDefaults def = UIManager.getDefaults();
+      int scrollwidth = def.getInt("ScrollBar.width");
+      if (scrollwidth <= 0) scrollwidth = 32; // this should leave enough room...
+      d.width += scrollwidth + 2;
+    }
 
-		if (d.width > maxSize.width)
-		{
-			doLimit = true;
-		}
+    if (d.width > maxSize.width)
+    {
+      doLimit = true;
+    }
 
-		if (doLimit)
-		{
-			dialog.setPreferredSize(maxSize);
-			dialog.pack();
-		}
+    if (doLimit)
+    {
+      dialog.setPreferredSize(maxSize);
+      dialog.pack();
+    }
 
-		dialog.pack();
+    dialog.pack();
 
-		try
-		{
-			WbSwingUtilities.center(dialog, window);
-			dialog.setVisible(true);
-		}
-		finally
-		{
-			dialog.dispose();
-		}
-	}
+    try
+    {
+      WbSwingUtilities.center(dialog, window);
+      dialog.setVisible(true);
+    }
+    finally
+    {
+      dialog.dispose();
+    }
+  }
 
-	public void setTable(WbTable table)
-	{
-		if (client != null && client != table)
-		{
-			client.removeTableModelListener(this);
-		}
-		this.client = table;
-		setEnabled(client != null && client.getRowCount() > 0);
-		if (client != null)
-		{
-			client.addTableModelListener(this);
-		}
-	}
+  public void setTable(WbTable table)
+  {
+    if (client != null && client != table)
+    {
+      client.removeTableModelListener(this);
+    }
+    this.client = table;
+    setEnabled(client != null && client.getRowCount() > 0);
+    if (client != null)
+    {
+      client.addTableModelListener(this);
+    }
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent e)
-	{
-		setEnabled(client != null && client.getRowCount() > 0);
-	}
+  @Override
+  public void tableChanged(TableModelEvent e)
+  {
+    setEnabled(client != null && client.getRowCount() > 0);
+  }
 
 }

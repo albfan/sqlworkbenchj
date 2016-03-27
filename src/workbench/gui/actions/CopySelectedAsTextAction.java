@@ -24,58 +24,60 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.ClipBoardCopier;
-import workbench.gui.components.WbTable;
 
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
+
 /**
  * Action to copy the selected content of a WbTable as tab-separated text to the clipboard
+ *
  * @see workbench.gui.components.ClipBoardCopier
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CopySelectedAsTextAction
-	extends WbAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public CopySelectedAsTextAction(WbTable aClient)
-	{
-		this(aClient, "MnuTxtCopySelectedAsText");
-	}
+  public CopySelectedAsTextAction(WbTable aClient)
+  {
+    this(aClient, "MnuTxtCopySelectedAsText");
+  }
 
-	public CopySelectedAsTextAction(WbTable aClient, String labelKey)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		this.initMenuDefinition(labelKey, null);
-		this.setEnabled(false);
-	}
+  public CopySelectedAsTextAction(WbTable aClient, String labelKey)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
+    this.initMenuDefinition(labelKey, null);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean hasShiftModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		boolean copyHeaders = true;
-		boolean selectColumns = false;
-		if (invokedByMouse(e))
-		{
-			copyHeaders = !isShiftPressed(e);
-			selectColumns = isCtrlPressed(e) ;
-		}
-		copier.copyDataToClipboard(copyHeaders, true, selectColumns);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    ClipBoardCopier copier = new ClipBoardCopier(this.client);
+    boolean copyHeaders = true;
+    boolean selectColumns = false;
+    if (invokedByMouse(e))
+    {
+      copyHeaders = !isShiftPressed(e);
+      selectColumns = isCtrlPressed(e);
+    }
+    copier.copyDataToClipboard(copyHeaders, true, selectColumns);
+  }
 }

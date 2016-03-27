@@ -24,52 +24,54 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.components.ClipBoardCopier;
 
-import workbench.gui.components.WbTable;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.components.ClipBoardCopier;
+import workbench.gui.components.WbTable;
 
 /**
  * Action to copy the selected content of a table to the clipboard as SQL INSERT statements
+ *
  * @see workbench.gui.components.ClipBoardCopier
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CopySelectedAsDbUnitXMLAction
-	extends WbAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public CopySelectedAsDbUnitXMLAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopySelectedAsDBUnitXML", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
-		this.setEnabled(false);
-	}
+  public CopySelectedAsDbUnitXMLAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtCopySelectedAsDBUnitXML", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_COPY_SELECTED);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean hasShiftModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		boolean selectColumns = false;
-		if (invokedByMouse(e))
-		{
-			selectColumns = isCtrlPressed(e);
-		}
-		copier.copyAsDbUnit(true, selectColumns);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    ClipBoardCopier copier = new ClipBoardCopier(this.client);
+    boolean selectColumns = false;
+    if (invokedByMouse(e))
+    {
+      selectColumns = isCtrlPressed(e);
+    }
+    copier.copyAsDbUnit(true, selectColumns);
+  }
 
 }

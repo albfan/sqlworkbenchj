@@ -46,23 +46,23 @@ import workbench.gui.dbobjects.TableDeleterUI;
  * @author Thomas Kellerer
  */
 public class DeleteTablesAction
-	extends WbAction
-	implements WbSelectionListener
+  extends WbAction
+  implements WbSelectionListener
 {
-	private DbObjectList source;
-	private TableDeleteListener deleteListener;
+  private DbObjectList source;
+  private TableDeleteListener deleteListener;
   private WbSelectionModel selection;
 
-	public DeleteTablesAction(DbObjectList client, WbSelectionModel list, TableDeleteListener l)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtDeleteTableData");
-		this.source = client;
-		this.deleteListener = l;
+  public DeleteTablesAction(DbObjectList client, WbSelectionModel list, TableDeleteListener l)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtDeleteTableData");
+    this.source = client;
+    this.deleteListener = l;
     selection = list;
     selectionChanged(list);
-		selection.addSelectionListener(this);
-	}
+    selection.addSelectionListener(this);
+  }
 
   @Override
   public void dispose()
@@ -74,12 +74,12 @@ public class DeleteTablesAction
     }
   }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
-		List<TableIdentifier> tables = getSelectedTables();
+    List<TableIdentifier> tables = getSelectedTables();
 
     boolean autoCommitChanged = false;
     boolean autoCommit = source.getConnection().getAutoCommit();
@@ -110,40 +110,40 @@ public class DeleteTablesAction
         source.getConnection().changeAutoCommit(autoCommit);
       }
     }
-	}
+  }
 
-	private List<TableIdentifier> getSelectedTables()
-	{
-		List<? extends DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.isEmpty()) return null;
+  private List<TableIdentifier> getSelectedTables()
+  {
+    List<? extends DbObject> objects = source.getSelectedObjects();
+    if (objects == null || objects.isEmpty()) return null;
 
-		List<TableIdentifier> tables = new ArrayList<>(objects.size());
-		for (DbObject dbo : objects)
-		{
-			if (dbo instanceof TableIdentifier)
-			{
-				String type = dbo.getObjectType();
-				if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
-				tables.add((TableIdentifier)dbo);
-			}
-		}
-		return tables;
-	}
+    List<TableIdentifier> tables = new ArrayList<>(objects.size());
+    for (DbObject dbo : objects)
+    {
+      if (dbo instanceof TableIdentifier)
+      {
+        String type = dbo.getObjectType();
+        if (!"table".equalsIgnoreCase(type) && !"view".equalsIgnoreCase(type)) continue;
+        tables.add((TableIdentifier)dbo);
+      }
+    }
+    return tables;
+  }
 
-	@Override
-	public void selectionChanged(WbSelectionModel model)
-	{
-		WbConnection conn = this.source.getConnection();
-		if (conn == null || conn.isSessionReadOnly())
-		{
-			setEnabled(false);
-		}
-		else
-		{
+  @Override
+  public void selectionChanged(WbSelectionModel model)
+  {
+    WbConnection conn = this.source.getConnection();
+    if (conn == null || conn.isSessionReadOnly())
+    {
+      setEnabled(false);
+    }
+    else
+    {
       List<TableIdentifier> tables = DbObjectList.Util.getSelectedTableObjects(source);
-			setEnabled(tables.size() > 0);
-		}
-	}
+      setEnabled(tables.size() > 0);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

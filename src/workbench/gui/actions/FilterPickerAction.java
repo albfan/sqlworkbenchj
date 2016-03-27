@@ -52,141 +52,141 @@ import workbench.storage.filter.FilterExpression;
 import workbench.util.WbFile;
 
 /**
- *	Select a different filter for a table.
- *	@author  Thomas Kellerer
+ * Select a different filter for a table.
+ *
+ * @author Thomas Kellerer
  */
 public class FilterPickerAction
-		extends WbAction
-		implements PropertyChangeListener, ActionListener
+  extends WbAction
+  implements PropertyChangeListener, ActionListener
 {
-	private WbTable client;
-	private DropDownButton dropDownButton;
+  private WbTable client;
+  private DropDownButton dropDownButton;
 
-	public FilterPickerAction(WbTable aClient)
-	{
-		super();
-		this.setClient(aClient);
-		this.initMenuDefinition("MnuTxtPickFilter");
-		this.setIcon("dropdown");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
-		mgr.addPropertyChangeListener(this);
-		checkEnabled();
-		buildPopup();
-	}
+  public FilterPickerAction(WbTable aClient)
+  {
+    super();
+    this.setClient(aClient);
+    this.initMenuDefinition("MnuTxtPickFilter");
+    this.setIcon("dropdown");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    FilterDefinitionManager mgr = FilterDefinitionManager.getInstance();
+    mgr.addPropertyChangeListener(this);
+    checkEnabled();
+    buildPopup();
+  }
 
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		if (this.client == null) return;
+  @Override
+  public void actionPerformed(ActionEvent e)
+  {
+    if (this.client == null) return;
 
-		if (e.getSource() instanceof JMenuItem)
-		{
-			String file = e.getActionCommand();
-			try
-			{
-				FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
-				this.client.applyFilter(f);
+    if (e.getSource() instanceof JMenuItem)
+    {
+      String file = e.getActionCommand();
+      try
+      {
+        FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
+        this.client.applyFilter(f);
 
-				String tooltip = "<html>" + ResourceMgr.getDescription("MnuTxtPickFilter");
-				tooltip += "<br>(" + file + ")</html>";
-				dropDownButton.setToolTipText(tooltip);
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logError("FilterPickerAction.actionPerformed()", "Error loading filter", ex);
-				Window w = SwingUtilities.getWindowAncestor(this.client);
-				WbSwingUtilities.showErrorMessage(w, "Could not load filter: " + ex.getMessage());
-				dropDownButton.setToolTipText(ResourceMgr.getDescription("MnuTxtPickFilter"));
-			}
-		}
-	}
+        String tooltip = "<html>" + ResourceMgr.getDescription("MnuTxtPickFilter");
+        tooltip += "<br>(" + file + ")</html>";
+        dropDownButton.setToolTipText(tooltip);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logError("FilterPickerAction.actionPerformed()", "Error loading filter", ex);
+        Window w = SwingUtilities.getWindowAncestor(this.client);
+        WbSwingUtilities.showErrorMessage(w, "Could not load filter: " + ex.getMessage());
+        dropDownButton.setToolTipText(ResourceMgr.getDescription("MnuTxtPickFilter"));
+      }
+    }
+  }
 
-	private void checkEnabled()
-	{
-		if (this.client == null)
-		{
-			this.setEnabled(false);
-		}
-		else
-		{
-			int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
-			this.setEnabled(availableFilters > 0);
-		}
-	}
+  private void checkEnabled()
+  {
+    if (this.client == null)
+    {
+      this.setEnabled(false);
+    }
+    else
+    {
+      int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
+      this.setEnabled(availableFilters > 0);
+    }
+  }
 
+  public final void setClient(WbTable c)
+  {
+    this.client = c;
+    checkEnabled();
+  }
 
-	public final void setClient(WbTable c)
-	{
-		this.client = c;
-		checkEnabled();
-	}
-
-	@Override
-	public JButton getToolbarButton(boolean createNew)
-	{
+  @Override
+  public JButton getToolbarButton(boolean createNew)
+  {
     JButton result = null;
-		if (this.dropDownButton == null || createNew)
-		{
-			ImageIcon icon = IconMgr.getInstance().getToolbarIcon("dropdown");
-			DropDownButton b = new DropDownButton(icon);
-			b.setAction(this);
-			b.setText(null);
-			b.setMnemonic(0);
-			int w = icon.getIconWidth();
-			int h = icon.getIconHeight();
-			Dimension d = new Dimension(w, h);
-			b.setMaximumSize(d);
-			b.setPreferredSize(d);
-			b.setMinimumSize(d);
+    if (this.dropDownButton == null || createNew)
+    {
+      ImageIcon icon = IconMgr.getInstance().getToolbarIcon("dropdown");
+      DropDownButton b = new DropDownButton(icon);
+      b.setAction(this);
+      b.setText(null);
+      b.setMnemonic(0);
+      int w = icon.getIconWidth();
+      int h = icon.getIconHeight();
+      Dimension d = new Dimension(w, h);
+      b.setMaximumSize(d);
+      b.setPreferredSize(d);
+      b.setMinimumSize(d);
       if (this.dropDownButton == null) this.dropDownButton = b;
       result = b;
-		}
+    }
     else
     {
       result = this.dropDownButton;
     }
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
-		this.setEnabled(availableFilters > 0);
-		buildPopup();
-	}
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    int availableFilters = FilterDefinitionManager.getInstance().getEntries().size();
+    this.setEnabled(availableFilters > 0);
+    buildPopup();
+  }
 
-	private void buildPopup()
-	{
-		List<WbFile> entries = FilterDefinitionManager.getInstance().getEntries();
-		if (entries == null || entries.isEmpty()) return;
+  private void buildPopup()
+  {
+    List<WbFile> entries = FilterDefinitionManager.getInstance().getEntries();
+    if (entries == null || entries.isEmpty()) return;
 
-		JMenu menu = new JMenu("filters");
-		for (WbFile f : entries)
-		{
-			JMenuItem item = new WbMenuItem(f.getName());
-			item.setToolTipText(f.getFullPath());
-			item.setActionCommand(f.getFullPath());
-			item.addActionListener(this);
-			menu.add(item);
-		}
-		if (this.dropDownButton == null)
-		{
-			this.getToolbarButton();
-		}
-		dropDownButton.setDropDownMenu(menu.getPopupMenu());
-	}
+    JMenu menu = new JMenu("filters");
+    for (WbFile f : entries)
+    {
+      JMenuItem item = new WbMenuItem(f.getName());
+      item.setToolTipText(f.getFullPath());
+      item.setActionCommand(f.getFullPath());
+      item.addActionListener(this);
+      menu.add(item);
+    }
+    if (this.dropDownButton == null)
+    {
+      this.getToolbarButton();
+    }
+    dropDownButton.setDropDownMenu(menu.getPopupMenu());
+  }
 
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		if (this.dropDownButton != null)
-		{
-			this.dropDownButton.dispose();
-			this.dropDownButton = null;
-		}
-	}
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (this.dropDownButton != null)
+    {
+      this.dropDownButton.dispose();
+      this.dropDownButton = null;
+    }
+  }
 
 }

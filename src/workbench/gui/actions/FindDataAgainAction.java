@@ -32,27 +32,28 @@ import javax.swing.KeyStroke;
 import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
 
-
 /**
- *	Search the next occurance in the result set.
- *	@author  Thomas Kellerer
+ * Search the next occurance in the result set.
+ *
+ * @author Thomas Kellerer
  */
-public class FindDataAgainAction extends WbAction
+public class FindDataAgainAction
+  extends WbAction
 {
-	private Searchable client;
+  private Searchable client;
 
-	public FindDataAgainAction(Searchable aClient)
-	{
-		super();
-		this.client = aClient;
+  public FindDataAgainAction(Searchable aClient)
+  {
+    super();
+    this.client = aClient;
 
-		this.initMenuDefinition("MnuTxtFindInTableDataAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.CTRL_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-	}
+    this.initMenuDefinition("MnuTxtFindInTableDataAgain", KeyStroke.getKeyStroke(KeyEvent.VK_F3, InputEvent.CTRL_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.findNext();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.findNext();
+  }
 }

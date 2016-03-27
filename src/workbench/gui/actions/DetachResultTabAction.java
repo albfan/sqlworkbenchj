@@ -34,48 +34,49 @@ import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.SqlPanel;
 
 /**
- * An action to detach the the currently selected result tab of a SqlPanel and open it in a separate window
+ * An action to detach the the currently selected result tab of a SqlPanel and open it in a separate window.
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class DetachResultTabAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel panel;
+  private SqlPanel panel;
 
-	public DetachResultTabAction(SqlPanel sqlPanel)
-	{
-		super();
-		panel = sqlPanel;
-		this.initMenuDefinition("MnuTxtDetachResult");
-		this.setIcon(null);
-		this.setEnabled(panel.getCurrentResult() != null);
-	}
+  public DetachResultTabAction(SqlPanel sqlPanel)
+  {
+    super();
+    panel = sqlPanel;
+    this.initMenuDefinition("MnuTxtDetachResult");
+    this.setIcon(null);
+    this.setEnabled(panel.getCurrentResult() != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		final DwPanel result = panel.getCurrentResult();
-		if (result == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    final DwPanel result = panel.getCurrentResult();
+    if (result == null) return;
 
-		if (result.getTable() == null) return;
-		if (result.getDataStore() == null) return;
+    if (result.getTable() == null) return;
+    if (result.getDataStore() == null) return;
 
     final int timer = panel.getRefreshMgr().getRefreshPeriod(result);
-		panel.removeCurrentResult();
-		final Window parent = SwingUtilities.getWindowAncestor(panel);
+    panel.removeCurrentResult();
+    final Window parent = SwingUtilities.getWindowAncestor(panel);
 
-		EventQueue.invokeLater(() ->
-    {
-      DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
-      if (timer > 0)
+    EventQueue.invokeLater(()
+      ->
       {
-        window.refreshAutomatically(timer);
-      }
-      window.showWindow();
+        DetachedResultWindow window = new DetachedResultWindow(result, parent, panel);
+        if (timer > 0)
+        {
+          window.refreshAutomatically(timer);
+        }
+        window.showWindow();
     });
 
-	}
+  }
 
   @Override
   public boolean useInToolbar()

@@ -30,32 +30,34 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Action to create a copy of the currently selected row in a table.
+ *
  * @see workbench.interfaces.DbData
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class CopyRowAction extends WbAction
+public class CopyRowAction
+  extends WbAction
 {
-	private DbData client;
+  private DbData client;
 
-	public CopyRowAction(DbData aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopyRow");
-		this.setIcon("copy_row");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
-	}
+  public CopyRowAction(DbData aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtCopyRow");
+    this.setIcon("copy_row");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.duplicateRow();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.duplicateRow();
+  }
 
-	public void setClient(DbData db)
-	{
-		this.client = db;
-	}
+  public void setClient(DbData db)
+  {
+    this.client = db;
+  }
 
 }

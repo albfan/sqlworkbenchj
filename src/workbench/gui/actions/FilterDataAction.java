@@ -34,7 +34,7 @@ import workbench.gui.components.WbTable;
 import workbench.gui.filter.DefineFilterExpressionPanel;
 
 /**
- * Filter data from a WbTable
+ * Filter data from a WbTable.
  *
  * @author Thomas Kellerer
  */

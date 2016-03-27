@@ -26,14 +26,16 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.WbSwingUtilities;
 
 /**
  * Exit and close the application.
  *
  * @see workbench.WbManager#exitWorkbench(boolean)
- *
+ * @see FileCloseAction
+ * 
  * @author  Thomas Kellerer
  */
 public class FileExitAction

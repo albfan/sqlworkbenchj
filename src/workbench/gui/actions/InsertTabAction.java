@@ -24,30 +24,34 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.MainWindow;
+
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.MainWindow;
 
 /**
  * Insert a new tab in the MainWindow
- *	@author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
-public class InsertTabAction extends WbAction
+public class InsertTabAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public InsertTabAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.initMenuDefinition("MnuTxtInsTab");
-		this.setIcon(null);
-		setDescriptiveName(ResourceMgr.getString("MnuTxtInsTabEx"));
-	}
+  public InsertTabAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+    this.initMenuDefinition("MnuTxtInsTab");
+    this.setIcon(null);
+    setDescriptiveName(ResourceMgr.getString("MnuTxtInsTabEx"));
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.insertTab();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.insertTab();
+  }
 }

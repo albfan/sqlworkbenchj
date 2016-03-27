@@ -35,26 +35,28 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.SqlPanel;
 
 /**
- * Run all statements in the current SQL Panel
+ * Run all statements in the current SQL Panel.
+ *
  * @see workbench.gui.sql.SqlPanel#runAll()
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class ExecuteAllAction extends WbAction
+public class ExecuteAllAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public ExecuteAllAction(SqlPanel aPanel)
-	{
-		super();
-		this.client = aPanel;
-		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setIcon("execute_all");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-	}
+  public ExecuteAllAction(SqlPanel aPanel)
+  {
+    super();
+    this.client = aPanel;
+    this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setIcon("execute_all");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.runAll();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.runAll();
+  }
 }

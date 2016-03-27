@@ -25,52 +25,56 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.editor.CodeTools;
-import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.editor.CodeTools;
+import workbench.gui.sql.EditorPanel;
+
 /**
- * Make an "IN" List
+ * Make an "IN" List for elements that need single quotes.
+ *
  * @see workbench.gui.editor.CodeTools#makeInListForChar()
- * @author  Thomas Kellerer
+ * @see MakeNonCharInListAction
+ * 
+ * @author Thomas Kellerer
  */
 public class MakeInListAction
-	extends WbAction
-	implements TextSelectionListener
+  extends WbAction
+  implements TextSelectionListener
 {
-	private EditorPanel client;
+  private EditorPanel client;
 
-	public MakeInListAction(EditorPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.client.addSelectionListener(this);
-		this.initMenuDefinition("MnuTxtMakeCharInList");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setEnabled(false);
-	}
+  public MakeInListAction(EditorPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.client.addSelectionListener(this);
+    this.initMenuDefinition("MnuTxtMakeCharInList");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		CodeTools tools = new CodeTools(client);
-		tools.makeInListForChar();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    CodeTools tools = new CodeTools(client);
+    tools.makeInListForChar();
+  }
 
-	@Override
-	public void selectionChanged(int newStart, int newEnd)
-	{
-		if(newEnd > newStart)
-		{
-			int startLine = this.client.getSelectionStartLine();
-			int endLine = this.client.getSelectionEndLine();
-			this.setEnabled(startLine < endLine);
-		}
-		else
-		{
-			this.setEnabled(false);
-		}
-	}
+  @Override
+  public void selectionChanged(int newStart, int newEnd)
+  {
+    if (newEnd > newStart)
+    {
+      int startLine = this.client.getSelectionStartLine();
+      int endLine = this.client.getSelectionEndLine();
+      this.setEnabled(startLine < endLine);
+    }
+    else
+    {
+      this.setEnabled(false);
+    }
+  }
 
 }

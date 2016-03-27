@@ -31,33 +31,33 @@ import workbench.log.LogMgr;
 /**
  * Action to copy a connection profile in the connect dialog.
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CopyProfileAction
-	extends WbAction
+  extends WbAction
 {
-	private FileActions client;
+  private FileActions client;
 
-	public CopyProfileAction(FileActions aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setIcon("copy-profile");
-		this.initMenuDefinition("LblCopyProfile");
-	}
+  public CopyProfileAction(FileActions aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setIcon("copy-profile");
+    this.initMenuDefinition("LblCopyProfile");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		try
-		{
-			this.client.newItem(true);
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    try
+    {
+      this.client.newItem(true);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("NewListEntryAction.executeAction()", "Error copying profile", ex);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

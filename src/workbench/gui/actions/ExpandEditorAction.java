@@ -28,31 +28,40 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
-import workbench.gui.sql.SplitPaneExpander;
+
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SplitPaneExpander;
 
 /**
  * Expand the editor in a SqlPanel to the full window size.
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class ExpandEditorAction extends WbAction
+public class ExpandEditorAction
+  extends WbAction
 {
-	private SplitPaneExpander client;
+  private SplitPaneExpander client;
 
-	public ExpandEditorAction(SplitPaneExpander aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtExpandEditor", KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.setIcon(null);
-	}
+  public ExpandEditorAction(SplitPaneExpander aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtExpandEditor", KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.toggleUpperComponentExpand();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.toggleUpperComponentExpand();
+  }
+  
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

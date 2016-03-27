@@ -25,6 +25,8 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
@@ -144,4 +146,33 @@ public class WbMenu
 		}
 		menu.removeAll();
 	}
+
+  public List<WbAction> getAllActions()
+  {
+    List<WbAction> result = new ArrayList<>();
+    result.addAll(getAllActions(this));
+    return result;
+  }
+
+  private List<WbAction> getAllActions(JMenuItem menu)
+  {
+    List<WbAction> result = new ArrayList<>();
+    for (Component comp : menu.getComponents())
+    {
+      if (comp instanceof JMenuItem)
+      {
+        JMenuItem item = (JMenuItem)comp;
+        Action action = item.getAction();
+        if (action instanceof WbAction)
+        {
+          result.add((WbAction)action);
+        }
+        else
+        {
+          result.addAll(getAllActions(item));
+        }
+      }
+    }
+    return result;
+  }
 }

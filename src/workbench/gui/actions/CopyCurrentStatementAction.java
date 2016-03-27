@@ -46,65 +46,65 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class CopyCurrentStatementAction
-	extends WbAction
+  extends WbAction
 {
-	private TextContainer script;
-	private String dbid;
-	private DelimiterDefinition alternateDelimiter;
+  private TextContainer script;
+  private String dbid;
+  private DelimiterDefinition alternateDelimiter;
 
-	public CopyCurrentStatementAction(TextContainer text)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtCopyCurrentStmt");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.script = text;
-	}
+  public CopyCurrentStatementAction(TextContainer text)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtCopyCurrentStmt");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.script = text;
+  }
 
-	public void setConnection(WbConnection conn)
-	{
-		if (conn == null)
-		{
-			this.dbid = null;
-			this.alternateDelimiter = null;
-		}
-		else
-		{
-			this.dbid = conn.getDbId();
-			this.alternateDelimiter = conn.getAlternateDelimiter();
-		}
-	}
+  public void setConnection(WbConnection conn)
+  {
+    if (conn == null)
+    {
+      this.dbid = null;
+      this.alternateDelimiter = null;
+    }
+    else
+    {
+      this.dbid = conn.getDbId();
+      this.alternateDelimiter = conn.getAlternateDelimiter();
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		String sql = script.getText();
-		if (StringUtil.isEmptyString(sql)) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    String sql = script.getText();
+    if (StringUtil.isEmptyString(sql)) return;
 
-		ScriptParser parser = new ScriptParser(sql, ParserType.getTypeFromDBID(dbid));
-		parser.setAlternateDelimiter(alternateDelimiter);
-		parser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbid));
-		parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
+    ScriptParser parser = new ScriptParser(sql, ParserType.getTypeFromDBID(dbid));
+    parser.setAlternateDelimiter(alternateDelimiter);
+    parser.setCheckEscapedQuotes(Settings.getInstance().useNonStandardQuoteEscaping(dbid));
+    parser.setEmptyLineIsDelimiter(Settings.getInstance().getEmptyLineIsDelimiter());
 
-		int cursor = script.getCaretPosition();
+    int cursor = script.getCaretPosition();
 
-		int index = parser.getCommandIndexAtCursorPos(cursor);
-		String command = parser.getCommand(index);
+    int index = parser.getCommandIndexAtCursorPos(cursor);
+    String command = parser.getCommand(index);
     command += "\n;\n";
 
-		boolean makeSnippet = false;
-		if (invokedByMouse(e) && isCtrlPressed(e))
-		{
-			makeSnippet = true;
-		}
+    boolean makeSnippet = false;
+    if (invokedByMouse(e) && isCtrlPressed(e))
+    {
+      makeSnippet = true;
+    }
 
-		if (makeSnippet)
-		{
-			command = CreateSnippetAction.makeJavaString(command, true);
-		}
+    if (makeSnippet)
+    {
+      command = CreateSnippetAction.makeJavaString(command, true);
+    }
 
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection sel = new StringSelection(command);
-		clp.setContents(sel, sel);
-	}
+    Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+    StringSelection sel = new StringSelection(command);
+    clp.setContents(sel, sel);
+  }
 
 }

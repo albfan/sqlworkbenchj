@@ -33,45 +33,47 @@ import workbench.gui.components.WbTable;
 /**
  * Action to copy the contents of a table to the clipboard as pairs of
  * DELETE/INSERT statements
+ *
  * @see workbench.gui.components.ClipBoardCopier
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class CopyAsSqlDeleteInsertAction extends WbAction
+public class CopyAsSqlDeleteInsertAction
+  extends WbAction
 {
-	private WbTable client;
+  private WbTable client;
 
-	public CopyAsSqlDeleteInsertAction(WbTable aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopyAsSqlDeleteInsert");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
-	}
+  public CopyAsSqlDeleteInsertAction(WbTable aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtCopyAsSqlDeleteInsert");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public boolean hasShiftModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasShiftModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		boolean selectColumns = false;
-		if (invokedByMouse(e))
-		{
-			selectColumns = isCtrlPressed(e) ;
-		}
-		copier.copyAsSqlDeleteInsert(false, selectColumns);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    ClipBoardCopier copier = new ClipBoardCopier(this.client);
+    boolean selectColumns = false;
+    if (invokedByMouse(e))
+    {
+      selectColumns = isCtrlPressed(e);
+    }
+    copier.copyAsSqlDeleteInsert(false, selectColumns);
+  }
 
   @Override
   public boolean useInToolbar()

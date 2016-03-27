@@ -36,40 +36,40 @@ import workbench.gui.MainWindow;
  * @author Thomas Kellerer
  */
 public class DisconnectTabAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow window;
+  private MainWindow window;
 
-	public DisconnectTabAction(MainWindow client)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtDisconnectTab");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setEnabled(false);
-		this.window = client;
-		checkState();
-	}
+  public DisconnectTabAction(MainWindow client)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtDisconnectTab");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setEnabled(false);
+    this.window = client;
+    checkState();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.window == null) return;
-		ConnectionProfile prof = window.getCurrentProfile();
-		if (prof.getUseSeparateConnectionPerTab()) return;
-		this.window.disconnectCurrentPanel();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.window == null) return;
+    ConnectionProfile prof = window.getCurrentProfile();
+    if (prof.getUseSeparateConnectionPerTab()) return;
+    this.window.disconnectCurrentPanel();
+  }
 
-	public void checkState()
-	{
-		if (this.window == null)
-		{
-			this.setEnabled(false);
-		}
-		else
-		{
-			this.setEnabled(window.canUseSeparateConnection() && window.usesSeparateConnection());
-		}
-	}
+  public void checkState()
+  {
+    if (this.window == null)
+    {
+      this.setEnabled(false);
+    }
+    else
+    {
+      this.setEnabled(window.canUseSeparateConnection() && window.usesSeparateConnection());
+    }
+  }
 
   @Override
   public boolean useInToolbar()

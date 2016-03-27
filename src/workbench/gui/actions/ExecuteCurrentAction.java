@@ -34,28 +34,29 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.SqlPanel;
 
 /**
- * Run all statements in the current SQL Panel
+ * Run all statements in the current SQL Panel.
+ *
  * @see workbench.gui.sql.SqlPanel#runCurrentStatement()
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ExecuteCurrentAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel target;
+  private SqlPanel target;
 
-	public ExecuteCurrentAction(SqlPanel aPanel)
-	{
-		super();
-		this.target = aPanel;
-		this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
-		this.setIcon("execute_current");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-	}
+  public ExecuteCurrentAction(SqlPanel aPanel)
+  {
+    super();
+    this.target = aPanel;
+    this.initMenuDefinition("MnuTxtExecuteCurrent", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
+    this.setIcon("execute_current");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.target.runCurrentStatement();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.target.runCurrentStatement();
+  }
 
 }

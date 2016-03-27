@@ -44,44 +44,44 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DropForeignKeyAction
-	extends WbAction
+  extends WbAction
 {
-	private final FkDisplayPanel fkDisplay;
+  private final FkDisplayPanel fkDisplay;
 
-	public DropForeignKeyAction(FkDisplayPanel display)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtDropFK");
-		this.fkDisplay = display;
-	}
+  public DropForeignKeyAction(FkDisplayPanel display)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtDropFK");
+    this.fkDisplay = display;
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		TableIdentifier tbl = fkDisplay.getCurrentTable();
-		if (tbl == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    TableIdentifier tbl = fkDisplay.getCurrentTable();
+    if (tbl == null) return;
 
-		WbConnection con = fkDisplay.getConnection();
-		if (con == null || con.isBusy()) return;
+    WbConnection con = fkDisplay.getConnection();
+    if (con == null || con.isBusy()) return;
 
-		Map<TableIdentifier, String> selectedConstraints = fkDisplay.getSelectedForeignKeys();
-		if (CollectionUtil.isEmpty(selectedConstraints)) return;
+    Map<TableIdentifier, String> selectedConstraints = fkDisplay.getSelectedForeignKeys();
+    if (CollectionUtil.isEmpty(selectedConstraints)) return;
 
-		DbObjectChanger changer = new DbObjectChanger(con);
+    DbObjectChanger changer = new DbObjectChanger(con);
 
-		String sql = changer.getDropFKScript(selectedConstraints);
+    String sql = changer.getDropFKScript(selectedConstraints);
 
-		if (StringUtil.isBlank(sql)) return;
+    if (StringUtil.isBlank(sql)) return;
 
-		RunScriptPanel panel = new RunScriptPanel(con, sql);
+    RunScriptPanel panel = new RunScriptPanel(con, sql);
 
-		panel.openWindow(fkDisplay, ResourceMgr.getString("TxtDropConstraint"));
+    panel.openWindow(fkDisplay, ResourceMgr.getString("TxtDropConstraint"));
 
-		if (panel.wasRun())
-		{
-			EventQueue.invokeLater(fkDisplay::reloadTable);
-		}
-	}
+    if (panel.wasRun())
+    {
+      EventQueue.invokeLater(fkDisplay::reloadTable);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

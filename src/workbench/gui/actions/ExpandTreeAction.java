@@ -29,27 +29,27 @@ import workbench.interfaces.ExpandableTree;
 
 /**
  * Expand all items in a Tree
-
+ *
  * @author Thomas Kellerer
  */
 public class ExpandTreeAction
-	extends WbAction
+  extends WbAction
 {
-	private ExpandableTree client;
+  private ExpandableTree client;
 
-	public ExpandTreeAction(ExpandableTree tree)
-	{
-		super();
-		this.client = tree;
-		this.initMenuDefinition("LblExpandAll");
-		this.setIcon("expand");
-	}
+  public ExpandTreeAction(ExpandableTree tree)
+  {
+    super();
+    this.client = tree;
+    this.initMenuDefinition("LblExpandAll");
+    this.setIcon("expand");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.expandAll();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.expandAll();
+  }
 
   @Override
   public boolean useInToolbar()

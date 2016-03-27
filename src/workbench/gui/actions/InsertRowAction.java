@@ -29,32 +29,33 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Insert a new row
- *	@author  Thomas Kellerer
+ * Insert a new row
+ *
+ * @author Thomas Kellerer
  */
 public class InsertRowAction
-	extends WbAction
+  extends WbAction
 {
-	private DbData client;
+  private DbData client;
 
-	public InsertRowAction(DbData aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtInsertRow");
-		this.setIcon("insert_row");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setEnabled(false);
-	}
+  public InsertRowAction(DbData aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtInsertRow");
+    this.setIcon("insert_row");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.addRow();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.addRow();
+  }
 
-	public void setClient(DbData db)
-	{
-		this.client = db;
-	}
+  public void setClient(DbData db)
+  {
+    this.client = db;
+  }
 }

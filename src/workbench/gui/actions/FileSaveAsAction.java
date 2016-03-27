@@ -30,23 +30,25 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Save the current file in the SQL Editor with a new name.
- *	@author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
-public class FileSaveAsAction extends WbAction
+public class FileSaveAsAction
+  extends WbAction
 {
-	private TextFileContainer client;
+  private TextFileContainer client;
 
-	public FileSaveAsAction(TextFileContainer aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFileSaveAs");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-	}
+  public FileSaveAsAction(TextFileContainer aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtFileSaveAs");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.saveFile();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.saveFile();
+  }
 }

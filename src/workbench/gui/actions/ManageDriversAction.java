@@ -22,6 +22,7 @@
  *
  */
 package workbench.gui.actions;
+
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
@@ -36,20 +37,21 @@ import workbench.gui.MainWindow;
 import workbench.gui.profiles.DriverEditorDialog;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class ManageDriversAction extends WbAction
+public class ManageDriversAction
+  extends WbAction
 {
-	public ManageDriversAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtEditDrivers");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-	}
+  public ManageDriversAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtEditDrivers");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     WbConnection currentConnection = null;
     DbDriver currentDrv = null;
 

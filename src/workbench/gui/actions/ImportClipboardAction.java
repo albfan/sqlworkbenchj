@@ -46,85 +46,92 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ImportClipboardAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public ImportClipboardAction(SqlPanel panel)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtImportClip");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		client = panel;
-		this.setEnabled(false);
-	}
+  public ImportClipboardAction(SqlPanel panel)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtImportClip");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    client = panel;
+    this.setEnabled(false);
+  }
 
-	@Override
-	public boolean hasCtrlModifier()
-	{
-		return true;
-	}
+  @Override
+  public boolean hasCtrlModifier()
+  {
+    return true;
+  }
 
-	@Override
-	public void executeAction(ActionEvent evt)
-	{
-		String content = getClipboardContents();
-		if (StringUtil.isBlank(content)) return;
-		boolean showOptions = false;
-		if (invokedByMouse(evt))
-		{
-			showOptions = isCtrlPressed(evt);
-		}
-		client.importString(content, showOptions);
-	}
+  @Override
+  public void executeAction(ActionEvent evt)
+  {
+    String content = getClipboardContents();
+    if (StringUtil.isBlank(content)) return;
+    boolean showOptions = false;
+    if (invokedByMouse(evt))
+    {
+      showOptions = isCtrlPressed(evt);
+    }
+    client.importString(content, showOptions);
+  }
 
-	private String getClipboardContents()
-	{
-		if (client == null)
-		{
-			return null;
-		}
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		Transferable content = clp.getContents(client);
+  private String getClipboardContents()
+  {
+    if (client == null)
+    {
+      return null;
+    }
+    Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+    Transferable content = clp.getContents(client);
 
-		DataFlavor[] flavors = content.getTransferDataFlavors();
-		StringBuilder info = new StringBuilder();
-		if (flavors != null)
-		{
-			for (int i=0; i < flavors.length; i++)
-			{
-				info.append(flavors[i].getHumanPresentableName());
-				if (i > 0) info.append(", ");
-			}
-		}
+    DataFlavor[] flavors = content.getTransferDataFlavors();
+    StringBuilder info = new StringBuilder();
+    if (flavors != null)
+    {
+      for (int i = 0; i < flavors.length; i++)
+      {
+        info.append(flavors[i].getHumanPresentableName());
+        if (i > 0) info.append(", ");
+      }
+    }
 
-		LogMgr.logDebug("ImportClipboardAction.getClipboardContents()", "Supported formats of the clipboard: " + info);
+    LogMgr.logDebug("ImportClipboardAction.getClipboardContents()", "Supported formats of the clipboard: " + info);
 
-		if (!content.isDataFlavorSupported(DataFlavor.stringFlavor))
-		{
-			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The clipboard does not contain a format compatible with a string. Clipboard format is: " + info, null);
-			WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
-			return null;
-		}
+    if (!content.isDataFlavorSupported(DataFlavor.stringFlavor))
+    {
+      LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The clipboard does not contain a format compatible with a string. Clipboard format is: " + info, null);
+      WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
+      return null;
+    }
 
-		try
-		{
-			return (String) content.getTransferData(DataFlavor.stringFlavor);
-		}
-		catch (UnsupportedFlavorException ufe)
-		{
-			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content cannot be used as a String", ufe);
-			WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
-		}
-		catch (IOException io)
-		{
-			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content can no longer be accessed", io);
-			WbSwingUtilities.showErrorMessage(client, "<html>" + ResourceMgr.getString("MsgClipInvalid") + "<br>(" + ExceptionUtil.getDisplay(io) + ")</html>");
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("ImportClipboardAction.getClipboardContents()", "Error accessing clipboard", e);
-		}
-		return null;
-	}
+    try
+    {
+      return (String)content.getTransferData(DataFlavor.stringFlavor);
+    }
+    catch (UnsupportedFlavorException ufe)
+    {
+      LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content cannot be used as a String", ufe);
+      WbSwingUtilities.showErrorMessageKey(client, "MsgClipInvalid");
+    }
+    catch (IOException io)
+    {
+      LogMgr.logError("ImportClipboardAction.getClipboardContents()", "The current clipboard content can no longer be accessed", io);
+      WbSwingUtilities.showErrorMessage(client, "<html>" + ResourceMgr.getString("MsgClipInvalid") + "<br>(" + ExceptionUtil.getDisplay(io) + ")</html>");
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("ImportClipboardAction.getClipboardContents()", "Error accessing clipboard", e);
+    }
+    return null;
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
 }

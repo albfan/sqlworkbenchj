@@ -858,6 +858,10 @@ public class MainWindow
     actions.add(newWindowAction);
     actions.add(saveProfilesAction);
     actions.add(fileExitAction);
+    actions.add(manageMacros);
+    actions.add(loadMacros);
+    actions.add(saveMacros);
+    actions.add(showMacroPopup);
     return actions;
   }
 

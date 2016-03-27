@@ -25,30 +25,38 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.sql.SplitPaneExpander;
-
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.sql.SplitPaneExpander;
 
 /**
  * Expand the result panel in the editor to the full window size.
- *	@author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
-public class ExpandResultAction extends WbAction
+public class ExpandResultAction
+  extends WbAction
 {
-	private SplitPaneExpander client;
+  private SplitPaneExpander client;
 
-	public ExpandResultAction(SplitPaneExpander expander)
-	{
-		super();
-		this.client = expander;
-		this.initMenuDefinition("MnuTxtExpandResult");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.setIcon(null);
-	}
+  public ExpandResultAction(SplitPaneExpander expander)
+  {
+    super();
+    this.client = expander;
+    this.initMenuDefinition("MnuTxtExpandResult");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.toggleLowerComponentExpand();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.toggleLowerComponentExpand();
+  }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
 }

@@ -36,27 +36,27 @@ import workbench.gui.tools.ConnectionInfoPanel;
  * @author Thomas Kellerer
  */
 public class HelpConnectionInfoAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWindow;
+  private MainWindow mainWindow;
 
-	public HelpConnectionInfoAction(MainWindow parent)
-	{
-		super();
-		mainWindow = parent;
-		initMenuDefinition("MnuTxtConnInfo");
-		removeIcon();
-	}
+  public HelpConnectionInfoAction(MainWindow parent)
+  {
+    super();
+    mainWindow = parent;
+    initMenuDefinition("MnuTxtConnInfo");
+    removeIcon();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     if (mainWindow == null) return;
     MainPanel panel = mainWindow.getCurrentPanel();
     if (panel == null) return;
     WbConnection connection = panel.getConnection();
     if (connection == null) return;
-		ConnectionInfoPanel.showConnectionInfo(connection);
-	}
+    ConnectionInfoPanel.showConnectionInfo(connection);
+  }
 
 }

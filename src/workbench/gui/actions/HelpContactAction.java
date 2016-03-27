@@ -25,10 +25,13 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import workbench.interfaces.MainPanel;
+
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.interfaces.MainPanel;
+
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
 
@@ -36,50 +39,50 @@ import workbench.util.ExceptionUtil;
  * @author Thomas Kellerer
  */
 public class HelpContactAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWindow;
+  private MainWindow mainWindow;
 
-	public HelpContactAction(MainWindow parent)
-	{
-		super();
-		mainWindow = parent;
-		initMenuDefinition("MnuTxtHelpContact");
-		removeIcon();
-	}
+  public HelpContactAction(MainWindow parent)
+  {
+    super();
+    mainWindow = parent;
+    initMenuDefinition("MnuTxtHelpContact");
+    removeIcon();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		sendEmail();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    sendEmail();
+  }
 
-	private void sendEmail()
-	{
-		sendEmail(mainWindow);
-	}
+  private void sendEmail()
+  {
+    sendEmail(mainWindow);
+  }
 
-	public static void sendEmail(MainWindow mainWin)
-	{
-		WbConnection currentConnection = null;
+  public static void sendEmail(MainWindow mainWin)
+  {
+    WbConnection currentConnection = null;
 
-		if (mainWin != null)
-		{
-			MainPanel panel = mainWin.getCurrentPanel();
-			if (panel != null)
-			{
-				currentConnection = panel.getConnection();
-			}
-		}
+    if (mainWin != null)
+    {
+      MainPanel panel = mainWin.getCurrentPanel();
+      if (panel != null)
+      {
+        currentConnection = panel.getConnection();
+      }
+    }
 
-		try
-		{
-			BrowserLauncher.openEmail("support@sql-workbench.net", currentConnection);
-		}
-		catch (Exception ex)
-		{
-			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
-		}
-	}
+    try
+    {
+      BrowserLauncher.openEmail("support@sql-workbench.net", currentConnection);
+    }
+    catch (Exception ex)
+    {
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
+    }
+  }
 
 }

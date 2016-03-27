@@ -32,40 +32,42 @@ import workbench.interfaces.FileActions;
 import workbench.log.LogMgr;
 
 /**
- *	Delete an etry from a List
- *	@author  Thomas Kellerer
+ * Delete an entry from a List.
+ *
+ * @author Thomas Kellerer
  */
-public class DeleteListEntryAction extends WbAction
+public class DeleteListEntryAction
+  extends WbAction
 {
-	private FileActions client;
+  private FileActions client;
 
-	public DeleteListEntryAction(FileActions aClient)
-	{
-		this(aClient, "LblDeleteListEntry");
-	}
+  public DeleteListEntryAction(FileActions aClient)
+  {
+    this(aClient, "LblDeleteListEntry");
+  }
 
-	public DeleteListEntryAction(FileActions aClient, String aKey)
-	{
-		super();
-		client = aClient;
-		isConfigurable = false;
-		setMenuTextByKey(aKey);
-		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		setIcon("delete");
-	}
+  public DeleteListEntryAction(FileActions aClient, String aKey)
+  {
+    super();
+    client = aClient;
+    isConfigurable = false;
+    setMenuTextByKey(aKey);
+    setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
+    setIcon("delete");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		try
-		{
-			client.deleteItem();
-		}
-		catch (Exception ex)
-		{
-			LogMgr.logError(this, "Error saving profiles", ex);
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    try
+    {
+      client.deleteItem();
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError(this, "Error saving profiles", ex);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

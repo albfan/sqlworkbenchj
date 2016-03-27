@@ -33,28 +33,29 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.EditorPanel;
 
 /**
- * Reload the currently loaded file in the SQL Editor
+ * Reload the currently loaded file in the SQL Editor.
+ *
  * @author Thomas Kellerer
  */
 public class FileReloadAction
-	extends WbAction
+  extends WbAction
 {
-	private EditorPanel client;
+  private EditorPanel client;
 
-	public FileReloadAction(EditorPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFileReload", KeyStroke.getKeyStroke(KeyEvent.VK_F5,KeyEvent.SHIFT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setEnabled(aClient.hasFileLoaded());
-	}
+  public FileReloadAction(EditorPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtFileReload", KeyStroke.getKeyStroke(KeyEvent.VK_F5, KeyEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setEnabled(aClient.hasFileLoaded());
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.reloadFile();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.reloadFile();
+  }
 
   @Override
   public boolean useInToolbar()

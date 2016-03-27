@@ -43,6 +43,7 @@ public class ExecuteUpToCursorAction
 		this.target = aPanel;
 		this.initMenuDefinition("MnuTxtExecuteToCursor");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setIcon("execute_to");
 	}
 
 	@Override

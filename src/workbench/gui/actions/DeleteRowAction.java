@@ -29,34 +29,35 @@ import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
- * Delete the currently highlighted row(s) from a table
+ * Delete the currently highlighted row(s) from a table.
+ *
  * @see workbench.interfaces.DbData
  * @see workbench.gui.sql.DwPanel
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class DeleteRowAction
-	extends WbAction
+  extends WbAction
 {
-	private DbData client;
+  private DbData client;
 
-	public DeleteRowAction(DbData aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setEnabled(false);
-		this.initMenuDefinition("MnuTxtDeleteRow");
-		this.setIcon("delete");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-	}
+  public DeleteRowAction(DbData aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setEnabled(false);
+    this.initMenuDefinition("MnuTxtDeleteRow");
+    this.setIcon("delete");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.deleteRow();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.deleteRow();
+  }
 
-	public void setClient(DbData db)
-	{
-		this.client = db;
-	}
+  public void setClient(DbData db)
+  {
+    this.client = db;
+  }
 }

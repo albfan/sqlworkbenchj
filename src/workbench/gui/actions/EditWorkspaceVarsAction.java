@@ -33,28 +33,29 @@ import workbench.gui.MainWindow;
 import workbench.gui.components.PropertiesEditor;
 import workbench.gui.components.ValidatingDialog;
 
-
 /**
- * Action to close the current workspace
+ * Action to close the current workspace.
+ *
  * @see workbench.gui.MainWindow#closeWorkspace(boolean)
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
-public class EditWorkspaceVarsAction extends WbAction
+public class EditWorkspaceVarsAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public EditWorkspaceVarsAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtEditWkspVars", null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
-		this.setIcon(null);
-	}
+  public EditWorkspaceVarsAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtEditWkspVars", null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     if (client == null) return;
 
     Properties variables = client.getCurrentWorkspaceVariables();
@@ -70,9 +71,9 @@ public class EditWorkspaceVarsAction extends WbAction
     editor.optimizeColumnWidths();
     dialog.setVisible(true);
 
-		if (!dialog.isCancelled())
-		{
+    if (!dialog.isCancelled())
+    {
       client.replaceWorkspaceVariables(editor.getProperties());
-		}
-	}
+    }
+  }
 }
