@@ -42,6 +42,7 @@ import workbench.gui.components.ValidatingDialog;
 public class EditWorkspaceVarsAction
   extends WbAction
 {
+  private final String CONFIG_PROP = "workbench.gui.edit.workspace.variables.dialog";
   private MainWindow client;
 
   public EditWorkspaceVarsAction(MainWindow aClient)
@@ -64,12 +65,14 @@ public class EditWorkspaceVarsAction
     PropertiesEditor editor = new PropertiesEditor(variables);
     ValidatingDialog dialog = ValidatingDialog.createDialog(client, editor, ResourceMgr.getPlainString("MnuTxtEditWkspVars"), null, 0, false);
 
-    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.workspace.variables"))
+    if (!Settings.getInstance().restoreWindowSize(dialog, CONFIG_PROP))
     {
       dialog.setSize(400, 300);
     }
     editor.optimizeColumnWidths();
     dialog.setVisible(true);
+    
+    Settings.getInstance().storeWindowSize(dialog, CONFIG_PROP);
 
     if (!dialog.isCancelled())
     {

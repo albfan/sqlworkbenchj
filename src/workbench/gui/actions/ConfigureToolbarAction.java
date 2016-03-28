@@ -39,6 +39,7 @@ import workbench.gui.toolbar.ConfigureToolbarPanel;
 public class ConfigureToolbarAction
   extends WbAction
 {
+  private final String CONFIG_PROP = "workbench.gui.edit.toolbar.dialog";
   public ConfigureToolbarAction()
   {
     super();
@@ -57,12 +58,13 @@ public class ConfigureToolbarAction
 
     ValidatingDialog dialog = new ValidatingDialog(window, title, panel, true);
 
-    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.toolbar"))
+    if (!Settings.getInstance().restoreWindowSize(dialog, CONFIG_PROP))
     {
-      dialog.setSize(800, 600);
+      dialog.setSize((int)(window.getWidth() * 0.5), (int)(window.getHeight() * 0.5));
     }
     dialog.setLocationRelativeTo(window);
     dialog.setVisible(true);
+    Settings.getInstance().storeWindowSize(dialog, CONFIG_PROP);
   }
 
   @Override
