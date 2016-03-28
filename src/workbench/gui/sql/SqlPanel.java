@@ -590,8 +590,8 @@ public class SqlPanel
 	{
     if (this.toolbar == null)
     {
-      ToolbarBuilder builder = new ToolbarBuilder(globalActions);
-      toolbar = builder.createToolbar(getAllActions());
+      ToolbarBuilder builder = new ToolbarBuilder(getAllActions(), globalActions);
+      toolbar = builder.createToolbar();
       updateConnectionInfo();
     }
 		return this.toolbar;

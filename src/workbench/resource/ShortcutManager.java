@@ -55,7 +55,7 @@ import workbench.util.WbPersistence;
  */
 public class ShortcutManager
 {
-	private Set<ChangeListener> changeListener = new HashSet<ChangeListener>(5);
+	private Set<ChangeListener> changeListener = new HashSet<>(5);
 
 	private String filename;
 
@@ -64,7 +64,7 @@ public class ShortcutManager
 
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action in the customization dialog
-	private List<WbAction> allActions = new ArrayList<WbAction>(100);
+	private List<WbAction> allActions = new ArrayList<>(100);
 
 	private Map<KeyStroke, WbAction> keyDebugMap;
 
@@ -92,7 +92,7 @@ public class ShortcutManager
 
 		if (this.keyMap == null)
 		{
-			this.keyMap = new HashMap<String, ShortcutDefinition>(30);
+			this.keyMap = new HashMap<>(30);
 		}
 	}
 
@@ -310,7 +310,7 @@ public class ShortcutManager
 		// we only want to saveAs those definitions where a different mapping is defined
 		// so we first create a copy of the current keymap, and then remove any
 		// definition that is not customized.
-		HashMap<String, ShortcutDefinition> toSave = new HashMap<String, ShortcutDefinition>(this.keyMap);
+		HashMap<String, ShortcutDefinition> toSave = new HashMap<>(this.keyMap);
 		for (Entry<String, ShortcutDefinition> entry : keyMap.entrySet())
 		{
 			ShortcutDefinition def = entry.getValue();
@@ -368,4 +368,8 @@ public class ShortcutManager
 		return this.keyMap.get(aClassname);
 	}
 
+  public List<WbAction> getAllActions()
+  {
+    return Collections.unmodifiableList(allActions);
+  }
 }

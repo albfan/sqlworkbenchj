@@ -67,11 +67,4 @@ public class ObjectSearchAction
       if (parent != null) WbSwingUtilities.showDefaultCursor(parent);
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
-
 }

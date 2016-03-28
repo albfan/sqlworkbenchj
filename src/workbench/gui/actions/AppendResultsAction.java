@@ -40,6 +40,7 @@ import workbench.gui.sql.SqlPanel;
 public class AppendResultsAction
 	extends CheckBoxAction
 {
+  private final String iconName = "append_result";
 	private SqlPanel client;
 	private JToggleButton toggleButton;
 
@@ -69,11 +70,23 @@ public class AppendResultsAction
 			this.toggleButton = new JToggleButton(this);
 			this.toggleButton.setText(null);
 			this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-			this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon("append_result"));
+			this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(iconName));
 			this.toggleButton.setSelected(this.isSwitchedOn());
 		}
 		return this.toggleButton;
 	}
+
+  @Override
+  public String getIconKey()
+  {
+    return iconName;
+  }
+
+  @Override
+  public boolean hasIcon()
+  {
+    return true;
+  }
 
 	@Override
 	public void addToToolbar(JToolBar aToolbar)

@@ -48,10 +48,4 @@ public class ShowHelpAction
   {
     HelpManager.showHelpIndex();
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

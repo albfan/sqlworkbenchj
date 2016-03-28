@@ -46,9 +46,4 @@ public class ShowManualAction
     HelpManager.showPdfHelp();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

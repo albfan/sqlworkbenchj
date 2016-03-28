@@ -114,10 +114,4 @@ public class ShowDbmsManualAction
       setTooltip(null);
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

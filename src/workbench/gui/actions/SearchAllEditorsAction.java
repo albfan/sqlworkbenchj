@@ -55,9 +55,4 @@ public class SearchAllEditorsAction
     });
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

@@ -572,6 +572,11 @@ public class WbAction
     return true;
   }
 
+  public String getIconKey()
+  {
+    return iconKey;
+  }
+  
   public boolean hasIcon()
   {
     return iconKey != null;

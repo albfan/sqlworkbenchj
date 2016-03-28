@@ -29,57 +29,65 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
  */
 public class ToolbarBuilder
 {
-  private final String separator = "wb-sep";
-  private final String defaultActions =
+  public static final String CONFIG_PROPERTY = "workbench.gui.toolbar.actions";
+  public static final String SEPARATOR_KEY = "$sep$";
+
+  private static final String DEFAULT_ACTIONS =
     "wb-ExecuteSelAction,wb-ExecuteCurrentAction," +
-    separator +
+    SEPARATOR_KEY +
     ",wb-StopAction," +
-    separator +
+    SEPARATOR_KEY +
     ",wb-FirstStatementAction,wb-PrevStatementAction,wb-NextStatementAction,wb-LastStatementAction," +
-    separator +
+    SEPARATOR_KEY +
     ",wb-UpdateDatabaseAction,wb-InsertRowAction,wb-CopyRowAction,wb-DeleteRowAction,"+
     ",wb-SelectionFilterAction,wb-FilterDataAction,wb-FilterPickerAction,wb-ResetFilterAction,"+
-    separator +
+    SEPARATOR_KEY +
     ",wb-CommitAction,wb-RollbackAction," +
-    separator +
+    SEPARATOR_KEY +
     ",wb-IgnoreErrorsAction,wb-AppendResultsAction," +
-    separator +
+    SEPARATOR_KEY +
     ",wb-ShowDbExplorerAction,wb-ShowDbTreeAction";
+
   private MainToolbar toolbar;
   private final List<WbAction> mainActions;
+  private final List<WbAction> panelActions;
 
-  public ToolbarBuilder(List<WbAction> globalActions)
+  public ToolbarBuilder(final List<WbAction> panelActionList, final List<WbAction> globalActions)
   {
     mainActions = new ArrayList<>(globalActions);
+    panelActions = new ArrayList<>(panelActionList);
   }
 
-  public MainToolbar createToolbar(List<WbAction> panelActions)
+  public MainToolbar createToolbar()
   {
-    WbSwingUtilities.invoke(() -> _createToolbar(panelActions));
+    // make sure this happens on the EDT!
+    WbSwingUtilities.invoke(this::_createToolbar);
     return toolbar;
   }
 
-  private void _createToolbar(final List<WbAction> panelActions)
+  private void _createToolbar()
   {
     toolbar = new MainToolbar();
-    List<String> commands = Settings.getInstance().getListProperty("workbench.gui.toolbar.actions", false, defaultActions);
+    List<String> commands = getConfiguredToolbarCommands();
 
     LogMgr.logDebug("ToolbarBuilder.createToolbar()", "Using toolbar list: " + commands);
     for (String cmd : commands)
     {
-      if (cmd.equals(separator))
+      if (cmd.equals(SEPARATOR_KEY))
       {
         toolbar.addSeparator();
       }
       else
       {
-        WbAction action = getPanelAction(panelActions, cmd);
+        WbAction action = getPanelAction(cmd);
         if (action != null)
         {
           action.addToToolbar(toolbar);
@@ -102,9 +110,19 @@ public class ToolbarBuilder
     toolbar.addConnectionInfo();
   }
 
-  private WbAction getPanelAction(List<WbAction> actions, String actionCommand)
+  public static List<String> getDefaultToolbarCommands()
   {
-    for (WbAction action : actions)
+    return StringUtil.stringToList(DEFAULT_ACTIONS, ",", true, true, false, false);
+  }
+  
+  public static List<String> getConfiguredToolbarCommands()
+  {
+    return Settings.getInstance().getListProperty(CONFIG_PROPERTY, false, DEFAULT_ACTIONS);
+  }
+
+  private WbAction getPanelAction(String actionCommand)
+  {
+    for (WbAction action : panelActions)
     {
       if (action.getActionCommand().equals(actionCommand)) return action;
     }

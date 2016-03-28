@@ -82,10 +82,4 @@ public class ShowDbExplorerAction
       }
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

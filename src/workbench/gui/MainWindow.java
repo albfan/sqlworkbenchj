@@ -87,6 +87,7 @@ import workbench.gui.actions.AssignWorkspaceAction;
 import workbench.gui.actions.BookmarksAction;
 import workbench.gui.actions.CloseWorkspaceAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
+import workbench.gui.actions.ConfigureToolbarAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DataPumperAction;
 import workbench.gui.actions.DisconnectTabAction;
@@ -231,6 +232,7 @@ public class MainWindow
   private FileCloseAction fileCloseAction;
   private OpenFileAction fileOpenAction;
   private FileExitAction fileExitAction;
+
 	private final WbTabbedPane sqlTab;
 	private final TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
@@ -832,6 +834,29 @@ public class MainWindow
 		return menuBar;
 	}
 
+  public List<WbAction> getAllActions()
+  {
+    SqlPanel panel = null;
+    int count = sqlTab.getTabCount();
+    for (int i=0; i < count; i++)
+    {
+      if (sqlTab.getComponent(i) instanceof SqlPanel)
+      {
+        panel = (SqlPanel)sqlTab.getComponent(i);
+      }
+    }
+    if (panel == null)
+    {
+      // should not happen
+      panel = new SqlPanel(-1);
+    }
+
+    List<WbAction> actions = new ArrayList<>(100);
+    actions.addAll(getGlobalActions());
+    actions.addAll(panel.getAllActions());
+    return actions;
+  }
+
   private List<WbAction> getGlobalActions()
   {
     List<WbAction> actions = new ArrayList<>(15);
@@ -862,6 +887,14 @@ public class MainWindow
     actions.add(loadMacros);
     actions.add(saveMacros);
     actions.add(showMacroPopup);
+
+    actions.add(new DataPumperAction(this));
+    actions.add(new ObjectSearchAction(this));
+    actions.add(new BookmarksAction(this));
+    actions.add(new SearchAllEditorsAction(this));
+    actions.add(new ShowHelpAction());
+    actions.add(new ShowManualAction());
+
     return actions;
   }
 
@@ -2952,6 +2985,7 @@ public class MainWindow
     result.addSeparator();
     new OptionsDialogAction().addToMenu(result);
     new ConfigureShortcutsAction().addToMenu(result);
+    new ConfigureToolbarAction().addToMenu(result);
 
 		return result;
 	}

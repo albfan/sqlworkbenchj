@@ -56,10 +56,4 @@ public class ShowDbTreeAction
       mainWin.showDbTree();
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

@@ -1,5 +1,5 @@
 /*
- * RollbackAction.java
+ * ManageDriversAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -24,37 +24,52 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
-import workbench.interfaces.Commitable;
+import workbench.WbManager;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
+import workbench.gui.MainWindow;
+import workbench.gui.components.ValidatingDialog;
+import workbench.gui.toolbar.ConfigureToolbarPanel;
 
 /**
- * Send a rollback() to the client
- *
  * @author Thomas Kellerer
  */
-public class RollbackAction
+public class ConfigureToolbarAction
   extends WbAction
 {
-  private Commitable client;
-
-  public RollbackAction(Commitable aClient)
+  public ConfigureToolbarAction()
   {
     super();
-    this.client = aClient;
-    this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
-    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-    this.setIcon("Rollback");
-    this.setEnabled(false);
+    this.initMenuDefinition("MnuTxtEditToolbar");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
   }
 
   @Override
   public void executeAction(ActionEvent e)
   {
-    if (this.client != null) this.client.rollback();
+    MainWindow window = (MainWindow)WbManager.getInstance().getCurrentWindow();
+
+    ConfigureToolbarPanel panel = new ConfigureToolbarPanel(window.getAllActions());
+
+    String title = ResourceMgr.getString("MnuTxtEditToolbar").replace("...", "");
+
+    ValidatingDialog dialog = new ValidatingDialog(window, title, panel, true);
+
+    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.toolbar"))
+    {
+      dialog.setSize(800, 600);
+    }
+    dialog.setLocationRelativeTo(window);
+    dialog.setVisible(true);
   }
+
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
+
 }

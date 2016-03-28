@@ -59,4 +59,10 @@ public class NewGroupAction
 		}
 	}
 
+  @Override
+  public boolean useInToolbar()
+  {
+    return false;
+  }
+
 }
