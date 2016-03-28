@@ -46,7 +46,7 @@ public interface MainPanel
 	extends ResultLogger
 {
 	List getMenuItems();
-	WbToolbar getToolbar(List<WbAction> globalActions);
+	WbToolbar getToolbar(List<WbAction> globalActions, boolean createNew);
 	void showLogPanel();
 	void showResultPanel();
 	void setConnectionClient(Connectable client);

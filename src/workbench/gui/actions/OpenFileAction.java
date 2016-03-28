@@ -278,10 +278,4 @@ public class OpenFileAction
 		return null;
 	}
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
-
 }

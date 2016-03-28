@@ -88,8 +88,17 @@ public class ConnectionInfo
 		add(infoText, BorderLayout.CENTER);
 	}
 
+  private boolean connectionsAreEqual(WbConnection one, WbConnection other)
+  {
+    if (one == null && other == null) return true;
+    if (one == null || other == null) return false;
+    return one.getId().equals(other.getId());
+  }
+
 	public void setConnection(WbConnection aConnection)
 	{
+    if (connectionsAreEqual(sourceConnection, aConnection)) return;
+
 		if (this.sourceConnection != null)
 		{
 			this.sourceConnection.removeChangeListener(this);

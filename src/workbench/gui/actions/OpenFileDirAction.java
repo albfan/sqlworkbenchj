@@ -33,6 +33,9 @@ import workbench.log.LogMgr;
 import workbench.gui.WbSwingUtilities;
 
 /**
+ * An action to open the directory of the currently loaded file in the system.
+ *
+ * @see Desktop#open(java.io.File) 
  *
  * @author Thomas Kellerer
  */

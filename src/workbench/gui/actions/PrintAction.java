@@ -77,10 +77,4 @@ public class PrintAction
       this.client.addTableModelListener(this);
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

@@ -60,4 +60,11 @@ public class MainToolbar
     connectionInfo.setConnection(conn);
   }
 
+  public void dispose()
+  {
+    if (connectionInfo != null)
+    {
+      connectionInfo.dispose();
+    }
+  }
 }

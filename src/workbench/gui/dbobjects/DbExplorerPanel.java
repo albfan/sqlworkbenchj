@@ -981,7 +981,7 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public WbToolbar getToolbar(List<WbAction> globalActions)
+	public WbToolbar getToolbar(List<WbAction> globalActions, boolean createNew)
 	{
 		return this.toolbar;
 	}

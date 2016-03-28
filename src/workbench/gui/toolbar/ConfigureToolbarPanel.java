@@ -114,6 +114,7 @@ public class ConfigureToolbarPanel
       }
       sourceModel.removeItem(selected[i]);
     }
+    configuredActions.clearSelection();
   }
 
   private void checkAddButton()

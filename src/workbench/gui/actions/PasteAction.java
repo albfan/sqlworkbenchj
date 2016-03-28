@@ -63,9 +63,4 @@ public class PasteAction
     this.client.paste();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

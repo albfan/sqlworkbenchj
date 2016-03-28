@@ -74,10 +74,4 @@ public class CopyAsSqlDeleteAction
     }
     copier.copyAsSqlDelete(false, selectColumns);
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

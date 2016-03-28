@@ -62,10 +62,4 @@ public class CutAction
   {
     this.client.cut();
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

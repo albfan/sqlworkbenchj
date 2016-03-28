@@ -55,9 +55,4 @@ public class UndoAction
     this.client.undo();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

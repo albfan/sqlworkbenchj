@@ -54,9 +54,4 @@ public class ImportFileAction
     this.client.importFile();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

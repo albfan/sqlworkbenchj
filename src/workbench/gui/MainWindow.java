@@ -163,6 +163,7 @@ import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
 import workbench.gui.tabhistory.ClosedTabManager;
+import workbench.gui.toolbar.ToolbarBuilder;
 
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
@@ -322,6 +323,7 @@ public class MainWindow
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_SHOW_TOOLBAR,
+      ToolbarBuilder.CONFIG_PROPERTY,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
 			GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON,
 			Settings.PROPERTY_TAB_POLICY,
@@ -907,7 +909,7 @@ public class MainWindow
 	 *
 	 * This method should be called on the EDT.
 	 */
-	private void updateToolbarVisibility()
+	private void updateToolbarVisibility(boolean createNew)
 	{
 		final JComponent content = (JComponent)this.getContentPane();
 
@@ -922,7 +924,7 @@ public class MainWindow
 			final MainPanel curPanel = this.getCurrentPanel();
 			if (curPanel != null)
 			{
-				this.currentToolbar = curPanel.getToolbar(getGlobalActions());
+				currentToolbar = curPanel.getToolbar(getGlobalActions(), createNew);
 				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}
@@ -943,15 +945,16 @@ public class MainWindow
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
+    String property = evt.getPropertyName();
+    if (Settings.PROPERTY_SHOW_TOOLBAR.equals(property) || ToolbarBuilder.CONFIG_PROPERTY.equals(property))
 		{
-			updateToolbarVisibility();
+			updateToolbarVisibility(ToolbarBuilder.CONFIG_PROPERTY.equals(property));
 		}
-		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
+		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(property))
 		{
 			this.renumberTabs();
 		}
-		else if (GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON.equals(evt.getPropertyName()))
+		else if (GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON.equals(property))
 		{
 			if (GuiSettings.getShowSqlTabCloseButton())
 			{
@@ -962,11 +965,11 @@ public class MainWindow
 				sqlTab.showCloseButton(null);
 			}
 		}
-		else if (Settings.PROPERTY_TAB_POLICY.equals(evt.getPropertyName()))
+		else if (Settings.PROPERTY_TAB_POLICY.equals(property))
 		{
 			updateTabPolicy();
 		}
-		else if (GuiSettings.WINDOW_TITLE_PROPS.contains(evt.getPropertyName()))
+		else if (GuiSettings.WINDOW_TITLE_PROPS.contains(property))
 		{
 			updateWindowTitle();
 		}
@@ -1414,7 +1417,7 @@ public class MainWindow
 		}
 
 		setJMenuBar(menu);
-		updateToolbarVisibility();
+		updateToolbarVisibility(false);
 		createNewConnection.checkState();
 		disconnectTab.checkState();
 		checkMacroMenuForPanel(index);

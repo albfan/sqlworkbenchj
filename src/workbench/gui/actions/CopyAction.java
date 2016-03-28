@@ -62,10 +62,4 @@ public class CopyAction
 	{
 		this.client.copy();
 	}
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

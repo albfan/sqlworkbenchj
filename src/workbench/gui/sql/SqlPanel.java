@@ -444,7 +444,10 @@ public class SqlPanel
 		}
 
 		tabName = ResourceMgr.getDefaultTabLabel();
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON, GuiSettings.PROP_SHOW_TEXT_SELECTION_INFO);
+		Settings.getInstance().addPropertyChangeListener(this,
+      ToolbarBuilder.CONFIG_PROPERTY,
+      GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON,
+      GuiSettings.PROP_SHOW_TEXT_SELECTION_INFO);
 		editor.setMacroExpansionEnabled(true, macroClientId);
 		editor.setBracketCompletionEnabled(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
@@ -586,10 +589,14 @@ public class SqlPanel
 	}
 
 	@Override
-	public WbToolbar getToolbar(List<WbAction> globalActions)
+	public WbToolbar getToolbar(List<WbAction> globalActions, boolean createNew)
 	{
-    if (this.toolbar == null)
+    if (this.toolbar == null || createNew)
     {
+      if (toolbar != null)
+      {
+        toolbar.dispose();
+      }
       ToolbarBuilder builder = new ToolbarBuilder(getAllActions(), globalActions);
       toolbar = builder.createToolbar();
       updateConnectionInfo();
@@ -4349,6 +4356,11 @@ public class SqlPanel
     String prop = evt.getPropertyName();
     if (prop == null) return;
 
+    if (ToolbarBuilder.CONFIG_PROPERTY.equals(prop))
+    {
+      // force re-creation of the toolbar
+      toolbar = null;
+    }
     if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
     {
       this.checkCommitAction();

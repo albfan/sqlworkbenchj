@@ -50,10 +50,4 @@ public class RedoAction
   {
     this.client.redo();
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

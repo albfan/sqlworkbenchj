@@ -57,7 +57,7 @@ public class ShowObjectInfoAction
   public ShowObjectInfoAction(SqlPanel panel)
   {
     display = panel;
-    setIcon(null);
+    setIcon("object-info");
     setMenuItemName(ResourceMgr.MNU_TXT_SQL);
     initMenuDefinition("MnuTxtShowObjectDef", KeyStroke.getKeyStroke(KeyEvent.VK_I, PlatformShortcuts.getDefaultModifier()));
     checkEnabled();

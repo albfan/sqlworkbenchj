@@ -53,6 +53,7 @@ public class PrintPreviewAction
     this.initMenuDefinition("MnuTxtPrintPreview");
     this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
     this.setEnabled(false);
+    this.setIcon("print-preview");
   }
 
   @Override
@@ -87,11 +88,5 @@ public class PrintPreviewAction
     {
       this.client.addTableModelListener(this);
     }
-  }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
   }
 }

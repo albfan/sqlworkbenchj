@@ -73,10 +73,4 @@ public class CopyAsDbUnitXMLAction
     }
     copier.copyAsDbUnit(false, selectColumns);
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }
