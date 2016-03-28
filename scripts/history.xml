@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-03-06">
+    <entry dev-build="2" type="enh">For HSQLDB 2.3.4 synonyms are now displayed</entry>
+    <entry dev-build="2" type="enh">It's now possible to configure the buttons on the toolbar</entry>
     <entry dev-build="1" type="enh">It's now possible to restore recently closed editor tabs</entry>
     <entry dev-build="1" type="enh">For Progress OpenEdge, squences and synonyms are now shown in the DbExplorer</entry>
     <entry dev-build="1" type="enh">It's now possible to associate variables with the connection profile and the workspace</entry>
