@@ -83,7 +83,16 @@ public class ConfigureToolbarPanel
     ActionListModel targetModel = (ActionListModel)configuredActions.getModel();
 
     if (isEmpty(selected)) return;
-    int targetIndex = configuredActions.getMaxSelectionIndex() + 1;
+    int targetIndex = -1;
+
+    if (configuredActions.getMaxSelectionIndex() > -1)
+    {
+      targetIndex = configuredActions.getMaxSelectionIndex() + 1;
+    }
+    else
+    {
+      targetIndex = targetModel.getSize();
+    }
 
     for (int i=selected.length - 1; i >=0 ; i--)
     {
@@ -156,16 +165,21 @@ public class ConfigureToolbarPanel
   private void addSeparator()
   {
     int index = configuredActions.getMaxSelectionIndex();
-    if (index < 0) return;
     ActionListModel model = (ActionListModel)configuredActions.getModel();
-    if (index == model.getSize() - 1)
+
+    int toSelect = -1;
+
+    if (index == model.getSize() - 1 || index < 0)
     {
       model.addItem(ToolbarBuilder.SEPARATOR_KEY);
+      toSelect = model.getSize() - 1;
     }
     else
     {
       model.addItem(index + 1, ToolbarBuilder.SEPARATOR_KEY);
+      toSelect = index + 1;
     }
+    configuredActions.setSelectedIndex(toSelect);
   }
 
   private void moveUp()
@@ -374,6 +388,7 @@ public class ConfigureToolbarPanel
     jPanel1.add(removeItem, gridBagConstraints);
 
     addSeparator.setText(ResourceMgr.getString("LblAddSep")); // NOI18N
+    addSeparator.setToolTipText(ResourceMgr.getString("d_LblAddSep")); // NOI18N
     addSeparator.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)

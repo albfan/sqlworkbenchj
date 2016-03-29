@@ -60,7 +60,7 @@ public class ConfigureToolbarAction
 
     if (!Settings.getInstance().restoreWindowSize(dialog, CONFIG_PROP))
     {
-      dialog.setSize((int)(window.getWidth() * 0.5), (int)(window.getHeight() * 0.5));
+      dialog.setSize((int)(window.getWidth() * 0.7), (int)(window.getHeight() * 0.7));
     }
     dialog.setLocationRelativeTo(window);
     dialog.setVisible(true);
