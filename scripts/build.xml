@@ -850,23 +850,30 @@
   </target>
 
   <target name="generate-lexer">
-    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
-      <jvmarg value="-Xmx256m"/>
-      <arg value="-q"/>
-      <arg value="../src/workbench/sql/lexer/StandardLexer.flex"/>
-    </java>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/lexer/StandardLexer.flex"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/StandardLexer.flex"/>
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
           tofile="../src/workbench/sql/lexer/NonStandardLexer.flex"/>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/lexer/StandardLexer.flex"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
           tofile="../src/workbench/sql/lexer/MySQLLexer.flex"/>
 
     <copy quiet="true" overwrite="true"
-					file="../src/workbench/sql/lexer/StandardLexer.flex"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
           tofile="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
+
+    <replace file="../src/workbench/sql/lexer/StandardLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>SqlServerLexer</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
+    </replace>
 
     <replace file="../src/workbench/sql/lexer/SqlServerLexer.flex">
       <replacefilter>
@@ -877,18 +884,23 @@
         <replacetoken>"UPDATE"|</replacetoken>
         <replacevalue>"UPDATE"|"(UPDATE{wsp}STATISTICS)"|</replacevalue>
       </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|" value="(BEGIN{wsp}TRANSACTION)|(BEGIN{wsp}TRAN)|"/>
       <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
-      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
       <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
       <replacefilter token="(PACKAGE{wsp}BODY)|"/>
       <replacefilter token="(TYPE{wsp}BODY)|"/>
       <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
-      <replacefilter token="(CONNECT{wsp}BY)|" value="(BEGIN{wsp}TRANSACTION)|"/>
-      <replacefilter token="(START{wsp}WITH)|" value="(BEGIN{wsp}TRANS)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
       <replacefilter token='"SIMILAR"|'/>
       <replacefilter token='"CYCLE"|'/>
       <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"DEFERRABLE"|'/>
+      <replacefilter token='"DEFERRED"|'/>
       <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
@@ -905,6 +917,7 @@
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>NonStandardLexer</replacevalue>
       </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
       <replacefilter>
         <replacetoken>string=([\'](([^\']|\'\')*)[\'])</replacetoken>
         <replacevalue>string=([\'](([^\']|\'\'|\\\')*)[\'])</replacevalue>
@@ -916,13 +929,14 @@
         <replacetoken>StandardLexer</replacetoken>
         <replacevalue>MySQLLexer</replacevalue>
       </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
       <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
       <replacefilter token="(START{wsp}WITH)|"/>
-      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
       <replacefilter token="(PACKAGE{wsp}BODY)|"/>
       <replacefilter token="(TYPE{wsp}BODY)|"/>
-      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
       <replacefilter token="(CONNECT{wsp}BY)|"/>
       <replacefilter token="(START{wsp}TRANSACTION)|"/>
@@ -930,6 +944,8 @@
       <replacefilter token='"SIMILAR"|'/>
       <replacefilter token='"CYCLE"|'/>
       <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"DEFERRABLE"|'/>
+      <replacefilter token='"DEFERRED"|'/>
       <replacefilter token='(DATABASE{wsp}LINK)|'/>
       <replacefilter token="(START{wsp}WITH)|"/>
       <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
@@ -937,6 +953,8 @@
       <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
       <replacefilter token="(FULL{wsp}JOIN)|"/>
       <replacefilter token="(FULL{wsp}OUTER{wsp}JOIN)|"/>
+      <replacefilter token="(OUTER{wsp}APPLY)|"/>
+      <replacefilter token="(CROSS{wsp}APPLY)|"/>
       <replacefilter>
         <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>
         <replacevalue>linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)</replacevalue>
@@ -946,6 +964,12 @@
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(`[^\r\n\t\f`]+`)]]></replacevalue>
       </replacefilter>
     </replace>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/StandardLexer.flex"/>
+    </java>
 
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
       <jvmarg value="-Xmx256m"/>
