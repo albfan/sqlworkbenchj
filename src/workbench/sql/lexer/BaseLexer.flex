@@ -1,10 +1,10 @@
-/* MySQLLexer.java is a generated file.  You probably want to
- * edit MySQLLexer.lex to make changes.  Use JFlex to generate it.
- * To generate MySQLLexer.java
+/* StandardLexer.java is a generated file.  You probably want to
+ * edit StandardLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate StandardLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main MySQLLexer.lex</code><br>
- * You will then have a file called MySQLLexer.java
+ * <code>java JFlex.Main StandardLexer.lex</code><br>
+ * You will then have a file called StandardLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * MySQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * StandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  MySQLLexer shredder = new MySQLLexer(System.in);
+ *  StandardLexer shredder = new StandardLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -50,7 +50,7 @@ import workbench.util.CharSequenceReader;
 
 %public
 %implements SQLLexer
-%class MySQLLexer
+%class StandardLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -137,12 +137,12 @@ import workbench.util.CharSequenceReader;
     }
   }
 
-	MySQLLexer(String source)
+	StandardLexer(String source)
 	{
 		this(new StringReader(source));
 	}
 
-	MySQLLexer(CharSequence source)
+	StandardLexer(CharSequence source)
 	{
 		this(new CharSequenceReader(source));
 	}
@@ -152,9 +152,9 @@ import workbench.util.CharSequenceReader;
 wsp = [ \r\n\t\f]+
 
 keyword=(
-
+XXXX_DBMS_XXXX|
 (ALTER{wsp}SESSION)|
-
+(CONNECT{wsp}BY)|
 (PRIMARY{wsp}KEY)|
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
@@ -162,21 +162,21 @@ keyword=(
 (PARTITION{wsp}BY)|
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|
-
-
-
-
+(PACKAGE{wsp}BODY)|
+(TYPE{wsp}BODY)|
+(CREATE{wsp}OR{wsp}REPLACE)|
+(CREATE{wsp}OR{wsp}ALTER)|
 (IS{wsp}NOT{wsp}NULL)|
-
-
-
-
+(FLASHBACK{wsp}ARCHIVE)|
+(MATERIALIZED{wsp}VIEW)|
+(MATERIALIZED{wsp}VIEW{wsp}LOG)|
+(START{wsp}WITH)|
 (OUTER{wsp}JOIN)|
 (CROSS{wsp}JOIN)|
-
+(OUTER{wsp}APPLY)|
 (CROSS{wsp}APPLY)|
-
-
+(FULL{wsp}JOIN)|
+(FULL{wsp}OUTER{wsp}JOIN)|
 (INNER{wsp}JOIN)|
 (LEFT{wsp}JOIN)|
 (LEFT{wsp}OUTER{wsp}JOIN)|
@@ -188,13 +188,13 @@ keyword=(
 (IS{wsp}NULL)|
 (IS{wsp}NOT{wsp}NULL)|
 (CHARACTER{wsp}VARYING)|
-
+(DISTINCT{wsp}ON)|
 (PRIMARY{wsp}KEY)|
-
-
+(SNAPSHOT{wsp}LOG)|
+(FOREIGN{wsp}DATA{wsp}WRAPPER)|
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
-
+(DATABASE{wsp}LINK)|
 "AFTER"|
 "AGGREGATE"|
 "ALL"|
@@ -249,17 +249,17 @@ keyword=(
 "CURRENT_USER"|
 "CURSOR"|
 "CURSOR_NAME"|
-
+"CYCLE"|
 "DATABASE"|
 "DATE"|
 "DAY"|
 "DECIMAL"|
 "DECLARE"|
 "DEFAULT"|
-
-
+"DEFERRABLE"|
+"DEFERRED"|
 "DELETE"|
-
+"DEPTH"|
 "DENSE_RANK"|
 "DESCRIBE"|
 "DISCONNECT"|
@@ -402,11 +402,11 @@ keyword=(
 "SESSION_USER"|
 "SET"|
 "SHARE"|
-
-
+"SIMILAR"|
+(SIMILAR{wsp}TO)|
 "SMALLINT"|
 "SNAPSHOT"|
-
+(START{wsp}TRANSACTION)|
 (BEGIN{wsp}TRANSACTION)|
 (BEGIN{wsp}WORK)|
 "SUBSTRING"|
@@ -491,7 +491,7 @@ keyword=(
 
 whitespace=([ \r\n\t\f])
 wbvar=(\$\[)(\&|\?)?[a-zA-Z_0-9]+(\])|(\$\{)(\&|\?)?[a-zA-Z_0-9]+(\})
-identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(`[^\r\n\t\f`]+`)
+identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
@@ -504,7 +504,7 @@ stringerror=([\'](([^\r\n\'])*)[\r\n])
 bitstringerror1=("B"[\']([^01\r\n]*)[\'])
 bitstringerror2=("B"[\'](([^\r\n\']|[\\][\'])*)[\r\n])
 floatpoint=(([+-]?{digits}"."({digits}?)("E"[+-]{digits})?)|(([+-]?{digits}?)"."{digits}("E"[+-]{digits})?)|([+-]?{digits}"E"[+-]{digits}))
-linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)
+linecomment=("--"[^\r\n]*)
 commentstart="/*"
 commenttext=(([^\*\/]|([\*]+[^\*\/])|([\/]+[^\*\/]))*)
 commentend=(([\*]*)"/")

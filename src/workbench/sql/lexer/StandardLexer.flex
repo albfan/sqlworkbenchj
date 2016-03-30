@@ -1,10 +1,10 @@
-/* StandardLexer.java is a generated file.  You probably want to
- * edit StandardLexer.lex to make changes.  Use JFlex to generate it.
- * To generate StandardLexer.java
+/* SqlServerLexer.java is a generated file.  You probably want to
+ * edit SqlServerLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate SqlServerLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main StandardLexer.lex</code><br>
- * You will then have a file called StandardLexer.java
+ * <code>java JFlex.Main SqlServerLexer.lex</code><br>
+ * You will then have a file called SqlServerLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * StandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * SqlServerLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  StandardLexer shredder = new StandardLexer(System.in);
+ *  SqlServerLexer shredder = new SqlServerLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -50,7 +50,7 @@ import workbench.util.CharSequenceReader;
 
 %public
 %implements SQLLexer
-%class StandardLexer
+%class SqlServerLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -137,12 +137,12 @@ import workbench.util.CharSequenceReader;
     }
   }
 
-	StandardLexer(String source)
+	SqlServerLexer(String source)
 	{
 		this(new StringReader(source));
 	}
 
-	StandardLexer(CharSequence source)
+	SqlServerLexer(CharSequence source)
 	{
 		this(new CharSequenceReader(source));
 	}
@@ -152,6 +152,7 @@ import workbench.util.CharSequenceReader;
 wsp = [ \r\n\t\f]+
 
 keyword=(
+
 (ALTER{wsp}SESSION)|
 (CONNECT{wsp}BY)|
 (PRIMARY{wsp}KEY)|
@@ -171,8 +172,8 @@ keyword=(
 (MATERIALIZED{wsp}VIEW{wsp}LOG)|
 (START{wsp}WITH)|
 (OUTER{wsp}JOIN)|
-(OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|
+(OUTER{wsp}APPLY)|
 (CROSS{wsp}APPLY)|
 (FULL{wsp}JOIN)|
 (FULL{wsp}OUTER{wsp}JOIN)|
@@ -406,6 +407,8 @@ keyword=(
 "SMALLINT"|
 "SNAPSHOT"|
 (START{wsp}TRANSACTION)|
+(BEGIN{wsp}TRANSACTION)|
+(BEGIN{wsp}WORK)|
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|

@@ -39,10 +39,11 @@ public class TransactionStartCommand
   public static final String MANUAL_TRANSACTION_IN_PROGRESS = "manual_transaction";
   public static final String PREVIOUS_SP_STRATEGY = "savepoint_strategy";
 
-  public static final TransactionStartCommand START_TRANS = new TransactionStartCommand("START TRANSACTION");
-  public static final TransactionStartCommand BEGIN_TRANS = new TransactionStartCommand("BEGIN");
-  public static final TransactionStartCommand BEGIN_TRANS_MS = new TransactionStartCommand("BEGIN TRANSACTION");
-  public static final TransactionStartCommand BEGIN_TRANS_MS_SHORT = new TransactionStartCommand("BEGIN TRANS");
+  public static final TransactionStartCommand BEGIN = new TransactionStartCommand("BEGIN");
+  public static final TransactionStartCommand BEGIN_WORK = new TransactionStartCommand("BEGIN WORK");
+  public static final TransactionStartCommand BEGIN_TRANSACTION = new TransactionStartCommand("BEGIN TRANSACTION");
+  public static final TransactionStartCommand BEGIN_TRAN = new TransactionStartCommand("BEGIN TRAN");
+  public static final TransactionStartCommand START_TRANSACTION = new TransactionStartCommand("START TRANSACTION");
 
   private final String verb;
 

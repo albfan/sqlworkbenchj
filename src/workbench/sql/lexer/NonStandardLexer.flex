@@ -152,6 +152,7 @@ import workbench.util.CharSequenceReader;
 wsp = [ \r\n\t\f]+
 
 keyword=(
+
 (ALTER{wsp}SESSION)|
 (CONNECT{wsp}BY)|
 (PRIMARY{wsp}KEY)|
@@ -171,8 +172,8 @@ keyword=(
 (MATERIALIZED{wsp}VIEW{wsp}LOG)|
 (START{wsp}WITH)|
 (OUTER{wsp}JOIN)|
-(OUTER{wsp}APPLY)|
 (CROSS{wsp}JOIN)|
+(OUTER{wsp}APPLY)|
 (CROSS{wsp}APPLY)|
 (FULL{wsp}JOIN)|
 (FULL{wsp}OUTER{wsp}JOIN)|
@@ -406,6 +407,8 @@ keyword=(
 "SMALLINT"|
 "SNAPSHOT"|
 (START{wsp}TRANSACTION)|
+(BEGIN{wsp}TRANSACTION)|
+(BEGIN{wsp}WORK)|
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|

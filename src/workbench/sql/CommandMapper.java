@@ -352,18 +352,32 @@ public class CommandMapper
       this.cmdDispatch.put(copy.getVerb(), copy);
 
       // support manual transactions in auto commit mode
-      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS.getVerb(), TransactionStartCommand.BEGIN_TRANS);
-      this.cmdDispatch.put(TransactionStartCommand.START_TRANS.getVerb(), TransactionStartCommand.START_TRANS);
-      this.dbSpecificCommands.add(TransactionStartCommand.START_TRANS.getVerb());
-      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS.getVerb());
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN.getVerb(), TransactionStartCommand.BEGIN);
+      this.cmdDispatch.put(TransactionStartCommand.START_TRANSACTION.getVerb(), TransactionStartCommand.START_TRANSACTION);
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANSACTION.getVerb(), TransactionStartCommand.BEGIN_TRANSACTION);
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_WORK.getVerb(), TransactionStartCommand.BEGIN_WORK);
+      this.dbSpecificCommands.add(TransactionStartCommand.START_TRANSACTION.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANSACTION.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_WORK.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN.getVerb());
 		}
 
     if (metaData.isSqlServer())
     {
-      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS_MS.getVerb(), TransactionStartCommand.BEGIN_TRANS_MS);
-      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANS_MS_SHORT.getVerb(), TransactionStartCommand.BEGIN_TRANS_MS_SHORT);
-      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS_MS.getVerb());
-      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANS_MS_SHORT.getVerb());
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANSACTION.getVerb(), TransactionStartCommand.BEGIN_TRANSACTION);
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRAN.getVerb(), TransactionStartCommand.BEGIN_TRAN);
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANSACTION.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRAN.getVerb());
+    }
+
+    if (metaData.isVertica())
+    {
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_TRANSACTION.getVerb(), TransactionStartCommand.BEGIN_TRANSACTION);
+      this.cmdDispatch.put(TransactionStartCommand.BEGIN_WORK.getVerb(), TransactionStartCommand.BEGIN_WORK);
+      this.cmdDispatch.put(TransactionStartCommand.START_TRANSACTION.getVerb(), TransactionStartCommand.START_TRANSACTION);
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_TRANSACTION.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.BEGIN_WORK.getVerb());
+      this.dbSpecificCommands.add(TransactionStartCommand.START_TRANSACTION.getVerb());
     }
 
 		if (metaData.isMySql())
