@@ -117,7 +117,10 @@ public class JdbcTableDefinitionReader
 
     if (primaryKey != null)
     {
-      primaryKeyColumns.addAll(primaryKey.getColumns());
+      for (String col : primaryKey.getColumns())
+      {
+        primaryKeyColumns.add(dbmeta.removeQuotes(col));
+      }
     }
 
     try

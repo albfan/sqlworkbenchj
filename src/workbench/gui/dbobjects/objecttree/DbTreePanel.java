@@ -251,6 +251,11 @@ public class DbTreePanel
     tree.selectObject(tbl);
   }
 
+  public DbObjectsTree getTree()
+  {
+    return tree;
+  }
+  
   public TreeLoader getLoader()
   {
     return tree.getLoader();

@@ -75,8 +75,19 @@ class ContextMenuFactory
 
     ReloadNodeAction reload = new ReloadNodeAction(dbTree);
     menu.add(reload);
-    menu.addSeparator();
 
+    List<ObjectTreeNode> selectedNodes = dbTree.getSelectedNodes();
+    if (selectedNodes.size() == 1)
+    {
+      ObjectTreeNode selectedNode = selectedNodes.get(0);
+      if (selectedNode.getType().equals(TreeLoader.TYPE_COLUMN_LIST))
+      {
+        SortColumnsAction sort = new SortColumnsAction(dbTree.getTree(), selectedNode);
+        menu.add(sort);
+      }
+    }
+
+    // this returns the number of selected DbObjects, not the selected nodes in general
     int count = dbTree.getSelectionCount();
     if (count == 1)
     {
@@ -90,9 +101,10 @@ class ContextMenuFactory
         find.setFinder(dbTree);
         find.setTargetTable(selectedNode.getDbObject());
         menu.add(find);
-        menu.addSeparator();
       }
     }
+
+    menu.addSeparator();
 
     SpoolDataAction export = new SpoolDataAction(dbTree);
     menu.add(export);
