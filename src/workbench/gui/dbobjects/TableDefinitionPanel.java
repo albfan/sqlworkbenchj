@@ -28,8 +28,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
@@ -45,6 +43,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import workbench.interfaces.DbData;
+import workbench.interfaces.IndexChangeListener;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.DbExplorerSettings;
@@ -56,8 +55,6 @@ import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
-import workbench.db.IndexColumn;
-import workbench.db.IndexReader;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -66,6 +63,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ColumnAlterAction;
 import workbench.gui.actions.CreateDummySqlAction;
+import workbench.gui.actions.CreateIndexAction;
 import workbench.gui.actions.CreatePKAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -102,7 +100,7 @@ import workbench.util.WbThread;
  */
 public class TableDefinitionPanel
 	extends JPanel
-	implements ActionListener, PropertyChangeListener, ListSelectionListener, Resettable, DbObjectList
+	implements PropertyChangeListener, ListSelectionListener, Resettable, DbObjectList, IndexChangeListener
 {
 	public static final String INDEX_PROP = "index";
 	public static final String DEFINITION_PROP = "tableDefinition";
@@ -113,7 +111,7 @@ public class TableDefinitionPanel
 	private WbTable tableDefinition;
 	private WbLabelField tableNameLabel;
 	private QuickFilterPanel columnFilter;
-	private WbAction createIndexAction;
+	private CreateIndexAction createIndexAction;
 	private CreatePKAction createPKAction;
 	private DropPKAction dropPKAction;
 	private ColumnAlterAction alterColumnsAction;
@@ -267,9 +265,7 @@ public class TableDefinitionPanel
 		this.add(toolbar, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 
-		this.createIndexAction = new WbAction(this, "create-index");
-		this.createIndexAction.setEnabled(false);
-		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
+    createIndexAction = new CreateIndexAction(this, this);
 
 		createPKAction = new CreatePKAction(this);
 		dropPKAction = new DropPKAction(this);
@@ -306,10 +302,11 @@ public class TableDefinitionPanel
 		firePropertyChange(DEFINITION_PROP, null, this.currentTable.getTableName());
 	}
 
-	protected void fireIndexChanged(String indexName)
-	{
-		firePropertyChange(INDEX_PROP, null, indexName);
-	}
+  @Override
+  public void indexChanged(TableIdentifier table, String indexName)
+  {
+    firePropertyChange(INDEX_PROP, null, indexName);
+  }
 
 	public boolean isBusy()
 	{
@@ -539,8 +536,8 @@ public class TableDefinitionPanel
 	{
 		initGui();
 		this.dbConnection = conn;
-		this.createIndexAction.setEnabled(this.dbConnection != null);
-		this.reloadAction.setEnabled(this.dbConnection != null);
+    this.createIndexAction.setConnection(dbConnection);
+		this.reloadAction.setEnabled(dbConnection != null);
 
 		validator.setConnection(dbConnection);
 
@@ -588,15 +585,6 @@ public class TableDefinitionPanel
 			}
 		};
 		t.start();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() == this.createIndexAction)
-		{
-			createIndex();
-		}
 	}
 
 	@Override
@@ -649,43 +637,6 @@ public class TableDefinitionPanel
   {
     return null;
   }
-
-	protected void createIndex()
-	{
-		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
-		int[] rows = this.tableDefinition.getSelectedRows();
-		int count = rows.length;
-		List<IndexColumn> columns = new ArrayList<>(count);
-		String indexName = ResourceMgr.getString("TxtNewIndexName");
-
-		for (int i=0; i < count; i++)
-		{
-			String colName = this.tableDefinition.getValueAsString(rows[i], TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
-			IndexColumn col = new IndexColumn(colName, null);
-			columns.add(col);
-		}
-
-		IndexReader reader = this.dbConnection.getMetadata().getIndexReader();
-		String sql = reader.buildCreateIndexSql(this.currentTable, indexName, false, columns);
-		if (!sql.trim().endsWith(";"))
-		{
-			sql += ";\n";
-		}
-
-		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
-
-		if (dbConnection.shouldCommitDDL())
-		{
-			sql += "\nCOMMIT;\n";
-		}
-		RunScriptPanel panel = new RunScriptPanel(dbConnection, sql);
-		panel.openWindow(this, title, indexName);
-
-		if (panel.wasRun())
-		{
-			fireIndexChanged(indexName);
-		}
-	}
 
 	protected boolean isTable()
 	{

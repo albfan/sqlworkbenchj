@@ -31,6 +31,7 @@ import javax.swing.event.PopupMenuListener;
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 
 import workbench.gui.MainWindow;
@@ -38,6 +39,7 @@ import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CountTableRowsAction;
 import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
+import workbench.gui.actions.CreateIndexAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ScriptDbObjectAction;
@@ -45,6 +47,8 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.WbPopupMenu;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
 import workbench.gui.sql.PasteType;
+
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -170,6 +174,14 @@ class ContextMenuFactory
 
     menu.addSeparator();
 
+    if (onlyColumnsSelected(selectedNodes))
+    {
+      CreateIndexAction createIndex = new CreateIndexAction(dbTree, null);
+      createIndex.setConnection(dbTree.getConnection());
+      menu.add(createIndex);
+      menu.addSeparator();
+    }
+
     DropDbObjectAction drop = new DropDbObjectAction(dbTree, selection);
     drop.addDropListener(dbTree);
     menu.add(drop);
@@ -181,6 +193,16 @@ class ContextMenuFactory
     menu.add(deleteData);
 
     return menu;
+  }
+
+  private static boolean onlyColumnsSelected(List<ObjectTreeNode> selectedNodes)
+  {
+    if (CollectionUtil.isEmpty(selectedNodes)) return false;
+    for (ObjectTreeNode node : selectedNodes)
+    {
+      if (! (node.getDbObject() instanceof ColumnIdentifier)) return false;
+    }
+    return true;
   }
 
 }
