@@ -36,13 +36,22 @@ public class SortColumnsAction
 {
   private ObjectTreeNode columnsNode;
   private DbObjectsTree client;
+  private boolean sortByName;
 
-  public SortColumnsAction(DbObjectsTree tree, ObjectTreeNode node)
+  public SortColumnsAction(DbObjectsTree tree, ObjectTreeNode node, boolean byName)
   {
     super();
     columnsNode = node;
     client = tree;
-    initMenuDefinition("MnuTxtSortColumns");
+    sortByName = byName;
+    if (byName)
+    {
+      initMenuDefinition("MnuTxtSortColByName");
+    }
+    else
+    {
+      initMenuDefinition("MnuTxtSortColByPos");
+    }
     setEnabled(columnsNode != null && columnsNode.getChildCount() > 0);
   }
 
@@ -67,7 +76,14 @@ public class SortColumnsAction
       columns.add((ColumnIdentifier)columnsNode.getChildAt(i).getDbObject());
     }
 
-    DbObjectSorter.sort(columns, true);
+    if (sortByName)
+    {
+      DbObjectSorter.sort(columns, true);
+    }
+    else
+    {
+      ColumnIdentifier.sortByPosition(columns);
+    }
 
     columnsNode.removeAllChildren();
 

@@ -82,8 +82,10 @@ class ContextMenuFactory
       ObjectTreeNode selectedNode = selectedNodes.get(0);
       if (selectedNode.getType().equals(TreeLoader.TYPE_COLUMN_LIST))
       {
-        SortColumnsAction sort = new SortColumnsAction(dbTree.getTree(), selectedNode);
-        menu.add(sort);
+        SortColumnsAction nameSort = new SortColumnsAction(dbTree.getTree(), selectedNode, true);
+        SortColumnsAction positionSort = new SortColumnsAction(dbTree.getTree(), selectedNode, false);
+        menu.add(nameSort);
+        menu.add(positionSort);
       }
     }
 
