@@ -41,7 +41,9 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.FileUtil;
 import workbench.util.Replacer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -167,8 +169,24 @@ public class WbInclude
 			return result;
 		}
 
-    allFiles = evaluateWildardFileArgs(fileArg);
-    if (allFiles.isEmpty())
+    if (FileUtil.hasWildcard(fileArg))
+    {
+      allFiles = evaluateWildardFileArgs(fileArg);
+    }
+    else
+    {
+      WbFile file = evaluateFileArgument(fileArg);
+      if (file != null && StringUtil.isEmptyString(file.getExtension()))
+      {
+        file = new WbFile(file.getFullPath() + ".sql");
+      }
+      if (file.exists())
+      {
+        allFiles = CollectionUtil.arrayList(file);
+      }
+    }
+
+    if (CollectionUtil.isEmpty(allFiles))
     {
       result.addErrorMessageByKey("ErrFileNotFound", fileArg);
       return result;
