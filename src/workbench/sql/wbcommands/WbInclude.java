@@ -122,6 +122,7 @@ public class WbInclude
 
 		boolean checkParms = true;
 		boolean showProgress = true;
+    boolean showOutput = false;
 
     String fileArg = null;
     List<WbFile> allFiles = null;
@@ -133,6 +134,7 @@ public class WbInclude
 			fileArg = plain.substring(1);
 			checkParms = false;
 			showProgress = false;
+      showOutput = true;
 		}
 		else
 		{
@@ -247,7 +249,7 @@ public class WbInclude
         batchRunner.setRetryHandler(runner.getRetryHandler());
       }
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
-			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false);
+			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, showOutput);
 			batchRunner.showResultSets(showResults);
 			batchRunner.setOptimizeColWidths(showResults);
 			if (cmdLine.isArgPresent(WbImport.ARG_USE_SAVEPOINT))
