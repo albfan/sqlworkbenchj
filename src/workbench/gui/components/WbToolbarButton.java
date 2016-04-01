@@ -24,8 +24,11 @@
 package workbench.gui.components;
 
 import java.awt.Insets;
+
 import javax.swing.Action;
 import javax.swing.Icon;
+
+import workbench.gui.actions.WbAction;
 
 /**
  *
@@ -59,15 +62,18 @@ public class WbToolbarButton
 	public WbToolbarButton(Icon icon)
 	{
 		super(icon);
-		this.setText(null);
+    this.setText(null);
 		init();
 	}
 
-	@Override
-	public void setAction(Action a)
+	public void setAction(WbAction a)
 	{
 		super.setAction(a);
-		this.setText(null);
+    // only remove the text if we do not have an icon
+		if (a.getIconKey() != null)
+    {
+      this.setText(null);
+    }
 		init();
 	}
 

@@ -131,8 +131,9 @@ public class WbConnection
     throws SQLException
   {
     this.id = anId;
+    this.profile = aProfile;
     setSqlConnection(aConn);
-    setProfile(aProfile);
+    initKeepAlive();
 
     // removeComments and removeNewLines are properties that are needed each time a SQL statement is executed
     // To speed up SQL parsing, the value for those properties are "cached" here
@@ -233,12 +234,6 @@ public class WbConnection
   {
     if (getDbSettings() == null) return null;
     return getDbSettings().getDbId();
-  }
-
-  private void setProfile(ConnectionProfile aProfile)
-  {
-    this.profile = aProfile;
-    initKeepAlive();
   }
 
   public void resetSessionReadOnly()

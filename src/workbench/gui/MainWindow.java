@@ -239,6 +239,7 @@ public class MainWindow
 	private WbToolbar currentToolbar;
 	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
 
+  private final Object workspaceLock = new Object();
 	private WbWorkspace currentWorkspace;
 
 	private final NextTabAction nextTab;
@@ -890,6 +891,7 @@ public class MainWindow
     actions.add(saveMacros);
     actions.add(showMacroPopup);
 
+    actions.add(new ManageDriversAction());
     actions.add(new DataPumperAction(this));
     actions.add(new ObjectSearchAction(this));
     actions.add(new BookmarksAction(this));
@@ -1108,7 +1110,7 @@ public class MainWindow
 	{
     if (currentWorkspace == null) return null;
 
-		synchronized (currentWorkspace)
+		synchronized (workspaceLock)
 		{
       Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
 

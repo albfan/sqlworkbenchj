@@ -72,10 +72,4 @@ public class ManageDriversAction
 
     DriverEditorDialog.showDriverDialog(mainWin, currentDrv);
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

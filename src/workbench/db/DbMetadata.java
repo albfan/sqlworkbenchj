@@ -78,6 +78,7 @@ import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
 import workbench.db.progress.OpenEdgeObjectListEnhancer;
+import workbench.db.progress.OpenEdgeSchemaInformationReader;
 import workbench.db.progress.OpenEdgeSequenceReader;
 import workbench.db.sqlite.SQLiteDataTypeResolver;
 import workbench.db.vertica.VerticaTableDefinitionReader;
@@ -381,6 +382,10 @@ public class DbMetadata
       dbId = DBID_OPENEDGE;
       objectListEnhancer = new OpenEdgeObjectListEnhancer();
       sequenceReader = new OpenEdgeSequenceReader(aConnection);
+      if (Settings.getInstance().getBoolProperty("workbench.db.openedge.check.defaultschema", true))
+      {
+        schemaInfoReader = new OpenEdgeSchemaInformationReader(dbConnection);
+      }
     }
     else if (productLower.equals("hdb"))
     {

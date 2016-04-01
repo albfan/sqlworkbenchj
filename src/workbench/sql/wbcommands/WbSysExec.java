@@ -26,6 +26,7 @@ package workbench.sql.wbcommands;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -243,6 +244,8 @@ public class WbSysExec
 		String first = StringUtil.getFirstWord(command.get(0)).toLowerCase();
 		String shell = System.getenv("SHELL");
 
+    WbFile file = evaluateFileArgument(first);
+
 		if ("windows".equals(os))
 		{
 			if (!first.startsWith("cmd"))
@@ -252,10 +255,19 @@ public class WbSysExec
 			}
       args.addAll(command);
 		}
+    else if (file != null && file.canExecute())
+    {
+      // even though it is a shell script with a shebang, ProcessBuilder can not run this directly
+      if (isShellScript(file))
+      {
+        args.add(shell);
+      }
+      args.add(StringUtil.listToString(command, ' '));
+    }
 		else if (!first.startsWith(shell))
 		{
-			args.add(shell);
-			args.add("-c");
+      args.add(shell);
+      args.add("-c");
 			args.add(StringUtil.listToString(command, ' '));
 		}
     else
@@ -264,6 +276,34 @@ public class WbSysExec
     }
 		return args;
 	}
+
+  private boolean isShellScript(WbFile file)
+  {
+    if (file == null) return false;
+    if (!file.exists()) return false;
+    if (file.length() < 3) return false;
+
+    FileInputStream in = null;
+    try
+    {
+      byte[] buffer = new byte[2];
+      in = new FileInputStream(file);
+      int numRead = in.read(buffer);
+      if (numRead == 2)
+      {
+        return buffer[0] == '#' && buffer[1] == '!';
+      }
+      return false;
+    }
+    catch (Throwable th)
+    {
+      return false;
+    }
+    finally
+    {
+      FileUtil.closeQuietely(in);
+    }
+  }
 
 	private boolean useShell(String command)
 	{

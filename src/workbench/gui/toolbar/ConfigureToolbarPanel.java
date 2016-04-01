@@ -21,6 +21,8 @@
 package workbench.gui.toolbar;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -31,6 +33,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.actions.WbAction;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -51,6 +54,15 @@ public class ConfigureToolbarPanel
     removeItem.setText("");
 
     allActions = new ArrayList<>(actions);
+    Collections.sort(allActions, new Comparator<WbAction>()
+    {
+      @Override
+      public int compare(WbAction o1, WbAction o2)
+      {
+        return StringUtil.compareStrings(o1.getMenuLabel(), o2.getMenuLabel(), true);
+      }
+    });
+    
     allActionList.setCellRenderer(new ActionRenderer());
     configuredActions.setCellRenderer(new ActionRenderer());
 
@@ -267,7 +279,7 @@ public class ConfigureToolbarPanel
     List<WbAction> result = new ArrayList<>(allActions.size());
     for (WbAction action : allActions)
     {
-      if (action.useInToolbar() && action.hasIcon() && !result.contains(action))
+      if (action.useInToolbar() && !result.contains(action))
       {
         result.add(action);
       }

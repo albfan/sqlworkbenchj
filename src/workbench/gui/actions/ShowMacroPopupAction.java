@@ -185,10 +185,4 @@ public class ShowMacroPopupAction
       macroWindow.setVisible(false);
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

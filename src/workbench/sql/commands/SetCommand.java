@@ -215,9 +215,12 @@ public class SetCommand
 
 		try
 		{
+      String newSchemaArg = null;
 			String oldSchema = null;
 			if (schemaChange)
 			{
+        currentConnection.getMetadata().clearCachedSchemaInformation();
+        newSchemaArg = param;
 				oldSchema = currentConnection.getCurrentSchema();
 			}
 			result = new StatementRunnerResult();
@@ -232,7 +235,7 @@ public class SetCommand
 
 			if (schemaChange)
 			{
-				String newSchema = handleSchemaChange(oldSchema);
+				String newSchema = handleSchemaChange(newSchemaArg, oldSchema);
 				result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
 			}
 			else
@@ -329,7 +332,7 @@ public class SetCommand
 		return false;
 	}
 
-	private String handleSchemaChange(String oldSchema)
+	private String handleSchemaChange(String schemaArg, String oldSchema)
 	{
 		boolean busy = currentConnection.isBusy();
 		String newSchema = null;
@@ -340,7 +343,15 @@ public class SetCommand
 			// so we need to clear it here.
 			currentConnection.setBusy(false);
 			LogMgr.logDebug("SetCommand.execute()", "Updating current schema");
+
 			newSchema = currentConnection.getCurrentSchema();
+
+      // this is for DBMS and JDBC drivers that don't properly support getCurrentSchema()
+      // mainly Progress OpenEdge. We simply assume the new schema is the one supplied in the command
+      if (newSchema == null)
+      {
+        newSchema = schemaArg;
+      }
 
 			// schemaChanged will trigger an update of the ConnectionInfo
 			// but that only retrieves the current schema if the connection isn't busy
