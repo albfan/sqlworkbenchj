@@ -570,7 +570,6 @@ public class ConfigureToolbarPanel
     jPanel2.add(filler2);
 
     assignIconButton.setIcon(IconMgr.getInstance().getLabelIcon("open"));
-    assignIconButton.setText(ResourceMgr.getString("LblSelectTbIcon")); // NOI18N
     assignIconButton.setToolTipText(ResourceMgr.getString("d_LblSelectTbIcon")); // NOI18N
     assignIconButton.setEnabled(false);
     assignIconButton.addActionListener(new java.awt.event.ActionListener()
@@ -583,7 +582,6 @@ public class ConfigureToolbarPanel
     jPanel2.add(assignIconButton);
 
     removeIconButton.setIcon(IconMgr.getInstance().getLabelIcon("delete"));
-    removeIconButton.setText(ResourceMgr.getString("LblRemoveTbIcon")); // NOI18N
     removeIconButton.setToolTipText(ResourceMgr.getString("d_LblRemoveTbIcon")); // NOI18N
     removeIconButton.setEnabled(false);
     removeIconButton.addActionListener(new java.awt.event.ActionListener()

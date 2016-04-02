@@ -1197,14 +1197,16 @@ public class WbSwingUtilities
 		return "KeyCode: 0x" + Integer.toString(keyCode, 16);
 	}
 
-	public static void callRepaint(final Component c)
+	public static void callRepaint(Component c)
 	{
+    if (c == null) return;
 		c.invalidate();
 		c.repaint();
 	}
 
 	public static void repaintNow(final Component c)
 	{
+    if (c == null) return;
 		invoke(() ->
     {
       callRepaint(c);
@@ -1213,6 +1215,7 @@ public class WbSwingUtilities
 
 	public static void repaintLater(final Component c)
 	{
+    if (c == null) return;
 		EventQueue.invokeLater(() ->
     {
       callRepaint(c);
@@ -1657,7 +1660,7 @@ public class WbSwingUtilities
       {
         return (JComponent)c;
       }
-      
+
       if (c instanceof Container)
       {
         JComponent comp = findComponent(componentClass, name, (Container)c);

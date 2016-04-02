@@ -32,6 +32,7 @@ import javax.swing.Icon;
 
 import workbench.resource.Settings;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
 /**
@@ -112,6 +113,8 @@ public class WbToolbarButton
       {
         this.setText(null);
       }
+      invalidate();
+      WbSwingUtilities.repaintLater(getParent());
     }
   }
 
