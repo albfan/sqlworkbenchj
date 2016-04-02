@@ -39,13 +39,13 @@ import workbench.gui.components.WbToolbarButton;
 public class IgnoreErrorsAction
   extends CheckBoxAction
 {
-  private final String iconName = "ignore_error";
   private JToggleButton toggleButton;
 
   public IgnoreErrorsAction()
   {
     super("MnuTxtIgnoreErrors", null);
     super.setSwitchedOn(Settings.getInstance().getIgnoreErrors());
+    setIcon("ignore_error");
   }
 
   public JToggleButton createButton()
@@ -53,7 +53,7 @@ public class IgnoreErrorsAction
     this.toggleButton = new JToggleButton(this);
     this.toggleButton.setText(null);
     this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-    this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(iconName));
+    this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(getIconKey()));
     this.toggleButton.setSelected(isSwitchedOn());
     return this.toggleButton;
   }
@@ -74,18 +74,6 @@ public class IgnoreErrorsAction
       this.toggleButton.setSelected(isSwitchedOn());
     }
     Settings.getInstance().setIgnoreErrors(isSwitchedOn());
-  }
-
-  @Override
-  public String getIconKey()
-  {
-    return iconName;
-  }
-
-  @Override
-  public boolean hasIcon()
-  {
-    return true;
   }
 
 }

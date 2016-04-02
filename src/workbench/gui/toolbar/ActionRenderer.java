@@ -63,11 +63,18 @@ public class ActionRenderer
       WbAction action = (WbAction)value;
       setText(action.getMenuLabel());
       String iconKey = action.getIconKey();
-      if (iconKey != null)
+      ImageIcon icon = null;
+      if (action.hasCustomIcon())
       {
-        ImageIcon icon = IconMgr.getInstance().getLabelIcon(iconKey);
-        setIcon(icon);
+        String iconFile = action.getCustomIconFile();
+        int labelSize = IconMgr.getInstance().getSizeForLabel();
+        icon = IconMgr.getInstance().getExternalImage(iconFile, labelSize);
       }
+      else if (iconKey != null)
+      {
+        icon = IconMgr.getInstance().getLabelIcon(iconKey);
+      }
+      setIcon(icon);
       setToolTipText(action.getToolTipText());
     }
     return this;

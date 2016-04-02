@@ -81,6 +81,20 @@ public class ActionListModel
     return objects.get(index);
   }
 
+  public List<WbAction> getActions()
+  {
+    List<WbAction> result = new ArrayList<>();
+    for (Object obj : objects)
+    {
+      if (obj instanceof WbAction)
+      {
+        WbAction action = (WbAction)obj;
+        result.add(action);
+      }
+    }
+    return result;
+  }
+
   public String getToolbarCommands()
   {
     StringBuilder result = new StringBuilder(objects.size() * 20);

@@ -24,9 +24,13 @@
 package workbench.gui.components;
 
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 import javax.swing.Icon;
+
+import workbench.resource.Settings;
 
 import workbench.gui.actions.WbAction;
 
@@ -36,6 +40,7 @@ import workbench.gui.actions.WbAction;
  */
 public class WbToolbarButton
 	extends WbButton
+  implements PropertyChangeListener
 {
 	public static final Insets MARGIN = new Insets(1,1,1,1);
 
@@ -70,17 +75,51 @@ public class WbToolbarButton
 	{
 		super.setAction(a);
     // only remove the text if we do not have an icon
-		if (a.getIconKey() != null)
+		if (a.getIconKey() != null || a.hasCustomIcon())
     {
       this.setText(null);
     }
 		init();
 	}
 
+  private void removeListener()
+  {
+    Settings.getInstance().removePropertyChangeListener(this);
+  }
+
 	private void init()
 	{
 		this.setMargin(MARGIN);
     this.setFocusable(false);
+    if (getAction() instanceof WbAction)
+    {
+      Settings.getInstance().addPropertyChangeListener(this, ((WbAction)getAction()).getCustomIconProperty());
+    }
+    else
+    {
+      removeListener();
+    }
 	}
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    if (getAction() instanceof WbAction)
+    {
+      WbAction wb = (WbAction)getAction();
+      configurePropertiesFromAction(wb);
+      if (wb.getIconKey() != null || wb.hasCustomIcon())
+      {
+        this.setText(null);
+      }
+    }
+  }
+
+  @Override
+  public void removeNotify()
+  {
+    super.removeNotify();
+    removeListener();
+  }
 
 }

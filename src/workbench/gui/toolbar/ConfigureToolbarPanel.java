@@ -22,7 +22,6 @@ package workbench.gui.toolbar;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -32,8 +31,12 @@ import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
+
+import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -54,15 +57,8 @@ public class ConfigureToolbarPanel
     removeItem.setText("");
 
     allActions = new ArrayList<>(actions);
-    Collections.sort(allActions, new Comparator<WbAction>()
-    {
-      @Override
-      public int compare(WbAction o1, WbAction o2)
-      {
-        return StringUtil.compareStrings(o1.getMenuLabel(), o2.getMenuLabel(), true);
-      }
-    });
-    
+    Collections.sort(allActions, (WbAction o1, WbAction o2) -> StringUtil.compareStrings(o1.getMenuLabel(), o2.getMenuLabel(), true));
+
     allActionList.setCellRenderer(new ActionRenderer());
     configuredActions.setCellRenderer(new ActionRenderer());
 
@@ -149,6 +145,56 @@ public class ConfigureToolbarPanel
   {
     int[] selected = configuredActions.getSelectedIndices();
     removeItem.setEnabled(isNotEmpty(selected));
+  }
+
+  private void selectIcon()
+  {
+    int index = configuredActions.getSelectedIndex();
+    ActionListModel model = (ActionListModel)configuredActions.getModel();
+    Object obj = model.getElementAt(index);
+    if (obj instanceof WbAction)
+    {
+      WbFile icon = FileDialogUtil.selectPngFile(this, "workbench.toolbaricon.lastdir");
+      if (icon != null)
+      {
+        String name = FileDialogUtil.removeConfigDir(icon);
+        ((WbAction)obj).setCustomIconFile(name);
+        configuredActions.invalidate();
+        WbSwingUtilities.repaintLater(configuredActions);
+      }
+    }
+  }
+
+  private void removeCustomIcon()
+  {
+    int index = configuredActions.getSelectedIndex();
+    ActionListModel model = (ActionListModel)configuredActions.getModel();
+    Object obj = model.getElementAt(index);
+    if (obj instanceof WbAction)
+    {
+      WbAction action = (WbAction)obj;
+      action.setCustomIconFile(null);
+      configuredActions.invalidate();
+      WbSwingUtilities.repaintLater(configuredActions);
+    }
+  }
+
+  private void checkIconButtons()
+  {
+    assignIconButton.setEnabled(false);
+    removeIconButton.setEnabled(false);
+    int[] selected = configuredActions.getSelectedIndices();
+    if (selected.length == 1)
+    {
+      ActionListModel model = (ActionListModel)configuredActions.getModel();
+      Object obj = model.getElementAt(selected[0]);
+      if (obj instanceof WbAction)
+      {
+        WbAction action = (WbAction)obj;
+        removeIconButton.setEnabled(action.hasCustomIcon());
+        assignIconButton.setEnabled(true);
+      }
+    }
   }
 
   private void checkMoveButtons()
@@ -303,6 +349,19 @@ public class ConfigureToolbarPanel
     ActionListModel model = (ActionListModel)configuredActions.getModel();
     String commands = model.getToolbarCommands();
     Settings.getInstance().setProperty(ToolbarBuilder.CONFIG_PROPERTY, commands);
+    List<WbAction> actions = model.getActions();
+    for (WbAction action : actions)
+    {
+      if (action.hasCustomIcon())
+      {
+        String iconFile = action.getCustomIconFile();
+        Settings.getInstance().setProperty(action.getCustomIconProperty(), iconFile);
+      }
+      else
+      {
+        Settings.getInstance().setProperty(action.getCustomIconProperty(), null);
+      }
+    }
     return true;
   }
 
@@ -334,11 +393,15 @@ public class ConfigureToolbarPanel
     removeItem = new javax.swing.JButton();
     addSeparator = new javax.swing.JButton();
     resetButton = new javax.swing.JButton();
+    jPanel3 = new javax.swing.JPanel();
     jScrollPane2 = new javax.swing.JScrollPane();
     configuredActions = new javax.swing.JList<>();
     jPanel2 = new javax.swing.JPanel();
     moveUp = new javax.swing.JButton();
     moveDown = new javax.swing.JButton();
+    filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
+    assignIconButton = new javax.swing.JButton();
+    removeIconButton = new javax.swing.JButton();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -380,6 +443,9 @@ public class ConfigureToolbarPanel
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
     jPanel1.add(addItem, gridBagConstraints);
 
@@ -395,8 +461,8 @@ public class ConfigureToolbarPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel1.add(removeItem, gridBagConstraints);
 
     addSeparator.setText(ResourceMgr.getString("LblAddSep")); // NOI18N
@@ -414,7 +480,8 @@ public class ConfigureToolbarPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(23, 0, 0, 0);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
     jPanel1.add(addSeparator, gridBagConstraints);
 
     resetButton.setText(ResourceMgr.getString("LblReset")); // NOI18N
@@ -428,12 +495,19 @@ public class ConfigureToolbarPanel
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel1.add(resetButton, gridBagConstraints);
+
+    jPanel3.setLayout(new java.awt.GridLayout(0, 1));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    jPanel1.add(jPanel3, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -473,7 +547,6 @@ public class ConfigureToolbarPanel
 
     moveUp.setIcon(IconMgr.getInstance().getLabelIcon("Up"));
     moveUp.setEnabled(false);
-    moveUp.setMinimumSize(new java.awt.Dimension(33, 18));
     moveUp.setPreferredSize(new java.awt.Dimension(33, 18));
     moveUp.addActionListener(new java.awt.event.ActionListener()
     {
@@ -494,6 +567,33 @@ public class ConfigureToolbarPanel
       }
     });
     jPanel2.add(moveDown);
+    jPanel2.add(filler2);
+
+    assignIconButton.setIcon(IconMgr.getInstance().getLabelIcon("open"));
+    assignIconButton.setText(ResourceMgr.getString("LblSelectTbIcon")); // NOI18N
+    assignIconButton.setToolTipText(ResourceMgr.getString("d_LblSelectTbIcon")); // NOI18N
+    assignIconButton.setEnabled(false);
+    assignIconButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        assignIconButtonActionPerformed(evt);
+      }
+    });
+    jPanel2.add(assignIconButton);
+
+    removeIconButton.setIcon(IconMgr.getInstance().getLabelIcon("delete"));
+    removeIconButton.setText(ResourceMgr.getString("LblRemoveTbIcon")); // NOI18N
+    removeIconButton.setToolTipText(ResourceMgr.getString("d_LblRemoveTbIcon")); // NOI18N
+    removeIconButton.setEnabled(false);
+    removeIconButton.addActionListener(new java.awt.event.ActionListener()
+    {
+      public void actionPerformed(java.awt.event.ActionEvent evt)
+      {
+        removeIconButtonActionPerformed(evt);
+      }
+    });
+    jPanel2.add(removeIconButton);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -507,6 +607,7 @@ public class ConfigureToolbarPanel
   {//GEN-HEADEREND:event_configuredActionsValueChanged
     checkMoveButtons();
     checkRemoveButton();
+    checkIconButtons();
   }//GEN-LAST:event_configuredActionsValueChanged
 
   private void moveUpActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_moveUpActionPerformed
@@ -544,18 +645,32 @@ public class ConfigureToolbarPanel
     addSeparator();
   }//GEN-LAST:event_addSeparatorActionPerformed
 
+  private void removeIconButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_removeIconButtonActionPerformed
+  {//GEN-HEADEREND:event_removeIconButtonActionPerformed
+    removeCustomIcon();
+  }//GEN-LAST:event_removeIconButtonActionPerformed
+
+  private void assignIconButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_assignIconButtonActionPerformed
+  {//GEN-HEADEREND:event_assignIconButtonActionPerformed
+    selectIcon();
+  }//GEN-LAST:event_assignIconButtonActionPerformed
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton addItem;
   private javax.swing.JButton addSeparator;
   private javax.swing.JList<String> allActionList;
+  private javax.swing.JButton assignIconButton;
   private javax.swing.JList<String> configuredActions;
+  private javax.swing.Box.Filler filler2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JButton moveDown;
   private javax.swing.JButton moveUp;
+  private javax.swing.JButton removeIconButton;
   private javax.swing.JButton removeItem;
   private javax.swing.JButton resetButton;
   // End of variables declaration//GEN-END:variables

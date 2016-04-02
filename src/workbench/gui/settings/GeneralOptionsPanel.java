@@ -32,7 +32,6 @@ import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Locale;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -85,9 +84,9 @@ public class GeneralOptionsPanel
 		if (!brushedMetal.isVisible())
 		{
 			GridBagLayout layout = (GridBagLayout)jPanel2.getLayout();
-			GridBagConstraints constraints = layout.getConstraints(singlePageHelp);
+			GridBagConstraints constraints = layout.getConstraints(focusToQuickFilter);
 			constraints.weightx = 1.0;
-			layout.setConstraints(singlePageHelp, constraints);
+			layout.setConstraints(focusToQuickFilter, constraints);
 		}
 
 		String[] updTypes = new String[] {
@@ -179,6 +178,7 @@ public class GeneralOptionsPanel
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
 		enableQuickFilter.setSelected(GuiSettings.enableProfileQuickFilter());
     focusToQuickFilter.setSelected(GuiSettings.focusToProfileQuickFilter());
+    showMenuIcons.setSelected(GuiSettings.showMenuIcons());
 		String iconName = Settings.getInstance().getProperty(IconHandler.PROP_LOADING_IMAGE, IconHandler.DEFAULT_BUSY_IMAGE);
 		LoadingImage img = new LoadingImage();
 		img.setName(iconName);
@@ -204,6 +204,7 @@ public class GeneralOptionsPanel
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		GuiSettings.setEnableProfileQuickFilter(enableQuickFilter.isSelected());
 		GuiSettings.setFocusToProfileQuickFilter(focusToQuickFilter.isSelected());
+    GuiSettings.setShowMenuIcons(showMenuIcons.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
@@ -294,6 +295,7 @@ public class GeneralOptionsPanel
     brushedMetal = new JCheckBox();
     autoSaveProfiles = new JCheckBox();
     enableQuickFilter = new JCheckBox();
+    showMenuIcons = new JCheckBox();
     focusToQuickFilter = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
@@ -405,9 +407,12 @@ public class GeneralOptionsPanel
     brushedMetal.setToolTipText(ResourceMgr.getString("d_LblBrushedMetal")); // NOI18N
     brushedMetal.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(brushedMetal, gridBagConstraints);
 
     autoSaveProfiles.setSelected(Settings.getInstance().getConsolidateLogMsg());
@@ -438,6 +443,19 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(0, 0, 4, 0);
     jPanel2.add(enableQuickFilter, gridBagConstraints);
 
+    showMenuIcons.setText(ResourceMgr.getString("LblShowMenuIcons")); // NOI18N
+    showMenuIcons.setToolTipText(ResourceMgr.getString("d_LblShowMenuIcons")); // NOI18N
+    showMenuIcons.setBorder(null);
+    showMenuIcons.setHorizontalAlignment(SwingConstants.LEFT);
+    showMenuIcons.setHorizontalTextPosition(SwingConstants.RIGHT);
+    showMenuIcons.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 0, 4, 0);
+    jPanel2.add(showMenuIcons, gridBagConstraints);
+
     focusToQuickFilter.setText(ResourceMgr.getString("LblProfileQuickFilterFocus")); // NOI18N
     focusToQuickFilter.setToolTipText(ResourceMgr.getString("d_LblProfileQuickFilterFocus")); // NOI18N
     focusToQuickFilter.setBorder(null);
@@ -448,8 +466,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(0, 10, 4, 0);
     jPanel2.add(focusToQuickFilter, gridBagConstraints);
 
@@ -852,6 +868,7 @@ public class GeneralOptionsPanel
   private JCheckBox scrollTabs;
   private JTextField settingsfilename;
   private JCheckBox showFinishAlert;
+  private JCheckBox showMenuIcons;
   private JCheckBox showResultTabClose;
   private JCheckBox showTabCloseButton;
   private JCheckBox showTabIndex;

@@ -25,6 +25,7 @@ package workbench.gui.components;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -34,6 +35,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicBorders;
+
 import workbench.resource.ResourceMgr;
 
 /**
@@ -42,7 +44,7 @@ import workbench.resource.ResourceMgr;
  */
 public class WbButton
 	extends JButton
-	implements MouseListener
+  implements MouseListener
 {
 	private static final Border ICON_EMPTY_BORDER = new EmptyBorder(1,0,0,0);
 	private static final Border SMALL_EMPTY_BORDER = new EmptyBorder(2,2,2,2);

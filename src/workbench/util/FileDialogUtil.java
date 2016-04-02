@@ -27,6 +27,7 @@ import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
 
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
@@ -249,11 +250,16 @@ public class FileDialogUtil
     }
   }
 
-  public String removeConfigDir(String aPathname)
+  public static String removeConfigDir(String aPathname)
   {
-    File f = new File(aPathname);
-    String fname = f.getName();
-    File dir = f.getParentFile();
+    WbFile f = new WbFile(aPathname);
+    return removeConfigDir(f);
+  }
+
+  public static String removeConfigDir(WbFile toRemove)
+  {
+    String fname = toRemove.getName();
+    File dir = toRemove.getParentFile();
     File config = Settings.getInstance().getConfigDir();
     if (dir != null && dir.equals(config))
     {
@@ -261,7 +267,7 @@ public class FileDialogUtil
     }
     else
     {
-      return aPathname;
+      return toRemove.getFullPath();
     }
   }
 
@@ -341,5 +347,44 @@ public class FileDialogUtil
       WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
       return null;
     }
+  }
+
+  public static WbFile selectPngFile(JComponent parent, String lastDirProp)
+  {
+    String last = Settings.getInstance().getProperty(lastDirProp, null);
+    File lastDir = null;
+
+    if (StringUtil.isNonBlank(last))
+    {
+      lastDir = new File(last);
+    }
+    else
+    {
+      lastDir = Settings.getInstance().getConfigDir();
+    }
+
+    JFileChooser fc = new WbFileChooser(lastDir);
+    ExtensionFileFilter ff = new ExtensionFileFilter(ResourceMgr.getString("TxtFileFilterIcons"), CollectionUtil.arrayList("png"), true);
+    fc.setMultiSelectionEnabled(false);
+    fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fc.removeChoosableFileFilter(fc.getAcceptAllFileFilter());
+    fc.addChoosableFileFilter(ff);
+    fc.setFileFilter(ff);
+
+    int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(parent));
+
+    if (answer == JFileChooser.APPROVE_OPTION)
+    {
+      WbFile f = new WbFile(fc.getSelectedFile());
+      if (!ImageUtil.isPng(f))
+      {
+        String msg = ResourceMgr.getFormattedString("ErrInvalidIcon", f.getName());
+        WbSwingUtilities.showErrorMessage(parent, msg);
+      }
+      WbFile dir = new WbFile(fc.getCurrentDirectory());
+      Settings.getInstance().setProperty(lastDirProp, dir.getFullPath());
+      return f;
+    }
+    return null;
   }
 }

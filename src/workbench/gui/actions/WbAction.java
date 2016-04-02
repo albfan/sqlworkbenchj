@@ -42,9 +42,11 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import workbench.resource.GuiSettings;
 import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.resource.ShortcutManager;
 
 import workbench.gui.components.WbMenuItem;
@@ -78,20 +80,14 @@ public class WbAction
 	protected boolean isConfigurable = true;
 	private String descriptiveName;
   private boolean useLabelSizeAsLargeIcon;
+  private String customIconFile;
 
 	public WbAction()
 	{
 		super();
-		String c = getClass().getName();
-		actionName = "wb-" + c.substring(c.lastIndexOf('.') + 1);
+		actionName = getClass().getSimpleName();
 		putValue(ACTION_COMMAND_KEY, this.actionName);
-	}
-
-	public WbAction(String actionCommand)
-	{
-		super();
-		actionName = actionCommand;
-		putValue(ACTION_COMMAND_KEY, this.actionName);
+    initCustomIcon();
 	}
 
 	/**
@@ -178,6 +174,16 @@ public class WbAction
     initTooltip();
 	}
 
+  public String getCustomIconProperty()
+  {
+    return "workbench.gui.action.icon." + actionName;
+  }
+
+  private void initCustomIcon()
+  {
+    customIconFile = Settings.getInstance().getProperty(getCustomIconProperty(), null);
+  }
+
   private void initTooltip()
   {
     if (StringUtil.isEmptyString(baseTooltip))
@@ -222,6 +228,7 @@ public class WbAction
 	protected void setActionName(String aName)
 	{
 		actionName = aName;
+    putValue(Action.ACTION_COMMAND_KEY, actionName);
 	}
 
 	public String getMenuLabel()
@@ -550,10 +557,19 @@ public class WbAction
 	@Override
 	public Object getValue(String key)
 	{
+    // Action.SMALL_ICON is used for the menu
 		if (key.equals(Action.SMALL_ICON))
 		{
-			return getIcon(Action.SMALL_ICON, IconMgr.getInstance().getSizeForMenuItem());
+      if (GuiSettings.showMenuIcons())
+      {
+        return getIcon(Action.SMALL_ICON, IconMgr.getInstance().getSizeForMenuItem());
+      }
+      else
+      {
+        return null;
+      }
 		}
+    // Action.LARGE_ICON_KEY is used for the toolbar
 		else if (key.equals(Action.LARGE_ICON_KEY))
 		{
       int size = IconMgr.getInstance().getToolbarIconSize();
@@ -576,14 +592,40 @@ public class WbAction
   {
     return iconKey;
   }
-  
+
+  public void setCustomIconFile(String fileName)
+  {
+    customIconFile = StringUtil.trimToNull(fileName);
+  }
+
+  public String getCustomIconFile()
+  {
+    return customIconFile;
+  }
+
+  public boolean hasCustomIcon()
+  {
+    return customIconFile != null;
+  }
+
   public boolean hasIcon()
   {
     return iconKey != null;
   }
 
+  public ImageIcon getToolbarIcon()
+  {
+    return (ImageIcon)getValue(Action.LARGE_ICON_KEY);
+  }
+
 	private ImageIcon getIcon(String key, int size)
 	{
+    if (customIconFile != null && key.equals(Action.LARGE_ICON_KEY))
+    {
+      ImageIcon icon = IconMgr.getInstance().getExternalImage(customIconFile, 0);
+      if (icon != null) return icon;
+    }
+
 		// No resource key assigned --> no icon
 		if (this.iconKey == null)
 		{

@@ -27,9 +27,32 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AppendResultsAction;
+import workbench.gui.actions.CommitAction;
+import workbench.gui.actions.CopyRowAction;
+import workbench.gui.actions.DeleteRowAction;
+import workbench.gui.actions.ExecuteCurrentAction;
+import workbench.gui.actions.ExecuteSelAction;
+import workbench.gui.actions.FilterDataAction;
+import workbench.gui.actions.FilterPickerAction;
+import workbench.gui.actions.FirstStatementAction;
+import workbench.gui.actions.IgnoreErrorsAction;
+import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.LastStatementAction;
+import workbench.gui.actions.NextStatementAction;
+import workbench.gui.actions.PrevStatementAction;
+import workbench.gui.actions.ResetFilterAction;
+import workbench.gui.actions.RollbackAction;
+import workbench.gui.actions.SelectionFilterAction;
+import workbench.gui.actions.ShowDbExplorerAction;
+import workbench.gui.actions.ShowDbTreeAction;
+import workbench.gui.actions.StopAction;
+import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.actions.WbAction;
 
 import workbench.util.StringUtil;
+
+import static workbench.gui.toolbar.ToolbarBuilder.*;
 
 /**
  *
@@ -41,20 +64,33 @@ public class ToolbarBuilder
   public static final String SEPARATOR_KEY = "$sep$";
 
   private static final String DEFAULT_ACTIONS =
-    "wb-ExecuteSelAction,wb-ExecuteCurrentAction," +
-    SEPARATOR_KEY +
-    ",wb-StopAction," +
-    SEPARATOR_KEY +
-    ",wb-FirstStatementAction,wb-PrevStatementAction,wb-NextStatementAction,wb-LastStatementAction," +
-    SEPARATOR_KEY +
-    ",wb-UpdateDatabaseAction,wb-InsertRowAction,wb-CopyRowAction,wb-DeleteRowAction,"+
-    ",wb-SelectionFilterAction,wb-FilterDataAction,wb-FilterPickerAction,wb-ResetFilterAction,"+
-    SEPARATOR_KEY +
-    ",wb-CommitAction,wb-RollbackAction," +
-    SEPARATOR_KEY +
-    ",wb-IgnoreErrorsAction,wb-AppendResultsAction," +
-    SEPARATOR_KEY +
-    ",wb-ShowDbExplorerAction,wb-ShowDbTreeAction";
+    ExecuteSelAction.class.getSimpleName() + "," +
+    ExecuteCurrentAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    StopAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    FirstStatementAction.class.getSimpleName() + "," +
+    PrevStatementAction.class.getSimpleName() + "," +
+    NextStatementAction.class.getSimpleName() + "," +
+    LastStatementAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    UpdateDatabaseAction.class.getSimpleName() + ","+
+    InsertRowAction.class.getSimpleName() + "," +
+    CopyRowAction.class.getSimpleName() + "," +
+    DeleteRowAction.class.getSimpleName() + "," +
+    SelectionFilterAction.class.getSimpleName() + "," +
+    FilterDataAction.class.getSimpleName() + "," +
+    FilterPickerAction.class.getSimpleName() + "," +
+    ResetFilterAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    CommitAction.class.getSimpleName() + "," +
+    RollbackAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    IgnoreErrorsAction.class.getSimpleName() + "," +
+    AppendResultsAction.class.getSimpleName() + "," +
+    SEPARATOR_KEY + "," +
+    ShowDbExplorerAction.class.getSimpleName() + "," +
+    ShowDbTreeAction.class.getSimpleName();
 
   private MainToolbar toolbar;
   private final List<WbAction> mainActions;
@@ -114,7 +150,7 @@ public class ToolbarBuilder
   {
     return StringUtil.stringToList(DEFAULT_ACTIONS, ",", true, true, false, false);
   }
-  
+
   public static List<String> getConfiguredToolbarCommands()
   {
     return Settings.getInstance().getListProperty(CONFIG_PROPERTY, false, DEFAULT_ACTIONS);

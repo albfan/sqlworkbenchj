@@ -81,14 +81,10 @@ public class CheckBoxAction
 		this.switchedOn = flag;
 		if (this.toggleMenu != null)
 		{
-			WbSwingUtilities.invoke(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					toggleMenu.setSelected(switchedOn);
-				}
-			});
+			WbSwingUtilities.invoke(() ->
+      {
+        toggleMenu.setSelected(switchedOn);
+      });
 		}
 		if (this.settingsProperty != null)
 		{

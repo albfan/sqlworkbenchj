@@ -1401,4 +1401,15 @@ public class GuiSettings
   {
     return Settings.getInstance().getIntProperty("workbench.gui.recenttabs.size", 25);
   }
+
+  public static boolean showMenuIcons()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.menu.showicons", true);
+  }
+
+  public static void setShowMenuIcons(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.gui.menu.showicons", flag);
+  }
+
 }

@@ -24,6 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -243,7 +244,7 @@ public class IconMgr
 
 		synchronized (this)
 		{
-			result = iconCache.get(fname);
+			result = useCache ? iconCache.get(fname) : null;
 			if (result == null)
 			{
 				result = retrieveImage(fname);
@@ -277,6 +278,37 @@ public class IconMgr
 		if (isPng) basename = basename.toLowerCase();
 		return basename + (isPng ? sz + ".png" : sz + ".gif");
 	}
+
+  public ImageIcon getExternalImage(String fname, int resizeTo)
+  {
+    File f = new File(fname);
+    if (!f.isAbsolute())
+    {
+      f = new File(Settings.getInstance().getConfigDir(), fname);
+    }
+
+    if (!f.exists()) return null;
+
+    ImageIcon result = null;
+
+    fname = f.getAbsolutePath();
+
+    if (Settings.getInstance().getCacheIcons())
+    {
+      result = iconCache.get(fname);
+    }
+
+    if (result == null)
+    {
+      result = new ImageIcon(fname);
+    }
+    
+    if (resizeTo > 0 && result != null && (result.getIconWidth() > resizeTo || result.getIconHeight() > resizeTo))
+    {
+      result = scale(result, resizeTo);
+    }
+    return result;
+  }
 
 	private ImageIcon retrieveImage(String fname)
 	{
