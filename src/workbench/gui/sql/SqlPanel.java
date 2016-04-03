@@ -358,6 +358,8 @@ public class SqlPanel
   private ResultTabDropHandler tabDropHandler;
 	private boolean macroExecution = false;
 
+  private final Object toolbarLock = new Object();
+
 //</editor-fold>
 
 	public SqlPanel(int clientId)
@@ -591,17 +593,20 @@ public class SqlPanel
 	@Override
 	public WbToolbar getToolbar(List<WbAction> globalActions, boolean createNew)
 	{
-    if (this.toolbar == null || createNew)
+    synchronized (toolbarLock)
     {
-      if (toolbar != null)
+      if (this.toolbar == null || createNew)
       {
-        toolbar.dispose();
+        if (toolbar != null)
+        {
+          toolbar.dispose();
+        }
+        ToolbarBuilder builder = new ToolbarBuilder(getAllActions(), globalActions);
+        toolbar = builder.createToolbar();
+        updateConnectionInfo();
       }
-      ToolbarBuilder builder = new ToolbarBuilder(getAllActions(), globalActions);
-      toolbar = builder.createToolbar();
-      updateConnectionInfo();
+      return this.toolbar;
     }
-		return this.toolbar;
 	}
 
   public List<WbAction> getAllActions()

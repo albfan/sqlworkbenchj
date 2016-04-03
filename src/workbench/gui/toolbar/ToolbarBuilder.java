@@ -114,7 +114,7 @@ public class ToolbarBuilder
     toolbar = new MainToolbar();
     List<String> commands = getConfiguredToolbarCommands();
 
-    LogMgr.logDebug("ToolbarBuilder.createToolbar()", "Using toolbar list: " + commands);
+    LogMgr.logTrace("ToolbarBuilder.createToolbar()", "Using toolbar list: " + commands);
     for (String cmd : commands)
     {
       if (cmd.equals(SEPARATOR_KEY))
@@ -142,7 +142,10 @@ public class ToolbarBuilder
         }
       }
     }
-    toolbar.addSeparator();
+    if (!commands.get(commands.size() - 1).equals(SEPARATOR_KEY))
+    {
+      toolbar.addSeparator();
+    }
     toolbar.addConnectionInfo();
   }
 

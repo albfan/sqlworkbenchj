@@ -137,31 +137,27 @@ public class ViewLogfileAction
 
   private void openInteralViewer(final WbFile logfile)
   {
-    EventQueue.invokeLater(new Runnable()
+    EventQueue.invokeLater(() ->
     {
-      @Override
-      public void run()
+      if (viewer == null)
       {
-        if (viewer == null)
+        try
         {
-          try
-          {
-            viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
-            viewer.addWindowListener(ViewLogfileAction.this);
-            viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
-            viewer.setVisible(true);
-            viewer.showFile(logfile);
-          }
-          catch (Exception e)
-          {
-            LogMgr.logError("ViewLogFileAction.executeAction()", "Error displaying the log file", e);
-            WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
-          }
+          viewer = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
+          viewer.addWindowListener(ViewLogfileAction.this);
+          viewer.setText(ResourceMgr.getString("LblLoadingProgress"));
+          viewer.setVisible(true);
+          viewer.showFile(logfile);
         }
-        else
+        catch (Exception e)
         {
-          viewer.toFront();
+          LogMgr.logError("ViewLogFileAction.executeAction()", "Error displaying the log file", e);
+          WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
         }
+      }
+      else
+      {
+        viewer.toFront();
       }
     });
   }
@@ -202,9 +198,4 @@ public class ViewLogfileAction
   {
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

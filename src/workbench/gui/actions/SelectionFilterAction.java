@@ -104,10 +104,4 @@ public class SelectionFilterAction
   {
     checkEnabled();
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

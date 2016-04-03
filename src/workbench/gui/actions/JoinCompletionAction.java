@@ -156,10 +156,5 @@ public class JoinCompletionAction
       statusbar.doRepaint();
     });
   }
-  
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
+
 }

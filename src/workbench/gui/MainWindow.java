@@ -890,6 +890,7 @@ public class MainWindow
     actions.add(loadMacros);
     actions.add(saveMacros);
     actions.add(showMacroPopup);
+    actions.add(disconnectTab);
 
     actions.add(new ManageDriversAction());
     actions.add(new DataPumperAction(this));
@@ -898,6 +899,7 @@ public class MainWindow
     actions.add(new SearchAllEditorsAction(this));
     actions.add(new ShowHelpAction());
     actions.add(new ShowManualAction());
+    actions.add(ViewLogfileAction.getInstance());
 
     return actions;
   }

@@ -57,9 +57,4 @@ public class FileReloadAction
     this.client.reloadFile();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

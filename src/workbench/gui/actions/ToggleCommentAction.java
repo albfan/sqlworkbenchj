@@ -63,11 +63,4 @@ public class ToggleCommentAction
     TextCommenter commenter = new TextCommenter(client);
     commenter.toggleComment();
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
-
 }

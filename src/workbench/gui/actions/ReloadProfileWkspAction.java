@@ -65,9 +65,4 @@ public class ReloadProfileWkspAction
     }
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

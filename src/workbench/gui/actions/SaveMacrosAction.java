@@ -81,9 +81,4 @@ public class SaveMacrosAction
     MacroManager.getInstance().getMacros(macroClientId).removeChangeListener(this);
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

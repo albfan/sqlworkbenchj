@@ -111,13 +111,9 @@ public class SpoolDataAction
 
     if (exporter.selectTables(tables, f))
     {
-      EventQueue.invokeLater(new Runnable()
+      EventQueue.invokeLater(() ->
       {
-        @Override
-        public void run()
-        {
-          exporter.startExport(f);
-        }
+        exporter.startExport(f);
       });
     }
   }
@@ -155,11 +151,5 @@ public class SpoolDataAction
   public void selectionChanged(int newStart, int newEnd)
   {
     checkEnabled();
-  }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
   }
 }

@@ -70,10 +70,4 @@ public class DisconnectTabAction
       this.setEnabled(window.canUseSeparateConnection() && window.usesSeparateConnection());
     }
   }
-
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

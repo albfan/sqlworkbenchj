@@ -57,9 +57,4 @@ public class SaveWorkspaceAction
     this.client.saveWorkspace(this.client.getCurrentWorkspaceFile(), false);
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

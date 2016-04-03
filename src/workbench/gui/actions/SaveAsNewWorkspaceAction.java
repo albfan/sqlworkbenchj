@@ -52,9 +52,4 @@ public class SaveAsNewWorkspaceAction
     this.client.saveWorkspace(null, false);
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

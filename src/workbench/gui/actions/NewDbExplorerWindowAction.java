@@ -49,9 +49,4 @@ public class NewDbExplorerWindowAction
     mainWin.newDbExplorerWindow();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }

@@ -57,9 +57,4 @@ public class LoadWorkspaceAction
     this.client.loadWorkspace();
   }
 
-  @Override
-  public boolean useInToolbar()
-  {
-    return false;
-  }
 }
