@@ -64,7 +64,7 @@ public class ConsoleRefresh
     boolean manualRefresh = false;
     if (RefreshAnnotation.ANNOTATION.equalsIgnoreCase(verb))
     {
-      if (history.size() == 0) return HandlerState.notHandled;
+      if (history.isEmpty()) return HandlerState.notHandled;
 
       interval = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
       if (StringUtil.isBlank(interval))
