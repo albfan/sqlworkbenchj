@@ -421,7 +421,7 @@ public class MainWindow
     }
 
     int count = getTabCount();
-    for (int i=0; i < count - 1; i++)
+    for (int i=0; i < count; i++)
     {
       MainPanel sqlPanel = getSqlPanel(i);
       sqlPanel.registerObjectFinder(treePanel);
@@ -467,7 +467,7 @@ public class MainWindow
       treePanel = null;
 
       int count = getTabCount();
-      for (int i=0; i < count - 1; i++)
+      for (int i=0; i < count; i++)
       {
         MainPanel sqlPanel = getSqlPanel(i);
         sqlPanel.registerObjectFinder(null);
@@ -3181,7 +3181,7 @@ public class MainWindow
 		if (this.currentWorkspace == null) return;
 		if (this.currentProfile == null) return;
 		FileDialogUtil util = new FileDialogUtil();
-		String filename = util.removeConfigDir(currentWorkspace.getFilename());
+		String filename = FileDialogUtil.removeConfigDir(currentWorkspace.getFilename());
 		currentProfile.setWorkspaceFile(filename);
 
 		// The MainWindow gets a copy of the profile managed by the ConnectionMgr
