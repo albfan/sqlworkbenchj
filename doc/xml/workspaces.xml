@@ -4,11 +4,11 @@
   <section id="workspace-overview">
     <title>Overview</title>
     <para>
-      A workspace is a collection of editor tabs that group scripts or statement together. A workspace stores the
+      A workspace is a collection of editor tabs that group scripts or statements together. A workspace stores the
       name of each editor tab, the cursor position for each editor, the selection and the statement history.
     </para>
     <para>
-      Each connection profile is assigned a workspace. If no workspace is explicitely chosen for a connection profile,
+      Each connection profile is associated with a workspace. If no workspace is explicitely chosen for a connection profile,
       a workspace with the name <literal>Default</literal> is used. If not specified otherwise, workspaces are stored
       in the <link linkend="config-dir">configuration directory</link>.
     </para>
@@ -25,9 +25,14 @@
 
     <para>
       Workspaces can be used to reduce the number of editor tabs being used. You can create different workspaces
-      for different topics you work on. One workspace that contains queries to monitor a database. One workspace
-      that contains everything related to a specific feature you are working on. One workspace to initialize a
+      for different topics you work on. One workspace that contains queries to monitor a database, one workspace
+      that contains everything related to a specific feature you are working on, one workspace to initialize a
       new environment and so on.
+    </para>
+
+    <para>
+      The workspace is saved when the window using that workspace is closed. If the option <link linkend=id="options-save-wksp">"Auto-Save workspace"</link>
+      is enabled the workspace is automatically saved when a SQL statement is executed.
     </para>
 
   </section>
