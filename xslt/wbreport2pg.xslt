@@ -749,7 +749,7 @@ Supported parameters:
 
   <xsl:template name="_quote_if_needed">
     <xsl:param name="identifier"/>
-    <xsl:value-of select="wb-name-util:preserveUppercase($identifier)"/>
+    <xsl:value-of select="wb-name-util:quoteIfNeeded($identifier)"/>
   </xsl:template>
 
   <xsl:template name="_cleanup_identifier">
