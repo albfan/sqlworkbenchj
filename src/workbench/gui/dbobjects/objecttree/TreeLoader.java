@@ -56,6 +56,7 @@ import workbench.gui.dbobjects.IsolationLevelChanger;
 import workbench.gui.dbobjects.objecttree.vertica.ProjectionListNode;
 
 import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 
 /**
@@ -227,11 +228,7 @@ public class TreeLoader
 
     if (connection.getDbSettings().supportsCatalogs())
     {
-      if (connection.getMetadata().getCatalogTerm().toLowerCase().equals("database"))
-      {
-        return ResourceMgr.getString("LblDatabases");
-      }
-      return ResourceMgr.getString("LblCatalogs");
+      return getDatabaseLabel();
     }
 
     if (connection.getDbSettings().supportsSchemas())
@@ -240,6 +237,25 @@ public class TreeLoader
     }
 
     return ResourceMgr.getString("TxtDbExplorerTables");
+  }
+
+  private String getDatabaseLabel()
+  {
+    if (connection.getMetadata().getCatalogTerm().toLowerCase().equals("database"))
+    {
+      return ResourceMgr.getString("LblDatabases");
+    }
+    return ResourceMgr.getString("LblCatalogs");
+  }
+
+  private void setRootLabel(String newLabel)
+  {
+    String lbl = root.getName();
+    if (StringUtil.stringsAreNotEqual(lbl, newLabel))
+    {
+      root.setNameAndType(newLabel, TYPE_ROOT);
+      model.nodeChanged(root);
+    }
   }
 
   public void clear()
@@ -268,8 +284,13 @@ public class TreeLoader
         loaded = loadCatalogs(root);
       }
 
-      if (!loaded && connection.getDbSettings().supportsSchemas())
+      if (loaded)
       {
+        setRootLabel(getDatabaseLabel());
+      }
+      else if (connection.getDbSettings().supportsSchemas())
+      {
+        setRootLabel(ResourceMgr.getString("LblSchemas"));
         loaded = loadSchemas(root);
       }
 
