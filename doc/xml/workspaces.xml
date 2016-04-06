@@ -31,7 +31,7 @@
     </para>
 
     <para>
-      The workspace is saved when the window using that workspace is closed. If the option <link linkend=id="options-save-wksp">"Auto-Save workspace"</link>
+      The workspace is saved when the window using that workspace is closed. If the option <link linkend="options-save-wksp">"Auto-Save workspace"</link>
       is enabled the workspace is automatically saved when a SQL statement is executed.
     </para>
 
