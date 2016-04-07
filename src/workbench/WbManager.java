@@ -838,21 +838,21 @@ public final class WbManager
       }
       Settings.getInstance().setMacroStorage(value);
 
-      LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
-      LogMgr.logInfo("WbManager.init()", ResourceMgr.getFullJavaInfo());
-      LogMgr.logInfo("WbManager.init()", ResourceMgr.getOSInfo());
+      LogMgr.logInfo("WbManager.readParameters()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
+      LogMgr.logInfo("WbManager.readParameters()", ResourceMgr.getFullJavaInfo());
+      LogMgr.logInfo("WbManager.readParameters()", ResourceMgr.getOSInfo());
 
       long maxMem = MemoryWatcher.MAX_MEMORY / (1024*1024);
-      LogMgr.logInfo("WbManager.init()", "Available memory: " + maxMem + "MB");
+      LogMgr.logInfo("WbManager.readParameters()", "Available memory: " + maxMem + "MB");
 
       if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
       {
-        LogMgr.logInfo("WbManager.init()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved.");
+        LogMgr.logInfo("WbManager.readParameters()", "The '" + AppArguments.ARG_NOSETTNGS + "' option was specified on the commandline. Global settings will not be saved.");
       }
     }
     catch (Exception e)
     {
-      LogMgr.logError("WbManager.initCdmLine()", "Error initializing command line arguments!", e);
+      LogMgr.logError("WbManager.readParameters()", "Error initializing command line arguments!", e);
     }
   }
 
@@ -1168,9 +1168,11 @@ public final class WbManager
 
   public static void main(String[] args)
   {
+    final String headlessCheckProperty = "workbench.gui.checkheadless";
     boolean runConsole = false;
+    boolean checkHeadless = StringUtil.stringToBool(System.getProperty(headlessCheckProperty, "true"));
 
-    if (GraphicsEnvironment.isHeadless())
+    if (checkHeadless && GraphicsEnvironment.isHeadless())
     {
       // no gui available --> default to console mode
       initConsoleMode();
@@ -1182,6 +1184,11 @@ public final class WbManager
     }
 
     wb.readParameters(args);
+
+    if (runConsole)
+    {
+      LogMgr.logInfo("WbManager.main()", "Forcing console mode because the Java runtime claims this is a headless system. Use -D" + headlessCheckProperty + "=false to disable the check");
+    }
 
     boolean hasScripts = wb.cmdLine.isArgPresent(AppArguments.ARG_SCRIPT) || wb.cmdLine.isArgPresent(AppArguments.ARG_COMMAND);
     boolean showHelp = wb.cmdLine.isArgPresent("help");
