@@ -430,6 +430,18 @@ public class SqlCommand
     return true;
   }
 
+  protected void setMaxRowsForStatement(Statement stmt)
+  {
+    try
+    {
+      stmt.setMaxRows(this.maxRows >= 0 ? maxRows : 0);
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logWarning("SqlCommand.setMaxRows()", "The JDBC driver does not support the setMaxRows() function! (" + e.getMessage() + ")");
+    }
+  }
+
   /**
    * Should be overridden by a specialised SqlCommand.
    * setConnection must be called before calling execute()
@@ -452,6 +464,11 @@ public class SqlCommand
     if (runner.useSavepointForDML())
     {
       runner.setSavepoint();
+    }
+
+    if (currentConnection.getDbSettings().useMaxRows(verb))
+    {
+      setMaxRowsForStatement(currentStatement);
     }
 
     try

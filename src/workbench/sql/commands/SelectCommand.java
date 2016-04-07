@@ -104,15 +104,7 @@ public class SelectCommand
 				LogMgr.logWarning("SelectCommand.execute()", "Error when setting query timeout: " + th.getMessage(), null);
 			}
 
-			try
-			{
-//				LogMgr.logTrace("SelectCommand.execute()", "Setting maxrows to: " + maxRows);
-				this.currentStatement.setMaxRows(this.maxRows);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("SelectCommand.execute()", "The JDBC driver does not support the setMaxRows() function! (" +e.getMessage() + ")");
-			}
+      setMaxRowsForStatement(currentStatement);
 
 			ResultSet rs = null;
 			boolean hasResult = true;

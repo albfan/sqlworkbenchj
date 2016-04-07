@@ -77,6 +77,7 @@ public class DbSettings
   private final String dbId;
   private final Set<String> updatingCommands = CollectionUtil.caseInsensitiveSet();
   private final Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
+  private final Set<String> useMaxRowsVerbs = CollectionUtil.caseInsensitiveSet();
 
   private final String prefix;
   private final String prefixMajorVersion;
@@ -117,6 +118,7 @@ public class DbSettings
 
     readNoUpdateCountVerbs();
     readUpdatingCommands();
+    readMaxRowVerbs();
   }
 
   public final String getDbId()
@@ -1866,6 +1868,12 @@ public class DbSettings
     return getBoolProperty("metadata.cleanup.types", false);
   }
 
+  public boolean useMaxRows(String verb)
+  {
+    if (verb == null) return false;
+    return useMaxRowsVerbs.contains(verb);
+  }
+
   public Set<String> verbsWithoutUpdateCount()
   {
     return Collections.unmodifiableSet(noUpdateCountVerbs);
@@ -1877,6 +1885,14 @@ public class DbSettings
     updatingCommands.addAll(StringUtil.stringToList(global, ",", true, true));
     String dbCommands = Settings.getInstance().getProperty(prefix + "updatingcommands", null);
     updatingCommands.addAll(StringUtil.stringToList(dbCommands, ",", true, true));
+  }
+
+  private void readMaxRowVerbs()
+  {
+    String global = Settings.getInstance().getProperty("workbench.db.maxrows.verbs", null);
+    useMaxRowsVerbs.addAll(StringUtil.stringToList(global, ",", true, true));
+    String dbCommands = Settings.getInstance().getProperty(prefix + "maxrows.verbs", null);
+    useMaxRowsVerbs.addAll(StringUtil.stringToList(dbCommands, ",", true, true));
   }
 
   private void readNoUpdateCountVerbs()
