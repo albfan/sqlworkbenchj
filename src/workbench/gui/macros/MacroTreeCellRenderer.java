@@ -38,8 +38,6 @@ import workbench.resource.IconMgr;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 
-import workbench.util.HtmlUtil;
-import workbench.util.StringUtil;
 
 /**
  * A tree cell renderer that can indicate a drop target
@@ -90,14 +88,7 @@ public class MacroTreeCellRenderer
 				{
 					setIcon(IconMgr.getInstance().getLabelIcon("macro"));
 				}
-        if (macro.getTooltip() == null)
-        {
-          setToolTipText("<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(macro.getText(), 500)) + "</pre></html>");
-        }
-        else
-        {
-          setToolTipText(macro.getTooltip());
-        }
+        setToolTipText(macro.getDisplayTooltip());
 			}
       else if (dataObject instanceof MacroGroup)
 			{

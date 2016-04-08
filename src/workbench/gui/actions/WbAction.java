@@ -168,9 +168,9 @@ public class WbAction
 		return false;
 	}
 
-	public void setTooltip(String aText)
+	public void setTooltip(String text)
 	{
-    baseTooltip = aText;
+    baseTooltip = StringUtil.trimToNull(text);
     initTooltip();
 	}
 
@@ -186,14 +186,14 @@ public class WbAction
 
   private void initTooltip()
   {
-    if (StringUtil.isEmptyString(baseTooltip))
+    if (baseTooltip == null)
     {
       putValue(Action.SHORT_DESCRIPTION, null);
     }
     else
     {
       String shortCut = this.getAcceleratorDisplay();
-      if (shortCut == null)
+      if (baseTooltip.startsWith("<html>") || shortCut == null)
       {
         putValue(Action.SHORT_DESCRIPTION, baseTooltip);
       }

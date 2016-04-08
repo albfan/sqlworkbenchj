@@ -25,6 +25,7 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -87,8 +88,6 @@ public class RunMacroAction
 			{
 				title = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
 			}
-			setMenuText(title);
-      initTooltip();
 
 			StoreableKeyStroke key = macro.getShortcut();
 			if (key != null)
@@ -96,6 +95,9 @@ public class RunMacroAction
 				KeyStroke stroke = key.getKeyStroke();
 				setAccelerator(stroke);
 			}
+
+      setMenuText(title);
+      initTooltip();
 		}
 
 		setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
@@ -106,7 +108,7 @@ public class RunMacroAction
 	public void setDataTable(WbTable table, Map<String, String> colMap)
 	{
 		this.dataTable = table;
-		this.columnMap = colMap;
+		this.columnMap = new HashMap<>(colMap);
 		if (columnMap == null)
 		{
 			columnMap = Collections.emptyMap();
@@ -131,13 +133,13 @@ public class RunMacroAction
   private void initTooltip()
   {
     if (macro == null) return;
-    String desc = macro.getTooltip();
+    String desc = macro.getDisplayTooltip();
     if (desc == null)
     {
       desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
       desc = StringUtil.replace(desc, "%macro%", "'" + macro.getName() + "'");
     }
-    putValue(Action.SHORT_DESCRIPTION, desc);
+    setTooltip(desc);
   }
 
 	public void setMacro(MacroDefinition def)

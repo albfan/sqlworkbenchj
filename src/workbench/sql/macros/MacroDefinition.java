@@ -23,7 +23,9 @@
  */
 package workbench.sql.macros;
 
+import workbench.resource.GuiSettings;
 import workbench.resource.StoreableKeyStroke;
+import workbench.util.HtmlUtil;
 
 import workbench.util.StringUtil;
 
@@ -63,6 +65,16 @@ public class MacroDefinition
 		this.name = macroName;
 		this.text = macroText;
 	}
+
+  public String getDisplayTooltip()
+  {
+    if (tooltip == null && GuiSettings.useMacroSourceForMenuTooltip())
+    {
+      int len = GuiSettings.getMacroSourceTooltipLength();
+      return "<html><pre>" + HtmlUtil.escapeXML(StringUtil.getMaxSubstring(getText(), len), false) + "</pre></html>";
+    }
+    return tooltip;
+  }
 
   public String getTooltip()
   {

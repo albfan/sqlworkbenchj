@@ -215,14 +215,18 @@ public class MacroPopup
 
 	private PropertyStorage getConfig()
 	{
+    PropertyStorage config = null;
+    
 		if (useWorkspace())
 		{
-			return mainWindow.getToolProperties(toolkey);
+			config = mainWindow.getToolProperties(toolkey);
 		}
-		else
+
+		if (config == null)
 		{
-			return Settings.getInstance();
+			config = Settings.getInstance();
 		}
+    return config;
 	}
 
 	private void closeWindow()

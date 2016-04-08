@@ -64,6 +64,8 @@ public class GuiSettings
 	public static final String PROPERTY_MACRO_POPUP_WKSP = "workbench.gui.macropopup.useworkspace";
 	public static final String PROPERTY_MACRO_POPUP_CLOSE_ESC = "workbench.gui.macropopup.esc.closes";
 	public static final String PROPERTY_MACRO_POPUP_RUN_ON_ENTER = "workbench.gui.macropopup.enter.run";
+	public static final String PROPERTY_MACRO_SOURCE_TOOLTIP_LENGTH = "workbench.gui.macro.source.tooltip.length";
+	public static final String PROPERTY_MACRO_MENU_USE_SOURCE_TOOLTIP = "workbench.gui.macro.menuitem.tooltip.usesource";
 
 	public static final String PROP_TITLE_SHOW_WKSP = "workbench.gui.display.showpworkspace";
 	public static final String PROP_TITLE_SHOW_URL = "workbench.gui.display.showurl";
@@ -246,6 +248,16 @@ public class GuiSettings
 		int modifier = key.getModifiers();
 		Settings.getInstance().setProperty(PROPERTY_EXPAND_KEYSTROKE, Integer.toString(code) + "," + Integer.toString(modifier));
 	}
+
+  public static int getMacroSourceTooltipLength()
+  {
+    return Settings.getInstance().getIntProperty(PROPERTY_MACRO_SOURCE_TOOLTIP_LENGTH, 500);
+  }
+
+  public static boolean useMacroSourceForMenuTooltip()
+  {
+    return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_MENU_USE_SOURCE_TOOLTIP, true);
+  }
 
 	public static void setRunMacroWithEnter(boolean flag)
 	{
