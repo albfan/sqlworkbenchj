@@ -44,7 +44,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
-import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
@@ -145,7 +144,6 @@ public class SortHeaderRenderer
       display = displayLabel;
     }
 
-    display.setIconTextGap((int)(IconMgr.getInstance().getSizeForLabel() / 2));
     display.setVerticalAlignment(SwingConstants.TOP);
     display.setHorizontalTextPosition(SwingConstants.LEFT);
     display.setHorizontalAlignment(SwingConstants.LEFT);
@@ -216,15 +214,16 @@ public class SortHeaderRenderer
 
     if (sorted)
     {
-      SortArrowIcon icon = null;
       Font f = display.getFont();
       FontMetrics fm = display.getFontMetrics(f);
       int height = getArrowSize(fm, primary);
-      icon = SortArrowIcon.getIcon(ascending ? SortArrowIcon.Direction.UP : SortArrowIcon.Direction.DOWN, height);
+      SortArrowIcon icon = SortArrowIcon.getIcon(ascending ? SortArrowIcon.Direction.UP : SortArrowIcon.Direction.DOWN, height);
+      display.setIconTextGap((int)(icon.getIconWidth() / 2));
       display.setIcon(icon);
     }
     else
     {
+      display.setIconTextGap(0);
       display.setIcon(null);
     }
 
