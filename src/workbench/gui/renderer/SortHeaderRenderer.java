@@ -44,6 +44,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.SortArrowIcon;
 import workbench.gui.components.WbTable;
+import workbench.resource.IconMgr;
 
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
@@ -144,7 +145,7 @@ public class SortHeaderRenderer
       display = displayLabel;
     }
 
-    display.setIconTextGap(5);
+    display.setIconTextGap((int)(IconMgr.getInstance().getSizeForLabel() / 2));
     display.setVerticalAlignment(SwingConstants.TOP);
     display.setHorizontalTextPosition(SwingConstants.LEFT);
     display.setHorizontalAlignment(SwingConstants.LEFT);
