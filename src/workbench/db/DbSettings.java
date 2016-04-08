@@ -78,6 +78,7 @@ public class DbSettings
   private final Set<String> updatingCommands = CollectionUtil.caseInsensitiveSet();
   private final Set<String> noUpdateCountVerbs = CollectionUtil.caseInsensitiveSet();
   private final Set<String> useMaxRowsVerbs = CollectionUtil.caseInsensitiveSet();
+  private boolean alwaysUseMaxRows;
 
   private final String prefix;
   private final String prefixMajorVersion;
@@ -1870,6 +1871,7 @@ public class DbSettings
 
   public boolean useMaxRows(String verb)
   {
+    if (alwaysUseMaxRows) return true;
     if (verb == null) return false;
     return useMaxRowsVerbs.contains(verb);
   }
@@ -1892,7 +1894,21 @@ public class DbSettings
     String global = Settings.getInstance().getProperty("workbench.db.maxrows.verbs", null);
     useMaxRowsVerbs.addAll(StringUtil.stringToList(global, ",", true, true));
     String dbCommands = Settings.getInstance().getProperty(prefix + "maxrows.verbs", null);
-    useMaxRowsVerbs.addAll(StringUtil.stringToList(dbCommands, ",", true, true));
+    
+    List<String> dbVerbs = StringUtil.stringToList(dbCommands, ",", true, true);
+    for (String verb : dbVerbs)
+    {
+      if (StringUtil.isEmptyString(verb)) continue;
+      if (verb.startsWith("-"))
+      {
+        useMaxRowsVerbs.remove(verb.substring(1));
+      }
+      else
+      {
+        useMaxRowsVerbs.add(verb);
+      }
+    }
+    alwaysUseMaxRows = useMaxRowsVerbs.contains("*");
   }
 
   private void readNoUpdateCountVerbs()
