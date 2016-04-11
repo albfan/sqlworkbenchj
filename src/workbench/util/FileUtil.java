@@ -522,19 +522,9 @@ public class FileUtil
       LogMgr.logWarning("FileUtil.listFiles()", "Could not get file list", ex);
     }
 
-    Comparator<File> fnameSorter = new Comparator<File>()
-    {
-      @Override
-      public int compare(File o1, File o2)
-      {
-        if (o1 == null && o2 == null) return 0;
-        if (o1 == null) return 1;
-        if (o2 == null) return -1;
-        return o1.getName().compareToIgnoreCase(o2.getName());
-      }
-    };
-
+    Comparator<File> fnameSorter = (File o1, File o2) -> o1.getName().compareToIgnoreCase(o2.getName());
     Collections.sort(result, fnameSorter);
+
     return result;
   }
 
