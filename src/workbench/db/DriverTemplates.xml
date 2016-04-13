@@ -198,7 +198,7 @@
      <string>sqljdbc4.jar</string>
     </void>
     <void property="name">
-     <string>SQL Server 2005</string>
+     <string>Microsoft SQL Server</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:sqlserver://serverName[\instanceName][:portNumber];property=value;property=value</string>
@@ -215,7 +215,7 @@
      <string>jconn3.jar</string>
     </void>
     <void property="name">
-     <string>Sybase jConnect 6.0</string>
+     <string>Sybase jConnect</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:sybase:Tds:machine-name:port-number</string>
