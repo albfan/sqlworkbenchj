@@ -178,9 +178,8 @@ public class ClipBoardCopier
 				printer.writeDataString(out, rows);
 			}
 
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
-//      StringSelection sel = new StringSelection(out.toString());
+			Clipboard clp = getClipboard();
       StringSelectionAdapter sel = new StringSelectionAdapter(out.toString(), includeHtml);
 			clp.setContents(sel, sel);
 		}
@@ -200,6 +199,14 @@ public class ClipBoardCopier
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
+
+  /**
+   * Protected so that Unit Tests can use the non-system clipboard.
+   */
+  protected Clipboard getClipboard()
+  {
+    return Toolkit.getDefaultToolkit().getSystemClipboard();
+  }
 
 	private int[] getColumnOrder()
 	{
@@ -266,7 +273,7 @@ public class ClipBoardCopier
 
 			if (sql != null)
 			{
-				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+				Clipboard clp = getClipboard();
 				StringSelection sel = new StringSelection(sql);
 				clp.setContents(sel, sel);
 			}
@@ -356,7 +363,7 @@ public class ClipBoardCopier
 		String sql = createSqlString(type, selectedOnly, showSelectColumns);
 		if (sql != null)
 		{
-			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+			Clipboard clp = getClipboard();
 			StringSelection sel = new StringSelection(sql);
 			clp.setContents(sel, sel);
 		}

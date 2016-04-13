@@ -23,10 +23,9 @@
  */
 package workbench.gui.components;
 
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -54,8 +53,6 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
-import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -70,15 +67,6 @@ public class ClipBoardCopierTest
 	public ClipBoardCopierTest()
 	{
 		super("ClipBoardCopierTest");
-	}
-
-	@Before
-	public void clearClipboard()
-	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection sel = new StringSelection("");
-		clp.setContents(sel, sel);
 	}
 
 	private DataStore createDataStore()
@@ -114,11 +102,19 @@ public class ClipBoardCopierTest
 	public void testCopyDataToClipboard()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
-		ClipBoardCopier copier = new ClipBoardCopier(createDataStore());
+    final Clipboard testClip = new TestClipboard("testCopyDataToClipboard");
+
+		ClipBoardCopier copier = new ClipBoardCopier(createDataStore())
+    {
+      @Override
+      protected Clipboard getClipboard()
+      {
+        return testClip;
+      }
+
+    };
 		copier.copyDataToClipboard(true, false, false);
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		Transferable contents = clp.getContents(copier);
+		Transferable contents = testClip.getContents(copier);
 		Object data = contents.getTransferData(DataFlavor.stringFlavor);
 		assertNotNull(data);
 		assertTrue(data instanceof String);
@@ -133,7 +129,7 @@ public class ClipBoardCopierTest
 	public void testCopyAsSqlInsert()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
+    final Clipboard testClip = new TestClipboard("testCopyAsSqlInsert");
 		try
 		{
 			GuiSettings.setDisplayNullString("<[NULL]>");
@@ -143,7 +139,14 @@ public class ClipBoardCopierTest
 			ds.setValue(row, 1, "Marvin");
 			ds.setValue(row, 2, null);
 
-			ClipBoardCopier copier = new ClipBoardCopier(ds);
+			ClipBoardCopier copier = new ClipBoardCopier(ds)
+      {
+        @Override
+        protected Clipboard getClipboard()
+        {
+          return testClip;
+        }
+      };
 			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
 			ScriptParser p = new ScriptParser(sql);
 			assertEquals(3, p.getSize());
@@ -164,7 +167,8 @@ public class ClipBoardCopierTest
 	public void testCopyIdentityAsInsert()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
+    final Clipboard testClip = new TestClipboard("testCopyIdentityAsInsert");
+
 		TestUtil util = getTestUtil();
 		WbConnection conn = util.getHSQLConnection("clipboard");
 
@@ -186,7 +190,14 @@ public class ClipBoardCopierTest
 			DataStore ds = new DataStore(rs, true);
 			ds.setOriginalConnection(conn);
 			ds.setUpdateTable(new TableIdentifier("FOO"));
-			ClipBoardCopier copier = new ClipBoardCopier(ds);
+			ClipBoardCopier copier = new ClipBoardCopier(ds)
+      {
+        @Override
+        protected Clipboard getClipboard()
+        {
+          return testClip;
+        }
+      };
 			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
 
 			ScriptParser parser = new ScriptParser(sql);
@@ -208,7 +219,8 @@ public class ClipBoardCopierTest
 	public void testCopyReadOnlyColumns()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
+    final Clipboard testClip = new TestClipboard("testCopyReadOnlyColumns");
+
 		TestUtil util = getTestUtil();
 		WbConnection conn = util.getHSQLConnection("clipboard");
 
@@ -232,8 +244,17 @@ public class ClipBoardCopierTest
 			ds.setUpdateTable(new TableIdentifier("FOO"));
 			ds.getResultInfo().getColumn(1).setReadonly(true);
 			ds.getResultInfo().getColumn(2).setReadonly(true);
-			ClipBoardCopier copier = new ClipBoardCopier(ds);
-			String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
+
+      ClipBoardCopier copier = new ClipBoardCopier(ds)
+      {
+        @Override
+        protected Clipboard getClipboard()
+        {
+          return testClip;
+        }
+      };
+
+      String sql = copier.createSqlString(ExportType.SQL_INSERT, false, false);
 
 			ScriptParser parser = new ScriptParser(sql);
 			int size = parser.getSize();
@@ -263,12 +284,22 @@ public class ClipBoardCopierTest
 	public void testCopyAsSqlDeleteInsert()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
+    final Clipboard testClip = new TestClipboard("testCopyAsSqlDeleteInsert");
 
-		ClipBoardCopier copier = new ClipBoardCopier(createDataStore());
+		ClipBoardCopier copier = new ClipBoardCopier(createDataStore())
+    {
+      @Override
+      protected Clipboard getClipboard()
+      {
+        return testClip;
+      }
+    };
+
 		copier.doCopyAsSql(ExportType.SQL_DELETE_INSERT, false, false);
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		Transferable contents = clp.getContents(copier);
+
+		Transferable contents = testClip.getContents(copier);
+    assertNotNull(contents);
+
 		Object data = contents.getTransferData(DataFlavor.stringFlavor);
 		assertNotNull(data);
 		assertTrue(data instanceof String);
@@ -284,17 +315,26 @@ public class ClipBoardCopierTest
 	public void testCopyAsSqlUpdate()
 		throws Exception
 	{
-		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
 		DataStore ds = createDataStore();
 		assertTrue(ds.hasPkColumns());
-		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-		ClipBoardCopier copier = new ClipBoardCopier(ds);
+
+    final Clipboard testClip = new TestClipboard("testCopyAsSqlUpdate");
+
+		ClipBoardCopier copier = new ClipBoardCopier(ds)
+    {
+      @Override
+      protected Clipboard getClipboard()
+      {
+        return testClip;
+      }
+    };
 		copier.doCopyAsSql(ExportType.SQL_UPDATE, false, false);
-		Transferable contents = clp.getContents(copier);
+		Transferable contents = testClip.getContents(copier);
+    assertNotNull(contents);
+
 		Object data = contents.getTransferData(DataFlavor.stringFlavor);
 		assertNotNull(data);
 		assertTrue(data instanceof String);
-//		System.out.println(data);
 		ScriptParser p = new ScriptParser((String)data);
 		assertEquals(2, p.getSize());
 		assertEquals("UPDATE", SqlUtil.getSqlVerb(p.getCommand(0)));
@@ -303,4 +343,22 @@ public class ClipBoardCopierTest
 		assertTrue(p.getCommand(1).contains("id = 2"));
 	}
 
+  private static class TestClipboard
+    extends Clipboard
+  {
+    public TestClipboard(String name)
+    {
+      super(name);
+    }
+
+    @Override
+    public synchronized void setContents(Transferable contents, ClipboardOwner owner)
+    {
+      this.owner = owner;
+      this.contents = contents;
+    }
+
+  }
+
 }
+
