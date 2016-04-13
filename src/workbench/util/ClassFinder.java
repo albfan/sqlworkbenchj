@@ -30,15 +30,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import workbench.log.LogMgr;
 
 /**
  * A class to search a list of jar files for an implementatioin of a specific interface.
@@ -83,9 +88,18 @@ public class ClassFinder
   public List<String> findImplementations(List<String> jarFiles)
     throws IOException
   {
-    List<String> result = new ArrayList<>();
     ClassLoader loader = buildClassLoader(jarFiles);
 
+    List<String> services = getServices(loader);
+    if (CollectionUtil.isNonEmpty(services))
+    {
+      LogMgr.logInfo("ClassFinder.findImplementions()", "Using drivers specified in the service definition of the driver jars");
+      return services;
+    }
+
+    LogMgr.logInfo("ClassFinder.findImplementions()", "No services defined in the driver jar file(s). Scanning all classes");
+
+    List<String> result = new ArrayList<>();
     for (String file : jarFiles)
     {
       File f = new File(file);
@@ -120,6 +134,30 @@ public class ClassFinder
       }
     }
     return result;
+  }
+
+  /**
+   * Read the service definition for the driver using the ServiceLoader.
+   */
+  private List<String> getServices(ClassLoader loader)
+  {
+    try
+    {
+      List<String> result = new ArrayList<>();
+      ServiceLoader<Driver> serviceLoader = ServiceLoader.load(java.sql.Driver.class, loader);
+      Iterator<Driver> iterator = serviceLoader.iterator();
+      while (iterator.hasNext())
+      {
+        Driver drv = iterator.next();
+        result.add(drv.getClass().getName());
+      }
+      return result;
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("ClassFinder.getServices()", "Could not load services", th);
+      return null;
+    }
   }
 
   private static List<Class> scanJarFile(String archive, ClassLoader loader, Set<String> excluded)
@@ -301,4 +339,6 @@ public class ClassFinder
     }
     return classes;
   }
+
+
 }
