@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-04-03">
+    <entry dev-build="3" type="enh">When searching for a JDBC driver class in the driver's jar file, available service registrations are used to speed up the searching.</entry>
     <entry dev-build="2" type="enh">It's now possible to disable icons in menus</entry>
     <entry dev-build="2" type="enh">For HSQLDB 2.3.4 synonyms are now displayed</entry>
     <entry dev-build="2" type="enh">It's now possible to configure the buttons on the toolbar</entry>
