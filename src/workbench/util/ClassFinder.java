@@ -93,7 +93,7 @@ public class ClassFinder
     List<String> services = getServices(loader);
     if (CollectionUtil.isNonEmpty(services))
     {
-      LogMgr.logInfo("ClassFinder.findImplementions()", "Using drivers specified in the service definition of the driver jars");
+      LogMgr.logInfo("ClassFinder.findImplementions()", "Using drivers specified in the service definition of the driver jars: " + services);
       return services;
     }
 
