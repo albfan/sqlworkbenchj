@@ -376,7 +376,7 @@ public class SetCommand
 		}
 		List<String> flags = StringUtil.stringToList(parameter.toLowerCase(), " ");
 
-		if (flags.contains("on") || flags.contains("traceonly"))
+		if (flags.contains("on") || flags.contains("traceonly") || flags.contains("trace"))
 		{
 			runner.setSessionProperty("autotrace", StringUtil.listToString(flags, ','));
 			result.addMessageByKey("MsgAutoTraceOn");
