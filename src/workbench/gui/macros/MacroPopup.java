@@ -31,6 +31,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -40,9 +41,12 @@ import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ToolTipManager;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -50,6 +54,7 @@ import workbench.interfaces.FileActions;
 import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.QuickFilter;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -59,9 +64,11 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.EditMacroAction;
 import workbench.gui.actions.EscAction;
+import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.WbToolbar;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
 
@@ -69,8 +76,6 @@ import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
 
 import workbench.util.StringUtil;
-
-import static javax.swing.WindowConstants.*;
 
 /**
  * Display a floating window with the MacroTree.
@@ -81,7 +86,8 @@ import static javax.swing.WindowConstants.*;
  */
 public class MacroPopup
 	extends JDialog
-	implements WindowListener, MouseListener, TreeSelectionListener, MacroChangeListener, ActionListener
+	implements WindowListener, MouseListener, TreeSelectionListener, MacroChangeListener, ActionListener,
+             KeyListener, QuickFilter
 {
 	private MacroTree tree;
 	private MainWindow mainWindow;
@@ -92,6 +98,10 @@ public class MacroPopup
 	private boolean isClosing;
 	private final String propkey = getClass().getName() + ".expandedgroups";
 	private final String toolkey = "macropopup";
+  private JTextField filterValue;
+  private QuickFilterAction filterAction;
+  private WbAction resetFilter;
+  private boolean keySelectionInProgress;
 
 	public MacroPopup(MainWindow parent)
 	{
@@ -168,6 +178,144 @@ public class MacroPopup
 
 		MacroManager.getInstance().getMacros(parent.getMacroClientId()).addChangeListener(this);
 		ToolTipManager.sharedInstance().registerComponent(tree);
+
+    if (GuiSettings.getShowFilterInMacroPopup())
+    {
+      showFilterPanel();
+    }
+	}
+
+  private void showFilterPanel()
+  {
+    JPanel filterPanel = new JPanel(new BorderLayout(0, 1));
+    filterPanel.setBorder(new EmptyBorder(2, 0, 2, 4));
+    filterValue = new JTextField();
+
+    filterAction = new QuickFilterAction(this);
+    resetFilter = new WbAction()
+    {
+      @Override
+      public void executeAction(ActionEvent e)
+      {
+        resetFilter();
+      }
+    };
+    resetFilter.setIcon("resetfilter");
+    resetFilter.setEnabled(false);
+
+    WbToolbar filterBar = new WbToolbar();
+    filterBar.add(filterAction);
+    filterBar.add(resetFilter);
+    filterBar.setMargin(WbSwingUtilities.getEmptyInsets());
+    filterBar.setBorderPainted(true);
+
+    filterPanel.add(filterBar, BorderLayout.LINE_START);
+    filterPanel.add(filterValue, BorderLayout.CENTER);
+
+    filterValue.addKeyListener(this);
+    add(filterPanel, BorderLayout.PAGE_START);
+  }
+  private boolean isEditKey(KeyEvent event)
+  {
+    int key = event.getKeyChar();
+    switch (key)
+    {
+      case KeyEvent.VK_BACK_SPACE:
+      case KeyEvent.VK_DELETE:
+      case KeyEvent.VK_CUT:
+      case KeyEvent.VK_INSERT:
+      case KeyEvent.VK_CLEAR:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+	@Override
+	public void keyTyped(final KeyEvent e)
+	{
+    if (e.isConsumed()) return;
+    if (Character.isISOControl(e.getKeyChar()) && isEditKey(e) == false) return;
+
+    if (GuiSettings.filterMacroWhileTyping())
+    {
+      EventQueue.invokeLater(this::applyQuickFilter);
+    }
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.getSource() != this.filterValue || e.getModifiers() != 0) return;
+
+		switch (e.getKeyCode())
+		{
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
+        if (keySelectionInProgress)
+        {
+          tree.dispatchEvent(e);
+        }
+        else
+        {
+          e.consume();
+        }
+        break;
+
+			case KeyEvent.VK_UP:
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_PAGE_DOWN:
+			case KeyEvent.VK_PAGE_UP:
+        keySelectionInProgress = true;
+        tree.dispatchEvent(e);
+				break;
+
+			case KeyEvent.VK_ENTER:
+        if (keySelectionInProgress)
+        {
+          tree.dispatchEvent(e);
+        }
+        else
+        {
+          e.consume();
+          keySelectionInProgress = false;
+          applyQuickFilter();
+        }
+        break;
+
+			case KeyEvent.VK_ESCAPE:
+        e.consume();
+        keySelectionInProgress = false;
+        resetFilter();
+        break;
+
+      default:
+        keySelectionInProgress = false;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+	}
+
+  @Override
+  public void resetFilter()
+  {
+    List<String> groups = getExpanedGroups();
+    tree.getModel().resetFilter();
+    resetFilter.setEnabled(false);
+    tree.expandGroups(groups);
+  }
+
+  @Override
+	public synchronized void applyQuickFilter()
+	{
+    String text = filterValue.getText();
+    List<String> groups = getExpanedGroups();
+    tree.getModel().applyFilter(text);
+    tree.expandGroups(groups);
+    resetFilter.setEnabled(true);
 	}
 
 	private boolean useWorkspace()
@@ -216,7 +364,7 @@ public class MacroPopup
 	private PropertyStorage getConfig()
 	{
     PropertyStorage config = null;
-    
+
 		if (useWorkspace())
 		{
 			config = mainWindow.getToolProperties(toolkey);

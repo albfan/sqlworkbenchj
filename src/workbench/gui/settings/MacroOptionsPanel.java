@@ -76,6 +76,7 @@ public class MacroOptionsPanel
 		closeEsc.setSelected(GuiSettings.getCloseMacroPopupWithEsc());
 		saveWksp.setSelected(GuiSettings.getStoreMacroPopupInWorkspace());
 		enterRuns.setSelected(GuiSettings.getRunMacroWithEnter());
+    showQuickFilter.setSelected(GuiSettings.getShowFilterInMacroPopup());
 	}
 
 	@Override
@@ -86,6 +87,7 @@ public class MacroOptionsPanel
 		GuiSettings.setCloseMacroPopupWithEsc(closeEsc.isSelected());
 		GuiSettings.setStoreMacroPopupInWorkspace(saveWksp.isSelected());
 		GuiSettings.setRunMacroWithEnter(enterRuns.isSelected());
+    GuiSettings.setShowFilterInMacroPopup(showQuickFilter.isSelected());
 	}
 
 
@@ -104,6 +106,7 @@ public class MacroOptionsPanel
     jPanel1 = new JPanel();
     closeEsc = new JCheckBox();
     saveWksp = new JCheckBox();
+    showQuickFilter = new JCheckBox();
     enterRuns = new JCheckBox();
 
     setLayout(new GridBagLayout());
@@ -147,10 +150,19 @@ public class MacroOptionsPanel
     gridBagConstraints.weightx = 1.0;
     jPanel1.add(saveWksp, gridBagConstraints);
 
-    enterRuns.setText(ResourceMgr.getString("LblMacroPopEnterRun")); // NOI18N
+    showQuickFilter.setText(ResourceMgr.getString("LblMacroPopFilter")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    jPanel1.add(showQuickFilter, gridBagConstraints);
+
+    enterRuns.setText(ResourceMgr.getString("LblMacroPopEnterRun")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
@@ -176,6 +188,7 @@ public class MacroOptionsPanel
   private JLabel jLabel3;
   private JPanel jPanel1;
   private JCheckBox saveWksp;
+  private JCheckBox showQuickFilter;
   // End of variables declaration//GEN-END:variables
 
 }

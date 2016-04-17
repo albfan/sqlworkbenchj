@@ -238,7 +238,6 @@ public class MacroStorage
 		{
       Comparator<MacroGroup> comp = new Comparator<MacroGroup>()
       {
-
         @Override
         public int compare(MacroGroup o1, MacroGroup o2)
         {
@@ -556,4 +555,21 @@ public class MacroStorage
     return allMacros.size() + " macros";
   }
 
+  public void resetFilter()
+  {
+    for (MacroGroup group : groups)
+    {
+      group.resetFilter();
+    }
+    updateMap();
+  }
+  
+  public void applyFilter(String filter)
+  {
+    for (MacroGroup group : groups)
+    {
+      group.applyFilter(filter);
+    }
+    updateMap();
+  }
 }

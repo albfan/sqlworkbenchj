@@ -64,6 +64,8 @@ public class GuiSettings
 	public static final String PROPERTY_MACRO_POPUP_WKSP = "workbench.gui.macropopup.useworkspace";
 	public static final String PROPERTY_MACRO_POPUP_CLOSE_ESC = "workbench.gui.macropopup.esc.closes";
 	public static final String PROPERTY_MACRO_POPUP_RUN_ON_ENTER = "workbench.gui.macropopup.enter.run";
+	public static final String PROPERTY_MACRO_POPUP_SHOW_FILTER = "workbench.gui.macropopup.show.filter";
+	public static final String PROPERTY_MACRO_POPUP_QUICKFILTER = "workbench.gui.macropopup.quickfilter";
 	public static final String PROPERTY_MACRO_SOURCE_TOOLTIP_LENGTH = "workbench.gui.macro.source.tooltip.length";
 	public static final String PROPERTY_MACRO_MENU_USE_SOURCE_TOOLTIP = "workbench.gui.macro.menuitem.tooltip.usesource";
 
@@ -288,6 +290,21 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty(PROPERTY_MACRO_POPUP_WKSP, flag);
 	}
+
+	public static boolean getShowFilterInMacroPopup()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_SHOW_FILTER, false);
+	}
+
+	public static void setShowFilterInMacroPopup(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_MACRO_POPUP_SHOW_FILTER, flag);
+	}
+
+  public static boolean filterMacroWhileTyping()
+  {
+    return Settings.getInstance().getBoolProperty(PROPERTY_MACRO_POPUP_QUICKFILTER, false);
+  }
 
 	public static boolean getShowResultSQL()
 	{

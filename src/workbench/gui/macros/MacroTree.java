@@ -137,6 +137,12 @@ public class MacroTree
 		setRowHeight(0);
 	}
 
+  @Override
+  public MacroListModel getModel()
+  {
+    return macroModel;
+  }
+
 	public final void loadMacros(boolean forPopup)
 	{
 		if (macroModel != null)

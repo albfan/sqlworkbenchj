@@ -46,12 +46,14 @@ public class MacroListModel
 {
 	private	MacroTreeNode rootNode;
 	private MacroStorage macros;
+  private boolean isPopupTree;
 
 	public MacroListModel(MacroStorage original, boolean forPopup)
 	{
 		super(null, true);
 		this.macros = original.createCopy();
-		buildTree(forPopup);
+    this.isPopupTree = forPopup;
+		buildTree();
 	}
 
 	public MacroStorage getMacros()
@@ -203,19 +205,19 @@ public class MacroListModel
 		}
   }
 
-	private void buildTree(boolean showPopupMacrosOnly)
+	private void buildTree()
 	{
 		rootNode = new MacroTreeNode("Macros", true);
 		Collection<MacroGroup> groups = macros.getGroups();
 
 		for (MacroGroup group : groups)
 		{
-			if (showPopupMacrosOnly && !group.isVisibleInPopup()) continue;
+			if (isPopupTree && !group.isVisibleInPopup()) continue;
 
 			MacroTreeNode groupNode = new MacroTreeNode(group, true);
 			rootNode.add(groupNode);
 			Collection<MacroDefinition> groupMacros;
-			if (showPopupMacrosOnly)
+			if (isPopupTree)
 			{
 				groupMacros = group.getMacrosForPopup();
 			}
@@ -326,4 +328,15 @@ public class MacroListModel
 		}
 	}
 
+  public void resetFilter()
+  {
+    macros.resetFilter();
+    buildTree();
+  }
+
+  public void applyFilter(String filter)
+  {
+    macros.applyFilter(filter);
+    buildTree();
+  }
 }

@@ -26,6 +26,7 @@ package workbench.sql.macros;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import workbench.util.StringUtil;
@@ -45,6 +46,7 @@ public class MacroGroup
 {
 	private String name;
 	private List<MacroDefinition> macros = new ArrayList<>();
+	private List<MacroDefinition> filtered = new ArrayList<>();
 	private int sortOrder;
   private String tooltip;
 	private boolean modified = false;
@@ -322,20 +324,11 @@ public class MacroGroup
 	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null)
+		if (obj instanceof MacroGroup)
 		{
-			return false;
+      return StringUtil.equalStringIgnoreCase(this.name, ((MacroGroup)obj).name);
 		}
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		final MacroGroup other = (MacroGroup) obj;
-		if ((this.name == null) ? (other.name != null) : !this.name.equalsIgnoreCase(other.name))
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -346,4 +339,29 @@ public class MacroGroup
 		return hash;
 	}
 
+  public void resetFilter()
+  {
+    macros.addAll(filtered);
+    filtered.clear();
+    applySort();
+  }
+
+  public void applyFilter(String filter)
+  {
+    resetFilter();
+
+    if (StringUtil.isBlank(filter)) return;
+
+    filter = filter.toLowerCase();
+    Iterator<MacroDefinition> itr = macros.iterator();
+    while (itr.hasNext())
+    {
+      MacroDefinition macro = itr.next();
+      if (!macro.getName().toLowerCase().contains(filter))
+      {
+        filtered.add(macro);
+        itr.remove();
+      }
+    }
+  }
 }
