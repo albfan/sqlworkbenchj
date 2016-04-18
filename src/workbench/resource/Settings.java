@@ -1261,7 +1261,7 @@ public class Settings
 
 	public boolean getEditorDetectEncoding()
 	{
-		return props.getBoolProperty("workbench.editor.drop.detect.encoding", true);
+		return getBoolProperty("workbench.editor.drop.detect.encoding", true);
 	}
 
 	public void setEditorFont(Font f)
@@ -1402,14 +1402,14 @@ public class Settings
 		Font result = null;
 
 		String baseKey = "workbench.font." + aFontName;
-		String name = this.props.getProperty(baseKey + ".name", null);
+		String name = StringUtil.trimToNull(getProperty(baseKey + ".name", null));
 
+    // nothing configured, use the Java defaults
 		if (name == null) return null;
 
-		String sizeS = this.props.getProperty(baseKey + ".size", "10");
-		String type = this.props.getProperty(baseKey + ".style", "Plain");
+		String fontSize = StringUtil.trimToNull(getProperty(baseKey + ".size", "12"));
+		String type = getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
-		int size = 12;
 		StringTokenizer tok = new StringTokenizer(type);
 		while (tok.hasMoreTokens())
 		{
@@ -1418,13 +1418,14 @@ public class Settings
 			if ("italic".equalsIgnoreCase(type)) style |= Font.ITALIC;
 		}
 
+    int size = 12;
 		try
 		{
-			size = Integer.parseInt(sizeS);
+			size = Integer.parseInt(fontSize);
 		}
 		catch (NumberFormatException e)
 		{
-			size = 10;
+			// ignore
 		}
 		result = new Font(name, style, size);
 		return result;
