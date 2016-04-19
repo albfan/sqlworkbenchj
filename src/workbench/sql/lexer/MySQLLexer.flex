@@ -174,7 +174,7 @@ keyword=(
 (OUTER{wsp}JOIN)|
 (CROSS{wsp}JOIN)|
 
-(CROSS{wsp}APPLY)|
+
 
 
 (INNER{wsp}JOIN)|

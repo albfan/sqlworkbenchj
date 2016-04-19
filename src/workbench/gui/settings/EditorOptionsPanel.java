@@ -227,14 +227,7 @@ public class EditorOptionsPanel
 			return true;
 		}
 		WbSwingUtilities.showErrorMessageKey(this, "ErrAutoClsBrkt");
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				autoCloseBrackets.requestFocusInWindow();
-			}
-		});
+		EventQueue.invokeLater(autoCloseBrackets::requestFocusInWindow);
 		return false;
 	}
 

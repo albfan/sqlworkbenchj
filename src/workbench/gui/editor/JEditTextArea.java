@@ -589,7 +589,7 @@ public class JEditTextArea
 		if (caret > 0 && caret < lineSegment.length())
 		{
 			char nextChar = lineSegment.charAt(caret);
-			if (!Character.isWhitespace(nextChar)) return;
+      if (!Character.isWhitespace(nextChar)) return;
 		}
 
 		// do not complete brackets inside string literals
@@ -622,7 +622,8 @@ public class JEditTextArea
 		char opening = bracketCompleter.getOpeningChar(currentChar);
 		if (opening == 0) return true;
 
-		getLineText(getCaretLine(), lineSegment);
+		int line = getCaretLine();
+		getLineText(line, lineSegment);
 		int caret = getCaretPositionInLine(getCaretLine());
 
 		if (caret <= 0 || caret >= lineSegment.length()) return true;
@@ -630,6 +631,13 @@ public class JEditTextArea
 		char nextChar = lineSegment.charAt(caret);
 
 		if (nextChar != currentChar) return true;
+    
+    String toComplete = bracketCompleter.getCompletionChar(currentChar);
+    if (toComplete != null && toComplete.charAt(0) == currentChar)
+    {
+      boolean isLiteral = currentTokenMarker.isStringLiteralAt(line, caret);
+      if (isLiteral) return false;
+    }
 
 		int count = 0;
 		for (int i=0; i < lineSegment.length(); i++)

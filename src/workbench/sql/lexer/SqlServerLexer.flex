@@ -152,7 +152,7 @@ import workbench.util.CharSequenceReader;
 wsp = [ \r\n\t\f]+
 
 keyword=(
-(BEGIN{wsp}TRANSACTION)|(BEGIN{wsp}TRAN)|(OUTER{wsp}APPLY)|
+(BEGIN{wsp}TRANSACTION)|(BEGIN{wsp}TRAN)|
 (ALTER{wsp}SESSION)|
 
 (PRIMARY{wsp}KEY)|
@@ -256,8 +256,8 @@ keyword=(
 "DECIMAL"|
 "DECLARE"|
 "DEFAULT"|
-"DEFERRABLE"|
-"DEFERRED"|
+
+
 "DELETE"|
 
 "DENSE_RANK"|
