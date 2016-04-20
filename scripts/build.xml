@@ -868,10 +868,6 @@
           tofile="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
 
     <replace file="../src/workbench/sql/lexer/StandardLexer.flex">
-      <replacefilter>
-        <replacetoken>StandardLexer</replacetoken>
-        <replacevalue>SqlServerLexer</replacevalue>
-      </replacefilter>
       <replacefilter token="XXXX_DBMS_XXXX|"/>
     </replace>
 
