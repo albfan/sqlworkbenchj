@@ -1,10 +1,10 @@
-/* SqlServerLexer.java is a generated file.  You probably want to
- * edit SqlServerLexer.lex to make changes.  Use JFlex to generate it.
- * To generate SqlServerLexer.java
+/* StandardLexer.java is a generated file.  You probably want to
+ * edit StandardLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate StandardLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main SqlServerLexer.lex</code><br>
- * You will then have a file called SqlServerLexer.java
+ * <code>java JFlex.Main StandardLexer.lex</code><br>
+ * You will then have a file called StandardLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * SqlServerLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * StandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  SqlServerLexer shredder = new SqlServerLexer(System.in);
+ *  StandardLexer shredder = new StandardLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -50,7 +50,7 @@ import workbench.util.CharSequenceReader;
 
 %public
 %implements SQLLexer
-%class SqlServerLexer
+%class StandardLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -63,8 +63,7 @@ import workbench.util.CharSequenceReader;
 	private int lastToken;
 	private int nextState=YYINITIAL;
 	private StringBuilder commentBuffer = new StringBuilder();
-	private int commentNestCount = 0;
-	private int commentStartChar = 0;
+  private int commentStartChar = 0;
 
 	/**
 	 * next Token method that allows you to control if whitespace and comments are
@@ -137,12 +136,12 @@ import workbench.util.CharSequenceReader;
     }
   }
 
-	SqlServerLexer(String source)
+	StandardLexer(String source)
 	{
 		this(new StringReader(source));
 	}
 
-	SqlServerLexer(CharSequence source)
+	StandardLexer(CharSequence source)
 	{
 		this(new CharSequenceReader(source));
 	}
@@ -523,7 +522,6 @@ commentend=(([\*]*)"/")
     nextState = COMMENT;
     commentBuffer.setLength(0);
     commentBuffer.append(yytext());
-    commentNestCount = 1;
     commentStartChar = yychar;
     yybegin(nextState);
 }
@@ -531,7 +529,6 @@ commentend=(([\*]*)"/")
 <COMMENT> {commentstart} {
     nextState = COMMENT;
     commentBuffer.append(yytext());
-    commentNestCount++;
     yybegin(nextState);
 }
 
@@ -542,16 +539,12 @@ commentend=(([\*]*)"/")
 }
 
 <COMMENT> {commentend} {
-    commentNestCount--;
     commentBuffer.append(yytext());
-    if (commentNestCount == 0)
-    {
-        nextState = YYINITIAL;
-        lastToken = SQLToken.COMMENT_TRADITIONAL;
-        SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
-        yybegin(nextState);
-        return(t);
-    }
+    nextState = YYINITIAL;
+    lastToken = SQLToken.COMMENT_TRADITIONAL;
+    SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
+    yybegin(nextState);
+    return(t);
 }
 
 <COMMENT> <<EOF>> {

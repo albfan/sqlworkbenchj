@@ -58,6 +58,31 @@ public class ScriptParserTest
 		super("ScriptParserTest");
 	}
 
+
+  @Test
+  public void wrongComments()
+  {
+    String sql =
+      "/**************\n" +
+      "/* some comment\n" +
+      "/**************/\n"+
+      "create or replace procedure foo\n" +
+      "is \n" +
+      "begin\n" +
+      "  null;\n" +
+      "end;\n" +
+      "/\n" +
+      "drop table foo;";
+
+		ScriptParser p = new ScriptParser(ParserType.Oracle);
+		p.setScript(sql);
+    int size = p.getSize();
+    assertEquals(2, size);
+    assertTrue(p.getCommand(0).contains("some comment"));
+    assertTrue(p.getCommand(0).contains("create or replace"));
+    assertTrue(p.getCommand(1).startsWith("drop"));
+  }
+
   @Test
   public void testEscapedQuotes()
   {
@@ -1380,7 +1405,7 @@ public class ScriptParserTest
     parser.setScript(script);
     int count = parser.getStatementCount();
     assertEquals(3, count);
-    System.out.println(parser.getCommand(1));
+//    System.out.println(parser.getCommand(1));
     assertEquals("truncate table foo", parser.getCommand(0));
     assertEquals("commit", parser.getCommand(2));
   }

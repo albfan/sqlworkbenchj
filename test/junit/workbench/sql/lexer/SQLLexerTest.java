@@ -556,4 +556,20 @@ public class SQLLexerTest
 		assertTrue(token.isComment());
 	}
 
+  @Test
+  public void testInvalidComments()
+  {
+    String sql =
+      "/*************\n" +
+      "/* a comment  \n" +
+      "**************/\n" +
+      "select * from foo;";
+    StandardLexer lexer = new StandardLexer(sql);
+    SQLToken token = lexer.getNextToken(true, false);
+    assertTrue(token.isComment());
+    token = lexer.getNextToken(true, false);
+    assertNotNull(token);
+    assertTrue(token.isReservedWord());
+    assertEquals("SELECT", token.getContents());
+  }
 }

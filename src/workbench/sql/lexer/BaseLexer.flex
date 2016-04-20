@@ -63,8 +63,7 @@ import workbench.util.CharSequenceReader;
 	private int lastToken;
 	private int nextState=YYINITIAL;
 	private StringBuilder commentBuffer = new StringBuilder();
-	private int commentNestCount = 0;
-	private int commentStartChar = 0;
+  private int commentStartChar = 0;
 
 	/**
 	 * next Token method that allows you to control if whitespace and comments are
@@ -523,7 +522,6 @@ commentend=(([\*]*)"/")
     nextState = COMMENT;
     commentBuffer.setLength(0);
     commentBuffer.append(yytext());
-    commentNestCount = 1;
     commentStartChar = yychar;
     yybegin(nextState);
 }
@@ -531,7 +529,6 @@ commentend=(([\*]*)"/")
 <COMMENT> {commentstart} {
     nextState = COMMENT;
     commentBuffer.append(yytext());
-    commentNestCount++;
     yybegin(nextState);
 }
 
@@ -542,16 +539,12 @@ commentend=(([\*]*)"/")
 }
 
 <COMMENT> {commentend} {
-    commentNestCount--;
     commentBuffer.append(yytext());
-    if (commentNestCount == 0)
-    {
-        nextState = YYINITIAL;
-        lastToken = SQLToken.COMMENT_TRADITIONAL;
-        SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
-        yybegin(nextState);
-        return(t);
-    }
+    nextState = YYINITIAL;
+    lastToken = SQLToken.COMMENT_TRADITIONAL;
+    SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
+    yybegin(nextState);
+    return(t);
 }
 
 <COMMENT> <<EOF>> {

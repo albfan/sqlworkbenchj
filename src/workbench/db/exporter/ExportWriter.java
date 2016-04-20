@@ -31,11 +31,11 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
@@ -46,6 +46,8 @@ import workbench.storage.RowDataReaderFactory;
 
 import workbench.util.Alias;
 import workbench.util.FileUtil;
+import workbench.util.LowMemoryException;
+import workbench.util.MemoryWatcher;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
@@ -223,6 +225,8 @@ public abstract class ExportWriter
     reader.setUseStreamsForBlobs(useStreamsForBlobs);
     reader.setUseStreamsForClobs(useStreamsForClobs);
 
+    final int checkInterval = Settings.getInstance().getLowMemoryCheckInterval();
+
     while (rs.next())
     {
       if (this.cancel) break;
@@ -241,6 +245,12 @@ public abstract class ExportWriter
       writeRow(row, rows);
       reader.closeStreams();
       rows ++;
+
+      if (rows % checkInterval == 0 && MemoryWatcher.isMemoryLow(false))
+      {
+        LogMgr.logError("DataStore.initData()", "Memory is running low. Aborting export...", null);
+        throw new LowMemoryException();
+      }
     }
 
     if (rows > 0 || this.exporter.writeEmptyResults())

@@ -825,6 +825,11 @@ public class Settings
 		setProperty(PROPERTY_LOG_ALL_SQL, flag);
 	}
 
+  public int getLowMemoryCheckInterval()
+  {
+    return getIntProperty("workbench.gui.data.memcheckinterval", 1000);
+  }
+
 	public boolean showSuccessMessageForVerb(String verb)
 	{
 		if (verb == null) return false;
