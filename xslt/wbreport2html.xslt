@@ -296,7 +296,7 @@
       </tr>
 
       <xsl:for-each select="column-def">
-        <xsl:sort select="dbms-position"/>
+        <xsl:sort select="dbms-position" data-type="number"/>
         <tr>
           <td class="tdTableDefinition">
             <xsl:value-of select="column-name"/>
