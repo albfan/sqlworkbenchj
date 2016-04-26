@@ -97,12 +97,18 @@ public class JdbcProcedureReader
         sp = this.connection.setSavepoint();
       }
 
+      if (Settings.getInstance().getDebugMetadataSql())
+      {
+        LogMgr.logDebug("JdbcProcedureReader.getProcedures()", "Calling getProcedures() using: catalog="+ catalog + ", schema=" + schema + ", name=" + name);
+      }
+
       ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
       if (Settings.getInstance().getBoolProperty("workbench.db.procreader.debug", false))
       {
         SqlUtil.dumpResultSetInfo("getProcedures()", rs.getMetaData());
       }
 
+      // fillProcedureListDataStore() will close the result set
       DataStore ds = fillProcedureListDataStore(rs);
 
       if (connection.getDbSettings().useGetFunctions())
