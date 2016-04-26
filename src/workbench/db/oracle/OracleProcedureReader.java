@@ -384,8 +384,7 @@ public class OracleProcedureReader
     // ALL_PROCEDURES does not return invalid procedures
     // so an outer join against ALL_OBJECTS is necessary
     String standardProcs =
-      "-- SQL Workbench \n" +
-      "select " + OracleUtils.getCacheHint() + "null as package_name,   \n" +
+      "select null as package_name,   \n" +
       "       ao.owner as procedure_owner,   \n" +
       "       ao.object_name as procedure_name,  \n" +
       "       null as overload_index,  \n" +
@@ -409,8 +408,7 @@ public class OracleProcedureReader
     standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
     String pkgProcs =
-      "-- SQL Workbench \n" +
-      "select " + OracleUtils.getCacheHint() + "aa.package_name,  \n" +
+      "select aa.package_name,  \n" +
       "       ao.owner as procedure_owner,  \n" +
       "       aa.object_name as procedure_name,  \n" +
       "       aa.overload as overload_index,  \n" +
@@ -435,7 +433,6 @@ public class OracleProcedureReader
       "      OR (aa.position = 1 and aa.sequence = 1)  \n" +
       "      OR (aa.position = 1 and aa.sequence = 0)  \n" +
       "    )";
-
     if (StringUtil.isNonBlank(schema))
     {
       pkgProcs += "\n AND ao.owner = '" + schema + "' ";
@@ -448,15 +445,54 @@ public class OracleProcedureReader
 
     pkgProcs += "\n AND aa.object_name LIKE '" + name + "' ";
 
-    String sql;
+    // if a package contains only procedures or functions without any arguments
+    // it will not show up with the previous statement.
+    // There is however noe way to determine if a row from all_procedures
+    // is a function or a procedure
+    String procsWithoutArgs =
+      "select ap.object_name as package_name, \n" +
+      "       ap.owner as procedure_owner, \n" +
+      "       ap.procedure_name, \n" +
+      "       ap.overload as overload_index, \n" +
+      "       null as remarks,\n" +
+      "       1 as procedure_type, \n" +
+      "       null as status\n" +
+      "from all_procedures ap\n" +
+      "where procedure_name is not null\n" +
+      "  and not exists (select 1 \n" +
+      "                 from all_arguments aa\n" +
+      "                 where aa.owner = ap.owner \n" +
+      "                   and aa.package_name = ap.object_name)\n";
+
+    if (StringUtil.isNonBlank(schema))
+    {
+      procsWithoutArgs += "\n  AND ap.owner = '" + schema + "' ";
+    }
+
+    if (StringUtil.isNonBlank(catalog))
+    {
+      procsWithoutArgs += "\n  AND ap.object_name = '" + catalog + "' ";
+    }
+
+    pkgProcs = pkgProcs + "\nUNION ALL \n" + procsWithoutArgs;
+
+    String sql =
+      "-- SQL Workbench \n" +
+      "select " + OracleUtils.getCacheHint() + "* \n" +
+      "from (\n";
+
     if (StringUtil.isBlank(catalog))
     {
-      sql = standardProcs + "\n UNION ALL \n" + pkgProcs + "\n ORDER BY 2,3";
+      sql += standardProcs + "\nUNION ALL \n" + pkgProcs;
     }
     else
     {
-      sql = pkgProcs + "\n ORDER BY 2,3";
+      sql += pkgProcs;
     }
+
+    sql +=
+      "\n)\n" +
+      "ORDER BY 2,3";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
