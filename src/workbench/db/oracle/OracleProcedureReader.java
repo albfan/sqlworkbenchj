@@ -447,8 +447,7 @@ public class OracleProcedureReader
 
     // if a package contains only procedures or functions without any arguments
     // it will not show up with the previous statement.
-    // There is however noe way to determine if a row from all_procedures
-    // is a function or a procedure
+    // There is however noe way to determine if a row from all_procedures is a function or a procedure
     String procsWithoutArgs =
       "select ap.object_name as package_name, \n" +
       "       ap.owner as procedure_owner, \n" +
