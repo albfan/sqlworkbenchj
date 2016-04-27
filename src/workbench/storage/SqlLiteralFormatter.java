@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
@@ -412,6 +413,10 @@ public class SqlLiteralFormatter
         }
       }
     }
+    else if ("hstore".equalsIgnoreCase(dbmsType) && value instanceof Map)
+    {
+      return getHstoreLiteral((Map)value);
+    }
     else if (type == Types.OTHER && "uuid".equalsIgnoreCase(dbmsType))
     {
       // this is for Postgres
@@ -420,6 +425,45 @@ public class SqlLiteralFormatter
 
     // Fallback, let the JDBC driver format the value
     return value.toString();
+  }
+
+  private String getHstoreLiteral(Map<String, String> data)
+  {
+    int count = 0;
+    StringBuilder result = new StringBuilder(data.size() * 20);
+    result.append('\'');
+    for (Map.Entry<String, String> entry : data.entrySet())
+    {
+      if (count > 0) result.append(',');
+      result.append('"');
+      result.append(escapeHstoreValue(entry.getKey()));
+      result.append('"');
+      result.append("=>");
+      result.append('"');
+      result.append(escapeHstoreValue(entry.getValue()));
+      result.append('"');
+      count ++;
+    }
+    result.append("'::hstore");
+    return result.toString();
+  }
+
+  private String escapeHstoreValue(String value)
+  {
+    if (StringUtil.isEmptyString(value)) return StringUtil.EMPTY_STRING;
+    if (value.indexOf('"') == -1 && value.indexOf('\\') == -1) return value;
+    
+    StringBuilder result = new StringBuilder(value.length());
+    for (int i=0; i < value.length(); i++)
+    {
+      int chr = value.charAt(i);
+      if (chr == '"' || chr == '\\')
+      {
+        result.append('\\');
+      }
+      result.append(chr);
+    }
+    return result.toString();
   }
 
   private String fixInfinity(String input)
