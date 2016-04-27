@@ -41,6 +41,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.ConstraintType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -81,7 +83,7 @@ public class H2ConstraintReaderTest
 		TableConstraint constraint = cons.get(0);
 		assertEquals("POSITIVE_ID", constraint.getConstraintName());
 		assertEquals("(ID > 42)", constraint.getExpression());
-		assertEquals("check", constraint.getType());
+		assertEquals(ConstraintType.Check, constraint.getConstraintType());
 		System.out.println(constraint.getSql());
 		assertEquals("CONSTRAINT POSITIVE_ID CHECK (ID > 42)", constraint.getSql());
 	}

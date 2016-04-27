@@ -66,6 +66,11 @@ public interface ConstraintReader
    */
   String getConstraintSource(List<TableConstraint> constraints, String indent);
 
+  default void updateIndexList(List<TableConstraint> constraints, List<IndexDefinition> tableIndex)
+  {
+
+  }
+
   /**
    * A ConstraintReader which does nothing.
    */

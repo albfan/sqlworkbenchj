@@ -577,7 +577,7 @@ public class ReportTable
     String expr = constraint.getExpression();
     String systemName = Boolean.toString(constraint.isSystemName());
 
-    TagAttribute type = new TagAttribute("type", constraint.getType());
+    TagAttribute type = new TagAttribute("type", constraint.getConstraintType().name().toLowerCase());
     TagAttribute sysName = null;
     TagAttribute nameAttr = null;
 

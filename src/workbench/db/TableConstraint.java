@@ -40,6 +40,13 @@ public class TableConstraint
   {
     super(cName);
     expression = StringUtil.isNonBlank(expr) ? expr.trim() : null;
+    setConstraintType(ConstraintType.Check);
+
+    // this is for Postgres
+    if (expression != null && expression.toLowerCase().startsWith("exclude"))
+    {
+      setConstraintType(ConstraintType.Exclusion);
+    }
   }
 
   public String getExpression()
@@ -85,20 +92,6 @@ public class TableConstraint
       return compareTo((TableConstraint)other) == 0;
     }
     return false;
-  }
-
-  /**
-   * Returns the type of this table constraint.
-   *
-   * @return "check"
-   */
-  public String getType()
-  {
-    if (expression.toLowerCase().startsWith("exclude"))
-    {
-      return "exclusion";
-    }
-    return "check";
   }
 
   @Override

@@ -40,6 +40,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.ConstraintType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -85,7 +87,7 @@ public class FirebirdConstraintReaderTest
 		TableConstraint constraint = cons.get(0);
 		assertEquals("POSITIVE_ID", constraint.getConstraintName());
 		assertEquals("check (id > 42)", constraint.getExpression());
-		assertEquals("check", constraint.getType());
+		assertEquals(ConstraintType.Check, constraint.getConstraintType());
 		assertEquals("CONSTRAINT POSITIVE_ID check (id > 42)", constraint.getSql());
 	}
 }

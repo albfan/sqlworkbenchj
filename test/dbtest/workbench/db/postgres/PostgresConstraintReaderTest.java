@@ -42,6 +42,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.ConstraintType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -100,13 +102,13 @@ public class PostgresConstraintReaderTest
 		TableConstraint check = cons.get(0);
 		assertEquals("aaa_check_id", check.getConstraintName());
 		assertEquals("(id > 42)", check.getExpression());
-		assertEquals("check", check.getType());
+		assertEquals(ConstraintType.Check, check.getConstraintType());
 		assertEquals("CONSTRAINT aaa_check_id CHECK (id > 42)", check.getSql());
 
 		TableConstraint exclusion = cons.get(1);
 		assertEquals("bbb_exclusion", exclusion.getConstraintName());
 		assertEquals("EXCLUDE USING btree (id WITH =)", exclusion.getExpression());
-		assertEquals("exclusion", exclusion.getType());
+		assertEquals(ConstraintType.Exclusion, exclusion.getConstraintType());
 		assertEquals("CONSTRAINT bbb_exclusion EXCLUDE USING btree (id WITH =)", exclusion.getSql());
 
 	}

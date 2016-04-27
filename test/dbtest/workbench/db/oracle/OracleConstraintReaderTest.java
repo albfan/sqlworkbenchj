@@ -42,6 +42,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import workbench.db.ConstraintType;
+
 /**
  *
  * @author Thomas Kellerer
@@ -90,7 +92,7 @@ public class OracleConstraintReaderTest
 		assertEquals("POSITIVE_ID", constraint.getConstraintName());
 		assertEquals("(id > 0)", constraint.getExpression());
 		assertEquals("CONSTRAINT POSITIVE_ID CHECK (id > 0)", constraint.getSql());
-		assertEquals("check", constraint.getType());
+		assertEquals(ConstraintType.Check, constraint.getConstraintType());
 	}
 
 	@Test
