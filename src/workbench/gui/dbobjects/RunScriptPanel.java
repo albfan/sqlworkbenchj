@@ -212,7 +212,7 @@ public class RunScriptPanel
     textToHighlight = highlight;
     WbSwingUtilities.invoke(() ->
     {
-      showDialog(owner, title);
+      showDialog(owner, title, true);
     });
   }
 

@@ -420,9 +420,16 @@ public abstract class ExecuteSqlPanel
     }
   }
 
-  public void showDialog(Window owner, String windowTitle)
+  public void showDialog(Window owner, String windowTitle, boolean isModal)
   {
-    window = new JDialog(owner, windowTitle, Dialog.ModalityType.APPLICATION_MODAL);
+    if (isModal)
+    {
+      window = new JDialog(owner, windowTitle, Dialog.ModalityType.APPLICATION_MODAL);
+    }
+    else
+    {
+      window = new JDialog(owner, windowTitle, Dialog.ModalityType.MODELESS);
+    }
 
     initUI();
 

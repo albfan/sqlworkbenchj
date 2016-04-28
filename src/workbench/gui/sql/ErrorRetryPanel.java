@@ -84,6 +84,7 @@ public class ErrorRetryPanel
   public void setStatement(ScriptParser parser, int cmdIndex, ErrorDescriptor error)
   {
     initUI();
+
     if (parser == null) return;
 
     String sql = parser.getCommand(cmdIndex);
@@ -242,6 +243,12 @@ public class ErrorRetryPanel
 
   public void showDialog(Window owner)
   {
-    super.showDialog(owner, ResourceMgr.getString("TxtWindowTitleErrorRetry"));
+	  super.showDialog(owner, ResourceMgr.getString("TxtWindowTitleErrorRetry"), true);
+  }
+
+  @Override
+  public void showDialog(Window owner, String windowTitle, boolean isModal)
+  {
+    super.showDialog(owner, windowTitle, isModal);
   }
 }
