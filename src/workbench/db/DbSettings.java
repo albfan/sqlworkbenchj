@@ -38,6 +38,7 @@ import workbench.resource.DbExplorerSettings;
 import workbench.resource.Settings;
 
 import workbench.db.exporter.RowDataConverter;
+import workbench.db.importer.SetObjectStrategy;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.sqltemplates.TemplateHandler;
 
@@ -1036,9 +1037,25 @@ public class DbSettings
    * Some drivers to not work properly when dealing with non JDBC Types here
    * (e.g. Postgres and UUID columns)
    */
-  public boolean getUseTypeWithSetObject()
+  public SetObjectStrategy getUseTypeWithSetObject()
   {
-    return getBoolProperty("import.setobject.usetype", false);
+    String value = getProperty("import.setobject.usetype", "false");
+    if ("true".equals(value))
+    {
+      return SetObjectStrategy.Always;
+    }
+    if ("fasle".equals(value))
+    {
+      return SetObjectStrategy.Never;
+    }
+    try
+    {
+      return SetObjectStrategy.valueOf(value);
+    }
+    catch (Throwable th)
+    {
+      return SetObjectStrategy.Never;
+    }
   }
 
   public boolean getRetrieveProcParmsForAutoCompletion()
@@ -1894,7 +1911,7 @@ public class DbSettings
     String global = Settings.getInstance().getProperty("workbench.db.maxrows.verbs", null);
     useMaxRowsVerbs.addAll(StringUtil.stringToList(global, ",", true, true));
     String dbCommands = Settings.getInstance().getProperty(prefix + "maxrows.verbs", null);
-    
+
     List<String> dbVerbs = StringUtil.stringToList(dbCommands, ",", true, true);
     for (String verb : dbVerbs)
     {

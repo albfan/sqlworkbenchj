@@ -166,7 +166,7 @@ public class DataImporter
 
   private boolean checkRealClobLength;
   private boolean isOracle;
-  private boolean useSetObjectWithType;
+  private SetObjectStrategy useSetObjectWithType;
   private int maxErrorCount = 1000;
 
   private boolean verifyTargetTable = true;
@@ -1345,7 +1345,9 @@ public class DataImporter
       int jdbcType = column.getDataType();
       String dbmsType = column.getDbmsType();
 
-      if (row[i] == null)
+      Object value = row[i];
+
+      if (value == null)
       {
         if (useSetNull)
         {
@@ -1361,12 +1363,12 @@ public class DataImporter
         Reader in = null;
         int size = -1;
 
-        if (row[i] instanceof Clob)
+        if (value instanceof Clob)
         {
-          Clob clob = (Clob) row[i];
+          Clob clob = (Clob)value;
           in = clob.getCharacterStream();
         }
-        else if (row[i] instanceof File)
+        else if (value instanceof File)
         {
           ImportFileHandler handler = (this.parser != null ? parser.getFileHandler() : null);
           String encoding = (handler != null ? handler.getEncoding() : null);
@@ -1375,7 +1377,7 @@ public class DataImporter
             encoding = (this.parser != null ? parser.getEncoding() : Settings.getInstance().getDefaultDataEncoding());
           }
 
-          File f = (File)row[i];
+          File f = (File)value;
           try
           {
             if (handler != null)
@@ -1428,7 +1430,7 @@ public class DataImporter
           // implement the toString() for whatever object
           // it created when reading that column!
           in = null;
-          pstmt.setObject(colIndex, row[i]);
+          pstmt.setObject(colIndex, value);
         }
 
         if (in != null)
@@ -1443,12 +1445,12 @@ public class DataImporter
       {
         InputStream in = null;
         int len = -1;
-        if (row[i] instanceof File)
+        if (value instanceof File)
         {
           // When importing files created by SQL Workbench/J
           // blobs will be "passed" as File objects pointing to the external file
           ImportFileHandler handler = (this.parser != null ? parser.getFileHandler() : null);
-          File f = (File)row[i];
+          File f = (File)value;
           try
           {
             if (handler != null)
@@ -1475,15 +1477,15 @@ public class DataImporter
             throw new SQLException(ex.getMessage());
           }
         }
-        else if (row[i] instanceof Blob)
+        else if (value instanceof Blob)
         {
-          Blob b = (Blob)row[i];
+          Blob b = (Blob)value;
           in = b.getBinaryStream();
           len = (int)b.length();
         }
-        else if (row[i] instanceof byte[])
+        else if (value instanceof byte[])
         {
-          byte[] buffer = (byte[])row[i];
+          byte[] buffer = (byte[])value;
           in = new ByteArrayInputStream(buffer);
           len = buffer.length;
         }
@@ -1501,18 +1503,18 @@ public class DataImporter
       }
       else
       {
-        if (isOracle && jdbcType == java.sql.Types.DATE && row[i] instanceof java.sql.Date)
+        if (isOracle && jdbcType == java.sql.Types.DATE && value instanceof java.sql.Date)
         {
-          java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
+          java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)value).getTime());
           pstmt.setTimestamp(colIndex, ts);
         }
-        else if (useSetObjectWithType)
+        else if (useJdbcType(jdbcType))
         {
-          pstmt.setObject(colIndex, row[i], jdbcType);
+          pstmt.setObject(colIndex, value, jdbcType);
         }
         else
         {
-          pstmt.setObject(colIndex, row[i]);
+          pstmt.setObject(colIndex, value);
         }
       }
     }
@@ -1543,6 +1545,21 @@ public class DataImporter
     long rows = pstmt.executeUpdate();
 
     return rows;
+  }
+
+  private boolean useJdbcType(int jdbcType)
+  {
+    switch (useSetObjectWithType)
+    {
+      case Never:
+        return false;
+      case Always:
+        return true;
+      case KnownTypes:
+        return jdbcType != Types.OTHER;
+    }
+    // can't happen
+    return false;
   }
 
   private void checkConstantValues(File currentFile)

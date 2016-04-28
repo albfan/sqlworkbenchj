@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -783,7 +783,7 @@ public class DataCopier
       }
     }
 
-    this.columnMap = new HashMap<>(sourceCols.size());
+    this.columnMap = new LinkedHashMap<>(sourceCols.size());
 
     if (columnMapping != null)
     {
