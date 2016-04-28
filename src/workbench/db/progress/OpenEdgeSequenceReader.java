@@ -210,33 +210,44 @@ public class OpenEdgeSequenceReader
     result.append("CREATE SEQUENCE ");
     result.append(def.getObjectExpression(dbConn));
 
+    boolean hasElement = false;
+
     if (increment != null)
     {
       result.append("\n     INCREMENT BY ");
       result.append(increment);
+      hasElement = true;
     }
 
     if (init != null)
     {
+      if (hasElement) result.append(',');
       result.append("\n     START WITH ");
       result.append(init);
+      hasElement = true;
     }
 
     if (minvalue != null && minvalue.intValue() != 0)
     {
+      if (hasElement) result.append(',');
       result.append("\n     MINVALUE ");
       result.append(minvalue);
+      hasElement = true;
     }
 
     if (maxvalue != null)
     {
+      if (hasElement) result.append(',');
       result.append("\n     MAXVALUE ");
       result.append(maxvalue);
+      hasElement = true;
     }
 
     if (StringUtil.equalString(cycle, "CYCLE"))
     {
+      if (hasElement) result.append(',');
       result.append("\n     CYCLE");
+      hasElement = true;
     }
 
     result.append(";\n");
