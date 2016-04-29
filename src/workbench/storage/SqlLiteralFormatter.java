@@ -24,6 +24,7 @@
 package workbench.storage;
 
 import java.io.File;
+import java.sql.Array;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -36,6 +37,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.exporter.InfinityLiterals;
@@ -79,6 +81,7 @@ public class SqlLiteralFormatter
   private boolean treatClobAsFile = false;
   private String clobEncoding = Settings.getInstance().getDefaultFileEncoding();
   private boolean isDbId;
+  private boolean isOracle;
   private DbSettings dbSettings;
 
   /**
@@ -109,6 +112,7 @@ public class SqlLiteralFormatter
       dbid = con.getMetadata().getDbId();
       isDbId = true;
       dbSettings = con.getDbSettings();
+      isOracle = con.getMetadata().isOracle();
     }
     setDateLiteralType(dbid);
   }
@@ -116,6 +120,7 @@ public class SqlLiteralFormatter
   public SqlLiteralFormatter(String dbid)
   {
     isDbId = true;
+    isOracle = DbMetadata.DBID_ORA.equals(dbid);
     setDateLiteralType(dbid);
   }
 
@@ -131,6 +136,7 @@ public class SqlLiteralFormatter
     {
       String dbid = con.getMetadata().getDbId();
       isDbId = true;
+      isOracle = con.getMetadata().isOracle();
       this.setDateLiteralType(dbid);
       this.dbSettings = con.getDbSettings();
     }
@@ -156,6 +162,7 @@ public class SqlLiteralFormatter
       {
         return;
       }
+      // no DBMS selected, using null for the type will select ANSI literals
       type = null;
     }
 
@@ -417,6 +424,13 @@ public class SqlLiteralFormatter
     {
       return getHstoreLiteral((Map)value);
     }
+    else if (type == Types.ARRAY)
+    {
+      if (isOracle) return value.toString();
+
+      // asume the value can be used inside a string literal
+      return "'" + value.toString() + "'";
+    }
     else if (type == Types.OTHER && "uuid".equalsIgnoreCase(dbmsType))
     {
       // this is for Postgres
@@ -452,7 +466,7 @@ public class SqlLiteralFormatter
   {
     if (StringUtil.isEmptyString(value)) return StringUtil.EMPTY_STRING;
     if (value.indexOf('"') == -1 && value.indexOf('\\') == -1) return value;
-    
+
     StringBuilder result = new StringBuilder(value.length());
     for (int i=0; i < value.length(); i++)
     {
