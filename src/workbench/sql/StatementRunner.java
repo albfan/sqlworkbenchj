@@ -29,10 +29,10 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import workbench.WbManager;
 import workbench.interfaces.ExecutionController;
@@ -104,7 +104,7 @@ public class StatementRunner
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
 
-	private final Map<String, String> sessionAttributes = new TreeMap<>();
+	private final Map<String, String> sessionAttributes = new HashMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
 
   private ScriptErrorHandler retryHandler;
@@ -119,7 +119,10 @@ public class StatementRunner
 		errorLevel = Settings.getInstance().getStatementErrorReportLevel();
 		cmdMapper = new CommandMapper();
 		logAllStatements = Settings.getInstance().getLogAllStatements();
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES, Settings.PROPERTY_LOG_ALL_SQL, Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
+		Settings.getInstance().addPropertyChangeListener(this,
+      Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES,
+      Settings.PROPERTY_LOG_ALL_SQL,
+      Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
 	}
 
   public ScriptErrorHandler getRetryHandler()
