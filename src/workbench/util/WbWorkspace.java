@@ -55,6 +55,11 @@ public class WbWorkspace
   private static final String TABINFO_FILENAME = "tabs.properties";
   private static final String TOOL_ENTRY_PREFIX = "toolprop_";
 
+  private static final String TAB_PREFIX = "tab";
+  private static final String CURSOR_POS_PROP = ".file.cursorpos";
+  private static final String ENCODING_PROP = ".encoding";
+  private static final String FILENAME_PROP = ".filename";
+
   private enum WorkspaceState
   {
     closed,
@@ -213,7 +218,7 @@ public class WbWorkspace
 
   public PanelType getPanelType(int index)
   {
-    String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
+    String type = tabInfo.getProperty(TAB_PREFIX + index + ".type", "sqlPanel");
     try
     {
       return PanelType.valueOf(type);
@@ -332,14 +337,14 @@ public class WbWorkspace
     int index = 0;
     while (found)
     {
-      if (tabInfo.containsKey("tab" + index + ".maxrows") ||
-          tabInfo.containsKey("tab" + index + ".title") ||
-          tabInfo.containsKey("tab" + index + ".append.results"))
+      if (tabInfo.containsKey(TAB_PREFIX + index + ".maxrows") ||
+          tabInfo.containsKey(TAB_PREFIX + index + ".title") ||
+          tabInfo.containsKey(TAB_PREFIX + index + ".append.results"))
       {
-        tabInfo.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
+        tabInfo.setProperty(TAB_PREFIX + index + ".type", PanelType.sqlPanel.toString());
         index ++;
       }
-      else if (tabInfo.containsKey("tab" + index + ".type"))
+      else if (tabInfo.containsKey(TAB_PREFIX + index + ".type"))
       {
         index ++;
       }
@@ -354,7 +359,7 @@ public class WbWorkspace
     // now add the missing .type entries for the DbExplorer panels
     for (int i=0; i < dbExplorer; i++)
     {
-      tabInfo.setProperty("tab" + index + ".type", PanelType.dbExplorer.toString());
+      tabInfo.setProperty(TAB_PREFIX + index + ".type", PanelType.dbExplorer.toString());
       index ++;
     }
     return index;
@@ -458,7 +463,7 @@ public class WbWorkspace
 
   public void setTabTitle(int index, String name)
   {
-    String key = "tab" + index + ".title";
+    String key = TAB_PREFIX + index + ".title";
     String encoded = StringUtil.escapeText(name, CharacterRange.RANGE_7BIT);
     this.tabInfo.setProperty(key, encoded);
   }
@@ -466,7 +471,7 @@ public class WbWorkspace
   public String getTabTitle(int index)
   {
     if (this.tabInfo == null) return null;
-    String key = "tab" + index + ".title";
+    String key = TAB_PREFIX + index + ".title";
     String value = (String)this.tabInfo.get(key);
     return StringUtil.decodeUnicode(value);
   }
@@ -474,7 +479,7 @@ public class WbWorkspace
   public int getExternalFileCursorPos(int tabIndex)
   {
     if (this.tabInfo == null) return -1;
-    String key = "tab" + tabIndex + ".file.cursorpos";
+    String key = TAB_PREFIX + tabIndex + CURSOR_POS_PROP;
     String value = (String)this.tabInfo.get(key);
     if (value == null) return -1;
     int result = -1;
@@ -492,14 +497,14 @@ public class WbWorkspace
 
   public void setQueryTimeout(int index, int timeout)
   {
-    String key = "tab" + index + ".timeout";
+    String key = TAB_PREFIX + index + ".timeout";
     this.tabInfo.setProperty(key, Integer.toString(timeout));
   }
 
   public int getQueryTimeout(int index)
   {
     if (this.tabInfo == null) return 0;
-    String key = "tab" + index + ".timeout";
+    String key = TAB_PREFIX + index + ".timeout";
     String value = (String)this.tabInfo.get(key);
     if (value == null) return 0;
     int result = 0;
@@ -516,14 +521,14 @@ public class WbWorkspace
 
   public void setMaxRows(int index, int numRows)
   {
-    String key = "tab" + index + ".maxrows";
+    String key = TAB_PREFIX + index + ".maxrows";
     this.tabInfo.setProperty(key, Integer.toString(numRows));
   }
 
   public int getMaxRows(int tabIndex)
   {
     if (this.tabInfo == null) return 0;
-    String key = "tab" + tabIndex + ".maxrows";
+    String key = TAB_PREFIX + tabIndex + ".maxrows";
     String value = (String)this.tabInfo.get(key);
     if (value == null) return 0;
     int result = 0;
@@ -538,10 +543,17 @@ public class WbWorkspace
     return result;
   }
 
+  public void removeExternalFileInfo(int index)
+  {
+    tabInfo.removeProperty(TAB_PREFIX + index + FILENAME_PROP);
+    tabInfo.removeProperty(TAB_PREFIX + index + ENCODING_PROP);
+    tabInfo.removeProperty(TAB_PREFIX + index + CURSOR_POS_PROP);
+  }
+
   public String getExternalFileName(int tabIndex)
   {
     if (this.tabInfo == null) return null;
-    String key = "tab" + tabIndex + ".filename";
+    String key = TAB_PREFIX + tabIndex + FILENAME_PROP;
     String value = (String)this.tabInfo.get(key);
     return StringUtil.decodeUnicode(value);
   }
@@ -549,7 +561,7 @@ public class WbWorkspace
   public String getExternalFileEncoding(int tabIndex)
   {
     if (this.tabInfo == null) return null;
-    String key = "tab" + tabIndex + ".encoding";
+    String key = TAB_PREFIX + tabIndex + ENCODING_PROP;
     String value = (String)this.tabInfo.get(key);
     if (StringUtil.isEmptyString(value)) return Settings.getInstance().getDefaultEncoding();
     return value;
@@ -557,13 +569,13 @@ public class WbWorkspace
 
   public void setExternalFileCursorPos(int tabIndex, int cursor)
   {
-    String key = "tab" + tabIndex + ".file.cursorpos";
+    String key = TAB_PREFIX + tabIndex + CURSOR_POS_PROP;
     this.tabInfo.setProperty(key, Integer.toString(cursor));
   }
 
   public void setExternalFileName(int tabIndex, String filename)
   {
-    String key = "tab" + tabIndex + ".filename";
+    String key = TAB_PREFIX + tabIndex + FILENAME_PROP;
     String encoded = StringUtil.escapeText(filename, CharacterRange.RANGE_7BIT);
     this.tabInfo.setProperty(key, encoded);
   }
@@ -571,7 +583,7 @@ public class WbWorkspace
   public void setExternalFileEncoding(int tabIndex, String encoding)
   {
     if (encoding == null) return;
-    String key = "tab" + tabIndex + ".encoding";
+    String key = TAB_PREFIX + tabIndex + ENCODING_PROP;
     this.tabInfo.setProperty(key, encoding);
   }
 

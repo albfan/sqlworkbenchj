@@ -149,6 +149,11 @@ public class PanelWorkspaceHandler
 			w.setExternalFileCursorPos(index, client.editor.getCaretPosition());
 			w.setExternalFileEncoding(index, client.editor.getCurrentFileEncoding());
 		}
+    else
+    {
+      // this is necessary if a tab position was switched with a tab that contained a file
+      w.removeExternalFileInfo(index);
+    }
 
 		String title = client.getTabName();
 		if (title == null)
