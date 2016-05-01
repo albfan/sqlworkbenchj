@@ -14,6 +14,7 @@
     <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new command (WbGenerateFKScript) is available to generate the DDL for only the foreign key constraints.</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now shown correctly</entry>
+    <entry dev-build="3" type="fix">Parsing of comments in SQL statements is now more lenient with invalid (nested) comments</entry>
     <entry dev-build="3" type="fix">When changing the position of SQL tabs with files loaded, the Workspace was not saved properly</entry>
     <entry dev-build="3" type="fix">For Progress OpenEdge, the SQL generated for sequences was invalid</entry>
     <entry dev-build="3" type="fix">For Postgres, the implizit index for an exclusion constraint was incorrectly added to the souce of the table</entry>
