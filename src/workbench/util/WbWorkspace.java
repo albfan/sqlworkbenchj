@@ -51,11 +51,12 @@ import workbench.gui.sql.SqlHistory;
 public class WbWorkspace
   implements Closeable
 {
+  public static final String TAB_PROP_PREFIX = "tab";
+
   private static final String VARIABLES_FILENAME = "variables.properties";
   private static final String TABINFO_FILENAME = "tabs.properties";
   private static final String TOOL_ENTRY_PREFIX = "toolprop_";
 
-  private static final String TAB_PREFIX = "tab";
   private static final String CURSOR_POS_PROP = ".file.cursorpos";
   private static final String ENCODING_PROP = ".encoding";
   private static final String FILENAME_PROP = ".filename";
@@ -88,17 +89,15 @@ public class WbWorkspace
   /**
    * Opens the workspace for writing.
    *
-   * Nothing will be saved. To actually save the workspace content the following methods need to be called:
+   * Nothing will be saved.
    *
-   * <ul>
-   * <li>{@link #saveProperties() }</li>
-   * <li>{@link #addHistoryEntry(int, workbench.gui.sql.SqlHistory) }
-   * </ul>
+   * To actually save the workspace content {@link #save()} needs to be called.
    *
    * If the workspace was already open, it is closed.
+   * This will reset all tab specific properties.
    *
    * @throws IOException
-   * @see #saveProperties()
+   * @see #save()
    */
   public void openForWriting()
     throws IOException
@@ -112,6 +111,7 @@ public class WbWorkspace
     zout.setComment("SQL Workbench/J Workspace file");
 
     state = WorkspaceState.writing;
+    tabInfo.clear();
   }
 
   /**
@@ -218,7 +218,7 @@ public class WbWorkspace
 
   public PanelType getPanelType(int index)
   {
-    String type = tabInfo.getProperty(TAB_PREFIX + index + ".type", "sqlPanel");
+    String type = tabInfo.getProperty(TAB_PROP_PREFIX + index + ".type", "sqlPanel");
     try
     {
       return PanelType.valueOf(type);
@@ -248,7 +248,7 @@ public class WbWorkspace
     }
   }
 
-  public void saveProperties()
+  public void save()
   {
     if (this.zout != null)
     {
@@ -337,14 +337,14 @@ public class WbWorkspace
     int index = 0;
     while (found)
     {
-      if (tabInfo.containsKey(TAB_PREFIX + index + ".maxrows") ||
-          tabInfo.containsKey(TAB_PREFIX + index + ".title") ||
-          tabInfo.containsKey(TAB_PREFIX + index + ".append.results"))
+      if (tabInfo.containsKey(TAB_PROP_PREFIX + index + ".maxrows") ||
+          tabInfo.containsKey(TAB_PROP_PREFIX + index + ".title") ||
+          tabInfo.containsKey(TAB_PROP_PREFIX + index + ".append.results"))
       {
-        tabInfo.setProperty(TAB_PREFIX + index + ".type", PanelType.sqlPanel.toString());
+        tabInfo.setProperty(TAB_PROP_PREFIX + index + ".type", PanelType.sqlPanel.toString());
         index ++;
       }
-      else if (tabInfo.containsKey(TAB_PREFIX + index + ".type"))
+      else if (tabInfo.containsKey(TAB_PROP_PREFIX + index + ".type"))
       {
         index ++;
       }
@@ -359,7 +359,7 @@ public class WbWorkspace
     // now add the missing .type entries for the DbExplorer panels
     for (int i=0; i < dbExplorer; i++)
     {
-      tabInfo.setProperty(TAB_PREFIX + index + ".type", PanelType.dbExplorer.toString());
+      tabInfo.setProperty(TAB_PROP_PREFIX + index + ".type", PanelType.dbExplorer.toString());
       index ++;
     }
     return index;
@@ -463,7 +463,7 @@ public class WbWorkspace
 
   public void setTabTitle(int index, String name)
   {
-    String key = TAB_PREFIX + index + ".title";
+    String key = TAB_PROP_PREFIX + index + ".title";
     String encoded = StringUtil.escapeText(name, CharacterRange.RANGE_7BIT);
     this.tabInfo.setProperty(key, encoded);
   }
@@ -471,7 +471,7 @@ public class WbWorkspace
   public String getTabTitle(int index)
   {
     if (this.tabInfo == null) return null;
-    String key = TAB_PREFIX + index + ".title";
+    String key = TAB_PROP_PREFIX + index + ".title";
     String value = (String)this.tabInfo.get(key);
     return StringUtil.decodeUnicode(value);
   }
@@ -479,7 +479,7 @@ public class WbWorkspace
   public int getExternalFileCursorPos(int tabIndex)
   {
     if (this.tabInfo == null) return -1;
-    String key = TAB_PREFIX + tabIndex + CURSOR_POS_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + CURSOR_POS_PROP;
     String value = (String)this.tabInfo.get(key);
     if (value == null) return -1;
     int result = -1;
@@ -497,14 +497,14 @@ public class WbWorkspace
 
   public void setQueryTimeout(int index, int timeout)
   {
-    String key = TAB_PREFIX + index + ".timeout";
+    String key = TAB_PROP_PREFIX + index + ".timeout";
     this.tabInfo.setProperty(key, Integer.toString(timeout));
   }
 
   public int getQueryTimeout(int index)
   {
     if (this.tabInfo == null) return 0;
-    String key = TAB_PREFIX + index + ".timeout";
+    String key = TAB_PROP_PREFIX + index + ".timeout";
     String value = (String)this.tabInfo.get(key);
     if (value == null) return 0;
     int result = 0;
@@ -521,14 +521,14 @@ public class WbWorkspace
 
   public void setMaxRows(int index, int numRows)
   {
-    String key = TAB_PREFIX + index + ".maxrows";
+    String key = TAB_PROP_PREFIX + index + ".maxrows";
     this.tabInfo.setProperty(key, Integer.toString(numRows));
   }
 
   public int getMaxRows(int tabIndex)
   {
     if (this.tabInfo == null) return 0;
-    String key = TAB_PREFIX + tabIndex + ".maxrows";
+    String key = TAB_PROP_PREFIX + tabIndex + ".maxrows";
     String value = (String)this.tabInfo.get(key);
     if (value == null) return 0;
     int result = 0;
@@ -543,17 +543,10 @@ public class WbWorkspace
     return result;
   }
 
-  public void removeExternalFileInfo(int index)
-  {
-    tabInfo.removeProperty(TAB_PREFIX + index + FILENAME_PROP);
-    tabInfo.removeProperty(TAB_PREFIX + index + ENCODING_PROP);
-    tabInfo.removeProperty(TAB_PREFIX + index + CURSOR_POS_PROP);
-  }
-
   public String getExternalFileName(int tabIndex)
   {
     if (this.tabInfo == null) return null;
-    String key = TAB_PREFIX + tabIndex + FILENAME_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + FILENAME_PROP;
     String value = (String)this.tabInfo.get(key);
     return StringUtil.decodeUnicode(value);
   }
@@ -561,7 +554,7 @@ public class WbWorkspace
   public String getExternalFileEncoding(int tabIndex)
   {
     if (this.tabInfo == null) return null;
-    String key = TAB_PREFIX + tabIndex + ENCODING_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + ENCODING_PROP;
     String value = (String)this.tabInfo.get(key);
     if (StringUtil.isEmptyString(value)) return Settings.getInstance().getDefaultEncoding();
     return value;
@@ -569,13 +562,13 @@ public class WbWorkspace
 
   public void setExternalFileCursorPos(int tabIndex, int cursor)
   {
-    String key = TAB_PREFIX + tabIndex + CURSOR_POS_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + CURSOR_POS_PROP;
     this.tabInfo.setProperty(key, Integer.toString(cursor));
   }
 
   public void setExternalFileName(int tabIndex, String filename)
   {
-    String key = TAB_PREFIX + tabIndex + FILENAME_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + FILENAME_PROP;
     String encoded = StringUtil.escapeText(filename, CharacterRange.RANGE_7BIT);
     this.tabInfo.setProperty(key, encoded);
   }
@@ -583,7 +576,7 @@ public class WbWorkspace
   public void setExternalFileEncoding(int tabIndex, String encoding)
   {
     if (encoding == null) return;
-    String key = TAB_PREFIX + tabIndex + ENCODING_PROP;
+    String key = TAB_PROP_PREFIX + tabIndex + ENCODING_PROP;
     this.tabInfo.setProperty(key, encoding);
   }
 

@@ -24,7 +24,6 @@
 package workbench.gui.sql;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -111,8 +110,8 @@ public class PanelWorkspaceHandler
 			}
 		}
 
-		boolean appendResults = props.getBoolProperty("tab" + (index) + ".append.results", false);
-		boolean locked = props.getBoolProperty("tab" + (index) + ".locked", false);
+		boolean appendResults = props.getBoolProperty( WbWorkspace.TAB_PROP_PREFIX + index + ".append.results", false);
+		boolean locked = props.getBoolProperty( WbWorkspace.TAB_PROP_PREFIX + index + ".locked", false);
 		client.setLocked(locked);
 		client.setAppendResults(appendResults);
 		client.updateAppendAction();
@@ -120,7 +119,6 @@ public class PanelWorkspaceHandler
 		client.editor.resetModified();
     client.editor.invalidate();
 	}
-
 
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
@@ -131,29 +129,27 @@ public class PanelWorkspaceHandler
 			client.storeStatementInHistory(); // make sure the current content is stored in the SqlHistory object
 			w.addHistoryEntry(index, client.getHistory());
 		}
-		Properties props = w.getSettings();
+
+		WbProperties props = w.getSettings();
+    String propStart = WbWorkspace.TAB_PROP_PREFIX + index;
 
 		int location = client.contentPanel.getDividerLocation();
 		int last = client.contentPanel.getLastDividerLocation();
-		props.setProperty("tab" + (index) + ".divider.location", Integer.toString(location));
-		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
-		props.setProperty("tab" + (index) + ".append.results", Boolean.toString(client.getAppendResults()));
-		props.setProperty("tab" + (index) + ".locked", Boolean.toString(client.isLocked()));
-		props.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
+		props.setProperty(propStart + ".divider.location", Integer.toString(location));
+		props.setProperty(propStart + ".divider.lastlocation", Integer.toString(last));
+		props.setProperty(propStart + ".append.results", Boolean.toString(client.getAppendResults()));
+		props.setProperty(propStart + ".locked", Boolean.toString(client.isLocked()));
+		props.setProperty(propStart + ".type", PanelType.sqlPanel.toString());
 
 		w.setMaxRows(index, client.statusBar.getMaxRows());
 		w.setQueryTimeout(index, client.statusBar.getQueryTimeout());
+    
 		if (client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() == ExternalFileHandling.link)
 		{
 			w.setExternalFileName(index, client.getCurrentFileName());
 			w.setExternalFileCursorPos(index, client.editor.getCaretPosition());
 			w.setExternalFileEncoding(index, client.editor.getCurrentFileEncoding());
 		}
-    else
-    {
-      // this is necessary if a tab position was switched with a tab that contained a file
-      w.removeExternalFileInfo(index);
-    }
 
 		String title = client.getTabName();
 		if (title == null)

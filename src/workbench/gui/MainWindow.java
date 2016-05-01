@@ -3261,8 +3261,7 @@ public class MainWindow
 		}
 		else if (WbManager.getInstance().outOfMemoryOcurred())
 		{
-			// sometimes when an OoM occurred, saving of the workspace
-			// succeeds but the ZIP file is not written correctly.
+			// Sometimes, when an OoM occurrs when saving of the workspace succeeds but the ZIP file is not written correctly.
 			// This tries to prevent the old file from beeing overwritten, just in case...
 			f.makeBackup();
 		}
@@ -3295,15 +3294,14 @@ public class MainWindow
 				}
 			}
       currentWorkspace.openForWriting();
-			int selected = this.sqlTab.getSelectedIndex();
-			currentWorkspace.setSelectedTab(selected);
+			currentWorkspace.setSelectedTab(sqlTab.getSelectedIndex());
 			currentWorkspace.setEntryCount(count);
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(currentWorkspace, i);
 			}
-      currentWorkspace.saveProperties();
+      currentWorkspace.save();
 			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + filename + " saved");
 		}
 		catch (Throwable e)
