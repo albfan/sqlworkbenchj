@@ -100,6 +100,7 @@ public class WbConnection
   private boolean hasOracleContainers;
 
   private boolean busy;
+  private boolean lastAutocommitState;
   private KeepAliveDaemon keepAlive;
   private String currentCatalog;
   private String currentSchema;
@@ -151,6 +152,7 @@ public class WbConnection
       }
       removeNewLines = db.removeNewLinesInSQL();
     }
+    lastAutocommitState = profile.getAutocommit();
   }
 
   public synchronized SqlParsingUtil getParsingUtil()
@@ -805,6 +807,7 @@ public class WbConnection
     {
       this.sqlConnection.setAutoCommit(flag);
       fireConnectionStateChanged(PROP_AUTOCOMMIT, Boolean.toString(old), Boolean.toString(flag));
+      lastAutocommitState = flag;
     }
   }
 
@@ -834,6 +837,12 @@ public class WbConnection
     if (!getDbSettings().supportsTransactions())
     {
       return true;
+    }
+
+    if (this.isBusy())
+    {
+      // not perfect, but better then hanging the AWT thread when checking for auto commit
+      return lastAutocommitState;
     }
 
     try
