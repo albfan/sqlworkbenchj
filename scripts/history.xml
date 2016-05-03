@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2016-04-03">
+  <release build="-1" date="2016-05-03">
     <entry dev-build="3" type="enh">It's now possible to show a quick filter in the macro popup window</entry>
     <entry dev-build="3" type="enh">When searching for a JDBC driver class in the driver's jar file, available service registrations are used to speed up the searching.</entry>
     <entry dev-build="2" type="enh">It's now possible to disable icons in menus</entry>
