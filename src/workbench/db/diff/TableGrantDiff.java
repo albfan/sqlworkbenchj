@@ -23,8 +23,8 @@
  */
 package workbench.db.diff;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import workbench.db.TableGrant;
 import workbench.db.report.ReportTableGrants;
@@ -59,7 +59,7 @@ public class TableGrantDiff
 
   public StringBuilder getMigrateTargetXml(TagWriter writer, StringBuilder indent)
   {
-    Collection<TableGrant> grantsToAdd = new LinkedList<>();
+    Collection<TableGrant> grantsToAdd = new ArrayList<>();
     if (this.referenceGrants != null)
     {
       grantsToAdd.addAll(this.referenceGrants);
@@ -69,7 +69,7 @@ public class TableGrantDiff
       grantsToAdd.removeAll(targetGrants);
     }
 
-    Collection<TableGrant> grantsToRemove = new LinkedList<>();
+    Collection<TableGrant> grantsToRemove = new ArrayList<>();
     if (this.targetGrants != null)
     {
       grantsToRemove.addAll(targetGrants);

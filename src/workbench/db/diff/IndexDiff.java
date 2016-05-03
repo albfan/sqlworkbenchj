@@ -23,9 +23,9 @@
  */
 package workbench.db.diff;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import workbench.db.IndexDefinition;
@@ -74,8 +74,8 @@ public class IndexDiff
   public StringBuilder getMigrateTargetXml()
   {
     StringBuilder result = new StringBuilder();
-    List<IndexDefinition> indexToAdd = new LinkedList<>();
-    List<IndexDefinition> indexToDrop = new LinkedList<>();
+    List<IndexDefinition> indexToAdd = new ArrayList<>();
+    List<IndexDefinition> indexToDrop = new ArrayList<>();
 
     StringBuilder myindent = new StringBuilder(indent);
     myindent.append("  ");

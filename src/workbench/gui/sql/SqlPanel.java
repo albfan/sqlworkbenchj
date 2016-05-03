@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -263,7 +262,7 @@ public class SqlPanel
 	protected volatile boolean cancelExecution;
 
 	private final List actions = new ArrayList(50);
-	private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
+	private final List<FilenameChangeListener> filenameChangeListeners = new ArrayList<>();
 
 	protected StopAction stopAction;
 	protected ExecuteAllAction executeAll;
@@ -338,7 +337,7 @@ public class SqlPanel
 	protected boolean updateRunning;
 	protected String tabName;
 
-	private List<DbExecutionListener> execListener;
+	private final List<DbExecutionListener> execListener = Collections.synchronizedList(new ArrayList<>());
 	protected Thread executionThread;
 	protected Interruptable worker;
 
@@ -4230,7 +4229,6 @@ public class SqlPanel
 	@Override
 	public void addDbExecutionListener(DbExecutionListener l)
 	{
-		if (this.execListener == null) this.execListener = Collections.synchronizedList(new LinkedList<DbExecutionListener>());
 		this.execListener.add(l);
 	}
 
@@ -4306,8 +4304,7 @@ public class SqlPanel
 		if (stmtRunner != null) this.stmtRunner.dispose();
     if (tabDropHandler != null) tabDropHandler.dispose();
 
-		if (this.execListener != null) execListener.clear();
-		this.execListener = null;
+		execListener.clear();
 
     if (statusBar != null)
     {

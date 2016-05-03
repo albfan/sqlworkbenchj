@@ -27,7 +27,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -252,7 +251,7 @@ class ProfileListModel
 	public List<String> getGroups()
 	{
 		if (this.rootNode == null) return null;
-		List<String> result = new LinkedList<>();
+		List<String> result = new ArrayList<>();
 		int children = this.getChildCount(this.rootNode);
 		for (int i = 0; i < children; i++)
 		{

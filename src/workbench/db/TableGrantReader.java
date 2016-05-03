@@ -24,11 +24,11 @@
 package workbench.db;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -135,7 +135,7 @@ public class TableGrantReader
       List<String> privs = grants.get(grantee);
       if (privs == null)
       {
-        privs = new LinkedList<>();
+        privs = new ArrayList<>();
         grants.put(grantee, privs);
       }
       privs.add(priv.trim());

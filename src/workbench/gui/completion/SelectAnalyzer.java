@@ -24,7 +24,6 @@
 package workbench.gui.completion;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -409,7 +408,7 @@ public class SelectAnalyzer
 	private List getColumnsForHaving()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false, dbConnection);
-		List<String> validCols = new LinkedList<>();
+		List<String> validCols = new ArrayList<>();
 		for (String col : cols)
 		{
 			if (col.indexOf('(') > -1 && col.indexOf(')') > -1)
@@ -423,7 +422,7 @@ public class SelectAnalyzer
 	private List getColumnsForGroupBy()
 	{
 		List<String> cols = SqlUtil.getSelectColumns(this.sql, false, dbConnection);
-		List<String> validCols = new LinkedList<>();
+		List<String> validCols = new ArrayList<>();
 		String[] funcs = new String[]{"sum", "count", "avg", "min", "max" };
 		StringBuilder regex = new StringBuilder(50);
 		for (int i = 0; i < funcs.length; i++)

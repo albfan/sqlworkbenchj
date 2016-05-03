@@ -33,9 +33,11 @@ import workbench.resource.Settings;
 
 import workbench.db.DropType;
 import workbench.db.importer.DeleteType;
+import workbench.db.importer.ImportMode;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -139,7 +141,13 @@ public class CommonArgs
 
 	public static void addImportModeParameter(ArgumentParser cmdLine)
 	{
-		cmdLine.addArgument(ARG_IMPORT_MODE, StringUtil.stringToList("insert,update,\"update,insert\",\"insert,update\",upsert,insertIgnore"));
+		cmdLine.addArgument(ARG_IMPORT_MODE, CollectionUtil.arrayList(
+                                            ImportMode.insert.getArgumentString(),
+                                            ImportMode.update.getArgumentString(),
+                                            ImportMode.updateInsert.getArgumentString(),
+                                            ImportMode.insertUpdate.getArgumentString(),
+                                            ImportMode.upsert.getArgumentString(),
+                                            ImportMode.insertIgnore.getArgumentString()));
 	}
 
 	public static void addSqlDateLiteralParameter(ArgumentParser cmdLine)

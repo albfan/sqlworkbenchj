@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +54,7 @@ import workbench.util.AggregatingMap;
 public class TableDependencySorter
 {
   private final WbConnection dbConn;
-  private final List<TableIdentifier> cycleErrors = new LinkedList<TableIdentifier>();
+  private final List<TableIdentifier> cycleErrors = new ArrayList<>();
   private ScriptGenerationMonitor monitor;
   private TableDependency dependencyReader;
   private boolean cancel;
@@ -129,7 +128,7 @@ public class TableDependencySorter
 
     if (addMissing)
     {
-      Set<TableIdentifier> missing = new HashSet<TableIdentifier>();
+      Set<TableIdentifier> missing = new HashSet<>();
       for (DependencyNode node : allNodes)
       {
         if (!tables.contains(node.getTable()))
@@ -147,7 +146,7 @@ public class TableDependencySorter
 
   private List<TableIdentifier> validateTables(List<TableIdentifier> toCheck)
   {
-    List<TableIdentifier> result = new ArrayList<TableIdentifier>(toCheck.size());
+    List<TableIdentifier> result = new ArrayList<>(toCheck.size());
     for (TableIdentifier tbl : toCheck)
     {
       TableIdentifier realTable = dbConn.getMetadata().findTable(tbl);
@@ -196,8 +195,8 @@ public class TableDependencySorter
 
   private List<DependencyNode> collectRoots(List<TableIdentifier> tables)
   {
-    List<DependencyNode> allNodes = new ArrayList<DependencyNode>(tables.size() * 2);
-    Set<DependencyNode> rootNodes = new HashSet<DependencyNode>(tables.size());
+    List<DependencyNode> allNodes = new ArrayList<>(tables.size() * 2);
+    Set<DependencyNode> rootNodes = new HashSet<>(tables.size());
     dependencyReader = new TableDependency(dbConn);
 
     int num = 1;
@@ -250,11 +249,11 @@ public class TableDependencySorter
   {
     long start = System.currentTimeMillis();
 
-    List<TableIdentifier> sorted = new ArrayList<TableIdentifier>(tables);
+    List<TableIdentifier> sorted = new ArrayList<>(tables);
 
-    final AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<TableIdentifier, DependencyNode>(false);
-    final Map<TableIdentifier, Integer> totalLevels = new HashMap<TableIdentifier, Integer>();
-    final Map<TableIdentifier, Integer> refCounters = new HashMap<TableIdentifier, Integer>();
+    final AggregatingMap<TableIdentifier, DependencyNode> tableNodes = new AggregatingMap<>(false);
+    final Map<TableIdentifier, Integer> totalLevels = new HashMap<>();
+    final Map<TableIdentifier, Integer> refCounters = new HashMap<>();
 
     for (DependencyNode node : allNodes)
     {
@@ -408,7 +407,7 @@ public class TableDependencySorter
 
     if (children.isEmpty()) return Collections.emptyList();
 
-    ArrayList<DependencyNode> result = new ArrayList<DependencyNode>();
+    ArrayList<DependencyNode> result = new ArrayList<>();
 
     for (DependencyNode node : children)
     {

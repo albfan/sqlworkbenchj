@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -228,7 +227,7 @@ public class DataExporter
   public DataExporter(WbConnection con)
   {
     this.dbConn = con;
-    this.jobQueue = new LinkedList<>();
+    this.jobQueue = new ArrayList<>();
     this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
     this.numberFormatter = Settings.getInstance().createDefaultDecimalFormatter(0);
     this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));

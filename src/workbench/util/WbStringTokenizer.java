@@ -26,7 +26,7 @@ package workbench.util;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -134,7 +134,7 @@ public class WbStringTokenizer
 
   public List<String> getAllTokens()
   {
-    List<String> result = new LinkedList<>();
+    List<String> result = new ArrayList<>();
     while (this.hasMoreTokens())
     {
       result.add(this.nextToken());

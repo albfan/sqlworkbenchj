@@ -27,8 +27,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -149,7 +149,7 @@ public class OracleControlFileWriter
         format = Settings.getInstance().getDefaultTimestampFormat();
       }
       String oraFormat = convertJavaDateFormatToOracle(format);
-      List<String> blobColumns = new LinkedList<>();
+      List<String> blobColumns = new ArrayList<>();
       boolean clobAsFile = exporter.getWriteClobAsFile();
       for (int i = 0; i < count; i++)
       {

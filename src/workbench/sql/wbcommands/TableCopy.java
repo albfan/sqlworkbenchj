@@ -94,7 +94,7 @@ class TableCopy
 		copier.setKeyColumns(keys);
 
 		String mode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
-		if (!this.copier.setMode(mode))
+		if (!this.copier.setMode(mode, targetConnection))
 		{
 			result.addErrorMessageByKey("ErrImpInvalidMode", mode);
 			return false;

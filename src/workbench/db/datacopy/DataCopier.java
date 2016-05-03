@@ -196,7 +196,12 @@ public class DataCopier
    */
   public boolean setMode(String mode)
   {
-    return this.importer.setMode(mode);
+    return setMode(mode, this.targetConnection);
+  }
+
+  public boolean setMode(String mode, WbConnection conn)
+  {
+    return this.importer.setMode(mode, conn);
   }
 
   @Override

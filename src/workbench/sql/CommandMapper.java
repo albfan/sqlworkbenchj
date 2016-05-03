@@ -23,8 +23,8 @@
  */
 package workbench.sql;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -244,7 +244,7 @@ public class CommandMapper
 		}
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.getCreateCommand());
 
-		this.dbSpecificCommands = new LinkedList<>();
+		this.dbSpecificCommands = new ArrayList<>();
 		this.allowAbbreviated = Settings.getInstance().getBoolProperty("workbench.sql.allow.abbreviation", false);
 		registerExtensions();
 	}

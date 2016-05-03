@@ -41,9 +41,9 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -110,7 +110,7 @@ public class ConnectionEditorPanel
 	private ConnectionProfile currentProfile;
 	private ProfileListModel sourceModel;
 	private boolean init;
-	private List<SimplePropertyEditor> editors = new LinkedList<>();
+	private List<SimplePropertyEditor> editors = new ArrayList<>();
   private Set<String> allTags;
 
 	public ConnectionEditorPanel()

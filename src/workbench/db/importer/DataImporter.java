@@ -39,7 +39,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -644,17 +643,22 @@ public class DataImporter
    */
   public boolean setMode(String mode)
   {
+    return setMode(mode, dbConn);
+  }
+
+  public boolean setMode(String mode, WbConnection conn)
+  {
     if (StringUtil.isEmptyString(mode)) return true;
 
     ImportMode modeValue = getModeValue(mode);
     if (modeValue == null) return false;
 
-    if (modeValue == ImportMode.insertIgnore && !ImportDMLStatementBuilder.supportsInsertIgnore(dbConn))
+    if (modeValue == ImportMode.insertIgnore && !ImportDMLStatementBuilder.supportsInsertIgnore(conn))
     {
       return false;
     }
 
-    if (modeValue == ImportMode.upsert && !ImportDMLStatementBuilder.supportsUpsert(dbConn))
+    if (modeValue == ImportMode.upsert && !ImportDMLStatementBuilder.supportsUpsert(conn))
     {
       return false;
     }
@@ -685,7 +689,7 @@ public class DataImporter
   {
     List cols = StringUtil.stringToList(aColumnList, ",");
     int count = cols.size();
-    this.keyColumns = new LinkedList<>();
+    this.keyColumns = new ArrayList<>();
     for (int i=0; i < count; i++)
     {
       ColumnIdentifier col = new ColumnIdentifier((String)cols.get(i));

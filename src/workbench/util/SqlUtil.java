@@ -36,7 +36,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -841,7 +840,7 @@ public class SqlUtil
    */
   public static List<ElementInfo> getColumnEntries(String select, boolean includeAlias, WbConnection conn)
   {
-    List<ElementInfo> result = new LinkedList<>();
+    List<ElementInfo> result = new ArrayList<>();
     try
     {
       SQLLexer lexer = SQLLexerFactory.createLexer(conn, select);

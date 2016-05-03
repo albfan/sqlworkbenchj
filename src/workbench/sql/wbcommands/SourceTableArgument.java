@@ -26,7 +26,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -266,7 +265,7 @@ public class SourceTableArgument
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setCheckBrackets(false);
 		tok.setKeepQuotes(true);
-		List<String> result = new LinkedList<>();
+		List<String> result = new ArrayList<>();
 		while (tok.hasMoreTokens())
 		{
 			String element = tok.nextToken();

@@ -286,7 +286,7 @@ public class DefineFilterExpressionPanel
 		}
 		removeAllPanels();
 		ComplexExpression cExp = (ComplexExpression) filter;
-		List expList = cExp.getExpressions();
+		List<FilterExpression> expList = cExp.getExpressions();
 		int count = expList.size();
 		for (int i=0; i < count; i++)
 		{

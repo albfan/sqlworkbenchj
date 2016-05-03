@@ -28,7 +28,6 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -282,7 +281,7 @@ public class ImportFileLister
   {
     Map<String, WbFile> fileMapping = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
-    tables = new LinkedList<>();
+    tables = new ArrayList<>();
     for (WbFile f : toProcess)
     {
       TableIdentifier tbl = getTableForFile(f);
@@ -297,7 +296,7 @@ public class ImportFileLister
       throw new CycleErrorException(sorter.getErrorTables().get(0));
     }
 
-    List<WbFile> result = new LinkedList<>();
+    List<WbFile> result = new ArrayList<>();
     for (TableIdentifier tbl : sorted)
     {
       WbFile f = fileMapping.get(tbl.getTableName());

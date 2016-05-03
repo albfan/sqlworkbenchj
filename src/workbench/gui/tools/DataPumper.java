@@ -80,6 +80,7 @@ import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.DataImporter;
 import workbench.db.importer.DeleteType;
+import workbench.db.importer.ImportDMLStatementBuilder;
 import workbench.db.importer.ImportMode;
 import workbench.db.importer.ImportOptions;
 import workbench.db.importer.ProducerFactory;
@@ -499,6 +500,26 @@ public class DataPumper
 		t.start();
 	}
 
+  private void updateImportModes()
+  {
+    List<String> availableModes = new ArrayList<>();
+    availableModes.add(ImportMode.insert.getArgumentString());
+    availableModes.add(ImportMode.update.getArgumentString());
+    availableModes.add(ImportMode.insertUpdate.getArgumentString());
+    availableModes.add(ImportMode.updateInsert.getArgumentString());
+    if (ImportDMLStatementBuilder.supportsInsertIgnore(targetConnection))
+    {
+      availableModes.add(ImportMode.insertIgnore.getArgumentString());
+    }
+    if (ImportDMLStatementBuilder.supportsUpsert(targetConnection))
+    {
+      availableModes.add(ImportMode.upsert.getArgumentString());
+    }
+
+    DefaultComboBoxModel model = new DefaultComboBoxModel(availableModes.toArray() );
+    modeComboBox.setModel(model);
+  }
+
 	private void doConnectTarget(ConnectionProfile profile)
 	{
 		this.isConnecting = true;
@@ -533,6 +554,7 @@ public class DataPumper
 			this.supportsBatch = this.targetConnection.getMetadata().supportsBatchUpdates();
 			this.checkUseBatch();
 			checkType();
+      updateImportModes();
 
 		  Thread t = new WbThread("Retrieve target tables")
 		  {

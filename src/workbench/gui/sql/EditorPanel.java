@@ -43,7 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -158,7 +158,7 @@ public class EditorPanel
   private final UnCommentAction unCommentAction;
   private final JumpToLineAction jumpToLineAction;
 
-  private final List<FilenameChangeListener> filenameChangeListeners = new LinkedList<>();
+  private final List<FilenameChangeListener> filenameChangeListeners = new ArrayList<>();
   private WbFile currentFile;
   private boolean saveInProgress;
   private boolean loadInProgress;

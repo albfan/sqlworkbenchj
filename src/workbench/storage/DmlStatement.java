@@ -42,7 +42,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -142,7 +141,7 @@ public class DmlStatement
   public int execute(WbConnection connection, boolean retrieveKeys)
     throws SQLException
   {
-    List<Closeable> streamsToClose = new LinkedList<>();
+    List<Closeable> streamsToClose = new ArrayList<>();
 
     PreparedStatement stmt = null;
     int rows = -1;

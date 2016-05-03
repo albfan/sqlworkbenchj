@@ -26,9 +26,10 @@ package workbench.gui.settings;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.List;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -37,6 +38,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.components.DividerBorder;
@@ -86,7 +88,7 @@ public class ExternalToolsPanel
 	@Override
 	public void saveSettings()
 	{
-		List<ToolDefinition> l = new LinkedList<ToolDefinition>();
+		List<ToolDefinition> l = new ArrayList<>();
 		Enumeration e = this.tools.elements();
 		while (e.hasMoreElements())
 		{

@@ -26,10 +26,24 @@ package workbench.db.importer;
  */
 public enum ImportMode
 {
-  insert,
-  insertIgnore,
-  update,
-  insertUpdate,
-  updateInsert,
-  upsert;
+  insert("insert"),
+  insertIgnore("insertIgnore"),
+  update("update"),
+  insertUpdate("Insert,Update"),
+  updateInsert("Update,Insert"),
+  upsert("Upsert");
+
+  private final String argumentString;
+
+  private ImportMode(String arg)
+  {
+    argumentString = arg;
+  }
+
+  public String getArgumentString()
+  {
+    return argumentString;
+  }
+
+
 }

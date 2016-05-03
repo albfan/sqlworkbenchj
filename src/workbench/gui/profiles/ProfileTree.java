@@ -38,7 +38,6 @@ import java.awt.event.MouseListener;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.ActionMap;
@@ -402,7 +401,7 @@ public class ProfileTree
 	 */
 	public List<String> getExpandedGroupNames()
 	{
-		LinkedList<String> result = new LinkedList<>();
+		ArrayList<String> result = new ArrayList<>();
 		TreePath[] groupNodes = this.profileModel.getGroupNodes();
 		for (TreePath groupNode : groupNodes)
 		{

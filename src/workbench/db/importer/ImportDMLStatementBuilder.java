@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-class ImportDMLStatementBuilder
+public class ImportDMLStatementBuilder
 {
   private final WbConnection dbConn;
   private final TableIdentifier targetTable;
@@ -89,7 +89,7 @@ class ImportDMLStatementBuilder
    * @param dbConn the DBMS to check
    * @return true if the DBMS supports some kine of "Insert but ignore unique key violations" statement.
    */
-  static boolean supportsInsertIgnore(WbConnection dbConn)
+  public static boolean supportsInsertIgnore(WbConnection dbConn)
   {
     if (dbConn == null) return false;
 
@@ -116,7 +116,7 @@ class ImportDMLStatementBuilder
    * @param dbConn the DBMS to check
    * @return true if the DBMS supports some kine of "upsert" statement.
    */
-  static boolean supportsUpsert(WbConnection connection)
+  public static boolean supportsUpsert(WbConnection connection)
   {
     if (connection == null) return false;
 

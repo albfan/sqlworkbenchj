@@ -20,8 +20,8 @@
  */
 package workbench.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import workbench.log.LogMgr;
@@ -64,7 +64,7 @@ public class TableListParser
 
     String fromPart = SqlParsingUtil.getFromPart(sql, lexer);
     if (StringUtil.isBlank(fromPart)) return Collections.emptyList();
-    List<Alias> result = new LinkedList<>();
+    List<Alias> result = new ArrayList<>();
 
     try
     {

@@ -27,9 +27,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventObject;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -302,7 +302,7 @@ public class ReferenceTableNavigator
 
 	private void buildMenu(WbMenu menu, ReferenceTableNavigation navi, String cmd)
 	{
-		List<JMenuItem> itemsToAdd = new LinkedList<>();
+		List<JMenuItem> itemsToAdd = new ArrayList<>();
 
 		TableIdentifier tbl = getUpdateTable();
 		if (tbl != null)
@@ -415,7 +415,7 @@ public class ReferenceTableNavigator
 
 	private List<List<ColumnData>> getColumnData(DependencyNode node)
 	{
-		List<List<ColumnData>> rows = new LinkedList<>();
+		List<List<ColumnData>> rows = new ArrayList<>();
 		int[] selectedRows = this.source.getSelectedRows();
 		int rowCount = selectedRows.length;
 
@@ -423,7 +423,7 @@ public class ReferenceTableNavigator
 		DataStore ds = this.source.getDataStore();
 		for (int i = 0; i < rowCount; i++)
 		{
-			List<ColumnData> rowData = new LinkedList<>();
+			List<ColumnData> rowData = new ArrayList<>();
 			for (String col : columns.values())
 			{
 				int colIndex = ds.getColumnIndex(col);

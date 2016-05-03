@@ -37,7 +37,7 @@ public class TabbedPaneHistory
 	implements ChangeListener
 {
 	private JTabbedPane client;
-	private LinkedList<Component> history = new LinkedList<Component>();
+	private LinkedList<Component> history = new LinkedList<>();
 
 	public TabbedPaneHistory(JTabbedPane pane)
 	{

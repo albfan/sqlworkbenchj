@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ActionMap;
@@ -290,7 +290,7 @@ public class MacroTree
 	 */
 	public List<String> getExpandedGroupNames()
 	{
-		LinkedList<String> result = new LinkedList<>();
+		List<String> result = new ArrayList<>();
 		TreePath[] groupNodes = this.macroModel.getGroupNodes();
 		for (TreePath groupNode : groupNodes)
 		{

@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,7 +82,7 @@ public class DeleteScriptGenerator
   private TableIdentifier rootTable;
   private WbTable sourceTable;
   private ScriptGenerationMonitor monitor;
-  private final List<String> statements = new LinkedList<>();
+  private final List<String> statements = new ArrayList<>();
   private final SqlLiteralFormatter formatter;
   private boolean formatSql = true;
   private boolean showFkNames;

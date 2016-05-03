@@ -27,7 +27,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.InputMap;
@@ -52,7 +52,7 @@ import workbench.gui.menu.TextPopup;
 public class TextComponentMouseListener
 	implements MouseListener, CaretListener
 {
-	private List<JMenuItem> additionalItems = new LinkedList<>();
+	private List<JMenuItem> additionalItems = new ArrayList<>();
 	private TextPopup popup;
 	private JTextComponent text;
 	private int originalComponentCount = -1;

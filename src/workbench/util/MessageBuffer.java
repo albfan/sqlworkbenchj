@@ -23,9 +23,8 @@
  */
 package workbench.util;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
@@ -46,7 +45,7 @@ import workbench.resource.Settings;
  */
 public class MessageBuffer
 {
-  private LinkedList<CharSequence> messages = new LinkedList<>();
+  private Deque<CharSequence> messages = new ArrayDeque<>();
   private int length = 0;
   private final String newLine = "\n";
   private final int maxSize;
@@ -70,14 +69,6 @@ public class MessageBuffer
   public MessageBuffer(int maxEntries)
   {
     maxSize = maxEntries;
-  }
-
-  /**
-   * Returns an unmodifiable reference to the stored messages.
-   */
-  public List<CharSequence> getMessages()
-  {
-    return Collections.unmodifiableList(messages);
   }
 
   public synchronized void clear()

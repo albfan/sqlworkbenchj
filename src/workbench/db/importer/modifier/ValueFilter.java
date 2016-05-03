@@ -23,8 +23,9 @@
  */
 package workbench.db.importer.modifier;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
 import workbench.db.ColumnIdentifier;
 
 /**
@@ -34,7 +35,7 @@ import workbench.db.ColumnIdentifier;
 public class ValueFilter
   implements ImportValueModifier
 {
-  private List<ImportValueModifier> modifiers = new LinkedList<ImportValueModifier>();
+  private List<ImportValueModifier> modifiers = new ArrayList<>();
 
   @Override
   public int getSize()

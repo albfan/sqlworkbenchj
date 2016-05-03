@@ -25,7 +25,6 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import workbench.interfaces.ResultLogger;
@@ -229,7 +228,7 @@ public class StatementRunnerResult
 
 	public int addDataStore(DataStore ds)
 	{
-		if (this.datastores == null) this.datastores = new ArrayList<>(5);
+		if (this.datastores == null) this.datastores = new ArrayList<>();
 		if (ds != null)
 		{
 			ds.resetCancelStatus();
@@ -240,7 +239,7 @@ public class StatementRunnerResult
 
 	public int addResultSet(ResultSet rs)
 	{
-		if (this.results == null) this.results = new LinkedList<>();
+		if (this.results == null) this.results = new ArrayList<>();
 		this.results.add(rs);
 		return this.results.size();
 	}

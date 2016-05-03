@@ -23,7 +23,8 @@
  */
 package workbench.storage.filter;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ import java.util.Map;
 public abstract class ComplexExpression
 	implements FilterExpression
 {
-	protected List<FilterExpression> filter = new LinkedList<FilterExpression>();
+	protected List<FilterExpression> filter = new ArrayList<>();
 
 	public void addExpression(FilterExpression expr)
 	{
@@ -66,9 +67,16 @@ public abstract class ComplexExpression
 	/**
 	 * Get the list of FilterExpression s that define this ComplexExpression
 	 */
-	public List getExpressions() { return filter; }
+  public List<FilterExpression> getExpressions()
+  {
+    return Collections.unmodifiableList(filter);
+  }
 
-	public void setExpressions(List<FilterExpression> l) { this.filter = l;}
+  public void setExpressions(List<FilterExpression> l)
+  {
+    this.filter.clear();
+    this.filter.addAll(l);
+  }
 
 	@Override
 	public boolean equals(Object other)

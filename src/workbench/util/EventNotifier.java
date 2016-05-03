@@ -23,8 +23,9 @@
  */
 package workbench.util;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
 import workbench.interfaces.EventDisplay;
 
 /**
@@ -33,7 +34,7 @@ import workbench.interfaces.EventDisplay;
  */
 public class EventNotifier
 {
-  private List<EventDisplay> displayClients = new LinkedList<>();
+  private List<EventDisplay> displayClients = new ArrayList<>(1);
   private NotifierEvent lastEvent = null;
   private static EventNotifier instance = new EventNotifier();
 
