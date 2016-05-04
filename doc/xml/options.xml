@@ -1319,42 +1319,6 @@
         </blockquote>
       </simplesect>
 
-      <simplesect id="dbexp-options-use-regex">
-        <title>Use RegEx in Quickfilter</title>
-        <blockquote>
-        <para>
-          If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
-          is used as a regular expression (rather than a "SQL" Expression) to filter the list.
-        </para>
-        </blockquote>
-      </simplesect>
-
-      <simplesect id="dbexp-options-partial-match">
-        <title>Partial match</title>
-        <blockquote>
-        <para>
-          If this option is enabled, then any text that is typed into the quick filter will matched anywhere
-          in the object name. It is equivalent to typing <literal>*foo*</literal> into the quick filter.
-          If this option is enabled and a wildcard is part of the value, then only that wildcard is used.
-          Using <literal>foo*</literal> for the filter while this option is enabled, shows all objects
-          that <emphasis>start</emphasis> with <literal>foo</literal>.
-        </para>
-        <para>
-          This option is only available when the use of regular expressions in the quick filter is disabled.
-        </para>
-        </blockquote>
-      </simplesect>
-
-      <simplesect id="dbexp-options-filter-typing">
-        <title>Filter while typing</title>
-        <blockquote>
-        <para>
-          If this option is enabled, the filter expression is applied while you type. In this case, the
-          "Filter" button does not need to be clicked in order to apply the filter expression.
-        </para>
-        </blockquote>
-      </simplesect>
-
       <simplesect id="dbexp-options-def-type">
         <title>Default object type</title>
         <blockquote>
@@ -1365,41 +1329,55 @@
         </blockquote>
       </simplesect>
 
-    </section>
-
-    <section id="dbexp-options-data-display">
-      <title>Data display options</title>
-      <simplesect id="dbexp-options-remember-sort">
-        <title>Remember sort column</title>
-        <blockquote>
+			<simplesect id="objectlist-quickfilter-options">
         <para>
-          When this option is selected, the sort column in the data display
-          of the DbExplorer will be restored after reloading the table data.
+          <emphasis role="bold">Quick filter options</emphasis>
         </para>
-        </blockquote>
-      </simplesect>
-
-      <simplesect id="dbexp-options-remember-col-order">
-        <title>Remember column order</title>
         <blockquote>
-        <para>
-          When you <link linkend="dbexplorer-column-reorder">reorder</link> the column
-          in the data display of a table, enabling this option will automatically
-          store the new column order and apply it the next time the table data
-          is displayed.
-        </para>
-        </blockquote>
-      </simplesect>
+          <para>
+            The following configuration options of the quick filter are also used for the quick filter in the
+            <link linkend="db-tree">Database Objects Tree</link>.
+          </para>
+          <para id="dbexp-options-use-regex">
+            <emphasis role="bold">Use RegEx in Quickfilter</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
+            is used as a regular expression (rather than a "SQL" Expression) to filter the list.
+          </para>
+          </blockquote>
 
-      <simplesect id="dbexp-options-use-order-by">
-        <title>Apply sort order as ORDER BY</title>
-        <blockquote>
-        <para>
-          If the table data was sorted by clicking on one of the columns, reloading the data
-          will use an appropriate <literal>ORDER BY</literal> clause for the data retrieval.
-          This is useful if not all rows were displayed in the data panel due to a max. row limit
-          and you want the first rows displayed based on the current column sort.
-        </para>
+          <para id="dbexp-options-partial-match">
+            <emphasis role="bold">Partial match</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, then any text that is typed into the quick filter will be matched anywhere
+            in the object name. It is equivalent to typing <literal>*foo*</literal> into the quick filter.
+            If this option is enabled and a wildcard is part of the value, then only that wildcard is used.
+            Using <literal>foo*</literal> for the filter while this option is enabled, shows all objects
+            that <emphasis>start</emphasis> with <literal>foo</literal>.
+          </para>
+          <para>
+            This also enables filtering for multiple values, separated by comma.
+            Entering <literal>foo,bar</literal> in the quick filter will show all objects that contain
+            either <literal>foo</literal> or <literal>bar</literal>.
+          </para>
+          <para>
+            This option is only available when the use of regular expressions in the quick filter is disabled.
+          </para>
+          </blockquote>
+
+          <para id="dbexp-options-filter-typing">
+            <emphasis role="bold">Filter while typing</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, the filter expression is applied while you type. In this case, the
+            "Filter" button does not need to be clicked in order to apply the filter expression.
+          </para>
+          </blockquote>
         </blockquote>
       </simplesect>
     </section>
@@ -1444,7 +1422,43 @@
         </para>
         </blockquote>
       </simplesect>
+    </section>
 
+    <section id="dbexp-options-data-display">
+      <title>Data display options</title>
+      <simplesect id="dbexp-options-remember-sort">
+        <title>Remember sort column</title>
+        <blockquote>
+        <para>
+          When this option is selected, the sort column in the data display
+          of the DbExplorer will be restored after reloading the table data.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-remember-col-order">
+        <title>Remember column order</title>
+        <blockquote>
+        <para>
+          When you <link linkend="dbexplorer-column-reorder">reorder</link> the column
+          in the data display of a table, enabling this option will automatically
+          store the new column order and apply it the next time the table data
+          is displayed.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-use-order-by">
+        <title>Apply sort order as ORDER BY</title>
+        <blockquote>
+        <para>
+          If the table data was sorted by clicking on one of the columns, reloading the data
+          will use an appropriate <literal>ORDER BY</literal> clause for the data retrieval.
+          This is useful if not all rows were displayed in the data panel due to a max. row limit
+          and you want the first rows displayed based on the current column sort.
+        </para>
+        </blockquote>
+      </simplesect>
     </section>
 
 	</section>

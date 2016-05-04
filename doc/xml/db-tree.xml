@@ -22,6 +22,9 @@
       The quick filter above the object tree can be used to quickly search for objects with a specific name.
       The filtering will only be done on <emphasis role="bold">already loaded</emphasis> elements of the tree.
     </para>
+    <para>
+      The behavior of the quick filter is the same as the filter in the <link linkend="objectlist-quickfilter-options">DbExplorer</link>
+    </para>
   </section>
 
   <section id="db-tree-drag-support">
