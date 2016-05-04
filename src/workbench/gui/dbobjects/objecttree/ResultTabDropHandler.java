@@ -36,6 +36,7 @@ import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.ResourceMgr;
 import workbench.util.CollectionUtil;
 
 
@@ -59,7 +60,12 @@ public class ResultTabDropHandler
 
   public void handleDrop(ObjectTreeTransferable selection)
   {
-    if (sqlPanel.isBusy()) return;
+    if (sqlPanel.isConnectionBusy())
+    {
+      sqlPanel.appendToLog(ResourceMgr.getString("ErrConnectionBusy"));
+      return;
+    }
+
     if (selection == null) return;
 
     ObjectTreeNode[] nodes = selection.getSelectedNodes();

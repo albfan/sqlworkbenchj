@@ -4211,6 +4211,13 @@ public class SqlPanel
     if (sqlHistory != null) sqlHistory.setEnabled(!busy);
 	}
 
+  public boolean isConnectionBusy()
+  {
+    if (isBusy()) return true;
+    if (this.dbConnection == null) return false;
+    return this.dbConnection.isBusy();
+  }
+  
 	@Override
 	public boolean isBusy()
 	{
