@@ -45,11 +45,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class SqlServerDDLTest
+public class SqlServerDMLTest
 	extends WbTestCase
 {
 
-	public SqlServerDDLTest()
+	public SqlServerDMLTest()
 	{
 		super("SqlServerDMLTest");
 	}
@@ -74,7 +74,7 @@ public class SqlServerDDLTest
 	}
 
 	@Test
-	public void testTableDrop()
+	public void testUpdateDatastore()
 		throws SQLException
 	{
 		WbConnection con = SQLServerTestUtil.getSQLServerConnection();
