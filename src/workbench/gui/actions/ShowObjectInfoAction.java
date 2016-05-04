@@ -66,7 +66,7 @@ public class ShowObjectInfoAction
   @Override
   public void executeAction(ActionEvent e)
   {
-    if (display.isBusy()) return;
+    if (display.isConnectionBusy()) return;
     final boolean includeDependencies;
     if (invokedByMouse(e))
     {
@@ -89,7 +89,7 @@ public class ShowObjectInfoAction
 
   protected void showInfo(boolean includeDependencies)
   {
-    if (display.isBusy()) return;
+    if (display.isConnectionBusy()) return;
     WbConnection conn = display.getConnection();
     if (conn == null) return;
 

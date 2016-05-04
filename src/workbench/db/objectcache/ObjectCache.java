@@ -95,20 +95,22 @@ class ObjectCache
   private String[] getCompletionTypes(WbConnection conn)
   {
     String dbId = conn.getDbId();
-    List<String> typeList = Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types", true, null);
+    Set<String> types = CollectionUtil.caseInsensitiveSet();
+    types.addAll(Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types", true, null));
 
-    if (CollectionUtil.isEmpty(typeList))
+    if (CollectionUtil.isEmpty(types))
     {
-      typeList = new ArrayList<>();
-      typeList.addAll(conn.getMetadata().getTableTypes());
-      typeList.addAll(conn.getDbSettings().getViewTypes());
+      types.addAll(conn.getMetadata().getTableTypes());
+      types.addAll(conn.getDbSettings().getViewTypes());
       if (conn.getMetadata().supportsMaterializedViews())
       {
-        typeList.add(conn.getMetadata().getMViewTypeName());
+        types.add(conn.getMetadata().getMViewTypeName());
       }
     }
+    List<String> excludeTypes = Settings.getInstance().getListProperty("workbench.db." + dbId + ".completion.types.exclude", true, null);
+    types.removeAll(excludeTypes);
 
-    return StringUtil.toArray(typeList, true);
+    return StringUtil.toArray(types, true);
   }
 
   private boolean isFiltered(TableIdentifier table)
@@ -189,7 +191,7 @@ class ObjectCache
     }
 
     namespaces.removeAll(ignore);
-    
+
     if (namespaces.isEmpty())
     {
       return CollectionUtil.arrayList((String)null);
@@ -381,7 +383,6 @@ class ObjectCache
     if (!conn.getDbSettings().useCurrentNamespaceForCompletion()) return;
 
     DbMetadata meta = conn.getMetadata();
-    boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
     String tSchema = table.getSchema();
     boolean ignoreSchema = (alwaysUseSchema ? false : meta.ignoreSchema(tSchema, currentSchema));
     if (ignoreSchema)
@@ -389,6 +390,7 @@ class ObjectCache
       table.setSchema(null);
     }
 
+    boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
     boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog()));
     if (ignoreCatalog)
     {
@@ -507,11 +509,19 @@ class ObjectCache
     LogMgr.logDebug("ObjectCache.getColumns()", "Checking columns for: " + tbl.getTableExpression(dbConnection));
 
     TableIdentifier toSearch = findEntry(dbConnection, tbl);
+
     List<ColumnIdentifier> cols = null;
 
     if (toSearch != null)
     {
       cols = this.objects.get(toSearch);
+    }
+    else if (!dbConnection.isBusy())
+    {
+      toSearch = dbConnection.getMetadata().searchSelectableObjectOnPath(tbl);
+      if (toSearch == null) return null;
+
+      toSearch.checkQuotesNeeded(dbConnection);
     }
 
     // nothing in the cache. We can only retrieve this from the database if the connection isn't busy
@@ -519,12 +529,6 @@ class ObjectCache
     {
       LogMgr.logDebug("ObjectCache.getColumns()", "No columns found for table " + tbl.getTableExpression() + ", but connection " + dbConnection.getId() + " is busy.");
       return Collections.emptyList();
-    }
-
-    if (cols == null)
-    {
-      toSearch = dbConnection.getMetadata().searchSelectableObjectOnPath(toSearch == null ? tbl : toSearch);
-      if (toSearch == null) return null;
     }
 
     // To support Oracle public synonyms, try to find a table with that name but without a schema

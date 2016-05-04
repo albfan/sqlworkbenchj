@@ -164,7 +164,7 @@ public class ResultTabDropHandler
 	@Override
 	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
 	{
-    if (sqlPanel.isBusy())
+    if (sqlPanel.isConnectionBusy())
     {
       dropTargetDragEvent.rejectDrag();
       return;

@@ -2046,7 +2046,7 @@ public class SqlPanel
 
 	private void startExecution(final String sql, final int offset, final boolean highlightError, final boolean appendResult, final RunType runType)
 	{
-		if (this.isBusy()) return;
+		if (this.isConnectionBusy()) return;
 
     if (!appendResult && !confirmDiscardChanges(-1, true))
     {
@@ -2155,7 +2155,7 @@ public class SqlPanel
 	 */
 	public void reloadCurrent()
 	{
-		if (isBusy()) return;
+		if (isConnectionBusy()) return;
 		if (currentData == null) return;
 
     startReloadPanel(currentData);
@@ -2204,7 +2204,7 @@ public class SqlPanel
 
 	private void runCurrentSql(DwPanel dataPanel)
 	{
-		if (isBusy()) return;
+		if (isConnectionBusy()) return;
 		if (dataPanel == null) return;
 
 		cancelExecution = false;
@@ -2243,7 +2243,7 @@ public class SqlPanel
 
   public void showData(TableIdentifier table, List<ColumnIdentifier> toSelect)
   {
-		if (isBusy()) return;
+		if (isConnectionBusy()) return;
     if (table == null) return;
 
     String sql = null;
@@ -2272,7 +2272,7 @@ public class SqlPanel
 	@Override
 	public void executeMacroSql(final String sql, final boolean replaceText, boolean appendData)
 	{
-		if (isBusy()) return;
+		if (isConnectionBusy()) return;
 		if (StringUtil.isBlank(sql)) return;
 
 		if (replaceText)
@@ -4217,7 +4217,7 @@ public class SqlPanel
     if (this.dbConnection == null) return false;
     return this.dbConnection.isBusy();
   }
-  
+
 	@Override
 	public boolean isBusy()
 	{
