@@ -163,6 +163,8 @@ public class DataPumper
 		this.targetProfile = target;
 
 		initComponents();
+    updateImportModes();
+
 		WbSwingUtilities.makeEqualWidth(cancelButton, closeButton, startButton, showLogButton, showWbCommand, helpButton);
 
 		sourceTable.setAutoSyncVisible(false);

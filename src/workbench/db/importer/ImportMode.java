@@ -27,11 +27,11 @@ package workbench.db.importer;
 public enum ImportMode
 {
   insert("insert"),
-  insertIgnore("insertIgnore"),
   update("update"),
-  insertUpdate("Insert,Update"),
-  updateInsert("Update,Insert"),
-  upsert("Upsert");
+  insertUpdate("insert,update"),
+  updateInsert("update,insert"),
+  insertIgnore("insertIgnore"),
+  upsert("upsert");
 
   private final String argumentString;
 
