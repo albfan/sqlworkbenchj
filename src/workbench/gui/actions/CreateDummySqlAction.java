@@ -169,23 +169,7 @@ public class CreateDummySqlAction
 
   private void checkEnabled()
   {
-    if (selection.hasSelection())
-    {
-      List<? extends DbObject> objects = source.getSelectedObjects();
-      for (DbObject dbo : objects)
-      {
-        if (!(dbo instanceof TableIdentifier))
-        {
-          setEnabled(false);
-          return;
-        }
-      }
-      setEnabled(true);
-    }
-    else
-    {
-      setEnabled(false);
-    }
+    setEnabled(source.getSelectionCount() > 0);
   }
 
   @Override

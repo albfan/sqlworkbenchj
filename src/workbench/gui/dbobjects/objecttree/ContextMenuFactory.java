@@ -33,6 +33,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
 
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
@@ -94,8 +95,8 @@ class ContextMenuFactory
     }
 
     // this returns the number of selected DbObjects, not the selected nodes in general
-    int count = dbTree.getSelectionCount();
-    if (count == 1)
+    int dboCount = dbTree.getSelectionCount();
+    if (dboCount == 1)
     {
       ObjectTreeNode selectedNode = dbTree.getSelectedNode();
 
@@ -163,6 +164,7 @@ class ContextMenuFactory
     }
 
     ScriptDbObjectAction script = new ScriptDbObjectAction(dbTree, selection, "MnuTxtShowSource");
+    script.setEnabled(dboCount > 0);
     script.setShowSinglePackageProcedure(true);
     menu.add(script);
 
@@ -183,13 +185,17 @@ class ContextMenuFactory
     }
 
     DropDbObjectAction drop = new DropDbObjectAction(dbTree, selection);
+    drop.setEnabled(dboCount > 0);
     drop.addDropListener(dbTree);
     menu.add(drop);
 
+    boolean onlyTables = onlyTablesSelected(selectedNodes);
     CreateDropScriptAction dropScript = new CreateDropScriptAction(dbTree, selection);
+    dropScript.setEnabled(onlyTables);
     menu.add(dropScript);
 
     DeleteTablesAction deleteData = new DeleteTablesAction(dbTree, selection, null);
+    deleteData.setEnabled(onlyTables);
     menu.add(deleteData);
 
     return menu;
@@ -201,6 +207,16 @@ class ContextMenuFactory
     for (ObjectTreeNode node : selectedNodes)
     {
       if (! (node.getDbObject() instanceof ColumnIdentifier)) return false;
+    }
+    return true;
+  }
+
+  private static boolean onlyTablesSelected(List<ObjectTreeNode> selectedNodes)
+  {
+    if (CollectionUtil.isEmpty(selectedNodes)) return false;
+    for (ObjectTreeNode node : selectedNodes)
+    {
+      if (! (node.getDbObject() instanceof TableIdentifier)) return false;
     }
     return true;
   }
