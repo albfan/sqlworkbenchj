@@ -365,6 +365,16 @@ public class OracleProcedureReader
     return result;
   }
 
+  private String getNameCondition(String name)
+  {
+    if (StringUtil.isEmptyString(name)) return "";
+    if (name.contains("_") || name.contains("%"))
+    {
+      return "LIKE '" + name + "' ";
+    }
+    return "= '" + name + "'";
+  }
+
   @Override
   public DataStore getProcedures(String catalog, String schema, String name)
     throws SQLException
@@ -405,7 +415,7 @@ public class OracleProcedureReader
       name = "%";
     }
 
-    standardProcs += " AND ao.object_name LIKE '" + name + "' ";
+    standardProcs += " AND ao.object_name " + getNameCondition(name);
 
     String pkgProcs =
       "select aa.package_name,  \n" +
@@ -443,7 +453,7 @@ public class OracleProcedureReader
       pkgProcs += "\n AND aa.package_name = '" + catalog + "' ";
     }
 
-    pkgProcs += "\n AND aa.object_name LIKE '" + name + "' ";
+    pkgProcs += "\n AND aa.object_name " + getNameCondition(name);
 
     // if a package contains only procedures or functions without any arguments
     // it will not show up with the previous statement.
@@ -472,6 +482,8 @@ public class OracleProcedureReader
     {
       procsWithoutArgs += "\n  AND ap.object_name = '" + catalog + "' ";
     }
+
+    procsWithoutArgs += "\n  AND ap.procedure_name " + getNameCondition(name);
 
     pkgProcs = pkgProcs + "\nUNION ALL \n" + procsWithoutArgs;
 
