@@ -12,8 +12,8 @@
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
 
-<xsl:variable name="ref-schema" select="concat('User=', /schema-diff/reference-connection/database-user, ' url=', /schema-diff/reference-connection/jdbc-url)"/>
-<xsl:variable name="target-schema" select="concat('User=', /schema-diff/target-connection/database-user, ' url=', /schema-diff/target-connection/jdbc-url)"/>
+<xsl:variable name="ref-db" select="concat('Schema=', /schema-diff/compare-settings/reference-schema, ', User=', /schema-diff/reference-connection/database-user, ', url=', /schema-diff/reference-connection/jdbc-url)"/>
+<xsl:variable name="target-db" select="concat('Schema=', /schema-diff/compare-settings/target-schema, ', User=', /schema-diff/target-connection/database-user, ', url=', /schema-diff/target-connection/jdbc-url)"/>
 
 <xsl:template match="/">
   <html>
@@ -115,12 +115,12 @@
         }
       ]]>
     </script>
-    <title>SQL Workbench/J - Schema Diff <xsl:value-of select="$ref-schema"/> &#187; <xsl:value-of select="$target-schema"/> </title>
+    <title>SQL Workbench/J - Schema Diff <xsl:value-of select="$ref-db"/> &#187; <xsl:value-of select="$target-db"/> </title>
   </head>
   <body>
     <h1>SQL Workbench/J - Schema Diff</h1>
-    <xsl:text>Reference schema: </xsl:text><xsl:value-of select="$ref-schema"/><br/>
-    <xsl:text>Target schema: </xsl:text><xsl:value-of select="$target-schema"/><br/>
+    <xsl:text>Reference database: </xsl:text><xsl:value-of select="$ref-db"/><br/>
+    <xsl:text>Target database: </xsl:text><xsl:value-of select="$target-db"/><br/>
     
     <xsl:variable name="tbl-mod-count" select="count(/schema-diff/modify-table)"/>
     <xsl:variable name="tbl-add-count" select="count(/schema-diff/add-table)"/>
@@ -181,81 +181,81 @@
       </ul>
       
       <xsl:if test="$tbl-add-count > 0">
-        <h2 id="add-tables">Tables to add in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="add-tables">Tables to add in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="missing-tables"/>
       </xsl:if>
 
       <xsl:if test="$tbl-mod-count > 0">
-        <h2 id="modify-tables">Tables to change in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="modify-tables">Tables to change in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="modify-tables"/>
       </xsl:if>
 
       <xsl:if test="$tbl-drop-count > 0">
-        <h2 id="drop-tables">Tables to drop in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="drop-tables">Tables to drop in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="drop-tables"/>
       </xsl:if>
 
       <xsl:if test="$view-add-count > 0">
-        <h2 id="add-views">Views to add in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="add-views">Views to add in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="create-views"/>
       </xsl:if>
 
       <xsl:if test="$view-mod-count > 0">
-        <h2 id="modify-views">Views to re-create in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="modify-views">Views to re-create in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="update-views"/>
       </xsl:if>
 
       <xsl:if test="$view-drop-count > 0">
-        <h2 id="drop-views">Views to drop in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="drop-views">Views to drop in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="drop-views"/>
       </xsl:if>
       
       <xsl:if test="$seq-add-count > 0">
-        <h2 id="add-seq">Sequences to add in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="add-seq">Sequences to add in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="create-sequences"/>
       </xsl:if>
 
       <!--
       <xsl:if test="$seq-mod-count > 0">
-        <h2 id="modify-seq">Sequences to update in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="modify-seq">Sequences to update in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="update-sequences"/>
       </xsl:if>
       -->
 
       <xsl:if test="$seq-drop-count > 0">
-        <h2 id="drop-seq">Sequences to drop in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="drop-seq">Sequences to drop in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="drop-sequences"/>
       </xsl:if>
 
       <!-- procedures -->
       <xsl:if test="$proc-add-count > 0">
-        <h2 id="add-procs">Procedures to create in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="add-procs">Procedures to create in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="create-procs"/>
       </xsl:if>
 
       <xsl:if test="$proc-drop-count > 0">
-        <h2 id="mod-procs">Procedures to update in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="mod-procs">Procedures to update in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="update-procs"/>
       </xsl:if>
 
       <xsl:if test="$proc-drop-count > 0">
-        <h2 id="drop-procs">Procedures to drop in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="drop-procs">Procedures to drop in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="drop-procs"/>
       </xsl:if>
       
       <!-- packages -->
       <xsl:if test="$pkg-add-count > 0">
-        <h2 id="add-pkg">Packages to create in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="add-pkg">Packages to create in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="create-pkg"/>
       </xsl:if>
 
       <xsl:if test="$pkg-drop-count > 0">
-        <h2 id="mod-pkg">Packages to update in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="mod-pkg">Packages to update in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="update-pkg"/>
       </xsl:if>
 
       <xsl:if test="$pkg-drop-count > 0">
-        <h2 id="drop-pkg">Packages to drop in <xsl:value-of select="$target-schema"/></h2>
+        <h2 id="drop-pkg">Packages to drop in <xsl:value-of select="$target-db"/></h2>
         <xsl:call-template name="drop-pkg"/>
       </xsl:if>
       
