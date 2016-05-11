@@ -23,23 +23,13 @@
  */
 package workbench.gui.renderer;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import javax.swing.AbstractCellEditor;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
+
+import javax.swing.JPanel;
+
 import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.WbAction;
+
 import workbench.gui.components.*;
-import workbench.resource.GuiSettings;
 
 /**
  * A class to render and edit BLOB columns in a result set.
@@ -54,126 +44,33 @@ import workbench.resource.GuiSettings;
  * @author  Thomas Kellerer
  */
 public class BlobColumnRenderer
-	extends AbstractCellEditor
-	implements TableCellEditor, ActionListener, TableCellRenderer, WbRenderer
+	extends AbstractDialogRenderer
 {
-	private BlobColumnPanel displayPanel;
-	private Object currentValue;
-	private WbTable currentTable;
-	private int currentRow;
-	private int currentColumn;
-	private Color alternateColor = GuiSettings.getAlternateRowColor();
-	private Color nullColor = GuiSettings.getNullColor();
-
-	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
+	private BlobDisplayPanel blobPanel;
 
 	public BlobColumnRenderer()
 	{
 		super();
-		this.displayPanel = new BlobColumnPanel();
-		this.displayPanel.addActionListener(this);
 	}
 
-	public void setFont(Font aFont)
-	{
-		this.displayPanel.setFont(aFont);
-	}
+  @Override
+  protected JPanel createDisplayPanel()
+  {
+    blobPanel = new BlobDisplayPanel();
+    blobPanel.addActionListener(this);
+    return blobPanel;
+  }
 
-	@Override
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
-	{
-		return getComponent(table, value, true, isSelected, row, column);
-	}
+  @Override
+  protected void setCurrentValue(Object value)
+  {
+    blobPanel.setValue(value);
+  }
 
-	@Override
-	public int getHorizontalAlignment()
-	{
-		return SwingConstants.LEFT;
-	}
-
-	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value,
-		                                             boolean isSelected,
-		                                             boolean hasFocus, int row, int column)
-	{
-		return getComponent(table, value, isSelected, hasFocus, row, column);
-	}
-
-	private Component getComponent(JTable table, Object value,
-							boolean isSelected, boolean hasFocus, int row, int column)
-	{
-		if (isSelected)
-		{
-			this.displayPanel.setForeground(table.getSelectionForeground());
-			this.displayPanel.setBackground(table.getSelectionBackground());
-		}
-		else
-		{
-			this.displayPanel.setForeground(table.getForeground());
-			if (value == null && nullColor != null)
-			{
-				this.displayPanel.setBackground(nullColor);
-			}
-			else
-			{
-				if (useAlternatingColors && ((row % 2) == 1))
-				{
-					this.displayPanel.setBackground(this.alternateColor);
-				}
-				else
-				{
-					this.displayPanel.setBackground(table.getBackground());
-				}
-			}
-		}
-		if (hasFocus)
-		{
-			this.displayPanel.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
-		}
-		else
-		{
-			this.displayPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		}
-
-		currentValue = value;
-		currentRow = row;
-		currentColumn = column;
-		currentTable = (WbTable)table;
-		displayPanel.setValue(value);
-		return displayPanel;
-	}
-
-	public void setBackground(Color c)
-	{
-		this.displayPanel.setBackground(c);
-	}
-
-	@Override
-	public Object getCellEditorValue()
-	{
-		return currentValue;
-	}
-
-	@Override
-	public String getDisplayValue()
-	{
-		return displayPanel.getLabel();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		cancelCellEditing();
-		boolean ctrlPressed = WbAction.isCtrlPressed(e);
-		boolean shiftPressed = WbAction.isShiftPressed(e);
+  @Override
+  protected void showEditDialog(boolean allowEditing, boolean ctrlPressed, boolean shiftPressed)
+  {
 		BlobHandler handler = new BlobHandler();
-
-		boolean allowEditing = true;
-		TableModel model = currentTable.getModel();
-		if (model instanceof DataStoreTableModel)
-		{
-			allowEditing = ((DataStoreTableModel)model).getAllowEditing();
-		}
 
 		if (ctrlPressed)
 		{
@@ -205,11 +102,4 @@ public class BlobColumnRenderer
 			}
 		}
 	}
-
-	@Override
-	public void prepareDisplay(Object value)
-	{
-		// nothing to do
-	}
-
 }

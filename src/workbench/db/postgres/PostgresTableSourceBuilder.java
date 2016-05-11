@@ -401,7 +401,7 @@ public class PostgresTableSourceBuilder
         if (user.equalsIgnoreCase(owner)) return null;
       }
 
-      return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " SET OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
+      return "\nALTER TABLE " + table.getFullyQualifiedName(dbConnection) + " OWNER TO " + SqlUtil.quoteObjectname(owner) + ";";
     }
     catch (Exception ex)
     {

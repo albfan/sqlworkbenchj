@@ -137,6 +137,7 @@ import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.renderer.BlobColumnRenderer;
 import workbench.gui.renderer.DateColumnRenderer;
+import workbench.gui.renderer.MapColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
@@ -1866,6 +1867,13 @@ public class WbTable
 		return rend;
 	}
 
+  public boolean isMapColumn(int column)
+  {
+		if (this.dwModel == null) return false;
+    Class colClass = dwModel.getColumnClass(column);
+    return (Map.class.isAssignableFrom(colClass));
+  }
+
 	public boolean isBlobColumn(int column)
 	{
 		if (this.dwModel == null) return false;
@@ -1915,6 +1923,7 @@ public class WbTable
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
 
 		this.setDefaultRenderer(byte[].class, new BlobColumnRenderer());
+		this.setDefaultRenderer(Map.class, new MapColumnRenderer());
 
 		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep, fixedDigits);
 		this.setDefaultRenderer(Number.class, numberRenderer);
@@ -2021,6 +2030,10 @@ public class WbTable
 			{
 				col.setCellEditor(new BlobColumnRenderer());
 			}
+      else if (isMapColumn(i))
+      {
+        col.setCellEditor(new MapColumnRenderer());
+      }
 			else if (isMultiLineColumn(i))
 			{
 				col.setCellEditor(this.multiLineEditor);

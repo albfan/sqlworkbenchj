@@ -1,5 +1,5 @@
 /*
- * WbRenderer.java
+ * BlobColumnPanel.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -24,16 +24,31 @@
 package workbench.gui.renderer;
 
 /**
- *
- * @author Thomas Kellerer
+ * A panel with a button to open the BlobInfo dialog
+ * <br/>
+ * If blob data is available the panel will display (BLOB) if the data
+ * is null, nothing will be displayed.
+ * <br/>
+ * @author  Thomas Kellerer
+ * @see BlobColumnRenderer
  */
-public interface WbRenderer
+public class MapDisplayPanel
+	extends AbstractDialogEditorPanel
 {
-	String getDisplayValue();
-	int getHorizontalAlignment();
-	void prepareDisplay(Object value);
-  default int calculateDisplaySize(Object value)
-  {
-    return -1;
-  }
+	public MapDisplayPanel()
+	{
+		super();
+	}
+
+	public void setValue(Object value)
+	{
+		if (value == null)
+		{
+			super.setDisplayValue("");
+		}
+		else
+		{
+			super.setDisplayValue(value.toString());
+		}
+	}
 }

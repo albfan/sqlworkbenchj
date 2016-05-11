@@ -35,7 +35,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionProfile;
 
-import workbench.gui.components.PropertiesEditor;
+import workbench.gui.components.MapEditor;
 import workbench.gui.components.ValidatingDialog;
 
 import workbench.storage.DataStore;
@@ -45,7 +45,7 @@ import workbench.storage.DataStore;
  * @author Thomas Kellerer
  */
 public class ConnectionPropertiesEditor
-	extends PropertiesEditor
+	extends MapEditor
 	implements FileActions
 {
 	private JCheckBox copyProps;

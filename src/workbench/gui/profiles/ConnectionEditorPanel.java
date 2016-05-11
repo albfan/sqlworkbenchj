@@ -80,8 +80,8 @@ import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
+import workbench.gui.components.MapEditor;
 import workbench.gui.components.PasswordPropertyEditor;
-import workbench.gui.components.PropertiesEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.ValidatingDialog;
@@ -1178,7 +1178,7 @@ public class ConnectionEditorPanel
       variables = new Properties();
     }
 
-    PropertiesEditor editor = new PropertiesEditor(variables);
+    MapEditor editor = new MapEditor(variables);
     Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
     ValidatingDialog dialog = ValidatingDialog.createDialog(d, editor, ResourceMgr.getString("TxtEditConnVars"), null, 0, false);
 

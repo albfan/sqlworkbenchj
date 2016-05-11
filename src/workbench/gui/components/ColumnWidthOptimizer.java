@@ -116,14 +116,15 @@ public class ColumnWidthOptimizer
 		int rowCount = this.table.getRowCount();
 		int maxLines = GuiSettings.getAutRowHeightMaxLines();
 		String s = null;
-		int stringWidth = 0;
+		int stringWidth = -1;
 
 		int addWidth = getAdditionalColumnSpace();
 
 		for (int row = 0; row < rowCount; row++)
 		{
 			TableCellRenderer rend = this.table.getCellRenderer(row, col);
-			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, col), false, false, row, col);
+      Object value = table.getValueAt(row, col);
+			Component c = rend.getTableCellRendererComponent(this.table, value, false, false, row, col);
 			FontMetrics fm = fontInfo;
 			if (fm == null)
 			{
@@ -136,7 +137,16 @@ public class ColumnWidthOptimizer
 			// so we'll first ask the Renderer or its component for the displayed value.
 			if (c instanceof WbRenderer)
 			{
-				s = ((WbRenderer)c).getDisplayValue();
+        WbRenderer wb = (WbRenderer)c;
+        int width = wb.calculateDisplaySize(value);
+        if (width > -1)
+        {
+          stringWidth = width;
+        }
+				else
+        {
+          s = wb.getDisplayValue();
+        }
 			}
 			else if (c instanceof JTextArea)
 			{
@@ -154,11 +164,7 @@ public class ColumnWidthOptimizer
 				s = this.table.getValueAsString(row, col);
 			}
 
-			if (s == null || s.length() == 0)
-			{
-				stringWidth = 0;
-			}
-			else
+      if (stringWidth == -1 && s != null)
 			{
 				String visible = StringUtil.rtrim(s);
 				stringWidth = fm.stringWidth(visible);

@@ -71,7 +71,7 @@ import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.renderer.BlobColumnPanel;
+import workbench.gui.renderer.BlobDisplayPanel;
 import workbench.gui.renderer.DateColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.WbRenderer;
@@ -350,9 +350,9 @@ public class RecordFormPanel
 				{
 					((JTextComponent)inputControls[i]).setText("");
 				}
-				if (inputControls[i] instanceof BlobColumnPanel)
+				if (inputControls[i] instanceof BlobDisplayPanel)
 				{
-					((BlobColumnPanel)inputControls[i]).setValue(null);
+					((BlobDisplayPanel)inputControls[i]).setValue(null);
 				}
 			}
 			else

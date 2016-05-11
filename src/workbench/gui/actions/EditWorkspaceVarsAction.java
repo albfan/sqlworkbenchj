@@ -30,7 +30,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.MainWindow;
-import workbench.gui.components.PropertiesEditor;
+import workbench.gui.components.MapEditor;
 import workbench.gui.components.ValidatingDialog;
 
 /**
@@ -62,7 +62,7 @@ public class EditWorkspaceVarsAction
     Properties variables = client.getCurrentWorkspaceVariables();
     if (variables == null) return;
 
-    PropertiesEditor editor = new PropertiesEditor(variables);
+    MapEditor editor = new MapEditor(variables);
     ValidatingDialog dialog = ValidatingDialog.createDialog(client, editor, ResourceMgr.getPlainString("MnuTxtEditWkspVars"), null, 0, false);
 
     if (!Settings.getInstance().restoreWindowSize(dialog, CONFIG_PROP))

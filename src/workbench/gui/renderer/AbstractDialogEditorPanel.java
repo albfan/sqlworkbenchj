@@ -26,6 +26,7 @@ package workbench.gui.renderer;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -36,10 +37,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import workbench.resource.IconMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
+
+import workbench.util.StringUtil;
 
 /**
  * A panel with a button to open the BlobInfo dialog
@@ -50,15 +52,16 @@ import workbench.gui.components.FlatButton;
  * @author  Thomas Kellerer
  * @see BlobColumnRenderer
  */
-public class BlobColumnPanel
+public class AbstractDialogEditorPanel
 	extends JPanel
+  implements WbRenderer
 {
 	private final int BUTTON_WIDTH = IconMgr.getInstance().getSizeForLabel();
 	private FlatButton openButton = new FlatButton("...");
 	private JLabel label = new JLabel();
 	private Insets insets = ToolTipRenderer.getDefaultInsets();
 
-	public BlobColumnPanel()
+	public AbstractDialogEditorPanel()
 	{
 		super();
 		setLayout(new GridBagLayout());
@@ -87,7 +90,6 @@ public class BlobColumnPanel
 		add(openButton, c);
 
 		openButton.setVisible(true);
-		this.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
 	}
 
 	@Override
@@ -108,16 +110,9 @@ public class BlobColumnPanel
     }
   }
 
-	public void setValue(Object value)
+	public void setDisplayValue(String value)
 	{
-		if (value == null)
-		{
-			this.label.setText("");
-		}
-		else
-		{
-			this.label.setText("(BLOB)");
-		}
+    this.label.setText(StringUtil.coalesce(value, ""));
 	}
 
 	public void addActionListener(ActionListener l)
@@ -155,5 +150,39 @@ public class BlobColumnPanel
 		super.setForeground(c);
 		if (label != null) label.setForeground(c);
 	}
+
+  @Override
+  public String getDisplayValue()
+  {
+    return getLabel();
+  }
+
+  @Override
+  public int getHorizontalAlignment()
+  {
+    return SwingConstants.LEFT;
+  }
+
+  @Override
+  public void prepareDisplay(Object value)
+  {
+  }
+
+  @Override
+  public int calculateDisplaySize(Object value)
+  {
+    int button = (int)(BUTTON_WIDTH * 1.1);
+    if (value == null)
+    {
+      return button;
+    }
+    Font f = getFont();
+    if (f == null) return -1;
+    FontMetrics fm = getFontMetrics(getFont());
+    if (fm == null) return -1;
+
+    int width = fm.stringWidth(getLabel()) + button + insets.left + insets.right;
+    return width;
+  }
 
 }

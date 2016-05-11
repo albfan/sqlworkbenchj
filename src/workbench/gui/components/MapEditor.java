@@ -26,6 +26,8 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.JPanel;
@@ -47,51 +49,87 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class PropertiesEditor
+public class MapEditor
 	extends JPanel
 	implements FileActions
 {
 	private DataStore propData;
 	private WbTable propTable;
 
-	public PropertiesEditor(Properties source)
+  private NewListEntryAction newItem;
+  private DeleteListEntryAction deleteItem;
+
+	public MapEditor(Properties source)
+  {
+    super();
+    initUI();
+
+    if (source != null)
+    {
+      Enumeration keys = source.propertyNames();
+      while (keys.hasMoreElements())
+      {
+        String key = (String)keys.nextElement();
+        String value = source.getProperty(key);
+        int row = this.propData.addRow();
+        this.propData.setValue(row, 0, key);
+        this.propData.setValue(row, 1, value);
+      }
+    }
+  }
+
+	public MapEditor(Map<String, String> source)
 	{
 		super();
-    this.propData = createDataStore();
-		this.propData.setAllowUpdates(true);
+    initUI();
 
 		if (source != null)
 		{
-			Enumeration keys = source.propertyNames();
-			while (keys.hasMoreElements())
+      for (Map.Entry<String, String> entry : source.entrySet())
 			{
-				String key = (String)keys.nextElement();
-				String value = source.getProperty(key);
 				int row = this.propData.addRow();
-				this.propData.setValue(row, 0, key);
-				this.propData.setValue(row, 1, value);
+				this.propData.setValue(row, 0, entry.getKey());
+				this.propData.setValue(row, 1, entry.getValue());
 			}
 		}
-		this.propTable = new WbTable();
-		this.propTable.setRendererSetup(new RendererSetup(false));
-
-		this.propTable.setModel(new DataStoreTableModel(this.propData));
-		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.propTable);
-		optimizer.optimizeAllColWidth(75, 200, true);
-
-		this.setLayout(new BorderLayout());
-		JScrollPane scroll = new JScrollPane(this.propTable);
-
-		WbToolbar toolbar = new WbToolbar();
-		toolbar.addDefaultBorder();
-		NewListEntryAction newItem = new NewListEntryAction(this);
-		DeleteListEntryAction deleteItem = new DeleteListEntryAction(this);
-
-		toolbar.add(newItem);
-		toolbar.add(deleteItem);
-		this.add(toolbar, BorderLayout.NORTH);
-		this.add(scroll, BorderLayout.CENTER);
 	}
+
+  public void setEditable(boolean flag)
+  {
+    newItem.setEnabled(flag);
+    deleteItem.setEnabled(flag);
+    propTable.setReadOnly(flag == false);
+  }
+
+  public boolean isModified()
+  {
+    return propData.isModified();
+  }
+  
+  private void initUI()
+  {
+    this.propData = createDataStore();
+    this.propData.setAllowUpdates(true);
+    this.propTable = new WbTable();
+    this.propTable.setRendererSetup(new RendererSetup(false));
+
+    this.propTable.setModel(new DataStoreTableModel(this.propData));
+    ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.propTable);
+    optimizer.optimizeAllColWidth(75, 200, true);
+
+    this.setLayout(new BorderLayout());
+    JScrollPane scroll = new JScrollPane(this.propTable);
+
+    WbToolbar toolbar = new WbToolbar();
+    toolbar.addDefaultBorder();
+    newItem = new NewListEntryAction(this);
+    deleteItem = new DeleteListEntryAction(this);
+
+    toolbar.add(newItem);
+    toolbar.add(deleteItem);
+    this.add(toolbar, BorderLayout.NORTH);
+    this.add(scroll, BorderLayout.CENTER);
+  }
 
   protected DataStore createDataStore()
   {
@@ -99,8 +137,15 @@ public class PropertiesEditor
   }
 
 	public Properties getProperties()
+  {
+    Properties props = new Properties();
+    props.putAll(getMap());
+    return props;
+  }
+
+	public Map<String, String> getMap()
 	{
-		Properties props = new Properties();
+		Map<String, String> props = new HashMap<>();
 		this.propTable.stopEditing();
 		int count = this.propData.getRowCount();
 		for (int row=0; row < count; row++)
@@ -108,7 +153,7 @@ public class PropertiesEditor
 			String key = this.propData.getValueAsString(row, 0);
 			if (StringUtil.isEmptyString(key)) continue;
 			String value = this.propData.getValueAsString(row, 1);
-			props.setProperty(key.trim(), (value == null ? "" : value.trim()));
+			props.put(key.trim(), (value == null ? "" : value.trim()));
 		}
 		return props;
 	}
