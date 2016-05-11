@@ -115,14 +115,14 @@ public class ColumnWidthOptimizer
 
 		int rowCount = this.table.getRowCount();
 		int maxLines = GuiSettings.getAutRowHeightMaxLines();
-		String s = null;
-		int stringWidth = -1;
-
 		int addWidth = getAdditionalColumnSpace();
 
 		for (int row = 0; row < rowCount; row++)
 		{
-			TableCellRenderer rend = this.table.getCellRenderer(row, col);
+      String s = null;
+      int stringWidth = -1;
+
+      TableCellRenderer rend = this.table.getCellRenderer(row, col);
       Object value = table.getValueAt(row, col);
 			Component c = rend.getTableCellRendererComponent(this.table, value, false, false, row, col);
 			FontMetrics fm = fontInfo;
