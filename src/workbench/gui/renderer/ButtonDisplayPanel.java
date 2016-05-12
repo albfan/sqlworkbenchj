@@ -52,7 +52,7 @@ import workbench.util.StringUtil;
  * @author  Thomas Kellerer
  * @see BlobColumnRenderer
  */
-public class AbstractDialogEditorPanel
+public class ButtonDisplayPanel
 	extends JPanel
   implements WbRenderer
 {
@@ -61,7 +61,7 @@ public class AbstractDialogEditorPanel
 	private JLabel label = new JLabel();
 	private Insets insets = ToolTipRenderer.getDefaultInsets();
 
-	public AbstractDialogEditorPanel()
+	public ButtonDisplayPanel()
 	{
 		super();
 		setLayout(new GridBagLayout());

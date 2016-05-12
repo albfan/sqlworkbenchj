@@ -221,6 +221,7 @@ import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
+import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
@@ -2248,7 +2249,7 @@ public class SqlPanel
 
     String sql = null;
 
-    if (toSelect != null)
+    if (CollectionUtil.isNonEmpty(toSelect))
     {
       TableSelectBuilder builder = new TableSelectBuilder(dbConnection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
       sql = builder.getSelectForColumns(table, toSelect, statusBar.getMaxRows());

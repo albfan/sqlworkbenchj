@@ -27,6 +27,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JMenuItem;
@@ -37,15 +38,18 @@ import workbench.interfaces.FilenameChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
+import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
+import workbench.gui.dbobjects.objecttree.DbTreeSettings;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
 
@@ -244,16 +248,29 @@ public class EditorTabSelectMenu
 
 	private void showTableData(final int panelIndex, final PasteType type)
 	{
-    TableDefinition selectedTable = objectList.getCurrentTableDefinition();
-		if (selectedTable == null) return;
+    WbConnection conn = objectList.getConnection();
 
-    final PanelContentSender sender = new PanelContentSender(this.parentWindow, selectedTable.getTable().getTableName());
-    TableSelectBuilder builder = new TableSelectBuilder(objectList.getConnection(), "select", null);
+    TableIdentifier tbl = objectList.getObjectTable();
+
+    if (tbl == null) return;
+
+    final PanelContentSender sender = new PanelContentSender(this.parentWindow, tbl.getTableName());
 
     try
     {
-      final String sql = builder.getSelectForTableData(selectedTable.getTable(), selectedTable.getColumns(), true);
+      List<ColumnIdentifier> columns = new ArrayList<>();
+
+      if (DbTreeSettings.useColumnListForTableDataDisplay(conn.getDbId()))
+      {
+        TableDefinition selectedTable = objectList.getCurrentTableDefinition();
+        columns = selectedTable.getColumns();
+      }
+
+      TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+      final String sql = builder.getSelectForTableData(tbl, columns, true);
+
       if (sql == null) return;
+
       EventQueue.invokeLater(() ->
       {
         sender.sendContent(sql, panelIndex, type);

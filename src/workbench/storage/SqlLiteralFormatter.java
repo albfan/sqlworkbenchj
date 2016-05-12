@@ -421,7 +421,7 @@ public class SqlLiteralFormatter
     }
     else if ("hstore".equalsIgnoreCase(dbmsType) && value instanceof Map)
     {
-      return getHstoreLiteral((Map)value);
+      return getHstoreLiteral((Map)value, true);
     }
     else if (type == Types.ARRAY)
     {
@@ -440,7 +440,7 @@ public class SqlLiteralFormatter
     return value.toString();
   }
 
-  public String getHstoreLiteral(Map<String, String> data)
+  public static String getHstoreLiteral(Map<String, String> data, boolean includeCast)
   {
     int count = 0;
     StringBuilder result = new StringBuilder(data.size() * 20);
@@ -453,11 +453,15 @@ public class SqlLiteralFormatter
       result.append(escapeHstoreValue(entry.getValue()));
       count ++;
     }
-    result.append("'::hstore");
+    result.append('\'');
+    if (includeCast)
+    {
+      result.append("::hstore");
+    }
     return result.toString();
   }
 
-  private String escapeHstoreValue(String value)
+  private static String escapeHstoreValue(String value)
   {
     if (StringUtil.isEmptyString(value)) return StringUtil.EMPTY_STRING;
     final String toEscape = "\"=> \\'";

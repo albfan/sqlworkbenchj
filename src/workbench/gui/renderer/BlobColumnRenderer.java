@@ -28,6 +28,7 @@ import java.io.File;
 import javax.swing.JPanel;
 
 import workbench.WbManager;
+import workbench.resource.ResourceMgr;
 
 import workbench.gui.components.*;
 
@@ -46,7 +47,7 @@ import workbench.gui.components.*;
 public class BlobColumnRenderer
 	extends AbstractDialogRenderer
 {
-	private BlobDisplayPanel blobPanel;
+	private ButtonDisplayPanel blobPanel;
 
 	public BlobColumnRenderer()
 	{
@@ -56,15 +57,24 @@ public class BlobColumnRenderer
   @Override
   protected JPanel createDisplayPanel()
   {
-    blobPanel = new BlobDisplayPanel();
+    blobPanel = new ButtonDisplayPanel();
     blobPanel.addActionListener(this);
+    blobPanel.setToolTipText(ResourceMgr.getDescription("LblShowBlobInfo", true));
+
     return blobPanel;
   }
 
   @Override
   protected void setCurrentValue(Object value)
   {
-    blobPanel.setValue(value);
+		if (value == null)
+		{
+			blobPanel.setDisplayValue("");
+		}
+		else
+		{
+			blobPanel.setDisplayValue("(BLOB)");
+		}
   }
 
   @Override

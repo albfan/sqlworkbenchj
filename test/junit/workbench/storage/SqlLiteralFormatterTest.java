@@ -185,17 +185,17 @@ public class SqlLiteralFormatterTest
     Map<String, String> data = new LinkedHashMap<>();
     data.put("foo", "bar");
     data.put("color", "blue");
-    SqlLiteralFormatter f = new SqlLiteralFormatter();
-    String literal = f.getHstoreLiteral(data);
-    System.out.println(literal);
+    String literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
     assertEquals("'foo=>bar,color=>blue'::hstore", literal);
+
+    literal = SqlLiteralFormatter.getHstoreLiteral(data, false);
+    assertEquals("'foo=>bar,color=>blue'", literal);
 
     data.clear();
     data.put("content", "foo bar");
     data.put("location", "Peter's House");
 
-    literal = f.getHstoreLiteral(data);
-    System.out.println(literal);
+    literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
     assertEquals("'content=>\"foo\\ bar\",location=>\"Peter''s\\ House\"'::hstore", literal);
   }
 }

@@ -985,6 +985,10 @@ public class DataStore
         return null;
       }
     }
+    else if (value instanceof Map)
+    {
+      return SqlLiteralFormatter.getHstoreLiteral((Map)value, false);
+    }
     else
     {
       return value.toString();

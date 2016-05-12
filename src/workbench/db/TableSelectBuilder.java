@@ -203,8 +203,6 @@ public class TableSelectBuilder
 
     if (CollectionUtil.isEmpty(columns))
     {
-      String tbl = SqlUtil.fullyQualifiedName(dbConnection, table);
-      LogMgr.logWarning("TableSelectBuilder.getSelectForColumns()", "No columns available for table " + tbl  + ". Using \"SELECT *\" instead");
       selectCols.append("*");
     }
     else
