@@ -24,7 +24,6 @@
 package workbench.storage;
 
 import java.io.File;
-import java.sql.Array;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -441,7 +440,7 @@ public class SqlLiteralFormatter
     return value.toString();
   }
 
-  private String getHstoreLiteral(Map<String, String> data)
+  public String getHstoreLiteral(Map<String, String> data)
   {
     int count = 0;
     StringBuilder result = new StringBuilder(data.size() * 20);
@@ -449,13 +448,9 @@ public class SqlLiteralFormatter
     for (Map.Entry<String, String> entry : data.entrySet())
     {
       if (count > 0) result.append(',');
-      result.append('"');
       result.append(escapeHstoreValue(entry.getKey()));
-      result.append('"');
       result.append("=>");
-      result.append('"');
       result.append(escapeHstoreValue(entry.getValue()));
-      result.append('"');
       count ++;
     }
     result.append("'::hstore");
@@ -465,18 +460,35 @@ public class SqlLiteralFormatter
   private String escapeHstoreValue(String value)
   {
     if (StringUtil.isEmptyString(value)) return StringUtil.EMPTY_STRING;
-    if (value.indexOf('"') == -1 && value.indexOf('\\') == -1) return value;
+    final String toEscape = "\"=> \\'";
 
-    StringBuilder result = new StringBuilder(value.length());
+    int count = 0;
     for (int i=0; i < value.length(); i++)
     {
-      int chr = value.charAt(i);
-      if (chr == '"' || chr == '\\')
+      if (toEscape.indexOf(value.charAt(i)) > -1)
+      {
+        count ++;
+      }
+    }
+
+    if (count == 0) return value;
+
+    StringBuilder result = new StringBuilder(value.length());
+    result.append('"');
+    for (int i=0; i < value.length(); i++)
+    {
+      char chr = value.charAt(i);
+      if (chr == '\'')
+      {
+        result.append(chr);
+      }
+      else if (toEscape.indexOf(chr) > -1)
       {
         result.append('\\');
       }
       result.append(chr);
     }
+    result.append('"');
     return result.toString();
   }
 

@@ -25,10 +25,16 @@ package workbench.storage;
 
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import workbench.WbTestCase;
+
 import workbench.db.ColumnIdentifier;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -172,4 +178,24 @@ public class SqlLiteralFormatterTest
 		String literal = f.getDefaultLiteral(data).toString();
 		assertEquals("'5b14ca52-3025-4c2e-8987-1c9f9d66acd5'", literal);
 	}
+
+  @Test
+  public void testHstoreLiteral()
+  {
+    Map<String, String> data = new LinkedHashMap<>();
+    data.put("foo", "bar");
+    data.put("color", "blue");
+    SqlLiteralFormatter f = new SqlLiteralFormatter();
+    String literal = f.getHstoreLiteral(data);
+    System.out.println(literal);
+    assertEquals("'foo=>bar,color=>blue'::hstore", literal);
+
+    data.clear();
+    data.put("content", "foo bar");
+    data.put("location", "Peter's House");
+
+    literal = f.getHstoreLiteral(data);
+    System.out.println(literal);
+    assertEquals("'content=>\"foo\\ bar\",location=>\"Peter''s\\ House\"'::hstore", literal);
+  }
 }
