@@ -1317,7 +1317,7 @@ public class SchemaDiff
   {
     if (this.tablesToDelete == null || this.tablesToDelete.isEmpty()) return;
     out.write("\n");
-    
+
     StringBuilder myindent = new StringBuilder(indent);
     myindent.append("  ");
     String tCatalog = targetDb.getCurrentCatalog();
@@ -1327,7 +1327,7 @@ public class SchemaDiff
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_CATALOG, tCatalog);
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_SCHEMA, targetSchema);
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, tbl.getTableName());
-    writeTag(out, indent, TAG_DROP_TABLE, false);
+      writeTag(out, indent, TAG_DROP_TABLE, false);
     }
   }
 
