@@ -1317,17 +1317,18 @@ public class SchemaDiff
   {
     if (this.tablesToDelete == null || this.tablesToDelete.isEmpty()) return;
     out.write("\n");
-    writeTag(out, indent, TAG_DROP_TABLE, true);
+    
     StringBuilder myindent = new StringBuilder(indent);
     myindent.append("  ");
     String tCatalog = targetDb.getCurrentCatalog();
     for (TableIdentifier tbl : tablesToDelete)
     {
+      writeTag(out, indent, TAG_DROP_TABLE, true);
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_CATALOG, tCatalog);
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_SCHEMA, targetSchema);
       writeTagValue(out, myindent, ReportTable.TAG_TABLE_NAME, tbl.getTableName());
-    }
     writeTag(out, indent, TAG_DROP_TABLE, false);
+    }
   }
 
   private void writeDiffInfo(Writer out)
