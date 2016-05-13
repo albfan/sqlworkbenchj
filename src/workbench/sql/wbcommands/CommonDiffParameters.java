@@ -284,8 +284,8 @@ public class CommonDiffParameters
 
 	public static class TableMapping
 	{
-		public List<TableIdentifier> referenceTables = new ArrayList<>();
-		public List<TableIdentifier> targetTables = new ArrayList<>();
+		public final List<TableIdentifier> referenceTables = new ArrayList<>();
+		public final List<TableIdentifier> targetTables = new ArrayList<>();
 
 		@Override
 		public String toString()
