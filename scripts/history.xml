@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-05-03">
+    <entry dev-build="4" type="enh">For Postgres, the generated source code for functions and custom aggregates now contains the new PARALLEL settings for Postgres 9.6</entry>
     <entry dev-build="3" type="enh">It's now possible to show a quick filter in the macro popup window</entry>
     <entry dev-build="3" type="enh">When searching for a JDBC driver class in the driver's jar file, available service registrations are used to speed up the searching.</entry>
     <entry dev-build="2" type="enh">It's now possible to disable icons in menus</entry>
@@ -14,7 +15,10 @@
     <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new command (WbGenerateFKScript) is available to generate the DDL for only the foreign key constraints.</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now shown correctly</entry>
-    <entry dev-build="4" type="fix">It was not possible to edit Postgres hstore columns</entry>
+    <entry dev-build="4" type="fix">For Postgres, the LEAKPROOF attribute was not included in the generated source code for functions</entry>
+    <entry dev-build="4" type="fix">WbSchemaDiff incorrectly combined all tables to be dropped in a single tag</entry>
+    <entry dev-build="4" type="fix">For Postgres, the format of hstore literals was not correct when exporting data as SQL statements</entry>
+    <entry dev-build="4" type="fix">For Postgres, hstore columns could not be edited in a query result</entry>
     <entry dev-build="4" type="fix">The ALTER TABLE OWNER TO statement for Postgres was not created correctly</entry>
     <entry dev-build="3" type="fix">It wasn't possible to use -mode=Upsert or -mode=InsertIgnore with WbCopy</entry>
     <entry dev-build="3" type="fix">Parsing of comments in SQL statements is now more lenient with invalid (nested) comments</entry>
