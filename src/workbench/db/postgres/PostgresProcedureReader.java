@@ -551,7 +551,7 @@ public class PostgresProcedureReader
           source.append("\n  LEAKPROOF");
         }
 
-        if (parallel != null)
+        if (nonDefaultParallel(parallel))
         {
           source.append("\n  PARALLEL " + codeToParallelType(parallel));
         }
@@ -780,7 +780,7 @@ public class PostgresProcedureReader
         }
 
         String parallel = rs.getString("proparallel");
-        if (parallel != null)
+        if (nonDefaultParallel(parallel))
         {
           source.append(",\n  parallel = ");
           source.append(codeToParallelType(parallel).toLowerCase());
@@ -803,6 +803,12 @@ public class PostgresProcedureReader
 
   }
 
+  private boolean nonDefaultParallel(String parallel)
+  {
+    if (parallel == null) return false;
+    return !parallel.equals("u");
+  }
+  
   private String codeToParallelType(String code)
   {
     switch (code)

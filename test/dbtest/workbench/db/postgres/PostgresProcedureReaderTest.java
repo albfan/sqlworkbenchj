@@ -214,7 +214,7 @@ public class PostgresProcedureReaderTest
 			"  VOLATILE\n" +
 			"  COST 100\n" +
 			"  ROWS 1000;";
-//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
+		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}
 
@@ -240,6 +240,7 @@ public class PostgresProcedureReaderTest
 			"  stype = anyarray,\n" +
 			"  initcond = '{}'\n" +
 			");";
+//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 		GenericObjectDropper dropper = new GenericObjectDropper();
 		dropper.setConnection(con);

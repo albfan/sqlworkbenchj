@@ -134,7 +134,25 @@ public class JdbcIndexReader
         ", approximate=true");
     }
 
-    return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), unique, true);
+    ResultSet rs = null;
+    Savepoint sp = null;
+    try
+    {
+      if (metaData.getDbSettings().useSavePointForDML())
+      {
+        sp = metaData.getWbConnection().setSavepoint();
+      }
+      rs = this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), unique, true);
+    }
+    catch (Exception sql)
+    {
+      metaData.getWbConnection().rollback(sp);
+    }
+    finally
+    {
+      metaData.getWbConnection().releaseSavepoint(sp);
+    }
+    return rs;
   }
 
   /**
@@ -176,8 +194,15 @@ public class JdbcIndexReader
 
       long start = System.currentTimeMillis();
 
+      Savepoint sp = null;
+
       try
       {
+        if (metaData.getDbSettings().useSavePointForDML())
+        {
+          sp = metaData.getWbConnection().setSavepoint();
+        }
+
         keysRs = getPrimaryKeyInfo(catalog, schema, tbl.getRawTableName());
         while (keysRs.next())
         {
@@ -207,10 +232,12 @@ public class JdbcIndexReader
       }
       catch (Exception e)
       {
+        metaData.getWbConnection().rollback(sp);
         LogMgr.logWarning("JdbcIndexReader.getPrimaryKey()", "Error retrieving PK information", e);
       }
       finally
       {
+        metaData.getWbConnection().releaseSavepoint(sp);
         SqlUtil.closeResult(keysRs);
         primaryKeysResultDone();
       }
@@ -826,6 +853,7 @@ public class JdbcIndexReader
     }
     catch (Exception e)
     {
+      conn.rollback(sp);
       LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Could not retrieve indexes", e);
       result = new ArrayList<>(0);
     }
@@ -1148,8 +1176,13 @@ public class JdbcIndexReader
 
     boolean hasStatus = supportsIndexStatus();
 
+    Savepoint sp = null;
     try
     {
+      if (metaData.getDbSettings().useSavePointForDML())
+      {
+        sp = metaData.getWbConnection().setSavepoint();
+      }
       stmt = this.metaData.getWbConnection().createStatementForQuery();
       rs = stmt.executeQuery(sql);
       while (rs.next())
@@ -1196,10 +1229,12 @@ public class JdbcIndexReader
     }
     catch (Exception e)
     {
+      metaData.getWbConnection().rollback(sp);
       LogMgr.logError("JdbcIndexReader.getIndexes()", "Error retrieving index list using: " + sql, e);
     }
     finally
     {
+      metaData.getWbConnection().releaseSavepoint(sp);
       SqlUtil.closeAll(rs, stmt);
     }
     processIndexList(result);
