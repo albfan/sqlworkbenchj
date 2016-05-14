@@ -23,6 +23,9 @@
  */
 package workbench.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Thomas Kellerer
  */
@@ -84,9 +87,16 @@ public class VersionNumber
 
   private int parseValue(String value)
   {
-    if (value.indexOf('-') > -1)
+    Pattern nonNumeric = Pattern.compile("[^0-9]");
+    Matcher matcher = nonNumeric.matcher(value);
+    int pos = -1;
+    if (matcher.find())
     {
-      String plain = value.substring(0, value.indexOf('-'));
+      pos = matcher.start();
+    }
+    if (pos > -1)
+    {
+      String plain = value.substring(0, pos);
       return Integer.parseInt(plain);
     }
     return Integer.parseInt(value);

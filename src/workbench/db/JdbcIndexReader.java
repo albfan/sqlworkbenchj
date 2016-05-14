@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -796,12 +797,21 @@ public class JdbcIndexReader
 
     ResultSet idxRs = null;
     TableIdentifier tbl = table.createCopy();
-    tbl.adjustCase(metaData.getWbConnection());
+
+    WbConnection conn = metaData.getWbConnection();
+    tbl.adjustCase(conn);
 
     List<IndexDefinition> result = null;
 
+    Savepoint sp = null;
+
     try
     {
+      if (metaData.getDbSettings().useSavePointForDML())
+      {
+        sp = conn.setSavepoint();
+      }
+
       PkDefinition pk = tbl.getPrimaryKey();
       if (pk == null && checkPK && !tbl.isPkInitialized())
       {
@@ -821,6 +831,7 @@ public class JdbcIndexReader
     }
     finally
     {
+      conn.releaseSavepoint(sp);
       SqlUtil.closeResult(idxRs);
       indexInfoProcessed();
     }

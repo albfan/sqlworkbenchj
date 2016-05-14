@@ -371,6 +371,9 @@ public class PostgresProcedureReader
       return;
     }
 
+    boolean is96 = JdbcUtils.hasMinimumServerVersion(connection, "9.6");
+    boolean is92 = JdbcUtils.hasMinimumServerVersion(connection, "9.2");
+
     PGProcName name = new PGProcName(def, getTypeLookup());
 
     String sql =
@@ -396,6 +399,8 @@ public class PostgresProcedureReader
             "       p.proretset, \n" +
             "       p.provolatile, \n" +
             "       p.proisstrict, \n" +
+            "       " + (is92 ? "p.proleakproof" : "false as proleakproof") + ", \n" +
+            "       " + (is96 ? "p.proparallel" : "null as proparallel") + ", \n" +
             "       p.proisagg, \n" +
             "       obj_description(p.oid, 'pg_proc') as remarks ";
 
@@ -478,8 +483,9 @@ public class PostgresProcedureReader
         String types = rs.getString("argtypes");
         String names = rs.getString("argnames");
         String modes = rs.getString("argmodes");
+        String parallel = rs.getString("proparallel");
         boolean returnSet = rs.getBoolean("proretset");
-
+        boolean leakproof = rs.getBoolean("proleakproof");
 
         boolean securityDefiner = rs.getBoolean("prosecdef");
         boolean strict = rs.getBoolean("proisstrict");
@@ -521,22 +527,35 @@ public class PostgresProcedureReader
         source.append(StringUtil.makePlainLinefeed(src));
         if (!src.endsWith(";")) source.append(';');
         source.append("\n$body$\n");
+
         if (volat.equals("i"))
         {
-          source.append(" IMMUTABLE");
+          source.append("  IMMUTABLE");
         }
         else if (volat.equals("s"))
         {
-          source.append(" STABLE");
+          source.append("  STABLE");
         }
         else
         {
-          source.append(" VOLATILE");
+          source.append("  VOLATILE");
         }
+
         if (strict)
         {
-          source.append(" STRICT");
+          source.append("\n  STRICT");
         }
+
+        if (leakproof)
+        {
+          source.append("\n  LEAKPROOF");
+        }
+
+        if (parallel != null)
+        {
+          source.append("\n  PARALLEL " + codeToParallelType(parallel));
+        }
+
         if (securityDefiner)
         {
           source.append("\n SECURITY DEFINER");
@@ -544,13 +563,13 @@ public class PostgresProcedureReader
 
         if (cost != null)
         {
-          source.append("\n COST ");
+          source.append("\n  COST ");
           source.append(cost.longValue());
         }
 
         if (rows != null && returnSet)
         {
-          source.append("\n ROWS ");
+          source.append("\n  ROWS ");
           source.append(rows.longValue());
         }
         source.append(";\n");
@@ -697,6 +716,9 @@ public class PostgresProcedureReader
       baseSelect += ", a.aggsortop ";
     }
 
+    boolean hasParallel = JdbcUtils.hasMinimumServerVersion(connection, "9.6");
+    baseSelect += ", " + (hasParallel ? "p.proparallel" : "null as proparallel");
+
     String sql = baseSelect + "\n" + from;
     sql += " WHERE p.proname = '" + name.getName() + "' ";
     if (StringUtil.isNonBlank(schema))
@@ -756,6 +778,13 @@ public class PostgresProcedureReader
           source.append(initcond);
           source.append('\'');
         }
+
+        String parallel = rs.getString("proparallel");
+        if (parallel != null)
+        {
+          source.append(",\n  parallel = ");
+          source.append(codeToParallelType(parallel).toLowerCase());
+        }
         source.append("\n);\n");
       }
       connection.releaseSavepoint(sp);
@@ -774,6 +803,19 @@ public class PostgresProcedureReader
 
   }
 
+  private String codeToParallelType(String code)
+  {
+    switch (code)
+    {
+      case "s":
+        return "SAFE";
+      case "r":
+        return "RESTRICTED";
+      case "u":
+        return "UNSAFE";
+    }
+    return code;
+  }
 
   /**
    * A workaround for pre 8.3 drivers so that argument names are retrieved properly

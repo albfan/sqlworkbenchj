@@ -180,9 +180,9 @@ public class PostgresProcedureReaderTest
 			"$body$\n" +
 			"select 'Arthur', 'Dent';\n" +
 			"$body$\n" +
-			" VOLATILE\n" +
-			" COST 100\n" +
-			" ROWS 1000;";
+			"  VOLATILE\n" +
+			"  COST 100\n" +
+			"  ROWS 1000;";
 //		System.out.println(source);
 		assertEquals(expected, source.trim());
 	}
@@ -211,9 +211,9 @@ public class PostgresProcedureReaderTest
 			"  return query select arg1, arg1 * 2;\n" +
 			"END;\n" +
 			"$body$\n" +
-			" VOLATILE\n" +
-			" COST 100\n" +
-			" ROWS 1000;";
+			"  VOLATILE\n" +
+			"  COST 100\n" +
+			"  ROWS 1000;";
 //		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}
