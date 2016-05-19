@@ -701,6 +701,7 @@ public class StatementRunner
 	public void abort()
 	{
 		if (this.result != null) this.result.clear();
+    endReadOnlyTransaction();
 		this.result = null;
 		this.savepoint = null;
 		this.currentCommand = null;
@@ -718,6 +719,7 @@ public class StatementRunner
 		synchronized (this)
 		{
 			if (this.result != null) this.result.clear();
+      endReadOnlyTransaction();
 			this.result = null;
 			this.releaseSavepoint();
 			this.currentConsumer = null;

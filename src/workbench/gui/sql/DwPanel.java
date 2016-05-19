@@ -885,6 +885,7 @@ public class DwPanel
 		}
 		finally
 		{
+      stmtRunner.statementDone();
 			stmtRunner.done();
 			clearStatusMessage();
 		}
