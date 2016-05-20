@@ -23,7 +23,10 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.event.ActionListener;
+
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
@@ -31,6 +34,7 @@ import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.HistoryTextField;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -38,7 +42,7 @@ import workbench.gui.components.HistoryTextField;
  */
 public class LoginPrompt
 	extends JPanel
-	implements ValidatingComponent
+	implements ValidatingComponent, ActionListener
 {
 
 	public LoginPrompt(String historyKey)
@@ -134,11 +138,36 @@ public class LoginPrompt
 
     tfUsername.setEditable(true);
     tfUsername.setMaximumRowCount(10);
+    tfUsername.addActionListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(2, 6, 4, 2);
     add(tfUsername, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt)
+  {
+    if (evt.getSource() == tfUsername)
+    {
+      LoginPrompt.this.tfUsernameActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+  private void tfUsernameActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_tfUsernameActionPerformed
+  {//GEN-HEADEREND:event_tfUsernameActionPerformed
+    try
+    {
+      JTextField text = (JTextField)tfUsername.getEditor().getEditorComponent();
+      text.selectAll();
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logWarning("LoginPrompt.actionPerformed()", "Could not select text of username combobox", th);
+    }
+
+  }//GEN-LAST:event_tfUsernameActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel lblPwd;

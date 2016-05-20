@@ -55,6 +55,9 @@
         <Property name="editable" type="boolean" value="true"/>
         <Property name="maximumRowCount" type="int" value="10"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tfUsernameActionPerformed"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new HistoryTextField(&quot;usernames&quot;);"/>
       </AuxValues>
