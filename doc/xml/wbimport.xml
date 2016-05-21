@@ -343,7 +343,7 @@
 					</row>
 
 					<row>
-						<entry>-ignoreIdentitiyColumns</entry>
+						<entry>-ignoreIdentityColumns</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
