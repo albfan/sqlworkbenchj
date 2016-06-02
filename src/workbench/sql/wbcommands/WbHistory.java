@@ -26,6 +26,7 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.WbManager;
 import workbench.interfaces.SqlHistoryProvider;
 
 import workbench.storage.DataStore;
@@ -104,6 +105,8 @@ public class WbHistory
 
 	private String getDisplayString(String sql)
 	{
+    if (WbManager.getInstance().isGUIMode()) return sql;
+    
 		boolean isMySQL = (this.currentConnection != null ? currentConnection.getMetadata().isMySql() : false);
 		String display = SqlUtil.makeCleanSql(sql, false, false, isMySQL, true);
 		if (maxLength > -1)
