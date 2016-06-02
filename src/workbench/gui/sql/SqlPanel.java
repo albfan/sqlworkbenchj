@@ -3435,8 +3435,8 @@ public class SqlPanel
           if (logmsg.length() > 0)
           {
             appendToLog(logmsg.toString());
+            appendToLog("\n");
           }
-          appendToLog("\n");
         }
         else if (statementResult.hasWarning())
         {
@@ -3814,6 +3814,7 @@ public class SqlPanel
 			{
 				LogMgr.logError("SqlPanel.showResultMessage()", "Not enough memory to show all messages!", null);
 			}
+      appendToLog("\n");
 		}
 		catch (OutOfMemoryError oome)
 		{
