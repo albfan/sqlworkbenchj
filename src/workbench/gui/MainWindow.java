@@ -3802,6 +3802,10 @@ public class MainWindow
 			{
 				this.renumberTabs();
 				newTab = this.sqlTab.getSelectedIndex();
+        if (panel instanceof DbExplorerPanel)
+        {
+          restoreDbTree();
+        }
 			}
 		}
 		catch (Throwable e)
