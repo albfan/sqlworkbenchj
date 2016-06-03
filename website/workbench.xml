@@ -135,8 +135,10 @@ WHERE id=42;</p>
       <ul style="margin-top:10px">
       <li><image-link title="Main window" name="MainWindow.png" back="screenshots" next="mainwindow_dbtree.png">Main Window</image-link><br/></li>
       <li><image-link title="Main window with database tree" name="mainwindow_dbtree.png" back="MainWindow.png" next="multiple_results.png">Main Window with database tree</image-link><br/></li>
-      <li><image-link title="Multiple results" name="multiple_results.png" back="mainwindow_dbtree.png" next="Profiles.png">Multiple Results</image-link><br/></li>
-      <li><image-link title="Connection Profile" name="Profiles.png" back="multiple_results.png" next="SqlFormat.png">Connection Profile</image-link><br/></li>
+      <li><image-link title="Multiple results" name="multiple_results.png" back="mainwindow_dbtree.png" next="EditData.png">Multiple Results</image-link><br/></li>
+      <li><image-link title="Edit data directly in the result" name="EditData.png" back="multiple_results.png" next="form_edit.png">Edit data directly in the result</image-link><br/></li>
+      <li><image-link title="Edit single row" name="form_edit.png" back="EditData.png" next="Profiles.png">Edit single row</image-link><br/></li>
+      <li><image-link title="Connection Profile" name="Profiles.png" back="form_edit.png" next="SqlFormat.png">Connection Profile</image-link><br/></li>
       <li><image-link title="SQL Formatter" name="SqlFormat.png" back="Profiles.png" next="child_rows.png">SQL Formatter</image-link></li>
       <li><image-link title="Select related child rows" name="child_rows.png" back="SqlFormat.png" next="parent_rows.png">Select related child rows</image-link></li>
       <li><image-link title="Select parent rows" name="parent_rows.png" back="child_rows.png" next="fk_lookup.png">Select related parent rows</image-link></li>
