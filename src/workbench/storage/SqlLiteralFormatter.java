@@ -27,8 +27,6 @@ import java.io.File;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import workbench.interfaces.DataFileWriter;
@@ -73,7 +71,7 @@ public class SqlLiteralFormatter
 
   private WbDateFormatter dateFormatter;
   private WbDateFormatter timestampFormatter;
-  private SimpleDateFormat timeFormatter;
+  private WbDateFormatter timeFormatter;
   private BlobLiteralFormatter blobFormatter;
   private DataFileWriter blobWriter;
   private DataFileWriter clobWriter;
@@ -342,15 +340,19 @@ public class SqlLiteralFormatter
     }
     else if (value instanceof Time)
     {
-      return this.timeFormatter.format((Time)value);
+      return this.timeFormatter.formatTime((Time)value);
     }
     else if (value instanceof Timestamp)
     {
-      return fixInfinity(this.timestampFormatter.format((Timestamp)value));
+      return fixInfinity(this.timestampFormatter.formatTimestamp((Timestamp)value));
     }
-    else if (value instanceof Date)
+    else if (value instanceof java.sql.Date)
     {
-      return fixInfinity(this.dateFormatter.format((Date)value));
+      return fixInfinity(this.dateFormatter.formatDate((java.sql.Date)value));
+    }
+    else if (value instanceof java.util.Date)
+    {
+      return fixInfinity(this.dateFormatter.formatUtilDate((java.util.Date)value));
     }
     else if (value instanceof File)
     {

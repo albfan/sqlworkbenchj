@@ -51,10 +51,10 @@ public class WbDateFormatterTest
 		cal.set(2012, 0, 1);
 
 		WbDateFormatter formatter = new WbDateFormatter("yyyy-MM-dd");
-		String result = formatter.format(cal.getTime());
+		String result = formatter.formatUtilDate(cal.getTime());
 		assertEquals("2012-01-01", result);
 
-		result = formatter.format(new Date(WbDateFormatter.DATE_POSITIVE_INFINITY));
+		result = formatter.formatUtilDate(new Date(WbDateFormatter.DATE_POSITIVE_INFINITY));
 		assertEquals(InfinityLiterals.PG_POSITIVE_LITERAL, result);
 	}
 
@@ -68,10 +68,10 @@ public class WbDateFormatterTest
 		cal.set(2012, 0, 1, 0, 0, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 		Date expected = cal.getTime();
-		Date result = formatter.parse(source);
+		Date result = formatter.parseDate(source);
 		assertEquals(expected, result);
 		expected = new Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
-		assertEquals(expected, formatter.parse(InfinityLiterals.PG_POSITIVE_LITERAL));
+		assertEquals(expected, formatter.parseDate(InfinityLiterals.PG_POSITIVE_LITERAL));
 	}
 
   @Test
@@ -79,48 +79,47 @@ public class WbDateFormatterTest
   {
     WbDateFormatter format = new WbDateFormatter("dd.MM.yyyy HH:mm:ss");
     Timestamp ts = Timestamp.valueOf("2015-03-27 20:21:22.123456");
-    assertEquals("27.03.2015 20:21:22", format.format(ts));
+    assertEquals("27.03.2015 20:21:22", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSS");
-    assertEquals("27.03.2015 20:21:22.123", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.123", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSS");
-    assertEquals("27.03.2015 20:21:22.123456", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.123456", format.formatTimestamp(ts));
 
     format.applyPattern("SSSSSS dd.MM.yyyy HH:mm:ss");
-    assertEquals("123456 27.03.2015 20:21:22", format.format(ts));
+    assertEquals("123456 27.03.2015 20:21:22", format.formatTimestamp(ts));
 
     format.applyPattern("SSS dd.MM.yyyy HH:mm:ss");
-    assertEquals("123 27.03.2015 20:21:22", format.format(ts));
+    assertEquals("123 27.03.2015 20:21:22", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSS");
     ts = Timestamp.valueOf("2015-03-27 20:21:22.123789");
-    assertEquals("27.03.2015 20:21:22.123", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.123", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSSSSS");
     ts = Timestamp.valueOf("2015-03-27 20:21:22.123456789");
-    assertEquals("27.03.2015 20:21:22.123456789", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.123456789", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSS");
 
     ts = Timestamp.valueOf("2015-03-27 20:21:22.123");
-    assertEquals("27.03.2015 20:21:22.123", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.123000", format.formatTimestamp(ts));
 
     ts = Timestamp.valueOf("2015-03-27 20:21:22.0001");
-    assertEquals("27.03.2015 20:21:22.0001", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.000100", format.formatTimestamp(ts));
 
     format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSS");
     ts = Timestamp.valueOf("2015-03-27 20:21:22");
-    assertEquals("27.03.2015 20:21:22.0", format.format(ts));
+    assertEquals("27.03.2015 20:21:22.000000", format.formatTimestamp(ts));
 
     format.applyPattern("'TIMESTAMP '''yyyy-MM-dd HH:mm:ss.SSSSSS''");
     ts = Timestamp.valueOf("2015-03-27 20:21:22.123456");
-    assertEquals("TIMESTAMP '2015-03-27 20:21:22.123456'", format.format(ts));
+    assertEquals("TIMESTAMP '2015-03-27 20:21:22.123456'", format.formatTimestamp(ts));
 
-    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSSSSSSSS");
+    format.applyPattern("dd.MM.yyyy HH:mm:ss.SSSSSSSSS");
     ts = Timestamp.valueOf("2015-03-27 20:21:22.789");
-    assertEquals("27.03.2015 20:21:22.789", format.format(ts));
-
+    assertEquals("27.03.2015 20:21:22.789000000", format.formatTimestamp(ts));
   }
 
 	/**

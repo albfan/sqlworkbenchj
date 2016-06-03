@@ -252,26 +252,18 @@ public class WbTabbedPane
 
 		if (onlyCloseActive && index != getSelectedIndex())
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					setSelectedIndex(index);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        setSelectedIndex(index);
+      });
 
 		}
 		else
 		{
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					tabCloser.tabCloseButtonClicked(index);
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        tabCloser.tabCloseButtonClicked(index);
+      });
 		}
 	}
 

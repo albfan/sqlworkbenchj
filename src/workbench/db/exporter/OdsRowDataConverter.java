@@ -295,9 +295,9 @@ public class OdsRowDataConverter
       content.write("  </style:style> \n");
     }
 
-    String tsStyleDef = timestampIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimestampFormatter), tsStyle, "N50") : "";
-    String dateStyleDef = dateIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultDateFormatter), dateStyle, "N60") : "";
-    String timeStyleDef = timeIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimeFormatter), dateStyle, "N80") : "";
+    String tsStyleDef = timestampIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimestampFormatter.toPattern()), tsStyle, "N50") : "";
+    String dateStyleDef = dateIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultDateFormatter.toPattern()), dateStyle, "N60") : "";
+    String timeStyleDef = timeIncluded() ? buildDateStyle(new OdsDateStyleBuilder(this.defaultTimeFormatter.toPattern()), dateStyle, "N80") : "";
 
     String styles =
       "  <style:style style:name=\"ro1\" style:family=\"table-row\"> \n" +

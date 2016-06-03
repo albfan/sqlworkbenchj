@@ -23,16 +23,14 @@
  */
 package workbench.util;
 
-import java.sql.Timestamp;
-import java.text.AttributedCharacterIterator;
-import java.text.CharacterIterator;
-import java.text.DateFormat;
-import java.text.DateFormatSymbols;
-import java.text.FieldPosition;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 import workbench.resource.Settings;
 
@@ -43,51 +41,45 @@ import workbench.db.exporter.InfinityLiterals;
  * @author Thomas Kellerer
  */
 public class WbDateFormatter
-  extends SimpleDateFormat
 {
+  private String pattern;
+  private DateTimeFormatter formatter;
+
   // copied from the PostgreSQL driver
   public static final long DATE_POSITIVE_INFINITY = 9223372036825200000l;
   public static final long DATE_NEGATIVE_INFINITY = -9223372036832400000l;
 
   private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
-  private int millisStart = -1;
-  private int millisLength = -1;
-
-  public WbDateFormatter(String pattern, DateFormatSymbols formatSymbols)
-  {
-    super(pattern, formatSymbols);
-    checkMicroSeconds();
-  }
-
-  public WbDateFormatter(String pattern, Locale locale)
-  {
-    super(pattern, locale);
-    checkMicroSeconds();
-  }
+  private boolean illegalDateAsNull;
 
   public WbDateFormatter(String pattern)
   {
-    super(pattern);
-    checkMicroSeconds();
+    applyPattern(pattern);
   }
 
   public WbDateFormatter()
   {
+    applyPattern(StringUtil.ISO_DATE_FORMAT);
   }
 
-  @Override
-  public void applyLocalizedPattern(String pattern)
+  public void setIllegalDateIsNull(boolean flag)
   {
-    super.applyLocalizedPattern(pattern);
-    checkMicroSeconds();
+    illegalDateAsNull = flag;
+    if (illegalDateAsNull)
+    {
+      formatter = formatter.withResolverStyle(ResolverStyle.STRICT);
+    }
+    else
+    {
+      formatter = formatter.withResolverStyle(ResolverStyle.SMART);
+    }
   }
 
-  @Override
   public void applyPattern(String pattern)
   {
-    super.applyPattern(pattern);
-    checkMicroSeconds();
+    this.formatter = DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.SMART);
+    this.pattern = pattern;
   }
 
   public void setInfinityLiterals(InfinityLiterals literals)
@@ -95,75 +87,70 @@ public class WbDateFormatter
     this.infinityLiterals = literals;
   }
 
-  @Override
-  public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition pos)
+  public String formatTime(java.sql.Time time)
+  {
+    return formatter.format(time.toLocalTime());
+  }
+
+  public String formatUtilDate(java.util.Date date)
   {
     if (infinityLiterals != null)
     {
       long dt = (date == null ? 0 : date.getTime());
       if (dt == DATE_POSITIVE_INFINITY)
       {
-        return toAppendTo.append(infinityLiterals.getPositiveInfinity());
+        return infinityLiterals.getPositiveInfinity();
       }
       else if (dt == DATE_NEGATIVE_INFINITY)
       {
-        return toAppendTo.append(infinityLiterals.getNegativeInfinity());
+        return infinityLiterals.getNegativeInfinity();
       }
     }
-
-    if (date instanceof Timestamp && millisLength > 3)
-    {
-      // SimpleDateFormat does not take nanoseconds from java.sql.Timestamp into account
-      return formatTimestamp((Timestamp)date, toAppendTo, pos);
-    }
-
-    return super.format(date, toAppendTo, pos);
+    LocalDateTime ldt = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    return formatter.format(ldt);
   }
 
-  private StringBuffer formatTimestamp(Timestamp date, StringBuffer toAppendTo, FieldPosition pos)
-  {
-    StringBuffer result = super.format(date, toAppendTo, pos);
-
-    // Timestamp.toString() always returns the timestamp in ISO format with 6 fractional digits
-    String value = date.toString();
-
-    // extract the nanoseconds as formatted by java.sql.Timestamp
-    // and replace the "formatted" milliseconds from the original result
-    // with the correct value
-    String fractionalSeconds = value.substring(value.lastIndexOf('.') + 1);
-
-    int len = Math.min(millisLength, fractionalSeconds.length());
-    String display = fractionalSeconds.substring(0, len);
-
-    result.delete(millisStart, millisStart + millisLength);
-    result.insert(millisStart, display);
-
-    return result;
-  }
-
-  @Override
-  public Date parse(String source)
-    throws ParseException
+  public String formatDate(java.sql.Date date)
   {
     if (infinityLiterals != null)
     {
-      if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
+      long dt = (date == null ? 0 : date.getTime());
+      if (dt == DATE_POSITIVE_INFINITY)
       {
-        return new Date(DATE_POSITIVE_INFINITY);
+        return infinityLiterals.getPositiveInfinity();
       }
-      if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
+      else if (dt == DATE_NEGATIVE_INFINITY)
       {
-        return new Date(DATE_NEGATIVE_INFINITY);
+        return infinityLiterals.getNegativeInfinity();
       }
     }
-    return super.parse(source);
+
+    return formatter.format(date.toLocalDate());
   }
 
-  public Date parseQuietly(String source)
+  public String formatTimestamp(java.sql.Timestamp ts)
+  {
+    if (infinityLiterals != null)
+    {
+      long dt = (ts == null ? 0 : ts.getTime());
+      if (dt == DATE_POSITIVE_INFINITY)
+      {
+        return infinityLiterals.getPositiveInfinity();
+      }
+      else if (dt == DATE_NEGATIVE_INFINITY)
+      {
+        return infinityLiterals.getNegativeInfinity();
+      }
+    }
+
+    return formatter.format(ts.toLocalDateTime());
+  }
+
+  public java.sql.Time parseTimeQuitely(String source)
   {
     try
     {
-      return this.parse(source);
+      return parseTime(source);
     }
     catch (ParseException ex)
     {
@@ -171,39 +158,95 @@ public class WbDateFormatter
     }
   }
 
-
-  /**
-   * Find the start and the length of the milliseconds pattern.
-   *
-   */
-  private void checkMicroSeconds()
+  public java.sql.Time parseTime(String source)
+    throws ParseException
   {
-    millisStart = -1;
-    millisLength = 0;
+    LocalTime lt = LocalTime.parse(source, formatter);
+    return java.sql.Time.valueOf(lt);
+  }
 
-    // using formatToCharacterIterator() is the only safe way to get the positions
-    // as that will take all valid formatting options into account including
-    // string literals enclosed in single quotes and other things.
-    AttributedCharacterIterator itr = formatToCharacterIterator(Timestamp.valueOf("2001-01-01 00:00:00.123456789"));
-    int pos = 0;
-
-    for (char c = itr.first(); c != CharacterIterator.DONE; c = itr.next())
+  public java.sql.Date parseDateQuietely(String source)
+  {
+    try
     {
-      Object attribute = itr.getAttribute(DateFormat.Field.MILLISECOND);
-      if (attribute != null)
-      {
-        if (millisStart == -1)
-        {
-          millisStart = pos;
-          millisLength = 1;
-        }
-        else if (millisStart > -1)
-        {
-          millisLength ++;
-        }
-      }
-      pos ++;
+      return parseDate(source);
     }
+    catch (DateTimeParseException ex)
+    {
+      return null;
+    }
+  }
+
+  public java.sql.Date parseDate(String source)
+    throws DateTimeParseException
+  {
+    if (infinityLiterals != null)
+    {
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
+      {
+        return new java.sql.Date(DATE_POSITIVE_INFINITY);
+      }
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
+      {
+        return new java.sql.Date(DATE_NEGATIVE_INFINITY);
+      }
+    }
+
+    try
+    {
+      LocalDate ld = LocalDate.parse(source, formatter);
+      return java.sql.Date.valueOf(ld);
+    }
+    catch (DateTimeParseException ex)
+    {
+      if (illegalDateAsNull) return null;
+      throw ex;
+    }
+  }
+
+  public java.sql.Timestamp parseTimestampQuietly(String source)
+  {
+    try
+    {
+      return parseTimestamp(source);
+    }
+    catch (DateTimeParseException ex)
+    {
+      return null;
+    }
+  }
+
+  public java.sql.Timestamp parseTimestamp(String source)
+    throws DateTimeParseException
+  {
+    if (infinityLiterals != null)
+    {
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
+      {
+        return new java.sql.Timestamp(DATE_POSITIVE_INFINITY);
+      }
+
+      if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
+      {
+        return new java.sql.Timestamp(DATE_NEGATIVE_INFINITY);
+      }
+    }
+
+    try
+    {
+      LocalDateTime ldt = LocalDateTime.parse(source, formatter);
+      return java.sql.Timestamp.valueOf(ldt);
+    }
+    catch (DateTimeParseException ex)
+    {
+      if (illegalDateAsNull) return null;
+      throw ex;
+    }
+  }
+
+  public String toPattern()
+  {
+    return pattern;
   }
 
   public static String getDisplayValue(Object value)
@@ -214,14 +257,14 @@ public class WbDateFormatter
     {
       String format = Settings.getInstance().getDefaultDateFormat();
       WbDateFormatter formatter = new WbDateFormatter(format);
-      return formatter.format((java.sql.Date) value);
+      return formatter.formatDate((java.sql.Date) value);
     }
 
     if (value instanceof java.sql.Timestamp)
     {
       String format = Settings.getInstance().getDefaultTimestampFormat();
       WbDateFormatter formatter = new WbDateFormatter(format);
-      return formatter.format((java.sql.Timestamp) value);
+      return formatter.formatTimestamp((java.sql.Timestamp) value);
     }
 
     if (value instanceof java.util.Date)

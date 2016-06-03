@@ -91,6 +91,14 @@ public class PostgresProcedureReaderTest
 			"END; \n" +
 			"$$ LANGUAGE plpgsql; \n" +
 			"\n "  +
+			"CREATE FUNCTION fn_answer(p1 varchar, p2 varchar)  \n" +
+			"  RETURNS integer  \n" +
+			"AS $$ \n" +
+			"BEGIN \n" +
+			"    RETURN 42;\n" +
+			"END; \n" +
+			"$$ LANGUAGE plpgsql; \n" +
+			"\n "  +
 			"commit;";
 		TestUtil.executeScript(con, fnCreate);
 
@@ -214,7 +222,7 @@ public class PostgresProcedureReaderTest
 			"  VOLATILE\n" +
 			"  COST 100\n" +
 			"  ROWS 1000;";
-		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
+//		System.out.println("--- expected --- \n" + expected + "\n--- actual ---\n"  + source.trim() + "\n-------");
 		assertEquals(expected, source.trim());
 	}
 
@@ -245,7 +253,7 @@ public class PostgresProcedureReaderTest
 		GenericObjectDropper dropper = new GenericObjectDropper();
 		dropper.setConnection(con);
 		String drop = dropper.getDropForObject(def).toString();
-    System.out.println(drop);
+//    System.out.println(drop);
 		assertEquals("DROP AGGREGATE array_accum(anyelement);", drop);
 	}
 
@@ -258,7 +266,7 @@ public class PostgresProcedureReaderTest
 
     PostgresProcedureReader reader = new PostgresProcedureReader(con);
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_answer%");
-		assertEquals(2, procs.size());
+		assertEquals(3, procs.size());
 
 		ProcedureDefinition f1 = procs.get(0);
 		String source1 = f1.getSource(con).toString();
@@ -288,16 +296,7 @@ public class PostgresProcedureReaderTest
     assertNotNull(con);
 
 		PostgresProcedureReader reader = new PostgresProcedureReader(con);
-    TestUtil.executeScript(con,
-			"CREATE FUNCTION fn_answer(p1 varchar, p2 varchar)  \n" +
-			"  RETURNS integer  \n" +
-			"AS $$ \n" +
-			"BEGIN \n" +
-			"    RETURN 42;\n" +
-			"END; \n" +
-			"$$ LANGUAGE plpgsql; \n" +
-			"\n "  +
-			"commit;");
+
 
 		List<ProcedureDefinition> procs = reader.getProcedureList(null, TEST_ID, "fn_answer%");
 		assertEquals(3, procs.size());

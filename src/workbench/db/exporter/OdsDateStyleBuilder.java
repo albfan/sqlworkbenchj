@@ -23,9 +23,9 @@
  */
 package workbench.db.exporter;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 import workbench.util.HtmlUtil;
 
 /**
@@ -40,12 +40,6 @@ public class OdsDateStyleBuilder
   public OdsDateStyleBuilder(String format)
   {
     this.formatString = format;
-    parseFormat();
-  }
-
-  public OdsDateStyleBuilder(SimpleDateFormat formatter)
-  {
-    formatString = formatter.toPattern();
     parseFormat();
   }
 

@@ -24,7 +24,9 @@
 package workbench.gui.renderer;
 
 import javax.swing.SwingConstants;
+
 import workbench.log.LogMgr;
+
 import workbench.util.WbDateFormatter;
 
 /**
@@ -75,11 +77,22 @@ public class DateColumnRenderer
 	{
 		try
 		{
-			java.util.Date d = (java.util.Date)value;
-			synchronized (this.dateFormatter)
-			{
-				this.displayValue = this.dateFormatter.format(d);
-			}
+      if (value instanceof java.sql.Timestamp)
+      {
+        this.displayValue = this.dateFormatter.formatTimestamp((java.sql.Timestamp)value);
+      }
+      else if (value instanceof java.sql.Date)
+      {
+        this.displayValue = this.dateFormatter.formatDate((java.sql.Date)value);
+      }
+      else if (value instanceof java.sql.Time)
+      {
+        this.displayValue = this.dateFormatter.formatTime((java.sql.Time)value);
+      }
+  		else
+      {
+        this.displayValue = this.dateFormatter.formatUtilDate((java.util.Date)value);
+      }
 
 			if (showTooltip)
 			{

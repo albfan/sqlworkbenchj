@@ -27,6 +27,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -577,13 +578,14 @@ public class ValueConverter
       return new java.sql.Time(now.getTime());
     }
 
-    java.util.Date parsed = null;
+    java.sql.Time parsed = null;
     for (String timeFormat : timeFormats)
     {
       try
       {
         this.formatter.applyPattern(timeFormat);
-        parsed = this.formatter.parse(time);
+        parsed = this.formatter.parseTime(time);
+
         LogMgr.logDebug("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
         break;
       }
@@ -595,7 +597,7 @@ public class ValueConverter
 
     if (parsed != null)
     {
-      return new java.sql.Time(parsed.getTime());
+      return parsed;
     }
     throw new ParseException("Could not parse [" + time + "] as a time value!", 0);
   }
@@ -626,11 +628,8 @@ public class ValueConverter
       return new java.sql.Timestamp(getToday().getTime());
     }
 
-    // when lenient is set to true, the parser will simply return null
-    // but will not throw an error for properly formatted values
-    timestampFormatter.setLenient(!illegalDateIsNull);
-
     java.util.Date result = null;
+    dateFormatter.setIllegalDateIsNull(illegalDateIsNull);
 
     if (this.defaultTimestampFormat != null)
     {
@@ -643,7 +642,7 @@ public class ValueConverter
         }
         else
         {
-          result = this.timestampFormatter.parse(timestampInput);
+          result = this.timestampFormatter.parseTimestamp(timestampInput);
         }
       }
       catch (Exception e)
@@ -652,7 +651,6 @@ public class ValueConverter
         result = null;
       }
     }
-
 
     if (result == null && illegalDateIsNull)
     {
@@ -667,7 +665,7 @@ public class ValueConverter
         try
         {
           this.formatter.applyPattern(format);
-          result = this.formatter.parse(timestampInput);
+          result = this.formatter.parseTimestamp(timestampInput);
           LogMgr.logDebug("ValueConverter.parseTimestamp()", "Succeeded parsing '" + timestampInput + "' using the format: " + format);
           if (useFirstMatching)
           {
@@ -675,7 +673,7 @@ public class ValueConverter
           }
           break;
         }
-        catch (ParseException e)
+        catch (DateTimeParseException e)
         {
           result = null;
         }
@@ -703,9 +701,9 @@ public class ValueConverter
       return new java.sql.Date(System.currentTimeMillis());
     }
 
-    java.util.Date result = null;
+    java.sql.Date result = null;
 
-    dateFormatter.setLenient(!illegalDateIsNull);
+    dateFormatter.setIllegalDateIsNull(illegalDateIsNull);
 
     if (this.defaultDateFormat != null)
     {
@@ -714,11 +712,11 @@ public class ValueConverter
         if (FORMAT_MILLIS.equalsIgnoreCase(defaultTimestampFormat))
         {
           long value = Long.parseLong(dateInput);
-          result = new java.util.Date(value);
+          result = new java.sql.Date(value);
         }
         else
         {
-          result = this.dateFormatter.parse(dateInput);
+          result = this.dateFormatter.parseDate(dateInput);
         }
       }
       catch (Exception e)
@@ -728,23 +726,23 @@ public class ValueConverter
       }
     }
 
+    if (result == null && illegalDateIsNull)
+    {
+      LogMgr.logInfo("ValueConverter.parseDate()", "Illegal date value '" + dateInput + "' set to null");
+      return null;
+    }
+
     // Apparently not a date, try the timestamp parser
     if (result == null && this.defaultTimestampFormat != null)
     {
       try
       {
-        result = this.timestampFormatter.parse(dateInput);
+        result = this.timestampFormatter.parseDate(dateInput);
       }
-      catch (ParseException e)
+      catch (DateTimeParseException e)
       {
         if (logWarnings) LogMgr.logWarning("ValueConverter.parseDate()", "Could not parse [" + dateInput + "] using: " + this.timestampFormatter.toPattern() + ". Trying to recognize the format...", null);
       }
-    }
-
-    if (result == null && illegalDateIsNull)
-    {
-      LogMgr.logInfo("ValueConverter.parseDate()", "Illegal date value '" + dateInput + "' set to null");
-      return null;
     }
 
     // Still no luck, try to detect the format by trying the built-in formats
@@ -753,7 +751,7 @@ public class ValueConverter
       for (String format : dateFormats)
       {
         this.formatter.applyPattern(format);
-        result = this.formatter.parseQuietly(dateInput);
+        result = this.formatter.parseDateQuietely(dateInput);
         if (result != null)
         {
           if (useFirstMatching)
@@ -771,9 +769,10 @@ public class ValueConverter
         for (String format : timestampFormats)
         {
           this.formatter.applyPattern(format);
-          result = this.formatter.parseQuietly(dateInput);
-          if (result != null)
+          java.sql.Timestamp ts = this.formatter.parseTimestampQuietly(dateInput);
+          if (ts != null)
           {
+            result = new java.sql.Date(ts.getTime());
             if (useFirstMatching)
             {
               this.defaultDateFormat = format;
@@ -787,7 +786,7 @@ public class ValueConverter
 
     if (result != null)
     {
-      return new java.sql.Date(result.getTime());
+      return result;
     }
 
     throw new ParseException("Could not convert [" + dateInput + "] to a date", 0);

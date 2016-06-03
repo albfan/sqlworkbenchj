@@ -845,7 +845,7 @@ public abstract class RowDataConverter
       String result = null;
       if (value instanceof java.sql.Timestamp && this.defaultTimestampFormatter != null)
       {
-        result = this.defaultTimestampFormatter.format(value);
+        result = this.defaultTimestampFormatter.formatTimestamp((java.sql.Timestamp)value);
       }
       else if (convertDateToTimestamp && value instanceof java.util.Date)
       {
@@ -861,16 +861,20 @@ public abstract class RowDataConverter
         }
         else
         {
-          result = this.defaultTimestampFormatter.format(value);
+          result = this.defaultTimestampFormatter.formatUtilDate((java.util.Date)value);
         }
       }
       else if (value instanceof java.sql.Time && defaultTimeFormatter != null)
       {
         result = defaultTimeFormatter.format(value);
       }
+      else if (value instanceof java.sql.Date && this.defaultDateFormatter != null)
+      {
+        result = this.defaultDateFormatter.formatDate((java.sql.Date)value);
+      }
       else if (value instanceof java.util.Date && this.defaultDateFormatter != null)
       {
-        result = this.defaultDateFormatter.format(value);
+        result = this.defaultDateFormatter.formatUtilDate((java.util.Date)value);
       }
       else if (value instanceof Number && this.defaultNumberFormatter != null)
       {
