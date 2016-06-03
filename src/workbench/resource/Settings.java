@@ -107,6 +107,7 @@ public class Settings
 	public static final String PROPERTY_TRIM_PWD = "workbench.profiles.trimpassword";
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
+	public static final String PROPERTY_VARIABLE_LENGTH_TS_FRACTION = "workbench.gui.display.datetimeformat.fractions.variable";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
 	public static final String PROPERTY_SHOW_TOOLBAR = "workbench.gui.mainwindow.showtoolbar";
 	public static final String PROPERTY_TAB_POLICY = "workbench.gui.mainwindow.tabpolicy";
@@ -2710,6 +2711,11 @@ public class Settings
 		return (PROPERTY_DATE_FORMAT.equals(prop) || PROPERTY_DATETIME_FORMAT.equals(prop) || PROPERTY_TIME_FORMAT.equals(prop));
 	}
 
+  public boolean useVariableLengthTimeFractions()
+  {
+    return getBoolProperty(PROPERTY_VARIABLE_LENGTH_TS_FRACTION, false);
+  }
+  
 	public String getDefaultDateFormat()
 	{
 		return getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);

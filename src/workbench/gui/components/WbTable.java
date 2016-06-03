@@ -1813,12 +1813,14 @@ public class WbTable
 	{
 		Settings sett = Settings.getInstance();
 
-    DateColumnRenderer dateRenderer = new DateColumnRenderer(sett.getDefaultDateFormat());
+    boolean variableFractions = sett.useVariableLengthTimeFractions();
+
+    DateColumnRenderer dateRenderer = new DateColumnRenderer(sett.getDefaultDateFormat(), false);
 		this.setDefaultRenderer(java.sql.Date.class, dateRenderer);
 		this.setDefaultRenderer(java.util.Date.class, dateRenderer);
 
-		this.setDefaultRenderer(java.sql.Timestamp.class, new DateColumnRenderer(sett.getDefaultTimestampFormat()));
-		this.setDefaultRenderer(java.sql.Time.class, new DateColumnRenderer(sett.getDefaultTimeFormat()));
+		this.setDefaultRenderer(java.sql.Timestamp.class, new DateColumnRenderer(sett.getDefaultTimestampFormat(), variableFractions));
+		this.setDefaultRenderer(java.sql.Time.class, new DateColumnRenderer(sett.getDefaultTimeFormat(), variableFractions));
 	}
 
 	@Override

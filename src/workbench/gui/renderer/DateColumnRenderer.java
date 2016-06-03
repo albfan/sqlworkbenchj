@@ -50,19 +50,19 @@ public class DateColumnRenderer
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
 
-	public DateColumnRenderer(String aDateFormat)
+	public DateColumnRenderer(String aDateFormat, boolean variableFractions)
 	{
 		this();
-		this.setFormat(aDateFormat);
+		this.setFormat(aDateFormat, variableFractions);
 	}
 
-	public final void setFormat(String aDateFormat)
+	public final void setFormat(String aDateFormat, boolean variableFractions)
 	{
 		try
 		{
 			synchronized (this.dateFormatter)
 			{
-				this.dateFormatter.applyPattern(aDateFormat);
+				this.dateFormatter.applyPattern(aDateFormat, variableFractions);
 			}
 		}
 		catch (Exception e)

@@ -300,10 +300,11 @@ public class RecordFormPanel
 		renderer = new WbRenderer[inputControls.length];
 
 		Settings sett = Settings.getInstance();
+    boolean variableFractions = sett.useVariableLengthTimeFractions();
 		String dateFormat = sett.getDefaultDateFormat();
-		WbRenderer dateRenderer = new DateColumnRenderer(dateFormat);
+		WbRenderer dateRenderer = new DateColumnRenderer(dateFormat, false);
 		String tsFormat = sett.getDefaultTimestampFormat();
-		WbRenderer tsRenderer = new DateColumnRenderer(tsFormat);
+		WbRenderer tsRenderer = new DateColumnRenderer(tsFormat, variableFractions);
 
 		int maxDigits = sett.getMaxFractionDigits();
 		char sep = sett.getDecimalSymbol().charAt(0);

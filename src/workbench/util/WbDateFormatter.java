@@ -29,8 +29,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import workbench.resource.Settings;
 
@@ -55,7 +59,12 @@ public class WbDateFormatter
 
   public WbDateFormatter(String pattern)
   {
-    applyPattern(pattern);
+    applyPattern(pattern, false);
+  }
+
+  public WbDateFormatter(String pattern, boolean allowVariableLengthFractions)
+  {
+    applyPattern(pattern, allowVariableLengthFractions);
   }
 
   public WbDateFormatter()
@@ -78,7 +87,35 @@ public class WbDateFormatter
 
   public void applyPattern(String pattern)
   {
-    this.formatter = DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.SMART);
+    applyPattern(pattern, false);
+  }
+
+  public void applyPattern(String pattern, boolean allowVariableLengthFraction)
+  {
+    String patternToUse = pattern;
+
+    int len = -1;
+    if (allowVariableLengthFraction)
+    {
+      Pattern p = Pattern.compile("\\.S{1,6}");
+      Matcher matcher = p.matcher(patternToUse);
+      // Make any millisecond/microsecond definition optional
+      // so that inputs with a variable length of milli/microseconds can be parsed
+      if (matcher.find())
+      {
+        int start = matcher.start();
+        int end = matcher.end();
+        // remove the .SSSSS from the pattern so that we can re-add it with a variable length using appendFraction
+        patternToUse = matcher.replaceAll("");
+        len = end - start;
+      }
+    }
+    DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder().appendPattern(patternToUse);
+    if (len > -1)
+    {
+      builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, len - 1, true);
+    }
+    this.formatter = builder.toFormatter().withResolverStyle(ResolverStyle.SMART);
     this.pattern = pattern;
   }
 
