@@ -25,12 +25,15 @@ package workbench.util;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Calendar;
+
 import workbench.WbTestCase;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -313,7 +316,7 @@ public class ValueConverterTest
 		c.clear(Calendar.SECOND);
 		c.clear(Calendar.MINUTE);
 		c.clear(Calendar.MILLISECOND);
-		java.sql.Date now = new java.sql.Date(c.getTime().getTime());
+		java.sql.Date now = java.sql.Date.valueOf(LocalDate.now());
 		data = converter.convertValue("today", Types.DATE);
 		assertEquals(0, now.compareTo((java.sql.Date)data));
 
