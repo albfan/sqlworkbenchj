@@ -173,6 +173,7 @@ public class ProfileTree
 		// setting the row height to 0 makes it dynamic
 		// so it will adjust properly to the font of the renderer
 		setRowHeight(0);
+    setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
   public DeleteListEntryAction getDeleteAction()

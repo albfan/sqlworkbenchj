@@ -139,6 +139,7 @@ public class DbTreePanel
     tree.addMouseListener(this);
     tree.addTreeSelectionListener(this);
     JScrollPane scroll = new JScrollPane(tree);
+    scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
     createToolbar();
 
     add(toolPanel, BorderLayout.PAGE_START);
@@ -255,7 +256,7 @@ public class DbTreePanel
   {
     return tree;
   }
-  
+
   public TreeLoader getLoader()
   {
     return tree.getLoader();

@@ -94,6 +94,7 @@ public class MacroTree
 	{
 		super();
 		macroClientId = clientId;
+    setBorder(WbSwingUtilities.EMPTY_BORDER);
 		loadMacros(forPopup);
 		setRootVisible(false);
 		setShowsRootHandles(true);

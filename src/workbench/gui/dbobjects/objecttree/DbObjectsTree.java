@@ -73,6 +73,7 @@ public class DbObjectsTree
   public DbObjectsTree(WbStatusLabel status)
   {
     super(new DbObjectTreeModel());
+    setBorder(WbSwingUtilities.EMPTY_BORDER);
     setShowsRootHandles(true);
     addTreeExpansionListener(this);
     renderer = new DbObjectNodeRenderer();

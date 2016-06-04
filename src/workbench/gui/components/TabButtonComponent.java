@@ -25,7 +25,6 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -34,13 +33,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import workbench.resource.GuiSettings;
-import workbench.resource.IconMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
@@ -64,7 +61,7 @@ public class TabButtonComponent
 
 	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
-    super(new BorderLayout(2,0));
+    super(new BorderLayout());
 		pane = tabPane;
 
     label = new JLabel(title)
@@ -93,8 +90,12 @@ public class TabButtonComponent
     label.setOpaque(true);
     label.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		int imgSize = IconMgr.getInstance().getSizeForComponentFont(label);
-		ImageIcon img = IconMgr.getInstance().getPngIcon("close-panel", imgSize);
+    int imgSize = WbSwingUtilities.getFontHeight(label);
+
+    BorderLayout layout = (BorderLayout)getLayout();
+    layout.setHgap((int)(imgSize / 3));
+
+    Icon img = CloseIcon.getIcon(imgSize);
     closeButton = new WbButton(img)
     {
       @Override
@@ -119,13 +120,8 @@ public class TabButtonComponent
       }
     };
     closeButton.setOpaque(true);
-
-		Dimension d = new Dimension(imgSize + 2, img.getIconHeight() + 2);
-		closeButton.setPreferredSize(d);
-		closeButton.setMinimumSize(d);
-		closeButton.setMaximumSize(d);
-		closeButton.enableBasicRollover();
-		closeButton.setFocusable(false);
+    closeButton.enableBasicRollover();
+    closeButton.setFocusable(false);
 		closeButton.addActionListener(this);
 
 		setupComponents();

@@ -125,7 +125,7 @@ public class ProfileSelectionPanel
 		copyItem.setEnabled(false);
 		toolbar.add(copyItem);
 		ProfileTree tree = (ProfileTree)profileTree;
-		tree.setBorder(null);
+    treeScroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.toolbar.add(new NewGroupAction(tree, "LblNewProfileGroup"));
 
@@ -593,7 +593,7 @@ public class ProfileSelectionPanel
     jSplitPane = new WbSplitPane();
 
     listPanel = new JPanel();
-    jScrollPane1 = new JScrollPane();
+    treeScroll = new JScrollPane();
     profileTree = new ProfileTree();
 
     FormListener formListener = new FormListener();
@@ -606,7 +606,7 @@ public class ProfileSelectionPanel
 
     listPanel.setLayout(new BorderLayout());
 
-    jScrollPane1.setPreferredSize(null);
+    treeScroll.setPreferredSize(null);
 
     DefaultMutableTreeNode treeNode1 = new DefaultMutableTreeNode("Profiles");
     DefaultMutableTreeNode treeNode2 = new DefaultMutableTreeNode("Postgres");
@@ -632,9 +632,9 @@ public class ProfileSelectionPanel
     profileTree.setName("profileTree"); // NOI18N
     profileTree.addMouseListener(formListener);
     profileTree.addTreeSelectionListener(formListener);
-    jScrollPane1.setViewportView(profileTree);
+    treeScroll.setViewportView(profileTree);
 
-    listPanel.add(jScrollPane1, BorderLayout.CENTER);
+    listPanel.add(treeScroll, BorderLayout.CENTER);
 
     jSplitPane.setLeftComponent(listPanel);
 
@@ -730,9 +730,9 @@ public class ProfileSelectionPanel
 	}//GEN-LAST:event_profileTreeValueChanged
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  protected JScrollPane jScrollPane1;
   protected JSplitPane jSplitPane;
   protected JPanel listPanel;
   protected JTree profileTree;
+  protected JScrollPane treeScroll;
   // End of variables declaration//GEN-END:variables
 }

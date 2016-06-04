@@ -378,6 +378,7 @@ public class TableListPanel
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		WbScrollPane scroll = new WbScrollPane(this.tableList);
+    scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);

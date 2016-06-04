@@ -82,7 +82,7 @@ public class WbButton
 
 	private void init()
 	{
-		putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
+  	putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
 		setRolloverEnabled(true);
 	}
 

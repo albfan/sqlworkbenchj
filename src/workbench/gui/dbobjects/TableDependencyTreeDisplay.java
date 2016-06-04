@@ -25,7 +25,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -178,17 +177,13 @@ public class TableDependencyTreeDisplay
 
 	private void createTreeDisplay(final DefaultMutableTreeNode root)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				createTree();
-				DefaultTreeModel model = new DefaultTreeModel(root, false);
-				tree.setModel(model);
-				expandNodes();
-			}
-		});
+		WbSwingUtilities.invoke(() ->
+    {
+      createTree();
+      DefaultTreeModel model = new DefaultTreeModel(root, false);
+      tree.setModel(model);
+      expandNodes();
+    });
 	}
 
   private void readTreeNodes(DependencyNode root)
@@ -308,14 +303,10 @@ public class TableDependencyTreeDisplay
 				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTextSelectInList"));
 				DependencyNode node = (DependencyNode)o;
 				final TableIdentifier table = node.getTable();
-				item.addActionListener(new ActionListener()
-				{
-					@Override
-					public void actionPerformed(ActionEvent e)
-					{
-						tables.selectTable(table);
-					}
-				});
+				item.addActionListener((ActionEvent e1) ->
+        {
+          tables.selectTable(table);
+        });
 				popup.add(item);
 				popup.show(tree, e.getX(), e.getY());
 			}
