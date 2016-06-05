@@ -172,7 +172,7 @@ public class DbTreePanel
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
 
-    Icon icon = CloseIcon.getIcon(IconMgr.getInstance().getToolbarIconSize());
+    Icon icon = new CloseIcon(IconMgr.getInstance().getToolbarIconSize());
     closeButton = new WbToolbarButton(icon);
     closeButton.setActionCommand("close-panel");
     closeButton.addActionListener(this);

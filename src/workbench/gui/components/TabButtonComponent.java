@@ -95,7 +95,10 @@ public class TabButtonComponent
     BorderLayout layout = (BorderLayout)getLayout();
     layout.setHgap((int)(imgSize / 3));
 
-    Icon img = CloseIcon.getIcon(imgSize);
+    Icon img = new CloseIcon(imgSize);
+    Icon rolloverImg = new CloseIcon(imgSize, Color.WHITE, Color.RED);
+    Icon pressedImg = new CloseIcon(imgSize, Color.WHITE, Color.RED.darker());
+
     closeButton = new WbButton(img)
     {
       @Override
@@ -120,7 +123,13 @@ public class TabButtonComponent
       }
     };
     closeButton.setOpaque(true);
-    closeButton.enableBasicRollover();
+    closeButton.setContentAreaFilled(false);
+    closeButton.setBorderPainted(false);
+    closeButton.setRolloverEnabled(true);
+    closeButton.setIcon(img);
+    closeButton.setRolloverIcon(rolloverImg);
+    closeButton.setPressedIcon(pressedImg);
+
     closeButton.setFocusable(false);
 		closeButton.addActionListener(this);
 
@@ -228,18 +237,6 @@ public class TabButtonComponent
 	{
 		super.removeNotify();
 		Settings.getInstance().removePropertyChangeListener(this);
-	}
-
-	public void setRolloverEnabled(boolean flag)
-	{
-		if (flag)
-		{
-			closeButton.enableBasicRollover();
-		}
-		else
-		{
-			closeButton.disableBasicRollover();
-		}
 	}
 
 	@Override

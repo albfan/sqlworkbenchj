@@ -504,6 +504,10 @@ public class WbTabbedPane
 		for (int i=0; i < count; i++)
 		{
 			boolean canClose = tabCloser.canCloseTab(i);
+      if (onlyCloseActive)
+      {
+        canClose = (i != index);
+      }
 			setCloseButtonEnabled(i, canClose);
 			TabButtonComponent tab = getTabButton(i);
 			if (tab != null)
@@ -511,14 +515,6 @@ public class WbTabbedPane
 				if (hideDisabledButtons)
 				{
 					tab.setButtonVisible(canClose);
-				}
-				if (onlyCloseActive)
-				{
-					tab.setRolloverEnabled(i == index);
-				}
-				else
-				{
-					tab.setRolloverEnabled(true);
 				}
 			}
 		}

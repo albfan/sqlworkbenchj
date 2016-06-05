@@ -29,8 +29,6 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.Icon;
 import javax.swing.UIDefaults;
@@ -45,24 +43,20 @@ public class CloseIcon
 {
 	private final int size;
   private final BasicStroke stroke;
+  private final Color foregroundColor;
+  private final Color backgroundColor;
 
-  private static final Map<Integer, CloseIcon> sharedIcons = new ConcurrentHashMap<>(1);
-	public static synchronized CloseIcon getIcon(int size)
-	{
-		Integer key = Integer.valueOf(size);
-		CloseIcon icon = sharedIcons.get(key);
-		if (icon == null)
-		{
-			icon = new CloseIcon(size);
-			sharedIcons.put(key, icon);
-		}
-		return icon;
-	}
+	public CloseIcon(int iconSize)
+  {
+    this(iconSize, null, null);
+  }
 
-	private CloseIcon(int iconSize)
+	public CloseIcon(int iconSize, Color foreground, Color background)
 	{
 		size = iconSize;
     stroke = new BasicStroke((float)(size / 10), BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
+    foregroundColor = foreground;
+    backgroundColor = background;
 	}
 
 	@Override
@@ -77,6 +71,21 @@ public class CloseIcon
 		return size;
 	}
 
+  private Color getForeground(Component c)
+  {
+    if (c.isEnabled())
+    {
+      return foregroundColor == null ? c.getForeground() : foregroundColor;
+    }
+    UIDefaults def = UIManager.getDefaults();
+    Color dc = def.getColor("Button.disabledForeground");
+    if (dc != null)
+    {
+      return dc;
+    }
+    return c.getForeground();
+  }
+
 	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y)
 	{
@@ -89,24 +98,16 @@ public class CloseIcon
     g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    if (c.isEnabled())
+    Color oldBack = g2.getBackground();
+    if (backgroundColor != null)
     {
-      g2.setColor(c.getForeground());
-    }
-    else
-    {
-      UIDefaults def = UIManager.getDefaults();
-      Color dc = def.getColor("Button.disabledForeground");
-      if (dc != null)
-      {
-        g2.setColor(dc);
-      }
-      else
-      {
-        g2.setColor(c.getForeground());
-      }
+      g2.setColor(backgroundColor);
+      g2.fillRect(x, y, x + (size - x), y + (size - y));
+      g2.setColor(oldBack);
     }
 
+    g2.setColor(getForeground(c));
+    g2.setStroke(stroke);
     g2.drawLine(p1 + x, p1 + y, p2 + x, p2 + y);
     g2.drawLine(p2 + x, p1 + y, p1+ x, p2 + y);
 	}
