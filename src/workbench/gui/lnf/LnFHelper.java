@@ -163,7 +163,13 @@ public class LnFHelper
     UIManager.put("Synthetica.extendedFileChooser.rememberLastDirectory", false);
 	}
 
-	private boolean isWindowsLookAndFeel()
+  public static boolean isGTKLookAndFeel()
+  {
+		String lnf = UIManager.getLookAndFeel().getClass().getName();
+		return lnf.contains("GTKLookAndFeel");
+  }
+  
+	public static boolean isWindowsLookAndFeel()
 	{
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
 		return lnf.contains("plaf.windows");

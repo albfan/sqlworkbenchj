@@ -45,6 +45,7 @@ public class CloseIcon
   private final BasicStroke stroke;
   private final Color foregroundColor;
   private final Color backgroundColor;
+  private boolean largeSize = false;
 
 	public CloseIcon(int iconSize)
   {
@@ -58,6 +59,11 @@ public class CloseIcon
     foregroundColor = foreground;
     backgroundColor = background;
 	}
+
+  public void setUseLargeSize(boolean flag)
+  {
+    largeSize = flag;
+  }
 
 	@Override
 	public int getIconWidth()
@@ -91,19 +97,18 @@ public class CloseIcon
 	{
     Graphics2D g2 = (Graphics2D)g;
 
-    int offset = (int)(size * 0.3);
+    float factor = largeSize ? 0.15f : 0.25f;
+    int offset = (int)(size * factor);
     int p1 = offset;
     int p2 = size - offset;
 
     g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    Color oldBack = g2.getBackground();
     if (backgroundColor != null)
     {
       g2.setColor(backgroundColor);
       g2.fillRect(x, y, x + (size - x), y + (size - y));
-      g2.setColor(oldBack);
     }
 
     g2.setColor(getForeground(c));

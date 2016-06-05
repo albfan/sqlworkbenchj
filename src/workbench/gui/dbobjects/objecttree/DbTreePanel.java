@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -172,7 +171,8 @@ public class DbTreePanel
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
 
-    Icon icon = new CloseIcon(IconMgr.getInstance().getToolbarIconSize());
+    CloseIcon icon = new CloseIcon(IconMgr.getInstance().getToolbarIconSize());
+    icon.setUseLargeSize(true);
     closeButton = new WbToolbarButton(icon);
     closeButton.setActionCommand("close-panel");
     closeButton.addActionListener(this);

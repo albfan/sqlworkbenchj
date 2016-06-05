@@ -25,6 +25,7 @@ package workbench.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
@@ -48,8 +49,19 @@ public class PlatformHelper
     if (isWindows())
     {
       VersionNumber current = new VersionNumber(System.getProperty("os.version"));
-      VersionNumber vista = new VersionNumber(5,1);
-      return current.isNewerOrEqual(vista);
+      VersionNumber xp = new VersionNumber(5,1);
+      return current.isNewerOrEqual(xp);
+    }
+    return false;
+  }
+
+  public static boolean isWindows8()
+  {
+    if (isWindows())
+    {
+      VersionNumber current = new VersionNumber(System.getProperty("os.version"));
+      VersionNumber win8 = new VersionNumber(8,1);
+      return current.isNewerOrEqual(win8);
     }
     return false;
   }
