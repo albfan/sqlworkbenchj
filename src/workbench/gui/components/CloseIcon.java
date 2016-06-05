@@ -106,9 +106,9 @@ public class CloseIcon
         g2.setColor(c.getForeground());
       }
     }
-    g2.setStroke(stroke);
-    g2.drawLine(p1, p1, p2, p2);
-    g2.drawLine(p2, p1, p1, p2);
+
+    g2.drawLine(p1 + x, p1 + y, p2 + x, p2 + y);
+    g2.drawLine(p2 + x, p1 + y, p1+ x, p2 + y);
 	}
 }
 

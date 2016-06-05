@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -80,6 +80,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.CloseIcon;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.MultiSelectComboBox;
 import workbench.gui.components.WbLabelField;
@@ -171,7 +172,7 @@ public class DbTreePanel
     gc.anchor = GridBagConstraints.LINE_END;
     toolPanel.add(bar, gc);
 
-    ImageIcon icon = IconMgr.getInstance().getLabelIcon("close-panel");
+    Icon icon = CloseIcon.getIcon(IconMgr.getInstance().getToolbarIconSize());
     closeButton = new WbToolbarButton(icon);
     closeButton.setActionCommand("close-panel");
     closeButton.addActionListener(this);
