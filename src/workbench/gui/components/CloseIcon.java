@@ -31,7 +31,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 import javax.swing.Icon;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 /**
@@ -41,11 +40,15 @@ import javax.swing.UIManager;
 public class CloseIcon
 	implements Icon
 {
-	private final int size;
+  private static final float SMALL_SIZE_FACTOR = 0.3f;
+  private static final float LARGE_SIZE_FACTOR = 0.15f;
+  private static final Color DISABLED_FG_COLOR = UIManager.getDefaults().getColor("Button.disabledForeground");
+
   private final BasicStroke stroke;
   private final Color foregroundColor;
   private final Color backgroundColor;
-  private boolean largeSize = false;
+  private int offset;
+	private final int size;
 
 	public CloseIcon(int iconSize)
   {
@@ -55,14 +58,27 @@ public class CloseIcon
 	public CloseIcon(int iconSize, Color foreground, Color background)
 	{
 		size = iconSize;
-    stroke = new BasicStroke((float)(size / 10), BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER);
     foregroundColor = foreground;
     backgroundColor = background;
+    stroke = new BasicStroke(size / 12f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
+    calculateSize(false);
 	}
 
   public void setUseLargeSize(boolean flag)
   {
-    largeSize = flag;
+    calculateSize(flag);
+  }
+
+  private void calculateSize(boolean useLargeSize)
+  {
+    if (useLargeSize)
+    {
+      offset = (int)(size * LARGE_SIZE_FACTOR);
+    }
+    else
+    {
+      offset = (int)(size * SMALL_SIZE_FACTOR);
+    }
   }
 
 	@Override
@@ -83,13 +99,7 @@ public class CloseIcon
     {
       return foregroundColor == null ? c.getForeground() : foregroundColor;
     }
-    UIDefaults def = UIManager.getDefaults();
-    Color dc = def.getColor("Button.disabledForeground");
-    if (dc != null)
-    {
-      return dc;
-    }
-    return c.getForeground();
+    return DISABLED_FG_COLOR == null ? c.getForeground() : DISABLED_FG_COLOR;
   }
 
 	@Override
@@ -97,8 +107,6 @@ public class CloseIcon
 	{
     Graphics2D g2 = (Graphics2D)g;
 
-    float factor = largeSize ? 0.15f : 0.25f;
-    int offset = (int)(size * factor);
     int p1 = offset;
     int p2 = size - offset;
 
@@ -108,7 +116,7 @@ public class CloseIcon
     if (backgroundColor != null)
     {
       g2.setColor(backgroundColor);
-      g2.fillRect(x, y, x + (size - x), y + (size - y));
+      g2.fillRect(x, y, x + size, y + size);
     }
 
     g2.setColor(getForeground(c));
