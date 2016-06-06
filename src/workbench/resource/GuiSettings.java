@@ -36,12 +36,10 @@ import workbench.log.LogMgr;
 
 import workbench.db.objectcache.ObjectCacheStorage;
 
-import workbench.gui.lnf.LnFHelper;
 import workbench.gui.sql.FileReloadType;
 
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
-import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 
 
@@ -430,8 +428,7 @@ public class GuiSettings
 
   public static boolean useFlatTabCloseButton()
   {
-    boolean useFlatDefault = (PlatformHelper.isWindows8() && LnFHelper.isWindowsLookAndFeel()) || LnFHelper.isGTKLookAndFeel();
-    return Settings.getInstance().getBoolProperty("workbench.gui.tabclose.flat", useFlatDefault );
+    return Settings.getInstance().getBoolProperty("workbench.gui.tabclose.flat", false);
   }
 
 	public static boolean useSystemTrayForAlert()
