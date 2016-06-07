@@ -120,6 +120,7 @@ Supported parameters:
             <xsl:with-param name="type-id" select="java-sql-type"/>
             <xsl:with-param name="precision" select="dbms-data-size"/>
             <xsl:with-param name="scale" select="dbms-data-digits"/>
+            <xsl:with-param name="auto-inc" select="auto-increment"/>
             <xsl:with-param name="dbms-type" select="dbms-data-type"/>
           </xsl:call-template>
         </xsl:if>
@@ -585,6 +586,8 @@ Supported parameters:
     <xsl:param name="precision"/>
     <xsl:param name="scale"/>
     <xsl:param name="dbms-type"/>
+    <xsl:param name="auto-inc"/>
+    
     <xsl:choose>
       <xsl:when test="$type-id = 2005"> <!-- CLOB -->
         <xsl:text>text</xsl:text>
@@ -624,10 +627,24 @@ Supported parameters:
         </xsl:choose>
       </xsl:when>
       <xsl:when test="$type-id = 4">
-        <xsl:text>integer</xsl:text>
+        <xsl:choose>
+          <xsl:when test="$auto-inc = 'true'">
+	        <xsl:text>serial</xsl:text>
+	      </xsl:when>
+	      <xsl:otherwise>
+        	<xsl:text>integer</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:when>
       <xsl:when test="$type-id = -5">
-        <xsl:text>bigint</xsl:text>
+        <xsl:choose>
+          <xsl:when test="$auto-inc = 'true'">
+	        <xsl:text>bigserial</xsl:text>
+	      </xsl:when>
+	      <xsl:otherwise>
+        	<xsl:text>bigint</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:when>
       <xsl:when test="$type-id = 5">
         <xsl:text>smallint</xsl:text>
@@ -656,10 +673,24 @@ Supported parameters:
         </xsl:if>
         <xsl:if test="$scale = 0 or $scale = ''">
           <xsl:if test="$precision &lt; 11">
-            <xsl:text>integer</xsl:text>
+            <xsl:choose>
+	          <xsl:when test="$auto-inc = 'true'">
+		        <xsl:text>serial</xsl:text>
+		      </xsl:when>
+		      <xsl:otherwise>
+	        	<xsl:text>integer</xsl:text>
+	          </xsl:otherwise>
+	        </xsl:choose>
           </xsl:if>
           <xsl:if test="$precision &gt; 10">
-            <xsl:text>bigint</xsl:text>
+            <xsl:choose>
+	          <xsl:when test="$auto-inc = 'true'">
+		        <xsl:text>bigserial</xsl:text>
+		      </xsl:when>
+		      <xsl:otherwise>
+	        	<xsl:text>bigint</xsl:text>
+	          </xsl:otherwise>
+	        </xsl:choose>
           </xsl:if>
         </xsl:if>
       </xsl:when>

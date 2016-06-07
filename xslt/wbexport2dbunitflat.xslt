@@ -12,6 +12,8 @@
   omit-xml-declaration="yes"
 />
 
+<xsl:param name="nullString">[NULL]</xsl:param>
+
 <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
 <xsl:variable name="lt" select="'&lt;'"/>
 <xsl:variable name="gt" select="'&gt;'"/>
@@ -36,7 +38,7 @@
       <xsl:variable name="value">
         <xsl:choose>
           <xsl:when test="@null='true'">
-            <xsl:value-of select="'NULL'"/>
+            <xsl:value-of select="$nullString"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:value-of select="."/>
