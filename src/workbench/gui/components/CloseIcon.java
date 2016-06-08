@@ -57,7 +57,8 @@ public class CloseIcon
 
 	public CloseIcon(int iconSize, Color foreground, Color background)
 	{
-		size = iconSize;
+    // only use even sizes
+		size = (iconSize % 2 == 0 ? iconSize : iconSize + 1);
     foregroundColor = foreground;
     backgroundColor = background;
     stroke = new BasicStroke(size / 12f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
@@ -71,14 +72,20 @@ public class CloseIcon
 
   private void calculateSize(boolean useLargeSize)
   {
+    int pct;
     if (useLargeSize)
     {
-      offset = (int)(size * LARGE_SIZE_FACTOR);
+      pct = (int)Math.ceil(size * LARGE_SIZE_FACTOR);
     }
     else
     {
-      offset = (int)(size * SMALL_SIZE_FACTOR);
+      pct = (int)Math.ceil(size * SMALL_SIZE_FACTOR);
     }
+    if (pct % 2 != 0)
+    {
+      pct ++;
+    }
+    offset = pct / 2;
   }
 
 	@Override
@@ -108,7 +115,7 @@ public class CloseIcon
     Graphics2D g2 = (Graphics2D)g;
 
     int p1 = offset;
-    int p2 = size - offset;
+    int p2 = size - offset - 1;
 
     g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

@@ -428,7 +428,7 @@ public class GuiSettings
 
   public static boolean useFlatTabCloseButton()
   {
-    return Settings.getInstance().getBoolProperty("workbench.gui.tabclose.flat", false);
+    return Settings.getInstance().getBoolProperty("workbench.gui.tabclose.flat", true);
   }
 
 	public static boolean useSystemTrayForAlert()
