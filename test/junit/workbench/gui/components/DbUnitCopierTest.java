@@ -114,7 +114,7 @@ public class DbUnitCopierTest
 			ds.setValue(row, 2, null);
 			ds.setUpdateTableToBeUsed(new TableIdentifier("PERSON"));
 			DbUnitCopier copier = new DbUnitCopier();
-			String xml = copier.createDBUnitXMLDataString(ds).trim();
+			String xml = copier.createDBUnitXMLDataString(ds, null).trim();
 			String expected =
 				"<dataset>\n" +
 				"  <person id=\"1\" firstname=\"Arthur\" lastname=\"Dent\"/>\n" +

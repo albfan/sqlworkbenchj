@@ -23,6 +23,7 @@
 package workbench.gui.components;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -43,7 +44,7 @@ import org.dbunit.dataset.datatype.DataType;
 public class DBUnitTableAdapter
 	implements ITable
 {
-
+  private int[] selectedRows;
 	private DataStore dataStore;
 
 	public DBUnitTableAdapter(DataStore dataStore)
@@ -59,8 +60,25 @@ public class DBUnitTableAdapter
 		{
 			throw new RowOutOfBoundsException();
 		}
+
+    if (selectedRows != null)
+    {
+      row = selectedRows[row];
+    }
 		return dataStore.getValue(row, column);
 	}
+
+  public void setSelectedRows(int[] rowsToCopy)
+  {
+    if (rowsToCopy == null)
+    {
+      selectedRows = null;
+    }
+    else
+    {
+      selectedRows = Arrays.copyOf(rowsToCopy, rowsToCopy.length);
+    }
+  }
 
 	@Override
 	public ITableMetaData getTableMetaData()
@@ -143,6 +161,7 @@ public class DBUnitTableAdapter
 	@Override
 	public int getRowCount()
 	{
+    if (selectedRows != null) return selectedRows.length;
 		return dataStore.getRowCount();
 	}
 

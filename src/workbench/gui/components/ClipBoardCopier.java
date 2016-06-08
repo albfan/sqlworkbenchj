@@ -62,7 +62,18 @@ import workbench.util.WbThread;
 
 /**
  * A class to copy the data of a {@link workbench.gui.components.WbTable} to
- * the clipboard. Either as tab-separated text or SQL Statements.
+ * the clipboard.
+ *
+ * The following formats are supported:
+ *
+ * <ul>
+ *  <li>tab-separated text, see {@link #copyDataToClipboard(boolean, boolean, boolean) }
+ *  <li>SQL DELETE, see {@link #copyAsSqlDelete(boolean, boolean)}</li>
+ *  <li>SQL DELETE/INSERT, see {@link #copyAsSqlDeleteInsert(boolean, boolean) (boolean, boolean)}</li>
+ *  <li>SQL INSERT, see {@link #copyAsSqlInsert(boolean, boolean) (boolean, boolean)}</li>
+ *  <li>SQL UPDATE, see {@link #copyAsSqlUpdate(boolean, boolean) (boolean, boolean)}</li>
+ *  <li>DBUnit XML, see {@link #doCopyAsDBUnitXML(boolean, boolean)}
+ * </ul>
  *
  * @author Thomas Kellerer
  */
@@ -195,7 +206,7 @@ public class ClipBoardCopier
 				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(ex));
 				WbSwingUtilities.showErrorMessage(client, msg);
 			}
-			LogMgr.logError(this, "Could not copy text data to clipboard", ex);
+			LogMgr.logError("ClipboardCopier.copyDataToClipboard()", "Could not copy text data to clipboard", ex);
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
@@ -237,7 +248,7 @@ public class ClipBoardCopier
 		{
 			// Should not happen.
 			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
-			LogMgr.logError("ClipBoardCopier.copyAsSql()", "Cannot copy without a DataStore!", null);
+			LogMgr.logError("ClipBoardCopier.copyAsDbUnit()", "Cannot copy without a DataStore!", null);
 			return;
 		}
 
@@ -269,12 +280,18 @@ public class ClipBoardCopier
 			// Otherwise not having the DbUnit jar in the classpath will prevent this class from being instantiated
 			// (and thus all other copy methods won't work either)
 			DbUnitCopier copier = new DbUnitCopier();
-			String sql = copier.createDBUnitXMLDataString(data);
+      int[] selected = null;
+      if (selectedOnly && client != null)
+      {
+        selected = client.getSelectedRows();
+      }
 
-			if (sql != null)
+      String xml = copier.createDBUnitXMLDataString(data, selected);
+
+			if (xml != null)
 			{
 				Clipboard clp = getClipboard();
-				StringSelection sel = new StringSelection(sql);
+				StringSelection sel = new StringSelection(xml);
 				clp.setContents(sel, sel);
 			}
 		}
@@ -293,7 +310,7 @@ public class ClipBoardCopier
 					WbSwingUtilities.showErrorMessage(client, msg);
 				}
 			}
-			LogMgr.logError("ClipboardCopier.doCopyAsSql()", "Error when copying as SQL", e);
+			LogMgr.logError("ClipboardCopier.doCopyAsDBUnitXML()", "Error when copying as SQL", e);
 		}
 		finally
 		{
@@ -387,7 +404,7 @@ public class ClipBoardCopier
 			// Can't do anything if we don't have PK
 			if (!pkOK)
 			{
-				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
+				LogMgr.logError("ClipBoardCopier.createSqlString()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
 				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNotAvailable");
 				return null;
 			}
@@ -424,7 +441,7 @@ public class ClipBoardCopier
 
 			if (columnsToInclude != null && columnsToInclude.size() == keyColumns.size() && columnsToInclude.containsAll(keyColumns))
 			{
-				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE statement with only key columns!", null);
+				LogMgr.logError("ClipBoardCopier.createSqlString()", "Cannot create UPDATE statement with only key columns!", null);
 				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessageKey(client, "ErrCopyNoNonKeyCols");
 				return null;
 			}
@@ -520,7 +537,7 @@ public class ClipBoardCopier
 				msg = StringUtil.replace(msg, "%errmsg%", ExceptionUtil.getDisplay(e));
 				if (!WbManager.isTest()) WbSwingUtilities.showErrorMessage(client, msg);
 			}
-			LogMgr.logError("ClipboardCopier.doCopyAsSql()", "Error when copying as SQL", e);
+			LogMgr.logError("ClipboardCopier.createSqlString()", "Error when copying as SQL", e);
 		}
 		finally
 		{

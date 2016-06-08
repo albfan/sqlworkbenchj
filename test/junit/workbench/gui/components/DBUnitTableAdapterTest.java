@@ -86,5 +86,49 @@ public class DBUnitTableAdapterTest
 		assertEquals("Arthur", name);
 	}
 
+	@Test
+	public void testSelectedRows()
+		throws Exception
+	{
+		ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+		id.setIsPkColumn(true);
+		ColumnIdentifier fname = new ColumnIdentifier("FIRSTNAME", Types.VARCHAR);
+		ColumnIdentifier lname = new ColumnIdentifier("LASTNAME", Types.VARCHAR);
+		ColumnIdentifier[] c = {id, fname, lname};
+
+		DataStore ds = new DataStore(new ResultInfo(c));
+		ds.setUpdateTableToBeUsed(new TableIdentifier("PERSON"));
+		int row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(42));
+		ds.setValue(row, 1, "Arthur");
+		ds.setValue(row, 2, "Dent");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(1));
+		ds.setValue(row, 1, "Zaphod");
+		ds.setValue(row, 2, "Beeblebrox");
+
+		row = ds.addRow();
+		ds.setValue(row, 0, Integer.valueOf(2));
+		ds.setValue(row, 1, "Tricia");
+		ds.setValue(row, 2, "McMillan");
+
+		DBUnitTableAdapter adapter = new DBUnitTableAdapter(ds);
+    int[] selected = new int[]{1};
+    adapter.setSelectedRows(selected);
+
+    assertEquals(1, adapter.getRowCount());
+    Object name = adapter.getValue(0, "FIRSTNAME");
+    assertEquals("Zaphod", name);
+
+    selected = new int[]{0,2};
+    adapter.setSelectedRows(selected);
+
+    assertEquals(2, adapter.getRowCount());
+    name = adapter.getValue(0, "FIRSTNAME");
+    assertEquals("Arthur", name);
+    name = adapter.getValue(1, "FIRSTNAME");
+    assertEquals("Tricia", name);
+	}
 
 }

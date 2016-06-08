@@ -37,13 +37,15 @@ import workbench.storage.DataStore;
  */
 public class DbUnitCopier
 {
-	public String createDBUnitXMLDataString(DataStore data)
+	public String createDBUnitXMLDataString(DataStore data, int selectedRows[])
 		throws Exception
 	{
 		if (data == null) return null;
 		if (data.getRowCount() <= 0) return null;
 
-		IDataSet fullDataSet = new DefaultDataSet(new DBUnitTableAdapter(data));
+    DBUnitTableAdapter dataTable = new DBUnitTableAdapter(data);
+    dataTable.setSelectedRows(selectedRows);
+		IDataSet fullDataSet = new DefaultDataSet(dataTable);
 		StringWriter s = new StringWriter();
 		FlatXmlDataSet.write(fullDataSet, s);
 		return s.toString();
