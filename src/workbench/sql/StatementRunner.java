@@ -106,7 +106,7 @@ public class StatementRunner
 
 	private final Map<String, String> sessionAttributes = new HashMap<>();
 	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
-
+  private int macroClientId;
   private ScriptErrorHandler retryHandler;
 
 	// The history provider is here to give SqlCommands access to the command history.
@@ -124,6 +124,16 @@ public class StatementRunner
       Settings.PROPERTY_LOG_ALL_SQL,
       Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
 	}
+
+  public void setMacroClientId(int id)
+  {
+    macroClientId = id;
+  }
+
+  public int getMacroClientId()
+  {
+    return macroClientId;
+  }
 
   public ScriptErrorHandler getRetryHandler()
   {

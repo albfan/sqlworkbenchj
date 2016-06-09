@@ -49,8 +49,6 @@ public class WbDeleteMacro
 
 	public static final String ARG_NAME = "name";
 
-	private int macroClientId = MacroManager.DEFAULT_STORAGE;
-
 	public WbDeleteMacro()
 	{
 		super();
@@ -68,11 +66,6 @@ public class WbDeleteMacro
 	protected boolean isConnectionRequired()
 	{
 		return false;
-	}
-
-	public void setMacroClientId(int clientId)
-	{
-		this.macroClientId = clientId;
 	}
 
 	@Override
@@ -101,7 +94,7 @@ public class WbDeleteMacro
 			return result;
 		}
 
-		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
+		MacroStorage storage = MacroManager.getInstance().getMacros(getMacroClientId());
 		MacroDefinition macro = storage.getMacro(macroName);
 
 		if (macro != null)

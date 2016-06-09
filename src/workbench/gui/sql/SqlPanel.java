@@ -455,6 +455,7 @@ public class SqlPanel
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
 
     stmtRunner = new StatementRunner();
+    stmtRunner.setMacroClientId(macroClientId);
     stmtRunner.setRowMonitor(this.rowMonitor);
     stmtRunner.setMessagePrinter(this);
     stmtRunner.setResultLogger(this);

@@ -49,6 +49,7 @@ import workbench.db.WbConnection;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 
 import workbench.util.ArgumentParser;
@@ -145,6 +146,12 @@ public class SqlCommand
     return dir;
   }
 
+  protected int getMacroClientId()
+  {
+    if (runner == null) return MacroManager.DEFAULT_STORAGE;
+    return runner.getMacroClientId();
+  }
+  
   protected String getDefaultSuccessMessage(StatementRunnerResult result)
   {
     String verb = getVerb();

@@ -64,6 +64,8 @@ public class MacroStorage
 	private List<MacroChangeListener> changeListeners = new ArrayList<>(1);
 	private WbFile sourceFile;
 
+  private boolean sendNotifications;
+
 	public MacroStorage(WbFile toLoad)
 	{
     sourceFile = toLoad;
@@ -236,16 +238,12 @@ public class MacroStorage
   {
 		synchronized (lock)
 		{
-      Comparator<MacroGroup> comp = new Comparator<MacroGroup>()
+      Comparator<MacroGroup> comp = (MacroGroup o1, MacroGroup o2) ->
       {
-        @Override
-        public int compare(MacroGroup o1, MacroGroup o2)
-        {
-          if (o1 == null && o2 == null) return 0;
-          if (o1 == null) return -1;
-          if (o2 == null) return 1;
-          return o1.getName().compareToIgnoreCase(o2.getName());
-        }
+        if (o1 == null && o2 == null) return 0;
+        if (o1 == null) return -1;
+        if (o2 == null) return 1;
+        return o1.getName().compareToIgnoreCase(o2.getName());
       };
 			Collections.sort(groups, comp);
 			modified = true;
@@ -357,6 +355,11 @@ public class MacroStorage
 	}
 
 	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
+  {
+    moveMacro(macro, newGroup, true);
+  }
+
+	private void moveMacro(MacroDefinition macro, MacroGroup newGroup, boolean notifyListeners)
 	{
 		MacroGroup currentGroup = findMacroGroup(macro.getName());
 
@@ -368,7 +371,10 @@ public class MacroStorage
 		newGroup.addMacro(macro);
 
 		this.modified = true;
-		this.fireMacroListChanged();
+		if (notifyListeners)
+    {
+      this.fireMacroListChanged();
+    }
 	}
 
 	public MacroGroup findMacroGroup(String macroName)
@@ -399,7 +405,7 @@ public class MacroStorage
 			{
 				addGroup(group);
 			}
-			moveMacro(macro, group);
+			moveMacro(macro, group, false);
 			macro.setSortOrder(group.getSize() + 1);
 			this.modified = true;
 		}
@@ -563,7 +569,7 @@ public class MacroStorage
     }
     updateMap();
   }
-  
+
   public void applyFilter(String filter)
   {
     for (MacroGroup group : groups)

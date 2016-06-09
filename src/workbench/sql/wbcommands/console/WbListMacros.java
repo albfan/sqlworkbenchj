@@ -31,6 +31,7 @@ import workbench.WbManager;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
+import workbench.storage.SortDefinition;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -38,7 +39,6 @@ import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
-import workbench.storage.SortDefinition;
 
 
 /**
@@ -50,7 +50,6 @@ public class WbListMacros
 	extends SqlCommand
 {
 	public static final String VERB = "WbListMacros";
-	private int macroClientId = MacroManager.DEFAULT_STORAGE;
 
 	public WbListMacros()
 	{
@@ -69,18 +68,13 @@ public class WbListMacros
 		return false;
 	}
 
-	public void setMacroClientId(int clientId)
-	{
-		this.macroClientId = clientId;
-	}
-
 	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
+		MacroStorage storage = MacroManager.getInstance().getMacros(getMacroClientId());
 		List<MacroGroup> groups = storage.getGroups();
 
 		String lblName = ResourceMgr.getString("LblMacroName");
