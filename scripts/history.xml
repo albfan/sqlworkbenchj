@@ -15,6 +15,7 @@
     <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new command (WbGenerateFKScript) is available to generate the DDL for only the foreign key constraints.</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now shown correctly</entry>
+    <entry dev-build="4" type="fix">WbListMacros, WbDeleteMacro and WbDefineMacro where always using the default macro file</entry>
     <entry dev-build="4" type="fix">Timestamps with microseconds (.SSSSSS in the format) where not imported correctly with WbImport</entry>
     <entry dev-build="4" type="fix">For Postgres, the LEAKPROOF attribute was not included in the generated source code for functions</entry>
     <entry dev-build="4" type="fix">WbSchemaDiff incorrectly combined all tables to be dropped in a single tag</entry>
