@@ -1038,28 +1038,25 @@ public class MainWindow
 	@Override
 	public void macroListChanged()
 	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			JMenu macros = this.getMacroMenu(i);
-			if (macros != null)
-			{
-				this.buildMacroMenu(macros);
-				MainPanel p = this.getSqlPanel(i);
-				this.setMacroMenuItemStates(macros, p.isConnected());
-			}
-		}
+    EventQueue.invokeLater(this::updateMacros);
 	}
 
-  private void buildMacroMenu(final JMenu macroMenu)
+  private void updateMacros()
   {
-    WbSwingUtilities.invoke(() ->
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
     {
-      _buildMacroMenu(macroMenu);
-    });
+      JMenu macros = this.getMacroMenu(i);
+      if (macros != null)
+      {
+        buildMacroMenu(macros);
+        MainPanel p = this.getSqlPanel(i);
+        this.setMacroMenuItemStates(macros, p.isConnected());
+      }
+    }
   }
 
-	private void _buildMacroMenu(JMenu macroMenu)
+	private void buildMacroMenu(JMenu macroMenu)
 	{
 		macroMenu.removeAll();
 		createMacro.addToMenu(macroMenu);

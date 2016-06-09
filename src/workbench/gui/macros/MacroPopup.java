@@ -541,9 +541,12 @@ public class MacroPopup
 	@Override
 	public void macroListChanged()
 	{
-		List<String> groups = tree.getExpandedGroupNames();
-		tree.loadMacros(true);
-		tree.expandGroups(groups);
+    EventQueue.invokeLater(() ->
+    {
+      List<String> groups = tree.getExpandedGroupNames();
+      tree.loadMacros(true);
+      tree.expandGroups(groups);
+    });
 	}
 
 	@Override

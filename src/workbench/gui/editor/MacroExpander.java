@@ -23,6 +23,7 @@
  */
 package workbench.gui.editor;
 
+import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
@@ -44,7 +45,6 @@ import workbench.sql.macros.MacroStorage;
 public class MacroExpander
 	implements MacroChangeListener, PropertyChangeListener
 {
-
 	public static final String CURSOR_PLACEHOLDER = "${c}";
 	public static final String SELECT_PLACEHOLDER = "${s}";
 
@@ -98,7 +98,7 @@ public class MacroExpander
 	@Override
 	public void macroListChanged()
 	{
-		readMap();
+		EventQueue.invokeLater(this::readMap);
 	}
 
 	public boolean hasExpandableMacros()

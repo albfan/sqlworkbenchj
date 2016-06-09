@@ -20,6 +20,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
 import workbench.interfaces.MacroChangeListener;
@@ -70,8 +71,11 @@ public class SaveMacrosAction
   @Override
   public void macroListChanged()
   {
-    String fname = MacroManager.getInstance().getMacros(macroClientId).getCurrentMacroFilename();
-    setTooltip(fname);
+    EventQueue.invokeLater(() ->
+    {
+      String fname = MacroManager.getInstance().getMacros(macroClientId).getCurrentMacroFilename();
+      setTooltip(fname);
+    });
   }
 
   @Override
