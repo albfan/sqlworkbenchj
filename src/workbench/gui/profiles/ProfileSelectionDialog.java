@@ -28,7 +28,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -57,7 +56,6 @@ import workbench.db.DbDriver;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
-import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
 
@@ -256,16 +254,7 @@ public class ProfileSelectionDialog
 		if (this.profiles.validateInput())
 		{
 			this.selectedProfile = this.profiles.getSelectedProfile();
-			boolean ok = true;
-
-			if (selectedProfile != null && this.selectedProfile.getPromptForUsername())
-			{
-				ok = promptUsername(this, selectedProfile);
-			}
-			else if (selectedProfile != null && this.selectedProfile.needsPasswordPrompt())
-			{
-				ok = promptPassword(this, selectedProfile);
-			}
+      boolean ok = ConnectionGuiHelper.doPrompt(this, selectedProfile);
 
 			if (ok)
 			{
@@ -277,44 +266,6 @@ public class ProfileSelectionDialog
 				}
 			}
 		}
-	}
-
-	public static boolean doPrompt(Window parent, ConnectionProfile profile)
-	{
-		if (profile == null) return true;
-
-		if (profile.getPromptForUsername())
-		{
-			return promptUsername(parent, profile);
-		}
-
-		if (profile.needsPasswordPrompt())
-		{
-			return promptPassword(parent, profile);
-		}
-		return true;
-	}
-
-	private static boolean promptUsername(Window parent, ConnectionProfile profile)
-	{
-		if (profile == null) return false;
-
-		LoginPrompt prompt = new LoginPrompt(profile.getSettingsKey());
-		boolean ok = ValidatingDialog.showConfirmDialog(parent, prompt, ResourceMgr.getString("TxtEnterLogin"));
-		if (!ok) return false;
-		profile.setPassword(prompt.getPassword());
-		profile.setTemporaryUsername(prompt.getUserName());
-		return true;
-	}
-
-	private static boolean promptPassword(Window parent, ConnectionProfile profile)
-	{
-		if (profile == null) return false;
-
-		String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
-		if (StringUtil.isEmptyString(pwd)) return false;
-		profile.setPassword(pwd);
-		return true;
 	}
 
 	public void profileListClicked(MouseEvent evt)

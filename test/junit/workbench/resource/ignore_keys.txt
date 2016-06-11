@@ -1,3 +1,4 @@
+LblTestConn
 LblGSTabName
 MsgProcessing
 MnuTxtCopyAsSqlDelete

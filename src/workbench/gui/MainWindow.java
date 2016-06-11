@@ -157,7 +157,7 @@ import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.menu.RecentFileManager;
 import workbench.gui.menu.SqlTabPopup;
-import workbench.gui.profiles.ProfileSelectionDialog;
+import workbench.gui.profiles.ConnectionGuiHelper;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.RenameableTab;
@@ -1715,7 +1715,7 @@ public class MainWindow
 
 	public void connectTo(ConnectionProfile profile, boolean showDialog, boolean loadWorkspace)
 	{
-		if (!ProfileSelectionDialog.doPrompt(this, profile))
+    if (!ConnectionGuiHelper.doPrompt(this, profile))
 		{
       LogMgr.logWarning("MainWindow.connectTo()", "Can't directly connect to a profile that requires prompting for a password or username");
 			return;

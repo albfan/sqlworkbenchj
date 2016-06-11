@@ -338,6 +338,7 @@ public class ConnectionEditorPanel
     editFilterButton = new FlatButton();
     editVariablesButton = new javax.swing.JButton();
     filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+    testConnectionButton = new javax.swing.JButton();
     groupNameLabel = new javax.swing.JLabel();
     tfProfileName = new StringPropertyEditor();
 
@@ -995,6 +996,10 @@ public class ConnectionEditorPanel
     gridBagConstraints.weighty = 1.0;
     jPanel6.add(filler2, gridBagConstraints);
 
+    testConnectionButton.setText(ResourceMgr.getString("LblTestConn")); // NOI18N
+    testConnectionButton.addActionListener(formListener);
+    jPanel6.add(testConnectionButton, new java.awt.GridBagConstraints());
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 16;
@@ -1003,7 +1008,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 14, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 14, 10);
     add(jPanel6, gridBagConstraints);
 
     groupNameLabel.setBackground(new java.awt.Color(255, 255, 255));
@@ -1049,6 +1054,10 @@ public class ConnectionEditorPanel
       else if (evt.getSource() == editVariablesButton)
       {
         ConnectionEditorPanel.this.editVariablesButtonActionPerformed(evt);
+      }
+      else if (evt.getSource() == testConnectionButton)
+      {
+        ConnectionEditorPanel.this.testConnectionButtonActionPerformed(evt);
       }
     }
 
@@ -1196,6 +1205,11 @@ public class ConnectionEditorPanel
 		}
   }//GEN-LAST:event_editVariablesButtonActionPerformed
 
+  private void testConnectionButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_testConnectionButtonActionPerformed
+  {//GEN-HEADEREND:event_testConnectionButtonActionPerformed
+    ConnectionGuiHelper.testConnection(this, getProfile());
+  }//GEN-LAST:event_testConnectionButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
   protected javax.swing.JTextField altDelimiter;
@@ -1250,6 +1264,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
   protected javax.swing.JTextField tagList;
+  protected javax.swing.JButton testConnectionButton;
   protected javax.swing.JTextField tfFetchSize;
   protected javax.swing.JTextField tfProfileName;
   protected javax.swing.JPasswordField tfPwd;
