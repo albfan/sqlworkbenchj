@@ -255,8 +255,8 @@
       <param name="section.autolabel" expression="1"/>
       <param name="section.autolabel.max.depth" expression="3"/>
       <param name="alignment" expression="left"/>
-      <param name="fop1.extensions" expression="0"/>
-      <param name="use.extensions" expression="0"/>
+      <param name="fop1.extensions" expression="1"/>
+      <param name="use.extensions" expression="1"/>
       <param name="tablecolumns.extension" expression="0"/>
       <param name="menuchoice.separator" expression=" &#187; "/>
       <param name="menuchoice.menu.separator" expression=" &#187; "/>
