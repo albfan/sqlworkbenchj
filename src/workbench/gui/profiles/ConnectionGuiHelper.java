@@ -21,6 +21,7 @@
 package workbench.gui.profiles;
 
 import java.awt.Window;
+import java.util.Collections;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -104,6 +105,7 @@ public class ConnectionGuiHelper
           conn = ConnectionMgr.getInstance().getConnection(profile, "$Connection-Test");
           connectingInfo.setVisible(false);
           WbSwingUtilities.showMessage(window, ResourceMgr.getFormattedString("MsgBatchConnectOk", profile.getUrl()));
+          ConnectionMgr.getInstance().abortAll(Collections.singletonList(conn));
         }
         catch (Exception ex)
         {
@@ -114,7 +116,6 @@ public class ConnectionGuiHelper
         finally
         {
           connectingInfo.dispose();
-          ConnectionMgr.getInstance().disconnect(conn);
         }
       }
     };
