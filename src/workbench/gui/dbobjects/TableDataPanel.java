@@ -525,7 +525,7 @@ public class TableDataPanel
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
 
 			LogMgr.logDebug("TableDataPanel.showRowCount()", "Retrieving row count using:\n" + sql);
-      
+
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
 			{
@@ -650,7 +650,7 @@ public class TableDataPanel
 		return sql;
 	}
 
-	private String buildSqlForTable(TableDefinition tableDef)
+	private String buildSqlForTable(TableDefinition tableDef, boolean respectMaxrows)
 	{
 		TableIdentifier tbl;
 		List<ColumnIdentifier> columns;
@@ -670,7 +670,8 @@ public class TableDataPanel
 		{
 			sort = lastSort.getSqlExpression(dbConnection.getMetadata());
 		}
-		String sql = builder.getSelectForColumns(tbl, columns, sort, dataDisplay.getMaxRows());
+    int maxRows = respectMaxrows ? dataDisplay.getMaxRows() : 0;
+		String sql = builder.getSelectForColumns(tbl, columns, sort, maxRows);
 		return sql;
 	}
 
@@ -824,7 +825,7 @@ public class TableDataPanel
 		if (!useDataStoreSource)
 		{
 			retrieveTableDefinition();
-			sql = this.buildSqlForTable(tableDefinition);
+			sql = this.buildSqlForTable(tableDefinition, respectMaxRows);
 			if (sql == null)
 			{
 				return;
