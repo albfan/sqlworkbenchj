@@ -24,10 +24,12 @@
 package workbench.util;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -56,6 +58,9 @@ public class WbDateFormatter
   private InfinityLiterals infinityLiterals = InfinityLiterals.PG_LITERALS;
 
   private boolean illegalDateAsNull;
+  private boolean containsTimeFields;
+
+  private final String timeFields = "ahKkHmsSAnNVzOXxZ";
 
   public WbDateFormatter(String pattern)
   {
@@ -117,6 +122,16 @@ public class WbDateFormatter
     }
     this.formatter = builder.toFormatter().withResolverStyle(ResolverStyle.SMART);
     this.pattern = pattern;
+    this.containsTimeFields = checkForTimeFields();
+  }
+
+  private boolean checkForTimeFields()
+  {
+    for (int i=0; i < timeFields.length(); i++)
+    {
+      if (pattern.indexOf(timeFields.charAt(i)) > -1) return true;
+    }
+    return false;
   }
 
   public void setInfinityLiterals(InfinityLiterals literals)
@@ -162,6 +177,17 @@ public class WbDateFormatter
       }
     }
 
+    // If the pattern for a java.sql.Date contains time fields DateTimeFormatter will
+    // throw an exception.
+    // So we convert the java.sql.Date to a java.util.Date as a fallback.
+    // It's unlikely the java.sql.Date instance will have a proper time value,
+    // but at least the date part will be formatted the way the user expects it
+    if (containsTimeFields)
+    {
+      java.util.Date ud = new java.util.Date(date.getTime());
+      LocalDateTime ldt = LocalDateTime.ofInstant(ud.toInstant(), ZoneId.systemDefault());
+      return formatter.format(ldt);
+    }
     return formatter.format(date.toLocalDate());
   }
 
