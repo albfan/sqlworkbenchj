@@ -99,13 +99,14 @@ public class ConnectionGuiHelper
       @Override
       public void run()
       {
-        WbConnection conn = null;
         try
         {
-          conn = ConnectionMgr.getInstance().getConnection(profile, "$Connection-Test");
+          WbConnection conn = ConnectionMgr.getInstance().getConnection(profile, "$Connection-Test");
+
           connectingInfo.setVisible(false);
-          WbSwingUtilities.showMessage(window, ResourceMgr.getFormattedString("MsgBatchConnectOk", profile.getUrl()));
           ConnectionMgr.getInstance().abortAll(Collections.singletonList(conn));
+
+          WbSwingUtilities.showMessage(window, ResourceMgr.getFormattedString("MsgBatchConnectOk", profile.getUrl()));
         }
         catch (Exception ex)
         {
