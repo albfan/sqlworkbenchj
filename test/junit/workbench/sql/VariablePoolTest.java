@@ -89,6 +89,38 @@ public class VariablePoolTest
 		assertEquals("select * from person where lastname = 'Dent';", replaced);
 	}
 
+  @Test
+  public void deleteVars()
+  {
+		VariablePool pool = VariablePool.getInstance();
+    pool.setParameterValue("base_id", "42");
+    pool.setParameterValue("base_name", "Arthur");
+    pool.setParameterValue("some_var", "Tricia");
+    pool.setParameterValue("some_varx", "Tricia");
+    int deleted = pool.removeVariable("base*");
+    assertEquals(2, deleted);
+    assertFalse(pool.isDefined("base_id"));
+    assertFalse(pool.isDefined("base_name"));
+    assertTrue(pool.isDefined("some_var"));
+    pool.setParameterValue("name_var", "Zaphod");
+    deleted = pool.removeVariable("some_var");
+    assertEquals(1, deleted);
+
+    pool.setParameterValue("answer", "42");
+    deleted = pool.removeVariable("*");
+    assertEquals(2, deleted);
+    assertEquals(0, pool.getParameterCount());
+
+    pool.setParameterValue("cust_id", "42");
+    pool.setParameterValue("person_id", "42");
+    pool.setParameterValue("id_value", "42");
+    deleted = pool.removeVariable("*_id");
+    assertEquals(2, deleted);
+    assertTrue(pool.isDefined("id_value"));
+    assertFalse(pool.isDefined("cust_id"));
+    assertFalse(pool.isDefined("person_id"));
+  }
+
 	@Test
 	public void testRemoveVars()
 	{

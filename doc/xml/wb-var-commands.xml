@@ -5,6 +5,10 @@
     All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
   </para></important>
 
+    <para>
+      More details about using variables can be found in the chapter <xref linkend="using-variables"/>.
+    </para>
+
   <section id="wb-define-var">
     <title>Define a script variable - WbVarDef</title>
 
@@ -13,10 +17,13 @@
       SQL execution.
     </para>
     <para>
-      There are two possibilities to define a variable. The short syntax is: <literal>WbVarDef variable=value</literal>
+      There are two possibilities to define a variable.
     </para>
     <para>
-      The long syntax allows to variables in a different way:
+       The short syntax is: <literal>WbVarDef variable=value</literal>
+    </para>
+    <para>
+      The long syntax allows to define variables in a different way:
     </para>
     <informaltable frame="all">
       <tgroup cols="2" align="left">
@@ -74,17 +81,26 @@
   <section id="command-vardelete">
     <title>Delete a script variable - WbVarDelete</title>
 
-    <para>This removes an internal variable from the variable list.
-      Details can be found in the chapter <xref linkend="using-variables"/>.
+    <para>
+      This removes a variable.
     </para>
+
+    <para>
+      The syntax is <literal>WbVarDelete variable</literal>
+    </para>
+    <para>
+      <literal>variable</literal> is the name of the variable to be removed.
+      The name can contain wildcards. <literal>WbVarDelete *</literal> will remove all defined variables.
+      <literal>WbVarDelete id*</literal> will remove all variables starting with <literal>id</literal>.
+    </para>
+
   </section>
 
   <section id="command-varlist">
     <title>Show defined script variables - WbVarList</title>
 
     <para>
-      This list all defined variables from the variable list.
-      Details can be found in the chapter <xref linkend="using-variables"/>.
+      This shows all defined variables.
     </para>
   </section>
 

@@ -69,16 +69,19 @@ public class WbRemoveVar extends SqlCommand
 		}
 		else
 		{
-			boolean removed = VariablePool.getInstance().removeVariable(var);
-			if (removed)
+			int removed = VariablePool.getInstance().removeVariable(var);
+      if (var.indexOf('*') > -1 || var.indexOf('%') > -1)
+      {
+        msg = ResourceMgr.getFormattedString("MsgVarPatternRemoved", removed);
+      }
+      else if (removed > 0)
 			{
-				msg = ResourceMgr.getString("MsgVarDefVariableRemoved");
+				msg = ResourceMgr.getFormattedString("MsgVarRemoved", var);
 			}
 			else
 			{
-				msg = ResourceMgr.getString("MsgVarDefVariableNotRemoved");
+				msg = ResourceMgr.getFormattedString("MsgVarNotRemoved", var);
 			}
-			msg = msg.replace("%var%", var);
 		}
 
 		result.addMessage(msg);

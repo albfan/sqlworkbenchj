@@ -27,6 +27,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -440,14 +441,45 @@ public class VariablePool
 		return result.toString();
 	}
 
-	public boolean removeVariable(String varName)
+  /**
+   * Remove
+   * @param varName
+   * @return
+   */
+	public int removeVariable(String varName)
 	{
-		if (varName == null) return false;
+		if (varName == null) return 0;
+
+    List<String> toDelete = new ArrayList<>();
+
+    try
+    {
+      String search = StringUtil.wildcardToRegex(varName, true);
+      Pattern p = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
+      for (String name : data.keySet())
+      {
+        Matcher m = p.matcher(name);
+        if (m.matches())
+        {
+          toDelete.add(name);
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      toDelete.add(varName);
+    }
+
+    int deletedCount = 0;
 		synchronized (this.data)
 		{
-			Object old = this.data.remove(varName);
-			return (old != null);
+      for (String name : toDelete)
+      {
+        Object old = this.data.remove(name);
+        if (old != null) deletedCount ++;
+      }
 		}
+    return deletedCount;
 	}
 
 	public List<String> getLookupValues(String varName)
