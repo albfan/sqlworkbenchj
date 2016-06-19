@@ -68,6 +68,12 @@ public class SchemaIdentifier
   }
 
   @Override
+  public void setName(String name)
+  {
+    schemaName = name;
+  }
+
+  @Override
   public String getObjectName(WbConnection conn)
   {
     return conn.getMetadata().quoteObjectname(schemaName);

@@ -60,6 +60,7 @@ public class ObjectTreeNode
   private Long rowCount;
   private int originalIndex;
   private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
+  private DbObject originalObject;
 
   public ObjectTreeNode(DbObject dbo)
   {
@@ -104,7 +105,7 @@ public class ObjectTreeNode
   {
     return isSchemaNode() || isCatalogNode();
   }
-  
+
   public boolean isSchemaNode()
   {
     if (getDbObject() instanceof SchemaIdentifier) return true;
@@ -202,6 +203,63 @@ public class ObjectTreeNode
       return nodeName;
     }
     return db.getObjectName();
+  }
+
+  public boolean isChanged()
+  {
+    return originalObject != null;
+  }
+
+  public void resetChanged()
+  {
+    originalObject = null;
+  }
+
+  private DbObject copyUserObject()
+  {
+    DbObject dbo = getDbObject();
+    if (dbo == null) return null;
+    if (dbo instanceof TableIdentifier)
+    {
+      return ((TableIdentifier)dbo).createCopy();
+    }
+    if (dbo instanceof ColumnIdentifier)
+    {
+      return ((ColumnIdentifier)dbo).createCopy();
+    }
+    if (dbo instanceof SchemaIdentifier)
+    {
+      SchemaIdentifier copy = new SchemaIdentifier(dbo.getSchema());
+      copy.setCatalog(dbo.getCatalog());
+      return copy;
+    }
+    if (dbo instanceof CatalogIdentifier)
+    {
+      CatalogIdentifier copy = new CatalogIdentifier(dbo.getCatalog());
+      return copy;
+    }
+    if (dbo instanceof IndexDefinition)
+    {
+      return ((IndexDefinition)dbo).createCopy();
+    }
+    return null;
+  }
+
+  @Override
+  public void setUserObject(Object newName)
+  {
+    if (newName instanceof String)
+    {
+      // this happens when a node is edited manually in the tree
+      originalObject = copyUserObject();
+      DbObject dbo = getDbObject();
+      String name = (String)newName;
+      dbo.setName(name);
+    }
+    else
+    {
+      super.setUserObject(newName);
+    }
   }
 
   @Override

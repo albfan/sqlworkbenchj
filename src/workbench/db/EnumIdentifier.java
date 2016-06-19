@@ -82,6 +82,12 @@ public class EnumIdentifier
   }
 
   @Override
+  public void setName(String name)
+  {
+    this.enumName = name;
+  }
+
+  @Override
   public String getObjectName()
   {
     return enumName;

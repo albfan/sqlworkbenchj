@@ -92,6 +92,7 @@ public class DbObjectsTree
     dragSource = new ObjectTreeDragSource(this);
     loader = new TreeLoader();
     statusBar = status;
+    setTransferHandler(new PlainTextTransferhandler(this));
   }
 
   public TreeLoader getLoader()

@@ -707,6 +707,12 @@ public class TableIdentifier
     }
   }
 
+  @Override
+  public void setName(String name)
+  {
+    setTablename(name);
+  }
+
   private void setTablename(String name)
   {
     if (name == null) return;

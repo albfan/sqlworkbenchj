@@ -408,6 +408,12 @@ public class ColumnIdentifier
   }
 
   @Override
+  public void setName(String name)
+  {
+    this.name = name;
+  }
+
+  @Override
   public String getObjectName()
   {
     return getColumnName();

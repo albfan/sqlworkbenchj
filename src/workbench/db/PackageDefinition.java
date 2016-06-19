@@ -54,6 +54,12 @@ public class PackageDefinition
   }
 
   @Override
+  public void setName(String name)
+  {
+    packageName = name;
+  }
+
+  @Override
   public String getObjectName(WbConnection conn)
   {
     return SqlUtil.buildExpression(conn, this);

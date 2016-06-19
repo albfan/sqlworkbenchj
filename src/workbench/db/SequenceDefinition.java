@@ -122,6 +122,12 @@ public class SequenceDefinition
   }
 
   @Override
+  public void setName(String name)
+  {
+    this.sequenceName = name;
+  }
+
+  @Override
   public String getDropStatement(WbConnection con, boolean cascade)
   {
     return null;

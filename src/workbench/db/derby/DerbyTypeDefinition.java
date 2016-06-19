@@ -68,6 +68,12 @@ public class DerbyTypeDefinition
   }
 
   @Override
+  public void setName(String name)
+  {
+    this.typeName = name;
+  }
+
+  @Override
   public String getObjectName()
   {
     return typeName;

@@ -184,6 +184,12 @@ public class IndexDefinition
     comment = c;
   }
 
+  @Override
+  public void setName(String name)
+  {
+    this.indexName = name;
+  }
+
   public void setCatalog(String idxCatalog)
   {
     // not yet implemented

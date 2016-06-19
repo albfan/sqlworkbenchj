@@ -176,6 +176,12 @@ public class ProcedureDefinition
     return dbmsProcType;
   }
 
+  @Override
+  public void setName(String name)
+  {
+    procName = name;
+  }
+
   public void setDisplayName(String name)
   {
     displayName = name;

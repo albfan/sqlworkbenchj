@@ -78,6 +78,12 @@ public class CatalogIdentifier
   }
 
   @Override
+  public void setName(String name)
+  {
+    catalogName = name;
+  }
+
+  @Override
   public String getObjectName(WbConnection conn)
   {
     return conn.getMetadata().quoteObjectname(catalogName);

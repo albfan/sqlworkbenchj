@@ -108,7 +108,7 @@ public class VariablePoolTest
 
     pool.setParameterValue("answer", "42");
     deleted = pool.removeVariable("*");
-    assertEquals(2, deleted);
+    assertEquals(3, deleted);
     assertEquals(0, pool.getParameterCount());
 
     pool.setParameterValue("cust_id", "42");

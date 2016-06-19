@@ -127,6 +127,8 @@ public interface DbObject
    */
   void setComment(String cmt);
 
+  default void setName(String name) {}
+
   String getDropStatement(WbConnection con, boolean cascade);
 
   boolean supportsGetSource();

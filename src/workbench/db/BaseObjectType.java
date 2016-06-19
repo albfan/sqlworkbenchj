@@ -42,9 +42,9 @@ public class BaseObjectType
   implements ComparableDbObject
 {
   private String catalog;
-  private final String schema;
-  private final String typeName;
-  private final String objectType = "TYPE";
+  private String schema;
+  private String typeName;
+  private String objectType = "TYPE";
   private String remarks;
   private String source;
   private List<ColumnIdentifier> columns;
@@ -100,6 +100,12 @@ public class BaseObjectType
   public String getObjectExpression(WbConnection conn)
   {
     return typeName;
+  }
+
+  @Override
+  public void setName(String name)
+  {
+    this.typeName = name;
   }
 
   @Override
