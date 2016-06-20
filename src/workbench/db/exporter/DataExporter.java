@@ -1255,15 +1255,7 @@ public class DataExporter
 
       if (!this.dbConn.getAutoCommit() && dbConn.selectStartsTransaction())
       {
-        // Postgres needs a rollback, but this doesn't (or shouldn't!)
-        // hurt with other DBMS either
-        try
-        {
-          this.dbConn.rollback();
-        }
-        catch (Throwable th)
-        {
-        }
+        dbConn.rollbackSilently();
       }
     }
     finally
