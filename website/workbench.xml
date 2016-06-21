@@ -117,6 +117,7 @@ WHERE id=42;</p>
       <li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a></li>
       <li><a target="_blank" href="http://www-01.ibm.com/software/data/informix">Informix</a></li>
       <li><a target="_blank" href="http://www.ingres.com/">Ingres</a></li>
+      <li><a target="_blank" href="https://aws.amazon.com/redshift/getting-started/">Amazon Redshift</a> (<a target="_blank" href="http://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html">Download JDBC driver</a>)</li>
       <li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="https://bitbucket.org/xerial/sqlite-jdbc">SQLiteJDBC</a>)</li>
       <li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
       <li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
