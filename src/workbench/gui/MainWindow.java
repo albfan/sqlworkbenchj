@@ -1302,8 +1302,13 @@ public class MainWindow
 	public boolean usesSeparateConnection()
 	{
 		if (!canUseSeparateConnection()) return false;
-		final MainPanel current = this.getCurrentPanel();
-		WbConnection conn = current.getConnection() ;
+    return usesSeparateConnection(this.getCurrentPanel());
+	}
+
+	public boolean usesSeparateConnection(MainPanel panel)
+	{
+		if (!canUseSeparateConnection()) return false;
+		WbConnection conn = panel.getConnection() ;
 
 		return (currentConnection != null && conn != this.currentConnection);
 	}
@@ -2281,7 +2286,7 @@ public class MainWindow
   }
 
 	/**
-	 *	This does the real disconnect action.
+	 *	This does the real disconnect action for all tabs.
 	 */
 	protected void doDisconnect()
 	{
@@ -3747,8 +3752,8 @@ public class MainWindow
 
 	/**
 	 * Removes the indicated tab without checking for modified file etc.
-	 * If the tab has a separate connection, the connection is closed (disconnected)
-	 * as well.
+	 * If the tab has a separate connection, the connection is closed (disconnected) as well (in a background thread).
+   *
 	 * If a single connection for all tabs is used, the connection is <b>not</b> closed.
 	 */
 	protected void removeTab(int index, boolean updateGUI, boolean addToHistory)
@@ -3770,26 +3775,16 @@ public class MainWindow
 		{
 			setIgnoreTabChange(true);
 
-			WbConnection conn = panel.getConnection();
-
-			// this does not really close the connection
-			// it simply tells the panel that it should
-			// release anything attached to the connection!
-			// the actual disconnect from the DB is done afterwards
-			// through the ConnectionMgr
-			panel.disconnect();
+      WbConnection conn = panel.getConnection();
+      boolean doDisconnect = usesSeparateConnection(panel) || (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab());
 
 			panel.dispose();
 
 			BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
 
-			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
-
-			if (doDisconnect)
+      if (doDisconnect)
 			{
-				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-				conn.disconnect();
-				showStatusMessage("");
+        disconnectInBackground(conn);
 			}
 			disposeMenu(panelMenus.get(index));
 			this.panelMenus.remove(index);
@@ -3825,6 +3820,28 @@ public class MainWindow
 		}
     updateTabHistoryMenu();
 	}
+
+	private void disconnectInBackground(final WbConnection conn)
+  {
+    if (conn == null) return;
+
+    WbThread close = new WbThread("Disconnect " + conn.getId())
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          conn.disconnect();
+        }
+        catch (Throwable th)
+        {
+          LogMgr.logWarning("MainWindow.closeConnection()", "Error when closing connection");
+        }
+      }
+    };
+    close.start();
+  }
 
 	private void disposeMenu(JMenuBar menuBar)
 	{

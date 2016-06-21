@@ -1034,6 +1034,7 @@ public class DbExplorerPanel
 	public void dispose()
 	{
 		this.reset();
+    this.disconnect();
 		if (tables != null)
 		{
 			this.tables.dispose();

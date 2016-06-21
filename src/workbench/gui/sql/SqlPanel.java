@@ -4309,6 +4309,7 @@ public class SqlPanel
 		Settings.getInstance().removePropertyChangeListener(this);
 		Settings.getInstance().removeFontChangedListener(this);
 
+    disconnect();
 		reset();
 		if (iconHandler != null) iconHandler.dispose();
 		if (stmtRunner != null) this.stmtRunner.dispose();
