@@ -123,7 +123,7 @@ public class KeepAliveDaemon
 
       synchronized (this)
       {
-        if (((now - lastAction) > idleTime))
+        if ((now - lastAction) > idleTime)
         {
           runSqlScript();
           this.lastAction = now;
