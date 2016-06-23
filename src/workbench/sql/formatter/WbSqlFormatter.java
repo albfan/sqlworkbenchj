@@ -738,7 +738,7 @@ public class WbSqlFormatter
 			}
 			else if (text.equals("("))
 			{
-				if ((!lastToken.isSeparator() || lastToken == t) && !this.lastCharIsWhitespace()) this.appendText(' ');
+				if ((!lastToken.isSeparator() || lastToken == t) && !this.lastCharIsWhitespace() && !isDbFunction(lastToken)) this.appendText(' ');
 				this.appendText(text);
 				bracketCount ++;
 			}
@@ -1117,6 +1117,11 @@ public class WbSqlFormatter
 	}
 
 	private SQLToken processSubSelect(SQLToken firstToken, int currentBracketCount, boolean checkForList, int maxSubLength)
+  {
+    return processSubSelect(firstToken, currentBracketCount, checkForList, maxSubLength, newLineForSubSelects);
+  }
+
+	private SQLToken processSubSelect(SQLToken firstToken, int currentBracketCount, boolean checkForList, int maxSubLength, boolean useNewLine)
 	{
 		SQLToken t = skipComments();
 		int bracketCount = currentBracketCount;
@@ -1137,7 +1142,7 @@ public class WbSqlFormatter
 		}
 
 		int lastIndent = 0;
-		if (newLineForSubSelects)
+		if (useNewLine)
 		{
 			lastIndent = indent == null ? 2 : indent.length() + 2;
 		}
@@ -1155,7 +1160,7 @@ public class WbSqlFormatter
 
 				if (bracketCount == 0)
 				{
-					appendSubSelect(subSql, lastIndent, maxSubLength);
+					appendSubSelect(subSql, lastIndent, maxSubLength, useNewLine);
 					return t;
 				}
 			}
@@ -1171,9 +1176,14 @@ public class WbSqlFormatter
 	}
 
 	private void appendSubSelect(StringBuilder subSql, int lastIndent, int maxSubLength)
+  {
+    appendSubSelect(subSql, lastIndent, maxSubLength, this.newLineForSubSelects);
+  }
+
+	private void appendSubSelect(StringBuilder subSql, int lastIndent, int maxSubLength, boolean useNewline)
 	{
 		WbSqlFormatter f = new WbSqlFormatter(subSql.toString(), lastIndent, maxSubLength, this.dbId);
-		f.setNewLineForSubselects(this.newLineForSubSelects);
+		f.setNewLineForSubselects(useNewline);
 		f.setFunctionCase(this.functionCase);
 		f.setIdentifierCase(this.identifierCase);
 		f.setKeywordCase(this.keywordCase);
@@ -1191,13 +1201,13 @@ public class WbSqlFormatter
 		{
 			s = s.replaceAll(" *" + WbSqlFormatter.NL + " *", " ").trim();
 		}
-		if (newLineForSubSelects && useFormattedQuery)
+		if (useNewline && useFormattedQuery)
 		{
 			this.result.append(WbSqlFormatter.NL);  // do not use appendNewLine() as it will indent the new line
 			this.appendText(StringUtil.padRight(" ", lastIndent));
 		}
 		this.appendText(s);
-		if (newLineForSubSelects && useFormattedQuery)
+		if (useNewline && useFormattedQuery)
 		{
 			this.appendNewline();
 		}
@@ -1981,7 +1991,7 @@ public class WbSqlFormatter
 						StringBuilder oldIndent = this.indent;
 						this.indent = new StringBuilder(indent == null ? "" : indent).append("  ");
 						this.appendNewline();
-						t = processSubSelect(null, 1, false);
+						t = processSubSelect(null, 1, false, maxSubselectLength, false);
 						this.indent = oldIndent;
 						this.appendNewline();
 						if (t == null) return t;
@@ -1996,7 +2006,7 @@ public class WbSqlFormatter
 							return t;
 						}
 						appendText(t.getContents());
-						appendNewline();
+  					appendNewline();
 						bracketCount --;
 						afterAs = false;
 					}

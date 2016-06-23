@@ -1554,20 +1554,20 @@ public class WbSqlFormatterTest
 			"ip_fromip and ip_endip),0) isNew\n"+
 			"from tmp ";
 
-		expected = "WITH tmp AS\n" +
-							"(\n" +
-							"  SELECT * FROM users\n" +
-							")\n" +
-							"SELECT tmp.*,\n" +
-							"       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
-							"FROM tmp";
+		expected =
+      "WITH tmp AS\n" +
+      "(\n" +
+      "  SELECT * FROM users\n" +
+      ")\n" +
+      "SELECT tmp.*,\n" +
+      "       nvl((SELECT 1 FROM td_cdma_ip WHERE tmp.src_ip BETWEEN ip_fromip AND ip_endip),0) isNew\n" +
+      "FROM tmp";
 		f = new WbSqlFormatter(sql);
 		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		f.addDBFunctions(CollectionUtil.caseInsensitiveSet("nvl"));
 		formatted = f.getFormattedSql();
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
-
 
 		// Make sure a WITH in a different statement is not mistaken for a CTE
 		sql = "CREATE VIEW vfoo \n" +
@@ -1594,21 +1594,22 @@ public class WbSqlFormatterTest
 			"select * from first_cte f join second_cte s on (f.col1 = s.col2)";
 		f = new WbSqlFormatter(sql);
 		formatted = f.getFormattedSql();
-		expected = "WITH first_cte (col1, col2) AS\n" +
-             "(\n" +
-             "  SELECT col1, col2 FROM table_1\n" +
-             "),\n" +
-             "second_cte (col1, col2) AS\n" +
-             "(\n" +
-             "  SELECT col4, col5 FROM table_2\n" +
-             "),\n" +
-             "third_cte AS\n" +
-             "(\n" +
-             "  SELECT 1, 2 FROM dual\n" +
-             ")\n" +
-             "SELECT *\n" +
-             "FROM first_cte f\n" +
-             "  JOIN second_cte s ON (f.col1 = s.col2)";
+		expected =
+      "WITH first_cte (col1, col2) AS\n" +
+      "(\n" +
+      "  SELECT col1, col2 FROM table_1\n" +
+      "),\n" +
+      "second_cte (col1, col2) AS\n" +
+      "(\n" +
+      "  SELECT col4, col5 FROM table_2\n" +
+      "),\n" +
+      "third_cte AS\n" +
+      "(\n" +
+      "  SELECT 1, 2 FROM dual\n" +
+      ")\n" +
+      "SELECT *\n" +
+      "FROM first_cte f\n" +
+      "  JOIN second_cte s ON (f.col1 = s.col2)";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 
@@ -1628,7 +1629,32 @@ public class WbSqlFormatterTest
              "FROM temp1";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
-	}
+
+    sql =
+      "with dates as\n" +
+      "(\n" +
+      "    select dt \n" +
+      "    from generate_series(current_date - 10, current_date, interval '1' day) as d (dt)\n" +
+      ")\n" +
+      "select * \n" +
+      "from dates";
+	  f = new WbSqlFormatter(sql, 50, DbMetadata.DBID_PG);
+    f.setFunctionCase(GeneratedIdentifierCase.lower);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setNewLineForSubselects(true);
+		formatted = f.getFormattedSql();
+    expected =
+      "WITH dates AS\n" +
+      "(\n" +
+      "  SELECT dt\n" +
+      "  FROM generate_series(current_date- 10,current_date,INTERVAL '1' DAY) AS d (dt)\n" +
+      ")\n" +
+      "SELECT *\n" +
+      "FROM dates";
+//		System.out.println("**************\n" + formatted + "\n------------------\n" + expected + "\n*************");
+    assertEquals(expected, formatted);
+  }
 
 	@Test
 	public void testCTAS()
@@ -2520,4 +2546,17 @@ public class WbSqlFormatterTest
 			assertEquals(expected, formatted);
 	}
 
+  @Test
+  public void testSelectFromFunction()
+  {
+    String sql = "select n from generate_series(1, 1, 1) AS x(n)";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100, DbMetadata.DBID_PG);
+    f.setFunctionCase(GeneratedIdentifierCase.lower);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT n\n" +
+      "FROM generate_series(1,1,1) AS x (n)";
+    assertEquals(expected, formatted);
+  }
 }
