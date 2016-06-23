@@ -117,6 +117,8 @@ public class KeepAliveDaemon
         }
       }
 
+      if (stopThread) break;
+
       now = System.currentTimeMillis();
 
       synchronized (this)
