@@ -43,9 +43,9 @@ public class KeepAliveDaemon
   private long idleTime;
   private WbThread idleThread;
   private boolean stopThread;
-  final private WbConnection dbConnection;
+  private WbConnection dbConnection;
   private String sqlScript;
-  private long lastAction;
+  private volatile long lastAction;
 
   public KeepAliveDaemon(long idle, WbConnection con, String sql)
   {
@@ -56,7 +56,12 @@ public class KeepAliveDaemon
 
   public void startThread()
   {
-    this.shutdown();
+    if (this.idleThread != null)
+    {
+      LogMgr.logWarning("KeepAliveDaemon.startThread()", "startThread() called on already running daemon", new Exception("Backtrace"));
+      return;
+    }
+
     LogMgr.logInfo("KeepAliveDaemon.startThread()", "Initializing keep alive every " + getTimeDisplay(idleTime) + " with sql: " + this.sqlScript);
     this.idleThread = new WbThread(this, "KeepAlive/" + this.dbConnection.getId());
     this.idleThread.setPriority(Thread.MIN_PRIORITY);
@@ -72,6 +77,7 @@ public class KeepAliveDaemon
       try
       {
         this.stopThread = true;
+        this.dbConnection = null;
         this.idleThread.interrupt();
       }
       catch (Exception e)
@@ -81,7 +87,7 @@ public class KeepAliveDaemon
     }
   }
 
-  public synchronized void setLastDbAction(long millis)
+  public void setLastDbAction(long millis)
   {
     this.lastAction = millis;
   }
@@ -121,13 +127,10 @@ public class KeepAliveDaemon
 
       now = System.currentTimeMillis();
 
-      synchronized (this)
+      if ((now - lastAction) > idleTime)
       {
-        if ((now - lastAction) > idleTime)
-        {
-          runSqlScript();
-          this.lastAction = now;
-        }
+        runSqlScript();
+        this.lastAction = now;
       }
     }
   }
@@ -179,27 +182,23 @@ public class KeepAliveDaemon
     if (this.dbConnection.isBusy()) return;
 
     Statement stmt = null;
-    synchronized (this.dbConnection)
+    try
     {
-      try
-      {
-        if (this.dbConnection == null) return;
-        stmt = this.dbConnection.createStatement();
-        LogMgr.logInfo("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + " - executing SQL: " + this.sqlScript);
-        stmt.execute(sqlScript);
-      }
-      catch (SQLException sql)
-      {
-        LogMgr.logError("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + ": SQL Error when running keep alive script: " + ExceptionUtil.getDisplay(sql), null);
-      }
-      catch (Throwable e)
-      {
-        LogMgr.logError("KeepAliveDaemon.runSqlScript()", "Error when running keep alive script", e);
-      }
-      finally
-      {
-        SqlUtil.closeStatement(stmt);
-      }
+      stmt = this.dbConnection.createStatement();
+      LogMgr.logInfo("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + " - executing SQL: " + this.sqlScript);
+      stmt.execute(sqlScript);
+    }
+    catch (SQLException sql)
+    {
+      LogMgr.logError("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + ": SQL Error when running keep alive script: " + ExceptionUtil.getDisplay(sql), null);
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("KeepAliveDaemon.runSqlScript()", "Error when running keep alive script", e);
+    }
+    finally
+    {
+      SqlUtil.closeStatement(stmt);
     }
   }
 }

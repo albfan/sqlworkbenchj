@@ -50,6 +50,7 @@ public class NameUtilTest
     assertEquals("foo_bar20", NameUtil.camelCaseToSnakeLower("foo-bar20"));
     assertEquals("some_things_are_stupid", NameUtil.camelCaseToSnakeLower("some things Are Stupid"));
     assertEquals("SOME_THINGS_ARE_STUPID", NameUtil.camelCaseToSnakeUpper("some things Are Stupid"));
+    assertEquals("attrib_id", NameUtil.camelCaseToSnakeLower("Attrib-ID"));
   }
 
   @Test

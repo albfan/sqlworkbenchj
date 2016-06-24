@@ -99,7 +99,7 @@ public class NameUtil
       {
         result.append('_');
       }
-      if (Character.isWhitespace(current) || (!Character.isDigit(current) && !Character.isLetter(current)) || INVALID_CHARS.indexOf(current) > -1)
+      if (current == '-' || Character.isWhitespace(current) || (!Character.isDigit(current) && !Character.isLetter(current)) || INVALID_CHARS.indexOf(current) > -1)
       {
         current = '_';
       }
