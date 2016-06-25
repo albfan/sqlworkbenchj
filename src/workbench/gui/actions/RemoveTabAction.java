@@ -65,10 +65,9 @@ public class RemoveTabAction
   @Override
   public void stateChanged(ChangeEvent e)
   {
-    EventQueue.invokeLater(()
-      ->
-      {
-        setEnabled(client.canCloseTab());
+    EventQueue.invokeLater(() ->
+    {
+      setEnabled(client.canCloseTab());
     });
   }
 
