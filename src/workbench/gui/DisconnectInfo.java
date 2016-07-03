@@ -24,6 +24,7 @@
 package workbench.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -32,6 +33,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import workbench.resource.ResourceMgr;
 
@@ -54,8 +56,9 @@ public class DisconnectInfo
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 		JPanel p = new JPanel();
-		p.setBorder(new CompoundBorder(WbSwingUtilities.getBevelBorderRaised(), new EmptyBorder(15, 20, 15, 20)));
-		p.setLayout(new BorderLayout());
+    Color c = p.getBackground().darker();
+    p.setBorder(new CompoundBorder(new LineBorder(c, 1), new EmptyBorder(15, 20, 15, 20)));
+		p.setLayout(new BorderLayout(0,0));
 		p.setMinimumSize(new Dimension(350, 50));
 
 		JLabel l = new JLabel(ResourceMgr.getString("MsgClosingConnections"));

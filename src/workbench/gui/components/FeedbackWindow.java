@@ -24,6 +24,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -36,6 +37,7 @@ import javax.swing.JRootPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import workbench.gui.WbSwingUtilities;
 
@@ -66,7 +68,8 @@ public class FeedbackWindow
 	private void initComponents(String msg)
 	{
 		JPanel p = new JPanel();
-		p.setBorder(new CompoundBorder(WbSwingUtilities.getBevelBorderRaised(), new EmptyBorder(15, 20, 15, 20)));
+    Color c = p.getBackground().darker();
+    p.setBorder(new CompoundBorder(new LineBorder(c, 1), new EmptyBorder(15, 20, 15, 20)));
 		p.setLayout(new BorderLayout(0, 0));
 		p.setMinimumSize(new Dimension(350, 50));
 		connectLabel = new JLabel(msg);

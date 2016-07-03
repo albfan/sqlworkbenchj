@@ -137,11 +137,6 @@ public class WbSwingUtilities
 		return createBevelBorder(BevelBorder.LOWERED);
 	}
 
-	public static Border getBevelBorderRaised()
-	{
-		return createBevelBorder(BevelBorder.RAISED);
-	}
-
 	private static Border createBevelBorder(int type)
 	{
 		BevelBorder b = new BevelBorder(type);
