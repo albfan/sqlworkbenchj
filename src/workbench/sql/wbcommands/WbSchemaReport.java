@@ -71,6 +71,7 @@ public class WbSchemaReport
 	public static final String ARG_OBJECT_NAMES = "objects";
 	public static final String ARG_OBJECT_TYPE_NAMES = "objectTypeNames";
 	public static final String ARG_FULL_SOURCE = "writeFullSource";
+	public static final String ARG_GENERATE_CONSTRAINT_NAMES = "generateConstraintNames";
 
 	public static final String ALTERNATE_VERB = "WbReport";
 	public static final String VERB = "WbSchemaReport";
@@ -92,6 +93,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS);
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_GENERATE_CONSTRAINT_NAMES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_INCLUDE_TABLES, ArgumentType.BoolArgument);
@@ -138,6 +140,7 @@ public class WbSchemaReport
 
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
+    this.reporter.setGenerateConstraintNames(cmdLine.getBoolean(ARG_GENERATE_CONSTRAINT_NAMES, false));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(ARG_INCLUDE_PROCS, false));
     reporter.setCreateFullObjectSource(cmdLine.getBoolean(ARG_FULL_SOURCE, false));
 		Set<String> types = CollectionUtil.caseInsensitiveSet();

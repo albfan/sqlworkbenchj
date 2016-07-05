@@ -191,7 +191,7 @@ public class TableSourceBuilder
       {
         continue;
       }
-      
+
       result.add(idx);
     }
     return result;
@@ -814,12 +814,8 @@ public class TableSourceBuilder
 
     if (pkName == null && DbExplorerSettings.getAutoGeneratePKName())
     {
-      pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
       int maxLen = this.dbConnection.getMetadata().getMaxTableNameLength();
-      if (maxLen > 0 && pkName.length() > maxLen)
-      {
-        pkName = pkName.substring(0, maxLen - 1);
-      }
+      pkName = nameTester.generatePKName(table, maxLen);
     }
     else if (pkName != null && dbConnection.getDbSettings().useFQConstraintName())
     {

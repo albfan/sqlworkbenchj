@@ -106,7 +106,7 @@ public class IndexDiff
           // the full definition of the reference index needs to be included in the XML
           IndexReporter rep = new IndexReporter(refIndex);
           rep.setMainTagToUse("reference-index");
-          rep.appendXml(result, idxIndent);
+          rep.appendXml(result, idxIndent, null);
 
           StringBuilder changedIndent = new StringBuilder(idxIndent);
           changedIndent.append("  ");
@@ -165,7 +165,7 @@ public class IndexDiff
       for (IndexDefinition idx : indexToAdd)
       {
         IndexReporter rep = new IndexReporter(idx);
-        rep.appendXml(result, idxIndent);
+        rep.appendXml(result, idxIndent, null);
       }
       writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
     }

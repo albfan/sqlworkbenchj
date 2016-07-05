@@ -53,6 +53,8 @@ import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
+import workbench.db.sqltemplates.ConstraintNameTester;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -90,7 +92,7 @@ public class ReportTable
   private TableIdentifier table;
   private Map<String, ForeignKeyDefinition> foreignKeys = new TreeMap<>();
   private List<ReportColumn> columns;
-  private IndexReporter reporter;
+  private IndexReporter indexReporter;
   private String tableComment;
   private TagWriter tagWriter = new TagWriter();
   private String schemaNameToUse;
@@ -101,6 +103,10 @@ public class ReportTable
   private ReportTableGrants grants;
   private final List<ObjectOption> dbmsOptions = new ArrayList<>();
   private boolean fixDefaultValues;
+
+  private boolean generatePKName;
+  private ConstraintNameTester nameTester;
+  private int maxIdentifierLength;
 
   /**
    * Initialize this ReportTable.
@@ -126,6 +132,9 @@ public class ReportTable
     this.includePrimaryKey = includePk;
     this.includePartitions = includePartitioning;
     this.fixDefaultValues = !conn.getDbSettings().returnsValidDefaultExpressions();
+
+    nameTester = new ConstraintNameTester(conn.getDbId());
+    maxIdentifierLength = conn.getMetadata().getMaxTableNameLength();
 
     // By using getTableDefinition() the TableIdentifier is completely initialized
     // (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
@@ -161,7 +170,7 @@ public class ReportTable
 
     if (includeIndex)
     {
-      this.reporter = new IndexReporter(table, conn, includePartitioning);
+      this.indexReporter = new IndexReporter(table, conn, includePartitioning);
     }
 
     if (includeFk)
@@ -206,6 +215,11 @@ public class ReportTable
   public ReportTable(TableIdentifier tbl)
   {
     this.table = tbl;
+  }
+
+  public void setGeneratePKName(boolean flag)
+  {
+    generatePKName = flag;
   }
 
   public boolean grantsIncluded()
@@ -298,7 +312,15 @@ public class ReportTable
   {
     if (!includePrimaryKey) return null;
     if (table.getPrimaryKey() == null) return null;
-    return table.getPrimaryKeyName();
+
+    String pkName = table.getPrimaryKeyName();
+
+    if (generatePKName && nameTester.isSystemConstraintName(pkName))
+    {
+      pkName = nameTester.generatePKName(table, maxIdentifierLength);
+    }
+
+    return pkName;
   }
 
   /**
@@ -385,8 +407,8 @@ public class ReportTable
 
   public Collection<IndexDefinition> getIndexList()
   {
-    if (this.reporter == null) return null;
-    return this.reporter.getIndexList();
+    if (this.indexReporter == null) return null;
+    return this.indexReporter.getIndexList();
   }
 
   public List<ReportColumn> getColumnsSorted()
@@ -483,7 +505,7 @@ public class ReportTable
     }
     line.append('\n');
     appendTableNameXml(line, colindent);
-    tagWriter.appendTag(line, colindent, TAG_TABLE_PK_NAME, table.getPrimaryKeyName(), false);
+    tagWriter.appendTag(line, colindent, TAG_TABLE_PK_NAME, getPrimaryKeyName(), false);
     tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 
     if (StringUtil.isNonBlank(table.getTablespace()))
@@ -501,7 +523,11 @@ public class ReportTable
     {
       col.appendXml(line, colindent);
     }
-    if (this.reporter != null) this.reporter.appendXml(line, colindent);
+
+    if (this.indexReporter != null)
+    {
+      this.indexReporter.appendXml(line, colindent, generatePKName ? getPrimaryKeyName() : null);
+    }
 
     writeConstraints(tableConstraints, tagWriter, line, colindent);
 

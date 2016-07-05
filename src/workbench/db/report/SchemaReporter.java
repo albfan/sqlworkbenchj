@@ -52,6 +52,7 @@ import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
+import workbench.db.sqltemplates.ConstraintNameTester;
 
 import workbench.storage.RowActionMonitor;
 
@@ -91,6 +92,7 @@ public class SchemaReporter
   private String schemaNameToUse = null;
   private String reportTitle = null;
   private boolean fullObjectSource;
+  private boolean generatePKNames;
 
   /**
    * Creates a new SchemaReporter for the supplied connection
@@ -172,6 +174,16 @@ public class SchemaReporter
     {
       this.schemaNameToUse = name;
     }
+  }
+
+  /**
+   * Controls if system generated PK names should be generated to "readable" PK names.
+   * @param flag
+   * @see ConstraintNameTester#isSystemConstraintName(java.lang.String) 
+   */
+  public void setGenerateConstraintNames(boolean flag)
+  {
+    generatePKNames = flag;
   }
 
   public void setProcedureNames(String name)
@@ -312,6 +324,7 @@ public class SchemaReporter
         {
           ReportTable rtable = new ReportTable((TableIdentifier)object, this.dbConn, true, true, true, true, includeGrants, includeTriggers, includePartitions);
           rtable.setSchemaNameToUse(this.schemaNameToUse);
+          rtable.setGeneratePKName(generatePKNames);
           rtable.writeXml(out);
           rtable.done();
         }

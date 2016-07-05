@@ -93,7 +93,7 @@ public class IndexReporter
     mainTagToUse = tag;
   }
 
-  public void appendXml(StringBuilder result, StringBuilder indent)
+  public void appendXml(StringBuilder result, StringBuilder indent, String pkName)
   {
     int numIndex = this.indexList.size();
     if (numIndex == 0) return;
@@ -104,7 +104,14 @@ public class IndexReporter
     {
       tagWriter.appendOpenTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
       result.append('\n');
-      tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
+      if (pkName != null && index.isPrimaryKeyIndex() )
+      {
+        tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, pkName);
+      }
+      else
+      {
+        tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
+      }
       tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, index.getExpression());
       tagWriter.appendTag(result, defIndent, TAG_INDEX_UNIQUE, index.isUnique());
       if (index.isUniqueConstraint())

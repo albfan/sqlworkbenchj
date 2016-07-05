@@ -272,7 +272,11 @@ public class ReportView
       this.grants.appendXml(line, colindent);
     }
     writeSourceTag(tagWriter, line, colindent, viewSource);
-    if (includeIndex && this.index != null) this.index.appendXml(line, colindent);
+    
+    if (includeIndex && this.index != null)
+    {
+      this.index.appendXml(line, colindent, null);
+    }
     tagWriter.appendCloseTag(line, indent, TAG_VIEW_DEF);
     return line;
   }

@@ -46,6 +46,7 @@
         <xsl:if test="$useJdbcTypes = 'true'">
           <xsl:call-template name="write-data-type">
             <xsl:with-param name="type-id" select="java-sql-type"/>
+            <xsl:with-param name="dbms-type" select="dbms-data-type"/>
             <xsl:with-param name="precision" select="dbms-data-size"/>
             <xsl:with-param name="scale" select="dbms-data-digits"/>
           </xsl:call-template>
@@ -237,7 +238,7 @@
       <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
     </xsl:for-each>
   </xsl:variable>
-  
+
   <xsl:variable name="update-rule" select="update-rule/text()"/>
   <xsl:variable name="delete-rule" select="delete-rule/text()"/>
   <xsl:variable name="deferrable-value" select="deferrable/@jdbcValue"/>
@@ -257,12 +258,12 @@
         <xsl:value-of select="$update-rule"/>
       </xsl:attribute>
     </xsl:if>
-    <!-- constant values for the deferrability: 
+    <!-- constant values for the deferrability:
          7 = not deferrable
          6 = initially immediate
          5 = initially deferred
     -->
-    <xsl:if test="$deferrable-value = 5 or $deferrable-value = 6"> 
+    <xsl:if test="$deferrable-value = 5 or $deferrable-value = 6">
       <xsl:attribute name="deferrable">
         <xsl:value-of select="'true'"/>
       </xsl:attribute>
@@ -329,6 +330,7 @@
 -->
 <xsl:template name="write-data-type">
   <xsl:param name="type-id"/>
+  <xsl:param name="dbms-type"/>
   <xsl:param name="precision"/>
   <xsl:param name="scale"/>
   <xsl:choose>
@@ -392,11 +394,16 @@
     <xsl:when test="$type-id = -7">
       <xsl:text>BIT</xsl:text>
     </xsl:when>
-    <xsl:when test="$type-id = 2">
-      <xsl:text>NUMERIC(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
-    </xsl:when>
-    <xsl:when test="$type-id = 3">
-      <xsl:text>DECIMAL(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+    <xsl:when test="$type-id = 3 or $type-id = 2">
+      <xsl:if test="$scale &gt; 0">
+        <xsl:text>DECIMAL(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+      </xsl:if>
+      <xsl:if test="$scale = 0 and $precision &gt; 10">
+        <xsl:text>BIGINT</xsl:text>
+      </xsl:if>
+      <xsl:if test="$scale = 0 and $precision &lt;= 10">
+        <xsl:text>INTEGER</xsl:text>
+      </xsl:if>
     </xsl:when>
     <xsl:when test="$type-id = 12">
       <xsl:text>VARCHAR(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
@@ -404,8 +411,14 @@
     <xsl:when test="$type-id = -9">
       <xsl:text>NVARCHAR(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
     </xsl:when>
+    <xsl:when test="$mapXMLToClob = 'true' and $type-id = 1111 and ($dbms-type='XML' or $dbms-type = 'XMLTYPE')">
+      <xsl:text>CLOB</xsl:text>
+    </xsl:when>
+    <xsl:when test="$mapXMLToClob = 'false' and $type-id = 1111 and ($dbms-type='XML' or $dbms-type = 'XMLTYPE')">
+      <xsl:value-of select="$dbms-type"/>
+    </xsl:when>
     <xsl:otherwise>
-        <xsl:text>[</xsl:text><xsl:value-of select="$type-id"/><xsl:text>]</xsl:text>
+        <xsl:text>$dbms-type</xsl:text>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>

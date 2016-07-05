@@ -17,6 +17,7 @@
 <xsl:param name="tablespace.index"/>
 <xsl:param name="authorName">sql-workbench</xsl:param>
 <xsl:param name="useJdbcTypes">true</xsl:param>
+<xsl:param name="mapXMLToClob">true</xsl:param>
 
 <xsl:import href="liquibase_common.xslt"/>
 

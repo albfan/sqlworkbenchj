@@ -25,8 +25,12 @@ package workbench.db.sqltemplates;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import workbench.db.PkDefinition;
+import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -54,6 +58,18 @@ public class ConstraintNameTester
     }
   }
 
+  public String generatePKName(TableIdentifier table, int maxLength)
+  {
+    if (table == null) return null;
+
+    String pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
+    if (maxLength > 0 && pkName.length() > maxLength)
+    {
+      pkName = pkName.substring(0, maxLength - 1);
+    }
+    return pkName;
+
+  }
   public boolean isSystemConstraintName(String name)
   {
     if (name == null) return false;

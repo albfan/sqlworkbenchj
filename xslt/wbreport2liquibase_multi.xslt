@@ -20,7 +20,9 @@
 <xsl:param name="tablespace.table"/>
 <xsl:param name="tablespace.index"/>
 <xsl:param name="authorName">sql-workbench</xsl:param>
+<xsl:param name="idPrefix">initial-</xsl:param>
 <xsl:param name="useJdbcTypes">true</xsl:param>
+<xsl:param name="mapXMLToClob">true</xsl:param>
 
 <xsl:variable name="newline">
   <xsl:text>&#10;</xsl:text>
@@ -40,15 +42,17 @@
 
       <xsl:variable name="id" select="position()"/>
       <!-- one changeset for each table -->
-      <changeSet author="{$authorName}" id="initial-tbl-{$id}">
+      <changeSet author="{$authorName}" id="{$idPrefix}{$id}">
       <!-- the create-table template is defined in liquibase_common.xslt -->
         <xsl:call-template name="create-table"/>
       </changeSet>
 
     </xsl:for-each>  <!-- tables -->
 
+    <xsl:variable name="fk-id" select="count(table-def) + 1"/>
+
     <!-- put all foreign keys in a single changeset -->
-    <changeSet author="{$authorName}" id="initial-fk">
+    <changeSet author="{$authorName}" id="{$idPrefix}{$fk-id}">
 
       <xsl:for-each select="table-def/foreign-keys/foreign-key">
         <xsl:call-template name="add-fk">
@@ -60,7 +64,7 @@
 
     <xsl:for-each select="proc-def">
       <xsl:variable name="id" select="position()"/>
-      <changeSet author="{$authorName}" id="initial-proc-{$id}">
+      <changeSet author="{$authorName}" id="{$idPrefix}proc-{$id}">
         <createProcedure>
            <xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>
            <xsl:value-of disable-output-escaping="yes" select="proc-source"/>
@@ -73,7 +77,7 @@
       <xsl:variable name="view-name" select="@name"/>
       <xsl:variable name="id" select="position()"/>
       <!-- one changeset for each table -->
-      <changeSet author="{$authorName}" id="initial-view-{$id}">
+      <changeSet author="{$authorName}" id="{$idPrefix}view-{$id}">
         <createView viewName="{$view-name}">
           <xsl:if test="string-length($schema.owner) &gt; 0">
             <xsl:attribute name="schemaName">
@@ -89,7 +93,7 @@
     <xsl:for-each select="sequence-def">
       <xsl:variable name="id" select="position()"/>
       <!-- one changeset for each table -->
-      <changeSet author="{$authorName}" id="initial-seq-{$id}">
+      <changeSet author="{$authorName}" id="{$idPrefix}sequence-{$id}">
         <xsl:apply-templates select="."/>
       </changeSet>
     </xsl:for-each>
