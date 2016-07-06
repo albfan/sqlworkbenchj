@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:wb-string-util="workbench.util.StringUtil">
 
 <xsl:template name="create-table">
   <xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
@@ -71,7 +72,7 @@
           </xsl:variable>
           <xsl:if test="contains($character-types, concat($type-id,';'))">
             <xsl:attribute name="defaultValue">
-              <xsl:value-of select="default-value"/>
+              <xsl:value-of select="wb-string-util:trimQuotes(default-value)"/>
             </xsl:attribute>
           </xsl:if>
 
@@ -311,10 +312,12 @@
         <xsl:value-of select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
       </xsl:attribute>
     </xsl:if>
-    <xsl:if test="string-length(sequence-properties/property[@name='ORDERED']/@value) &gt; 0">
-      <xsl:attribute name="ordered">
-        <xsl:value-of select="sequence-properties/property[@name='ORDERED']/@value"/>
-      </xsl:attribute>
+    <xsl:if test="$useOrderedSequence = 'true'">
+      <xsl:if test="string-length(sequence-properties/property[@name='ORDERED']/@value) &gt; 0">
+        <xsl:attribute name="ordered">
+          <xsl:value-of select="sequence-properties/property[@name='ORDERED']/@value"/>
+        </xsl:attribute>
+      </xsl:if>
     </xsl:if>
   </createSequence>
   <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">

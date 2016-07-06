@@ -54,7 +54,6 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
 import workbench.db.sqltemplates.ConstraintNameTester;
-import workbench.resource.DbExplorerSettings;
 
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -639,7 +638,8 @@ public class ReportTable
 
   public boolean equals(ReportTable other)
   {
-    return this.table.getTableName().equalsIgnoreCase(other.table.getTableName());
+    if (other == null) return false;
+    return SqlUtil.objectNamesAreEqual(this.table, other.table, false);
   }
 
 }

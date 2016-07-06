@@ -29,6 +29,7 @@ import java.util.Map;
 import workbench.db.DependencyNode;
 
 import workbench.util.NumberStringCache;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -241,7 +242,7 @@ public class ForeignKeyDefinition
     try
     {
       boolean baseEqual = compareColumns(ref);
-      baseEqual = baseEqual && this.foreignTable.equals(ref.foreignTable);
+      baseEqual = baseEqual && SqlUtil.objectNamesAreEqual(this.foreignTable.getTable().getTableName(), ref.foreignTable.getTable().getTableName());
 
       if (baseEqual && compareFKRules)
       {

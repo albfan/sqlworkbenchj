@@ -23,6 +23,7 @@
 <xsl:param name="idPrefix">initial-</xsl:param>
 <xsl:param name="useJdbcTypes">true</xsl:param>
 <xsl:param name="mapXMLToClob">true</xsl:param>
+<xsl:param name="useOrderedSequence">false</xsl:param>
 
 <xsl:variable name="newline">
   <xsl:text>&#10;</xsl:text>

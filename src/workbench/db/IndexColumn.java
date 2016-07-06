@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
+import workbench.util.SqlUtil;
 
 import workbench.util.StringUtil;
 
@@ -99,7 +100,7 @@ public class IndexColumn
     if (other instanceof IndexColumn)
     {
       IndexColumn otherCol = (IndexColumn)other;
-      return StringUtil.equalString(column, otherCol.column) && StringUtil.equalStringIgnoreCase(getDirection(), otherCol.getDirection());
+      return SqlUtil.objectNamesAreEqual(column, otherCol.column) && StringUtil.equalStringIgnoreCase(getDirection(), otherCol.getDirection());
     }
     else
     {

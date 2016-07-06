@@ -177,6 +177,11 @@ public class SchemaDiff
     }
   }
 
+  public boolean isSameDBMS()
+  {
+    return referenceDb.getDbId().equalsIgnoreCase(targetDb.getDbId());
+  }
+
   public void setUseFullObjectSource(boolean flag)
   {
     useFullSource = flag;
@@ -676,7 +681,9 @@ public class SchemaDiff
       tid.setSchema(getSchemaForTargetTable(rid, targetTables));
       tid.setCatalog(null);
 
-      if (!targetDb.getMetadata().needsQuotes(tname))
+      boolean isDefaultCase = referenceDb.getMetadata().isDefaultCase(rid.getTableName());
+
+      if (isDefaultCase || !targetDb.getMetadata().needsQuotes(tname))
       {
         // if the name does not need quoting, then adjust the case, otherwise use it as it is.
         tid.setNeverAdjustCase(false);

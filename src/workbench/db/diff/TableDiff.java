@@ -88,6 +88,7 @@ public class TableDiff
   {
     this.checkConstraintNames = flag;
   }
+
   /**
    * Return the XML that describes how the target table needs to
    * modified in order to get the same structure as the reference table.
@@ -372,11 +373,25 @@ public class TableDiff
     return null;
   }
 
+  private void adjustRuleCheck(Collection<ForeignKeyDefinition> fklist)
+  {
+    for (ForeignKeyDefinition fk : fklist)
+    {
+      fk.setCompareFKRules(false);
+    }
+  }
+
   private List<ForeignKeyDefinition> getMissingForeignKeys()
   {
     if (!diff.getIncludeForeignKeys()) Collections.emptyList();
     Collection<ForeignKeyDefinition> sourceFK = referenceTable.getForeignKeys().values();
     Collection<ForeignKeyDefinition> targetFK = targetTable.getForeignKeys().values();
+
+    // we are only checking for missing FKs
+    // if we compared the actual "ON XXX" option on the FKs
+    // FK that reference the same tables but have different "ON XXX" rules would be reported as "missing"
+    adjustRuleCheck(sourceFK);
+    adjustRuleCheck(targetFK);
 
     List<ForeignKeyDefinition> missing = new ArrayList<>();
     for (ForeignKeyDefinition fk : sourceFK)

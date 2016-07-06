@@ -336,14 +336,21 @@ public class SqlUtil
 
   public static boolean objectNamesAreEqual(DbObject dbo1, DbObject dbo2)
   {
+    return objectNamesAreEqual(dbo1, dbo2, true);
+  }
+  public static boolean objectNamesAreEqual(DbObject dbo1, DbObject dbo2, boolean checkObjectType)
+  {
     if (dbo1 == null || dbo2 == null) return false;
 
-    // only compare names of objects of the same type
-    String type1 = dbo1.getObjectType();
-    String type2 = dbo2.getObjectType();
-    if (type1 == null || type2 == null) return false;
-    if (StringUtil.compareStrings(type1, type2, true) != 0) return false;
-
+    if (checkObjectType)
+    {
+      // only compare names of objects of the same type
+      String type1 = dbo1.getObjectType();
+      String type2 = dbo2.getObjectType();
+      if (type1 == null || type2 == null) return false;
+      if (StringUtil.compareStrings(type1, type2, true) != 0) return false;
+    }
+    
     // only compare the catalog if both objects have one
     String cat1 = removeObjectQuotes(dbo1.getCatalog());
     String cat2 = removeObjectQuotes(dbo2.getCatalog());
