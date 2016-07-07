@@ -229,7 +229,7 @@ class ObjectCache
             tbl.checkQuotesNeeded(dbConnection);
           }
           this.setTables(tables);
-          LogMgr.logDebug("ObjectCache.getTables()", "Namespace: " + namespace + " not found in cache. Retrieved " + tables.size() + " objects");
+          LogMgr.logDebug("ObjectCache.getTables()", "Namespace \"" + namespace + "\" not found in cache. Retrieved " + tables.size() + " objects");
         }
         catch (Exception e)
         {
@@ -390,8 +390,10 @@ class ObjectCache
       table.setSchema(null);
     }
 
+    String catalog = meta.getCurrentCatalog();
     boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
-    boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog()));
+
+    boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog(), catalog));
     if (ignoreCatalog)
     {
       table.setCatalog(null);

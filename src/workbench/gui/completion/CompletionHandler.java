@@ -163,11 +163,13 @@ public class CompletionHandler
 
 		try
 		{
+      long start = System.currentTimeMillis();
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
 
 			if (ctx.isStatementSupported())
 			{
 				currentWord = editor.getWordLeftOfCursor(ctx.getAnalyzer().getWordDelimiters());
+
 				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && StringUtil.isNonBlank(currentWord));
 				BaseAnalyzer analyzer = ctx.getAnalyzer();
 				if (analyzer != null && StringUtil.isNonBlank(currentWord) && analyzer.isWbParam() && currentWord.charAt(0) == '-')
@@ -178,12 +180,14 @@ public class CompletionHandler
 
 				this.elements = ctx.getData();
 
+        long duration = System.currentTimeMillis() - start;
 				LogMgr.logDebug("CompletionHandler.updateSelectionList()",
 					"Auto-completion invoked for " + analyzer.getSqlVerb() +
 						", analyzer: " + analyzer.getClass().getSimpleName() +
 						", context: " + analyzer.contextToString() +
 						", currentSchema: " + analyzer.getSchemaForTableList() +
-						", element count: " + elements.size());
+						", element count: " + elements.size() +
+            " (" + duration + "ms)");
 
 				this.header.setText(ctx.getTitle());
 				this.window.setContext(ctx);

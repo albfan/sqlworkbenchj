@@ -1034,6 +1034,11 @@ public class DbMetadata
    */
   public boolean ignoreCatalog(String catalog)
   {
+    return ignoreCatalog(catalog, null);
+  }
+  
+  public boolean ignoreCatalog(String catalog, String currentCatalog)
+  {
     if (catalog == null) return true;
     if (dbSettings.alwaysUseCatalog()) return false;
     if (!dbSettings.supportsCatalogs()) return true;
@@ -1044,7 +1049,7 @@ public class DbMetadata
     }
     if (catalogsToIgnore.contains("$current"))
     {
-      String current = getCurrentCatalog();
+      String current = currentCatalog == null ? getCurrentCatalog() : currentCatalog;
       if (current != null)
       {
         return SqlUtil.objectNamesAreEqual(current, catalog);
