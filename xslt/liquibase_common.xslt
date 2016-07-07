@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-               xmlns:wb-string-util="workbench.util.StringUtil">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:wb-string-util="workbench.util.StringUtil">
 
 <xsl:template name="create-table">
   <xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
@@ -11,7 +11,8 @@
     <xsl:value-of select="count(column-def[primary-key='true'])"/>
   </xsl:variable>
 
-  <createTable tableName="{$table-name}">
+  <xsl:element name="createTable">
+    <xsl:attribute name="tableName"><xsl:value-of select="$table-name"/></xsl:attribute>
     <xsl:if test="string-length($schema.owner) &gt; 0">
       <xsl:attribute name="schemaName">
          <xsl:value-of select="$schema.owner"/>
@@ -58,7 +59,9 @@
         </xsl:if>
       </xsl:variable>
 
-      <column name="{$column-name}" type="{$data-type}">
+      <xsl:element name="column">
+        <xsl:attribute name="name"><xsl:value-of select="$column-name"/></xsl:attribute>
+        <xsl:attribute name="type"><xsl:value-of select="$data-type"/></xsl:attribute>
 
         <xsl:variable name="pk-flag" select="primary-key"/>
         <xsl:variable name="nullable" select="nullable"/>
@@ -115,7 +118,7 @@
         </xsl:if>
 
         <xsl:if test="($pk-flag = 'true' and $pk-col-count = 1) or $nullable = 'false'">
-          <constraints>
+          <xsl:element name="constraints">
 
             <xsl:if test="$nullable = 'false'">
               <xsl:attribute name="nullable">
@@ -131,15 +134,14 @@
                 <xsl:value-of select="$pk-name"/>
               </xsl:attribute>
             </xsl:if>
-
-          </constraints>
+          </xsl:element>
         </xsl:if>
 
-      </column>
+      </xsl:element>
 
     </xsl:for-each> <!-- columns -->
 
-  </createTable>
+  </xsl:element>
 
   <!--
     now process all index definitions for this table
@@ -155,7 +157,7 @@
     <xsl:variable name="condition">
         <xsl:value-of select="normalize-space(.)"/>
     </xsl:variable>
-    <sql>ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></sql><xsl:text>&#10;</xsl:text>
+    <xsl:element name="sql">ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></xsl:element>
   </xsl:for-each>
 
 </xsl:template>
@@ -193,30 +195,37 @@
       </xsl:for-each>
     </xsl:variable>
 
-    <addPrimaryKey tableName="{$table-name}" columnNames="{$pk-columns}" constraintName="{$index-name}"/>
+    <xsl:element name="addPrimaryKey">
+      <xsl:attribute name="tableName"><xsl:value-of select="$table-name"/></xsl:attribute>
+      <xsl:attribute name="columnNames"><xsl:value-of select="$pk-columns"/></xsl:attribute>
+      <xsl:attribute name="constraintName"><xsl:value-of select="$index-name"/></xsl:attribute>
+    </xsl:element>
   </xsl:if>
 
   <xsl:if test="primary-key='false' or count(column-list/column) != $pk-col-count">
-    <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}">
-    <xsl:if test="string-length($schema.owner) &gt; 0">
-      <xsl:attribute name="schemaName">
-         <xsl:value-of select="$schema.owner"/>
-      </xsl:attribute>
-    </xsl:if>
-    <xsl:if test="string-length($tablespace.index) &gt; 0">
-      <xsl:attribute name="tablespace">
-         <xsl:value-of select="$tablespace.index"/>
-      </xsl:attribute>
-    </xsl:if>
-
-    <xsl:for-each select="column-list/column">
-      <column>
-        <xsl:attribute name="name">
-          <xsl:value-of select="@name"/>
+    <xsl:element name="createIndex">
+      <xsl:attribute name="indexName"><xsl:value-of select="$index-name"/></xsl:attribute>
+      <xsl:attribute name="tableName"><xsl:value-of select="$table-name"/></xsl:attribute>
+      <xsl:attribute name="unique"><xsl:value-of select="$unique-flag"/></xsl:attribute>
+      <xsl:if test="string-length($schema.owner) &gt; 0">
+        <xsl:attribute name="schemaName">
+           <xsl:value-of select="$schema.owner"/>
         </xsl:attribute>
-      </column>
-    </xsl:for-each> <!-- index columns -->
-    </createIndex>
+      </xsl:if>
+      <xsl:if test="string-length($tablespace.index) &gt; 0">
+        <xsl:attribute name="tablespace">
+           <xsl:value-of select="$tablespace.index"/>
+        </xsl:attribute>
+      </xsl:if>
+
+      <xsl:for-each select="column-list/column">
+        <xsl:element name="column">
+          <xsl:attribute name="name">
+            <xsl:value-of select="@name"/>
+          </xsl:attribute>
+        </xsl:element>
+      </xsl:for-each> <!-- index columns -->
+    </xsl:element>
   </xsl:if>
 </xsl:template>
 
@@ -244,11 +253,13 @@
   <xsl:variable name="delete-rule" select="delete-rule/text()"/>
   <xsl:variable name="deferrable-value" select="deferrable/@jdbcValue"/>
 
-  <addForeignKeyConstraint constraintName="{$fk-name}"
-                           baseTableName="{$tablename}"
-                           baseColumnNames="{$base-columns}"
-                           referencedTableName="{$referenced-table}"
-                           referencedColumnNames="{$referenced-columns}">
+  <xsl:element name="addForeignKeyConstraint">
+    <xsl:attribute name="constraintName"><xsl:value-of select="$fk-name"/></xsl:attribute>
+    <xsl:attribute name="baseTableName"><xsl:value-of select="$tablename"/></xsl:attribute>
+    <xsl:attribute name="baseColumnNames"><xsl:value-of select="$base-columns"/></xsl:attribute>
+    <xsl:attribute name="referencedTableName"><xsl:value-of select="$referenced-table"/></xsl:attribute>
+    <xsl:attribute name="referencedColumnNames"><xsl:value-of select="$referenced-columns"/></xsl:attribute>
+
     <xsl:if test="$delete-rule != 'NO ACTION' and $delete-rule != 'RESTRICT'">
       <xsl:attribute name="onDelete">
         <xsl:value-of select="$delete-rule"/>
@@ -279,14 +290,15 @@
         </xsl:attribute>
       </xsl:if>
     </xsl:if>
-  </addForeignKeyConstraint>
+  </xsl:element>
 </xsl:template>
 
 <xsl:template match="sequence-def">
   <xsl:variable name="seq-name" select="@name"/>
   <xsl:variable name="max-value" select="sequence-properties/property[@name='MAX_VALUE']/@value"/>
 
-  <createSequence sequenceName="{$seq-name}">
+  <xsl:element name="createSequence">
+    <xsl:attribute name="sequenceName"><xsl:value-of select="$seq-name"/></xsl:attribute>
     <xsl:if test="string-length($schema.owner) &gt; 0">
       <xsl:attribute name="schemaName">
         <xsl:value-of select="$schema.owner"/>
@@ -319,11 +331,12 @@
         </xsl:attribute>
       </xsl:if>
     </xsl:if>
-  </createSequence>
+  </xsl:element>
   <xsl:if test="string-length(sequence-properties/property[@name='OWNED_BY']/@value) &gt; 0">
-    <sql dbms="postgresql">
+    <xsl:element name="sql">
+      <xsl:attribute name="dbms">postgresql</xsl:attribute>
       <xsl:text>ALTER SEQUENCE </xsl:text><xsl:value-of select="$seq-name"/><xsl:text> OWNED BY </xsl:text><xsl:value-of select="sequence-properties/property[@name='OWNED_BY']/@value"/><xsl:text>;</xsl:text>
-    </sql>
+    </xsl:element>
   </xsl:if>
 </xsl:template>
 
@@ -446,4 +459,4 @@
     </xsl:choose>
 </xsl:template>
 
-</xsl:transform>
+</xsl:stylesheet>
