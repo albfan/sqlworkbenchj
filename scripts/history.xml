@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">For SAP HANA dependency for tables, views, triggers, procedures and sequences are now shown in the DbExplorer and DbTree</entry>
     <entry dev-build="1" type="enh">A new command (WbGenerateFKScript) is available to generate the DDL for only the foreign key constraints.</entry>
     <entry dev-build="1" type="enh">For DB2 10.5 indexes based on expressions are now shown correctly</entry>
+    <entry dev-build="6" type="fix">For DBMS supporting catalogs and schemas, auto completion for large schemas was slow.</entry>
     <entry dev-build="5" type="fix">Fixed a problem where in rare cases, closing an editor tab could hang the application.</entry>
     <entry dev-build="5" type="fix">Ignoring the "Max Rows" setting in the DbExplorer's table data did not work any more</entry>
     <entry dev-build="5" type="fix">WbListMacros, WbDeleteMacro and WbDefineMacro were always using the default macro file</entry>
