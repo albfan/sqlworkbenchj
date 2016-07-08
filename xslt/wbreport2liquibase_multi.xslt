@@ -50,18 +50,15 @@
 
     </xsl:for-each>  <!-- tables -->
 
-    <xsl:variable name="fk-id" select="count(table-def) + 1"/>
-
-    <!-- put all foreign keys in a single changeset -->
-    <changeSet author="{$authorName}" id="{$idPrefix}{$fk-id}">
-
-      <xsl:for-each select="table-def/foreign-keys/foreign-key">
+    <xsl:for-each select="table-def/foreign-keys/foreign-key">
+      <xsl:variable name="id" select="position()"/>
+      <changeSet author="{$authorName}" id="{$idPrefix}fk-{$id}">
         <xsl:call-template name="add-fk">
           <xsl:with-param name="tablename" select="../../table-name"/>
         </xsl:call-template>
-      </xsl:for-each>
+      </changeSet>
+    </xsl:for-each>
 
-    </changeSet>
 
     <xsl:for-each select="proc-def">
       <xsl:variable name="id" select="position()"/>
