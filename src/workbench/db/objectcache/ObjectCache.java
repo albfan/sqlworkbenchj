@@ -364,6 +364,7 @@ class ObjectCache
 
     boolean alwaysUseSchema = conn.getDbSettings().alwaysUseSchemaForCompletion() || schemas.size() > 1;
 
+    String catalog = conn.getMetadata().getCurrentCatalog();
     for (TableIdentifier tbl : objects.keySet())
     {
       String ttype = tbl.getType();
@@ -371,14 +372,14 @@ class ObjectCache
       if ( requestedTypes.contains(ttype) && (tSchema == null || schemas.contains(tSchema)) )
       {
         TableIdentifier copy = tbl.createCopy();
-        adjustSchemaAndCatalog(conn, copy, currentSchema, alwaysUseSchema);
+        adjustSchemaAndCatalog(conn, copy, currentSchema, catalog, alwaysUseSchema);
         result.add(copy);
       }
     }
     return result;
   }
 
-  private void adjustSchemaAndCatalog(WbConnection conn, TableIdentifier table, String currentSchema, boolean alwaysUseSchema)
+  private void adjustSchemaAndCatalog(WbConnection conn, TableIdentifier table, String currentSchema, String currentCatalog, boolean alwaysUseSchema)
   {
     if (!conn.getDbSettings().useCurrentNamespaceForCompletion()) return;
 
@@ -390,10 +391,9 @@ class ObjectCache
       table.setSchema(null);
     }
 
-    String catalog = meta.getCurrentCatalog();
     boolean alwaysUseCatalog = conn.getDbSettings().alwaysUseCatalogForCompletion();
 
-    boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog(), catalog));
+    boolean ignoreCatalog = (alwaysUseCatalog ? false : meta.ignoreCatalog(table.getCatalog(), currentCatalog));
     if (ignoreCatalog)
     {
       table.setCatalog(null);
@@ -419,6 +419,8 @@ class ObjectCache
       currentSchema = supportsSchemas ? meta.getCurrentSchema() : meta.getCurrentCatalog();
     }
 
+    String currentCatalog = meta.getCurrentCatalog();
+    
     for (TableIdentifier tbl : objects.keySet())
     {
       String tSchema = supportsSchemas ? tbl.getSchema() : tbl.getCatalog();
@@ -426,7 +428,7 @@ class ObjectCache
       if (schemasToCheck.contains(tSchema) || schemasToCheck.isEmpty())
       {
         TableIdentifier copy = tbl.createCopy();
-        adjustSchemaAndCatalog(dbConnection, copy, currentSchema, alwaysUseSchema);
+        adjustSchemaAndCatalog(dbConnection, copy, currentSchema, currentCatalog, alwaysUseSchema);
         result.add(copy);
       }
     }

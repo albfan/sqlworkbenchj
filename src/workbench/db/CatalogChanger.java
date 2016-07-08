@@ -75,11 +75,13 @@ public class CatalogChanger
     if (conn == null) return false;
     if (StringUtil.isEmptyString(newCatalog)) return false;
 
-    String old = conn.getMetadata().getCurrentCatalog();
+    DbMetadata meta = conn.getMetadata();
+
+    String old = meta.getCurrentCatalog();
     boolean useSetCatalog = conn.getDbSettings().useSetCatalog();
     boolean clearWarnings = conn.getDbSettings().getBoolProperty("setcatalog.clearwarnings", true);
 
-    DbMetadata meta = conn.getMetadata();
+    meta.clearCachedCatalog();
 
     String sql = conn.getDbSettings().getSwitchCatalogStatement();
     String catalogName = conn.getMetadata().removeQuotes(newCatalog.trim());

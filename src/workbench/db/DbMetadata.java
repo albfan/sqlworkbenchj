@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,6 +145,7 @@ public class DbMetadata
   private SequenceReader sequenceReader;
   private ProcedureReader procedureReader;
   private SchemaInformationReader schemaInfoReader;
+  private CatalogInformationReader catalogInfoReader;
   private IndexReader indexReader;
   private List<ObjectListExtender> extenders = new ArrayList<>();
   private List<ObjectListAppender> appenders = new ArrayList<>();
@@ -528,6 +528,8 @@ public class DbMetadata
     {
       this.schemaInfoReader = new GenericSchemaInfoReader(this.dbConnection, dbSettings);
     }
+
+    this.catalogInfoReader = new GenericCatalogInformationReader(this.dbConnection, dbSettings);
 
     LogMgr.logInfo("DbMetadata.<init>", "Using catalog separator: " + catalogSeparator);
   }
@@ -1036,7 +1038,7 @@ public class DbMetadata
   {
     return ignoreCatalog(catalog, null);
   }
-  
+
   public boolean ignoreCatalog(String catalog, String currentCatalog)
   {
     if (catalog == null) return true;
@@ -1381,7 +1383,7 @@ public class DbMetadata
    */
   public String getCurrentSchema()
   {
-    if (dbSettings.supportsSchemas() && this.schemaInfoReader != null && schemaInfoReader.isSupported())
+    if (dbSettings.supportsSchemas() && schemaInfoReader.isSupported())
     {
       return this.schemaInfoReader.getCurrentSchema();
     }
@@ -1403,10 +1405,8 @@ public class DbMetadata
 
   public void clearCachedSchemaInformation()
   {
-    if (dbSettings.supportsSchemas() && this.schemaInfoReader != null)
-    {
-      this.schemaInfoReader.clearCache();
-    }
+    this.schemaInfoReader.clearCache();
+    this.catalogInfoReader.clearCache();
   }
 
   /**
@@ -2575,74 +2575,19 @@ public class DbMetadata
   /**
    * Return the current catalog for this connection.
    *
-   * If no catalog is defined or the DBMS does not support catalogs, null is returned.
-   *
-   * This method works around a bug in Microsoft's JDBC driver which does
-   * not return the correct database (=catalog) after the database has
-   * been changed with the USE <db> command from within the Workbench.
-   *
-   * If no query has been configured for the current DBMS, Connection.getCatalog()
-   * is used, otherwise the query that is configured with the property
-   * workbench.db.[dbid].currentcatalog.query
-   *
-   * @see DbSettings#getQueryForCurrentCatalog()
-   * @see DbSettings#supportsCatalogs()
+   * Wrapper function for CatalogInformationReader.getCurrentCatalog()
    *
    * @return The name of the current catalog or null if there is no current catalog
+   * @see CatalogInformationReader#getCurrentCatalog()
    */
   public String getCurrentCatalog()
   {
-    if (!dbSettings.supportsCatalogs())
-    {
-      return null;
-    }
+    return catalogInfoReader.getCurrentCatalog();
+  }
 
-    String catalog = null;
-
-    String query = this.dbSettings.getQueryForCurrentCatalog();
-    if (query != null)
-    {
-      // for some reason, getCatalog() does not return the correct
-      // information when using Microsoft's JDBC driver.
-      // If this is the case, a SQL query can be defined that is
-      // used instead of the JDBC call, e.g. SELECT db_name()
-      Statement stmt = null;
-      ResultSet rs = null;
-      try
-      {
-        stmt = this.dbConnection.createStatementForQuery();
-        rs = stmt.executeQuery(query);
-        if (rs.next()) catalog = rs.getString(1);
-
-        // if a query was configured, and this was successful don't try to use getCatalog()
-        return catalog;
-      }
-      catch (Exception e)
-      {
-        LogMgr.logWarning("DbMetadata.getCurrentCatalog()", "Error retrieving current catalog using query:\n" + query, e);
-        catalog = null;
-      }
-      finally
-      {
-        SqlUtil.closeAll(rs, stmt);
-      }
-    }
-
-    if (catalog == null && supportsGetCatalog)
-    {
-      try
-      {
-        catalog = this.dbConnection.getSqlConnection().getCatalog();
-      }
-      catch (Exception e)
-      {
-        LogMgr.logWarning("DbMetadata.getCurrentCatalog", "Could not retrieve catalog using getCatalog()", e);
-        catalog = null;
-        supportsGetCatalog = false;
-      }
-    }
-
-    return catalog;
+  public void clearCachedCatalog()
+  {
+    catalogInfoReader.clearCache();
   }
 
   /**
