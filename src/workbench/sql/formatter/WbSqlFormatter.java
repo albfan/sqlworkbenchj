@@ -130,7 +130,7 @@ public class WbSqlFormatter
 	private int colsPerInsert = -1;
 	private int colsPerUpdate = -1;
 	private int colsPerSelect = -1;
-  private String schemaSeparator = ".";
+  private char schemaSeparator = '.';
 
 	WbSqlFormatter(CharSequence aScript)
 	{
@@ -160,6 +160,11 @@ public class WbSqlFormatter
 	public void setCatalogSeparator(char separator)
 	{
 		this.catalogSeparator = separator;
+	}
+
+	public void setSchemaSeparator(char separator)
+	{
+		this.schemaSeparator = separator;
 	}
 
 	private WbSqlFormatter(CharSequence aScript, int indentCount, int maxLength, String dbId)
@@ -599,7 +604,7 @@ public class WbSqlFormatter
 		String currentText = current.getContents();
 		char lastChar = lastText.charAt(lastText.length() - 1);
 		char currChar = currentText.charAt(0);
-		if (currChar == catalogSeparator) return false;
+		if (isSchemaOrCatalogSeparator(currChar)) return false;
 		if (!ignoreStartOfline && this.isStartOfLine()) return false;
 		boolean isCurrentOpenBracket = "(".equals(currentText);
 		boolean isLastOpenBracket = "(".equals(lastText);
@@ -636,9 +641,9 @@ public class WbSqlFormatter
 		if (lastChar == '=') return true;
 		if (lastChar == '[' && !last.isIdentifier()) return false;
 
-		if (lastChar == catalogSeparator && current.isIdentifier()) return false;
-		if (lastChar == catalogSeparator && currChar == '*') return false; // e.g. person.*
-		if (lastChar == catalogSeparator && currChar == '[') return false; // e.g. p.[id] for the dreaded SQL Server "quotes"
+    if (isSchemaOrCatalogSeparator(lastChar) && current.isIdentifier()) return false;
+		if (isSchemaOrCatalogSeparator(lastChar) && currChar == '*') return false; // e.g. person.*
+		if (isSchemaOrCatalogSeparator(lastChar) && currChar == '[') return false; // e.g. p.[id] for the dreaded SQL Server "quotes"
 		if (last.isLiteral() && isCurrentOpenBracket) return true;
 		if (isLastOpenBracket && isKeyword(currentText)) return false;
 		if (isLastCloseBracket && !current.isSeparator() ) return true;
@@ -650,6 +655,11 @@ public class WbSqlFormatter
 
 		return true;
 	}
+
+  private boolean isSchemaOrCatalogSeparator(char c)
+  {
+    return c == schemaSeparator || c == catalogSeparator;
+  }
 
 	private SQLToken processHaving(SQLToken last)
 	{
@@ -2530,7 +2540,7 @@ public class WbSqlFormatter
     String name = part.getContents();
     appendIdentifier(name);
 
-    part = lexer.getNextToken(false, false);
+    part = collapseWhiteSpace();
     if (part == null) return null;
 
     while (!isEndOfIdentifier(part, nameTerminal))
@@ -2543,9 +2553,24 @@ public class WbSqlFormatter
       {
         appendText(part.getContents());
       }
-      part = lexer.getNextToken(false, false);
+      part = collapseWhiteSpace();
     }
     return part;
+  }
+
+  private SQLToken collapseWhiteSpace()
+  {
+    SQLToken t = lexer.getNextToken(true, true);
+    if (t == null) return t;
+
+    boolean wasSpace = false;
+    while (t.isWhiteSpace())
+    {
+      wasSpace = true;
+      t = lexer.getNextToken(false, true);
+    }
+    if (wasSpace) appendText(' ');
+    return t;
   }
 
 	/**

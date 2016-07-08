@@ -29,14 +29,14 @@ import workbench.WbTestCase;
 import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
+import workbench.db.DbMetadata;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.db.DbMetadata;
 
 /**
  *
@@ -51,6 +51,30 @@ public class WbSqlFormatterTest
 	}
 
   @Test
+  public void nonStandardCreate()
+  {
+    String sql =
+      "create temp table testtable distkey(dw_eff_dt) as\n" +
+      "select max(dw_eff_dt) from ba_ab_test_page_agg_daily;";
+
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setIndentWhereCondition(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "CREATE TEMP TABLE testtable distkey\n" +
+      "(\n" +
+      "  dw_eff_dt   \n" +
+      ")\n" +
+      "AS\n" +
+      "SELECT MAX(dw_eff_dt)\n" +
+      "FROM ba_ab_test_page_agg_daily;";
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testCreateTableWithType()
   {
     String sql = "create unlogged table foobar (id integer)";
@@ -60,7 +84,7 @@ public class WbSqlFormatterTest
     f.setIndentWhereCondition(true);
     String formatted = f.getFormattedSql();
     String expected =
-      "CREATE UNLOGGED TABLE foobar\n" +
+      "CREATE UNLOGGED TABLE foobar \n" +
       "(\n" +
       "  id   INTEGER\n" +
       ")";
@@ -145,8 +169,8 @@ public class WbSqlFormatterTest
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
     String expected =
-      "CREATE INDEX idx_foo\n" +
-      "  ON bar(CASE WHEN some_col IS NULL THEN 1 ELSE some_col END, \"other_col\")";
+      "CREATE INDEX idx_foo \n" +
+      "  ON bar (CASE WHEN some_col IS NULL THEN 1 ELSE some_col END, \"other_col\")";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
   }
@@ -779,7 +803,7 @@ public class WbSqlFormatterTest
 			"  d   varchar(5) AS (LEFT(b,5)) persistent \n" +
 			")";
 		String expected =
-			"CREATE TABLE table1\n" +
+			"CREATE TABLE table1 \n" +
 			"(\n" +
 			"  a   INT NOT NULL,\n" +
 			"  b   VARCHAR(32),\n" +
@@ -1662,7 +1686,7 @@ public class WbSqlFormatterTest
 	{
 		String sql = "CREATE table cust as select * from customers where rownum <= 1000";
 		String expected =
-				"CREATE TABLE cust\n"+
+				"CREATE TABLE cust \n"+
 				"AS\n"+
 				"SELECT *\n" +
 				"FROM customers\n" +
@@ -1904,7 +1928,7 @@ public class WbSqlFormatterTest
     f.setIndentWhereCondition(true);
     String formatted = f.getFormattedSql();
     String expected =
-      "CREATE TABLE \"Foo\"/\"Bar\"\n" +
+      "CREATE TABLE \"Foo\"/\"Bar\" \n" +
       "(\n" +
       "  id          INTEGER,\n" +
       "  some_data   VARCHAR(100)\n" +
@@ -1918,7 +1942,7 @@ public class WbSqlFormatterTest
     f.setIdentifierCase(GeneratedIdentifierCase.upper);
     formatted = f.getFormattedSql();
     expected =
-      "CREATE TABLE FOO:BAR\n" +
+      "CREATE TABLE FOO:BAR \n" +
       "(\n" +
       "  ID          INTEGER,\n" +
       "  SOME_DATA   VARCHAR(100)\n" +
@@ -1955,7 +1979,7 @@ public class WbSqlFormatterTest
     f.setIdentifierCase(GeneratedIdentifierCase.upper);
 		String formatted = f.getFormattedSql();
 		String expected =
-			"CREATE TABLE \"Public\".\"Users\"\n" +
+			"CREATE TABLE \"Public\".\"Users\" \n" +
 			"(\n" +
 			"  \"id\"          INTEGER,\n" +
 			"  \"firstname\"   VARCHAR(100),\n" +
@@ -1974,7 +1998,7 @@ public class WbSqlFormatterTest
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
-			"CREATE TABLE \"USERS\"\n" +
+			"CREATE TABLE \"USERS\" \n" +
 			"(\n" +
 			"  \"id\"          INTEGER,\n" +
 			"  \"firstname\"   VARCHAR(100),\n" +
@@ -1993,7 +2017,7 @@ public class WbSqlFormatterTest
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
-		String expected = "CREATE INDEX ix_foo\n  ON \"Public\".\"Users\"(\"id\")";
+		String expected = "CREATE INDEX ix_foo \n  ON \"Public\".\"Users\" (\"id\")";
 //		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
   }
@@ -2007,7 +2031,7 @@ public class WbSqlFormatterTest
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
-		String expected = "CREATE BITMAP INDEX ix_foo\n  ON \"Public\".\"Users\"(\"id\")";
+		String expected = "CREATE BITMAP INDEX ix_foo \n  ON \"Public\".\"Users\" (\"id\")";
 //		System.out.println("----------------------\n" + formatted + "\n++++++++++++++++\n" + expected);
 		assertEquals(expected, formatted.trim());
   }
@@ -2021,7 +2045,7 @@ public class WbSqlFormatterTest
 		WbSqlFormatter f = null;
 
 		String expected =
-			"CREATE TABLE ##foo_tmp\n" +
+			"CREATE TABLE ##foo_tmp \n" +
 			"(\n" +
 			"  foo   INTEGER,\n" +
 			"  bar   INTEGER\n" +
@@ -2037,7 +2061,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
 		expected =
-			"CREATE TABLE #foo_tmp\n" +
+			"CREATE TABLE #foo_tmp \n" +
 			"(\n" +
 			"  foo   INTEGER,\n" +
 			"  bar   INTEGER\n" +
@@ -2095,7 +2119,7 @@ public class WbSqlFormatterTest
 		f = new WbSqlFormatter(sql, "postgresql");
 		formatted = f.getFormattedSql();
 		String expected =
-				"CREATE TABLE person\n"+
+				"CREATE TABLE person \n"+
 				"(\n"+
 				"  id1   INTEGER NOT NULL,\n"+
 				"  CONSTRAINT xyz EXCLUDE (id1 WITH = )\n"+
@@ -2107,7 +2131,7 @@ public class WbSqlFormatterTest
 		formatted = f.getFormattedSql();
 //		System.out.println("++++\n" + formatted + "\n-----");
 		expected =
-				"CREATE TABLE person\n"+
+				"CREATE TABLE person \n"+
 				"(\n"+
 				"  id1         INTEGER NOT NULL PRIMARY KEY,\n"+
 				"  some_data   VARCHAR(100),\n"+

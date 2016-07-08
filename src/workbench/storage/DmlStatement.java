@@ -501,6 +501,7 @@ public class DmlStatement
       if (con != null)
       {
         f.setCatalogSeparator(con.getMetadata().getCatalogSeparator());
+        f.setSchemaSeparator(con.getMetadata().getSchemaSeparator());
       }
       return f.getFormattedSql();
     }
