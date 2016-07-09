@@ -147,6 +147,7 @@ public class JdbcIndexReader
     catch (Exception sql)
     {
       metaData.getWbConnection().rollback(sp);
+      LogMgr.logWarning("JdbcIndexReader.getIndexInfo()", "Error calling DatabaseMetaData.getIndexInfo()", sql);
     }
     finally
     {
