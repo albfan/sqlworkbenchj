@@ -147,10 +147,13 @@
     now process all index definitions for this table
   -->
   <xsl:for-each select="index-def">
-    <xsl:call-template name="create-index">
-       <xsl:with-param name="table-name" select="$table-name"/>
-       <xsl:with-param name="pk-col-count" select="$pk-col-count"/>
-    </xsl:call-template>
+    <!-- There is no way to create an Oracle DOMAIN index with Liquibase -->
+    <xsl:if test="type != 'DOMAIN'">
+      <xsl:call-template name="create-index">
+         <xsl:with-param name="table-name" select="$table-name"/>
+         <xsl:with-param name="pk-col-count" select="$pk-col-count"/>
+      </xsl:call-template>
+    </xsl:if>
   </xsl:for-each> <!-- index-def -->
 
   <xsl:for-each select="table-constraints/constraint-definition[@type='check']">
