@@ -2113,7 +2113,18 @@ public class Settings
 		setProperty(PROP_JOIN_COMPLETION_PREFER_USING, flag);
 	}
 
-	public void setAutoCompletionPasteCase(GeneratedIdentifierCase value)
+
+  public boolean getUseProfileFilterForCompletion()
+  {
+    return getBoolProperty("workbench.editor.autocompletion.use.profilefilter", true);
+  }
+
+  public void setUseProfileFilterForCompletion(boolean flag)
+  {
+    setProperty("workbench.editor.autocompletion.use.profilefilter", flag);
+  }
+
+  public void setAutoCompletionPasteCase(GeneratedIdentifierCase value)
 	{
 		setIdentifierCase("workbench.editor.autocompletion.paste.case", value);
 	}
@@ -2715,7 +2726,7 @@ public class Settings
   {
     return getBoolProperty(PROPERTY_VARIABLE_LENGTH_TS_FRACTION, false);
   }
-  
+
 	public String getDefaultDateFormat()
 	{
 		return getProperty(PROPERTY_DATE_FORMAT, StringUtil.ISO_DATE_FORMAT);

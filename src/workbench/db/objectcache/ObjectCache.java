@@ -116,16 +116,19 @@ class ObjectCache
   private boolean isFiltered(TableIdentifier table)
   {
     boolean filtered = false;
-    if (schemaFilter != null)
+    if (Settings.getInstance().getUseProfileFilterForCompletion())
     {
-      filtered = schemaFilter.isExcluded(table.getSchema());
-    }
+      if (schemaFilter != null)
+      {
+        filtered = schemaFilter.isExcluded(table.getSchema());
+      }
 
-    if (filtered) return true;
+      if (filtered) return true;
 
-    if (catalogFilter != null)
-    {
-      filtered = catalogFilter.isExcluded(table.getCatalog());
+      if (catalogFilter != null)
+      {
+        filtered = catalogFilter.isExcluded(table.getCatalog());
+      }
     }
     return filtered;
   }
@@ -420,7 +423,7 @@ class ObjectCache
     }
 
     String currentCatalog = meta.getCurrentCatalog();
-    
+
     for (TableIdentifier tbl : objects.keySet())
     {
       String tSchema = supportsSchemas ? tbl.getSchema() : tbl.getCatalog();
