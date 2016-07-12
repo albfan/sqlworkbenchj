@@ -119,10 +119,10 @@ public class OracleDataTypeResolver
   {
     if (type == Types.DATE && OracleUtils.getMapDateToTimestamp(connection)) return Types.TIMESTAMP;
 
-    // Oracle reports TIMESTAMP WITH TIMEZONE with the numeric
-    // value -101 (which is not an official java.sql.Types value
+    // Oracle reports TIMESTAMP WITH TIMEZONE with the numeric value -101 and
     // TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
-    if (type == -101 || type == -102) return Types.TIMESTAMP;
+    // neither of them are valid java.sql.Types values
+    if (type == -101 || type == -102) return Types.TIMESTAMP_WITH_TIMEZONE;
 
     // The Oracle driver stupidly reports TIMESTAMP(n) columns as Types.OTHER
     if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP("))
