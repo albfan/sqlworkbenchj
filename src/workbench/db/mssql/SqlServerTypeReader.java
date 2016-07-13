@@ -23,6 +23,7 @@
  */
 package workbench.db.mssql;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -314,20 +315,30 @@ public class SqlServerTypeReader
       "  join sys.schemas s on tt.schema_id = s.schema_id \n" +
       "  left join sys.default_constraints def on def.object_id = col.default_object_id and def.parent_column_id = col.column_id \n";
 
-    Statement stmt = null;
+    PreparedStatement pstmt = null;
     ResultSet rs = null;
+
+    sql += "where tt.name = ? \n";
 
     if (StringUtil.isNonBlank(type.getSchema()))
     {
-      sql += " AND s.name = '" + type.getSchema() + "' \n";
+      sql += " AND s.name = ? \n";
     }
+
     sql += "order by col.column_id";
     List<ColumnIdentifier> columns = new ArrayList<>();
 
     try
     {
-      stmt = con.createStatementForQuery();
-      rs = stmt.executeQuery(sql);
+      pstmt = con.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, con.getMetadata().removeQuotes(type.getObjectName()));
+
+      if (StringUtil.isNonBlank(type.getSchema()))
+      {
+        pstmt.setString(2, con.getMetadata().removeQuotes(type.getSchema()));
+      }
+
+      rs = pstmt.executeQuery();
       while (rs.next())
       {
         String colname = rs.getString("name");
@@ -355,12 +366,12 @@ public class SqlServerTypeReader
     }
     catch (SQLException ex)
     {
-      LogMgr.logError("SqlServerTypeReader.getTableTypeSource()", "Could not read type columns", ex);
+      LogMgr.logError("SqlServerTypeReader.getTableTypeSource()", "Could not read columns for type " + type.getObjectName(), ex);
       return "";
     }
     finally
     {
-      SqlUtil.closeAll(rs, stmt);
+      SqlUtil.closeAll(rs, pstmt);
     }
   }
 

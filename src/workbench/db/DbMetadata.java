@@ -1182,6 +1182,8 @@ public class DbMetadata
   {
     if (StringUtil.isEmptyString(name)) return name;
 
+    name = name.trim();
+    
     if (this.isSqlServer && name.startsWith("[") && name.endsWith("]"))
     {
       return name.substring(1, name.length() - 1);

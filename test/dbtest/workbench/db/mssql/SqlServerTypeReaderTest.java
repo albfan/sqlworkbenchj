@@ -55,7 +55,7 @@ public class SqlServerTypeReaderTest
 	public static void setUpClass()
 		throws Exception
 	{
-		SQLServerTestUtil.initTestcase("SqlServerProcedureReaderTest");
+		SQLServerTestUtil.initTestcase("SqlServerTypeReaderTest");
 		WbConnection conn = SQLServerTestUtil.getSQLServerConnection();
 		Assume.assumeNotNull("No connection available", conn);
 		SQLServerTestUtil.dropAllObjects(conn);
@@ -68,8 +68,16 @@ public class SqlServerTypeReaderTest
 			"   streetname  varchar(50), \n" +
 			"   city        varchar(50)     DEFAULT ('Munich'), \n" +
 			"   some_value  numeric(12,4) \n" +
-			")\n" +
-			"commit;\n";
+			");\n" +
+			"CREATE TYPE code_type \n" +
+			"AS \n" +
+			"TABLE \n" +
+			"( \n" +
+			"   code   integer, \n" +
+			"   value  varchar(50) \n" +
+			");\n" +
+      "create type int_alias from integer not null\n" +
+			"commit;";
 		TestUtil.executeScript(conn, sql);
 	}
 
@@ -91,8 +99,10 @@ public class SqlServerTypeReaderTest
 		assertNotNull("No connection available", conn);
 		List<TableIdentifier> types = conn.getMetadata().getObjectList(null, new String[] { "TYPE" });
 		assertNotNull(types);
-		assertEquals(1, types.size());
+		assertEquals(3, types.size());
 		assertEquals("address_type", types.get(0).getObjectName());
+		assertEquals("code_type", types.get(1).getObjectName());
+		assertEquals("int_alias", types.get(2).getObjectName());
 
 		String source = types.get(0).getSource(conn).toString().trim();
 		String expected =
@@ -104,6 +114,26 @@ public class SqlServerTypeReaderTest
 			"   city        varchar(50)     DEFAULT ('Munich'),\n" +
 			"   some_value  numeric(12,4)\n" +
 			");";
+//		System.out.println("----------------\n" + source + "\n++++++++++++\n" + expected);
+		assertEquals(expected, source);
+
+    source = types.get(1).getSource(conn).toString().trim();
+    expected =
+			"CREATE TYPE dbo.code_type\n" +
+			"AS\n" +
+			"TABLE\n" +
+			"(\n" +
+			"   code   int,\n" +
+			"   value  varchar(50)\n" +
+			");";
+//		System.out.println("----------------\n" + source + "\n++++++++++++\n" + expected);
+		assertEquals(expected, source);
+
+    source = types.get(2).getSource(conn).toString().trim();
+    expected =
+      "CREATE TYPE dbo.int_alias\n" +
+      "  FROM int NOT NULL;";
+
 //		System.out.println("----------------\n" + source + "\n++++++++++++\n" + expected);
 		assertEquals(expected, source);
 	}
