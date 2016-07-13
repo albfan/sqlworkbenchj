@@ -171,7 +171,7 @@ public class OracleMViewReader
     }
 
     boolean supportsCompression = JdbcUtils.hasMinimumServerVersion(dbConnection, "11.1");
-
+    boolean supportsUsingIndex = JdbcUtils.hasMinimumServerVersion(dbConnection, "9.0");
     String sql =
       "-- SQL Workbench \n" +
       "select mv.rewrite_enabled, \n" +
@@ -179,6 +179,9 @@ public class OracleMViewReader
       "       mv.refresh_method, \n" +
       "       mv.build_mode, \n " +
       "       mv.fast_refreshable, \n" +
+      (supportsUsingIndex ?
+      "       mv.use_no_index, \n" :
+      "       null as use_no_index, ") +
       "       cons.constraint_name, \n" +
       "       cons.index_name, \n" +
       "       rc.interval, \n" +
@@ -189,9 +192,9 @@ public class OracleMViewReader
       "       null as compression, \n   null as compress_for \n") +
       "from all_mviews mv \n" +
       (supportsCompression ?
-      "  join all_tables tb on tb.owner = mv.owner and tb.table_name = mv.container_name \n " :
+      "  join all_tables tb on tb.owner = mv.owner and tb.table_name = mv.container_name \n" :
       "") +
-      "  left join all_constraints cons on cons.owner = mv.owner and cons.table_name = mv.mview_name and cons.constraint_type = 'P' \n " +
+      "  left join all_constraints cons on cons.owner = mv.owner and cons.table_name = mv.mview_name and cons.constraint_type = 'P' \n" +
       "  left join all_refresh_children rc on rc.owner = mv.owner and rc.name = mv.mview_name \n" +
       "where mv.owner = ? \n" +
       " and mv.mview_name = ? ";
@@ -230,9 +233,22 @@ public class OracleMViewReader
           }
         }
 
-        String immediate = rs.getString("BUILD_MODE");
-        result.append("\n  BUILD ");
-        result.append(immediate);
+        String useNoIndex = rs.getString("USE_NO_INDEX");
+        if ("Y".equals(useNoIndex))
+        {
+          result.append("\n  USING NO INDEX\n");
+        }
+
+        String buildMode = rs.getString("BUILD_MODE");
+        if ("PREBUILT".equals(buildMode))
+        {
+          result.append("\n  ON PREBUILT TABLE ");
+        }
+        else
+        {
+          result.append("\n  BUILD ");
+          result.append(buildMode);
+        }
 
         String method = rs.getString("REFRESH_METHOD");
         result.append("\n  REFRESH ");
