@@ -2357,6 +2357,11 @@ public class Settings
 		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
 	}
 
+	public void setDebugMetadataSql(boolean flag)
+	{
+		setProperty("workbench.dbmetadata.debugmetasql", flag);
+	}
+
 	public boolean getCheckPreparedStatements()
 	{
 		return getBoolProperty("workbench.sql.checkprepared", false);

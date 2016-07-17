@@ -63,6 +63,13 @@ public class DB2TypeReaderTest
       "  nr integer \n" +
       ") \n" +
       "MODE db2sql; \n" +
+			"create type wbjunit.zz_type as  \n" +
+      "( \n" +
+      "  zz_street varchar(50),  \n" +
+      "  zz_city varchar(50), \n" +
+      "  zz_nr integer \n" +
+      ") \n" +
+      "MODE db2sql; \n" +
 			"create type wbjunit.person_id_type as integer with comparisons; \n" +
 			"create type wbjunit.id_list as integer array[10]; \n" +
 			"create type wbjunit.person_row as row (id integer, name varchar(10)); \n" +
@@ -93,13 +100,13 @@ public class DB2TypeReaderTest
 
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(Db2TestUtil.getSchemaName(), new String[] {"TYPE"} );
 		assertNotNull(objects);
-		assertEquals(4, objects.size());
+		assertEquals(5, objects.size());
 		assertEquals("TYPE", objects.get(0).getType());
 
 		DB2TypeReader reader = new DB2TypeReader();
 		List<DB2ObjectType> types = reader.getTypes(con, Db2TestUtil.getSchemaName(), null);
 		assertNotNull(types);
-		assertEquals(4, types.size());
+		assertEquals(5, types.size());
 
 		DB2ObjectType type = types.get(0);
 		assertEquals("ADDRESS_TYPE", type.getObjectName());
@@ -129,6 +136,17 @@ public class DB2TypeReaderTest
 			"  ID    INTEGER,\n" +
 			"  NAME  VARCHAR(10)\n" +
 			");";
+		assertEquals(src, sql);
+
+    type = types.get(4);
+    src = type.getSource(con).toString().trim();
+    sql =
+      "CREATE TYPE ZZ_TYPE AS\n" +
+      "(\n" +
+      "  ZZ_STREET  VARCHAR(50),\n" +
+      "  ZZ_CITY    VARCHAR(50),\n" +
+      "  ZZ_NR      INTEGER\n" +
+      ");";
 		assertEquals(src, sql);
 	}
 

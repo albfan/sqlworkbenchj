@@ -175,6 +175,7 @@ public class GeneralOptionsPanel
 		alertDuration.setText(durationDisplay);
 		alertDuration.setEnabled(showFinishAlert.isSelected());
 		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
+    logMetaSQL.setSelected(Settings.getInstance().getDebugMetadataSql());
 		autoSaveProfiles.setSelected(Settings.getInstance().getSaveProfilesImmediately());
 		enableQuickFilter.setSelected(GuiSettings.enableProfileQuickFilter());
     focusToQuickFilter.setSelected(GuiSettings.focusToProfileQuickFilter());
@@ -210,6 +211,7 @@ public class GeneralOptionsPanel
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
 		set.setLogAllStatements(logAllStatements.isSelected());
+		set.setDebugMetadataSql(logMetaSQL.isSelected());
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
@@ -257,10 +259,10 @@ public class GeneralOptionsPanel
 			GuiSettings.setUseSystemTrayForAlert(useSystemTray.isSelected());
 		}
 		LoadingImage img = (LoadingImage)iconCombobox.getSelectedItem();
-		Settings.getInstance().setProperty(IconHandler.PROP_LOADING_IMAGE, img.getName());
+		set.setProperty(IconHandler.PROP_LOADING_IMAGE, img.getName());
 
 		LoadingImage cancelImg = (LoadingImage)cancelIconCombo.getSelectedItem();
-		Settings.getInstance().setProperty(IconHandler.PROP_CANCEL_IMAGE, cancelImg.getName());
+		set.setProperty(IconHandler.PROP_CANCEL_IMAGE, cancelImg.getName());
 	}
 
 	@Override
@@ -330,6 +332,7 @@ public class GeneralOptionsPanel
     checkUpdatesLabel = new JLabel();
     checkInterval = new JComboBox();
     logAllStatements = new JCheckBox();
+    logMetaSQL = new JCheckBox();
     jSeparator5 = new JSeparator();
     logfileLabel = new WbLabelField();
 
@@ -481,7 +484,7 @@ public class GeneralOptionsPanel
     settingsfilename.setText("Settings");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -669,14 +672,14 @@ public class GeneralOptionsPanel
     logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     add(logLevelLabel, gridBagConstraints);
 
     logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -794,9 +797,24 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 0, 5, 0);
     add(logAllStatements, gridBagConstraints);
+
+    logMetaSQL.setSelected(Settings.getInstance().getConsolidateLogMsg());
+    logMetaSQL.setText(ResourceMgr.getString("LblLogMetaSql")); // NOI18N
+    logMetaSQL.setToolTipText(ResourceMgr.getString("d_LblLogMetaSql")); // NOI18N
+    logMetaSQL.setBorder(null);
+    logMetaSQL.setHorizontalAlignment(SwingConstants.LEFT);
+    logMetaSQL.setHorizontalTextPosition(SwingConstants.RIGHT);
+    logMetaSQL.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 0, 5, 0);
+    add(logMetaSQL, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(0, 0, 9, 0);
@@ -805,7 +823,7 @@ public class GeneralOptionsPanel
     logfileLabel.setText("Logfile");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -863,6 +881,7 @@ public class GeneralOptionsPanel
   private JCheckBox logAllStatements;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
+  private JCheckBox logMetaSQL;
   private JTextField logfileLabel;
   private JCheckBox onlyActiveTab;
   private JCheckBox scrollTabs;
