@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2016-07-03">
+  <release build="-1" date="2016-07-17">
+  </release>
+  <release build="120" date="2016-07-17">
     <entry dev-build="5" type="enh">It's now possible to delete variables using wildcards</entry>
     <entry dev-build="5" type="enh">It's now possible to test the connection from the profile dialog</entry>
     <entry dev-build="4" type="enh">For Postgres, the generated source code for functions and custom aggregates now contains the new PARALLEL settings for Postgres 9.6</entry>

@@ -437,6 +437,13 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 119 (requires Java 8!)<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build119.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build119-MacJava8.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build119.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 118 (works with Java 7)<br/>
           <ul>
             <li><a href="archive/Workbench-Build118.zip">All Platforms</a></li>
