@@ -357,8 +357,8 @@ public class ProcedureListPanel
     ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, list);
 		procList.addPopupAction(createScript, true);
 
-		this.compileAction = new CompileDbObjectAction(this, list);
-		procList.addPopupAction(compileAction, false);
+    compileAction = new CompileDbObjectAction(this, list);
+    procList.addPopupAction(compileAction, false);
 
 		DropDbObjectAction dropAction = new DropDbObjectAction(this, list, this);
 		procList.addPopupAction(dropAction, false);

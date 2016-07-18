@@ -64,6 +64,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
@@ -195,10 +196,15 @@ public class TriggerListPanel
 		this.reset();
 
     WbSelectionModel list = WbSelectionModel.Factory.createFacade(triggerList.getSelectionModel());
+
+    ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, list);
+		triggerList.addPopupAction(createScript, true);
+
+    compileAction = new CompileDbObjectAction(this, list);
+    triggerList.addPopupAction(compileAction, false);
+
     this.dropAction = new DropDbObjectAction(this, list, this);
-		triggerList.addPopupAction(dropAction, true);
-		this.compileAction = new CompileDbObjectAction(this, list);
-		triggerList.addPopupAction(compileAction, false);
+		triggerList.addPopupAction(dropAction, false);
 
 		if (dbConnection != null)
 		{
