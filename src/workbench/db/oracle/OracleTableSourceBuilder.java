@@ -444,6 +444,12 @@ public class OracleTableSourceBuilder
         long retention = rs.getLong("retention");
         long sfRetention = rs.getLong("retention_value");
         String retentionType = rs.getString("retention_type");
+        if ("DEFAULT".equalsIgnoreCase(retentionType))
+        {
+          // Oracle stores the type "DEFAULT" in the system catalogs,
+          // but DEFAULT cannot be used in a DDL statement, only AUTO
+          retentionType = "AUTO";
+        }
         if (rs.wasNull()) retention = -1;
         String cache = rs.getString("cache");
         String logging = rs.getString("logging");
