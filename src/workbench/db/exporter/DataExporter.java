@@ -1441,6 +1441,10 @@ public class DataExporter
           String baseName = outputfile.getFileName();
           String dir = outputfile.getParent();
           this.realOutputfile = new WbFile(dir, baseName + ".zip");
+          if (realOutputfile.equals(outputfile))
+          {
+            throw new IOException(ResourceMgr.getString("ErrExportWrongZip"));
+          }
           OutputStream zout = new FileOutputStream(realOutputfile);
           this.zipArchive = new ZipOutputStream(zout);
           this.zipArchive.setLevel(9);
