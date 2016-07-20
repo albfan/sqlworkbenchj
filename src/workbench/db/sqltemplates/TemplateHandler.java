@@ -34,6 +34,7 @@ import workbench.db.QuoteHandler;
 import workbench.db.WbConnection;
 
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -115,9 +116,27 @@ public abstract class TemplateHandler
     if (sql == null) return sql;
     if (table == null) return sql;
     QuoteHandler handler = connection == null ? QuoteHandler.STANDARD_HANDLER : connection.getMetadata();
+
+    if (table.getSchema() == null)
+    {
+      sql = removeSchemaPlaceholder(sql, SqlUtil.getSchemaSeparator(connection));
+    }
+    else
+    {
+      sql = replacePlaceholder(sql, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, handler.quoteObjectname(table.getSchema()), addWhitespace);
+    }
+
+    if (table.getCatalog() == null)
+    {
+      sql = TemplateHandler.removeCatalogPlaceholder(sql, SqlUtil.getCatalogSeparator(connection));
+    }
+    else
+    {
+      sql = replacePlaceholder(sql, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, handler.quoteObjectname(table.getCatalog()), addWhitespace);
+    }
+
     sql = replacePlaceholder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, handler.quoteObjectname(table.getObjectName()), addWhitespace);
-    sql = replacePlaceholder(sql, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, handler.quoteObjectname(table.getSchema()), addWhitespace);
-    sql = replacePlaceholder(sql, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, handler.quoteObjectname(table.getCatalog()), addWhitespace);
+
 
     // do not call getObjectExpression() or getFullyQualifiedName() if not necessary.
     // this might trigger a SELECT to the database to get the current schema and/or catalog

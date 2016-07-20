@@ -280,25 +280,7 @@ public class TableSelectBuilder
   private String replacePlaceholders(TableIdentifier table, CharSequence selectCols, int maxRows)
   {
     String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
-    select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection, false);
-
-    if (table.getSchema() == null)
-    {
-      select = TemplateHandler.removeSchemaPlaceholder(select, SqlUtil.getSchemaSeparator(dbConnection));
-    }
-    else
-    {
-      select = select.replace(MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, table.getSchema());
-    }
-
-    if (table.getCatalog() == null)
-    {
-      select = TemplateHandler.removeCatalogPlaceholder(select, SqlUtil.getCatalogSeparator(dbConnection));
-    }
-    else
-    {
-      select = select.replace(MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, table.getCatalog());
-    }
+    select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection);
 
     select = applyLimit(select, maxRows);
 
