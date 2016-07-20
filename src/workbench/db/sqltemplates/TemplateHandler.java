@@ -116,6 +116,8 @@ public abstract class TemplateHandler
     if (table == null) return sql;
     QuoteHandler handler = connection == null ? QuoteHandler.STANDARD_HANDLER : connection.getMetadata();
     sql = replacePlaceholder(sql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, handler.quoteObjectname(table.getObjectName()), addWhitespace);
+    sql = replacePlaceholder(sql, MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, handler.quoteObjectname(table.getSchema()), addWhitespace);
+    sql = replacePlaceholder(sql, MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, handler.quoteObjectname(table.getCatalog()), addWhitespace);
 
     // do not call getObjectExpression() or getFullyQualifiedName() if not necessary.
     // this might trigger a SELECT to the database to get the current schema and/or catalog
@@ -129,6 +131,7 @@ public abstract class TemplateHandler
     {
       sql = replacePlaceholder(sql, MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(connection), addWhitespace);
     }
+
     return sql;
   }
 

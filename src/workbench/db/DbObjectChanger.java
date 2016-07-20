@@ -30,6 +30,8 @@ import java.util.Map;
 
 import workbench.log.LogMgr;
 
+import workbench.db.mssql.SqlServerTableSourceBuilder;
+import workbench.db.oracle.OracleTableSourceBuilder;
 import workbench.db.sqltemplates.TemplateHandler;
 
 import workbench.util.CollectionUtil;
@@ -115,7 +117,7 @@ public class DbObjectChanger
         result.append(";\n");
       }
     }
-    if (settings.ddlNeedsCommit() && result.length() > 0)
+    if (needsCommit() && result.length() > 0)
     {
       result.append("\nCOMMIT;\n");
     }
@@ -258,7 +260,8 @@ public class DbObjectChanger
     if (StringUtil.isBlank(sql)) return null;
     StringBuilder script = new StringBuilder(sql);
     script.append(";\n");
-    if (settings.ddlNeedsCommit())
+
+    if (needsCommit())
     {
       script.append("\nCOMMIT;\n");
     }
@@ -319,11 +322,20 @@ public class DbObjectChanger
     if (StringUtil.isBlank(sql)) return null;
     StringBuilder script = new StringBuilder(sql);
     script.append(";\n");
-    if (settings.ddlNeedsCommit())
+    if (needsCommit())
     {
       script.append("\nCOMMIT;\n");
     }
     return script.toString();
+  }
+
+  private boolean needsCommit()
+  {
+    if (settings.ddlNeedsCommit())
+    {
+      return dbConnection == null ? true : dbConnection.getAutoCommit() == false;
+    }
+    return false;
   }
 
   /**
@@ -349,7 +361,10 @@ public class DbObjectChanger
       pkName = pkName.toLowerCase();
     }
 
-    sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConnection, false);
+    sql = TemplateHandler.removePlaceholder(sql, SqlServerTableSourceBuilder.CLUSTERED_PLACEHOLDER, true);
+    sql = TemplateHandler.removePlaceholder(sql, OracleTableSourceBuilder.INDEX_USAGE_PLACEHOLDER, true);
+
     if (pkName != null)
     {
       sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, pkName);
@@ -375,18 +390,7 @@ public class DbObjectChanger
 
     if (sql == null) return null;
 
-    if (sql.contains(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER))
-    {
-      sql = sql.replace(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, table.getTableExpression(dbConnection));
-    }
-    else if (sql.contains(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER))
-    {
-      sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getFullyQualifiedName(dbConnection));
-    }
-    
-    sql = sql.replace(MetaDataSqlManager.SCHEMA_NAME_PLACEHOLDER, table.getRawSchema());
-    sql = sql.replace(MetaDataSqlManager.CATALOG_NAME_PLACEHOLDER, table.getRawCatalog());
-    sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getRawTableName());
+    sql = TemplateHandler.replaceTablePlaceholder(sql, table, dbConnection, false);
     sql = sql.replace(MetaDataSqlManager.CONSTRAINT_NAME_PLACEHOLDER, fkName);
     return sql;
   }
@@ -405,7 +409,7 @@ public class DbObjectChanger
         script.append(";\n");
       }
     }
-    if (settings.ddlNeedsCommit())
+    if (needsCommit())
     {
       script.append("\nCOMMIT;\n");
     }

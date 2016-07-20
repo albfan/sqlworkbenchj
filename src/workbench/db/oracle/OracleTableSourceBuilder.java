@@ -56,9 +56,9 @@ import workbench.util.StringUtil;
 public class OracleTableSourceBuilder
   extends TableSourceBuilder
 {
-  private static final String REV_IDX_TYPE = "NORMAL/REV";
-  private static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
-  private static final String IOT_OPTIONS = "%IOT_DEFINITION%";
+  public static final String REV_IDX_TYPE = "NORMAL/REV";
+  public static final String INDEX_USAGE_PLACEHOLDER = "%pk_index_usage%";
+  public static final String IOT_OPTIONS = "%IOT_DEFINITION%";
   private static final String A_DEFAULT = "DEFAULT";
   private String defaultTablespace;
   private String currentUser;
