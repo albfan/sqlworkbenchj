@@ -177,6 +177,7 @@ public class MacroManager
 		{
 			storage = allMacros.get(getDefaultMacroFile().getFullPath());
 			LogMgr.logError("MacroManager.getStorage()", "No macros registered for clientId=" + macroClientId + ". Using default macros!", new Exception("Client not initialized"));
+      LogMgr.logInfo("MacroManager.getStorage()", "Current macro clients: " + macroClients + ", current storages: " + allMacros);
 		}
 		return storage;
 	}
@@ -223,7 +224,7 @@ public class MacroManager
 		return null;
 	}
 
-	public Map<String, MacroDefinition> getExpandableMacros(int clientId)
+	public synchronized Map<String, MacroDefinition> getExpandableMacros(int clientId)
 	{
 		MacroStorage storage = getStorage(clientId);
 		Map<String, MacroDefinition> result = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);

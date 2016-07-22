@@ -614,7 +614,7 @@ public class ValueConverter
     }
 
     java.sql.Timestamp result = null;
-    dateFormatter.setIllegalDateIsNull(illegalDateIsNull);
+    timestampFormatter.setIllegalDateIsNull(illegalDateIsNull);
 
     if (this.defaultTimestampFormat != null)
     {

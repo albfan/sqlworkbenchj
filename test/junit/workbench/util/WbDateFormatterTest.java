@@ -64,6 +64,7 @@ public class WbDateFormatterTest
 	{
 		String source = "2012-01-01";
 		WbDateFormatter formatter = new WbDateFormatter("yyyy-MM-dd");
+
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, 0, 1, 0, 0, 0);
 		cal.set(Calendar.MILLISECOND, 0);
@@ -72,6 +73,9 @@ public class WbDateFormatterTest
 		assertEquals(expected, result);
 		expected = new Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
 		assertEquals(expected, formatter.parseDate(InfinityLiterals.PG_POSITIVE_LITERAL));
+
+    result = formatter.parseTimestamp(source);
+    assertEquals(cal.getTime(), result);
 	}
 
   @Test

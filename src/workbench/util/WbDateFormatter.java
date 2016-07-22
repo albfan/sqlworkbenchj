@@ -280,6 +280,14 @@ public class WbDateFormatter
   public java.sql.Timestamp parseTimestamp(String source)
     throws DateTimeParseException
   {
+    if (!containsTimeFields)
+    {
+      // a format mask that does not include time values cannot be parsed using LocalDateTime
+      // it must be done through LocalDate
+      java.sql.Date dt = parseDate(source);
+      return new java.sql.Timestamp(dt.getTime());
+    }
+
     if (infinityLiterals != null)
     {
       if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
