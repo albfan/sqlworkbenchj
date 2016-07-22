@@ -64,8 +64,6 @@ public class MacroStorage
 	private List<MacroChangeListener> changeListeners = new ArrayList<>(1);
 	private WbFile sourceFile;
 
-  private boolean sendNotifications;
-
 	public MacroStorage(WbFile toLoad)
 	{
     sourceFile = toLoad;
@@ -74,6 +72,13 @@ public class MacroStorage
 
   MacroStorage()
   {
+  }
+
+  public synchronized void loadNewFile(WbFile toLoad)
+  {
+    sourceFile = toLoad;
+    loadMacros();
+    fireMacroListChanged();
   }
 
 	public synchronized MacroDefinition getMacro(String key)

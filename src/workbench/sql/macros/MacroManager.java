@@ -24,8 +24,10 @@
 package workbench.sql.macros;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.swing.KeyStroke;
@@ -128,17 +130,44 @@ public class MacroManager
 
 	public synchronized void loadMacros(int clientId, WbFile macroFile)
 	{
-		String fname = macroFile.getFullPath();
-		MacroStorage storage = allMacros.get(fname);
+		String newFilename = macroFile.getFullPath();
+    String oldFilename = macroClients.get(clientId);
+
+    MacroStorage storage = null;
+    if (oldFilename != null)
+    {
+      storage = allMacros.get(oldFilename);
+    }
+
 		if (storage == null)
 		{
 			storage = new MacroStorage(macroFile);
-			allMacros.put(fname, storage);
-      LogMgr.logDebug("MacroManager.loadMacros()", "Loaded " + storage.getSize() + " macros from file " + macroFile.getFullPath() + " for clientId:  " + clientId);
 		}
-		macroClients.put(clientId, fname);
+    else
+    {
+      allMacros.remove(oldFilename);
+      storage.loadNewFile(macroFile);
+    }
+
+    LogMgr.logDebug("MacroManager.loadMacros()", "Loaded " + storage.getSize() + " macros from file " + macroFile.getFullPath() + " for clientId:  " + clientId);
+    allMacros.put(newFilename, storage);
+		macroClients.put(clientId, newFilename);
+    purgeMacroStorage();
     dumpMacroInfo();
 	}
+
+  private void purgeMacroStorage()
+  {
+    Set<String> unusedMacros = new HashSet<>(allMacros.keySet());
+    unusedMacros.removeAll(macroClients.values());
+    unusedMacros.remove(getDefaultMacroFile().getFullPath());
+
+    for (String fname : unusedMacros)
+    {
+      LogMgr.logDebug("MacroManager.purgeMacroStorage()", "Macro file: " + fname + " no longer in use, removing it.");
+      allMacros.remove(fname);
+    }
+  }
 
 	private MacroStorage getStorage(int macroClientId)
 	{
