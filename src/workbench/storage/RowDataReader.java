@@ -223,7 +223,7 @@ public class RowDataReader
         {
           value = rs.getString(i+1);
         }
-        else if (type == Types.TIMESTAMP)
+        else if (type == Types.TIMESTAMP || type == Types.TIMESTAMP_WITH_TIMEZONE)
         {
           value = readTimestampValue(rs, i+1);
         }
