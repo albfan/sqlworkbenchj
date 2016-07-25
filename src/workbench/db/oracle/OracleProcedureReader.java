@@ -376,110 +376,90 @@ public class OracleProcedureReader
   }
 
   @Override
-  public DataStore getProcedures(String catalog, String schema, String name)
+  public DataStore getProcedures(String pkgName, String schema, String name)
     throws SQLException
   {
     if (!useCustomSql())
     {
-      return getProceduresFromJdbc(catalog, schema, name);
+      return getProceduresFromJdbc(pkgName, schema, name);
     }
 
     schema = DbMetadata.cleanupWildcards(schema);
     name = DbMetadata.cleanupWildcards(name);
 
     schema = connection.getMetadata().adjustObjectnameCase(schema);
-    catalog = connection.getMetadata().adjustObjectnameCase(catalog);
+    pkgName = connection.getMetadata().adjustObjectnameCase(pkgName);
     name = connection.getMetadata().adjustObjectnameCase(name);
 
     // ALL_PROCEDURES does not return invalid procedures
     // so an outer join against ALL_OBJECTS is necessary
     String standardProcs =
-      "select null as package_name,   \n" +
-      "       ao.owner as procedure_owner,   \n" +
-      "       ao.object_name as procedure_name,  \n" +
-      "       null as overload_index,  \n" +
-      "       null as remarks,  \n" +
-      "       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE,  \n" +
-      "       ao.status  \n" +
-      "from all_objects ao  \n" +
-      "  left join all_procedures ap on ao.object_name = ap.object_name and ao.owner = ap.owner   \n" +
-      "where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
+      "  select null as package_name,   \n" +
+      "         ao.owner as procedure_owner,   \n" +
+      "         ao.object_name as procedure_name,  \n" +
+      "         null as overload_index,  \n" +
+      "         null as remarks,  \n" +
+      "         decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE,  \n" +
+      "         ao.status  \n" +
+      "  from all_objects ao  \n" +
+      "    left join all_procedures ap on ao.object_name = ap.object_name and ao.owner = ap.owner   \n" +
+      "  where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
 
     if (StringUtil.isNonBlank(schema))
     {
-      standardProcs += " AND ao.owner = '" + schema + "' ";
+      standardProcs += "\n    and ao.owner = '" + schema + "' ";
     }
 
     if (StringUtil.isNonBlank(name))
     {
-      standardProcs += " AND ao.object_name " + getNameCondition(name);
-    }
-
-    String pkgProcs1 =
-      "  select aa.owner, aa.package_name, aa.object_name as procedure_name, aa.subprogram_id, aa.overload as overload_index,  \n" +
-      "         case  \n" +
-      "           when (select count(*)   \n" +
-      "                 from all_arguments aa2   \n" +
-      "                 where aa2.owner = aa.owner   \n" +
-      "                   and aa2.package_name = aa.package_name  \n" +
-      "                   and aa2.object_name = aa.object_name  \n" +
-      "                     and aa2.in_out = 'OUT' and aa2.argument_name is null) = 1 then " + DatabaseMetaData.procedureReturnsResult + " \n" +
-      "             else " + DatabaseMetaData.procedureNoResult + " \n " +
-      "          end as procedure_type  \n" +
-      "  from all_arguments aa  \n" +
-      "  where package_name is not null  \n";
-
-    String pkgProcs2 =
-      "  select ap.owner, ap.object_name as package_name, ap.procedure_name, ap.subprogram_id, ap.overload as overload_index, 1 as procedure_type \n" +
-      "  from all_procedures ap \n" +
-      "  where owner = user \n" +
-      "    and ap.procedure_name is not null \n" +
-      "    and ap.object_name is not null \n" +
-      "    and not exists (select 1  \n" +
-      "                    from all_arguments aa  \n" +
-      "                    where aa.owner = ap.owner \n" +
-      "                    and aa.object_name = ap.procedure_name) \n";
-
-    if (StringUtil.isNonBlank(schema))
-    {
-      pkgProcs1 += "\n AND aa.owner = '" + schema + "' ";
-      pkgProcs2 += "\n AND ap.owner = '" + schema + "' ";
-    }
-
-    if (StringUtil.isNonBlank(name))
-    {
-      pkgProcs1 += "\n AND aa.object_name " + getNameCondition(name);
-      pkgProcs2 += "\n AND ap.procedure_name " + getNameCondition(name);
-    }
-
-    if (StringUtil.isNonBlank(catalog))
-    {
-      pkgProcs1 += "\n AND aa.package_name = '" + catalog + "' ";
-      pkgProcs2 += "\n AND ap.object_name = '" + catalog + "' ";
+      standardProcs += "\n    and ao.object_name " + getNameCondition(name);
     }
 
     String pkgProcs =
-      "select p.package_name, \n" +
-      "       p.owner as procedure_owner, \n" +
-      "       p.procedure_name, \n" +
-      "       p.overload_index, \n" +
-      "       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
-      "       p.procedure_type, \n" +
-      "       ao.status \n" +
-      "from (\n" +
-        pkgProcs1 + "\n  union\n" + pkgProcs2 +
-      "\n) p \n" +
-      "  join all_objects ao on p.package_name = ao.object_name and p.owner = ao.owner \n" +
-      "where ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE')";
+      "  select ap.object_name as package_name, \n" +
+      "         ap.owner as procedure_owner, \n" +
+      "         ap.procedure_name, \n" +
+      "         ap.overload as overload_index, \n" +
+      "         decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
+      "         case  \n" +
+      "           when (select count(*)   \n" +
+      "                 from all_arguments aa   \n" +
+      "                 where aa.owner = ap.owner   \n" +
+      "                   and aa.package_name = ap.object_name  \n" +
+      "                   and aa.object_name = ap.procedure_name \n" +
+      "                     and aa.in_out = 'OUT' and aa.argument_name is null) = 1 then " + DatabaseMetaData.procedureReturnsResult + " \n" +
+      "             else " + DatabaseMetaData.procedureNoResult + " \n " +
+      "          end as procedure_type,  \n" +
+      "          ao.status \n" +
+      "  from all_procedures ap \n" +
+      "    join all_objects ao on ap.object_name = ao.object_name and ap.owner = ao.owner \n" +
+      "  where ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE') \n" +
+      "    and ap.procedure_name is not null \n" +
+      "    and ap.object_name is not null";
+
+    if (StringUtil.isNonBlank(schema))
+    {
+      pkgProcs += "\n    and ap.owner = '" + schema + "' ";
+    }
+
+    if (StringUtil.isNonBlank(name))
+    {
+      pkgProcs += "\n    and ap.procedure_name " + getNameCondition(name);
+    }
+
+    if (StringUtil.isNonBlank(pkgName))
+    {
+      pkgProcs += "\n    and ap.object_name = '" + pkgName + "' ";
+    }
 
     String sql =
       "-- SQL Workbench \n" +
       "select " + OracleUtils.getCacheHint() + "* \n" +
       "from (\n";
 
-    if (StringUtil.isBlank(catalog))
+    if (StringUtil.isBlank(pkgName))
     {
-      sql += standardProcs + "\nUNION ALL \n" + pkgProcs;
+      sql += standardProcs + "\n  UNION ALL \n" + pkgProcs;
     }
     else
     {
