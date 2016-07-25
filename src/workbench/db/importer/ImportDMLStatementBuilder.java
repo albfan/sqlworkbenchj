@@ -438,8 +438,18 @@ public class ImportDMLStatementBuilder
     if (CollectionUtil.isEmpty(keyColumns)) return null;
 
     String insert = createInsertStatement(columnConstants, insertSqlStart);
-    insert += "\nON CONFLICT (";
+
+    insert += "\nON CONFLICT";
+
+    if (useIgnore)
+    {
+      insert += "\nDO NOTHING";
+      return insert;
+    }
+
     DbMetadata meta = dbConn.getMetadata();
+
+    insert += " (";
     for (int i=0; i < keyColumns.size(); i++)
     {
       if (i > 0) insert += ",";
@@ -447,21 +457,17 @@ public class ImportDMLStatementBuilder
       colname = meta.quoteObjectname(colname);
       insert += colname;
     }
-    if (useIgnore)
+
+    insert += ")\nDO UPDATE\n  SET ";
+
+    for (int i=0; i < targetColumns.size(); i++)
     {
-      insert += ")\nDO NOTHING";
+      if (i > 0) insert += ",\n      ";
+      String colname = targetColumns.get(i).getDisplayName();
+      colname = meta.quoteObjectname(colname);
+      insert += colname + " = EXCLUDED." + colname;
     }
-    else
-    {
-      insert += ")\nDO UPDATE\n  SET ";
-      for (int i=0; i < targetColumns.size(); i++)
-      {
-        if (i > 0) insert += ",\n      ";
-        String colname = targetColumns.get(i).getDisplayName();
-        colname = meta.quoteObjectname(colname);
-        insert += colname + " = EXCLUDED." + colname;
-      }
-    }
+
     return insert;
   }
 
