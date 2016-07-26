@@ -27,14 +27,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
 
 import workbench.log.LogMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import workbench.db.oracle.OracleUtils;
 
 
 /**
@@ -49,19 +52,22 @@ public class OracleRowDataReader
   extends RowDataReader
 {
   private Method stringValue;
+  private Method internalToTimestamp;
 
   private Connection sqlConnection;
-  private SimpleDateFormat tsParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-  private final Set<String> tsClasses = new HashSet<>(3);
+  private DateTimeFormatter tsParser;
+  private boolean useInternalConversion;
 
   public OracleRowDataReader(ResultInfo info, WbConnection conn)
     throws ClassNotFoundException
   {
     super(info, conn);
     sqlConnection = conn.getSqlConnection();
+    useInternalConversion = OracleUtils.useInternalTimestampConversion();
 
-    // TODO: do I also need to convert TIMESTAMP WITH LOCAL TIME ZONE (oracle.sql.TIMESTAMPTLZ)?
-    tsClasses.add("oracle.sql.TIMESTAMPTZ");
+    DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ss");
+    builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true);
+    tsParser = builder.toFormatter().withResolverStyle(ResolverStyle.SMART);
 
     // we cannot have any "hardcoded" references to the Oracle classes
     // because that will throw a ClassNotFoundException as those classes were loaded through a different class loader.
@@ -69,12 +75,26 @@ public class OracleRowDataReader
     try
     {
       Class oraDatum = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.Datum");
-      stringValue= oraDatum.getMethod("stringValue", java.sql.Connection.class);
+      stringValue = oraDatum.getMethod("stringValue", java.sql.Connection.class);
     }
     catch (Throwable t)
     {
       LogMgr.logError("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum class", t);
       throw new ClassNotFoundException("TIMESTAMPTZ");
+    }
+
+    if (useInternalConversion)
+    {
+      try
+      {
+        Class tzClass = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.TIMESTAMPTZ");
+        internalToTimestamp = tzClass.getMethod("timestampValue", java.sql.Connection.class);
+      }
+      catch (Throwable t)
+      {
+        useInternalConversion = false;
+        LogMgr.logError("OracleRowDataReader.initialize()", "Could not accessoracle.sql.TIMESTAMPTZ class", t);
+      }
     }
   }
 
@@ -87,16 +107,36 @@ public class OracleRowDataReader
     if (value == null) return null;
     if (rs.wasNull()) return null;
 
-    if (tsClasses.contains(value.getClass().getName()))
-    {
-      return adjustTIMESTAMP(value);
-    }
-
     if (value instanceof java.sql.Timestamp)
     {
       return value;
     }
+
+    if ("oracle.sql.TIMESTAMPTZ".equals(value.getClass().getName()))
+    {
+      if (useInternalConversion)
+      {
+        return timestampValue(value);
+      }
+      return adjustTIMESTAMP(value);
+    }
+
+    // fallback
     return rs.getTimestamp(column);
+  }
+
+  private Object timestampValue(Object tz)
+  {
+    try
+    {
+      Timestamp ts = (Timestamp)internalToTimestamp.invoke(tz, sqlConnection);
+      return ts;
+    }
+    catch (Throwable ex)
+    {
+      LogMgr.logDebug("OracleRowDataReader.timestampValue()", "Could not convert timestamp", ex);
+    }
+    return tz;
   }
 
   private Object adjustTIMESTAMP(Object tz)
@@ -105,19 +145,12 @@ public class OracleRowDataReader
     {
       String tsValue = (String) stringValue.invoke(tz, sqlConnection);
 
-      // SimpleDateFormat doesn't support more than 3 digits for milliseconds
-      // Oracle returns 6 digits, e.g: 2015-01-26 11:42:46.894119 Europe/Berlin
-      // apparently SimpleDateFormat does some strange rounding there and will return
-      // the above timestamp as 11:57:40.119
-      // so we need to strip the additional milliseconds
-      // and the timezone name as Java can't handle that either.
-
-      String cleanValue = cleanupTSValue(tsValue);
-
+      // Strip of the timezone in order to parse the "plain" time
       // this loses the time zone information stored in Oracle's TIMESTAMPTZ or TIMESTAMPLTZ values
       // but otherwise the displayed time would be totally wrong.
-      java.util.Date date = tsParser.parse(cleanValue);
-      Timestamp ts = new java.sql.Timestamp(date.getTime());
+      String cleanValue = removeTimezone(tsValue);
+      LocalDateTime dt = LocalDateTime.parse(cleanValue, tsParser);
+      Timestamp ts = java.sql.Timestamp.valueOf(dt);
 
       // TODO: extract the stripped nanoseconds from the passed object
       // and set them in the Timestamp instance using setNanos();
@@ -130,28 +163,16 @@ public class OracleRowDataReader
     return tz;
   }
 
-  public static String cleanupTSValue(String tsValue)
+  public static String removeTimezone(String tsValue)
   {
     int len = tsValue.length();
-    if (len < 19)
+    if (len <= 19)
     {
       return tsValue;
     }
-    int msPos = tsValue.indexOf('.');
-    int end = -1;
-    if (msPos == 19)
-    {
-      end = tsValue.indexOf(' ', msPos);
-    }
-    else
-    {
-      // no milliseconds, find the timezone name
-      end = tsValue.indexOf(' ', 12);
-    }
+    int end = tsValue.indexOf(' ', 12);
 
-    end = Math.min(len, 23);
-
-    if (end < len)
+    if (end > 0 && end < len)
     {
       tsValue = tsValue.substring(0, end);
     }

@@ -23,8 +23,9 @@
  */
 package workbench.storage;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -40,16 +41,17 @@ public class OracleRowDataReaderTest
 	@Test
 	public void testCleanupTSValue()
 	{
-		assertEquals("2015-01-26 11:42:46.07", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.07"));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.078"));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.0789"));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.07899"));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.07899   "));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.078999"));
-		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.078999       "));
-		assertEquals("2015-01-26 11:42:46.0", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.0"));
-		assertEquals("2015-01-26 11:42:46.894", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42:46.894119 Europe/Berlin"));
-		assertEquals("2015-01-26 11:42", OracleRowDataReader.cleanupTSValue("2015-01-26 11:42"));
+		assertEquals("2015-01-26 11:42:46.07", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.07"));
+		assertEquals("2015-01-26 11:42:46.078", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.078"));
+		assertEquals("2015-01-26 11:42:46.0789", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.0789"));
+		assertEquals("2015-01-26 11:42:46.07899", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.07899"));
+		assertEquals("2015-01-26 11:42:46.07899", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.07899   "));
+		assertEquals("2015-01-26 11:42:46.078999", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.078999"));
+		assertEquals("2015-01-26 11:42:46.078999", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.078999       "));
+		assertEquals("2015-01-26 11:42:46.0", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.0"));
+		assertEquals("2015-01-26 11:42:46.894119", OracleRowDataReader.removeTimezone("2015-01-26 11:42:46.894119 Europe/Berlin"));
+		assertEquals("2015-01-26 11:42", OracleRowDataReader.removeTimezone("2015-01-26 11:42"));
+		assertEquals("2016-07-26 12:15:16.0", OracleRowDataReader.removeTimezone("2016-07-26 12:15:16.0 UTC"));
 	}
 
 }

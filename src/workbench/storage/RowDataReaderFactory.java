@@ -23,9 +23,9 @@
 package workbench.storage;
 
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.db.WbConnection;
+import workbench.db.oracle.OracleUtils;
 
 /**
  *
@@ -35,7 +35,7 @@ public class RowDataReaderFactory
 {
   public static RowDataReader createReader(ResultInfo info, WbConnection conn)
   {
-    if (conn != null  && conn.getMetadata().isOracle() && Settings.getInstance().getBoolProperty("workbench.db.oracle.fix.timstamptz", true))
+    if (conn != null  && conn.getMetadata().isOracle() && OracleUtils.fixTimestampTZ())
     {
       try
       {
@@ -45,7 +45,7 @@ public class RowDataReaderFactory
       {
         LogMgr.logError("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader", cnf);
         // disable the usage of the OracleRowDataReader for now, to avoid unnecessary further attempts
-        System.setProperty("workbench.db.oracle.fix.timstamptz", "false");
+        System.setProperty(OracleUtils.PROP_FIX_TIMESTAMPTZ, "false");
       }
     }
     return new RowDataReader(info, conn);
