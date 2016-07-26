@@ -292,6 +292,34 @@ public class JdbcUtils
         SqlServerUtil.setLockTimeout(connection, timeout);
       }
     }
+  }
 
+  public static String getDbIdFromUrl(String url)
+  {
+    if (StringUtil.isBlank(url)) return null;
+
+    if (url.startsWith("jdbc:postgresql")) return DbMetadata.DBID_PG;
+    if (url.startsWith("jdbc:pgsql")) return DbMetadata.DBID_PG;
+    if (url.startsWith("jdbc:oracle")) return DbMetadata.DBID_ORA;
+    if (url.startsWith("jdbc:sqlserver")) return DbMetadata.DBID_MS;
+    if (url.startsWith("jdbc:jtds:sqlserver")) return DbMetadata.DBID_MS;
+    if (url.startsWith("jdbc:microsoft:sqlserver")) return DbMetadata.DBID_MS;
+    if (url.startsWith("jdbc:firebirdsql")) return DbMetadata.DBID_FIREBIRD;
+    if (url.startsWith("jdbc:h2")) return DbMetadata.DBID_H2;
+    if (url.startsWith("jdbc:derby")) return DbMetadata.DBID_DERBY;
+    if (url.startsWith("jdbc:hsqldb")) return DbMetadata.DBID_HSQLDB;
+    if (url.startsWith("jdbc:sap")) return DbMetadata.DBID_HANA;
+    if (url.startsWith("jdbc:datadirect:openedge")) return DbMetadata.DBID_OPENEDGE;
+    if (url.startsWith("jdbc:db2")) return DbMetadata.DBID_DB2_LUW;
+    if (url.startsWith("jdbc:informix")) return DbMetadata.DBID_INFORMIX;
+    if (url.startsWith("jdbc:cubrid")) return DbMetadata.DBID_CUBRID;
+    if (url.startsWith("jdbc:sqlite")) return DbMetadata.DBID_SQLITE;
+    if (url.startsWith("jdbc:vertica")) return DbMetadata.DBID_VERTICA;
+    if (url.startsWith("jdbc:mysql")) return DbMetadata.DBID_MYSQL;
+    if (url.startsWith("jdbc:mariadb")) return DbMetadata.DBID_MYSQL;
+
+    // take anything between the first and second colon
+    String db = url.replaceFirst("[^:]+:([^:]+):[^:]+", "$1");
+    return db;
   }
 }

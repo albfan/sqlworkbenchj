@@ -49,6 +49,7 @@ import workbench.db.importer.TableDependencySorter;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.ObjectScripterUI;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -88,6 +89,7 @@ public class DeleteScriptGenerator
   private boolean showFkNames;
   private List<TableIdentifier> excludeTables = new ArrayList<>();
   private TextOutput output;
+  private boolean endTransaction;
 
   private final Comparator<Integer> descComparator = (Integer i1, Integer i2) ->
   {
@@ -102,6 +104,12 @@ public class DeleteScriptGenerator
     this.connection = aConnection;
     this.meta = this.connection.getMetadata();
     this.formatter = new SqlLiteralFormatter(this.connection);
+  }
+
+  @Override
+  public void setEndTransaction(boolean flag)
+  {
+    endTransaction = flag;
   }
 
   @Override
@@ -626,6 +634,10 @@ public class DeleteScriptGenerator
         this.monitor.setCurrentObject(null, -1, -1);
       }
       connection.setBusy(false);
+      if (endTransaction)
+      {
+        DbExplorerSettings.endTransaction(connection);
+      }
     }
   }
 

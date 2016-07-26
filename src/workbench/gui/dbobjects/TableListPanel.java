@@ -1984,10 +1984,7 @@ public class TableListPanel
 
 	private void endTransaction()
 	{
-		if (DbExplorerSettings.isOwnTransaction(dbConnection) && this.dbConnection.selectStartsTransaction())
-		{
-			dbConnection.rollbackSilently();
-		}
+		DbExplorerSettings.endTransaction(dbConnection);
 	}
 
 	private final Object busyLock = new Object();

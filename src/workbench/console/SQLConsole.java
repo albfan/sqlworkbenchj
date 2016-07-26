@@ -399,6 +399,7 @@ public class SQLConsole
 	{
 		BatchRunner batchRunner = BatchRunner.createBatchRunner(cmdLine, false);
 		batchRunner.showResultSets(true);
+    batchRunner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
 		batchRunner.setShowStatementWithResult(false);
 		batchRunner.setShowStatementSummary(false);
 		batchRunner.setOptimizeColWidths(optimizeColWidths);

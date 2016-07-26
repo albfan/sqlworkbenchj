@@ -312,7 +312,7 @@ public abstract class AbstractImportFileParser
 
     TableIdentifier table = createTargetTableId();
 
-    targetTable = connection.getMetadata().getTableDefinition(table, false);
+    targetTable = connection.getMetadata().getTableDefinition(table, true);
 
     return targetTable;
   }

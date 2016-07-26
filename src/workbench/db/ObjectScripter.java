@@ -89,6 +89,7 @@ public class ObjectScripter
   private int currentObject;
   private int totalObjects;
   private TextOutput output;
+  private boolean endTransaction;
 
   public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
   {
@@ -154,6 +155,12 @@ public class ObjectScripter
   public WbConnection getCurrentConnection()
   {
     return dbConnection;
+  }
+
+  @Override
+  public void setEndTransaction(boolean flag)
+  {
+    endTransaction = flag;
   }
 
   public void setIncludeForeignKeys(boolean flag)
@@ -261,6 +268,10 @@ public class ObjectScripter
     finally
     {
       this.dbConnection.setBusy(false);
+      if (endTransaction)
+      {
+        DbExplorerSettings.endTransaction(dbConnection);
+      }
     }
     if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
     {

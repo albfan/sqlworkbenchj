@@ -512,27 +512,31 @@ public class DbDriver
 
       conn = this.driverClassInstance.connect(url, props);
 
-      // The system property for the Firebird driver is only needed when the connection is created
-      // so after the connect was successful, we can clean up the system properties
-      if (doSetAppName() && url.startsWith("jdbc:firebirdsql:"))
+      if (doSetAppName(url))
       {
-        System.clearProperty("org.firebirdsql.jdbc.processName");
-      }
-
-      // PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
-      if (doSetAppName() && url.startsWith("jdbc:postgresql") && !props.containsKey(PostgresUtil.APP_NAME_PROPERTY))
-      {
-        PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
-      }
-      else if (doSetAppName() && url.startsWith("jdbc:sap"))
-      {
-        conn.setClientInfo("APPLICATION", StringUtil.coalesce(getAppName(), ResourceMgr.TXT_PRODUCT_NAME));
-        conn.setClientInfo("APPLICATIONSOURCE", id);
-        conn.setClientInfo("APPLICATIONVERSION", ResourceMgr.getBuildNumber().toString());
-        String username = System.getProperty("user.name");
-        if (username != null)
+        // The system property for the Firebird driver is only needed when the connection is created
+        // so after the connect was successful, we can clean up the system properties
+        if (url.startsWith("jdbc:firebirdsql:"))
         {
-          conn.setClientInfo("APPLICATIONUSER", username);
+          System.clearProperty("org.firebirdsql.jdbc.processName");
+        }
+
+        // PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
+        if (url.startsWith("jdbc:postgresql") && !props.containsKey(PostgresUtil.APP_NAME_PROPERTY))
+        {
+          PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
+        }
+        
+        if (url.startsWith("jdbc:sap"))
+        {
+          conn.setClientInfo("APPLICATION", StringUtil.coalesce(getAppName(), ResourceMgr.TXT_PRODUCT_NAME));
+          conn.setClientInfo("APPLICATIONSOURCE", id);
+          conn.setClientInfo("APPLICATIONVERSION", ResourceMgr.getBuildNumber().toString());
+          String username = System.getProperty("user.name");
+          if (username != null)
+          {
+            conn.setClientInfo("APPLICATIONUSER", username);
+          }
         }
       }
     }
@@ -587,9 +591,11 @@ public class DbDriver
     return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
   }
 
-  private boolean doSetAppName()
+  private boolean doSetAppName(String url)
   {
-    return Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
+    String dbid = JdbcUtils.getDbIdFromUrl(url);
+    boolean defaultValue = Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
+    return Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".connection.set.appname", defaultValue);
   }
 
   /**
@@ -602,7 +608,7 @@ public class DbDriver
    */
   private void setAppInfo(Properties props, String url, String id, String user)
   {
-    if (!doSetAppName()) return;
+    if (!doSetAppName(url)) return;
 
     // identify the program name when connecting
     // this is different for each DBMS.

@@ -119,6 +119,8 @@ public class DbMetadata
   public static final String DBID_SQL_ANYWHERE = "sql_anywhere";
   public static final String DBID_TERADATA = "teradata";
   public static final String DBID_H2 = "h2";
+  public static final String DBID_HSQLDB = "hsql_database_engine";
+  public static final String DBID_DERBY = "apache_derby";
   public static final String DBID_OPENEDGE = "openedge";
   public static final String DBID_HANA = "hdb";
   public static final String DBID_CUBRID = "cubrid";
@@ -278,7 +280,7 @@ public class DbMetadata
       // product name that is reported with the 1.5 driver.
       // Otherwise the DBID would look something like:
       // firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
-      dbId = "firebird";
+      dbId = DBID_FIREBIRD;
 
       // because the dbId is already initialized, we need to log it here
       LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
@@ -1183,7 +1185,7 @@ public class DbMetadata
     if (StringUtil.isEmptyString(name)) return name;
 
     name = name.trim();
-    
+
     if (this.isSqlServer && name.startsWith("[") && name.endsWith("]"))
     {
       return name.substring(1, name.length() - 1);

@@ -66,6 +66,7 @@ public class CreateDeleteScriptAction
       boolean hasPK = client.checkPkColumns(true);
       if (!hasPK) return;
       DeleteScriptGenerator gen = new DeleteScriptGenerator(con);
+      gen.setEndTransaction(true);
       gen.setSource(client);
       gen.startGenerate();
     }

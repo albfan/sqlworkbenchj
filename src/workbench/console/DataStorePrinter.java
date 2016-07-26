@@ -49,13 +49,12 @@ public class DataStorePrinter
 {
   private final String longValueSuffix = " (...)";
 	private DataStore data;
-  private int maxDataLength;
+  private int maxDataLength = Integer.MAX_VALUE;
 
 	public DataStorePrinter(DataStore source)
 	{
 		super();
 		this.data = source;
-    this.maxDataLength = ConsoleSettings.getMaxColumnDataWidth();
 	}
 
   public void setMaxDataLength(int maxLength)

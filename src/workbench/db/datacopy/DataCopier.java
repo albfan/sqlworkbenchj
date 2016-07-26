@@ -413,14 +413,14 @@ public class DataCopier
    * create table are retrieved and we have to use those columns e.g.
    * because upper/lowercase can be different now.
    *
-   * @param realCols
+   * @param columnsFromDatabase
    * @param toUpdate to column definitions to be updated
    */
-  private void updateTargetColumns(List<ColumnIdentifier> realCols, Collection<ColumnIdentifier> toUpdate)
+  private void updateTargetColumns(List<ColumnIdentifier> columnsFromDatabase, Collection<ColumnIdentifier> toUpdate)
   {
     for (ColumnIdentifier targetCol : toUpdate)
     {
-      ColumnIdentifier realCol = findColumn(realCols, targetCol.getDisplayName());
+      ColumnIdentifier realCol = findColumn(columnsFromDatabase, targetCol.getDisplayName());
       if (realCol != null)
       {
         targetCol.setColumnName(realCol.getColumnName());
@@ -429,6 +429,9 @@ public class DataCopier
         targetCol.setDataType(realCol.getDataType());
         targetCol.setColumnSize(realCol.getColumnSize());
         targetCol.setDecimalDigits(realCol.getDecimalDigits());
+        targetCol.setIsNullable(realCol.isNullable());
+        targetCol.setIsPkColumn(realCol.isPkColumn());
+        targetCol.setIsAutoincrement(realCol.isAutoincrement());
       }
     }
   }
@@ -657,7 +660,7 @@ public class DataCopier
 
     if (!skipTargetCheck)
     {
-      List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable);
+      List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable, importer.needsKeyColumnInformation());
       updateTargetColumns(realCols, targetColumnsForQuery);
     }
     this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery, null);
@@ -770,7 +773,7 @@ public class DataCopier
     {
       if (useSourceColumns)
       {
-        targetCols =  this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+        targetCols =  this.sourceConnection.getMetadata().getTableColumns(this.sourceTable, importer.needsKeyColumnInformation());
         for (ColumnIdentifier col : targetCols)
         {
           String colname = sourceConnection.getMetadata().removeQuotes(col.getColumnName());
@@ -784,7 +787,7 @@ public class DataCopier
       }
       else
       {
-        targetCols =  this.targetConnection.getMetadata().getTableColumns(this.targetTable);
+        targetCols =  this.targetConnection.getMetadata().getTableColumns(this.targetTable, importer.needsKeyColumnInformation());
       }
     }
 

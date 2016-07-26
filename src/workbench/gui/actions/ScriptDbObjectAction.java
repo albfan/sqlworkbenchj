@@ -92,6 +92,7 @@ public class ScriptDbObjectAction
     if (objects == null || objects.isEmpty()) return;
 
     ObjectScripter s = new ObjectScripter(objects, source.getConnection());
+    s.setEndTransaction(true);
     s.setShowPackageProcedureOnly(showSinglePackageProcedure);
     s.setIncludeForeignKeys(source.getConnection().getDbSettings().getGenerateTableFKSource());
     s.setIncludeGrants(DbExplorerSettings.getGenerateTableGrants());

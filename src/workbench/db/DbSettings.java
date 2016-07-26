@@ -927,7 +927,7 @@ public class DbSettings
   {
     return getBoolProperty("dml.insert.multirow.supported", true);
   }
-  
+
   public boolean supportsSortedIndex()
   {
     return getBoolProperty("index.sorted", true);
@@ -2207,5 +2207,14 @@ public class DbSettings
   public boolean databaseProductVersionReturnsRealVersion()
   {
     return getBoolProperty("databaseproductversion.realversion", false);
+  }
+
+  /**
+   * Return true if the real PK columns should be excluded in the UPDATE part of an upsert
+   * if different key columns are specified.
+   */
+  public boolean excludePKColumnsForUpsert()
+  {
+    return getBoolProperty("upsert.customkeys.excludepk", true);
   }
 }

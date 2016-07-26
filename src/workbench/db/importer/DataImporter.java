@@ -523,6 +523,11 @@ public class DataImporter
     this.deleteTarget = deleteTarget;
   }
 
+  public boolean needsKeyColumnInformation()
+  {
+    return mode != ImportMode.insert;
+  }
+  
   public boolean isModeInsert() { return (this.mode == ImportMode.insert); }
   public boolean isModeUpsert() { return (this.mode == ImportMode.upsert); }
   public boolean isModeInsertIgnore() { return (this.mode == ImportMode.insertIgnore); }

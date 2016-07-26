@@ -46,6 +46,7 @@ import workbench.util.StringUtil;
 public class ConsoleSettings
   implements PropertyChangeListener
 {
+  public static final String PROP_MAX_DISPLAY_SIZE = "workbench.console.dataprinter.max.colwidth";
   public static final String PROP_CLEAR_SCREEN = "workbench.console.refresh.clear.screen";
   public static final String PROP_NULL_STRING = "workbench.console.nullstring";
   public static final String EVT_PROPERTY_ROW_DISPLAY = "display";
@@ -53,7 +54,7 @@ public class ConsoleSettings
 	private RowDisplay nextRowDisplay;
 	private List<PropertyChangeListener> listener = new ArrayList<>();
 
-	protected static class LazyInstanceHolder
+	private static class LazyInstanceHolder
 	{
 		protected static ConsoleSettings instance = new ConsoleSettings();
 	}
@@ -188,7 +189,7 @@ public class ConsoleSettings
 
   public static int getMaxColumnDataWidth()
   {
-    return Settings.getInstance().getIntProperty("workbench.console.dataprinter.max.colwidth", 120);
+    return Settings.getInstance().getIntProperty(PROP_MAX_DISPLAY_SIZE, 150);
   }
 
 }

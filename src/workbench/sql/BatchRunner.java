@@ -134,6 +134,7 @@ public class BatchRunner
   private ErrorDescriptor lastError;
   private int errorStatementIndex;
   private ScriptErrorHandler retryHandler;
+  private int maxColumnLength = Integer.MAX_VALUE;
 
 	public BatchRunner()
 	{
@@ -169,6 +170,11 @@ public class BatchRunner
 		if (errors != null) errors.clear();
 		queryResults.clear();
 	}
+
+  public void setMaxColumnDisplayLength(int maxLength)
+  {
+    this.maxColumnLength = maxLength;
+  }
 
   public void setRetryHandler(ScriptErrorHandler handler)
   {
@@ -1065,6 +1071,7 @@ public class BatchRunner
 			if (ds != null)
 			{
 				DataStorePrinter printer = new DataStorePrinter(ds);
+        printer.setMaxDataLength(maxColumnLength);
 				printer.setFormatColumns(optimizeCols);
 				printer.setPrintRowCount(showRowCount);
 				printer.setPrintRowsAsLine(rowsAsLine);

@@ -34,6 +34,7 @@ import workbench.interfaces.Scripter;
 import workbench.interfaces.TextOutput;
 
 import workbench.db.sqltemplates.TemplateHandler;
+import workbench.resource.DbExplorerSettings;
 
 import workbench.storage.RowActionMonitor;
 
@@ -66,11 +67,18 @@ public class DropScriptGenerator
   private boolean sortByType;
   private boolean includeTableMarkers = true;
   private TextOutput display;
+  private boolean endTransaction;
 
   public DropScriptGenerator(WbConnection aConnection)
   {
     this.connection = aConnection;
     dropTemplate = connection.getDbSettings().getDropFKConstraint("table");
+  }
+
+  @Override
+  public void setEndTransaction(boolean flag)
+  {
+    endTransaction = flag;
   }
 
   @Override
@@ -361,34 +369,45 @@ public class DropScriptGenerator
   @Override
   public void generateScript()
   {
-    reset();
-    if (rowMonitor != null)
+    try
     {
-      rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
-    }
-    int count = tables.size();
-    int currentTable = 1;
-    for (TableIdentifier table : tables)
-    {
+      reset();
       if (rowMonitor != null)
       {
-        rowMonitor.setCurrentObject(table.getTableName(), currentTable, count);
+        rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
       }
-      if (scriptMonitor != null)
-      {
-        scriptMonitor.setCurrentObject(table.getTableName(), currentTable, count);
-      }
-      createStatementsForTable(table);
-      currentTable ++;
-    }
-    if (rowMonitor != null)
-    {
-      rowMonitor.jobFinished();
-    }
 
-    if (display != null)
+      int count = tables.size();
+      int currentTable = 1;
+      for (TableIdentifier table : tables)
+      {
+        if (rowMonitor != null)
+        {
+          rowMonitor.setCurrentObject(table.getTableName(), currentTable, count);
+        }
+        if (scriptMonitor != null)
+        {
+          scriptMonitor.setCurrentObject(table.getTableName(), currentTable, count);
+        }
+        createStatementsForTable(table);
+        currentTable ++;
+      }
+      if (rowMonitor != null)
+      {
+        rowMonitor.jobFinished();
+      }
+
+      if (display != null)
+      {
+        display.append(getScript());
+      }
+    }
+    finally
     {
-      display.append(getScript());
+      if (endTransaction)
+      {
+        DbExplorerSettings.endTransaction(connection);
+      }
     }
   }
 

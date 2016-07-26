@@ -37,4 +37,5 @@ public interface Scripter
 	void cancel();
 	boolean isCancelled();
 	WbConnection getCurrentConnection();
+  void setEndTransaction(boolean flag);
 }

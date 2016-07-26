@@ -234,6 +234,15 @@ public class DbExplorerSettings
 		Settings.getInstance().setProperty(PROP_INSTANT_FILTER, flag);
 	}
 
+	public static void endTransaction(WbConnection dbConnection)
+	{
+    if (dbConnection == null) return;
+		if (isOwnTransaction(dbConnection) && dbConnection.selectStartsTransaction())
+		{
+			dbConnection.rollbackSilently();
+		}
+	}
+
 	public static boolean isOwnTransaction(WbConnection dbConnection)
 	{
 		if (dbConnection == null) return false;

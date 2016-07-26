@@ -460,12 +460,17 @@ public class ImportDMLStatementBuilder
 
     insert += ")\nDO UPDATE\n  SET ";
 
+    boolean excludePKColumn = dbConn.getDbSettings().excludePKColumnsForUpsert();
+
+    int colCount = 0;
     for (int i=0; i < targetColumns.size(); i++)
     {
-      if (i > 0) insert += ",\n      ";
-      String colname = targetColumns.get(i).getDisplayName();
-      colname = meta.quoteObjectname(colname);
+      ColumnIdentifier col = targetColumns.get(i);
+      if ((excludePKColumn && col.isPkColumn()) || keyColumns.contains(col) ) continue;
+      if (colCount > 0) insert += ",\n      ";
+      String colname = meta.quoteObjectname(col.getDisplayName());
       insert += colname + " = EXCLUDED." + colname;
+      colCount ++;
     }
 
     return insert;

@@ -91,6 +91,7 @@ public class CreateDropScriptAction
       }
     }
     DropScriptGenerator generator = new DropScriptGenerator(source.getConnection());
+    generator.setEndTransaction(true);
     if (isCtrlPressed(e))
     {
       generator.setIncludeRecreateStatements(false);
