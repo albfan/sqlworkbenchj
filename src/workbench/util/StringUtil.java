@@ -1073,10 +1073,11 @@ public class StringUtil
     return input;
   }
 
-  public static boolean stringToBool(String aString)
+  public static boolean stringToBool(String value)
   {
-    if (aString == null) return false;
-    return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "on".equalsIgnoreCase(aString) );
+    if (value == null) return false;
+    value = value.trim();
+    return ("true".equalsIgnoreCase(value) || "1".equals(value) || "y".equalsIgnoreCase(value) || "yes".equalsIgnoreCase(value) || "on".equalsIgnoreCase(value) );
   }
 
   public static String getMaxSubstring(String s, int maxLen, String add)

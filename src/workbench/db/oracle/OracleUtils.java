@@ -86,7 +86,7 @@ public class OracleUtils
       // checked in the system properties
       value = getDriverProperty(conn, "oracle.jdbc.remarksReporting", true);
     }
-    return "true".equalsIgnoreCase(value == null ? "false" : value.trim());
+    return StringUtil.stringToBool(value);
   }
 
   static boolean getMapDateToTimestamp(WbConnection conn)
@@ -102,7 +102,7 @@ public class OracleUtils
     // this is what the driver does: it assumes true if nothing was specified
     if (value == null) return true;
 
-    return "true".equalsIgnoreCase(value);
+    return StringUtil.stringToBool(value);
   }
 
   static String getDriverProperty(WbConnection con, String property, boolean includeSystemProperty)
@@ -139,7 +139,7 @@ public class OracleUtils
     {
       value = props.getProperty("remarksReporting", "false");
     }
-    return "true".equals(value);
+    return StringUtil.stringToBool(value);
   }
 
   /**
@@ -159,7 +159,7 @@ public class OracleUtils
     {
       value = props.getProperty("useInformationSchema", "false");
     }
-    return "true".equals(value);
+    return StringUtil.stringToBool(value);
   }
 
   public static boolean hasMultipleContainers(WbConnection conn)
