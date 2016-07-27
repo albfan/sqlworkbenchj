@@ -276,6 +276,7 @@ public abstract class ExecuteSqlPanel
       runner.getConnection().setBusy(true);
 
       setButtonsEnabled(false);
+      clearError();
       statusBar.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
       execStatus = runner.runScript(sqlEditor.getText());
@@ -347,12 +348,17 @@ public abstract class ExecuteSqlPanel
 
   protected void scriptSuccess()
   {
-    WbSwingUtilities.invoke(this::clearError);
+    WbSwingUtilities.invoke(this::showSuccessMessage);
   }
 
   protected void clearError()
   {
     errorDisplay.setText("");
+  }
+
+  protected void showSuccessMessage()
+  {
+    errorDisplay.setText(ResourceMgr.getString("TxtScriptFinished"));
   }
 
   @Override
