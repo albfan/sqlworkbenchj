@@ -45,6 +45,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
 import workbench.db.ErrorPositionReader;
 import workbench.db.WbConnection;
+import workbench.db.oracle.OracleUtils;
 
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
@@ -151,7 +152,7 @@ public class SqlCommand
     if (runner == null) return MacroManager.DEFAULT_STORAGE;
     return runner.getMacroClientId();
   }
-  
+
   protected String getDefaultSuccessMessage(StatementRunnerResult result)
   {
     String verb = getVerb();
@@ -481,6 +482,12 @@ public class SqlCommand
     try
     {
       boolean hasResult = this.currentStatement.execute(sql);
+      if (hasResult && shouldCallGetMoreResultsFirst(sql))
+      {
+        // workaround for an Oracle driver bug
+        // see: https://community.oracle.com/message/13952214#13952214
+        hasResult = currentStatement.getMoreResults();
+      }
       result.setSuccess();
       processResults(result, hasResult);
       appendSuccessMessage(result);
@@ -499,6 +506,20 @@ public class SqlCommand
       this.done();
     }
     return result;
+  }
+
+  private boolean shouldCallGetMoreResultsFirst(String sql)
+  {
+    if (sql == null) return false;
+    if (currentConnection == null) return false;
+    if (currentConnection.getMetadata().isOracle() && OracleUtils.fixPLSQLResultSetBug())
+    {
+      sql = StringUtil.getMaxSubstring(sql.trim(), 20, null).toLowerCase();
+
+      // this is only necessary for anonymous PL/SQL blocks
+      return (sql.startsWith("begin") || sql.startsWith("declare"));
+    }
+    return false;
   }
 
   /**

@@ -50,6 +50,8 @@ public class OracleUtils
 {
   public static final String PROP_KEY_TBLSPACE = "oracle_default_tablespace";
   public static final String PROP_FIX_TIMESTAMPTZ = "workbench.db.oracle.fix.timstamptz";
+  public static final String PROP_FIX_PLSQL_RESULTSET = "workbench.db.oracle.fix.plsql.resultset";
+
   public static final String KEYWORD_EDITIONABLE = "EDITIONABLE";
 
   public static final Set<String> STANDARD_TYPES = CollectionUtil.caseInsensitiveSet("INTERVALDS", "INTERVALYM", "TIMESTAMP WITH LOCAL TIME ZONE", "TIMESTAMP WITH TIME ZONE",
@@ -400,6 +402,11 @@ public class OracleUtils
   public static boolean fixTimestampTZ()
   {
     return Settings.getInstance().getBoolProperty(PROP_FIX_TIMESTAMPTZ, true);
+  }
+
+  public static boolean fixPLSQLResultSetBug()
+  {
+    return Settings.getInstance().getBoolProperty(PROP_FIX_PLSQL_RESULTSET, true);
   }
 
 }
