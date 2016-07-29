@@ -482,7 +482,7 @@ public class SqlCommand
     try
     {
       boolean hasResult = this.currentStatement.execute(sql);
-      if (hasResult && shouldCallGetMoreResultsFirst(sql))
+      if (hasResult && shouldCallGetMoreResultsFirst(verb))
       {
         // workaround for an Oracle driver bug
         // see: https://community.oracle.com/message/13952214#13952214
@@ -508,16 +508,14 @@ public class SqlCommand
     return result;
   }
 
-  private boolean shouldCallGetMoreResultsFirst(String sql)
+  private boolean shouldCallGetMoreResultsFirst(String verb)
   {
-    if (sql == null) return false;
+    if (verb == null) return false;
     if (currentConnection == null) return false;
     if (currentConnection.getMetadata().isOracle() && OracleUtils.fixPLSQLResultSetBug())
     {
-      sql = StringUtil.getMaxSubstring(sql.trim(), 20, null).toLowerCase();
-
       // this is only necessary for anonymous PL/SQL blocks
-      return (sql.startsWith("begin") || sql.startsWith("declare"));
+      return (verb.equalsIgnoreCase("begin") || verb.equalsIgnoreCase("declare"));
     }
     return false;
   }
