@@ -1364,10 +1364,10 @@ public class DataExporter
       this.exportWriter.exportStarting();
       this.exportWriter.writeExport(ds, columnsToExport);
     }
-    catch (SQLException e)
+    catch (Exception e)
     {
-      this.addError(e.getMessage());
-      LogMgr.logError("DataExporter.startExport()", "SQL Error", e);
+      this.addError(ExceptionUtil.getDisplay(e));
+      LogMgr.logError("DataExporter.startExport()", "Could not export data", e);
       throw e;
     }
     finally

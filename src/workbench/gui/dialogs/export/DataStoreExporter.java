@@ -32,6 +32,7 @@ import workbench.db.exporter.DataExporter;
 import workbench.gui.WbSwingUtilities;
 
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 
 import workbench.util.WbFile;
 
@@ -99,6 +100,7 @@ public class DataStoreExporter
 		catch (Exception e)
 		{
 			LogMgr.logError("DataStoreExporter.writeFile()", "Error writing export file", e);
+      WbSwingUtilities.showErrorMessage(caller, ExceptionUtil.getDisplay(e));
 		}
 	}
 
