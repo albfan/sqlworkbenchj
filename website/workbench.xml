@@ -437,6 +437,13 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 120 (requires Java 8!)<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build120.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build120-MacJava8.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build120.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 119 (requires Java 8!)<br/>
           <ul>
             <li><a href="archive/Workbench-Build119.zip">All Platforms</a></li>
@@ -508,73 +515,6 @@ WHERE id=42;</p>
             <li><a href="archive/Workbench-Build110.zip">All Platforms</a></li>
             <li><a href="archive/Workbench-Build110-Mac.tgz">Mac Package</a></li>
             <li><a href="archive/WorkbenchSrc-Build110.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 109<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build109.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build109-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build109.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 108<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build108.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build108-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build108.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 107<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build107.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build107-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build107.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 106<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build106.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build106-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build106.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 105<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build105.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build105-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build105.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 104<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build104.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build104-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build104.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 103<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build103.zip">All Platforms</a></li>
-            <li><a href="archive/Workbench-Build103-Mac.tgz">Mac Package</a></li>
-            <li><a href="archive/WorkbenchSrc-Build103.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 102<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build102.zip">All Platforms</a></li>
-            <li><a href="archive/WorkbenchSrc-Build102.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 101<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build101.zip">All Platforms</a></li>
-            <li><a href="archive/WorkbenchSrc-Build101.zip">Source Code</a></li>
-          </ul>
-        </li>
-        <li>Build 100<br/>
-          <ul>
-            <li><a href="archive/Workbench-Build100.zip">All Platforms</a></li>
-            <li><a href="archive/WorkbenchSrc-Build100.zip">Source Code</a></li>
           </ul>
         </li>
       </ul>

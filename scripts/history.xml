@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2016-07-17">
+  <release build="121" date="2016-07-31">
     <entry dev-build="1" type="fix">Some DDL statements were not generated properly when changing tables or indexes in the DbExplorer</entry>
     <entry dev-build="1" type="fix">For Oracle, columns defined as TIMESTAMP WITH TIME ZONE or TIMESTAMP WITH LOCAL TIMEZONE where not displayed correctly</entry>
     <entry dev-build="1" type="fix">It was no longer possible to use a timestamp format without time for WbImport</entry>
