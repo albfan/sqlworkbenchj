@@ -57,11 +57,19 @@ public class OracleRowDataReader
   private Connection sqlConnection;
   private DateTimeFormatter tsParser;
   private boolean useInternalConversion;
+  private boolean useDefaultClassLoader;
 
   public OracleRowDataReader(ResultInfo info, WbConnection conn)
     throws ClassNotFoundException
   {
+    this(info, conn, false);
+  }
+
+  OracleRowDataReader(ResultInfo info, WbConnection conn, boolean useDefaultClassLoader)
+    throws ClassNotFoundException
+  {
     super(info, conn);
+    this.useDefaultClassLoader = useDefaultClassLoader;
     sqlConnection = conn.getSqlConnection();
     useInternalConversion = OracleUtils.useInternalTimestampConversion();
 
@@ -74,7 +82,7 @@ public class OracleRowDataReader
     // Therefor I need to use reflection to access the stringValue() method
     try
     {
-      Class oraDatum = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.Datum");
+      Class oraDatum = loadClass(conn, "oracle.sql.Datum");
       stringValue = oraDatum.getMethod("stringValue", java.sql.Connection.class);
     }
     catch (Throwable t)
@@ -87,7 +95,7 @@ public class OracleRowDataReader
     {
       try
       {
-        Class tzClass = ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), "oracle.sql.TIMESTAMPTZ");
+        Class tzClass = loadClass(conn, "oracle.sql.TIMESTAMPTZ");
         internalToTimestamp = tzClass.getMethod("timestampValue", java.sql.Connection.class);
       }
       catch (Throwable t)
@@ -96,6 +104,16 @@ public class OracleRowDataReader
         LogMgr.logError("OracleRowDataReader.initialize()", "Could not accessoracle.sql.TIMESTAMPTZ class", t);
       }
     }
+  }
+
+  private Class loadClass(WbConnection conn, String className)
+    throws ClassNotFoundException
+  {
+    if (useDefaultClassLoader)
+    {
+      return Class.forName(className);
+    }
+    return ConnectionMgr.getInstance().loadClassFromDriverLib(conn.getProfile(), className);
   }
 
   @Override

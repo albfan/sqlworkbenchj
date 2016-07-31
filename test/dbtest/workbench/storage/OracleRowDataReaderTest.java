@@ -23,6 +23,18 @@
  */
 package workbench.storage;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+
+import workbench.db.WbConnection;
+import workbench.db.oracle.OracleTestUtil;
+
+import workbench.util.SqlUtil;
+
+import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -32,11 +44,62 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class OracleRowDataReaderTest
+  extends WbTestCase
 {
 
 	public OracleRowDataReaderTest()
 	{
+    super("OracleRowDataReaderTest");
 	}
+
+  @AfterClass
+  public static void tearDown()
+    throws Exception
+  {
+    OracleTestUtil.cleanUpTestCase();
+  }
+
+  @Test
+  public void testReadData()
+    throws Exception
+  {
+    WbConnection conn = OracleTestUtil.getOracleConnection();
+    assertNotNull(conn);
+    TestUtil.executeScript(conn,
+      "create table dt_test\n" +
+      "(\n" +
+      "  id integer, \n" +
+      "  dt date, \n" +
+      "  ts timestamp, " +
+      "  tstz timestamp with time zone, \n" +
+      "  tsltz timestamp with local time zone\n" +
+      ");\n" +
+      "insert into dt_test values \n" +
+      "(1, date '206-01-01', timestamp '2016-01-01 14:15:16', timestamp '2016-01-01 14:15:16', timestamp '2016-01-01 14:15:16');\n" +
+      "commit;");
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
+      stmt = conn.createStatement();
+      rs = stmt.executeQuery("select * from dt_test");
+      ResultInfo info = new ResultInfo(rs.getMetaData(), conn);
+      OracleRowDataReader reader = new OracleRowDataReader(info, conn, true);
+      rs.next();
+      RowData row = reader.read(rs, false);
+      assertNotNull(row);
+      assertEquals(1, ((Number)row.getValue(0)).intValue());
+      assertTrue(row.getValue(1) instanceof java.sql.Timestamp);
+      assertTrue(row.getValue(2) instanceof java.sql.Timestamp);
+      assertTrue(row.getValue(3) instanceof java.sql.Timestamp);
+      assertTrue(row.getValue(4) instanceof java.sql.Timestamp);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+  }
 
 	@Test
 	public void testCleanupTSValue()
