@@ -756,9 +756,8 @@ public class DataStoreTableModel
 		{
 			ascending = false;
 		}
-		else if (sortCols <= 1)
+		else
 		{
-			// toggle the ascending status only if there is a single sort column
 			ascending = !this.isSortAscending(aColumn);
 		}
 		sortInBackground(table, aColumn, ascending, addSortColumn);
