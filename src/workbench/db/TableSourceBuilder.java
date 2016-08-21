@@ -267,7 +267,10 @@ public class TableSourceBuilder
 
   public static void appendComments(StringBuilder result, WbConnection connection, TableDefinition table)
   {
-    appendComments(result, connection, table.getTable(), table.getColumns(), "\n", true);
+    if (table != null)
+    {
+      appendComments(result, connection, table.getTable(), table.getColumns(), "\n", true);
+    }
   }
 
   public static void appendComments(StringBuilder result, WbConnection connection, TableIdentifier table, List<ColumnIdentifier> columns, String lineEnding, boolean generateColumnComments)
@@ -286,7 +289,7 @@ public class TableSourceBuilder
         }
       }
 
-      if (generateColumnComments)
+      if (generateColumnComments && CollectionUtil.isNonEmpty(columns))
       {
         StringBuilder colComments = commentReader.getTableColumnCommentsSql(connection, table, columns);
         if (StringUtil.isNonBlank(colComments))

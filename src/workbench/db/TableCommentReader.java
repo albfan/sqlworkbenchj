@@ -30,6 +30,7 @@ import workbench.resource.Settings;
 
 import workbench.db.sqltemplates.ColumnChanger;
 
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -124,6 +125,8 @@ public class TableCommentReader
 
     String columnStatement = mgr.getCommentSqlTemplate("column", CommentSqlManager.COMMENT_ACTION_SET);
     if (StringUtil.isBlank(columnStatement)) return null;
+    if (CollectionUtil.isEmpty(columns)) return null;
+
     StringBuilder result = new StringBuilder(columns.size() * 25);
     ColumnChanger colChanger = new ColumnChanger(con);
 

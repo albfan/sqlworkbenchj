@@ -24,7 +24,8 @@
 package workbench.gui.settings;
 
 /**
- * A wrapper class to display an Action for the {@link ShortcutEditor}
+ * A wrapper class to display an Action for the {@link ShortcutEditor}.
+ * 
  * It simply holds a text and a tooltip
  *
  * @see ActionDisplayRenderer
@@ -56,4 +57,22 @@ public class ActionDisplay
 	{
 		return text;
 	}
+
+  @Override
+  public int hashCode()
+  {
+    return text.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other instanceof ActionDisplay)
+    {
+      ActionDisplay a = (ActionDisplay)other;
+      return text.equalsIgnoreCase(a.text);
+    }
+    return false;
+  }
+
 }

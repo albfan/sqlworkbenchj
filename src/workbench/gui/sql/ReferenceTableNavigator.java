@@ -29,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Map;
@@ -370,6 +371,7 @@ public class ReferenceTableNavigator
 			item.setEnabled(false);
 			itemsToAdd.add(item);
 		}
+		Collections.sort(itemsToAdd, (o1, o2) -> o1.getText().compareTo(o2.getText()));
 		addMenuItems(menu, itemsToAdd);
 	}
 
