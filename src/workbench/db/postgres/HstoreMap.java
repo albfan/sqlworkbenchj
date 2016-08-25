@@ -27,6 +27,7 @@ import java.util.Set;
 import workbench.storage.SqlLiteralFormatter;
 
 /**
+ * A wrapper class to get a proper toString() method for a Postgres hstore Map.
  *
  * @author Thomas Kellerer
  */
@@ -115,7 +116,12 @@ public class HstoreMap
   @Override
   public String toString()
   {
-    return SqlLiteralFormatter.getHstoreLiteral(original, false);
+    return SqlLiteralFormatter.getHstoreLiteral(original, false, false);
+  }
+
+  public String getLiteral()
+  {
+    return SqlLiteralFormatter.getHstoreLiteral(original, true);
   }
 
 }

@@ -5,7 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -596,15 +596,11 @@ public class MenuScroller
 	{
 		MenuScrollTimer(final int increment, int interval)
 		{
-			super(interval, new ActionListener()
-			{
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					firstIndex += increment;
-					refreshMenu();
-				}
-			});
+			super(interval, (ActionEvent e) ->
+      {
+        firstIndex += increment;
+        refreshMenu();
+      });
 		}
 	}
 

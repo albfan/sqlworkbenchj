@@ -137,7 +137,7 @@ import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.renderer.BlobColumnRenderer;
 import workbench.gui.renderer.DateColumnRenderer;
-import workbench.gui.renderer.MapColumnRenderer;
+import workbench.gui.renderer.HstoreRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
@@ -1665,7 +1665,7 @@ public class WbTable
 			}
 		}
 
-		initMultiLineRenderer();
+		initTypeSpecificRenderer();
 		initDefaultEditors();
 		restoreColumnSizes();
 		adjustRowHeight();
@@ -1925,7 +1925,6 @@ public class WbTable
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
 
 		this.setDefaultRenderer(byte[].class, new BlobColumnRenderer());
-		this.setDefaultRenderer(Map.class, new MapColumnRenderer());
 
 		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep, fixedDigits);
 		this.setDefaultRenderer(Number.class, numberRenderer);
@@ -1938,7 +1937,7 @@ public class WbTable
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
     this.setDefaultRenderer(String.class, new StringColumnRenderer());
-    initMultiLineRenderer();
+    initTypeSpecificRenderer();
 	}
 
 	public ResetHighlightAction getResetHighlightAction()
@@ -1979,7 +1978,7 @@ public class WbTable
     }
   }
 
-	private void initMultiLineRenderer()
+	private void initTypeSpecificRenderer()
 	{
 		if (this.dwModel != null)
 		{
@@ -1992,22 +1991,41 @@ public class WbTable
 				{
 					col.setCellRenderer(this.multiLineRenderer);
 				}
+        else if (isHstoreColumn(i))
+        {
+          col.setCellRenderer(new HstoreRenderer());
+        }
 			}
 		}
 	}
 
+	private boolean isHstoreColumn(int col)
+  {
+    ColumnIdentifier column = getColumnDefinition(col);
+    if (column == null) return false;
+    return "hstore".equals(column.getDbmsType());
+  }
+
 	private boolean isMultiLineColumn(int col)
 	{
-		if (this.dwModel == null) return false;
+    ColumnIdentifier column = getColumnDefinition(col);
+    if (column == null) return false;
+
+		return SqlUtil.isMultiLineColumn(column);
+	}
+
+  private ColumnIdentifier getColumnDefinition(int col)
+  {
+		if (this.dwModel == null) return null;
 
 		int offset = (this.dwModel.isStatusColumnVisible() ? 1 : 0);
 
 		// the first column is never a multiline if the status column is displayed.
-		if (col - offset < 0) return false;
+		if (col - offset < 0) return null;
 
 		ColumnIdentifier column = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset);
-		return SqlUtil.isMultiLineColumn(column);
-	}
+    return column;
+  }
 
 	private void initDefaultEditors()
 	{
@@ -2032,10 +2050,10 @@ public class WbTable
 			{
 				col.setCellEditor(new BlobColumnRenderer());
 			}
-      else if (isMapColumn(i))
-      {
-        col.setCellEditor(new MapColumnRenderer());
-      }
+//      else if (isMapColumn(i))
+//      {
+//        col.setCellEditor(new MapColumnRenderer());
+//      }
 			else if (isMultiLineColumn(i))
 			{
 				col.setCellEditor(this.multiLineEditor);

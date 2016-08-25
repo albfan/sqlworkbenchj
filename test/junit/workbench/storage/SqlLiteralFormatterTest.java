@@ -186,16 +186,19 @@ public class SqlLiteralFormatterTest
     data.put("foo", "bar");
     data.put("color", "blue");
     String literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
-    assertEquals("'foo=>bar,color=>blue'::hstore", literal);
+    assertEquals("'\"foo\"=>\"bar\", \"color\"=>\"blue\"'::hstore", literal);
 
     literal = SqlLiteralFormatter.getHstoreLiteral(data, false);
-    assertEquals("'foo=>bar,color=>blue'", literal);
+    assertEquals("'\"foo\"=>\"bar\", \"color\"=>\"blue\"'", literal);
 
     data.clear();
     data.put("content", "foo bar");
     data.put("location", "Peter's House");
 
     literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
-    assertEquals("'content=>\"foo bar\",location=>\"Peter''s House\"'::hstore", literal);
+    assertEquals("'\"content\"=>\"foo bar\", \"location\"=>\"Peter''s House\"'::hstore", literal);
+
+    literal = SqlLiteralFormatter.getHstoreLiteral(data, false, false);
+    assertEquals("\"content\"=>\"foo bar\", \"location\"=>\"Peter's House\"", literal);
   }
 }

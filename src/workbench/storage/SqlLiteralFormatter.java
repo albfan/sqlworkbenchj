@@ -444,69 +444,48 @@ public class SqlLiteralFormatter
 
   public static String getHstoreLiteral(Map<String, String> data, boolean includeCast)
   {
+    return getHstoreLiteral(data, includeCast, true);
+  }
+
+  public static String getHstoreLiteral(Map<String, String> data, boolean includeCast, boolean includeSingleQuotes)
+  {
     int count = 0;
     StringBuilder result = new StringBuilder(data.size() * 20);
-    result.append('\'');
+    if (includeCast) includeSingleQuotes = true;
+    
+    if (includeSingleQuotes) result.append('\'');
     for (Map.Entry<String, String> entry : data.entrySet())
     {
-      if (count > 0) result.append(',');
-      result.append(escapeHstoreValue(entry.getKey()));
+      if (count > 0) result.append(", ");
+
+      result.append('"');
+      result.append(entry.getKey());
+      result.append('"');
+
       result.append("=>");
-      result.append(escapeHstoreValue(entry.getValue()));
+
+      String value = entry.getValue();
+      if (value == null)
+      {
+        result.append("NULL");
+      }
+      else
+      {
+        if (includeSingleQuotes)
+        {
+          value = SqlUtil.escapeQuotes(value);
+        }
+        result.append('"');
+        result.append(value);
+        result.append('"');
+      }
       count ++;
     }
-    result.append('\'');
+    if (includeSingleQuotes) result.append('\'');
     if (includeCast)
     {
       result.append("::hstore");
     }
-    return result.toString();
-  }
-
-  private static String escapeHstoreValue(String value)
-  {
-    if (StringUtil.isEmptyString(value)) return StringUtil.EMPTY_STRING;
-    final String toEscape = "\"=> \\'";
-
-    int count = 0;
-    int quoteCount = 0;
-    
-    for (int i=0; i < value.length(); i++)
-    {
-      char ch = value.charAt(i);
-      if (ch == '\'')
-      {
-        count ++;
-        quoteCount ++;
-      }
-      else if (toEscape.indexOf(ch) > -1)
-      {
-        count ++;
-      }
-    }
-
-    if (count == 0) return value;
-
-    StringBuilder result = new StringBuilder(value.length() + quoteCount + 2);
-    result.append('"');
-
-    if (quoteCount == 0)
-    {
-      result.append(value);
-    }
-    else
-    {
-      for (int i=0; i < value.length(); i++)
-      {
-        char chr = value.charAt(i);
-        if (chr == '\'')
-        {
-          result.append(chr);
-        }
-        result.append(chr);
-      }
-    }
-    result.append('"');
     return result.toString();
   }
 
