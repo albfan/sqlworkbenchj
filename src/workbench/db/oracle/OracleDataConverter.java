@@ -46,7 +46,7 @@ public class OracleDataConverter
 {
   private Method stringValueMethod;
 
-  protected static class LazyInstanceHolder
+  private static class LazyInstanceHolder
   {
     protected static final OracleDataConverter instance = new OracleDataConverter();
   }
@@ -63,7 +63,8 @@ public class OracleDataConverter
   @Override
   public Class getConvertedClass(int jdbcType, String dbmsType)
   {
-    return String.class;
+    if (convertsType(jdbcType, dbmsType)) return String.class;
+    return null;
   }
 
   /**

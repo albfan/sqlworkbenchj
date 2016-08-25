@@ -74,6 +74,8 @@ import workbench.util.WbThread;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import workbench.RunMode;
+
 /**
  * A simple console interface for SQL Workbench/J
  * <br>
@@ -641,7 +643,7 @@ public class SQLConsole
 		else
 		{
       WbManager.initConsoleMode();
-      WbManager.getInstance().readParameters(args);
+      WbManager.getInstance().readParameters(args, RunMode.Console);
       runConsole();
 		}
 	}

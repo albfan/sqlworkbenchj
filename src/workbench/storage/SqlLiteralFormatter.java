@@ -469,9 +469,17 @@ public class SqlLiteralFormatter
     final String toEscape = "\"=> \\'";
 
     int count = 0;
+    int quoteCount = 0;
+    
     for (int i=0; i < value.length(); i++)
     {
-      if (toEscape.indexOf(value.charAt(i)) > -1)
+      char ch = value.charAt(i);
+      if (ch == '\'')
+      {
+        count ++;
+        quoteCount ++;
+      }
+      else if (toEscape.indexOf(ch) > -1)
       {
         count ++;
       }
@@ -479,20 +487,24 @@ public class SqlLiteralFormatter
 
     if (count == 0) return value;
 
-    StringBuilder result = new StringBuilder(value.length());
+    StringBuilder result = new StringBuilder(value.length() + quoteCount + 2);
     result.append('"');
-    for (int i=0; i < value.length(); i++)
+
+    if (quoteCount == 0)
     {
-      char chr = value.charAt(i);
-      if (chr == '\'')
+      result.append(value);
+    }
+    else
+    {
+      for (int i=0; i < value.length(); i++)
       {
+        char chr = value.charAt(i);
+        if (chr == '\'')
+        {
+          result.append(chr);
+        }
         result.append(chr);
       }
-      else if (toEscape.indexOf(chr) > -1)
-      {
-        result.append('\\');
-      }
-      result.append(chr);
     }
     result.append('"');
     return result.toString();

@@ -40,7 +40,7 @@ public class SqlServerDataConverter
 {
   private boolean convertVarbinary;
 
-  protected static class LazyInstanceHolder
+  private static class LazyInstanceHolder
   {
     protected static final SqlServerDataConverter instance = new SqlServerDataConverter();
   }
@@ -58,7 +58,8 @@ public class SqlServerDataConverter
   @Override
   public Class getConvertedClass(int jdbcType, String dbmsType)
   {
-    return String.class;
+    if (convertsType(jdbcType, dbmsType)) return String.class;
+    return null;
   }
 
   /**

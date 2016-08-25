@@ -42,6 +42,7 @@ import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerDataConverter;
 import workbench.db.oracle.OracleDataConverter;
+import workbench.db.postgres.PostgresDataConverter;
 
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -511,6 +512,10 @@ public class RowDataReader
     if (meta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
     {
       return SqlServerDataConverter.getInstance();
+    }
+    if (meta.isPostgres())
+    {
+      return PostgresDataConverter.getInstance();
     }
     return null;
   }

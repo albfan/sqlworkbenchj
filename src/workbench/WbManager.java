@@ -710,14 +710,14 @@ public final class WbManager
     }
   }
 
-  public void readParameters(String[] args)
+  public void readParameters(String[] args, RunMode mode)
   {
     try
     {
       cmdLine.parse(args);
 
       String lang = cmdLine.getValue(AppArguments.ARG_LANG);
-      if (!StringUtil.isEmptyString(lang))
+      if (StringUtil.isNonEmpty(lang))
       {
         System.setProperty("workbench.gui.language", lang);
       }
@@ -728,29 +728,29 @@ public final class WbManager
         System.setProperty(Settings.PROPERTY_LOG_ALL_SQL, Boolean.toString(logAllStmts));
       }
 
-      String value = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
-      if (!StringUtil.isEmptyString(value))
+      String configDir = cmdLine.getValue(AppArguments.ARG_CONFIGDIR);
+      if (StringUtil.isNonEmpty(configDir))
       {
-        System.setProperty("workbench.configdir", value);
+        System.setProperty("workbench.configdir", configDir);
       }
 
-      value = cmdLine.getValue(AppArguments.ARG_LIBDIR);
-      if (!StringUtil.isEmptyString(value))
+      String libdir = cmdLine.getValue(AppArguments.ARG_LIBDIR);
+      if (StringUtil.isNonEmpty(libdir))
       {
-        System.setProperty(Settings.PROP_LIBDIR, value);
+        System.setProperty(Settings.PROP_LIBDIR, libdir);
       }
 
-      value = cmdLine.getValue(AppArguments.ARG_LOGFILE);
-      if (!StringUtil.isEmptyString(value))
+      String logfile = cmdLine.getValue(AppArguments.ARG_LOGFILE);
+      if (StringUtil.isNonEmpty(logfile))
       {
-        WbFile file = new WbFile(value);
+        WbFile file = new WbFile(logfile);
         System.setProperty("workbench.log.filename", file.getFullPath());
       }
 
-      value = cmdLine.getValue(AppArguments.ARG_LOGLEVEL);
-      if (!StringUtil.isEmptyString(value))
+      String logLevel = cmdLine.getValue(AppArguments.ARG_LOGLEVEL);
+      if (StringUtil.isNonEmpty(logLevel))
       {
-        System.setProperty("workbench.log.level", value);
+        System.setProperty("workbench.log.level", logLevel);
       }
 
       if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
@@ -788,17 +788,26 @@ public final class WbManager
       boolean showHelp = cmdLine.isArgPresent("help");
       boolean hasScript = StringUtil.isNonBlank(scriptname) || StringUtil.isNonBlank(cmd) ;
 
-      this.runMode = RunMode.GUI;
+      if (mode == null)
+      {
+        if (hasScript || showHelp)
+        {
+          this.runMode = RunMode.Batch;
+        }
+        else
+        {
+          this.runMode = RunMode.GUI;
+        }
+      }
+      else
+      {
+        this.runMode = mode;
+      }
 
-      if (BatchRunner.hasConnectionArgument(cmdLine) || showHelp || hasScript)
+      if (BatchRunner.hasConnectionArgument(cmdLine) || runMode != RunMode.GUI)
       {
         // Do not read the driver templates in batchmode
         readDriverTemplates = false;
-      }
-
-      if (hasScript || showHelp)
-      {
-        this.runMode = RunMode.Batch;
       }
 
       readVariablesFromCommandline();
@@ -810,33 +819,31 @@ public final class WbManager
 
       ConnectionMgr.getInstance().setReadTemplates(readDriverTemplates);
 
-      // Setting the profile storage should be done after initializing
-      // the configuration stuff correctly.
-      value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
-      if (value != null)
+      String profiles = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
+      if (StringUtil.isNonEmpty(profiles))
       {
         // evaluate relative filenames right now
         // to prevent Settings to use the config directory
         // if the user specified a file on the command line
         // this should follow the usual file search path
-        WbFile prof = new WbFile(value);
+        WbFile prof = new WbFile(profiles);
         if (prof.exists())
         {
-          value = prof.getFullPath();
+          profiles = prof.getFullPath();
         }
       }
-      Settings.getInstance().setProfileStorage(value);
+      Settings.getInstance().setProfileStorage(profiles);
 
-      value = cmdLine.getValue(AppArguments.ARG_MACRO_STORAGE);
-      if (value != null)
+      String macros = cmdLine.getValue(AppArguments.ARG_MACRO_STORAGE);
+      if (StringUtil.isNonEmpty(macros))
       {
-        WbFile prof = new WbFile(value);
+        WbFile prof = new WbFile(macros);
         if (prof.exists())
         {
-          value = prof.getFullPath();
+          macros = prof.getFullPath();
         }
       }
-      Settings.getInstance().setMacroStorage(value);
+      Settings.getInstance().setMacroStorage(macros);
 
       LogMgr.logInfo("WbManager.readParameters()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
       LogMgr.logInfo("WbManager.readParameters()", ResourceMgr.getFullJavaInfo());
@@ -1096,7 +1103,6 @@ public final class WbManager
     wb.cmdLine.removeArgument(AppArguments.ARG_CONN_SEPARATE);
     wb.cmdLine.removeArgument(AppArguments.ARG_WORKSPACE);
     wb.runMode = RunMode.Console;
-    ConnectionMgr.getInstance().setReadTemplates(false);
     wb.writeSettings = false; // SQLConsole will save the settings explicitely
   }
 
@@ -1136,7 +1142,7 @@ public final class WbManager
     }
     System.setProperty("workbench.system.doexit", "false");
     System.setProperty(Settings.TEST_MODE_PROPERTY, "true");
-    wb.readParameters(realArgs);
+    wb.readParameters(realArgs, null);
     if (doStart)
     {
       wb.startApplication();
@@ -1163,7 +1169,7 @@ public final class WbManager
     System.setProperty("workbench.log.console", "false");
     System.setProperty("workbench.log.log4j", "false");
     System.setProperty("workbench.gui.language", "en");
-    wb.readParameters(args);
+    wb.readParameters(args, null);
   }
 
   public static void main(String[] args)
@@ -1183,7 +1189,7 @@ public final class WbManager
       wb = new WbManager();
     }
 
-    wb.readParameters(args);
+    wb.readParameters(args, null);
 
     if (runConsole)
     {

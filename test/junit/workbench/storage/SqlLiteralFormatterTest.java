@@ -196,6 +196,6 @@ public class SqlLiteralFormatterTest
     data.put("location", "Peter's House");
 
     literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
-    assertEquals("'content=>\"foo\\ bar\",location=>\"Peter''s\\ House\"'::hstore", literal);
+    assertEquals("'content=>\"foo bar\",location=>\"Peter''s House\"'::hstore", literal);
   }
 }
