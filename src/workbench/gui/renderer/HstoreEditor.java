@@ -48,6 +48,7 @@ import javax.swing.text.JTextComponent;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.Settings;
 
+import workbench.db.postgres.HstoreMap;
 import workbench.db.postgres.HstoreSupport;
 
 import workbench.gui.WbSwingUtilities;
@@ -231,7 +232,7 @@ public class HstoreEditor
   public Object getCellEditorValue()
   {
     if (isNull) return null;
-    return getHstore();
+    return new HstoreMap(getHstore());
   }
 
   @Override

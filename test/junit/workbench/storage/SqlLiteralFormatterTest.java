@@ -25,6 +25,8 @@ package workbench.storage;
 
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import workbench.WbTestCase;
 
@@ -175,5 +177,18 @@ public class SqlLiteralFormatterTest
 		ColumnData data = new ColumnData("5b14ca52-3025-4c2e-8987-1c9f9d66acd5", uid);
 		String literal = f.getDefaultLiteral(data).toString();
 		assertEquals("'5b14ca52-3025-4c2e-8987-1c9f9d66acd5'", literal);
+	}
+
+	@Test
+	public void testHstore()
+	{
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		ColumnIdentifier uid = new ColumnIdentifier("attributes", Types.OTHER);
+		uid.setDbmsType("hstore");
+    Map<String, String> map = new HashMap<>();
+    map.put("key", "value");
+		ColumnData data = new ColumnData(map, uid);
+		String literal = f.getDefaultLiteral(data).toString();
+		assertEquals("'\"key\"=>\"value\"'::hstore", literal);
 	}
 }

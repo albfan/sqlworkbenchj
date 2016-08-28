@@ -424,7 +424,7 @@ public class SqlLiteralFormatter
     }
     else if ("hstore".equalsIgnoreCase(dbmsType) && value instanceof Map)
     {
-      return HstoreSupport.getLiteral((Map)data);
+      return HstoreSupport.getLiteral((Map)value);
     }
     else if (type == Types.ARRAY)
     {

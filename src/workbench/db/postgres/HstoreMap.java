@@ -23,6 +23,9 @@ package workbench.db.postgres;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /**
@@ -116,6 +119,84 @@ public class HstoreMap
   public String toString()
   {
     return HstoreSupport.getDisplay(original);
+  }
+
+  @Override
+  public boolean equals(Object other)
+  {
+    return original.equals(other);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return original.hashCode();
+  }
+
+  @Override
+  public Object getOrDefault(Object key, Object defaultValue)
+  {
+    return original.getOrDefault(key, defaultValue);
+  }
+
+  @Override
+  public void forEach(BiConsumer action)
+  {
+    original.forEach(action);
+  }
+
+  @Override
+  public void replaceAll(BiFunction function)
+  {
+    original.replaceAll(function);
+  }
+
+  @Override
+  public Object putIfAbsent(Object key, Object value)
+  {
+    return original.putIfAbsent(key, value);
+  }
+
+  @Override
+  public boolean remove(Object key, Object value)
+  {
+    return original.remove(key, value);
+  }
+
+  @Override
+  public boolean replace(Object key, Object oldValue, Object newValue)
+  {
+    return original.replace(key, oldValue, newValue);
+  }
+
+  @Override
+  public Object replace(Object key, Object value)
+  {
+    return original.replace(key, value);
+  }
+
+  @Override
+  public Object computeIfAbsent(Object key, Function mappingFunction)
+  {
+    return original.computeIfAbsent(key, mappingFunction);
+  }
+
+  @Override
+  public Object computeIfPresent(Object key, BiFunction remappingFunction)
+  {
+    return original.computeIfPresent(key, remappingFunction);
+  }
+
+  @Override
+  public Object compute(Object key, BiFunction remappingFunction)
+  {
+    return original.compute(key, remappingFunction);
+  }
+
+  @Override
+  public Object merge(Object key, Object value, BiFunction remappingFunction)
+  {
+    return original.merge(key, value, remappingFunction);
   }
 
 }
