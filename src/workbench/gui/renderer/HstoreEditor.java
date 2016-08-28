@@ -45,6 +45,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
+import workbench.interfaces.Disposable;
 import workbench.interfaces.NullableEditor;
 import workbench.resource.Settings;
 
@@ -68,7 +69,7 @@ import workbench.storage.DataStore;
  * @author Thomas Kellerer
  */
 public class HstoreEditor
-  implements CellEditor, TableCellEditor, ActionListener, MouseListener, NullableEditor
+  implements CellEditor, TableCellEditor, ActionListener, MouseListener, NullableEditor, Disposable
 {
   private final String CONFIG_PROP = "workbench.gui.hstoreeditor";
   private JPanel component;
@@ -145,6 +146,14 @@ public class HstoreEditor
   public void actionPerformed(ActionEvent e)
   {
     showEditDialog();
+  }
+
+  @Override
+  public void dispose()
+  {
+    if (setNull != null) setNull.dispose();
+    if (contextMenu != null) contextMenu.dispose();
+    listeners.clear();
   }
 
   protected void showEditDialog()

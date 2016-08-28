@@ -81,6 +81,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import workbench.interfaces.Disposable;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Resettable;
@@ -1305,7 +1306,15 @@ public class WbTable
 	{
 		final int row = this.getEditingRow();
 		final int col = this.getEditingColumn();
+
+    TableCellEditor editor = getCellEditor();
+
 		super.removeEditor();
+
+    if (editor instanceof Disposable)
+    {
+      ((Disposable)editor).dispose();
+    }
 
 		resetHighlightRenderers(row);
 
