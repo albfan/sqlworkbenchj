@@ -1073,6 +1073,25 @@ public class StringUtil
     return input;
   }
 
+
+  public static String trimQuotes(String input, char c)
+  {
+    if (isBlank(input)) return input;
+
+    String result = input.trim();
+    int len = result.length();
+
+    if (len < 2) return input;
+
+    char firstChar = result.charAt(0);
+    char lastChar = result.charAt(len - 1);
+
+    if ((firstChar == c && lastChar == c))
+    {
+      return result.substring(1, len - 1);
+    }
+    return input;
+  }
   public static boolean stringToBool(String value)
   {
     if (value == null) return false;

@@ -75,7 +75,32 @@ public class PostgresSequenceReader
   @Override
   public void readSequenceSource(SequenceDefinition def)
   {
-    if (def == null) return;
+    readSequenceSource(def, true);
+  }
+
+  public void readSequenceSource(SequenceDefinition def, boolean includeOwner)
+  {
+    CharSequence source = getSequenceSource(def, includeOwner);
+    def.setSource(source);
+  }
+
+  /**
+   *  Return the source SQL for a PostgreSQL sequence definition.
+   *
+   *  @return The SQL to recreate the given sequence
+   */
+  @Override
+  public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
+  {
+    SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
+    if (def == null) return "";
+    return def.getSource();
+  }
+
+  @Override
+  public CharSequence getSequenceSource(SequenceDefinition def, boolean includeOwner)
+  {
+    if (def == null) return null;
 
     StringBuilder buf = new StringBuilder(250);
 
@@ -113,11 +138,16 @@ public class PostgresSequenceReader
       TableIdentifier tbl = def.getRelatedTable();
       if (tbl != null && StringUtil.isNonBlank(col))
       {
-        buf.append("\n       OWNED BY ");
-        buf.append(tbl.getTableName());
-        buf.append('.');
-        buf.append(col);
+        String owningColumn = tbl.getTableName() + "." + col;
+
+        if (includeOwner)
+        {
+          buf.append("\n       OWNED BY ");
+          buf.append(owningColumn);
+        }
+        def.setPostCreationSQL("ALTER SEQUENCE " + def.getObjectExpression(dbConnection) + " OWNED BY " + owningColumn + ";");
       }
+
       buf.append(";\n");
 
       if (StringUtil.isNonBlank(def.getComment()))
@@ -130,21 +160,7 @@ public class PostgresSequenceReader
     {
       LogMgr.logError("PgSequenceReader.getSequenceSource()", "Error reading sequence definition", e);
     }
-
-    def.setSource(buf);
-  }
-
-  /**
-   *  Return the source SQL for a PostgreSQL sequence definition.
-   *
-   *  @return The SQL to recreate the given sequence
-   */
-  @Override
-  public CharSequence getSequenceSource(String catalog, String schema, String aSequence)
-  {
-    SequenceDefinition def = getSequenceDefinition(catalog, schema, aSequence);
-    if (def == null) return "";
-    return def.getSource();
+    return buf;
   }
 
   /**
@@ -263,7 +279,7 @@ public class PostgresSequenceReader
       // for a sequence that doesn't exist. There is no need to log this
       LogMgr.logDebug("PostgresSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition using:\n" +
         SqlUtil.replaceParameters(sql, sequence, schema), e);
-      
+
       return null;
     }
     finally
@@ -304,4 +320,11 @@ public class PostgresSequenceReader
   {
     return SequenceReader.DEFAULT_TYPE_NAME;
   }
+
+  @Override
+  public boolean supportsDependentSQL()
+  {
+    return true;
+  }
+
 }

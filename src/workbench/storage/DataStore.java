@@ -48,6 +48,7 @@ import workbench.db.QuoteHandler;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.postgres.HstoreSupport;
 
 import workbench.gui.WbSwingUtilities;
 
@@ -446,6 +447,12 @@ public class DataStore
       }
     }
     return modifiedCount;
+  }
+
+  public String getDbmsType(int column)
+    throws IndexOutOfBoundsException
+  {
+    return this.resultInfo.getDbmsTypeName(column);
   }
 
   public int getColumnType(int column)
@@ -985,9 +992,9 @@ public class DataStore
         return null;
       }
     }
-    else if (value instanceof Map)
+    else if (value instanceof Map && "hstore".equalsIgnoreCase(getDbmsType(aColumn)))
     {
-      return SqlLiteralFormatter.getHstoreLiteral((Map)value, false);
+      return HstoreSupport.getDisplay((Map)value);
     }
     else
     {

@@ -28,10 +28,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import workbench.db.JdbcUtils;
-import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.JdbcUtils;
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
@@ -171,4 +174,4 @@ public class PostgresUtil
     return result;
   }
 
-}
+  }

@@ -50,6 +50,7 @@ public class SequenceDefinition
   private TableIdentifier relatedTable;
   private String relatedColumn;
   private String typeName = SequenceReader.DEFAULT_TYPE_NAME;
+  private String postCreationSQL;
 
   private Map<String, Object> properties = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
@@ -313,4 +314,13 @@ public class SequenceDefinition
     return true;
   }
 
+  public void setPostCreationSQL(String sql)
+  {
+    this.postCreationSQL = sql;
+  }
+
+  public String getPostCreationSQL()
+  {
+    return postCreationSQL;
+  }
 }

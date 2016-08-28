@@ -429,7 +429,8 @@ public class PostgresTableSourceBuilder
       {
         String defaultValue = col.getDefaultValue();
         // if the default value is shown as nextval, the sequence name is already visible
-        if (defaultValue != null && defaultValue.toLowerCase().startsWith("nextval")) continue;
+        if (defaultValue != null && defaultValue.toLowerCase().contains("nextval")) continue;
+        
         String colname = StringUtil.trimQuotes(col.getColumnName());
         sql = "select pg_get_serial_sequence('" + tblname + "', '" + colname + "')";
         rs = stmt.executeQuery(sql);

@@ -35,7 +35,6 @@ import workbench.gui.components.MapEditor;
 import workbench.gui.components.ValidatingDialog;
 
 import workbench.storage.DataStore;
-import workbench.storage.SqlLiteralFormatter;
 
 /**
  * A class to render and edit BLOB columns in a result set.
@@ -71,14 +70,7 @@ public class MapColumnRenderer
   @Override
   protected void setCurrentValue(Object value)
   {
-    if (value instanceof Map)
-    {
-      display.setDisplayValue(SqlLiteralFormatter.getHstoreLiteral((Map)value, false));
-    }
-    else
-    {
-      display.setDisplayValue(value == null ? "" : value.toString());
-    }
+    display.setDisplayValue(value == null ? "" : value.toString());
   }
 
   @Override

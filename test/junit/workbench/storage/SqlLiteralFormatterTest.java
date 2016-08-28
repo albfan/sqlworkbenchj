@@ -25,8 +25,6 @@ package workbench.storage;
 
 import java.sql.Types;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import workbench.WbTestCase;
 
@@ -178,27 +176,4 @@ public class SqlLiteralFormatterTest
 		String literal = f.getDefaultLiteral(data).toString();
 		assertEquals("'5b14ca52-3025-4c2e-8987-1c9f9d66acd5'", literal);
 	}
-
-  @Test
-  public void testHstoreLiteral()
-  {
-    Map<String, String> data = new LinkedHashMap<>();
-    data.put("foo", "bar");
-    data.put("color", "blue");
-    String literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
-    assertEquals("'\"foo\"=>\"bar\", \"color\"=>\"blue\"'::hstore", literal);
-
-    literal = SqlLiteralFormatter.getHstoreLiteral(data, false);
-    assertEquals("'\"foo\"=>\"bar\", \"color\"=>\"blue\"'", literal);
-
-    data.clear();
-    data.put("content", "foo bar");
-    data.put("location", "Peter's House");
-
-    literal = SqlLiteralFormatter.getHstoreLiteral(data, true);
-    assertEquals("'\"content\"=>\"foo bar\", \"location\"=>\"Peter''s House\"'::hstore", literal);
-
-    literal = SqlLiteralFormatter.getHstoreLiteral(data, false, false);
-    assertEquals("\"content\"=>\"foo bar\", \"location\"=>\"Peter's House\"", literal);
-  }
 }

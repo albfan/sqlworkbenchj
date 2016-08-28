@@ -137,7 +137,9 @@ import workbench.gui.fontzoom.ResetFontSize;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.renderer.BlobColumnRenderer;
 import workbench.gui.renderer.DateColumnRenderer;
+import workbench.gui.renderer.HstoreEditor;
 import workbench.gui.renderer.HstoreRenderer;
+import workbench.gui.renderer.MapColumnRenderer;
 import workbench.gui.renderer.NumberColumnRenderer;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.renderer.RequiredFieldHighlighter;
@@ -1869,13 +1871,6 @@ public class WbTable
 		return rend;
 	}
 
-  public boolean isMapColumn(int column)
-  {
-		if (this.dwModel == null) return false;
-    Class colClass = dwModel.getColumnClass(column);
-    return (Map.class.isAssignableFrom(colClass));
-  }
-
 	public boolean isBlobColumn(int column)
 	{
 		if (this.dwModel == null) return false;
@@ -1995,9 +1990,20 @@ public class WbTable
         {
           col.setCellRenderer(new HstoreRenderer());
         }
+        else if (isMapColumn(i))
+        {
+          col.setCellRenderer(new MapColumnRenderer());
+        }
 			}
 		}
 	}
+
+  private boolean isMapColumn(int column)
+  {
+    if (this.dwModel == null) return false;
+    Class colClass = dwModel.getColumnClass(column);
+    return (Map.class.isAssignableFrom(colClass));
+  }
 
 	private boolean isHstoreColumn(int col)
   {
@@ -2050,10 +2056,14 @@ public class WbTable
 			{
 				col.setCellEditor(new BlobColumnRenderer());
 			}
-//      else if (isMapColumn(i))
-//      {
-//        col.setCellEditor(new MapColumnRenderer());
-//      }
+      else if (isHstoreColumn(i))
+      {
+        col.setCellEditor(new HstoreEditor());
+      }
+      else if (isMapColumn(i))
+      {
+        col.setCellEditor(new MapColumnRenderer());
+      }
 			else if (isMultiLineColumn(i))
 			{
 				col.setCellEditor(this.multiLineEditor);

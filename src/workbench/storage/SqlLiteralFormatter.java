@@ -38,6 +38,7 @@ import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.exporter.InfinityLiterals;
+import workbench.db.postgres.HstoreSupport;
 
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -423,7 +424,7 @@ public class SqlLiteralFormatter
     }
     else if ("hstore".equalsIgnoreCase(dbmsType) && value instanceof Map)
     {
-      return getHstoreLiteral((Map)value, true);
+      return HstoreSupport.getLiteral((Map)data);
     }
     else if (type == Types.ARRAY)
     {
@@ -440,53 +441,6 @@ public class SqlLiteralFormatter
 
     // Fallback, let the JDBC driver format the value
     return value.toString();
-  }
-
-  public static String getHstoreLiteral(Map<String, String> data, boolean includeCast)
-  {
-    return getHstoreLiteral(data, includeCast, true);
-  }
-
-  public static String getHstoreLiteral(Map<String, String> data, boolean includeCast, boolean includeSingleQuotes)
-  {
-    int count = 0;
-    StringBuilder result = new StringBuilder(data.size() * 20);
-    if (includeCast) includeSingleQuotes = true;
-    
-    if (includeSingleQuotes) result.append('\'');
-    for (Map.Entry<String, String> entry : data.entrySet())
-    {
-      if (count > 0) result.append(", ");
-
-      result.append('"');
-      result.append(entry.getKey());
-      result.append('"');
-
-      result.append("=>");
-
-      String value = entry.getValue();
-      if (value == null)
-      {
-        result.append("NULL");
-      }
-      else
-      {
-        if (includeSingleQuotes)
-        {
-          value = SqlUtil.escapeQuotes(value);
-        }
-        result.append('"');
-        result.append(value);
-        result.append('"');
-      }
-      count ++;
-    }
-    if (includeSingleQuotes) result.append('\'');
-    if (includeCast)
-    {
-      result.append("::hstore");
-    }
-    return result.toString();
   }
 
   private String fixInfinity(String input)

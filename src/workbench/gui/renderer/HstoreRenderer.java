@@ -25,7 +25,8 @@ package workbench.gui.renderer;
 
 import java.util.Map;
 
-import workbench.storage.SqlLiteralFormatter;
+import workbench.db.postgres.HstoreSupport;
+
 
 /**
  * A class to render and edit BLOB columns in a result set.
@@ -52,7 +53,7 @@ public class HstoreRenderer
   {
     if (value instanceof Map)
     {
-      displayValue = SqlLiteralFormatter.getHstoreLiteral((Map)value, false, false);
+      displayValue = HstoreSupport.getDisplay((Map)value);
     }
     else
     {

@@ -23,8 +23,11 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -86,6 +89,7 @@ public class ObjectScripter
   private Set<String> additionalTableTypes = CollectionUtil.caseInsensitiveSet();
   private Set<String> additionalViewTypes = CollectionUtil.caseInsensitiveSet();
   private Set<String> typesToGenerate = CollectionUtil.caseInsensitiveSet();
+  private Map<ScriptSection, List<String>> additionalSQL = new EnumMap<>(ScriptSection.class);
   private int currentObject;
   private int totalObjects;
   private TextOutput output;
@@ -230,6 +234,8 @@ public class ObjectScripter
         generateIfNeeded(type);
       }
 
+      appendSectionSQL(ScriptSection.AfterAllTables);
+
       if (!cancel && includeForeignKeys)
       {
         this.generateForeignKeys();
@@ -278,6 +284,23 @@ public class ObjectScripter
       output.append("\nCOMMIT");
       DelimiterDefinition delim = getDelimiter();
       output.append(delim.getScriptText());
+    }
+  }
+
+  private void appendSectionSQL(ScriptSection section)
+  {
+    List<String> sectionScript = additionalSQL.get(section);
+    if (sectionScript != null)
+    {
+      for (String sql : sectionScript)
+      {
+        output.append(sql);
+        if (!StringUtil.endsWith(sql, nl))
+        {
+          output.append(nl);
+        }
+      }
+      output.append(nl);
     }
   }
 
@@ -361,6 +384,8 @@ public class ObjectScripter
   {
     List<DbObject> toProcess = objectList.stream().filter(dbo -> dbo.getObjectType().equalsIgnoreCase(typeToShow)).collect(Collectors.toList());
 
+    SequenceReader seqReader = dbConnection.getMetadata().getSequenceReader();
+
     for (DbObject dbo : toProcess)
     {
       if (cancel) break;
@@ -379,8 +404,23 @@ public class ObjectScripter
       {
         if (dbo instanceof TableIdentifier)
         {
-          // do not generate foreign keys now, they should be generated at the end after all tables
-          source = ((TableIdentifier)dbo).getSource(dbConnection, false, includeGrants);
+          if (dbConnection.getMetadata().isSequenceType(dbo.getObjectType()))
+          {
+            SequenceDefinition seq = seqReader.getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
+            source = seqReader.getSequenceSource(seq, false);
+            List<String> sectionScript = additionalSQL.get(ScriptSection.AfterAllTables);
+            if (sectionScript == null)
+            {
+              sectionScript = new ArrayList<>();
+              additionalSQL.put(ScriptSection.AfterAllTables, sectionScript);
+            }
+            sectionScript.add(seq.getPostCreationSQL());
+          }
+          else
+          {
+            // do not generate foreign keys now, they should be generated at the end after all tables
+            source = ((TableIdentifier)dbo).getSource(dbConnection, false, includeGrants);
+          }
         }
         else
         {
