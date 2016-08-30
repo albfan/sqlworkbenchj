@@ -644,7 +644,13 @@ public class TextFileParser
             }
             continue;
           }
+
           String value = currentRowValues.get(sourceIndex);
+
+          if (this.emptyStringIsNull && value != null && value.isEmpty())
+          {
+            value = null;
+          }
 
           try
           {
@@ -679,10 +685,6 @@ public class TextFileParser
                 if (this.decodeUnicode)
                 {
                   value = StringUtil.decodeUnicode(value);
-                }
-                if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
-                {
-                  value = null;
                 }
                 rowData[targetIndex] = value;
               }
