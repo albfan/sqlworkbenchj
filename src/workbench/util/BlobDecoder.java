@@ -40,8 +40,8 @@ import static workbench.db.exporter.BlobMode.*;
  */
 public class BlobDecoder
 {
-  public File baseDir;
-  public BlobMode mode;
+  private File baseDir;
+  private BlobMode mode;
 
   public BlobDecoder()
   {
