@@ -26,7 +26,6 @@ package workbench.gui.actions;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import workbench.resource.IconMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.components.WbToolbarButton;
@@ -53,7 +52,7 @@ public class IgnoreErrorsAction
     this.toggleButton = new JToggleButton(this);
     this.toggleButton.setText(null);
     this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-    this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(getIconKey()));
+    this.toggleButton.setIcon(getToolbarIcon());
     this.toggleButton.setSelected(isSwitchedOn());
     return this.toggleButton;
   }

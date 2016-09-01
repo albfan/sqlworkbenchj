@@ -27,9 +27,14 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.ImageIcon;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+
 import workbench.resource.ResourceMgr;
 
 import workbench.db.WbConnection;
+import workbench.gui.components.WbToolbarButton;
 
 /**
  * An action to toggle the auto commit attribute of the
@@ -42,6 +47,7 @@ public class ToggleAutoCommitAction
   implements PropertyChangeListener
 {
   private WbConnection connection;
+  private JToggleButton toggleButton;
 
   public ToggleAutoCommitAction()
   {
@@ -79,6 +85,10 @@ public class ToggleAutoCommitAction
     {
       this.setEnabled(true);
       this.setSwitchedOn(this.connection.getAutoCommit());
+      if (this.toggleButton != null)
+      {
+        this.toggleButton.setSelected(isSwitchedOn());
+      }
     }
     else
     {
@@ -103,5 +113,33 @@ public class ToggleAutoCommitAction
     {
       this.connection.removeChangeListener(this);
     }
+    if (this.toggleButton != null)
+    {
+      toggleButton.setAction(null);
+      toggleButton.setIcon(null);
+      toggleButton = null;
+    }
   }
+
+  @Override
+  public void addToToolbar(JToolBar aToolbar)
+  {
+    if (this.toggleButton == null) this.createButton();
+    aToolbar.add(this.toggleButton);
+  }
+
+  private JToggleButton createButton()
+  {
+    this.toggleButton = new JToggleButton(this);
+    this.toggleButton.setMargin(WbToolbarButton.MARGIN);
+    ImageIcon icon = getToolbarIcon();
+    if (icon != null)
+    {
+      this.toggleButton.setIcon(icon);
+      this.toggleButton.setText(null);
+    }
+    this.toggleButton.setSelected(isSwitchedOn());
+    return this.toggleButton;
+  }
+
 }
