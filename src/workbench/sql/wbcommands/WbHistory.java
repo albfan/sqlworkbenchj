@@ -28,6 +28,7 @@ import java.util.List;
 
 import workbench.WbManager;
 import workbench.interfaces.SqlHistoryProvider;
+import workbench.resource.GuiSettings;
 
 import workbench.storage.DataStore;
 
@@ -87,7 +88,11 @@ public class WbHistory
 		String parameter = this.getCommandLine(sql);
 		if (StringUtil.isNonBlank(parameter)) return result;
 
-		DataStore ds = new DataStore(new String[] {"NR", "SQL"}, new int[] { Types.INTEGER, Types.VARCHAR} );
+		DataStore ds = new DataStore(
+        new String[] {"NR", "SQL"},
+        new int[] {Types.INTEGER, Types.VARCHAR},
+        new int[] {5, GuiSettings.getMultiLineThreshold()} );
+    
 		int index = 1;
 		for (String entry : history)
 		{
@@ -106,7 +111,7 @@ public class WbHistory
 	private String getDisplayString(String sql)
 	{
     if (WbManager.getInstance().isGUIMode()) return sql;
-    
+
 		boolean isMySQL = (this.currentConnection != null ? currentConnection.getMetadata().isMySql() : false);
 		String display = SqlUtil.makeCleanSql(sql, false, false, isMySQL, true);
 		if (maxLength > -1)
