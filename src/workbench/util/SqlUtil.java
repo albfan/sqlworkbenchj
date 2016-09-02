@@ -350,7 +350,7 @@ public class SqlUtil
       if (type1 == null || type2 == null) return false;
       if (StringUtil.compareStrings(type1, type2, true) != 0) return false;
     }
-    
+
     // only compare the catalog if both objects have one
     String cat1 = removeObjectQuotes(dbo1.getCatalog());
     String cat2 = removeObjectQuotes(dbo2.getCatalog());
@@ -2223,7 +2223,7 @@ public class SqlUtil
 
       text = display.getWordAtCursor(wordChars);
     }
-    return text;
+    return trimSemicolon(text);
   }
 
 
