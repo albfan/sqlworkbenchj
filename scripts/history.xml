@@ -4,6 +4,7 @@
   <release build="-1" date="2016-07-31">
     <entry dev-build="1" type="enh">Improved editing of hstore result columns.</entry>
     <entry dev-build="1" type="fix">When using -configDir in console mode the connection profiles were still loaded from the default location.</entry>
+    <entry dev-build="1" type="fix">For Postgres, when generating scripts for tables and sequences the owner column for a sequence was not correctly generated.</entry>
   </release>
   <release build="121" date="2016-07-31">
     <entry dev-build="1" type="fix">Some DDL statements were not generated properly when changing tables or indexes in the DbExplorer</entry>
