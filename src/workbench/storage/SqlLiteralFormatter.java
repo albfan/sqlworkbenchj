@@ -28,6 +28,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
@@ -40,6 +41,7 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.InfinityLiterals;
 import workbench.db.postgres.HstoreSupport;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbDateFormatter;
@@ -81,6 +83,9 @@ public class SqlLiteralFormatter
   private boolean isDbId;
   private boolean isOracle;
   private DbSettings dbSettings;
+  private boolean checkDBMSTypes;
+
+  private final Map<String, WbDateFormatter> dbmsFormatters = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
   /**
    * Create a new formatter with default formatting.
@@ -113,6 +118,7 @@ public class SqlLiteralFormatter
       isOracle = con.getMetadata().isOracle();
     }
     setDateLiteralType(dbid);
+    checkDBMSTypes = true;
   }
 
   public SqlLiteralFormatter(String dbid)
@@ -120,6 +126,7 @@ public class SqlLiteralFormatter
     isDbId = true;
     isOracle = DbMetadata.DBID_ORA.equals(dbid);
     setDateLiteralType(dbid);
+    checkDBMSTypes = true;
   }
 
   /**
@@ -135,13 +142,15 @@ public class SqlLiteralFormatter
       String dbid = con.getMetadata().getDbId();
       isDbId = true;
       isOracle = con.getMetadata().isOracle();
-      this.setDateLiteralType(dbid);
-      this.dbSettings = con.getDbSettings();
+      dbSettings = con.getDbSettings();
+      setDateLiteralType(dbid);
     }
+    checkDBMSTypes = true;
   }
 
   /**
    * Use a specific product name for formatting date and timestamp values.
+   *
    * This call is ignored if the passed value is DBMS and this instance has
    * been initialised with a Connection (thus the DBMS specific formatter is already
    * selected).
@@ -152,6 +161,9 @@ public class SqlLiteralFormatter
    */
   public final void setDateLiteralType(String type)
   {
+    checkDBMSTypes = false;
+    dbmsFormatters.clear();
+
     // If the DBMS specific format is selected and we already have a DBID
     // then this call is simply ignored.
     if (DBMS_DATE_LITERAL_TYPE.equalsIgnoreCase(type))
@@ -245,25 +257,28 @@ public class SqlLiteralFormatter
     if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
   }
 
-  public static WbDateFormatter createFormatter(String format, String type, String defaultPattern)
+  private static String getPattern(String format, String dataType)
   {
-    String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + type + ".pattern";
+    String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + dataType + ".pattern";
+    String pattern = Settings.getInstance().getProperty(key, null);
+    if (pattern != null && pattern.startsWith("${") && pattern.endsWith("}"))
+    {
+      format = pattern.substring(2, pattern.length() - 1);
+      key = "workbench.sql.literals." + format + "." + dataType + ".pattern";
+      pattern = Settings.getInstance().getProperty(key, null);
+    }
+    return pattern;
+  }
+
+  public static WbDateFormatter createFormatter(String format, String dataType, String defaultPattern)
+  {
     WbDateFormatter f = null;
-    String pattern = null;
+    String pattern = getPattern(format, dataType);
     try
     {
-      pattern = Settings.getInstance().getProperty(key, null);
-
-      if (pattern != null && pattern.startsWith("${") && pattern.endsWith("}"))
-      {
-        format = pattern.substring(2, pattern.length() - 1);
-        key = "workbench.sql.literals." + format + "." + type + ".pattern";
-        pattern = Settings.getInstance().getProperty(key, null);
-      }
-
       if (pattern == null)
       {
-        key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + type + ".pattern";
+        String key = "workbench.sql.literals." + STANDARD_DATE_LITERAL_TYPE + "." + dataType + ".pattern";
         pattern = Settings.getInstance().getProperty(key, defaultPattern);
       }
 
@@ -312,6 +327,12 @@ public class SqlLiteralFormatter
     String dbmsType = data.getIdentifier().getDbmsType();
 
     if (type == ColumnIdentifier.NO_TYPE_INFO) return value.toString();
+
+    String formatted = formatDbmsType(data);
+    if (formatted != null)
+    {
+      return formatted;
+    }
 
     if (type == Types.STRUCT)
     {
@@ -452,4 +473,91 @@ public class SqlLiteralFormatter
     }
     return input;
   }
+
+  private boolean isDateTime(int jdbcType)
+  {
+    return jdbcType == Types.DATE || jdbcType == Types.TIMESTAMP || jdbcType == Types.TIME ||
+           jdbcType == Types.TIMESTAMP_WITH_TIMEZONE || jdbcType == Types.TIME_WITH_TIMEZONE;
+  }
+
+  private String cleanupTypeName(String type)
+  {
+    return StringUtil.replace(type, " ", "_").toLowerCase();
+  }
+
+  private String getDbmsFormat(String dbmsTypeName)
+  {
+    if (dbSettings == null) return null;
+
+    return getPattern(dbSettings.getDbId(), cleanupTypeName(dbmsTypeName));
+  }
+
+  private synchronized String formatDbmsType(ColumnData data)
+  {
+    int type = data.getIdentifier().getDataType();
+    if (!checkDBMSTypes || !isDateTime(type))
+    {
+      return null;
+    }
+
+    String dbmsType = data.getIdentifier().getDbmsType();
+
+    WbDateFormatter formatter = dbmsFormatters.get(dbmsType);
+    String format = null;
+
+    if (formatter == null)
+    {
+      format = getDbmsFormat(dbmsType);
+      if (StringUtil.isEmptyString(format))
+      {
+        return null;
+      }
+
+      format = format.replace("${dbtype}", dbmsType);
+
+      try
+      {
+        formatter = new WbDateFormatter(format, true);
+        dbmsFormatters.put(dbmsType, formatter);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logWarning("SqlLiteralFormatter.formatDbmsType()", "Could not create formatter for type \"" + dbmsType + "\" using '" + format + "'", ex);
+      }
+    }
+
+    if (formatter == null)
+    {
+      return null;
+    }
+
+    Object value = data.getValue();
+
+    try
+    {
+
+      if (value instanceof Time)
+      {
+        return formatter.formatTime((Time)value);
+      }
+      else if (value instanceof Timestamp)
+      {
+        return formatter.formatTimestamp((Timestamp)value);
+      }
+      else if (value instanceof java.sql.Date)
+      {
+        return formatter.formatDate((java.sql.Date)value);
+      }
+      else if (value instanceof java.util.Date)
+      {
+        return formatter.formatUtilDate((java.util.Date)value);
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("SqlLiteralFormatter.formatDbmsType()", "Could not format type \"" + dbmsType + "\" using '" + format + "'", ex);
+    }
+    return null;
+  }
+
 }

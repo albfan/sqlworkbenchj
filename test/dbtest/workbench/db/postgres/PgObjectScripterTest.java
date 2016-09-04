@@ -64,15 +64,14 @@ public class PgObjectScripterTest
     assertNotNull(con);
 
     TestUtil.executeScript(con,
-      "create sequence code_seq;\n" +
-      "create table base_table (code varchar(10) default concat('cd', to_char(nextval('code_seq'), '99999999')), some_data varchar(100));\n" +
-      "alter sequence code_seq owned by base_table.code;\n" +
+      "create sequence public.code_seq;\n" +
+      "create table public.base_table (code varchar(10) default concat('cd', to_char(nextval('code_seq'), '99999999')), some_data varchar(100));\n" +
+      "alter sequence public.code_seq owned by public.base_table.code;\n" +
       "commit;\n");
 
     List<TableIdentifier> objects = con.getMetadata().getObjectList("public", new String[] {"TABLE", "SEQUENCE" });
     ObjectScripter scripter = new ObjectScripter(objects, con);
     String script = scripter.getScript();
-    System.out.println(script);
     ScriptParser parser = new ScriptParser(ParserType.Postgres);
     parser.setScript(script);
     assertEquals(4, parser.getSize()); // three statements and a COMMIT
