@@ -416,40 +416,45 @@ public class OracleProcedureReader
     }
 
     String pkgProcs =
-      "  select ap.object_name as package_name, \n" +
-      "         ap.owner as procedure_owner, \n" +
-      "         ap.procedure_name, \n" +
-      "         ap.overload as overload_index, \n" +
-      "         decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
-      "         case  \n" +
-      "           when (select count(*)   \n" +
-      "                 from all_arguments aa   \n" +
-      "                 where aa.owner = ap.owner   \n" +
-      "                   and aa.package_name = ap.object_name  \n" +
-      "                   and aa.object_name = ap.procedure_name \n" +
-      "                     and aa.in_out = 'OUT' and aa.argument_name is null) = 1 then " + DatabaseMetaData.procedureReturnsResult + " \n" +
-      "             else " + DatabaseMetaData.procedureNoResult + " \n " +
-      "          end as procedure_type,  \n" +
-      "          ao.status \n" +
-      "  from all_procedures ap \n" +
-      "    join all_objects ao on ap.object_name = ao.object_name and ap.owner = ao.owner \n" +
-      "  where ao.object_type IN ('PACKAGE BODY', 'TYPE', 'OBJECT TYPE') \n" +
-      "    and ap.procedure_name is not null \n" +
-      "    and ap.object_name is not null";
+      "  select package_name, procedure_owner, procedure_name, overload_index, remarks, procedure_type, status \n" +
+      "  from ( \n" +
+      "    select ap.object_name as package_name, \n" +
+      "           ap.owner as procedure_owner, \n" +
+      "           ap.procedure_name, \n" +
+      "           ap.overload as overload_index, \n" +
+      "           decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
+      "           case  \n" +
+      "             when (select count(*)   \n" +
+      "                   from all_arguments aa   \n" +
+      "                   where aa.owner = ap.owner   \n" +
+      "                     and aa.package_name = ap.object_name  \n" +
+      "                     and aa.object_name = ap.procedure_name \n" +
+      "                       and aa.in_out = 'OUT' and aa.argument_name is null) = 1 then " + DatabaseMetaData.procedureReturnsResult + " \n" +
+      "               else " + DatabaseMetaData.procedureNoResult + " \n " +
+      "            end as procedure_type,  \n" +
+      "            ao.status,  \n" +
+      "            row_number() over (partition by ap.owner, ap.object_name, ap.procedure_name order by ao.object_type desc) as rn \n" +
+      "    from all_procedures ap \n" +
+      "      join all_objects ao on ap.object_name = ao.object_name and ap.owner = ao.owner \n" +
+      "    where ao.object_type IN ('PACKAGE BODY', 'PACKAGE', 'TYPE', 'OBJECT TYPE') \n" +
+      "      and ap.procedure_name is not null \n" +
+      "      and ap.object_name is not null\n" +
+      "  )\n" +
+      "  where rn = 1";
 
     if (StringUtil.isNonBlank(schema))
     {
-      pkgProcs += "\n    and ap.owner = '" + schema + "' ";
+      pkgProcs += "\n    and procedure_owner = '" + schema + "' ";
     }
 
     if (StringUtil.isNonBlank(name))
     {
-      pkgProcs += "\n    and ap.procedure_name " + getNameCondition(name);
+      pkgProcs += "\n    and procedure_name " + getNameCondition(name);
     }
 
     if (StringUtil.isNonBlank(pkgName))
     {
-      pkgProcs += "\n    and ap.object_name = '" + pkgName + "' ";
+      pkgProcs += "\n    and package_name = '" + pkgName + "' ";
     }
 
     String sql =
