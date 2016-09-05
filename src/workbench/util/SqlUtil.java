@@ -2223,7 +2223,7 @@ public class SqlUtil
 
       text = display.getWordAtCursor(wordChars);
     }
-    return trimSemicolon(text);
+    return trimSemicolon(StringUtil.trimToNull(text));
   }
 
 
