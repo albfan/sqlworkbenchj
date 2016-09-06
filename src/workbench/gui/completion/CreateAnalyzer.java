@@ -89,7 +89,7 @@ public class CreateAnalyzer
 						bracketCount ++;
 						if (bracketCount == 1)
 						{
-							tableEndPos = token.getCharBegin() - 1;
+							tableEndPos = token.getCharBegin();
 							if (this.cursorPos >= token.getCharBegin())
 							{
 								showTables = false;

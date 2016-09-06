@@ -51,6 +51,16 @@ public class CreateAnalyzerTest
 		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
 		assertEquals("bar", analyzer.getTableForColumnList().getTableName());
 
+		analyzer = new CreateAnalyzer(null, "create index foo on bar();", 24);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+		assertEquals("bar", analyzer.getTableForColumnList().getTableName());
+
+		analyzer = new CreateAnalyzer(null, "create index concurrently on bar();", 33);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
+		assertEquals("bar", analyzer.getTableForColumnList().getTableName());
+
 		analyzer = new CreateAnalyzer(null, "create index foo on bar (lower(x),  );", 34);
 		analyzer.checkContext();
 		assertEquals(BaseAnalyzer.CONTEXT_COLUMN_LIST, analyzer.getContext());
