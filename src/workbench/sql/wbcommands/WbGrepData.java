@@ -118,6 +118,11 @@ public class WbGrepData
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
+    if (displayHelp(searchResult))
+    {
+      return searchResult;
+    }
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(searchResult, cmdLine, ResourceMgr.getString("ErrDataSearchWrongParms"));

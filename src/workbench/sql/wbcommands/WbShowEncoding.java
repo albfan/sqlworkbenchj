@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
@@ -32,64 +31,92 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
+import workbench.util.WbFile;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbShowEncoding
-	extends SqlCommand
+  extends SqlCommand
 {
-	public static final String ARG_LIST = "list";
-	public static final String VERB = "WbShowEncoding";
+  public static final String ARG_LIST = "list";
+  public static final String ARG_FILE = "file";
+  public static final String VERB = "WbShowEncoding";
 
-	public WbShowEncoding()
-	{
-		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(ARG_LIST, ArgumentType.BoolSwitch);
-	}
+  public WbShowEncoding()
+  {
+    cmdLine = new ArgumentParser();
+    cmdLine.addArgument(ARG_LIST, ArgumentType.BoolSwitch);
+    cmdLine.addArgument(ARG_FILE, ArgumentType.Filename);
+  }
 
-	@Override
-	public String getVerb()
-	{
-		return VERB;
-	}
+  @Override
+  public String getVerb()
+  {
+    return VERB;
+  }
 
-	@Override
-	protected boolean isConnectionRequired()
-	{
-		return false;
-	}
+  @Override
+  protected boolean isConnectionRequired()
+  {
+    return false;
+  }
 
-	@Override
-	public StatementRunnerResult execute(String sql)
-		throws SQLException
-	{
-		StatementRunnerResult result = new StatementRunnerResult();
+  @Override
+  public StatementRunnerResult execute(String sql)
+    throws SQLException
+  {
+    StatementRunnerResult result = new StatementRunnerResult();
 
-		cmdLine.parse(getCommandLine(sql));
+    cmdLine.parse(getCommandLine(sql));
 
-		if (cmdLine.getBoolean(ARG_LIST))
-		{
-			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
-			result.addMessage("");
-			String[] encodings = EncodingUtil.getEncodings();
-			for (String encoding : encodings)
-			{
-				result.addMessage(encoding);
-			}
-			result.addMessage("");
-		}
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
-		String msg = ResourceMgr.getFormattedString("MsgDefaultEncoding", Settings.getInstance().getDefaultEncoding());
-		result.addMessage(msg);
-		result.setSuccess();
-		return result;
-	}
+    WbFile file = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
 
-	@Override
-	public boolean isWbCommand()
-	{
-		return true;
-	}
+    if (cmdLine.getBoolean(ARG_LIST))
+    {
+      result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
+      result.addMessage("");
+      String[] encodings = EncodingUtil.getEncodings();
+      for (String encoding : encodings)
+      {
+        result.addMessage(encoding);
+      }
+      result.addMessage("");
+    }
+    else if (file != null)
+    {
+      String fMsg = "File " + file;
+      if (file.exists())
+      {
+        String encoding = FileUtil.detectFileEncoding(file);
+        if (encoding != null && encoding.toUpperCase().equals("UTF8"))
+        {
+          encoding += " with BOM";
+        }
+        result.addMessage(fMsg + " has encoding: " + encoding);
+      }
+      else
+      {
+        result.addErrorMessage(fMsg + " does not exist");
+      }
+    }
+
+    String msg = ResourceMgr.getFormattedString("MsgDefaultEncoding", Settings.getInstance().getDefaultEncoding());
+    result.addMessage(msg);
+    result.setSuccess();
+    return result;
+  }
+
+  @Override
+  public boolean isWbCommand()
+  {
+    return true;
+  }
 }

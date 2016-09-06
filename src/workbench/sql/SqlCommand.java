@@ -51,9 +51,12 @@ import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 
 import workbench.sql.macros.MacroManager;
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
+import workbench.util.ArgumentValue;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
@@ -120,6 +123,56 @@ public class SqlCommand
   public boolean isWbCommand()
   {
     return false;
+  }
+
+  public String getParameterHelp()
+  {
+    StringBuilder msg = new StringBuilder(100);
+    int maxLength = Integer.MIN_VALUE;
+
+    for (String arg : cmdLine.getRegisteredArguments())
+    {
+      if (arg.length() > maxLength) maxLength = arg.length();
+    }
+
+    maxLength += 3;
+
+    maxLength = Math.max(10, maxLength);
+
+    msg.append("Parameters for " + getVerb() + "\n\n");
+    String header = String.format("%-" + maxLength + "s %-20s %s\n", "NAME", "TYPE", "VALUES");
+    msg.append(header);
+    msg.append(StringUtil.padRight("-", header.length(), '-') + "\n");
+
+    for (String arg : cmdLine.getRegisteredArguments())
+    {
+      if (arg.equalsIgnoreCase(CommonArgs.ARG_HELP)) continue;
+
+      Collection<ArgumentValue> values = cmdLine.getAllowedValues(arg);
+      ArgumentType argType = cmdLine.getArgumentType(arg);
+
+      String valueList = "";
+
+      if (argType == ArgumentType.ListArgument)
+      {
+        if (CollectionUtil.isNonEmpty(values))
+        {
+          boolean first = true;
+          for (ArgumentValue val : values)
+          {
+            if (!first) valueList += ", ";
+            if (first) first = false;
+            valueList += val.getDisplay();
+          }
+        }
+      }
+      else if (argType == ArgumentType.BoolArgument)
+      {
+        valueList = "true,false";
+      }
+      msg.append(String.format("%-" + maxLength + "s %-20s %s \n", "-" + arg, argType, valueList));
+    }
+    return msg.toString();
   }
 
   protected File getXsltBaseDir()
@@ -448,6 +501,17 @@ public class SqlCommand
     {
       LogMgr.logWarning("SqlCommand.setMaxRows()", "The JDBC driver does not support the setMaxRows() function! (" + e.getMessage() + ")");
     }
+  }
+
+  public boolean displayHelp(StatementRunnerResult result)
+  {
+    if (cmdLine.getBoolean(CommonArgs.ARG_HELP))
+    {
+      result.addMessage(getParameterHelp());
+      result.setSuccess();
+      return true;
+    }
+    return false;
   }
 
   /**

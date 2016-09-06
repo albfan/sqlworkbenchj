@@ -118,6 +118,10 @@ public class WbSchemaReport
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		if (cmdLine.hasUnknownArguments())
 		{

@@ -176,18 +176,23 @@ public class WbCopy
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		synchronized (VERB)
-		{
-			runId = ++runCount;
-		}
-
 		cmdLine.parse(getCommandLine(sql));
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
+
+    synchronized (VERB)
+    {
+      runId = ++runCount;
+    }
 
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourceSchema = cmdLine.getValue(PARAM_SOURCESCHEMA);

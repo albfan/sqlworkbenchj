@@ -103,6 +103,12 @@ public class WbSysExec
 		}
 
 		cmdLine.parse(command);
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
 		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
 		{
 			return result;

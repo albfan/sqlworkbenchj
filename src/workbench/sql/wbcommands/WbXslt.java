@@ -79,6 +79,10 @@ public class WbXslt
 		String parm = SqlUtil.stripVerb(aSql);
 
 		cmdLine.parse(parm);
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		WbFile inputFile = evaluateFileArgument(cmdLine.getValue(ARG_INPUT));
 		WbFile outputFile = evaluateFileArgument(cmdLine.getValue(ARG_OUTPUT));

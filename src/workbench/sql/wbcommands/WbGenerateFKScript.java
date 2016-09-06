@@ -75,7 +75,12 @@ public class WbGenerateFKScript
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
-		String tableNames = cmdLine.getValue(CommonArgs.ARG_TABLES);
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    String tableNames = cmdLine.getValue(CommonArgs.ARG_TABLES);
 		String excludeTables = cmdLine.getValue(CommonArgs.ARG_EXCLUDE_TABLES);
 
 		if (StringUtil.isBlank(tableNames))

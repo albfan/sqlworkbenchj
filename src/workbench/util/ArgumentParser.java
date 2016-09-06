@@ -43,6 +43,8 @@ import java.util.regex.Pattern;
 
 import workbench.log.LogMgr;
 
+import workbench.sql.wbcommands.CommonArgs;
+
 /**
  *
  * @author  Thomas Kellerer
@@ -72,6 +74,7 @@ public class ArgumentParser
     arguments = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
     argTypes = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
     allowedValues = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+    addArgument(CommonArgs.ARG_HELP, ArgumentType.BoolSwitch);
   }
 
   public ArgumentParser(boolean parameterSwitchNeeded)

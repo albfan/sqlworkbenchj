@@ -268,11 +268,13 @@ public class WbImport
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
-		imp = new DataImporter();
-		imp.setConnection(currentConnection);
-
 		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
 		String options = getCommandLine(sqlCommand);
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		cmdLine.parse(options);
 
@@ -287,6 +289,9 @@ public class WbImport
 			addWrongParamsMessage(result);
 			return result;
 		}
+
+    imp = new DataImporter();
+    imp.setConnection(currentConnection);
 
 		WbFile inputFile = evaluateFileArgument(cmdLine.getValue(ARG_FILE));
 		String type = cmdLine.getValue(ARG_TYPE);

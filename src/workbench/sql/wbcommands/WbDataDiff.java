@@ -183,6 +183,11 @@ public class WbDataDiff
 
 		this.cmdLine.parse(getCommandLine(sql));
 
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
 		if (cmdLine.getArgumentCount() == 0)
 		{
 			result.addErrorMessage(getWrongArgumentsMessage());

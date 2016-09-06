@@ -75,6 +75,11 @@ public class WbLoadPkMapping
 		StatementRunnerResult result = new StatementRunnerResult();
 		String sql = getCommandLine(sqlCommand);
 		cmdLine.parse(sql);
+    if (displayHelp(result))
+    {
+      return result;
+    }
+    
 		String file = cmdLine.getValue(CommonArgs.ARG_FILE);
 		if (file == null)
 		{

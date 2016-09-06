@@ -171,7 +171,6 @@ public class WbExport
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
-
 		cmdLine.addArgument(ARG_EXPORT_TYPE, StringUtil.stringToList(exportTypes));
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_LOWERCASE_NAMES, ArgumentType.BoolArgument);
@@ -330,6 +329,11 @@ public class WbExport
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		if (cmdLine.isArgPresent(ARG_SHOW_ENCODINGS))
 		{

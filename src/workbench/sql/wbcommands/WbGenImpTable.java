@@ -113,6 +113,12 @@ public class WbGenImpTable
     result.setFailure();
 
     cmdLine.parse(getCommandLine(sql));
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
     String fileName = cmdLine.getValue(WbImport.ARG_FILE);
 
     if (StringUtil.isBlank(fileName))

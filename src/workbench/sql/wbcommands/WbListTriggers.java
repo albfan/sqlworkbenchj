@@ -75,6 +75,10 @@ public class WbListTriggers
 		String options = getCommandLine(aSql);
 
 		cmdLine.parse(options);
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 

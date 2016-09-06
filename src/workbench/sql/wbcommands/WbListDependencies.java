@@ -99,6 +99,11 @@ public class WbListDependencies
     }
 
 		cmdLine.parse(options);
+    
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		String schema = null;
 		String catalog = null;

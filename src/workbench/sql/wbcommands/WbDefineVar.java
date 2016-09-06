@@ -115,6 +115,12 @@ public class WbDefineVar
 		String sql = getCommandLine(aSql);
 
 		cmdLine.parse(sql);
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
 		WbFile file = this.evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
 		WbFile contentFile = this.evaluateFileArgument(cmdLine.getValue(ARG_CONTENT_FILE));
 

@@ -36,10 +36,10 @@ import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 
 import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.ResultInfo;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -90,6 +90,10 @@ public class WbListProcedures
 		String args = getCommandLine(aSql);
 
 		cmdLine.parse(args);
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		String schema = null;
 		String catalog = null;

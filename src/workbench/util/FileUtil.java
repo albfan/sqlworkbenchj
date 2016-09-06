@@ -575,6 +575,23 @@ public class FileUtil
       }
       detector.dataEnd();
       encoding = detector.getDetectedCharset();
+
+      if (encoding != null && encoding.toUpperCase().startsWith("UTF"))
+      {
+        Reader r = null;
+        try
+        {
+          r = EncodingUtil.createReader(file, encoding);
+          if (r instanceof UnicodeReader)
+          {
+            encoding = ((UnicodeReader)r).getEncoding();
+          }
+        }
+        finally
+        {
+          closeQuietely(r);
+        }
+      }
       LogMgr.logInfo("FileUtil.detectFileEncoding()", "Detected encoding: " + encoding + " for file " + file.getAbsolutePath());
     }
     catch (Throwable th)
@@ -596,21 +613,17 @@ public class FileUtil
    */
   public static void sortFiles(List<? extends File> files)
   {
-    Comparator<File> comp = new Comparator<File>()
+    Comparator<File> comp = (File o1, File o2) ->
     {
-      @Override
-      public int compare(File o1, File o2)
-      {
-        if (Objects.equals(o1, o2)) return 0;
-        if (o1 == null && o2 != null) return -1;
-        if (o1 != null && o2 == null) return 1;
+      if (Objects.equals(o1, o2)) return 0;
+      if (o1 == null && o2 != null) return -1;
+      if (o1 != null && o2 == null) return 1;
 
-        if (o1.isDirectory() && o2.isFile()) return -1;
-        if (o1.isFile() && o2.isDirectory()) return 1;
+      if (o1.isDirectory() && o2.isFile()) return -1;
+      if (o1.isFile() && o2.isDirectory()) return 1;
 
-        // both objects are either files or directories;
-        return o1.compareTo(o2);
-      }
+      // both objects are either files or directories;
+      return o1.compareTo(o2);
     };
     Collections.sort(files, comp);
   }

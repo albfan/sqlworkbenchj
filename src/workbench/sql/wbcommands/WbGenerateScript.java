@@ -101,6 +101,11 @@ public class WbGenerateScript
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
 
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
 		List<String> schemas = null;
 		Collection<String> types = null;
 		String names = null;

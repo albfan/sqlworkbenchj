@@ -75,6 +75,11 @@ public class WbGenInsert
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 		cmdLine.parse(args);
+    
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		if (cmdLine.hasUnknownArguments())
 		{

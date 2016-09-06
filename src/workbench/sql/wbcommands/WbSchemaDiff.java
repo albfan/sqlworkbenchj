@@ -122,7 +122,7 @@ public class WbSchemaDiff
 
 		cmdLine.parse(getCommandLine(sql));
 
-		if (cmdLine.getArgumentCount() == 0)
+    if (cmdLine.getArgumentCount() == 0 || cmdLine.getBoolean(CommonArgs.ARG_HELP))
 		{
 			result.addErrorMessageByKey("ErrDiffWrongParameters");
 			return result;

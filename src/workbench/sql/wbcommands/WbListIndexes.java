@@ -75,15 +75,17 @@ public class WbListIndexes
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		String options = getCommandLine(aSql);
-
-		DbMetadata meta = currentConnection.getMetadata();
-
-		IndexReader reader = meta.getIndexReader();
-
 		StatementRunnerResult result = new StatementRunnerResult();
 
+    String options = getCommandLine(aSql);
 		cmdLine.parse(options);
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    DbMetadata meta = currentConnection.getMetadata();
+    IndexReader reader = meta.getIndexReader();
 
 		String schema = null;
 		String catalog = null;
