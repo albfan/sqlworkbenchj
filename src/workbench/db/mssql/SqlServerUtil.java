@@ -23,6 +23,7 @@
  */
 package workbench.db.mssql;
 
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.db.JdbcUtils;
@@ -112,4 +113,16 @@ public class SqlServerUtil
     }
   }
 
+  public static void changeDatabase(WbConnection conn, String dbName)
+  {
+    try
+    {
+      conn.getSqlConnection().setCatalog(dbName);
+    }
+    catch (SQLException ex)
+    {
+      LogMgr.logWarning("SqlServerUtil.setCatalog()", "Could not change database", ex);
+    }
+
+  }
 }

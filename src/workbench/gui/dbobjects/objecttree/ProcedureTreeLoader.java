@@ -34,7 +34,13 @@ public class ProcedureTreeLoader
     ProcedureReader procReader = ReaderFactory.getProcedureReader(connection.getMetadata());
     ObjectTreeNode schemaNode = procListNode.getParent();
     String schemaName = schemaNode.getName();
-    List<ProcedureDefinition> procedures = procReader.getProcedureList(null, schemaName, null);
+    String catalog = null;
+    ObjectTreeNode parent = schemaNode.getParent();
+    if (parent != null && parent.isCatalogNode())
+    {
+      catalog = parent.getName();
+    }
+    List<ProcedureDefinition> procedures = procReader.getProcedureList(catalog, schemaName, null);
 
     Map<String, List<ProcedureDefinition>> procs = getPackageProcedures(procedures);
     for (Map.Entry<String, List<ProcedureDefinition>> entry : procs.entrySet())

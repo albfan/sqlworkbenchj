@@ -68,7 +68,7 @@ public class SpHelpTextRunner
     {
       if (changeCatalog)
       {
-        setCatalog(connection, dbName);
+        SqlServerUtil.changeDatabase(connection, dbName);
       }
       stmt = connection.createStatement();
 
@@ -104,23 +104,11 @@ public class SpHelpTextRunner
     {
       if (changeCatalog)
       {
-        setCatalog(connection, currentDb);
+        SqlServerUtil.changeDatabase(connection, currentDb);
       }
       SqlUtil.closeAll(rs, stmt);
     }
     return sql;
-  }
-
-  private void setCatalog(WbConnection connection, String newCatalog)
-  {
-    try
-    {
-      connection.getSqlConnection().setCatalog(newCatalog);
-    }
-    catch (SQLException ex)
-    {
-      LogMgr.logWarning("SpHelpTextRunner.setCatalog()", "Could not change database", ex);
-    }
   }
 
 }

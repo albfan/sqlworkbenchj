@@ -36,6 +36,7 @@ import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -51,13 +52,34 @@ public class SqlServerTriggerReader
   }
 
   @Override
-  public DataStore getTriggers(String catalog, String schema)
+  public DataStore getTriggers(String dbName, String schema, String baseTable)
     throws SQLException
   {
-    DataStore result = super.getTriggers(catalog, schema);
-    if (SqlServerUtil.isSqlServer2005(dbConnection))
+    String currentDb = dbConnection.getCurrentCatalog();
+    boolean changeCatalog = StringUtil.stringsAreNotEqual(currentDb, dbName) && StringUtil.isNonBlank(dbName);
+
+    DataStore result = null;
+
+    try
     {
-      readDDLTriggers(result);
+      if (changeCatalog)
+      {
+        SqlServerUtil.changeDatabase(dbConnection, dbName);
+      }
+
+      result = super.getTriggers(dbName, schema, baseTable);
+
+      if (SqlServerUtil.isSqlServer2005(dbConnection) && StringUtil.isEmptyString(baseTable))
+      {
+        readDDLTriggers(result);
+      }
+    }
+    finally
+    {
+      if (changeCatalog)
+      {
+        SqlServerUtil.changeDatabase(dbConnection, currentDb);
+      }
     }
     return result;
   }
