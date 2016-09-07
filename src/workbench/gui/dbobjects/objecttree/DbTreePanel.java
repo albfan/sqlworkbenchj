@@ -310,7 +310,7 @@ public class DbTreePanel
       if (DbTreeSettings.useAutocommit(connection.getDbId()))
       {
         LogMgr.logDebug("DbTreePanel.doConnect()", "Setting connection " + cid + " to auto commit");
-        connection.setAutoCommit(true);
+        connection.changeAutoCommit(true);
       }
 
       JdbcUtils.initDbExplorerConnection(connection);

@@ -584,7 +584,11 @@ public class FileUtil
           r = EncodingUtil.createReader(file, encoding);
           if (r instanceof UnicodeReader)
           {
-            encoding = ((UnicodeReader)r).getEncoding();
+            UnicodeReader ur = (UnicodeReader)r;
+            if (ur.hasBOM())
+            {
+              encoding = ur.getEncoding();
+            }
           }
         }
         finally

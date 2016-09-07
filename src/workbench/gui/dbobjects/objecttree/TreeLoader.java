@@ -309,7 +309,7 @@ public class TreeLoader
 
   public void endTransaction()
   {
-    if (connection.getDbSettings().selectStartsTransaction())
+    if (connection.getDbSettings().selectStartsTransaction() && !connection.getAutoCommit())
     {
       LogMgr.logTrace("TreeLoader.endTransaction()", "Ending DbTree transaction using rollback on connection: " + connection.getId());
       connection.rollbackSilently();

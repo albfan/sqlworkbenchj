@@ -120,7 +120,7 @@ public class DbTreeSettings
 
   public static boolean useAutocommit(String dbid)
   {
-    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "." + dbid + ".autocommit", false);
+    return Settings.getInstance().getBoolProperty(SETTINGS_PREFIX + "." + dbid + ".autocommit", true);
   }
 
 }

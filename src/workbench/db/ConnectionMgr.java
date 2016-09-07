@@ -233,7 +233,7 @@ public class ConnectionMgr
     copyPropsToSystem(profile);
 
     int oldTimeout = DriverManager.getLoginTimeout();
-    Connection sql = null;
+    Connection sqlConn = null;
     try
     {
       int timeout = profile.getConnectionTimeoutValue();
@@ -241,7 +241,7 @@ public class ConnectionMgr
       {
         DriverManager.setLoginTimeout(timeout);
       }
-      sql = drv.connect(profile.getUrl(), profile.getLoginUser(), profile.getLoginPassword(), anId, getConnectionProperties(profile));
+      sqlConn = drv.connect(profile.getUrl(), profile.getLoginUser(), profile.getLoginPassword(), anId, getConnectionProperties(profile));
     }
     finally
     {
@@ -250,7 +250,7 @@ public class ConnectionMgr
 
     try
     {
-      sql.setAutoCommit(profile.getAutocommit());
+      sqlConn.setAutoCommit(profile.getAutocommit());
     }
     catch (Throwable th)
     {
@@ -258,7 +258,7 @@ public class ConnectionMgr
       LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
     }
 
-    WbConnection conn = new WbConnection(anId, sql, profile);
+    WbConnection conn = new WbConnection(anId, sqlConn, profile);
     if (profile.isReadOnly())
     {
       conn.syncReadOnlyState();
@@ -450,7 +450,7 @@ public class ConnectionMgr
 
   public void setDrivers(List<DbDriver> aDriverList)
   {
-    this.drivers = aDriverList;
+    this.drivers = new ArrayList<>(aDriverList);
     if (this.driverChangeListener != null)
     {
       PropertyChangeEvent evt = new PropertyChangeEvent(this, "drivers", null, null);

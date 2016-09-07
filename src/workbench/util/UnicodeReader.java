@@ -22,9 +22,10 @@ import java.io.*;
 public class UnicodeReader
   extends Reader
 {
-  PushbackInputStream internalIn;
-  InputStreamReader internalIn2 = null;
-  String defaultEnc;
+  private PushbackInputStream internalIn;
+  private InputStreamReader internalIn2 = null;
+  private String defaultEnc;
+  private boolean hasBOM = true;
 
   private static final int BOM_SIZE = 4;
 
@@ -46,6 +47,11 @@ public class UnicodeReader
   {
     if (internalIn2 == null) return null;
     return internalIn2.getEncoding();
+  }
+
+  public boolean hasBOM()
+  {
+    return hasBOM;
   }
 
   /**
@@ -93,6 +99,7 @@ public class UnicodeReader
       // Unicode BOM mark not found, unread all bytes
       encoding = defaultEnc;
       unread = n;
+      hasBOM = false;
     }
     if (unread > 0) internalIn.unread(bom, (n - unread), unread);
     else if (unread < -1) internalIn.unread(bom, 0, 0);

@@ -777,7 +777,7 @@ public class WbConnection
     boolean flag = this.getAutoCommit();
     try
     {
-      this.setAutoCommit(!flag);
+      setAutoCommit(!flag);
     }
     catch (Exception e)
     {
@@ -791,9 +791,9 @@ public class WbConnection
     {
       setAutoCommit(flag);
     }
-    catch (SQLException ex)
+    catch (Exception ex)
     {
-      // ignore
+      LogMgr.logWarning("WbConnection.changeAutoCommit()", "Error when setting autocommit to " + flag, ex);
     }
   }
 
@@ -805,7 +805,7 @@ public class WbConnection
     boolean old = this.getAutoCommit();
     if (old != flag)
     {
-      this.sqlConnection.setAutoCommit(flag);
+      sqlConnection.setAutoCommit(flag);
       fireConnectionStateChanged(PROP_AUTOCOMMIT, Boolean.toString(old), Boolean.toString(flag));
       lastAutocommitState = flag;
     }
