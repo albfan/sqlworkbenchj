@@ -973,7 +973,8 @@ public class TreeLoader
       }
       colDisplay += ")</html>";
 
-      ObjectTreeNode fkEntry = new ObjectTreeNode(colDisplay, TYPE_FK_DEF);
+      ObjectTreeNode fkEntry = new ObjectTreeNode(fk.getFkName(), TYPE_FK_DEF);
+      fkEntry.setDisplay(colDisplay);
       fkEntry.setAllowsChildren(false);
       fkEntry.setChildrenLoaded(true);
       tblNode.add(fkEntry);

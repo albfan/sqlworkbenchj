@@ -61,6 +61,7 @@ public class ObjectTreeNode
   private int originalIndex;
   private List<ObjectTreeNode> filteredNodes = new ArrayList<>();
   private DbObject originalObject;
+  private String display;
 
   public ObjectTreeNode(DbObject dbo)
   {
@@ -86,6 +87,11 @@ public class ObjectTreeNode
   {
     nodeType = type;
     nodeName = name;
+  }
+
+  public void setDisplay(String text)
+  {
+    this.display = text;
   }
 
   public void setChildrenLoaded(boolean flag)
@@ -266,10 +272,17 @@ public class ObjectTreeNode
   public String toString()
   {
     DbObject dbo = getDbObject();
+
+    if (display != null)
+    {
+      return display;
+    }
+
     if (dbo == null)
     {
       return nodeName;
     }
+    
     if (dbo instanceof ColumnIdentifier)
     {
       ColumnIdentifier col = (ColumnIdentifier)dbo;
