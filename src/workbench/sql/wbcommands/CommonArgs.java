@@ -207,19 +207,19 @@ public class CommonArgs
 
 	public static void setProgressInterval(ProgressReporter reporter, ArgumentParser cmdLine)
 	{
-		String value = cmdLine.getValue(ARG_PROGRESS);
+		String progress = cmdLine.getValue(ARG_PROGRESS, cmdLine.getValue(ARG_BATCHSIZE));
 
-		if ("true".equalsIgnoreCase(value))
+		if ("true".equalsIgnoreCase(progress))
 		{
 			reporter.setReportInterval(1);
 		}
-		else if ("false".equalsIgnoreCase(value))
+		else if ("false".equalsIgnoreCase(progress))
 		{
 			reporter.setReportInterval(0);
 		}
-		else if (value != null)
+		else if (progress != null)
 		{
-			int interval = StringUtil.getIntValue(value, 0);
+			int interval = StringUtil.getIntValue(progress, 0);
 			reporter.setReportInterval(interval);
 		}
 		else
