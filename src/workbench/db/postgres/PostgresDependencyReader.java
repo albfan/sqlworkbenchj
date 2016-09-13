@@ -49,7 +49,7 @@ import workbench.util.SqlUtil;
 public class PostgresDependencyReader
   implements DependencyReader
 {
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence", "trigger", "function");
 
   private final String typeCase =
       "       CASE cl.relkind \n" +
@@ -105,6 +105,36 @@ public class PostgresDependencyReader
     "  and n.nspname = ? \n" +
     "  and s.relname = ?";
 
+  private static final String triggerImplementationFunction =
+    "SELECT trgsch.nspname as function_schema, proc.proname as function_name, 'FUNCTION', obj_description(proc.oid) as remarks \n" +
+    "FROM pg_trigger trg  \n" +
+    "  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
+    "  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
+    "  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
+    "  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n" +
+    "WHERE tblsch.nspname =  ? \n" +
+    "  AND trg.tgname = ? ";
+
+  private static final String triggerTable =
+    "SELECT tblsch.nspname as table_schema, tbl.relname as table_name, 'TABLE', obj_description(tbl.oid) as remarks \n" +
+    "FROM pg_trigger trg  \n" +
+    "  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
+    "  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
+    "  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
+    "  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n" +
+    "WHERE tblsch.nspname =  ? \n" +
+    "  AND trg.tgname = ? ";
+
+  private static final String triggersUsingFunction =
+    "SELECT trgsch.nspname as trigger_schema, trg.tgname as trigger_name, 'TRIGGER', obj_description(trg.oid) as remarks \n" +
+    "FROM pg_trigger trg  \n" +
+    "  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
+    "  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
+    "  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
+    "  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n" +
+    "WHERE tblsch.nspname = ? \n" +
+    "  and proc.proname = ? ";
+
   public PostgresDependencyReader()
   {
   }
@@ -113,6 +143,16 @@ public class PostgresDependencyReader
   public List<DbObject> getUsedObjects(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
+
+    if (base.getObjectType().equalsIgnoreCase("function"))
+    {
+      return Collections.emptyList();
+    }
+
+    if (base.getObjectType().equalsIgnoreCase("trigger"))
+    {
+      return getTriggerFunction(connection, base);
+    }
 
     List<DbObject> objects = retrieveObjects(connection, base, searchUsed);
 
@@ -138,6 +178,17 @@ public class PostgresDependencyReader
   public List<DbObject> getUsedBy(WbConnection connection, DbObject base)
   {
     if (base == null || connection == null) return Collections.emptyList();
+
+    if (base.getObjectType().equalsIgnoreCase("trigger"))
+    {
+      return retrieveObjects(connection, base, triggerTable);
+    }
+
+    if (base.getObjectType().equalsIgnoreCase("function"))
+    {
+      return retrieveObjects(connection, base, triggersUsingFunction);
+    }
+
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
 
     List<DbObject> tables = retrieveObjects(connection, base, sequenceUsageSql);
@@ -156,6 +207,11 @@ public class PostgresDependencyReader
     DbObjectSorter.sort(objects, true);
 
     return objects;
+  }
+
+  private List<DbObject> getTriggerFunction(WbConnection connection, DbObject base)
+  {
+    return retrieveObjects(connection, base, triggerImplementationFunction);
   }
 
   private List<DbObject> retrieveObjects(WbConnection connection, DbObject base, String sql)
