@@ -51,7 +51,7 @@ import workbench.db.ReaderFactory;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
-import workbench.db.TableNameSorter;
+import workbench.db.ObjectNameSorter;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
@@ -358,7 +358,7 @@ class ObjectCache
 
   private Set<TableIdentifier> filterTablesByType(WbConnection conn, List<String> schemas, Collection<String> requestedTypes)
   {
-    SortedSet<TableIdentifier> result = new TreeSet<>(new TableNameSorter());
+    SortedSet<TableIdentifier> result = new TreeSet<>(new ObjectNameSorter());
     String currentSchema = null;
     if (schemas.size() == 1)
     {
@@ -405,7 +405,7 @@ class ObjectCache
 
   private Set<TableIdentifier> filterTablesBySchema(WbConnection dbConnection, List<String> schemas)
   {
-    SortedSet<TableIdentifier> result = new TreeSet<>(new TableNameSorter(true));
+    SortedSet<TableIdentifier> result = new TreeSet<>(new ObjectNameSorter(true));
     DbMetadata meta = dbConnection.getMetadata();
 
     List<String> schemasToCheck = new ArrayList<>(schemas.size());

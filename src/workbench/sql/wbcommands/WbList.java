@@ -54,6 +54,8 @@ public class WbList
 
 	public WbList()
 	{
+    super();
+    this.isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS);
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);

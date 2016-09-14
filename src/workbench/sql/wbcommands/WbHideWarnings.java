@@ -47,7 +47,8 @@ public class WbHideWarnings
 
 	public WbHideWarnings()
 	{
-		super();
+    super();
+    this.isUpdatingCommand = false;
 		this.cmdLine = new ArgumentParser(false);
 		this.cmdLine.addArgument("on");
 		this.cmdLine.addArgument("off");

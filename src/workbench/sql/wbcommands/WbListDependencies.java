@@ -64,6 +64,8 @@ public class WbListDependencies
 
 	public WbListDependencies()
 	{
+    super();
+    this.isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
@@ -99,7 +101,7 @@ public class WbListDependencies
     }
 
 		cmdLine.parse(options);
-    
+
     if (displayHelp(result))
     {
       return result;

@@ -44,7 +44,8 @@ public class WbHelp
 
 	public WbHelp()
 	{
-		super();
+    super();
+    this.isUpdatingCommand = false;
 	}
 
 	@Override

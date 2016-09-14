@@ -282,7 +282,7 @@ public class ObjectTreeNode
     {
       return nodeName;
     }
-    
+
     if (dbo instanceof ColumnIdentifier)
     {
       ColumnIdentifier col = (ColumnIdentifier)dbo;
@@ -334,19 +334,27 @@ public class ObjectTreeNode
     if (dbo instanceof TriggerDefinition)
     {
       TriggerDefinition trg = (TriggerDefinition)dbo;
-      String tip = trg.getTriggerType() + " " + trg.getTriggerEvent();
-      if (trg.getRelatedTable() != null)
+      String tip = null;
+      if (trg.getTriggerType() != null && trg.getTriggerEvent() != null)
       {
-        tip += " ON " + trg.getRelatedTable().getTableName();
+        tip = trg.getTriggerType() + " " + trg.getTriggerEvent();
+        if (trg.getRelatedTable() != null)
+        {
+          tip += " ON " + trg.getRelatedTable().getTableName();
+        }
+        TriggerLevel level = trg.getLevel();
+        if (level == TriggerLevel.row)
+        {
+          tip += " FOR EACH ROW";
+        }
+        else if (level == TriggerLevel.statement)
+        {
+          tip += " FOR EACH STATEMENT";
+        }
       }
-      TriggerLevel level = trg.getLevel();
-      if (level == TriggerLevel.row)
+      else
       {
-        tip += " FOR EACH ROW";
-      }
-      else if (level == TriggerLevel.statement)
-      {
-        tip += " FOR EACH STATEMENT";
+        tip = trg.getObjectType();
       }
       return tip;
     }
@@ -363,7 +371,7 @@ public class ObjectTreeNode
     {
       return remarks;
     }
-    return null;
+    return dbo.getObjectType();
   }
 
   private String getColumnTooltip(ColumnIdentifier col)

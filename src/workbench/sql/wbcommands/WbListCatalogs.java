@@ -55,6 +55,7 @@ public class WbListCatalogs
 	public WbListCatalogs()
 	{
 		super();
+    this.isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
     cmdLine.addArgument(CommonArgs.ARG_VERBOSE, ArgumentType.BoolSwitch);
 	}

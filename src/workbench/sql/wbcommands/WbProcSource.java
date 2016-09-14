@@ -33,6 +33,8 @@ import workbench.db.TableIdentifier;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 
 import workbench.util.StringUtil;
 
@@ -50,6 +52,12 @@ public class WbProcSource
 	public WbProcSource()
 	{
 		super();
+		this.isUpdatingCommand = false;
+
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
+		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override

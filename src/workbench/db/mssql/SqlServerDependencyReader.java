@@ -34,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DbObject;
+import workbench.db.DomainIdentifier;
 import workbench.db.ProcedureDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -71,10 +72,10 @@ public class SqlServerDependencyReader
       "          when 'SQL_TRIGGER' then 'TRIGGER'\n" +
       "          when 'CLR_TRIGGER' then 'TRIGGER'\n" +
       "          else type_desc \n" +
-      "        end as type \n";
+      "        end as type";
 
   private final String searchUsedByInfSchema =
-      "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc +
+      "SELECT vtu.TABLE_CATALOG, vtu.TABLE_SCHEMA, vtu.TABLE_NAME,\n" + typeDesc + "\n" +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.TABLE_NAME and schema_name(ao.schema_id) = vtu.TABLE_SCHEMA\n" +
       "WHERE VIEW_CATALOG = ? \n" +
@@ -82,7 +83,7 @@ public class SqlServerDependencyReader
       "  AND VIEW_NAME = ?";
 
   private final String searchUsedSqlInfSchema =
-      "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc +
+      "SELECT vtu.VIEW_CATALOG, vtu.VIEW_SCHEMA, vtu.VIEW_NAME,\n" + typeDesc  + "\n" +
       "FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE vtu \n" +
       "  JOIN sys.all_objects ao ON ao.name = vtu.VIEW_NAME and schema_name(ao.schema_id) = vtu.VIEW_SCHEMA\n" +
       "WHERE TABLE_CATALOG = ? \n" +
@@ -92,14 +93,51 @@ public class SqlServerDependencyReader
   private final String searchUsedByDMView =
       "SELECT distinct db_name() as catalog_name,  \n" +
       "       coalesce(re.referenced_schema_name, schema_name()) as schema_name,  \n" +
-      "       re.referenced_entity_name,  \n" + typeDesc +
+      "       re.referenced_entity_name,  \n" + typeDesc  + "\n" +
       "FROM sys.dm_sql_referenced_entities(?, 'OBJECT') re \n" +
       "  JOIN sys.all_objects ao on ao.object_id = re.referenced_id";
+
+  private final String searchDefaultConstraints =
+      "SELECT db_name() as catalog_name, \n" +
+      "       schema_name(ao.schema_id) as schema_name,\n" +
+      "       ao.name as constraint_name, \n" +
+      "       'DEFAULT' as type \n" +
+      "from sys.columns c \n" +
+      "  join sys.all_objects ao on ao.object_id = c.default_object_id \n" +
+      "where c.object_id = object_id(?)\n" +
+      "  and ao.type = 'D'\n" +
+      "  and coalesce(ao.parent_object_id,0) = 0;";
+
+  private final String searchColumnTypes =
+      "select distinct db_name() as catalog_name, \n" +
+      "       schema_name(t.schema_id) as schema_name,\n" +
+      "       t.name as type_name, \n" +
+      "       'TYPE' as type\n" +
+      "from sys.types t \n" +
+      "  join sys.columns c on c.user_type_id = t.user_type_id \n" +
+      "where c.object_id = object_id(?)\n" +
+      "and t.is_user_defined = 1";
 
   private final String searchUsedSqlDMView =
       "SELECT db_name() as catalog,  \n" +
       "       coalesce(re.referencing_schema_name,schema_name()) as schema_name,  \n" +
-      "       re.referencing_entity_name, \n" + typeDesc +
+      "       re.referencing_entity_name, \n" + typeDesc + ", \n" +
+      "        case \n" +
+      "          when ao.type_desc like '%TRIGGER%' then\n" +
+      "             case\n" +
+      "                when ObjectProperty(ao.object_id, 'ExecIsUpdateTrigger') = 1 then 'UPDATE'\n" +
+      "                when ObjectProperty(ao.object_id, 'ExecIsDeleteTrigger') = 1 then 'DELETE'\n" +
+      "                when ObjectProperty(ao.object_id, 'ExecIsInsertTrigger') = 1 then 'INSERT'\n" +
+      "             end\n" +
+      "        end as trigger_event,\n" +
+      "        case \n" +
+      "          when ao.type_desc like '%TRIGGER%' then\n" +
+      "             case\n" +
+      "                when ObjectProperty(ao.object_id, 'ExecIsAfterTrigger') = 1 then 'AFTER'\n" +
+      "                when ObjectProperty(ao.object_id, 'ExecIsInsteadOfTrigger') = 1 then 'INSTEAD OF'\n" +
+      "                else 'BEFORE'\n" +
+      "             end \n" +
+      "         end as trigger_type \n" +
       "FROM sys.dm_sql_referencing_entities(?, 'OBJECT') re \n" +
       "  JOIN sys.all_objects ao on ao.object_id = re.referencing_id";
 
@@ -115,11 +153,25 @@ public class SqlServerDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
+    List<DbObject> result = null;
     if (connection.getDbSettings().getBoolProperty("dependency.use.infoschema", false))
     {
-      return retrieveObjects(connection, base, searchUsedByInfSchema, false);
+      result = retrieveObjects(connection, base, searchUsedByInfSchema, false);
     }
-    return retrieveObjects(connection, base, searchUsedByDMView, true);
+    else
+    {
+      result = retrieveObjects(connection, base, searchUsedByDMView, true);
+    }
+
+    if (connection.getMetadata().isTableType(base.getObjectType()))
+    {
+      List<DbObject> defaults = retrieveObjects(connection, base, searchDefaultConstraints, true);
+      result.addAll(defaults);
+
+      List<DbObject> types = retrieveObjects(connection, base, searchColumnTypes, true);
+      result.addAll(types);
+    }
+    return result;
   }
 
   @Override
@@ -194,6 +246,9 @@ public class SqlServerDependencyReader
       }
 
       rs = pstmt.executeQuery();
+
+      boolean hasTriggerDetails = rs.getMetaData().getColumnCount() > 4;
+
       while (rs.next())
       {
         String catalog = rs.getString(1);
@@ -212,7 +267,25 @@ public class SqlServerDependencyReader
         }
         else if (type.equals("TRIGGER"))
         {
-          dbo = new TriggerDefinition(catalog, schema, name);
+          TriggerDefinition trg = new TriggerDefinition(catalog, schema, name);
+          if (hasTriggerDetails)
+          {
+            String event = rs.getString("trigger_event");
+            String trgType = rs.getString("trigger_type");
+            trg.setTriggerEvent(event);
+            trg.setTriggerType(trgType);
+          }
+          dbo = trg;
+        }
+        else if (type.equals("DEFAULT"))
+        {
+          dbo = new NamedDefault(catalog, schema, name);
+        }
+        else if (type.equals("TYPE"))
+        {
+          DomainIdentifier domain = new DomainIdentifier(catalog, schema, name);
+          domain.setObjectType("TYPE");
+          dbo = domain;
         }
         else
         {

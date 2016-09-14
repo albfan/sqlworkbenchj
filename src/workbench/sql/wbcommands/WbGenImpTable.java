@@ -175,7 +175,7 @@ public class WbGenImpTable
       }
 
       StatementRunnerResult createResult = null;
-      if (createTable)
+      if (createTable && isModificationAllowed(currentConnection, VERB))
       {
         boolean doPrompt = cmdLine.getBoolean(ARG_DO_PROMPT, true);
 

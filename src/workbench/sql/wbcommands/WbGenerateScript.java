@@ -81,6 +81,7 @@ public class WbGenerateScript
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
 		cmdLine.addArgument(ARG_EXCLUDE);
 		cmdLine.addArgument(WbSchemaReport.ARG_INCLUDE_PROCS, ArgumentType.BoolSwitch);
@@ -107,6 +108,7 @@ public class WbGenerateScript
     }
 
 		List<String> schemas = null;
+		List<String> catalogs = null;
 		Collection<String> types = null;
 		String names = null;
 
@@ -123,6 +125,7 @@ public class WbGenerateScript
 			}
 			names = cmdLine.getValue(CommonArgs.ARG_OBJECTS);
 			schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
+      catalogs = cmdLine.getListValue(CommonArgs.ARG_CATALOG);
 			types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 		}
 
@@ -150,25 +153,42 @@ public class WbGenerateScript
 			objects.addAll(selector.getTables());
 		}
 
-		if (cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_PROCS, false))
+    boolean treatSchemaAsCatalog = currentConnection.getDbSettings().schemaIsCatalog();
+
+    List<String> procNames = getSearchNames(WbSchemaReport.ARG_INCLUDE_PROCS);
+
+		if (procNames != null)
 		{
 			ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 			for (String schema : schemas)
 			{
 				if (isCancelled) break;
-				List<ProcedureDefinition> procs = reader.getProcedureList(null, schema, null);
-				objects.addAll(procs);
+        String catalogToUse = treatSchemaAsCatalog ? schema : null;
+        String schemaToUse = treatSchemaAsCatalog ? null : schema;
+
+        for (String searchName : procNames)
+        {
+          List<ProcedureDefinition> procs = reader.getProcedureList(catalogToUse, schemaToUse, searchName);
+          objects.addAll(procs);
+        }
 			}
 		}
 
-		if (cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_TRIGGERS, false))
+    List<String> trgNames = getSearchNames(WbSchemaReport.ARG_INCLUDE_TRIGGERS);
+		if (trgNames != null)
 		{
 			TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 			for (String schema : schemas)
 			{
 				if (isCancelled) break;
-				List<TriggerDefinition> triggers = reader.getTriggerList(null, schema, null);
-				objects.addAll(triggers);
+        String catalogToUse = treatSchemaAsCatalog ? schema : null;
+        String schemaToUse = treatSchemaAsCatalog ? null : schema;
+
+        for (String searchName : trgNames)
+        {
+          List<TriggerDefinition> triggers = reader.getTriggerList(catalogToUse, schemaToUse, names);
+          objects.addAll(triggers);
+        }
 			}
 		}
 
@@ -243,6 +263,22 @@ public class WbGenerateScript
 		}
 		return result;
 	}
+
+  private List<String> getSearchNames(String argName)
+  {
+    List<String> names = null;
+
+    String arg = cmdLine.getValue(argName, null);
+    if (StringUtil.isBoolean(arg) && StringUtil.stringToBool(arg))
+    {
+      names = CollectionUtil.arrayList((String)null);
+    }
+    else if (arg != null)
+    {
+      names = StringUtil.stringToList(arg, ",", true, true, false, false);
+    }
+    return names;
+  }
 
 	@Override
 	public void cancel()

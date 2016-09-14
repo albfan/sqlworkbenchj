@@ -53,6 +53,8 @@ public class WbHistory
 
 	public WbHistory()
 	{
+    super();
+    this.isUpdatingCommand = false;
 	}
 
 	@Override
@@ -92,7 +94,7 @@ public class WbHistory
         new String[] {"NR", "SQL"},
         new int[] {Types.INTEGER, Types.VARCHAR},
         new int[] {5, GuiSettings.getMultiLineThreshold()} );
-    
+
 		int index = 1;
 		for (String entry : history)
 		{

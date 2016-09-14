@@ -88,10 +88,11 @@ public class SqlServerColumnEnhancer
     if (SqlServerUtil.isSqlServer2005(conn))
     {
       sql =
-        "select c.name as column_name,  \n" +
-        "       cc.definition,  \n" +
-        "       cc.is_persisted,  \n" +
-        "       t.name as data_type,  \n" +
+        "select c.name as column_name, \n" +
+        "       cc.definition, \n" +
+        "       cc.is_persisted, \n" +
+        "       t.name as data_type, \n" +
+        "       t.is_user_defined, \n" +
         "       c.collation_name \n" +
         "from sys.columns c \n" +
         "  left join sys.types t on c.user_type_id = t.user_type_id \n" +
@@ -102,9 +103,9 @@ public class SqlServerColumnEnhancer
     }
     else
     {
-      // This is for Server 2000
+      // This is for SQL Server 2000
       sql =
-        "select c.name, t.[text], 0 as is_persisted, null as data_type, c.collation \n" +
+        "select c.name, t.[text], 0 as is_persisted, null as data_type, 0 as is_user_defined, c.collation \n" +
         "from sysobjects o with (nolock) \n" +
         "  join syscolumns c with (nolock) on o.id = c.id \n" +
         "  left join syscomments t with (nolock) on t.number = c.colid and t.id = c.id \n" +
@@ -142,7 +143,8 @@ public class SqlServerColumnEnhancer
         String def = StringUtil.trim(rs.getString(2));
         boolean isPersisted = rs.getBoolean(3);
         String dataType = rs.getString(4);
-        String collation = rs.getString(5);
+        boolean isUserType = rs.getBoolean(5);
+        String collation = rs.getString(6);
 
         ColumnIdentifier col = ColumnIdentifier.findColumnInList(columns, colname);
         if (col == null) continue; // shouldn't happen
@@ -166,6 +168,13 @@ public class SqlServerColumnEnhancer
           String fullType = col.getDbmsType() + " COLLATE " + collation;
           col.setDbmsType(fullType);
           col.setCollation(collation);
+        }
+
+        if (isUserType)
+        {
+          col.setDefaultClause(null);
+          col.setDefaultValue(null);
+          col.setDbmsType(dataType);
         }
 
         // the JDBC driver returns geometry and geography as "VARBINAR"

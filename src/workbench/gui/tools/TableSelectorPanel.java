@@ -50,7 +50,7 @@ import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.TableIdentifier;
-import workbench.db.TableNameSorter;
+import workbench.db.ObjectNameSorter;
 import workbench.db.WbConnection;
 
 import workbench.gui.WbSwingUtilities;
@@ -297,7 +297,7 @@ public class TableSelectorPanel
 			tableSelector.removeItemListener(this);
 			List<TableIdentifier> tables = dbConnection.getMetadata().getSelectableObjectsList(null, currentSchema);
 
-			Collections.sort(tables, new TableNameSorter());
+			Collections.sort(tables, new ObjectNameSorter());
 			tableSelector.removeAllItems();
 
 			if (allowNewTable)

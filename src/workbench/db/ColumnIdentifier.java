@@ -216,14 +216,7 @@ public class ColumnIdentifier
    */
   public void setDefaultClause(String clause)
   {
-    if (StringUtil.isBlank(clause))
-    {
-      this.defaultClause = null;
-    }
-    else
-    {
-      this.defaultClause = clause.trim();
-    }
+    this.defaultClause = StringUtil.trimToNull(clause);
   }
 
   /**

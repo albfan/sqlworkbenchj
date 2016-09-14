@@ -1659,6 +1659,11 @@ public class DbSettings
     return getBoolProperty("schemas.supported", true);
   }
 
+  public boolean schemaIsCatalog()
+  {
+    return getBoolProperty("schema.is.catalog", false);
+  }
+
   /**
    * Return true if the driver for this DBMS is known to support PreparedStatement.getParameterMetaData()
    */

@@ -50,7 +50,8 @@ public class WbListSchemas
 
 	public WbListSchemas()
 	{
-		super();
+    super();
+    this.isUpdatingCommand = false;
 	}
 
 	@Override

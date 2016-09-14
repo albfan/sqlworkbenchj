@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.util.Comparator;
 
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -34,17 +35,17 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class TableNameSorter
-  implements Comparator<TableIdentifier>
+public class ObjectNameSorter
+  implements Comparator<DbObject>
 {
   private boolean useExpression = false;
   private boolean useNaturalSort;
 
-  public TableNameSorter()
+  public ObjectNameSorter()
   {
   }
 
-  public TableNameSorter(boolean sortOnExpression)
+  public ObjectNameSorter(boolean sortOnExpression)
   {
     useExpression = sortOnExpression;
   }
@@ -55,7 +56,7 @@ public class TableNameSorter
   }
 
   @Override
-  public int compare(TableIdentifier t1, TableIdentifier t2)
+  public int compare(DbObject t1, DbObject t2)
   {
     if (useExpression)
     {
@@ -63,15 +64,15 @@ public class TableNameSorter
     }
     if (useNaturalSort)
     {
-      return StringUtil.naturalCompare(t1.getRawTableName(), t2.getRawTableName(), true);
+      return StringUtil.naturalCompare(SqlUtil.removeObjectQuotes(t1.getObjectName()), SqlUtil.removeObjectQuotes(t2.getObjectName()), true);
     }
-    return StringUtil.compareStrings(t1.getRawTableName(), t2.getRawTableName(), true);
+    return StringUtil.compareStrings(SqlUtil.removeObjectQuotes(t1.getObjectName()), SqlUtil.removeObjectQuotes(t2.getObjectName()), true);
   }
 
-  private String buildCleanExpression(TableIdentifier tbl)
+  private String buildCleanExpression(DbObject tbl)
   {
-    String catalog = tbl.getRawCatalog();
-    String schema = tbl.getRawSchema();
+    String catalog = SqlUtil.removeObjectQuotes(tbl.getCatalog());
+    String schema = SqlUtil.removeObjectQuotes(tbl.getSchema());
     StringBuilder result = new StringBuilder();
     if (catalog != null)
     {
@@ -83,7 +84,7 @@ public class TableNameSorter
       result.append(schema);
       result.append('.');
     }
-    result.append(tbl.getRawTableName());
+    result.append(SqlUtil.removeObjectQuotes(tbl.getObjectName()));
     return result.toString();
   }
 }

@@ -33,6 +33,7 @@ import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -44,9 +45,18 @@ import static org.junit.Assert.*;
 public class PgObjectScripterTest
   extends WbTestCase
 {
+  private static final String SCHEMA = "scripter_test";
+
   public PgObjectScripterTest()
   {
     super("PgObjectScripterTest");
+  }
+
+  @BeforeClass
+  public static void setUpClass()
+    throws Exception
+  {
+    PostgresTestUtil.initTestCase(SCHEMA);
   }
 
   @AfterClass
@@ -64,12 +74,12 @@ public class PgObjectScripterTest
     assertNotNull(con);
 
     TestUtil.executeScript(con,
-      "create sequence public.code_seq;\n" +
-      "create table public.base_table (code varchar(10) default concat('cd', to_char(nextval('code_seq'), '99999999')), some_data varchar(100));\n" +
-      "alter sequence public.code_seq owned by public.base_table.code;\n" +
+      "create sequence code_seq;\n" +
+      "create table base_table (code varchar(10) default concat('cd', to_char(nextval('code_seq'), '99999999')), some_data varchar(100));\n" +
+      "alter sequence code_seq owned by base_table.code;\n" +
       "commit;\n");
 
-    List<TableIdentifier> objects = con.getMetadata().getObjectList("public", new String[] {"TABLE", "SEQUENCE" });
+    List<TableIdentifier> objects = con.getMetadata().getObjectList(SCHEMA, new String[] {"TABLE", "SEQUENCE" });
     ObjectScripter scripter = new ObjectScripter(objects, con);
     String script = scripter.getScript();
     ScriptParser parser = new ScriptParser(ParserType.Postgres);

@@ -58,6 +58,8 @@ public class WbListIndexes
 
 	public WbListIndexes()
 	{
+    super();
+    this.isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMA, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);

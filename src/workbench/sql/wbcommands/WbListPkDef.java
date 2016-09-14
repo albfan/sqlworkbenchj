@@ -42,6 +42,12 @@ public class WbListPkDef
 
 	public static final String VERB = "WbListPkDef";
 
+  public WbListPkDef()
+  {
+    super();
+    this.isUpdatingCommand = false;
+  }
+
 	@Override
 	public String getVerb()
 	{

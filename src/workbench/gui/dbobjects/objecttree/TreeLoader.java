@@ -39,12 +39,12 @@ import workbench.db.DbSettings;
 import workbench.db.DependencyNode;
 import workbench.db.IndexColumn;
 import workbench.db.IndexDefinition;
+import workbench.db.ObjectNameSorter;
 import workbench.db.ProcedureDefinition;
 import workbench.db.SchemaIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableDependency;
 import workbench.db.TableIdentifier;
-import workbench.db.TableNameSorter;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
@@ -595,7 +595,7 @@ public class TreeLoader
     boolean loaded = true;
     List<TableIdentifier> objects = connection.getMetadata().getObjectList(null, catalog, schema, new String[] { typeNode.getName() });
 
-    TableNameSorter sorter = new TableNameSorter();
+    ObjectNameSorter sorter = new ObjectNameSorter();
     sorter.setUseNaturalSort(DbTreeSettings.useNaturalSort());
     Collections.sort(objects, sorter);
 
@@ -875,6 +875,10 @@ public class TreeLoader
     {
       objects = dependencyLoader.getUsedObjects(connection, dbo);
     }
+
+    ObjectNameSorter sorter = new ObjectNameSorter();
+    sorter.setUseNaturalSort(DbTreeSettings.useNaturalSort());
+    Collections.sort(objects, sorter);
 
     for (DbObject obj : objects)
     {

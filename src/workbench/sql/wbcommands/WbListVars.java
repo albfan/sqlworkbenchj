@@ -45,6 +45,12 @@ public class WbListVars extends SqlCommand
 	public static final String VERB = "WbVarList";
 	public static final String VERB_ALTERNATE = "WbListVars";
 
+  public WbListVars()
+  {
+    super();
+    this.isUpdatingCommand = false;
+  }
+
 	@Override
 	public String getVerb()
 	{

@@ -1092,6 +1092,13 @@ public class StringUtil
     }
     return input;
   }
+
+  public static boolean isBoolean(String value)
+  {
+    if (value == null) return false;
+    return "false".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+  }
+  
   public static boolean stringToBool(String value)
   {
     if (value == null) return false;

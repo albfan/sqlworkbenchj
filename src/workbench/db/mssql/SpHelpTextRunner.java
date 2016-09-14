@@ -24,13 +24,11 @@
 package workbench.db.mssql;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.NoConfigException;
 import workbench.db.WbConnection;
 
 import workbench.util.SqlUtil;
@@ -44,7 +42,6 @@ public class SpHelpTextRunner
 {
 
   public CharSequence getSource(WbConnection connection, String dbName, String schemaName, String objectName)
-    throws NoConfigException
   {
     String currentDb = connection.getCurrentCatalog();
     CharSequence sql = null;
@@ -95,9 +92,9 @@ public class SpHelpTextRunner
         sql = source;
       }
     }
-    catch (SQLException ex)
+    catch (Exception ex)
     {
-      LogMgr.logError("SpHelpTextRunner.getSource()", "Could not retrieve view definition using: " + query, ex);
+      LogMgr.logError("SpHelpTextRunner.getSource()", "Could not retrieve object source using:\n" + query, ex);
       sql = ex.getMessage();
     }
     finally

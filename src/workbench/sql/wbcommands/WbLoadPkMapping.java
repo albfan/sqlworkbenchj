@@ -51,7 +51,8 @@ public class WbLoadPkMapping
 
 	public WbLoadPkMapping()
 	{
-		super();
+    super();
+    this.isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 	}
@@ -79,7 +80,7 @@ public class WbLoadPkMapping
     {
       return result;
     }
-    
+
 		String file = cmdLine.getValue(CommonArgs.ARG_FILE);
 		if (file == null)
 		{
