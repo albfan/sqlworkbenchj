@@ -31,6 +31,7 @@ import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.CatalogChanger;
 import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -65,6 +66,8 @@ public class ObjectSourceSearcher
   private boolean isRunning;
   private int numSearched;
   private Set<String> searchedObjects;
+  private String catalog;
+  private CatalogChanger catalogChanger = new CatalogChanger();
 
   public ObjectSourceSearcher(WbConnection con)
   {
@@ -77,6 +80,11 @@ public class ObjectSourceSearcher
       types.add(con.getMetadata().getMViewTypeName().toLowerCase());
     }
     searchedObjects = CollectionUtil.caseInsensitiveSet();
+  }
+
+  public void setCatalog(String catalogToSearch)
+  {
+    catalog = catalogToSearch;
   }
 
   public int getNumberOfObjectsSearched()
@@ -165,8 +173,15 @@ public class ObjectSourceSearcher
     cancelSearch = false;
     isRunning = true;
     numSearched = 0;
+
+    String currentCatalog = connection.getMetadata().getCurrentCatalog();
+    boolean catalogChanged = false;
     try
     {
+      if (connection.getDbSettings().supportsCatalogs())
+      {
+        catalogChanged = changeCatalog(catalog);
+      }
       searchResult = CollectionUtil.sizedArrayList(50);
 
       if (CollectionUtil.isEmpty(schemas))
@@ -221,8 +236,27 @@ public class ObjectSourceSearcher
     finally
     {
       isRunning = false;
+      if (catalogChanged)
+      {
+        changeCatalog(currentCatalog);
+      }
     }
     return searchResult;
+  }
+
+  private boolean changeCatalog(String newCatalog)
+  {
+    if (newCatalog == null) return false;
+
+    try
+    {
+      return catalogChanger.setCurrentCatalog(connection, newCatalog);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ObjectSourceSearcher.changeCatalog()", "Could not change catalot to: " + newCatalog, ex);
+    }
+    return false;
   }
 
   private void searchList(List<DbObject> toSearch, List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)

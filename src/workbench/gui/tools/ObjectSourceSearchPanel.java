@@ -30,6 +30,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -132,6 +134,36 @@ public class ObjectSourceSearchPanel
 		TextComponentMouseListener.addListener(this.objectNames, this.searchValues, this.objectTypes, this.schemaNames);
 	}
 
+  private void checkCatalogDD()
+  {
+    boolean showCat = false;
+    if (connection != null)
+    {
+      showCat = connection.getDbSettings().supportsCatalogs() && connection.getDbSettings().supportsSchemas();
+      String catalogTerm = StringUtil.capitalize(connection.getMetadata().getCatalogTerm());
+      catalogLabel.setText(catalogTerm);
+      List<String> catalogs = connection.getMetadata().getCatalogs();
+      ComboBoxModel model = new DefaultComboBoxModel(catalogs.toArray());
+      catalogDD.setModel(model);
+      String currentCatalog = connection.getCurrentCatalog();
+      if (currentCatalog != null)
+      {
+        catalogDD.setSelectedItem(currentCatalog);
+      }
+    }
+    catalogLabel.setVisible(showCat);
+    catalogDD.setVisible(showCat);
+  }
+
+  private String getSelectedCatalog()
+  {
+    if (catalogDD.isVisible())
+    {
+      return (String)catalogDD.getSelectedItem();
+    }
+    return null;
+  }
+
 	protected void clearSearch()
 	{
 		objectSource.reset();
@@ -152,6 +184,7 @@ public class ObjectSourceSearchPanel
 		searcher.setSchemasToSearch(schemas);
 		searcher.setNamesToSearch(names);
 		searcher.setTypesToSearch(types);
+    searcher.setCatalog(getSelectedCatalog());
 
 		final List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
 
@@ -332,6 +365,7 @@ public class ObjectSourceSearchPanel
     {
       statusbar.setText("");
       checkButtons();
+      checkCatalogDD();
       updateWindowTitle();
     });
 	}
@@ -524,7 +558,7 @@ public class ObjectSourceSearchPanel
 	private void selectSchemas()
 	{
 		if (this.connection == null) return;
-		Collection<String> schemas = connection.getMetadata().getSchemas();
+		Collection<String> schemas = connection.getMetadata().getSchemas(null, getSelectedCatalog());
 		List<String> selected = StringUtil.stringToList(schemaNames.getText(), ",");
 		String result = selectFromList(schemas, selected);
 		if (result != null)
@@ -623,7 +657,7 @@ public class ObjectSourceSearchPanel
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
 		final String name = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_NAME);
     final String type = (String)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_OBJECT_TYPE);
-    
+
 		EventQueue.invokeLater(() ->
     {
       objectSource.setText(source == null ? "" : source.toString(), name, type);
@@ -729,6 +763,8 @@ public class ObjectSourceSearchPanel
     java.awt.GridBagConstraints gridBagConstraints;
 
     topPanel = new javax.swing.JPanel();
+    catalogLabel = new javax.swing.JLabel();
+    catalogDD = new javax.swing.JComboBox<>();
     schemaLabel = new javax.swing.JLabel();
     schemaNames = new javax.swing.JTextField();
     nameLabel = new javax.swing.JLabel();
@@ -757,11 +793,28 @@ public class ObjectSourceSearchPanel
 
     topPanel.setLayout(new java.awt.GridBagLayout());
 
+    catalogLabel.setText("Catalog");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 7, 0);
+    topPanel.add(catalogLabel, gridBagConstraints);
+
+    catalogDD.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 5;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 7, 0);
+    topPanel.add(catalogDD, gridBagConstraints);
+
     schemaLabel.setText(ResourceMgr.getString("LblSchemas")); // NOI18N
     schemaLabel.setToolTipText(ResourceMgr.getString("d_LblSchemas")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     topPanel.add(schemaLabel, gridBagConstraints);
@@ -769,7 +822,7 @@ public class ObjectSourceSearchPanel
     schemaNames.setToolTipText(ResourceMgr.getString("d_LblSchemas")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
@@ -779,7 +832,7 @@ public class ObjectSourceSearchPanel
     nameLabel.setToolTipText(ResourceMgr.getString("d_LblObjectNames")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 13, 0, 0);
@@ -788,7 +841,7 @@ public class ObjectSourceSearchPanel
     objectNames.setToolTipText(ResourceMgr.getString("d_LblObjectNames")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.3;
@@ -798,18 +851,17 @@ public class ObjectSourceSearchPanel
     valueLabel.setText(ResourceMgr.getString("LblSearchCriteria")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
     topPanel.add(valueLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.insets = new java.awt.Insets(10, 4, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     topPanel.add(searchValues, gridBagConstraints);
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -819,7 +871,8 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
     jPanel1.add(matchAll, gridBagConstraints);
 
@@ -828,7 +881,8 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
     jPanel1.add(ignoreCase, gridBagConstraints);
 
     regex.setText(ResourceMgr.getString("LblSearchRegEx")); // NOI18N
@@ -836,25 +890,26 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
     jPanel1.add(regex, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(10, 8, 5, 0);
     topPanel.add(jPanel1, gridBagConstraints);
 
     typeLabel.setText(ResourceMgr.getString("LblTypes")); // NOI18N
     typeLabel.setToolTipText(ResourceMgr.getString("d_LblTypes")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
@@ -863,8 +918,9 @@ public class ObjectSourceSearchPanel
     objectTypes.setToolTipText(ResourceMgr.getString("d_LblTypes")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.3;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     topPanel.add(objectTypes, gridBagConstraints);
@@ -880,8 +936,9 @@ public class ObjectSourceSearchPanel
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 0);
     topPanel.add(selectSchemasButton, gridBagConstraints);
 
     selectTypesButton.setText("...");
@@ -895,9 +952,9 @@ public class ObjectSourceSearchPanel
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(0, 8, 0, 5);
     topPanel.add(selectTypesButton, gridBagConstraints);
 
     selectConnection.setText(ResourceMgr.getString("LblSelectConnection")); // NOI18N
@@ -910,9 +967,10 @@ public class ObjectSourceSearchPanel
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 3, 0, 5);
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 5);
     topPanel.add(selectConnection, gridBagConstraints);
 
     add(topPanel, java.awt.BorderLayout.NORTH);
@@ -1031,6 +1089,8 @@ public class ObjectSourceSearchPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel buttonPanel;
+  private javax.swing.JComboBox<String> catalogDD;
+  private javax.swing.JLabel catalogLabel;
   private javax.swing.JButton closeButton;
   private javax.swing.JPanel footerPanel;
   private javax.swing.JCheckBox ignoreCase;

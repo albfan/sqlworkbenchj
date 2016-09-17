@@ -69,6 +69,7 @@ public class WbGrepSource
 		cmdLine.addArgument(CommonArgs.ARG_TYPES, ArgumentType.ObjectTypeArgument);
 		cmdLine.addArgument(CommonArgs.ARG_SCHEMAS, ArgumentType.SchemaArgument);
 		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(PARAM_SEARCH_EXP);
 		cmdLine.addArgument(PARAM_USE_REGEX);
 		cmdLine.addArgument(PARAM_MATCHALL, ArgumentType.BoolArgument);
@@ -93,7 +94,7 @@ public class WbGrepSource
     {
       return result;
     }
-    
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrSrcSearchWrongParameters"));
@@ -121,6 +122,7 @@ public class WbGrepSource
 		searcher.setSchemasToSearch(schemas);
 		searcher.setTypesToSearch(types);
 		searcher.setNamesToSearch(names);
+    searcher.setCatalog(cmdLine.getValue(CommonArgs.ARG_CATALOG));
 
 		try
 		{
