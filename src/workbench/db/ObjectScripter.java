@@ -75,7 +75,8 @@ public class ObjectScripter
   private boolean cancel;
   private String nl = Settings.getInstance().getInternalEditorLineEnding();
   private Collection<String> commitTypes;
-  private boolean appendCommit;
+  private boolean commitNeeded;
+  private boolean includeCommitIfNeeded = true;
   private boolean useSeparator;
   private boolean includeDrop;
   private boolean includeGrants = true;
@@ -153,6 +154,11 @@ public class ObjectScripter
         break;
       }
     }
+  }
+
+  public void setIncludeCommit(boolean flag)
+  {
+    includeCommitIfNeeded = flag;
   }
 
   @Override
@@ -279,7 +285,8 @@ public class ObjectScripter
         DbExplorerSettings.endTransaction(dbConnection);
       }
     }
-    if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
+
+    if (includeCommitIfNeeded && commitNeeded && this.dbConnection.getDbSettings().ddlNeedsCommit())
     {
       output.append("\nCOMMIT");
       DelimiterDefinition delim = getDelimiter();
@@ -446,7 +453,7 @@ public class ObjectScripter
         // so it makes no sense to append a commit
         if (isCompleteProcedure)
         {
-          appendCommit = appendCommit || commitTypes.contains(type.toLowerCase());
+          commitNeeded = commitNeeded || commitTypes.contains(type.toLowerCase());
         }
       }
       catch (Exception e)

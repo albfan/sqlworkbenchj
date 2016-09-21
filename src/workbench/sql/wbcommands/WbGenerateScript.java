@@ -69,6 +69,8 @@ public class WbGenerateScript
 	public static final String SHORT_VERB = "WbGenScript";
 	public static final String ARG_EXCLUDE = "exclude";
 	public static final String ARG_INCLUDE_FK = "includeForeignkeys";
+  public static final String ARG_INCLUDE_DROP = "includeDrop";
+	public static final String ARG_INCLUDE_COMMIT = "includeCommit";
   public static final String ARG_USE_SEPARATOR = "useSeparator";
 
 	private ObjectScripter scripter;
@@ -90,7 +92,8 @@ public class WbGenerateScript
 		cmdLine.addArgument(ARG_USE_SEPARATOR, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_INCLUDE_FK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
-		cmdLine.addArgument("includeDrop", ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_INCLUDE_DROP, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -108,7 +111,7 @@ public class WbGenerateScript
     }
 
 		List<String> schemas = null;
-		List<String> catalogs = null;
+		String catalog = null;
 		Collection<String> types = null;
 		String names = null;
 
@@ -125,7 +128,7 @@ public class WbGenerateScript
 			}
 			names = cmdLine.getValue(CommonArgs.ARG_OBJECTS);
 			schemas = cmdLine.getListValue(CommonArgs.ARG_SCHEMAS);
-      catalogs = cmdLine.getListValue(CommonArgs.ARG_CATALOG);
+      catalog = cmdLine.getValue(CommonArgs.ARG_CATALOG);
 			types = cmdLine.getListValue(CommonArgs.ARG_TYPES);
 		}
 
@@ -163,7 +166,7 @@ public class WbGenerateScript
 			for (String schema : schemas)
 			{
 				if (isCancelled) break;
-        String catalogToUse = treatSchemaAsCatalog ? schema : null;
+        String catalogToUse = treatSchemaAsCatalog ? schema : catalog;
         String schemaToUse = treatSchemaAsCatalog ? null : schema;
 
         for (String searchName : procNames)
@@ -181,12 +184,12 @@ public class WbGenerateScript
 			for (String schema : schemas)
 			{
 				if (isCancelled) break;
-        String catalogToUse = treatSchemaAsCatalog ? schema : null;
+        String catalogToUse = treatSchemaAsCatalog ? schema : catalog;
         String schemaToUse = treatSchemaAsCatalog ? null : schema;
 
         for (String searchName : trgNames)
         {
-          List<TriggerDefinition> triggers = reader.getTriggerList(catalogToUse, schemaToUse, names);
+          List<TriggerDefinition> triggers = reader.getTriggerList(catalogToUse, schemaToUse, searchName);
           objects.addAll(triggers);
         }
 			}
@@ -202,9 +205,10 @@ public class WbGenerateScript
 
 		scripter = new ObjectScripter(objects, currentConnection);
 		scripter.setUseSeparator(cmdLine.getBoolean(ARG_USE_SEPARATOR, DbExplorerSettings.getGenerateScriptSeparator()));
-		scripter.setIncludeDrop(cmdLine.getBoolean("includeDrop", false));
+		scripter.setIncludeDrop(cmdLine.getBoolean(ARG_INCLUDE_DROP, false));
 		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, true));
     scripter.setIncludeForeignKeys(cmdLine.getBoolean(ARG_INCLUDE_FK, true));
+    scripter.setIncludeCommit(cmdLine.getBoolean(ARG_INCLUDE_COMMIT, true));
 
 		if (this.rowMonitor != null)
 		{
@@ -271,7 +275,7 @@ public class WbGenerateScript
     String arg = cmdLine.getValue(argName, null);
     if (StringUtil.isBoolean(arg) && StringUtil.stringToBool(arg))
     {
-      names = CollectionUtil.arrayList((String)null);
+      names = CollectionUtil.arrayList("*");
     }
     else if (arg != null)
     {
