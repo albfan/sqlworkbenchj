@@ -95,7 +95,7 @@ public class WbSelectBlob
 		SQLToken token  = lexer.getNextToken(false, false);
 		if (!token.getContents().equals("WBSELECTBLOB"))
 		{
-			result.addMessage(ResourceMgr.getString("ErrSelectBlobSyntax"));
+			result.addMessageByKey("ErrSelectBlobSyntax");
 			result.setFailure();
 			return result;
 		}
@@ -112,7 +112,7 @@ public class WbSelectBlob
 
 		if (token != null && !token.getContents().equals("INTO"))
 		{
-			result.addMessage(ResourceMgr.getString("ErrSelectBlobSyntax"));
+			result.addMessageByKey("ErrSelectBlobSyntax");
 			result.setFailure();
 			return result;
 		}

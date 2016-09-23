@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.AppArguments;
-import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
@@ -135,8 +134,7 @@ public class WbDefineDriver
 			WbFile f = new WbFile(file);
 			if (!f.exists())
 			{
-				String msg = ResourceMgr.getFormattedString("ErrFileNotFound", f.getFullPath());
-				result.addMessage(msg);
+				result.addMessageByKey("ErrFileNotFound", f.getFullPath());
 				result.setFailure();
 			}
 		}
@@ -150,11 +148,11 @@ public class WbDefineDriver
 
 		if (driverExists)
 		{
-			result.addMessage(ResourceMgr.getFormattedString("MsgDriverUpdated", name));
+			result.addMessageByKey("MsgDriverUpdated", name);
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", name));
+			result.addMessageByKey("MsgDriverAdded", name);
 		}
 		result.setSuccess();
 		return result;

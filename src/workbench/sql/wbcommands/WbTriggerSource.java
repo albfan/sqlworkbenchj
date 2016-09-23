@@ -25,8 +25,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -82,7 +80,7 @@ public class WbTriggerSource
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrTrgNotFound", object.getObjectExpression(currentConnection)));
+			result.addMessageByKey("ErrTrgNotFound", object.getObjectExpression(currentConnection));
 			result.setFailure();
 		}
 

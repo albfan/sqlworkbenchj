@@ -132,7 +132,7 @@ public class SetCommand
 					int rows = Integer.parseInt(param);
 					this.runner.setMaxRows(rows);
 					result.setSuccess();
-					result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, rows));
+					result.addMessageByKey("MsgSetSuccess", command, rows);
 				}
 				catch (Exception e)
 				{
@@ -148,7 +148,7 @@ public class SetCommand
 					int timeout = Integer.parseInt(param);
 					this.runner.setQueryTimeout(timeout);
 					result.setSuccess();
-					result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, timeout));
+					result.addMessageByKey("MsgSetSuccess", command, timeout);
 				}
 				catch (Exception e)
 				{
@@ -194,8 +194,7 @@ public class SetCommand
 					result = new StatementRunnerResult();
 					if (Settings.getInstance().getShowIgnoredWarning())
 					{
-						String msg = ResourceMgr.getFormattedString("MsgCommandIgnored", getParsingUtil().getSqlVerb(userSql));
-						result.addMessage(msg);
+						result.addMessageByKey("MsgCommandIgnored", getParsingUtil().getSqlVerb(userSql));
 					}
 					result.setSuccess();
 				}
@@ -236,7 +235,7 @@ public class SetCommand
 			if (schemaChange)
 			{
 				String newSchema = handleSchemaChange(newSchemaArg, oldSchema);
-				result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", newSchema));
+				result.addMessageByKey("MsgSchemaChanged", newSchema);
 			}
 			else
 			{
@@ -299,8 +298,7 @@ public class SetCommand
 			}
 			runner.setSessionProperty(FirebirdStatementHook.SESS_ATTR_SHOWPLAN, Boolean.toString(on));
 			String flagKey = on ? "TxtOn" : "TxtOff";
-			String msg = ResourceMgr.getFormattedString("MsgFbExecPlan", ResourceMgr.getString(flagKey));
-			result.addMessage(msg);
+			result.addMessageByKey("MsgFbExecPlan", ResourceMgr.getString(flagKey));
 			return true;
 		}
 		else if (token.getText().equalsIgnoreCase("planonly"))

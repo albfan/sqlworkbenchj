@@ -335,7 +335,7 @@ public class SqlCommand
       }
       if (!hideLabel)
       {
-        result.addMessage(ResourceMgr.getString("TxtServerOutput"));
+        result.addMessageByKey("TxtServerOutput");
       }
       result.addMessage(s);
     }
@@ -363,7 +363,7 @@ public class SqlCommand
     // server does not already start with "Warning"
     if (addLabel && warn.length() > 7 && !warn.subSequence(0, 7).toString().equalsIgnoreCase("Warning"))
     {
-      result.addMessage(ResourceMgr.getString("TxtWarnings"));
+      result.addMessageByKey("TxtWarnings");
     }
     result.addWarning(warn);
     result.addMessageNewLine();

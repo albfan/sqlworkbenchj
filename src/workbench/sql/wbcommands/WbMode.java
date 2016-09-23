@@ -25,8 +25,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ConnectionProfile;
 
 import workbench.sql.SqlCommand;
@@ -139,7 +137,7 @@ public class WbMode
 
 		if (result.isSuccess())
 		{
-			result.addMessage(ResourceMgr.getFormattedString("MsgModeSession", currentConnection.isSessionReadOnly(), currentConnection.confirmUpdatesInSession()));
+			result.addMessageByKey("MsgModeSession", currentConnection.isSessionReadOnly(), currentConnection.confirmUpdatesInSession());
 		}
 		else
 		{

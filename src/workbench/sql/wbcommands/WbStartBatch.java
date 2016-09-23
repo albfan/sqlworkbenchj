@@ -55,13 +55,13 @@ public class WbStartBatch
 		{
 			this.batch = null;
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrJdbcBatchUpdateNotSupported"));
+			result.addMessageByKey("ErrJdbcBatchUpdateNotSupported");
 		}
 		else
 		{
 			this.batch = currentConnection.createStatement();
 			result.setSuccess();
-			result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingStarted"));
+			result.addMessageByKey("MsgJdbcBatchProcessingStarted");
 		}
 		return result;
 	}
@@ -80,17 +80,17 @@ public class WbStartBatch
 		if (this.batch == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrJdbcBatchUpdateNotSupported"));
+			result.addMessageByKey("ErrJdbcBatchUpdateNotSupported");
 			return result;
 		}
 		long totalRows = 0;
 		result.setSuccess();
-		result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingEnded"));
+		result.addMessageByKey("MsgJdbcBatchProcessingEnded");
 
 		int[] rows = this.batch.executeBatch();
 		if (rows == null || rows.length == 0)
 		{
-			result.addMessage(ResourceMgr.getString("MsgJdbcBatchStatementNoInfo"));
+			result.addMessageByKey("MsgJdbcBatchStatementNoInfo");
 		}
 		else
 		{

@@ -23,9 +23,8 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.IOException;
 import java.sql.SQLException;
-
-import workbench.resource.ResourceMgr;
 
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -35,8 +34,11 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * Display the source code for a procedure.
@@ -48,6 +50,7 @@ public class WbProcSource
 	extends SqlCommand
 {
 	public static final String VERB = "WbProcSource";
+  public static final String ARG_PROCNAME = "procedure";
 
 	public WbProcSource()
 	{
@@ -55,7 +58,7 @@ public class WbProcSource
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(CommonArgs.ARG_OBJECTS, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_PROCNAME);
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -73,7 +76,28 @@ public class WbProcSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		TableIdentifier object = new TableIdentifier(args, currentConnection);
+    cmdLine.parse(args);
+    String procName = null;
+    WbFile outputfile = null;
+    String encoding = null;
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    if (cmdLine.hasArguments())
+    {
+      procName = cmdLine.getValue(ARG_PROCNAME);
+      outputfile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
+      encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
+    }
+    else
+    {
+      procName = args;
+    }
+
+		TableIdentifier object = new TableIdentifier(procName, currentConnection);
 		object.adjustCase(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
@@ -82,27 +106,43 @@ public class WbProcSource
 		if (def != null)
 		{
 			CharSequence source = def.getSource(currentConnection);
-			if (def.isPackageProcedure())
-			{
-        CharSequence procSrc = reader.getPackageProcedureSource(def);
-				if (procSrc != null)
-				{
-					String msg = "Package: " + def.getPackageName();
-					result.addMessage(msg);
-					result.addMessage(StringUtil.padRight("-", msg.length(), '-') + "\n");
-					result.addMessage(procSrc);
-					result.addMessageNewLine();
-				}
-				else
-				{
-					result.addMessage(source);
-				}
-			}
-			else
-			{
-				result.addMessage(source);
-			}
-			result.setSuccess();
+      if (outputfile != null && source != null)
+      {
+        try
+        {
+          FileUtil.writeString(outputfile, source.toString(), encoding, false);
+          result.addMessageByKey("MsgScriptWritten", outputfile.getFullPath());
+          result.setSuccess();
+        }
+        catch (IOException io)
+        {
+          result.addErrorMessage(io.getLocalizedMessage());
+        }
+      }
+      else
+      {
+        if (def.isPackageProcedure())
+        {
+          CharSequence procSrc = reader.getPackageProcedureSource(def);
+          if (procSrc != null)
+          {
+            String msg = "Package: " + def.getPackageName();
+            result.addMessage(msg);
+            result.addMessage(StringUtil.padRight("-", msg.length(), '-') + "\n");
+            result.addMessage(procSrc);
+            result.addMessageNewLine();
+          }
+          else
+          {
+            result.addMessage(source);
+          }
+        }
+        else
+        {
+          result.addMessage(source);
+        }
+        result.setSuccess();
+      }
 		}
 		else
 		{
@@ -115,7 +155,7 @@ public class WbProcSource
         result.addMessageNewLine();
         return result;
       }
-			result.addMessage(ResourceMgr.getFormattedString("ErrProcNotFound", args));
+			result.addMessageByKey("ErrProcNotFound", args);
 			result.setFailure();
 		}
 		return result;

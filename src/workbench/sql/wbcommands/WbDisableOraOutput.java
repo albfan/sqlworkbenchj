@@ -26,7 +26,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -70,7 +69,7 @@ public class WbDisableOraOutput extends SqlCommand
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
+			result.addMessageByKey("MsgDbmsOutputDisabled");
 		}
 		return result;
 	}

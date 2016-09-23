@@ -25,17 +25,12 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
-
 import workbench.gui.profiles.ProfileKey;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -115,7 +110,7 @@ public class WbStoreProfile
 
 		ConnectionMgr.getInstance().addProfile(profile);
 		ConnectionMgr.getInstance().saveProfiles();
-		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", key.toString()));
+		result.addMessageByKey("MsgProfileAdded", key.toString());
 
 		DbDriver drv = ConnectionMgr.getInstance().findDriver(profile.getDriverclass());
 
@@ -130,7 +125,7 @@ public class WbStoreProfile
 			profile.setDriverName(drvName);
 			ConnectionMgr.getInstance().getDrivers().add(newDrv);
 			ConnectionMgr.getInstance().saveDrivers();
-			result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", drvName));
+			result.addMessageByKey("MsgDriverAdded", drvName);
 		}
 
 		result.setSuccess();

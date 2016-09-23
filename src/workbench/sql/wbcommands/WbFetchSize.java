@@ -77,7 +77,7 @@ public class WbFetchSize
       {
         currentValue = Integer.toString(size);
       }
-      result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeCurrent", currentValue));
+      result.addMessageByKey("MsgFetchSizeCurrent", currentValue);
     }
 		return result;
 	}
@@ -97,7 +97,7 @@ public class WbFetchSize
 		}
 
 		connection.setFetchSize(size);
-		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", Integer.toString(connection.getFetchSize())));
+		result.addMessageByKey("MsgFetchSizeChanged", Integer.toString(connection.getFetchSize()));
   }
 
 	@Override

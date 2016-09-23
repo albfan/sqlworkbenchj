@@ -36,22 +36,16 @@ import java.util.Map;
 
 import workbench.WbManager;
 import workbench.console.ConsolePrompter;
-import workbench.interfaces.StatementParameterPrompter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleUtils;
-
 import workbench.gui.preparedstatement.ParameterEditor;
-
-import workbench.storage.DataStore;
-
+import workbench.interfaces.StatementParameterPrompter;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.lexer.SQLLexer;
@@ -59,7 +53,7 @@ import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.preparedstatement.ParameterDefinition;
 import workbench.sql.preparedstatement.StatementParameters;
-
+import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlParsingUtil;
@@ -310,7 +304,7 @@ public class WbCall
       // SQL Server seems to return results from a stored procedure even if an error occurred.
       processResults(result, false);
 			LogMgr.logError("WbCall.execute()", "Error calling stored procedure using: " + sqlUsed, e);
-			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
+			result.addMessageByKey("MsgExecuteError");
 			result.addErrorMessage(ExceptionUtil.getDisplay(e));
 		}
 		finally
@@ -328,7 +322,7 @@ public class WbCall
 			{
 				procname = t.getText();
 			}
-			result.addMessage(ResourceMgr.getFormattedString("MsgKnownStatementOK", procname));
+			result.addMessageByKey("MsgKnownStatementOK", procname);
 		}
 
 		return result;

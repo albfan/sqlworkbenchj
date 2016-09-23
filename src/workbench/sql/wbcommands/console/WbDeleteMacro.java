@@ -25,8 +25,6 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.macros.MacroDefinition;
@@ -90,7 +88,7 @@ public class WbDeleteMacro
 		if (StringUtil.isBlank(macroName))
 		{
 			result.setFailure();
-			result.addMessage("ErrMacroNameReq");
+			result.addMessageByKey("ErrMacroNameReq");
 			return result;
 		}
 
@@ -102,14 +100,12 @@ public class WbDeleteMacro
 			storage.removeMacro(macro);
 
 			MacroManager.getInstance().save();
-			String msg = ResourceMgr.getFormattedString("MsgMacroDeleted", macro.getName());
-			result.addMessage(msg);
+			result.addMessageByKey("MsgMacroDeleted", macro.getName());
 			result.setSuccess();
 		}
 		else
 		{
-			String msg = ResourceMgr.getFormattedString("MsgMacroNotFound", macroName);
-			result.addMessage(msg);
+			result.addMessageByKey("MsgMacroNotFound", macroName);
 			result.setFailure();
 		}
 

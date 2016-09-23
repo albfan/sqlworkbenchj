@@ -248,7 +248,7 @@ public class WbGenerateScript
 			{
 				writer = EncodingUtil.createWriter(output, encoding, false);
 				writer.write(script.toString());
-				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getAbsolutePath()));
+				result.addMessageByKey("MsgScriptWritten", output.getAbsolutePath());
 			}
 			catch (IOException io)
 			{

@@ -27,17 +27,13 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.AppArguments;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
-
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ConnectionDescriptor;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -161,7 +157,7 @@ public class WbCreateProfile
 		ConnectionMgr.getInstance().saveProfiles();
 		ConnectionMgr.getInstance().saveDrivers();
 
-		result.addMessage(ResourceMgr.getFormattedString("MsgProfileAdded", profile.getKey().toString()));
+		result.addMessageByKey("MsgProfileAdded", profile.getKey().toString());
 		return result;
 	}
 

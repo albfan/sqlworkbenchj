@@ -40,12 +40,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.postgres.PostgresUtil;
-
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -172,6 +170,8 @@ public class DbDriver
     WbFile f = buildFile(libraryList.get(0));
     String jarDir = f.getAbsoluteFile().getParent();
 
+    // This is the default layout when installing the driver
+    // The driver's directory will be added anyway
     WbFile authDir = null;
     if (is64Bit)
     {
@@ -192,40 +192,36 @@ public class DbDriver
 
   private void addToLibraryPath()
   {
-    if (CollectionUtil.isEmpty(libraryList)) return;
+    if (libraryList == null) return;
 
-    String addPath = null;
+    // By putting the directories into a Set, we make sure each directory is only added once
+    final Set<String> paths = new TreeSet<>();
 
     if (driverClass.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver"))
     {
-      addPath = findAuthDLLDir();
+      String authDll = findAuthDLLDir();
+      if (StringUtil.isNonEmpty(authDll))
+      {
+        paths.add(authDll);
+      }
     }
 
-    if (addPath == null)
+    for (String file : libraryList)
     {
-      // By putting the directories into a Set, we make sure each directory is only added once
-      Set<String> paths = new TreeSet<>();
+      WbFile f = buildFile(file);
+      File dir = f.getParentFile().getAbsoluteFile();
 
-      for (String file : libraryList)
+      // only add the directory if it isn't already on the path
+      if (FileUtil.isDirectoryOnLibraryPath(dir) == false)
       {
-        WbFile f = buildFile(file);
-        File dir = f.getParentFile().getAbsoluteFile();
-
-        // only add the directory if it isn't already on the path
-        if (FileUtil.isDirectoryOnLibraryPath(dir) == false)
-        {
-          paths.add(dir.getAbsolutePath());
-        }
+        paths.add(dir.getAbsolutePath());
       }
+    }
 
-      if (CollectionUtil.isNonEmpty(paths))
-      {
-        addPath = "";
-        for (String path : paths)
-        {
-          addPath += path + File.pathSeparator;
-        }
-      }
+    String addPath = "";
+    for (String path : paths)
+    {
+      addPath += path + File.pathSeparator;
     }
 
     if (StringUtil.isBlank(addPath)) return;
@@ -526,7 +522,7 @@ public class DbDriver
         {
           PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
         }
-        
+
         if (url.startsWith("jdbc:sap"))
         {
           conn.setClientInfo("APPLICATION", StringUtil.coalesce(getAppName(), ResourceMgr.TXT_PRODUCT_NAME));

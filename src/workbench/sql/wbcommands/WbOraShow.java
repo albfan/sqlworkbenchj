@@ -347,7 +347,7 @@ public class WbOraShow
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("TxtOraNoErr"));
+			result.addMessageByKey("TxtOraNoErr");
 		}
 		return result;
 	}

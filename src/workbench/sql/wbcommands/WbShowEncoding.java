@@ -81,14 +81,14 @@ public class WbShowEncoding
 
     if (cmdLine.getBoolean(ARG_LIST))
     {
-      result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
-      result.addMessage("");
+      result.addMessageByKey("MsgAvailableEncodings");
+      result.addMessageNewLine();
       String[] encodings = EncodingUtil.getEncodings();
       for (String encoding : encodings)
       {
         result.addMessage(encoding);
       }
-      result.addMessage("");
+      result.addMessageNewLine();
     }
     else if (file != null)
     {

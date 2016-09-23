@@ -28,7 +28,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.sql.SqlCommand;
@@ -133,7 +132,7 @@ public class SelectCommand
 
 			if (this.isCancelled)
 			{
-				result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+				result.addMessageByKey("MsgStatementCancelled");
 				result.setFailure();
 			}
 			else
@@ -142,7 +141,7 @@ public class SelectCommand
 
 				if (isCancelled)
 				{
-					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
+					result.addMessageByKey("MsgStatementCancelled");
 				}
 				else
 				{

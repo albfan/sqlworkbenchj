@@ -94,7 +94,7 @@ public class WbListIndexes
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			result.addMessage(ResourceMgr.getString("ErrListIdxWrongArgs"));
+			result.addMessageByKey("ErrListIdxWrongArgs");
 			result.setFailure();
 			return result;
 		}
@@ -128,7 +128,7 @@ public class WbListIndexes
 		{
       if (!reader.supportsIndexList())
       {
-        result.addMessage(ResourceMgr.getFormattedString("ErrIdxListNotSupported", meta.getProductName()));
+        result.addMessageByKey("ErrIdxListNotSupported", meta.getProductName());
         result.setFailure();
         return result;
       }

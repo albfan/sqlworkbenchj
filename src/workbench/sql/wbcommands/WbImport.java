@@ -792,7 +792,7 @@ public class WbImport
 
     if (!imp.setMode(importMode))
     {
-      result.addMessage(ResourceMgr.getFormattedString("ErrInvalidModeIgnored", importMode));
+      result.addMessageByKey("ErrInvalidModeIgnored", importMode);
     }
 
 		String where = cmdLine.getValue(ARG_UPDATE_WHERE);

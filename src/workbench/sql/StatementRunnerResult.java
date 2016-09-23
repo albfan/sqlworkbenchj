@@ -248,7 +248,7 @@ public class StatementRunnerResult
 	{
 		if (ignoreUpdateCount) return;
 		this.totalUpdateCount += count;
-		addMessage(ResourceMgr.getFormattedString("MsgRowsAffected", count));
+		addMessageByKey("MsgRowsAffected", count);
 	}
 
   /**
@@ -302,6 +302,11 @@ public class StatementRunnerResult
 	public void addMessageByKey(String key)
 	{
 		addMessage(ResourceMgr.getString(key));
+	}
+
+	public void addMessageByKey(String key, Object... args)
+	{
+		addMessage(ResourceMgr.getFormattedString(key, args));
 	}
 
 	public void addMessage(MessageBuffer buffer)

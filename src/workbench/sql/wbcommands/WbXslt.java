@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -139,7 +138,7 @@ public class WbXslt
 			if (msg.length() != 0)
 			{
 				result.addMessage(msg);
-				result.addMessage(""); // create newline
+				result.addMessageNewLine();
 			}
 
 			WbFile xsltUsed = new WbFile(transformer.getXsltUsed());
@@ -147,9 +146,9 @@ public class WbXslt
 			if (xsltUsed != null && !userXslt.equals(xsltUsed))
 			{
 				// If the xslt file has been "automatically" found, inform the user about this
-				result.addMessage(ResourceMgr.getFormattedString("MsgXsltUsed", xsltUsed.getFullPath()));
+				result.addMessageByKey("MsgXsltUsed", xsltUsed.getFullPath());
 			}
-			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
+			result.addMessageByKey("MsgXsltSuccessful", outputFile);
 			result.setSuccess();
 		}
 		catch (Exception e)

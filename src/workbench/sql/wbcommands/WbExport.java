@@ -337,8 +337,8 @@ public class WbExport
 
 		if (cmdLine.isArgPresent(ARG_SHOW_ENCODINGS))
 		{
-			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
-			result.addMessage("");
+			result.addMessageByKey("MsgAvailableEncodings");
+			result.addMessageNewLine();
 			String[] encodings = EncodingUtil.getEncodings();
 			for (String encoding : encodings)
 			{
@@ -382,16 +382,16 @@ public class WbExport
 		if ((type.equals("xls") || type.equals("xlsx")) && !PoiHelper.isPoiAvailable())
 		{
 			result.addErrorMessage(ResourceMgr.getString("ErrNoXLS"));
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
+			result.addMessageNewLine();
+			result.addMessageByKey("ErrExportUseXLSM");
 			return result;
 		}
 
 		if (type.equals("xlsx") && !PoiHelper.isXLSXAvailable())
 		{
 			result.addErrorMessage(ResourceMgr.getString("ErrNoXLSX"));
-			result.addMessage("");
-			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
+			result.addMessageNewLine();
+			result.addMessageByKey("ErrExportUseXLSM");
 			return result;
 		}
 
@@ -1117,7 +1117,7 @@ public class WbExport
 
 		if (exporter.hasWarning())
 		{
-			result.addMessage(ResourceMgr.getString("TxtWarnings"));
+			result.addMessageByKey("TxtWarnings");
 			result.addMessage(exporter.getWarnings());
 		}
 	}
@@ -1150,7 +1150,7 @@ public class WbExport
 
 			if (exporter.isSuccess())
 			{
-				toConsume.addMessage(""); // force new line in output
+				toConsume.addMessageNewLine(); // force new line in output
 				toConsume.addMessage(ResourceMgr.getFormattedString("MsgSpoolOk", Long.toString(rowCount)));
 				toConsume.addMessage(ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename());
 			}
@@ -1167,7 +1167,7 @@ public class WbExport
 		}
 		catch (Exception e)
 		{
-			toConsume.addMessage(ResourceMgr.getString("ErrExportExecute"));
+			toConsume.addMessageByKey("ErrExportExecute");
 			toConsume.addErrorMessage(ExceptionUtil.getAllExceptions(e).toString());
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error exporting data", e);
 		}

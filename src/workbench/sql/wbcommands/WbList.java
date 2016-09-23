@@ -81,7 +81,7 @@ public class WbList
 		cmdLine.parse(options);
 		if (cmdLine.isArgPresent(CommonArgs.ARG_HELP))
 		{
-			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
+			result.addMessageByKey("ErrListWrongArgs");
 			result.setSuccess();
 			return result;
 		}

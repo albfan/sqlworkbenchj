@@ -26,7 +26,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.WbManager;
-import workbench.resource.ResourceMgr;
 
 import workbench.db.ConnectionInfoBuilder;
 
@@ -61,7 +60,7 @@ public class WbConnInfo
 
 		if (this.currentConnection == null)
 		{
-			result.addMessage(ResourceMgr.getString("TxtNotConnected"));
+			result.addMessageByKey("TxtNotConnected");
 		}
 		else
 		{
@@ -72,13 +71,13 @@ public class WbConnInfo
 				ConnectionInfoBuilder info = new ConnectionInfoBuilder();
 				if (WbManager.getInstance().isConsoleMode())
 				{
-					result.addMessage(" ");
+					result.addMessageNewLine();
 					indent = 2;
 				}
 				result.addMessage(info.getPlainTextDisplay(currentConnection, indent));
 				if (WbManager.getInstance().isConsoleMode())
 				{
-					result.addMessage("");
+					result.addMessageNewLine();
 				}
 			}
 			finally

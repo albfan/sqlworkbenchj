@@ -22,9 +22,8 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.IOException;
 import java.sql.SQLException;
-
-import workbench.resource.ResourceMgr;
 
 import workbench.db.DropType;
 import workbench.db.TableIdentifier;
@@ -33,8 +32,13 @@ import workbench.db.ViewReaderFactory;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  * Display the source code of a view.
@@ -46,10 +50,17 @@ public class WbViewSource
 {
 
 	public static final String VERB = "WbViewSource";
+  public static final String ARG_VIEWNAME = "view";
 
 	public WbViewSource()
 	{
 		super();
+    this.isUpdatingCommand = false;
+
+    cmdLine = new ArgumentParser();
+    cmdLine.addArgument(ARG_VIEWNAME);
+    cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
+    CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override
@@ -65,7 +76,28 @@ public class WbViewSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		TableIdentifier object = new TableIdentifier(args, currentConnection);
+    cmdLine.parse(args);
+    String viewName = null;
+    WbFile outputfile = null;
+    String encoding = null;
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    if (cmdLine.hasArguments())
+    {
+      viewName = cmdLine.getValue(ARG_VIEWNAME);
+      outputfile = evaluateFileArgument(cmdLine.getValue(CommonArgs.ARG_FILE));
+      encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
+    }
+    else
+    {
+      viewName = args;
+    }
+
+		TableIdentifier object = new TableIdentifier(viewName, currentConnection);
 		TableIdentifier tbl = currentConnection.getMetadata().findObject(object);
 
 		CharSequence source = null;
@@ -77,13 +109,28 @@ public class WbViewSource
 
 		if (StringUtil.isNonEmpty(source))
 		{
-			result.addMessage(source);
-			result.setSuccess();
+      if (outputfile != null)
+      {
+        try
+        {
+          FileUtil.writeString(outputfile, source.toString(), encoding, false);
+          result.addMessageByKey("MsgScriptWritten", outputfile.getFullPath());
+          result.setSuccess();
+        }
+        catch (IOException io)
+        {
+          result.addErrorMessage(io.getLocalizedMessage());
+        }
+      }
+      else
+      {
+  			result.addMessage(source);
+        result.setSuccess();
+      }
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getFormattedString("ErrViewNotFound", object.getObjectExpression(currentConnection)));
-			result.setFailure();
+			result.addErrorMessageByKey("ErrViewNotFound", object.getObjectExpression(currentConnection));
 		}
 
 		return result;

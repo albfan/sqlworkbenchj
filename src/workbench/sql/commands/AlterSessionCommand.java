@@ -129,7 +129,7 @@ public class AlterSessionCommand
         if (StringUtil.compareStrings(oldSchema, schema, true) != 0)
         {
           notifyConnection(ChangeType.schema, oldSchema, schema);
-					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", schema));
+					result.addMessageByKey("MsgSchemaChanged", schema);
 				}
 			}
       else if (oldContainer != null)
@@ -138,7 +138,7 @@ public class AlterSessionCommand
         if (StringUtil.compareStrings(oldContainer, newContainer, true) != 0)
         {
           notifyConnection(ChangeType.container, oldContainer, newContainer);
-          result.addMessage(ResourceMgr.getFormattedString("MsgContainerChanged", newContainer));
+          result.addMessageByKey("MsgContainerChanged", newContainer);
         }
       }
 			else

@@ -21,17 +21,12 @@
 package workbench.sql.wbcommands;
 
 import workbench.WbManager;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-
 import workbench.gui.profiles.ProfileKey;
-
+import workbench.log.LogMgr;
 import workbench.sql.StatementRunnerResult;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -79,7 +74,7 @@ public class CommandLineConnectionHandler
 			catch (Exception e)
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnection()", "Error connecting to database", e);
-				result.addMessage(ResourceMgr.getFormattedString("ErrConnectDescriptor", desc));
+				result.addMessageByKey("ErrConnectDescriptor", desc);
 				result.addErrorMessage(ExceptionUtil.getDisplay(e));
 				return null;
 			}
@@ -114,7 +109,7 @@ public class CommandLineConnectionHandler
 			catch (Exception e)
 			{
 				LogMgr.logError("CommandLineConnectionHandler.getConnectionFromKey()", "Error connecting to database", e);
-				result.addMessage(ResourceMgr.getFormattedString("ErrConnectProfile", profileKey.toString()));
+				result.addMessageByKey("ErrConnectProfile", profileKey.toString());
 				result.addErrorMessage(ExceptionUtil.getDisplay(e));
 				return null;
 			}

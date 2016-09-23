@@ -27,7 +27,6 @@ import java.awt.Desktop;
 import java.sql.SQLException;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -67,7 +66,7 @@ public class WbSysOpen
 		if (!doc.exists())
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getFormattedString("ErrFileNotFound", doc.getFullPath()));
+			result.addMessageByKey("ErrFileNotFound", doc.getFullPath());
 			return result;
 		}
 

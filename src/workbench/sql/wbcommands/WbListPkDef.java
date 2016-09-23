@@ -25,8 +25,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.storage.PkMapping;
 
 import workbench.sql.SqlCommand;
@@ -71,14 +69,14 @@ public class WbListPkDef
 		String info = PkMapping.getInstance().getMappingAsText();
 		if (info != null)
 		{
-			result.addMessage(ResourceMgr.getString("MsgPkDefinitions"));
-			result.addMessage("");
+			result.addMessageByKey("MsgPkDefinitions");
+			result.addMessageNewLine();
 			result.addMessage(info);
-			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEnd"));
+			result.addMessageByKey("MsgPkDefinitionsEnd");
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEmpty"));
+			result.addMessageByKey("MsgPkDefinitionsEmpty");
 		}
 		return result;
 	}

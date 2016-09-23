@@ -288,7 +288,8 @@ public class ObjectScripter
 
     if (includeCommitIfNeeded && commitNeeded && this.dbConnection.getDbSettings().ddlNeedsCommit())
     {
-      output.append("\nCOMMIT");
+      output.append(nl);
+      output.append("COMMIT");
       DelimiterDefinition delim = getDelimiter();
       output.append(delim.getScriptText());
     }

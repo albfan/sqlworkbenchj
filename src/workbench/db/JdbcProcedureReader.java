@@ -519,6 +519,8 @@ public class JdbcProcedureReader
 
     StringBuilder source = new StringBuilder(500);
 
+    String nl = Settings.getInstance().getInternalEditorLineEnding();
+
     CharSequence body = retrieveProcedureSource(def);
     StringBuilder header = getProcedureHeader(def);
 
@@ -532,9 +534,9 @@ public class JdbcProcedureReader
 
     if (delimiter != null && !StringUtil.endsWith(source, delimiter.getDelimiter()))
     {
-      if (delimiter.isSingleLine()) source.append('\n');
+      if (delimiter.isSingleLine()) source.append(nl);
       source.append(delimiter.getDelimiter());
-      if (delimiter.isSingleLine()) source.append('\n');
+      if (delimiter.isSingleLine()) source.append(nl);
     }
 
     String comment = def.getComment();
@@ -566,25 +568,23 @@ public class JdbcProcedureReader
         }
 
         template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment.replace("'", "''"));
-        source.append('\n');
+        source.append(nl);
         source.append(template);
-        source.append('\n');
+        source.append(nl);
         if (!template.endsWith(";"))
         {
           source.append(delimiter.getDelimiter());
-          if (delimiter.isSingleLine()) source.append('\n');
+          if (delimiter.isSingleLine()) source.append(nl);
         }
       }
     }
 
-    String result = source.toString();
+    CharSequence result = source;
 
-    String dbId = this.connection.getMetadata().getDbId();
-    boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbId + ".replacenl.proceduresource", false);
+    boolean replaceNL = connection.getDbSettings().getBoolProperty("replacenl.proceduresource", false);
 
     if (replaceNL)
     {
-      String nl = Settings.getInstance().getInternalEditorLineEnding();
       result = StringUtil.replace(source.toString(), "\\n", nl);
     }
 

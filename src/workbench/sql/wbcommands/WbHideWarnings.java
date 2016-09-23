@@ -25,8 +25,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.lexer.SQLLexer;
@@ -87,7 +85,7 @@ public class WbHideWarnings
 				  !parm.equalsIgnoreCase("true") && !parm.equalsIgnoreCase("false"))
 			{
 				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrShowWarnWrongParameter"));
+				result.addMessageByKey("ErrShowWarnWrongParameter");
 				return result;
 			}
 			else
@@ -98,11 +96,11 @@ public class WbHideWarnings
 
 		if (runner.getHideWarnings())
 		{
-			result.addMessage(ResourceMgr.getString("MsgWarningsDisabled"));
+			result.addMessageByKey("MsgWarningsDisabled");
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("MsgWarningsEnabled"));
+			result.addMessageByKey("MsgWarningsEnabled");
 		}
 		return result;
 	}

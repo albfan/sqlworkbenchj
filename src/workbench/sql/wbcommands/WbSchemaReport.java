@@ -278,12 +278,12 @@ public class WbSchemaReport
 			if (currentConnection.getMetadata().isOracle() && !OracleUtils.remarksEnabled(currentConnection))
 			{
 				result.addMessageByKey("MsgSchemaReporterOracleRemarksWarning");
-				result.addMessage("");
+				result.addMessageNewLine();
 			}
 			if (currentConnection.getMetadata().isMySql() && !OracleUtils.remarksEnabledMySQL(currentConnection))
 			{
 				result.addMessageByKey("MsgSchemaReporterMySQLRemarksWarning");
-				result.addMessage("");
+				result.addMessageNewLine();
 			}
 		}
 
@@ -315,8 +315,7 @@ public class WbSchemaReport
 
 		if (result.isSuccess())
 		{
-			String msg = ResourceMgr.getFormattedString("MsgSchemaReportTablesWritten", currentTable, output.getFullPath());
-			result.addMessage(msg);
+			result.addMessageByKey("MsgSchemaReportTablesWritten", currentTable, output.getFullPath());
 			result.setSuccess();
 		}
 
@@ -333,9 +332,9 @@ public class WbSchemaReport
 				if (msg.length() != 0)
 				{
 					result.addMessage(msg);
-					result.addMessage(""); // create newline
+					result.addMessageNewLine(); // create newline
 				}
-				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
+				result.addMessageByKey("MsgXsltSuccessful", xsltOutput);
 				result.setSuccess();
 			}
 			catch (FileNotFoundException fnf)

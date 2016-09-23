@@ -236,7 +236,7 @@ public class WbSchemaDiff
 			List<String> tl = StringUtil.stringToList(tarTables, ",", true, true);
 			if (rl.size() != tl.size())
 			{
-				result.addMessage(ResourceMgr.getString("ErrDiffTableListNoMatch"));
+				result.addMessageByKey("ErrDiffTableListNoMatch");
 				result.setFailure();
 				return result;
 			}
@@ -246,7 +246,7 @@ public class WbSchemaDiff
 
 		if (isCancelled || diff.isCancelled())
 		{
-			result.addWarning(ResourceMgr.getString("MsgDiffCancelled"));
+			result.addWarningByKey("MsgDiffCancelled");
 			return result;
 		}
 
@@ -294,7 +294,7 @@ public class WbSchemaDiff
 
 		if (diff.isCancelled())
 		{
-			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
+			result.addMessageByKey("MsgDiffCancelled");
 		}
 		else
 		{
@@ -322,7 +322,7 @@ public class WbSchemaDiff
 						if (xsltMsg.length() != 0)
 						{
 							result.addMessage(xsltMsg);
-							result.addMessage(""); // create newline
+							result.addMessageNewLine(); 
 						}
 						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 						result.setSuccess();

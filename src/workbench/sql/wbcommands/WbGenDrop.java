@@ -155,7 +155,7 @@ public class WbGenDrop
 				}
 			}
 			result.setSuccess();
-			result.addMessage(ResourceMgr.getFormattedString("MsgDropScriptsWritten", Integer.valueOf(count), dirFile.getFullPath()));
+			result.addMessageByKey("MsgDropScriptsWritten", Integer.valueOf(count), dirFile.getFullPath());
 		}
 		else if (file != null)
 		{
@@ -163,7 +163,7 @@ public class WbGenDrop
 			try
 			{
 				FileUtil.writeString(output, gen.getScript());
-				result.addMessage(ResourceMgr.getFormattedString("MsgScriptWritten", output.getFullPath()));
+				result.addMessageByKey("MsgScriptWritten", output.getFullPath());
 				result.setSuccess();
 			}
 			catch (IOException io)

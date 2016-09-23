@@ -63,7 +63,7 @@ public class WbRemoveVar extends SqlCommand
 
 		if (var == null || var.length() == 0)
 		{
-			result.addMessage(ResourceMgr.getString("ErrVarRemoveWrongParameter"));
+			result.addMessageByKey("ErrVarRemoveWrongParameter");
 			result.setFailure();
 			return result;
 		}

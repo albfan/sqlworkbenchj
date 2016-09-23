@@ -95,7 +95,7 @@ public class WbLoadPkMapping
 		if (file == null)
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrPkDefNoFile"));
+			result.addMessageByKey("ErrPkDefNoFile");
 			return result;
 		}
 
@@ -104,13 +104,13 @@ public class WbLoadPkMapping
 		File f = new File(file);
 		msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
 		result.addMessage(msg);
-		result.addMessage("");
+		result.addMessageNewLine();
 
 		String info = PkMapping.getInstance().getMappingAsText();
 		if (info != null)
 		{
 			result.addMessage(info);
-			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEnd"));
+			result.addMessageByKey("MsgPkDefinitionsEnd");
 		}
 
 		result.setSuccess();

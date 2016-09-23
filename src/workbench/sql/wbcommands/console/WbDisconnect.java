@@ -26,8 +26,6 @@ package workbench.sql.wbcommands.console;
 import java.sql.SQLException;
 
 import workbench.RunMode;
-import workbench.resource.ResourceMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -61,12 +59,12 @@ public class WbDisconnect
 			//this.currentConnection.disconnect();
 			// setConnection will call disconnect() on the "old" connection
 			this.runner.setConnection(null);
-			result.addMessage(ResourceMgr.getString("MsgDisconnected"));
+			result.addMessageByKey("MsgDisconnected");
 			result.setSuccess();
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("TxtNotConnected"));
+			result.addMessageByKey("TxtNotConnected");
 			result.setFailure();
 		}
 		return result;

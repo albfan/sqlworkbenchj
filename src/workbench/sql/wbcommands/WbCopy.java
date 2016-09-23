@@ -166,7 +166,7 @@ public class WbCopy
 		if (!WbManager.getInstance().isBatchMode())
 		{
 			result.addMessageNewLine();
-			result.addMessage(ResourceMgr.getString("ErrCopyWrongParameters"));
+			result.addMessageByKey("ErrCopyWrongParameters");
 		}
 	}
 
