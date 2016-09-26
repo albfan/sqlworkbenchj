@@ -194,6 +194,7 @@ keyword=(
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
 (DATABASE{wsp}LINK)|
+(OWNED{wsp}BY)|
 "AFTER"|
 "AGGREGATE"|
 "ALL"|

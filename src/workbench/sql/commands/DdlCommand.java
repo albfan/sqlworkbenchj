@@ -40,6 +40,10 @@ import workbench.db.TableIdentifier;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
@@ -79,6 +83,7 @@ public class DdlCommand
 	private Savepoint ddlSavepoint;
 	private final Set<String> typesToRemember = CollectionUtil.caseInsensitiveSet("procedure", "function", "trigger", "package", "package body", "type");
   private Pattern alterDropPattern;
+  private Pattern pgDropOwned;
 
 	private DdlCommand(String sqlVerb)
 	{
@@ -89,6 +94,10 @@ public class DdlCommand
     {
    		// an ALTER ... statement might also be a DROP (e.g. ALTER TABLE someTable DROP PRIMARY KEY)
       alterDropPattern = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
+    }
+    if ("DROP".equals(verb))
+    {
+      pgDropOwned = Pattern.compile("DROP\\s+OWNED\\s+BY\\s+", Pattern.CASE_INSENSITIVE);
     }
 	}
 
@@ -161,7 +170,7 @@ public class DdlCommand
 
       if (result.isSuccess())
       {
-        result.addMessage(getSuccessMessage(info, getVerb()));
+        result.addMessage(buildSuccessMessage(info, sql));
       }
 
       this.currentConnection.releaseSavepoint(ddlSavepoint);
@@ -258,16 +267,53 @@ public class DdlCommand
 		return m.find();
 	}
 
+  private String buildSuccessMessage(DdlObjectInfo info, String sql)
+  {
+    if (isPgDropOwned(sql))
+    {
+      String owner = getOwner(sql);
+      if (owner != null)
+      {
+        return ResourceMgr.getFormattedString("MsgDropOwned", owner);
+      }
+    }
+    return getSuccessMessage(info, getVerb());
+  }
+
+  private String getOwner(String sql)
+  {
+    SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Postgres, sql);
+    lexer.getNextToken(false, false); // skip the drop
+    lexer.getNextToken(false, false); // skip the "owned by"
+
+    SQLToken owner = lexer.getNextToken(false, false);
+    if (owner != null)
+    {
+      return SqlUtil.removeObjectQuotes(owner.getText());
+    }
+    return null;
+  }
+
 	@Override
 	protected String getSuccessMessage(DdlObjectInfo info, String verb)
 	{
-		String msg = super.getSuccessMessage(info, getVerb());
+    String msg = super.getSuccessMessage(info, getVerb());
 		if (msg == null)
 		{
 			return getDefaultSuccessMessage(null);
 		}
 		return msg;
 	}
+
+  private boolean isPgDropOwned(String sql)
+  {
+    if (pgDropOwned != null)
+    {
+      Matcher m = pgDropOwned.matcher(sql);
+      return m.find();
+    }
+    return false;
+  }
 
 	/**
 	 * Retrieve extended error information if the DBMS supports this.
