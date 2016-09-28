@@ -96,7 +96,7 @@ public class DatastoreTransposerTest
     assertEquals("Support", result.getColumnName(5));
 
     assertEquals("count", result.getValueAsString(0,0));
-    assertEquals("avg_salary", result.getValueAsString(0,0));
+    assertEquals("avg_salary", result.getValueAsString(1,0));
   }
 
 	@Test
