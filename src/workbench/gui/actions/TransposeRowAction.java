@@ -31,6 +31,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.SqlPanel;
@@ -65,6 +66,7 @@ public class TransposeRowAction
   public void executeAction(ActionEvent e)
   {
     DatastoreTransposer transpose = new DatastoreTransposer(client.getDataStore());
+    transpose.setUseTableNameForResult(GuiSettings.getUseTablenameAsResultName());
     int[] rows = client.getSelectedRows();
     DataStore ds = transpose.transposeRows(rows);
     showDatastore(ds);

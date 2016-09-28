@@ -43,13 +43,12 @@ import workbench.util.SqlUtil;
 public class DatastoreTransposer
 {
   private DataStore source;
-  private String resultName;
+  private boolean useTableNameForResultName;
   private final Set<String> excludeColumns = CollectionUtil.caseInsensitiveSet();
 
   public DatastoreTransposer(DataStore sourceData)
   {
     this.source = sourceData;
-    retrieveResultName();
   }
 
   public void setColumnsToExclude(Collection<String> toExclude)
@@ -64,15 +63,19 @@ public class DatastoreTransposer
     }
   }
 
-  private void retrieveResultName()
+  public void setUseTableNameForResult(boolean flag)
+  {
+    useTableNameForResultName = flag;
+  }
+
+  private String getSourceResultName()
   {
     if (source == null)
     {
-      resultName = "";
-      return;
+      return "";
     }
-    resultName = source.getResultName();
-    if (resultName == null)
+    String resultName = source.getResultName();
+    if (resultName == null && useTableNameForResultName)
     {
       String sql = source.getGeneratingSql();
       List<Alias> tables = SqlUtil.getTables(sql, false, source.getOriginalConnection());
@@ -81,51 +84,79 @@ public class DatastoreTransposer
         resultName = tables.get(0).getObjectName();
       }
     }
+    return resultName;
   }
 
   public DataStore transposeRows(int[] rows)
   {
-    if (rows == null || rows.length == 0) return null;
+    return transposeWithLabel(null, rows);
+  }
 
-    String[] columns = new String[rows.length + 1];
-    int[] types = new int[rows.length + 1];
+  public DataStore transposeWithLabel(String labelColumn, int[] rows)
+  {
+    int labelColumnIndex = source.getColumnIndex(labelColumn);
 
-    columns[0] = ResourceMgr.getString("TxtColumnName");
+    int rowCount = (rows == null ? source.getRowCount() : rows.length);
+    int colCount = rowCount + 1;
+
+    String[] columns = new String[colCount];
+    int[] types = new int[colCount];
+
     types[0] = Types.VARCHAR;
-
-    for (int i=0; i < rows.length; i++)
+    if (labelColumnIndex > -1)
     {
-      columns[i+1] = ResourceMgr.getString("TxtRow") + " " + NumberStringCache.getNumberString(rows[i] + 1);
+      columns[0] = "";
+    }
+    else
+    {
+      columns[0] = ResourceMgr.getString("TxtColumnName");
+    }
+
+    for (int i = 0; i < rowCount ; i++)
+    {
+      int sourceRow = (rows == null ? i : rows[i]);
+      if (labelColumnIndex > -1)
+      {
+        columns[i+1] = source.getValueAsString(sourceRow, labelColumnIndex);
+      }
+      else
+      {
+        columns[i+1] = ResourceMgr.getString("TxtRow") + " " + NumberStringCache.getNumberString(sourceRow + 1);
+      }
       types[i+1] = Types.VARCHAR;
     }
 
-    DataStore ds = new DataStore(columns, types);
+    DataStore result = new DataStore(columns, types);
 
-    int colCount = source.getColumnCount();
-    for (int i=0; i < colCount  - excludeColumns.size(); i++)
+    int targetRows = source.getColumnCount() - excludeColumns.size();
+    if (labelColumnIndex > -1) targetRows --;
+
+    for (int i=0; i < targetRows; i ++)
     {
-      ds.addRow();
+      result.addRow();
     }
 
-    for (int ix=0; ix < rows.length; ix++)
+    for (int sourceRow=0; sourceRow < rowCount; sourceRow ++)
     {
-      int sourceRow = rows[ix];
-      int colRow = 0;
+      int targetRow = 0;
+      int targetColumn = sourceRow + 1;
 
-      for (int col=0; col < colCount; col ++)
+      for (int sourceCol=0; sourceCol < source.getColumnCount(); sourceCol ++)
       {
-        String colDisplay = source.getColumnDisplayName(col);
-        if (!excludeColumns.contains(colDisplay))
-        {
-          ds.setValue(colRow, 0, colDisplay);
-          ds.setValue(colRow, 1 + ix, source.getValueAsString(sourceRow, col));
-          colRow ++;
-        }
+        if (sourceCol == labelColumnIndex) continue;
+
+        String name = source.getColumnName(sourceCol);
+        if (excludeColumns.contains(name)) continue;
+
+        String value = source.getValueAsString(sourceRow, sourceCol);
+        result.setValue(targetRow, 0, name);
+        result.setValue(targetRow, targetColumn, value);
+        targetRow ++;
       }
     }
-    ds.setResultName("<[ " + resultName + " ]>");
-    ds.resetStatus();
-    return ds;
+    result.setResultName(getSourceResultName());
+    result.resetStatus();
+    return result;
   }
 
 }

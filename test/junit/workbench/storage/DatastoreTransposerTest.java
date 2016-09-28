@@ -43,6 +43,62 @@ public class DatastoreTransposerTest
 		super("DatastoreTransposerTest");
 	}
 
+  @Test
+  public void testLabelColumn()
+  {
+		String[] cols = new String[] {"dept", "count", "avg_salary"};
+		int[] types = new int[] { Types.VARCHAR, Types.INTEGER, Types.INTEGER };
+		DataStore data = new DataStore(cols, types);
+    data.setResultName("Report");
+		int row = data.addRow();
+		data.setValue(row, 0, "Finance");
+		data.setValue(row, 1, 5);
+		data.setValue(row, 2, 5000);
+
+		row = data.addRow();
+		data.setValue(row, 0, "HR");
+		data.setValue(row, 1, 1);
+		data.setValue(row, 2, 2500);
+
+		row = data.addRow();
+		data.setValue(row, 0, "IT");
+		data.setValue(row, 1, 12);
+		data.setValue(row, 2, 6400);
+
+		row = data.addRow();
+		data.setValue(row, 0, "DEV");
+		data.setValue(row, 1, 42);
+		data.setValue(row, 2, 4200);
+
+		row = data.addRow();
+		data.setValue(row, 0, "Support");
+		data.setValue(row, 1, 2);
+		data.setValue(row, 2, 3000);
+
+		DatastoreTransposer transposer = new DatastoreTransposer(data);
+    DataStore result = transposer.transposeWithLabel("dept", null);
+
+//    expected output:
+//                | Finance | HR   | IT     | DEV   | Support
+//    ----------- +---------+------+------  +------ +--------
+//    count       | 5       | 1    | 12     | 42    | 2
+//    avg_salary  | 5000    | 2500 | 6400   | 4200  | 3000
+
+//		DataStorePrinter printer = new DataStorePrinter(result);
+//		printer.printTo(System.out);
+
+    assertNotNull(result);
+    assertEquals(2, result.getRowCount());
+    assertEquals("Finance", result.getColumnName(1));
+    assertEquals("HR", result.getColumnName(2));
+    assertEquals("IT", result.getColumnName(3));
+    assertEquals("DEV", result.getColumnName(4));
+    assertEquals("Support", result.getColumnName(5));
+
+    assertEquals("count", result.getValueAsString(0,0));
+    assertEquals("avg_salary", result.getValueAsString(0,0));
+  }
+
 	@Test
 	public void testTransposeRows()
 	{
@@ -51,11 +107,12 @@ public class DatastoreTransposerTest
 		int[] rows = new int[] {0,2};
 		DatastoreTransposer transposer = new DatastoreTransposer(data);
 		DataStore result = transposer.transposeRows(rows);
-		assertEquals(3, result.getRowCount());
-		assertEquals(3, result.getColumnCount());
 
 //		DataStorePrinter printer = new DataStorePrinter(result);
 //		printer.printTo(System.out);
+
+		assertEquals(3, result.getRowCount());
+		assertEquals(3, result.getColumnCount());
 
 		assertEquals("Row 1", result.getColumnDisplayName(1));
 		assertEquals("Row 3", result.getColumnDisplayName(2));
@@ -67,6 +124,10 @@ public class DatastoreTransposerTest
 		rows = new int[] {0,1,2};
 		transposer = new DatastoreTransposer(data);
 		result = transposer.transposeRows(rows);
+
+//		DataStorePrinter printer = new DataStorePrinter(result);
+//		printer.printTo(System.out);
+
 		assertEquals(3, result.getRowCount());
 		assertEquals(4, result.getColumnCount());
 	}

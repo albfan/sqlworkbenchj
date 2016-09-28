@@ -50,6 +50,7 @@ import workbench.db.TransactionChecker;
 import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
+import workbench.storage.DatastoreTransposer;
 import workbench.storage.RowActionMonitor;
 
 import workbench.sql.commands.AlterSessionCommand;
@@ -58,6 +59,7 @@ import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 
+import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
 import workbench.util.SqlUtil;
@@ -575,6 +577,7 @@ public class StatementRunner
 		}
 
 		removeEmptyResults(result, realSql);
+    processCrossTab(result, realSql);
 
 		if (this.currentConsumer != null && currentCommand != currentConsumer && result.isSuccess())
 		{
@@ -590,6 +593,32 @@ public class StatementRunner
 			logStatement(realSql, time, currentConnection);
 		}
 	}
+
+	private void processCrossTab(StatementRunnerResult result, String sql )
+  {
+    List<DataStore> dataStores = result.getDataStores();
+
+    // TODO: handle plain resultsets so that this can be used for WbExport
+    if (CollectionUtil.isEmpty(dataStores)) return;
+
+    CrossTabAnnotation crossTabAnnotation = new CrossTabAnnotation();
+    if (crossTabAnnotation.containsAnnotation(sql))
+    {
+      ArgumentParser cmdLine = new ArgumentParser(false);
+      cmdLine.addArgument("labelColumn");
+      for (int i = 0; i < dataStores.size(); i++)
+      {
+        DataStore ds = dataStores.get(i);
+        String parameter = crossTabAnnotation.getAnnotationValue(sql);
+        cmdLine.parse(parameter);
+        String column = cmdLine.getValue("labelColumn");
+        DatastoreTransposer transposer = new DatastoreTransposer(ds);
+        DataStore crossTabData = transposer.transposeWithLabel(column, null);
+        dataStores.set(i, crossTabData);
+        ds.reset();
+      }
+    }
+  }
 
 	private void removeEmptyResults(StatementRunnerResult result, String sql)
 	{
