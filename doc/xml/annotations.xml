@@ -185,4 +185,64 @@ FROM pg_stat_activity;
       </para>
     </section>
 
+    <section id="crosstab-annotation">
+      <title>Create crosstab (pivot) from a result</title>
+      <para>
+        This annotation can automatically transpose rows to columns from a result of a query. This is also known as "crosstab" or "pivot".
+      </para>
+      <para>
+        Assuming the following statement
+      </para>
+    <programlisting>select department_id as dept,
+       count(*) as "Employees",
+       avg(salary)::int as "Avg. Salary",
+       min(salary)::int as "Min. Salary"
+from employees
+where department_id in (10,20,30)
+group by department_id
+order by department_id;
+</programlisting>
+      <para>
+        Returns the following result:
+      </para>
+<programlisting>dept | Employees | Avg. Salary | Min. Salary
+-----+-----------+-------------+------------
+  10 |         1 |        4400 |        4400
+  20 |         2 |        9500 |        6000
+  30 |         6 |        4150 |        2500</programlisting>
+      <para>
+        Then the result can be turned into a crosstab by adding the annotation <literal>@WbCrossTab</literal>.
+        The annotation supports two parameters:
+        <simplelist>
+          <member><literal>labelColumn</literal> - to define the column that should be used for the header's label</member>
+          <member><literal>addLabel</literal> - an additional text that will be added to the value of the labels</member>
+        </simplelist>
+      </para>
+    <programlisting>-- @WbCrossTab labelColumn=dept addLabel="Dept "
+select department_id as dept,
+       count(*) as "Employees",
+       avg(salary) as "Avg. Salary",
+       min(salary) as "Min. Salary"
+from employees
+where department_id in (10,20,30)
+group by department_id
+order by department_id;
+</programlisting>
+      <para>
+        Returns the following result:
+      </para>
+<programlisting>            | Dept 10 | Dept 20 | Dept 30
+------------+---------+---------+--------
+Employees   | 1       | 2       | 6
+Avg. Salary | 4400    | 9500    | 4150
+Min. Salary | 4400    | 6000    | 2500</programlisting>
+
+      <para>
+        If this is used to export a crosstab using <link linkend="command-export"><literal>WbExport</literal></link>,
+        the data is <emphasis role="bold">always</emphasis> read completely into memory in order to be able to
+        generate the crosstab - even if the query would normally be streamed directly to the export file.
+      </para>
+      
+    </section>
+
 </section>

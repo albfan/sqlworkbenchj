@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import workbench.AppArguments;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.DbSettings;
 import workbench.db.DropType;
 import workbench.db.TableIdentifier;
@@ -45,11 +42,10 @@ import workbench.db.compare.TableDiffStatus;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.TableDependencySorter;
-
-import workbench.storage.RowActionMonitor;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
-
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -79,6 +75,7 @@ class SchemaCopy
 	private List<TableIdentifier> sourceTables;
 	private Map<TableIdentifier, TableIdentifier> targetToSourceMap;
 
+  private TableDependencySorter sorter;
 	private RowActionMonitor rowMonitor;
 	private boolean cancel;
 	private boolean doSyncDelete;
@@ -407,7 +404,7 @@ class SchemaCopy
 			}
 
 			List<TableIdentifier> tables = new ArrayList<>(targetToSourceMap.keySet());
-			TableDependencySorter sorter = new TableDependencySorter(targetConnection);
+			sorter = new TableDependencySorter(targetConnection);
 			List<TableIdentifier> sorted = null;
 			if (forInsert)
 			{
@@ -423,6 +420,10 @@ class SchemaCopy
 		{
 			LogMgr.logError("SchemaCopy.sortTables()", "Error when checking FK dependencies", e);
 		}
+    finally
+    {
+      sorter = null;
+    }
 		return null;
 	}
 
@@ -511,6 +512,10 @@ class SchemaCopy
 		{
 			this.copier.cancel();
 		}
+    if (this.sorter != null)
+    {
+      sorter.cancel();
+    }
 	}
 
 }

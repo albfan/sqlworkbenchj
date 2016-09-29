@@ -94,6 +94,7 @@ public class SqlCommand
   protected ArgumentParser cmdLine;
   protected boolean includeStatementInError;
   protected boolean showDataLoading = true;
+  protected boolean alwaysBufferResults;
 
   public void setRowMonitor(RowActionMonitor monitor)
   {
@@ -123,6 +124,11 @@ public class SqlCommand
   public boolean isWbCommand()
   {
     return false;
+  }
+
+  public void setAlwaysBufferResults(boolean flag)
+  {
+    this.alwaysBufferResults = flag;
   }
 
   public String getParameterHelp()
@@ -745,7 +751,7 @@ public class SqlCommand
         }
 
         ResultSetConsumer consumer = runner.getConsumer();
-        if (consumer != null)
+        if (consumer != null && !alwaysBufferResults)
         {
           result.addResultSet(rs);
           consumer.consumeResult(result);

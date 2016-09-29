@@ -27,9 +27,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 
@@ -43,10 +40,10 @@ import workbench.storage.DatastoreTransposer;
  * An action to transpose the selected row in a WbTable.
  *
  * @author Thomas Kellerer
+ * @see DatastoreTransposer
  */
 public class TransposeRowAction
   extends WbAction
-  implements ListSelectionListener
 {
   private WbTable client;
 
@@ -54,12 +51,8 @@ public class TransposeRowAction
   {
     super();
     this.client = aClient;
-    if (client != null)
-    {
-      client.getSelectionModel().addListSelectionListener(this);
-    }
     this.initMenuDefinition("MnuTxtTransposeRow");
-    this.setEnabled(false);
+    this.setEnabled(client != null);
   }
 
   @Override
@@ -67,8 +60,16 @@ public class TransposeRowAction
   {
     DatastoreTransposer transpose = new DatastoreTransposer(client.getDataStore());
     transpose.setUseTableNameForResult(GuiSettings.getUseTablenameAsResultName());
-    int[] rows = client.getSelectedRows();
+    int[] rows = null;
+    if (client.getSelectedRowCount() > 0)
+    {
+      rows = client.getSelectedRows();
+    }
     DataStore ds = transpose.transposeRows(rows);
+    if (ds.getResultName() != null)
+    {
+      ds.setResultName("<[ " + ds.getResultName() + " ]>");
+    }
     showDatastore(ds);
   }
 
@@ -101,17 +102,6 @@ public class TransposeRowAction
       c = c.getParent();
     }
     return null;
-  }
-
-  @Override
-  public void valueChanged(ListSelectionEvent e)
-  {
-    boolean selected = false;
-    if (client != null)
-    {
-      selected = client.getSelectedRowCount() > 0;
-    }
-    setEnabled(selected);
   }
 
   @Override

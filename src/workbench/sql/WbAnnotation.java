@@ -89,8 +89,8 @@ public class WbAnnotation
 
 	public static List<WbAnnotation> readAllAnnotations(String sql, Set<String> keys)
 	{
-		if (StringUtil.isBlank(sql)) return Collections.emptyList();
-		if (sql.indexOf('@') == -1) return Collections.emptyList();
+		if (sql == null) return Collections.emptyList();
+    if (!sql.startsWith("--") && !sql.startsWith("/*")) return Collections.emptyList();
 
 		SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		SQLToken token = lexer.getNextToken(true, false);
@@ -203,4 +203,23 @@ public class WbAnnotation
 		if (sql.startsWith("/*")) return sql.substring(2, sql.length() - 2);
 		return sql;
 	}
+
+  @Override
+  public int hashCode()
+  {
+    return this.keyword.toLowerCase().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) return true;
+    if (obj instanceof WbAnnotation)
+    {
+      final WbAnnotation other = (WbAnnotation)obj;
+      return this.keyword.equalsIgnoreCase(other.keyword);
+    }
+    return false;
+  }
+
 }

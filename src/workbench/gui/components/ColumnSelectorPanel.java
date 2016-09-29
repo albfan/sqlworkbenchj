@@ -32,9 +32,9 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -44,8 +44,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import workbench.db.ColumnIdentifier;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.ColumnIdentifier;
 
 /**
  *
@@ -222,7 +223,7 @@ public class ColumnSelectorPanel
 	public List<ColumnIdentifier> getSelectedColumns()
 	{
 		int selected = this.getSelectedCount();
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(selected);
+		List<ColumnIdentifier> result = new ArrayList<>(selected);
 		for (int i=0; i < this.model.selected.length; i++)
 		{
 			if (this.model.selected[i])
@@ -292,7 +293,7 @@ class ColumnSelectTableModel
 
 	private final int rows;
 
-	public ColumnSelectTableModel(ColumnIdentifier[] cols)
+	ColumnSelectTableModel(ColumnIdentifier[] cols)
 	{
 		this.rows = cols.length;
 		this.columns = cols;

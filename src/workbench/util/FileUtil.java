@@ -511,6 +511,7 @@ public class FileUtil
 
     try
     {
+      LogMgr.logDebug("FileUtil.listFiles()", "Looking for files matching " + f.getName() + " in " + parentDir.toPath());
       DirectoryStream<Path> stream = Files.newDirectoryStream(parentDir.toPath(), f.getName());
       for (Path file : stream)
       {

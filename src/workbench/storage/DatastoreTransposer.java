@@ -34,6 +34,7 @@ import workbench.util.Alias;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to turn the columns of a datastore into rows.
@@ -89,10 +90,10 @@ public class DatastoreTransposer
 
   public DataStore transposeRows(int[] rows)
   {
-    return transposeWithLabel(null, rows);
+    return transposeWithLabel(null, null, rows);
   }
 
-  public DataStore transposeWithLabel(String labelColumn, int[] rows)
+  public DataStore transposeWithLabel(String labelColumn, String addLabel, int[] rows)
   {
     int labelColumnIndex = source.getColumnIndex(labelColumn);
 
@@ -112,12 +113,14 @@ public class DatastoreTransposer
       columns[0] = ResourceMgr.getString("TxtColumnName");
     }
 
+    if (addLabel == null) addLabel = "";
+
     for (int i = 0; i < rowCount ; i++)
     {
       int sourceRow = (rows == null ? i : rows[i]);
       if (labelColumnIndex > -1)
       {
-        columns[i+1] = source.getValueAsString(sourceRow, labelColumnIndex);
+        columns[i+1] = addLabel + StringUtil.coalesce(source.getValueAsString(sourceRow, labelColumnIndex), "");
       }
       else
       {

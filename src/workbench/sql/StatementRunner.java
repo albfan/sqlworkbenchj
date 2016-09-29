@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import workbench.WbManager;
 import workbench.interfaces.ExecutionController;
@@ -107,7 +108,9 @@ public class StatementRunner
 	private boolean showDataLoadingProgress = true;
 
 	private final Map<String, String> sessionAttributes = new HashMap<>();
-	private final	RemoveEmptyResultsAnnotation removeAnnotation = new RemoveEmptyResultsAnnotation();
+  private final CrossTabAnnotation crossTab = new CrossTabAnnotation();
+  private final RemoveEmptyResultsAnnotation removeEmpty = new RemoveEmptyResultsAnnotation();
+  private final Set<String> annotationTags = CollectionUtil.caseInsensitiveSet(crossTab.getKeyWord(), removeEmpty.getKeyWord());
   private int macroClientId;
   private ScriptErrorHandler retryHandler;
 
@@ -557,6 +560,11 @@ public class StatementRunner
 
 		long sqlExecStart = System.currentTimeMillis();
 
+    List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(realSql, annotationTags);
+    int crosstabIndex = annotations.indexOf(crossTab);
+
+    currentCommand.setAlwaysBufferResults(crosstabIndex >= 0);
+
 		if (realSql == null)
 		{
 			// this can happen when the statement hook signalled to not execute the statement
@@ -576,8 +584,15 @@ public class StatementRunner
 			this.result = this.batchCommand.executeBatch();
 		}
 
-		removeEmptyResults(result, realSql);
-    processCrossTab(result, realSql);
+    if (annotations.contains(removeEmpty))
+    {
+      removeEmptyResults(result);
+    }
+
+    if (crosstabIndex > -1)
+    {
+      processCrossTab(result, annotations.get(crosstabIndex));
+    }
 
 		if (this.currentConsumer != null && currentCommand != currentConsumer && result.isSuccess())
 		{
@@ -594,49 +609,45 @@ public class StatementRunner
 		}
 	}
 
-	private void processCrossTab(StatementRunnerResult result, String sql )
+	private void processCrossTab(StatementRunnerResult result, WbAnnotation annotation)
   {
+    if (!result.isSuccess()) return;
     List<DataStore> dataStores = result.getDataStores();
 
-    // TODO: handle plain resultsets so that this can be used for WbExport
-    if (CollectionUtil.isEmpty(dataStores)) return;
+    ArgumentParser cmdLine = new ArgumentParser(false);
+    cmdLine.addArgument("labelColumn");
+    cmdLine.addArgument("addLabel");
 
-    CrossTabAnnotation crossTabAnnotation = new CrossTabAnnotation();
-    if (crossTabAnnotation.containsAnnotation(sql))
+    String parameter = annotation.getValue();
+    cmdLine.parse(parameter);
+    String column = StringUtil.trimToNull(cmdLine.getValue("labelColumn"));
+    String addLabel = cmdLine.getValue("addLabel");
+
+    for (int i = 0; i < dataStores.size(); i++)
     {
-      ArgumentParser cmdLine = new ArgumentParser(false);
-      cmdLine.addArgument("labelColumn");
-      for (int i = 0; i < dataStores.size(); i++)
-      {
-        DataStore ds = dataStores.get(i);
-        String parameter = crossTabAnnotation.getAnnotationValue(sql);
-        cmdLine.parse(parameter);
-        String column = cmdLine.getValue("labelColumn");
-        DatastoreTransposer transposer = new DatastoreTransposer(ds);
-        DataStore crossTabData = transposer.transposeWithLabel(column, null);
-        dataStores.set(i, crossTabData);
-        ds.reset();
-      }
+      DataStore ds = dataStores.get(i);
+      DatastoreTransposer transposer = new DatastoreTransposer(ds);
+      DataStore crossTabData = transposer.transposeWithLabel(column, addLabel, null);
+      dataStores.set(i, crossTabData);
+      ds.reset();
     }
   }
 
-	private void removeEmptyResults(StatementRunnerResult result, String sql)
+	private void removeEmptyResults(StatementRunnerResult result)
 	{
-		if (removeAnnotation.containsAnnotation(sql))
-		{
-      List<DataStore> dataStores = result.getDataStores();
-      if (CollectionUtil.isEmpty(dataStores)) return;
+    if (!result.isSuccess()) return;
+    List<DataStore> dataStores = result.getDataStores();
+    if (CollectionUtil.isEmpty(dataStores)) return;
 
-			Iterator<DataStore> itr = dataStores.iterator();
-			while (itr.hasNext())
-			{
-				DataStore ds = itr.next();
-				if (ds.getRowCount() == 0)
-				{
-					itr.remove();
-				}
-			}
-		}
+    Iterator<DataStore> itr = dataStores.iterator();
+    while (itr.hasNext())
+    {
+      DataStore ds = itr.next();
+      if (ds.getRowCount() == 0)
+      {
+        itr.remove();
+      }
+    }
 	}
 
 	public static void logStatement(String sql, long time, WbConnection conn)

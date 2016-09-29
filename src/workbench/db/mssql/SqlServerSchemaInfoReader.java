@@ -57,7 +57,7 @@ public class SqlServerSchemaInfoReader
     // I assume it's safe to cache the current schema.
 
     schemaRetrieved = false;
-    if (JdbcUtils.hasMiniumDriverVersion(dbConnection, "4.0") && SqlServerUtil.isMicrosoftDriver(dbConnection))
+    if (JdbcUtils.hasMiniumDriverVersion(dbConnection, "4.2") && SqlServerUtil.isMicrosoftDriver(dbConnection))
     {
       try
       {
@@ -68,7 +68,7 @@ public class SqlServerSchemaInfoReader
       }
       catch (Throwable th)
       {
-        LogMgr.logError("SqlServerSchemaInfoReader.<init>", "Error retrieving current schema using getSchema()", th);
+        LogMgr.logWarning("SqlServerSchemaInfoReader.<init>", "Error retrieving current schema using getSchema(): " + th.getMessage());
       }
     }
 
