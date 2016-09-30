@@ -23,15 +23,12 @@
  */
 package workbench.db.postgres;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
@@ -39,7 +36,8 @@ import workbench.db.JdbcIndexReader;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -92,7 +90,7 @@ public class PostgresIndexReader
     if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
     {
       sql.append(
-        "SELECT indexdef, indexname, tablespace, obj_description(indexname::regclass, 'pg_class') \n" +
+        "SELECT indexdef, indexname, tablespace, obj_description((quote_ident(schemaname)||'.'||quote_ident(indexname))::regclass, 'pg_class') \n" +
         "FROM pg_indexes \n" +
         "WHERE (schemaname, indexname) IN (");
     }
@@ -248,7 +246,7 @@ public class PostgresIndexReader
 
     StringBuilder sql = new StringBuilder(50 + count * 20);
     sql.append(
-      "SELECT indexname, tablespace, obj_description(indexname::regclass, 'pg_class') as remarks \n" +
+      "SELECT indexname, tablespace, obj_description((quote_ident(schemaname)||'.'||quote_ident(indexname))::regclass, 'pg_class') as remarks \n" +
       "FROM pg_indexes \n" +
       "WHERE (schemaname, indexname) IN (");
 
@@ -323,72 +321,7 @@ public class PostgresIndexReader
       return getUniqueConstraint(table, indexDefinition);
     }
 
-    WbConnection con = this.metaData.getWbConnection();
-
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    // The full CREATE INDEX Statement is stored in pg_indexes for each
-    // index. So all we need to do, is retrieve the indexdef value from that view
-
-    String result = null;
-
-    StringBuilder sql = new StringBuilder(100);
-    if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
-    {
-      sql.append(
-        "SELECT indexdef, tablespace, obj_description(indexname::regclass, 'pg_class') \n" +
-        "FROM pg_indexes \n" +
-        "WHERE indexname = ? and schemaname = ? ");
-    }
-    else
-    {
-      sql.append(
-        "SELECT indexdef, null::text as tablespace, null::text as remarks \n" +
-        "FROM pg_indexes \n" +
-        "WHERE indexname = ? and schemaname = ? ");
-    }
-
-    if (Settings.getInstance().getDebugMetadataSql())
-    {
-      LogMgr.logDebug("PostgresIndexReader.getIndexSource2()", "Retrieving index source using:\n " +
-        SqlUtil.replaceParameters(sql, indexDefinition.getName(), table.getSchema()));
-    }
-
-    Savepoint sp = null;
-    try
-    {
-      sp = con.setSavepoint();
-      stmt = con.getSqlConnection().prepareStatement(sql.toString());
-      stmt.setString(1, indexDefinition.getName());
-      stmt.setString(2, table.getSchema());
-      rs = stmt.executeQuery();
-      if (rs.next())
-      {
-        result = rs.getString(1);
-        String tblSpace = rs.getString(2);
-        String remarks = rs.getString(3);
-        indexDefinition.setTablespace(tblSpace);
-        indexDefinition.setComment(result);
-
-        if (StringUtil.isNonBlank(remarks))
-        {
-          result += "\nCOMMENT ON INDEX " + SqlUtil.quoteObjectname(indexDefinition.getName()) + " IS '" + SqlUtil.escapeQuotes(remarks) + "';\n";
-        }
-      }
-      con.releaseSavepoint(sp);
-    }
-    catch (Exception e)
-    {
-      con.rollback(sp);
-      LogMgr.logError("PostgresIndexReader.getIndexSource2()", "Error when retrieving index information using:\n" +
-          SqlUtil.replaceParameters(sql, indexDefinition.getName(), table.getSchema()), e);
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-    }
-    return result;
+    return getIndexSource(table, Collections.singletonList(indexDefinition));
   }
 
   @Override
