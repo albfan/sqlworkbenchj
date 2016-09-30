@@ -76,7 +76,7 @@ public class DatastoreTransposerTest
 		data.setValue(row, 2, 3000);
 
 		DatastoreTransposer transposer = new DatastoreTransposer(data);
-    DataStore result = transposer.transposeWithLabel("dept", null);
+    DataStore result = transposer.transposeWithLabel("dept", null, null);
 
 //    expected output:
 //                | Finance | HR   | IT     | DEV   | Support

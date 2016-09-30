@@ -77,13 +77,15 @@ public class PostgresDataTypeResolver
     {
       return "bit(" + size + ")";
     }
+    
     if (sqlType == Types.ARRAY && dbmsName.charAt(0) == '_')
     {
       if ("_int2".equals(dbmsName)) return "smallint[]";
       if ("_int4".equals(dbmsName)) return "integer[]";
       if ("_int8".equals(dbmsName)) return "bigint[]";
+      if ("_varchar".equals(dbmsName)) return "varchar[]";
     }
-    if ("_varchar".equals(dbmsName)) return "varchar[]";
+
     if ("varchar".equals(dbmsName) && size < 0) return "varchar";
 
     return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);

@@ -172,6 +172,8 @@ public class DataImporter
   private boolean adjustSequences;
   private String insertSqlStart;
 
+  private ArrayValueHandler arrayHandler;
+
   /**
    * Indicates multiple imports run with this instance oft DataImporter.
    * Set via {@link #beginMultiTable() }
@@ -206,6 +208,7 @@ public class DataImporter
     }
 
     this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
+    this.arrayHandler = ArrayValueHandler.Factory.getInstance(aConn);
   }
 
   public void setUseSavepoint(boolean flag)
@@ -527,7 +530,7 @@ public class DataImporter
   {
     return mode != ImportMode.insert;
   }
-  
+
   public boolean isModeInsert() { return (this.mode == ImportMode.insert); }
   public boolean isModeUpsert() { return (this.mode == ImportMode.upsert); }
   public boolean isModeInsertIgnore() { return (this.mode == ImportMode.insertIgnore); }
@@ -1509,6 +1512,10 @@ public class DataImporter
           this.messages.append(ResourceMgr.getFormattedString("MsgBlobNotRead", Integer.valueOf(i+1)));
           this.messages.appendNewLine();
         }
+      }
+      else if (arrayHandler != null && jdbcType == java.sql.Types.ARRAY)
+      {
+        arrayHandler.setValue(pstmt, colIndex, value, column);
       }
       else
       {

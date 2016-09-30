@@ -52,6 +52,7 @@ import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
+import workbench.db.importer.ArrayValueHandler;
 
 import workbench.sql.formatter.WbSqlFormatter;
 
@@ -60,7 +61,6 @@ import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.WbStringTokenizer;
 
 /**
  * A class to execute a SQL Statement and to create the statement
@@ -153,6 +153,8 @@ public class DmlStatement
     boolean useBlobSetBytes = dbs.useSetBytesForBlobs();
     boolean padCharColumns = dbs.padCharColumns();
 
+    ArrayValueHandler arrayHandler = ArrayValueHandler.Factory.getInstance(connection);
+
     DmlExpressionBuilder builder = DmlExpressionBuilder.Factory.getBuilder(connection);
 
     this.generatedKeys = null;
@@ -242,7 +244,14 @@ public class DmlStatement
         }
         else if (type == Types.ARRAY)
         {
-          handleArray(stmt, i+1, dbmsType, value, connection);
+          if (arrayHandler != null)
+          {
+            arrayHandler.setValue(stmt, i+1, value, data.getIdentifier());
+          }
+          else
+          {
+            handleArray(stmt, i+1, value);
+          }
         }
         else
         {
@@ -352,18 +361,13 @@ public class DmlStatement
   /**
    * Handle an array column.
    *
-   * This is currently only tested on Postgres.
-   * But as I'm not aware of any other DBMS with a decent array support anyway this shouldn't do much harm.
-   *
    * @param stmt           the statement to use
    * @param index          the column index for the prepared statement
-   * @param dbmsType       the DBMS typename as returned by the driver
    * @param value          the value to use
-   * @param connection     the connection to use
    *
    * @throws SQLException
    */
-  private void handleArray(PreparedStatement stmt, int index, String dbmsType, Object value, WbConnection connection)
+  private void handleArray(PreparedStatement stmt, int index, Object value)
     throws SQLException
   {
     if (value instanceof Array)
@@ -376,54 +380,10 @@ public class DmlStatement
     if (StringUtil.isEmptyString(valueString))
     {
       stmt.setNull(index, Types.ARRAY);
-      return;
     }
-
-    if (connection.getMetadata().isPostgres())
+    else
     {
-      // this is an array of a custom type created with "CREATE TYPE"
-      if (dbmsType.startsWith("_"))
-      {
-        // just assume the User entered a valid expression for this.
-        stmt.setObject(index, valueString, Types.OTHER);
-        return;
-      }
-      else if (valueString.startsWith("{") && valueString.endsWith("}"))
-      {
-        valueString = valueString.substring(1,valueString.length() - 1);
-      }
-    }
-
-    WbStringTokenizer tok = new WbStringTokenizer(",", true, "\"'", false);
-    tok.setDelimiterNeedsWhitspace(false);
-    tok.setSourceString(valueString);
-
-    List<Object> arrayValues = new ArrayList<>();
-    while (tok.hasMoreTokens())
-    {
-      String s = tok.nextToken().trim();
-      arrayValues.add(s);
-    }
-
-    Object[] data = arrayValues.toArray();
-
-    try
-    {
-      if (connection.getDbSettings().supportsCreateArray())
-      {
-        String baseType = SqlUtil.getBaseTypeName(dbmsType);
-        Array array = connection.getSqlConnection().createArrayOf(baseType, data);
-        stmt.setArray(index, array);
-      }
-      else
-      {
-        stmt.setObject(index, data);
-      }
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logError("DmlStatement.handleArray()", "Error setting array value", ex);
-      stmt.setObject(index, data);
+      stmt.setObject(index, value, Types.ARRAY);
     }
   }
 
