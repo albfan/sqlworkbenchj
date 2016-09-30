@@ -45,6 +45,7 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -66,6 +67,13 @@ public class WbDataDiffTest
     util = new TestUtil("dataDiffTest");
   }
 
+  @After
+  public void tearDown()
+    throws Exception
+  {
+    getTestUtil().emptyBaseDirectory();
+  }
+  
   @Test
   public void testIsConnectionRequired()
   {
@@ -320,17 +328,7 @@ public class WbDataDiffTest
       {
         WbFile f = new WbFile(util.getBaseDir(), fname);
         assertTrue(f.exists());
-        if (!f.delete())
-        {
-          fail("Could not delete " + f.getFullPath());
-        }
       }
-
-      if (!main.delete())
-      {
-        fail("Could not delete " + main.getFullPath());
-      }
-
 
       TestUtil.executeScript(source, "update person set lastname = '<name>' where person_id = 10;commit;");
 
