@@ -23,8 +23,6 @@ package workbench.db.postgres;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import workbench.WbManager;
 import workbench.log.LogMgr;
@@ -35,6 +33,8 @@ import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
 import workbench.db.importer.ArrayValueHandler;
 
+import workbench.util.StringUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -42,7 +42,6 @@ import workbench.db.importer.ArrayValueHandler;
 public class PostgresArrayHandler
   implements ArrayValueHandler
 {
-  private final Map<String, String> dataTypeMap = new HashMap<>();
   private Class pgObjectClass;
   private Method setValue;
   private Method setType;
@@ -51,16 +50,6 @@ public class PostgresArrayHandler
   public PostgresArrayHandler(WbConnection connection)
   {
     useDefaultClassloader = WbManager.isTest();
-
-    String defaultMap = connection.getDbSettings().getProperty("import.arraymap.default", "smallint[],_int2;integer[],_int4;bigint[],_int8;text[],_text;varchar[],_varchar;numeric[],_numeric;boolean[],_bool");
-    String arraymap = connection.getDbSettings().getProperty("import.arraymap", defaultMap);
-    String[] pairs = arraymap.split(";");
-    for (String pair : pairs)
-    {
-      String[] elements = pair.split(",");
-      LogMgr.logDebug("PostgresArrayHandler.<init>", "Mapping type: " + elements[0] + " to internal type: " + elements[1]);
-      dataTypeMap.put(elements[0], elements[1]);
-    }
     initialize(connection);
   }
 
@@ -109,18 +98,21 @@ public class PostgresArrayHandler
     if (setValue == null) return data;
     if (setType == null) return data;
 
-    String internalType = dataTypeMap.get(userType);
+    String internalType = PostgresDataTypeResolver.mapArrayDisplayToInternal(userType);
+
     if (internalType == null)
     {
       LogMgr.logDebug("PostgresArrayHandler.createPgObject()", "No mapping for type: " + userType);
       return data;
     }
 
+    String value = adjustLiteral(data);
+
     try
     {
       Object pgo = pgObjectClass.newInstance();
       setType.invoke(pgo, internalType);
-      setValue.invoke(pgo, data.toString());
+      setValue.invoke(pgo, value);
       return pgo;
     }
     catch (Throwable th)
@@ -128,5 +120,23 @@ public class PostgresArrayHandler
       LogMgr.logWarning("PostgresArrayHandler.createPgObject()", "Could not create instance of PGobject", th);
       return data;
     }
+  }
+
+  private String adjustLiteral(Object data)
+  {
+    if (data == null) return null;
+    String value = StringUtil.trimToNull(data.toString());
+    if (isArrayLiteral(value))
+    {
+      return value;
+    }
+    return "{" + value + "}";
+  }
+
+  private boolean isArrayLiteral(String literal)
+  {
+    if (literal == null) return true;
+    if (literal.length() < 2) return false;
+    return literal.charAt(0) == '{' && literal.charAt(literal.length() - 1) == '}';
   }
 }

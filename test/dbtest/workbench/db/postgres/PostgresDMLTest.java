@@ -122,10 +122,12 @@ public class PostgresDMLTest
 			);
 
 			Statement query = conn.createStatement();
-			ResultSet rs = query.executeQuery("select id, rating from ratings");
-			ResultInfo info = new ResultInfo(rs.getMetaData(), conn);
-			info.setUpdateTable(new TableIdentifier("ratings"));
-			rs.close();
+      ResultInfo info;
+      try (ResultSet rs = query.executeQuery("select id, rating from ratings"))
+      {
+        info = new ResultInfo(rs.getMetaData(), conn);
+        info.setUpdateTable(new TableIdentifier("ratings"));
+      }
 
 			StatementFactory factory = new StatementFactory(info, conn);
 			RowData row = new RowData(info);
@@ -158,10 +160,12 @@ public class PostgresDMLTest
 				"commit;"
 			);
 			Statement query = conn.createStatement();
-			ResultSet rs = query.executeQuery("select id, tags from array_test");
-			ResultInfo info = new ResultInfo(rs.getMetaData(), conn);
-			info.setUpdateTable(new TableIdentifier("array_test"));
-			rs.close();
+      ResultInfo info;
+      try (ResultSet rs = query.executeQuery("select id, tags from array_test"))
+      {
+        info = new ResultInfo(rs.getMetaData(), conn);
+        info.setUpdateTable(new TableIdentifier("array_test"));
+      }
 
 			StatementFactory factory = new StatementFactory(info, conn);
 			RowData row = new RowData(info);
@@ -172,6 +176,9 @@ public class PostgresDMLTest
 			conn.commit();
 			assertEquals(1, rows);
 			int count = ((Number) TestUtil.getSingleQueryValue(conn, "select count(*) from array_test where id = 42")).intValue();
+			assertEquals(1, count);
+
+			count = ((Number) TestUtil.getSingleQueryValue(conn, "select count(*) from array_test where tags = '{1,2}'")).intValue();
 			assertEquals(1, count);
 		}
 		finally

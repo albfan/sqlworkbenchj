@@ -47,6 +47,7 @@ import workbench.util.StringUtil;
  * <ul>
  * <li>the column collation available for versions >= PostgreSQL 9.1</li>
  * <li>The array dimensions so that arrays are displayed correctly.</li>
+ * <li>Converts serial columns back to "serial"</li>
  * </ul>
  *
  * @author Thomas Kellerer
@@ -131,6 +132,19 @@ public class PostgresColumnEnhancer
     }
   }
 
+  /**
+   * Adjust the display of dimensions for an array column.
+   *
+   * Array columns are only reported with an internal array identifier e.g. "_int4" for an integer[] column.
+   * The {@link PostgresDataTypeResolver} already converts that to a properly formatted array, but
+   * isn't able to properly display multiple dimensions.
+   *
+   * This method retrieves the information about the dimensions of an array
+   * and adjusts the display type accordingly.
+   *
+   * @param table
+   * @param conn
+   */
   private void updateArrayTypes(TableDefinition table, WbConnection conn)
   {
     int arrayCols = 0;
@@ -176,7 +190,7 @@ public class PostgresColumnEnhancer
         ArrayDef def = new ArrayDef();
         String colname = rs.getString(1);
         def.numDims = rs.getInt(2);
-        def.formattedType = rs.getString(3);
+        def.formattedType = StringUtil.replace(rs.getString(3), "character varying", "varchar");
         dims.put(colname, def);
       }
     }

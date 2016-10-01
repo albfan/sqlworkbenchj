@@ -110,8 +110,10 @@ public class TableColumnsDatastore
   public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 11;
 
   public static final String JAVA_SQL_TYPE_COL_NAME = "JDBC Type";
+  public static final String SCALE_COL_NAME = "SCALE/SIZE";
+  public static final String PRECISION_COL_NAME = "PRECISION";
 
-  public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "AUTOINCREMENT", "COMPUTED", "REMARKS", JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION", "POSITION"};
+  public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "AUTOINCREMENT", "COMPUTED", "REMARKS", JAVA_SQL_TYPE_COL_NAME, SCALE_COL_NAME, PRECISION_COL_NAME, "POSITION"};
   private static final int[] TYPES = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
   private static final int[] SIZES = {20, 18, 5, 8, 10, 10, 25, 18, 2, 2, 2, 2};
 

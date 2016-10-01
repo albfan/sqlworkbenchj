@@ -24,10 +24,13 @@
 package workbench.db.postgres;
 
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 import workbench.db.DataTypeResolver;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * @author Thomas Kellerer
@@ -35,6 +38,37 @@ import workbench.util.SqlUtil;
 public class PostgresDataTypeResolver
   implements DataTypeResolver
 {
+
+  private static final Map<String, String> arrayTypesToDisplay = new HashMap<>();
+  private static final Map<String, String> displayToArrayType = new HashMap<>();
+
+  static
+  {
+    arrayTypesToDisplay.put("_int2","smallint[]");
+    arrayTypesToDisplay.put("_int4","integer[]");
+    arrayTypesToDisplay.put("_int8","bigint[]");
+    arrayTypesToDisplay.put("_varchar","varchar[]");
+    arrayTypesToDisplay.put("_float4","real[]");
+    arrayTypesToDisplay.put("_float8","double precision[]");
+    arrayTypesToDisplay.put("_bpchar","char[]");
+    arrayTypesToDisplay.put("_text","text[]");
+    arrayTypesToDisplay.put("_bool","boolean[]");
+    arrayTypesToDisplay.put("_numeric","numeric[]");
+    arrayTypesToDisplay.put("_date","date[]");
+    arrayTypesToDisplay.put("_time","time[]");
+    arrayTypesToDisplay.put("_timestamp","timestamp[]");
+    arrayTypesToDisplay.put("_timestamptz","timestamptz[]");
+    arrayTypesToDisplay.put("_timetz","timetz[]");
+
+    for (Map.Entry<String, String> entry : arrayTypesToDisplay.entrySet())
+    {
+      displayToArrayType.put(entry.getValue(), entry.getKey());
+    }
+    displayToArrayType.put("timestamp without time zone[]", "_timestamp");
+    displayToArrayType.put("timestamp with time zone[]", "_timestamptz");
+    displayToArrayType.put("time without time zone[]", "_time");
+    displayToArrayType.put("time with time zone[]", "_timetz");
+  }
 
   @Override
   public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
@@ -77,13 +111,10 @@ public class PostgresDataTypeResolver
     {
       return "bit(" + size + ")";
     }
-    
+
     if (sqlType == Types.ARRAY && dbmsName.charAt(0) == '_')
     {
-      if ("_int2".equals(dbmsName)) return "smallint[]";
-      if ("_int4".equals(dbmsName)) return "integer[]";
-      if ("_int8".equals(dbmsName)) return "bigint[]";
-      if ("_varchar".equals(dbmsName)) return "varchar[]";
+      return mapInternaArrayToDisplay(dbmsName);
     }
 
     if ("varchar".equals(dbmsName) && size < 0) return "varchar";
@@ -104,4 +135,26 @@ public class PostgresDataTypeResolver
     return type;
   }
 
+  public static String mapArrayDisplayToInternal(String dbmsType)
+  {
+    String internal = displayToArrayType.get(dbmsType);
+    if (internal != null)
+    {
+      return internal;
+    }
+    return "_" + StringUtil.replace(dbmsType, "[]", "");
+  }
+
+  public static String mapInternaArrayToDisplay(String internal)
+  {
+    if (StringUtil.isEmptyString(internal)) return null;
+
+    String display = arrayTypesToDisplay.get(internal);
+    if (display != null) return display;
+    if (internal.charAt(0) == '_')
+    {
+      return internal.substring(1) + "[]";
+    }
+    return internal;
+  }
 }
