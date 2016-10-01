@@ -2,9 +2,9 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-07-31">
-    <entry dev-build="1" type="enh">For Postgres it's now possible to import values into array columns if the source data is formatted as a Postgres array literal.</entry>
+    <entry dev-build="1" type="enh">For Postgres it's now possible to import values into array columns if the source data is formatted as a Postgres array literal (WbImport and WbCopy)</entry>
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create crosstabs (aka "pivot") from query results.</entry>
-    <entry dev-build="1" type="enh">Improved editing of hstore result columns.</entry>
+    <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
     <entry dev-build="1" type="fix">For SQL Server, the source of procedures, functions and triggers was not displayed correctly in the DbExplorer for databases other then the default database of the connection.</entry>
     <entry dev-build="1" type="fix">When using -configDir in console mode the connection profiles were still loaded from the default location.</entry>
