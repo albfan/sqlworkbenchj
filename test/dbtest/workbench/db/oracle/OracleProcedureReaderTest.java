@@ -242,4 +242,51 @@ public class OracleProcedureReaderTest
 		String status2 = ds2.getValueAsString(0, OracleProcedureReader.COLUMN_IDX_PROC_LIST_ORA_STATUS);
 		assertEquals("INVALID", status2);
 	}
+
+  @Test
+  public void testOverloaded()
+    throws Exception
+  {
+    String sql =
+      "create or replace package overload_test \n" +
+      "AS   \n" +
+      "  PROCEDURE proc_1(id1 integer); \n" +
+      "  PROCEDURE proc_1(id1 integer, id2 integer); \n" +
+      "END overload_test; \n" +
+      "/\n" +
+      "\n" +
+      "create or replace package body overload_test \n" +
+      "AS  \n" +
+      "  procedure proc_1(id1 integer)  \n" +
+      "  IS \n" +
+      "   l_result integer; \n" +
+      "  BEGIN   \n" +
+      "    l_result := id1 * 10; \n" +
+      "  END; \n" +
+      "  \n" +
+      "  procedure proc_1(id1 integer, id2 integer)  \n" +
+      "  IS \n" +
+      "   l_result integer; \n" +
+      "  BEGIN   \n" +
+      "    l_result := id1 * id2; \n" +
+      "  END; \n" +
+      "END overload_test; \n" +
+      "/\n";
+
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		Settings.getInstance().setProperty("workbench.db.oracle.procedures.custom_sql", true);
+
+    TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+
+    List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList("OVERLOAD_TEST", OracleTestUtil.SCHEMA_NAME, "%");
+		assertEquals(2, procs.size());
+
+    DataStore cols1 = con.getMetadata().getProcedureReader().getProcedureColumns(procs.get(0));
+    assertEquals(1, cols1.getRowCount());
+
+    DataStore cols2 = con.getMetadata().getProcedureReader().getProcedureColumns(procs.get(1));
+    assertEquals(2, cols2.getRowCount());
+  }
 }

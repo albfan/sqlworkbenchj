@@ -433,7 +433,7 @@ public class OracleProcedureReader
       "               else " + DatabaseMetaData.procedureNoResult + " \n " +
       "            end as procedure_type,  \n" +
       "            ao.status,  \n" +
-      "            row_number() over (partition by ap.owner, ap.object_name, ap.procedure_name order by ao.object_type desc) as rn \n" +
+      "            row_number() over (partition by ap.owner, ap.object_name, ap.procedure_name, ap.overload order by ao.object_type desc) as rn \n" +
       "    from all_procedures ap \n" +
       "      join all_objects ao on ap.object_name = ao.object_name and ap.owner = ao.owner \n" +
       "    where ao.object_type IN ('PACKAGE BODY', 'PACKAGE', 'TYPE', 'OBJECT TYPE') \n" +
@@ -471,9 +471,9 @@ public class OracleProcedureReader
       sql += pkgProcs;
     }
 
-    sql +=
-      "\n)\n" +
-      "ORDER BY 2,3";
+      sql +=
+        "\n)\n" +
+        "ORDER BY 2,3,4";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {

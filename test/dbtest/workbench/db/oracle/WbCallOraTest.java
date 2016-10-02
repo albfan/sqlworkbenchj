@@ -174,47 +174,47 @@ public class WbCallOraTest
 		sql =
 			"create or replace package overload_pkg \n" +
 			"as \n" +
-			"  procedure get_data( db_status   out    number \n" +
-			"                    , app_status  out    number \n" +
-			"                    , id1         in     number \n" +
-			"                    , id2         in     number \n" +
-			"                    , id3         in     number \n" +
-			"                    , cur         in out sys_refcursor); \n" +
+			"  procedure get_data( db_status   out    number, \n" +
+			"                      app_status  out    number, \n" +
+			"                      id1         in     number, \n" +
+			"                      id2         in     number, \n" +
+			"                      id3         in     number, \n" +
+			"                      cur         in out sys_refcursor); \n" +
 			" \n" +
-			"   procedure get_data( db_status  out     number \n" +
-			"                  , app_status    out     number \n" +
-			"                  , id1           in      number \n" +
-			"                  , id2           in      number \n" +
-			"                  , id3           in      number \n" +
-			"                  , id4           in      number \n" +
-			"                  , some_filter   in      some_type_table \n" +
-			"                  , cur           in out  sys_refcursor); \n" +
+			"   procedure get_data( db_status  out     number, \n" +
+			"                       app_status    out     number, \n" +
+			"                       id1           in      number, \n" +
+			"                       id2           in      number, \n" +
+			"                       id3           in      number, \n" +
+			"                       id4           in      number, \n" +
+			"                       some_filter   in      some_type_table, \n" +
+			"                       cur           in out  sys_refcursor); \n" +
 			"end overload_pkg; \n" +
 			"/ \n" +
 			" \n" +
 			"create or replace package body overload_pkg \n" +
 			"as \n" +
 			"   \n" +
-			"  procedure get_data( db_status   out    number \n" +
-			"                    , app_status  out    number \n" +
-			"                    , id1         in     number \n" +
-			"                    , id2         in     number \n" +
-			"                    , id3         in     number \n" +
-			"                    , cur         in out sys_refcursor) \n" +
+			"  procedure get_data( db_status   out    number, \n" +
+			"                      app_status  out    number, \n" +
+			"                      id1         in     number, \n" +
+			"                      id2         in     number, \n" +
+			"                      id3         in     number, \n" +
+			"                      cur         in out sys_refcursor) \n" +
 			"  is \n" +
 			"  begin \n" +
 			"    db_status := 1; \n" +
 			"    app_status := 2; \n" +
 			"  end get_data; \n" +
 			"   \n" +
-			"   procedure get_data( db_status     out    number \n" +
-			"                     , app_status    out    number \n" +
-			"                     , id1           in     number \n" +
-			"                     , id2           in     number \n" +
-			"                     , id3           in     number \n" +
-			"                     , id4           in     number \n" +
-			"                     , some_filter   in     some_type_table \n" +
-			"                     , cur           in out sys_refcursor) \n" +
+			"   procedure get_data( db_status     out    number, \n" +
+			"                       app_status    out    number, \n" +
+			"                       id1           in     number, \n" +
+			"                       id2           in     number, \n" +
+			"                       id3           in     number, \n" +
+			"                       id4           in     number, \n" +
+			"                       some_filter   in     some_type_table, \n" +
+			"                       cur           in out sys_refcursor) \n" +
 			"  is \n" +
 			"  begin \n" +
 			"    db_status := 10; \n" +
@@ -243,17 +243,13 @@ public class WbCallOraTest
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				assertEquals(1, parms.getParameterCount());
-				parms.setParameterValue(0, "0");
-				parms.setParameterValue(1, "1");
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      assertEquals(1, parms.getParameterCount());
+      parms.setParameterValue(0, "0");
+      parms.setParameterValue(1, "1");
+      return true;
+    };
 		runner.setConnection(con);
 		call.setStatementRunner(runner);
 		call.setConnection(con);
@@ -283,16 +279,12 @@ public class WbCallOraTest
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "REF_CURSOR_EXAMPLE");
 		assertEquals(1, procs.size());
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				assertEquals(1, parms.getParameterCount());
-				parms.setParameterValue(0, "1");
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      assertEquals(1, parms.getParameterCount());
+      parms.setParameterValue(0, "1");
+      return true;
+    };
 
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
@@ -428,15 +420,11 @@ public class WbCallOraTest
 		String sql = procs.get(0).createSql(con);
 		assertEquals("-- Parameters: SOME_VALUE (OUT), SOME_ID (IN)\nWbCall PROC_PCKG.PROCESS_PKG_DATA(?,?);", sql);
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				prompterCalled = true;
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      prompterCalled = true;
+      return true;
+    };
 
 		WbCall call = new WbCall();
 		prompterCalled = false;
@@ -474,15 +462,11 @@ public class WbCallOraTest
 		String sql = procs.get(0).createSql(con);
 		assertEquals("-- Parameters: SOME_VALUE (OUT), SOME_ID (IN)\nWbCall PROCESS_DATA(?,?);", sql);
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				prompterCalled = true;
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      prompterCalled = true;
+      return true;
+    };
 
 		WbCall call = new WbCall();
 		prompterCalled = false;
@@ -518,15 +502,11 @@ public class WbCallOraTest
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				prompterCalled = true;
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      prompterCalled = true;
+      return true;
+    };
 
 		WbCall call = new WbCall();
 		prompterCalled = false;
@@ -567,15 +547,11 @@ public class WbCallOraTest
 		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_ANSWER");
 		assertEquals(1, procs.size());
 
-		StatementParameterPrompter prompter = new StatementParameterPrompter()
-		{
-			@Override
-			public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-			{
-				prompterCalled = true;
-				return true;
-			}
-		};
+		StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
+    {
+      prompterCalled = true;
+      return true;
+    };
 
 		WbCall call = new WbCall();
 		prompterCalled = false;
