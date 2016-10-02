@@ -6,6 +6,7 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="1" type="fix">For Oracle, overloaded procedures inside packages where no longer displayed.</entry>
     <entry dev-build="1" type="fix">For SQL Server, the source of procedures, functions and triggers was not displayed correctly in the DbExplorer for databases other then the default database of the connection.</entry>
     <entry dev-build="1" type="fix">When using -configDir in console mode the connection profiles were still loaded from the default location.</entry>
     <entry dev-build="1" type="fix">For Postgres, when generating scripts for tables and sequences the owner column for a sequence was not correctly generated.</entry>
