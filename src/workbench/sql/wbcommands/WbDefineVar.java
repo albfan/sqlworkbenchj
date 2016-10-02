@@ -344,11 +344,9 @@ public class WbDefineVar
 	}
 
 	/**
-	 *	Return the result of the given SQL string and return
-	 *	the value of the first column of the first row
-	 *	as a string value.
+	 *	Return the result of the given SQL string and return the column values of the first row as a list of values.
 	 *
-	 *	If the SQL gives an error, an empty string will be returned
+	 *	If the SQL gives an error, an empty List will be returned
 	 */
 	private List<String> evaluateSql(WbConnection conn, String sql, StatementRunnerResult stmtResult)
 		throws SQLException
