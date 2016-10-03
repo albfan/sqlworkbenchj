@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2016-07-31">
+  <release build="-1" date="2016-10-02">
     <entry dev-build="1" type="enh">For Postgres it's now possible to import values into array columns if the source data is formatted as a Postgres array literal (WbImport and WbCopy)</entry>
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
