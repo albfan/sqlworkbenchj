@@ -43,6 +43,7 @@ import workbench.sql.DelimiterDefinition;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringBuilderOutput;
 import workbench.util.StringUtil;
 
@@ -95,6 +96,7 @@ public class ObjectScripter
   private int totalObjects;
   private TextOutput output;
   private boolean endTransaction;
+  private DelimiterDefinition delimiterToUse;
 
   public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
   {
@@ -154,6 +156,11 @@ public class ObjectScripter
         break;
       }
     }
+  }
+
+  public void setDelimiterToUse(DelimiterDefinition delimiter)
+  {
+    delimiterToUse = delimiter;
   }
 
   public void setIncludeCommit(boolean flag)
@@ -326,6 +333,8 @@ public class ObjectScripter
 
   private DelimiterDefinition getDelimiter()
   {
+    if (delimiterToUse != null) return delimiterToUse;
+
     if (needsAlternateDelimiter)
     {
       return Settings.getInstance().getAlternateDelimiter(dbConnection, DelimiterDefinition.STANDARD_DELIMITER);
@@ -415,7 +424,7 @@ public class ObjectScripter
           if (dbConnection.getMetadata().isSequenceType(dbo.getObjectType()))
           {
             SequenceDefinition seq = seqReader.getSequenceDefinition(dbo.getCatalog(), dbo.getSchema(), dbo.getObjectName());
-            source = seqReader.getSequenceSource(seq, false);
+            source = adjustDelimiter(seqReader.getSequenceSource(seq, false));
             List<String> sectionScript = additionalSQL.get(ScriptSection.AfterAllTables);
             if (sectionScript == null)
             {
@@ -427,7 +436,7 @@ public class ObjectScripter
           else
           {
             // do not generate foreign keys now, they should be generated at the end after all tables
-            source = ((TableIdentifier)dbo).getSource(dbConnection, false, includeGrants);
+            source = adjustDelimiter(((TableIdentifier)dbo).getSource(dbConnection, false, includeGrants));
           }
         }
         else
@@ -446,6 +455,10 @@ public class ObjectScripter
                 isCompleteProcedure = false;
               }
             }
+          }
+          else
+          {
+            source = adjustDelimiter(source);
           }
         }
 
@@ -500,4 +513,13 @@ public class ObjectScripter
     }
   }
 
+  private CharSequence adjustDelimiter(CharSequence source)
+  {
+    if (source == null) return source;
+    if (delimiterToUse == null) return source;
+    if (delimiterToUse.isStandard()) return source;
+
+    String sql = SqlUtil.trimSemicolon(source.toString());
+    return sql + delimiterToUse.getScriptText();
+  }
 }

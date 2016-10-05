@@ -45,6 +45,7 @@ import workbench.db.TriggerReaderFactory;
 
 import workbench.storage.RowActionMonitor;
 
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -72,6 +73,7 @@ public class WbGenerateScript
   public static final String ARG_INCLUDE_DROP = "includeDrop";
 	public static final String ARG_INCLUDE_COMMIT = "includeCommit";
   public static final String ARG_USE_SEPARATOR = "useSeparator";
+  public static final String ARG_STMT_DELIMITER = "statementDelimiter";
 
 	private ObjectScripter scripter;
 
@@ -94,6 +96,7 @@ public class WbGenerateScript
 		cmdLine.addArgument(CommonArgs.ARG_FILE, ArgumentType.Filename);
 		cmdLine.addArgument(ARG_INCLUDE_DROP, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_INCLUDE_COMMIT, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(ARG_STMT_DELIMITER, DelimiterDefinition.ABBREVIATIONS);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -209,6 +212,10 @@ public class WbGenerateScript
 		scripter.setIncludeGrants(cmdLine.getBoolean(WbSchemaReport.ARG_INCLUDE_GRANTS, true));
     scripter.setIncludeForeignKeys(cmdLine.getBoolean(ARG_INCLUDE_FK, true));
     scripter.setIncludeCommit(cmdLine.getBoolean(ARG_INCLUDE_COMMIT, true));
+
+		String delimDef = cmdLine.getValue(ARG_STMT_DELIMITER);
+		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
+    scripter.setDelimiterToUse(delim);
 
 		if (this.rowMonitor != null)
 		{

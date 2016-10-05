@@ -24,9 +24,12 @@
 package workbench.sql;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -51,6 +54,10 @@ public class DelimiterDefinition
 	 * A default alternate delimiter that matches SQL Server's GO command
 	 */
 	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO", true);
+
+  public static final String ORA_ABBREVIATION = "oracle";
+  public static final String SQLSERVER_ABBREVIATION = "mssql";
+  public static final List<String> ABBREVIATIONS = Collections.unmodifiableList(CollectionUtil.arrayList(ORA_ABBREVIATION, SQLSERVER_ABBREVIATION));
 
 	private String delimiter;
 	private boolean singleLineDelimiter;
@@ -123,11 +130,11 @@ public class DelimiterDefinition
 		if (StringUtil.isEmptyString(arg)) return null;
 
 		arg = arg.trim();
-		if ("ORA".equalsIgnoreCase(arg) || "ORACLE".equalsIgnoreCase(arg) || "SQLPLUS".equalsIgnoreCase(arg))
+		if ("ORA".equalsIgnoreCase(arg) || ORA_ABBREVIATION.equalsIgnoreCase(arg) || "SQLPLUS".equalsIgnoreCase(arg))
 		{
 			return DEFAULT_ORA_DELIMITER;
 		}
-		else if ("MSSQL".equalsIgnoreCase(arg))
+		else if (SQLSERVER_ABBREVIATION.equalsIgnoreCase(arg) || "sqlserver".equalsIgnoreCase(arg))
 		{
 			return DEFAULT_MS_DELIMITER;
 		}
