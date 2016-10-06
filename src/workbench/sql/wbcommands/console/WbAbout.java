@@ -25,16 +25,13 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
+import workbench.db.ConnectionInfoBuilder;
+import workbench.db.ConnectionMgr;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.ConnectionInfoBuilder;
-import workbench.db.ConnectionMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
 import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -64,6 +61,12 @@ public class WbAbout
 	{
 		return false;
 	}
+
+  @Override
+  public boolean isWbCommand()
+  {
+    return true;
+  }
 
 	@Override
 	public StatementRunnerResult execute(String sql)
