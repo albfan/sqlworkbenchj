@@ -440,9 +440,9 @@ public class DbMetadata
     LogMgr.logInfo("DbMetadata.<init>", "Using identifier quote character: " + quoteCharacter);
     LogMgr.logInfo("DbMetadata.<init>", "Using search string escape character: " + getSearchStringEscape());
 
-    baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
+    baseTableTypeName = dbSettings.getProperty("basetype.table", "TABLE");
 
-    Collection<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, null);
+    Collection<String> ttypes = dbSettings.getListProperty("tabletypes");
     if (ttypes.isEmpty())
     {
       ttypes.addAll(retrieveTableTypes());
@@ -463,8 +463,7 @@ public class DbMetadata
       LogMgr.logInfo("DbMetadata.<init>", "Using configured table types: " + ttypes);
     }
 
-    tableTypesList = CollectionUtil.caseInsensitiveSet();
-    tableTypesList.addAll(ttypes);
+    tableTypesList = CollectionUtil.caseInsensitiveSet(ttypes);
 
     // make sure synonyms are not treated as tables
     tableTypesList.remove(SynonymReader.SYN_TYPE_NAME);
@@ -750,6 +749,7 @@ public class DbMetadata
   {
     Set<String> objectsWithData = CollectionUtil.caseInsensitiveSet();
     objectsWithData.addAll(retrieveTableTypes());
+    objectsWithData.addAll(getTableTypes());
     objectsWithData.addAll(getDbSettings().getViewTypes());
 
     String keyPrefix = "workbench.db.objecttype.selectable.";
@@ -2829,12 +2829,8 @@ public class DbMetadata
     Set<String> result = CollectionUtil.caseInsensitiveSet();
     result.addAll(retrieveTableTypes());
 
-    String types = System.getProperty("workbench.db." + this.getDbId() + ".additional.objecttypes", "");
-    if (StringUtil.isNonBlank(types))
-    {
-      List<String> addTypes = StringUtil.stringToList(types.toUpperCase(), ",", true, true, false, false);
-      result.addAll(addTypes);
-    }
+    List<String> addTypes = dbSettings.getListProperty("additional.objecttypes");
+    result.addAll(addTypes);
 
     if (supportsSynonyms())
     {
@@ -2890,7 +2886,7 @@ public class DbMetadata
   public boolean isExtendedTableType(String type)
   {
     if (isTableType(type)) return true;
-    List<String> types = Settings.getInstance().getListProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",false);
+    List<String> types = dbSettings.getListProperty("additional.tabletypes");
     return types.contains(type);
   }
 

@@ -33,18 +33,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.Settings;
+
 import workbench.db.exporter.RowDataConverter;
 import workbench.db.importer.SetObjectStrategy;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.gui.dbobjects.TableSearchPanel;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.Settings;
-import workbench.sql.EndReadOnlyTrans;
-import workbench.sql.commands.TransactionEndCommand;
+
 import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
+
+import workbench.sql.EndReadOnlyTrans;
+import workbench.sql.commands.TransactionEndCommand;
+
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -126,6 +131,18 @@ public class DbSettings
   public boolean supportsCommentInSql()
   {
     return getBoolProperty("sql.embeddedcomments", true);
+  }
+
+
+  public List<String> getListProperty(String prop)
+  {
+    return getListProperty(prop, null);
+  }
+
+  public List<String> getListProperty(String prop, String defaultValue)
+  {
+    String value = getProperty(prop, defaultValue);
+    return StringUtil.stringToList(value, ",", true, true, false);
   }
 
   public String getProperty(String prop, String defaultValue)
@@ -682,9 +699,8 @@ public class DbSettings
   public boolean isSynonymType(String type)
   {
     if (type == null) return false;
-    String synTypes = getProperty("synonymtypes", "synonym").toLowerCase();
-    List types = StringUtil.stringToList(synTypes, ",", true, true, false);
-    return types.contains(type.toLowerCase());
+    Set<String> synTypes = CollectionUtil.caseInsensitiveSet(getListProperty("synonymtypes", "synonym"));
+    return synTypes.contains(type.toLowerCase());
   }
 
   public boolean isMview(String type)
@@ -1697,9 +1713,7 @@ public class DbSettings
 
   public Set<String> getTableTypeSynonyms()
   {
-    String typeList = getProperty("table.type.alternate.names", null);
-    if (typeList == null) return Collections.emptySet();
-    return CollectionUtil.caseInsensitiveSet(StringUtil.stringToList(typeList, ",", true, true, false, false));
+    return CollectionUtil.caseInsensitiveSet(getListProperty("table.type.alternate.names"));
   }
 
   public String getIdentifierQuoteString()
