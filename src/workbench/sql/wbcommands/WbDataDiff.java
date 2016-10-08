@@ -432,7 +432,8 @@ public class WbDataDiff
 			if (result.isSuccess() && !isCancelled)
 			{
 				writeOutput(mainScript, mapping, encoding, sourceCon, targetCon, checkDependencies, singleFile);
-				result.addMessage(ResourceMgr.getFormattedString("MsgDataDiffSuccess", mainScript.getFullPath()));
+        result.addMessageNewLine();
+				result.addMessage(ResourceMgr.getFormattedString("MsgDataDiffSuccess", tableCount, mainScript.getFullPath()));
 			}
 		}
 		finally

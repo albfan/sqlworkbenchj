@@ -91,8 +91,8 @@ public final class WbManager
   implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler, ToolWindowManager
 {
   private static WbManager wb;
-  private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
-  private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
+  private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<>(5));
+  private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<>(5));
 
   private RunMode runMode;
   private boolean writeSettings = true;

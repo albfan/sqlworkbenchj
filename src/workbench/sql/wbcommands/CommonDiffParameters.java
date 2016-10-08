@@ -160,13 +160,14 @@ public class CommonDiffParameters
 			refSchema = referenceConn.getMetadata().adjustSchemaNameCase(refSchema);
 		}
 
-		SourceTableArgument refArg = new SourceTableArgument(refTableNames, excludedNames, refSchema, referenceConn);
+    String[] tableTypes = referenceConn.getMetadata().getTableTypesArray();
+		SourceTableArgument refArg = new SourceTableArgument(refTableNames, excludedNames, refSchema, tableTypes, referenceConn);
 		refTables = refArg.getTables();
 		missingRefTables.addAll(refArg.getMissingTables());
 
 		if (StringUtil.isNonBlank(includeNames))
 		{
-			SourceTableArgument include = new SourceTableArgument(includeNames, null, refSchema, referenceConn);
+			SourceTableArgument include = new SourceTableArgument(includeNames, null, refSchema, tableTypes, referenceConn);
 			refTables.addAll(include.getTables());
 		}
 
@@ -200,7 +201,8 @@ public class CommonDiffParameters
 			targetTableNames = refTableNames;
 		}
 
-		SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon);
+    tableTypes = targetCon.getMetadata().getTableTypesArray();
+		SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, tableTypes, targetCon);
 		targetTables = targetArg.getTables();
 		missingTargetTables.addAll(targetArg.getMissingTables());
 
