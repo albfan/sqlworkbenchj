@@ -164,7 +164,10 @@ public class MultiSelectComboBox<T extends Object>
 	public void removeAllItems()
 	{
 		super.removeAllItems();
-		values.clear();
+    synchronized (values)
+    {
+      values.clear();
+    }
 	}
 
 	@Override
@@ -184,8 +187,11 @@ public class MultiSelectComboBox<T extends Object>
 
 	public int getValueCount()
 	{
-		if (values == null) return 0;
-		return values.size();
+    synchronized (values)
+    {
+      if (values == null) return 0;
+      return values.size();
+    }
 	}
 
 	private void setupItemIndexes()
@@ -233,11 +239,14 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public void setSelectedItems(Collection<T> selectedItems)
 	{
-		for (JCheckBox cbx : values)
-		{
-			T item = getUserObject(cbx);
-			cbx.setSelected(item != null && selectedItems.contains(item));
-		}
+    synchronized (values)
+    {
+      for (JCheckBox cbx : values)
+      {
+        T item = getUserObject(cbx);
+        cbx.setSelected(item != null && selectedItems.contains(item));
+      }
+    }
 	}
 
 	/**
@@ -274,10 +283,10 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public int getSelectedCount()
 	{
-    if (CollectionUtil.isEmpty(values)) return 0;
-
 		synchronized (values)
 		{
+      if (CollectionUtil.isEmpty(values)) return 0;
+
 			int count = 0;
 			for (JCheckBox cbx : values)
 			{
@@ -299,10 +308,11 @@ public class MultiSelectComboBox<T extends Object>
 	public List<T> getSelectedItems()
 	{
 		List<T> ret = new ArrayList<>();
-		if (CollectionUtil.isEmpty(values)) return ret;
 
 		synchronized (values)
 		{
+      if (CollectionUtil.isEmpty(values)) return ret;
+      
 			// Avoid the iterator to prevent a ConcurrentModificationException
 			for (JCheckBox cbx : values)
 			{
@@ -402,8 +412,11 @@ public class MultiSelectComboBox<T extends Object>
 		}
 		else if (index >= valueIndexOffset)
 		{
-			JCheckBox cb = values.get(index - valueIndexOffset);
-			cb.setSelected(!cb.isSelected());
+      synchronized (values)
+      {
+        JCheckBox cb = values.get(index - valueIndexOffset);
+        cb.setSelected(!cb.isSelected());
+      }
 		}
 		// clear the selection of the underlying listbox so that all items are "unselected"
 		// as the selection itself is represented by the checkbox
