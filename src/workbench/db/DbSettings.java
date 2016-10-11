@@ -33,23 +33,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.Settings;
-
 import workbench.db.exporter.RowDataConverter;
 import workbench.db.importer.SetObjectStrategy;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.sqltemplates.TemplateHandler;
-
 import workbench.gui.dbobjects.TableSearchPanel;
-
-import workbench.storage.BlobLiteralType;
-import workbench.storage.DmlStatement;
-
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.Settings;
 import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.commands.TransactionEndCommand;
-
+import workbench.storage.BlobLiteralType;
+import workbench.storage.DmlStatement;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -869,6 +864,21 @@ public class DbSettings
     return getBoolProperty("export.select.use.columns", true);
   }
 
+  public boolean exportXMLAsClob()
+  {
+    return getBoolProperty("export.xml.clob", true);
+  }
+
+  public boolean getUseStreamsForBlobExport()
+  {
+    return getBoolProperty("export.blob.use.streams", true);
+  }
+
+  public boolean getUseStreamsForClobExport()
+  {
+    return getBoolProperty("export.clob.use.streams", false);
+  }
+
   public boolean needsExactClobLength()
   {
     return getBoolProperty("exactcloblength", false);
@@ -1543,13 +1553,13 @@ public class DbSettings
 
   public boolean useXmlAPI()
   {
-    return Settings.getInstance().getBoolProperty(prefix + "use.xmlapi", false);
+    return getBoolProperty("use.xmlapi", false);
   }
 
   public boolean isClobType(String dbmsType)
   {
     if (dbmsType == null) return false;
-    return Settings.getInstance().getBoolProperty(prefix + "isclob." + dbmsType, false);
+    return getBoolProperty("isclob." + dbmsType, false);
   }
 
   public boolean pkIndexHasTableName()
@@ -1862,16 +1872,6 @@ public class DbSettings
   public String getNoValidateConstraintKeyword()
   {
     return getProperty("sql.constraint.notvalid", null);
-  }
-
-  public boolean getUseStreamsForBlobExport()
-  {
-    return Settings.getInstance().getBoolProperty(prefix + "export.blob.use.streams", true);
-  }
-
-  public boolean getUseStreamsForClobExport()
-  {
-    return Settings.getInstance().getBoolProperty(prefix + "export.clob.use.streams", false);
   }
 
   public boolean getUseGenericExecuteForSelect()

@@ -43,15 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.Committer;
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
@@ -61,11 +52,17 @@ import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
-
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.Committer;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
-
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.EncodingUtil;
@@ -1370,7 +1367,7 @@ public class DataImporter
           pstmt.setObject(colIndex, null);
         }
       }
-      else if (SqlUtil.isClobType(jdbcType, dbmsType, dbConn.getDbSettings()) || SqlUtil.isXMLType(jdbcType))
+      else if (SqlUtil.isClobType(jdbcType, dbmsType, dbConn.getDbSettings()) || SqlUtil.isXMLType(jdbcType, dbmsType))
       {
         Reader in = null;
         int size = -1;

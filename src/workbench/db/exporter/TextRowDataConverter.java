@@ -25,16 +25,13 @@ package workbench.db.exporter;
 
 import java.io.File;
 
-import workbench.log.LogMgr;
-
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
 import workbench.storage.DataConverter;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.util.CharacterEscapeType;
-
 import workbench.util.CharacterRange;
 import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
@@ -194,7 +191,7 @@ public class TextRowDataConverter
           throw new RuntimeException("Error writing BLOB file", e);
         }
       }
-      else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, dbs))
+      else if (!isConverted && writeClobFiles && isClob(dbmsType, colType, dbs))
       {
         Object clobData = row.getValue(colIndex);
         if (clobData != null)
@@ -262,6 +259,14 @@ public class TextRowDataConverter
     }
     result.append(lineEnding);
     return result;
+  }
+
+  private boolean isClob(String dbmsType, int jdbcType, DbSettings dbs)
+  {
+    if (SqlUtil.isClobType(jdbcType, dbmsType, dbs)) return true;
+    boolean treatXMLAsClob = dbs != null && dbs.exportXMLAsClob();
+    if (treatXMLAsClob && SqlUtil.isXMLType(jdbcType, dbmsType)) return true;
+    return false;
   }
 
   private boolean needsQuotes(String value)

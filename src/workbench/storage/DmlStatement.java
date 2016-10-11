@@ -45,17 +45,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.importer.ArrayValueHandler;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.formatter.WbSqlFormatter;
-
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
@@ -201,7 +198,7 @@ public class DmlStatement
             streamsToClose.add(in);
           }
         }
-        else if (useXmlApi && SqlUtil.isXMLType(type) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String || value instanceof Clob))
+        else if (useXmlApi && SqlUtil.isXMLType(type, dbmsType) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String || value instanceof Clob))
         {
           SQLXML xml = null;
           if (value instanceof Clob)
