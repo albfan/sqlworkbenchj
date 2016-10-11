@@ -50,6 +50,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.util.CollectionUtil;
 
+
 /**
  * A JComboBox containing checkboxes to allow multiple items to be selected.
  *
@@ -92,7 +93,9 @@ public class MultiSelectComboBox<T extends Object>
    *
 	 * The actual item value is stored as a client property of the checkbox.
 	 */
-	private final List<JCheckBox> values = new ArrayList<>();
+	private List<JCheckBox> values = new ArrayList<>(0);
+
+  private final Object dataLock = new Object();
 
 	private String nothingSelectedText;
 	private String selectAllLabel;
@@ -123,36 +126,43 @@ public class MultiSelectComboBox<T extends Object>
 	{
 		super.removeActionListener(this);
 
-		removeAllItems();
+    removeAllItems();
+    List<JCheckBox> newItems = new ArrayList<>(items.size());
 
-		this.addItem(nothingSelectedText);
-		this.addItem(selectAllLabel);
-		this.addItem(selectNoneLabel);
+    this.addItem(nothingSelectedText);
+    this.addItem(selectAllLabel);
+    this.addItem(selectNoneLabel);
 
-		setupItemIndexes();
+    setupItemIndexes();
 
-		maxElementWidth = Integer.MIN_VALUE;
+    maxElementWidth = Integer.MIN_VALUE;
 
-		for (T item : items)
-		{
-			boolean selected = selectedItems == null ? false : selectedItems.contains(item);
-			JCheckBox cb = new JCheckBox(item.toString());
-			cb.setBorder(emptyBorder);
+    for (T item : items)
+    {
+      boolean selected = selectedItems == null ? false : selectedItems.contains(item);
+      JCheckBox cb = new JCheckBox(item.toString());
+      cb.setBorder(emptyBorder);
 
-			int cwidth = cb.getPreferredSize().width;
-			if (cwidth > maxElementWidth)
-			{
-				maxElementWidth = cwidth;
-			}
-			cb.putClientProperty(PROP_KEY, item);
-			cb.setSelected(selected);
-			values.add(cb);
-			addItem(cb);
-		}
-		int scrollWidth = UIManager.getInt("ScrollBar.width");
-		setPopupWidth(maxElementWidth + scrollWidth + 5);
-		this.setToolTipText(getSelectedItemsDisplay());
-		super.addActionListener(this);
+      int cwidth = cb.getPreferredSize().width;
+      if (cwidth > maxElementWidth)
+      {
+        maxElementWidth = cwidth;
+      }
+      cb.putClientProperty(PROP_KEY, item);
+      cb.setSelected(selected);
+      newItems.add(cb);
+      addItem(cb);
+    }
+
+    synchronized (dataLock)
+    {
+      values = newItems;
+    }
+
+    int scrollWidth = UIManager.getInt("ScrollBar.width");
+    setPopupWidth(maxElementWidth + scrollWidth + 5);
+    this.setToolTipText(getSelectedItemsDisplay());
+    super.addActionListener(this);
 	}
 
 	public void setCloseOnSelect(boolean flag)
@@ -164,7 +174,7 @@ public class MultiSelectComboBox<T extends Object>
 	public void removeAllItems()
 	{
 		super.removeAllItems();
-    synchronized (values)
+    synchronized (dataLock)
     {
       values.clear();
     }
@@ -187,9 +197,8 @@ public class MultiSelectComboBox<T extends Object>
 
 	public int getValueCount()
 	{
-    synchronized (values)
+    synchronized (dataLock)
     {
-      if (values == null) return 0;
       return values.size();
     }
 	}
@@ -239,7 +248,7 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public void setSelectedItems(Collection<T> selectedItems)
 	{
-    synchronized (values)
+    synchronized (dataLock)
     {
       for (JCheckBox cbx : values)
       {
@@ -283,10 +292,8 @@ public class MultiSelectComboBox<T extends Object>
 	 */
 	public int getSelectedCount()
 	{
-		synchronized (values)
+		synchronized (dataLock)
 		{
-      if (CollectionUtil.isEmpty(values)) return 0;
-
 			int count = 0;
 			for (JCheckBox cbx : values)
 			{
@@ -309,11 +316,8 @@ public class MultiSelectComboBox<T extends Object>
 	{
 		List<T> ret = new ArrayList<>();
 
-		synchronized (values)
+		synchronized (dataLock)
 		{
-      if (CollectionUtil.isEmpty(values)) return ret;
-      
-			// Avoid the iterator to prevent a ConcurrentModificationException
 			for (JCheckBox cbx : values)
 			{
 				if (cbx.isSelected())
