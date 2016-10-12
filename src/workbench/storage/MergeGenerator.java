@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import workbench.resource.Settings;
-
 import workbench.db.AnsiSQLMergeGenerator;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
@@ -42,7 +40,7 @@ import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.Postgres95MergeGenerator;
 import workbench.db.postgres.PostgresMergeGenerator;
-
+import workbench.resource.Settings;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
@@ -149,7 +147,7 @@ public interface MergeGenerator
 
       if (type.equals("postgres-9.5"))
       {
-        return new PostgresMergeGenerator();
+        return new Postgres95MergeGenerator();
       }
 
       if (type.equals("postgres") || type.equals("postgresql"))

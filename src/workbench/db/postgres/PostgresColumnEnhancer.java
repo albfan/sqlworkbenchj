@@ -25,18 +25,14 @@ package workbench.db.postgres;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Types;
-import java.util.HashMap;
-
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
 
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -45,8 +41,10 @@ import workbench.util.StringUtil;
  *
  * The following additional information is updated:
  * <ul>
- * <li>the column collation available for versions >= PostgreSQL 9.1</li>
+ * <li>The column collation if the the version is &gt;= 9.1</li>
+ * <li>Storage definition</li>
  * <li>The array dimensions so that arrays are displayed correctly.</li>
+ * <li>Inheritance information</li>
  * <li>Converts serial columns back to "serial"</li>
  * </ul>
  *
@@ -65,14 +63,9 @@ public class PostgresColumnEnhancer
   @Override
   public void updateColumnDefinition(TableDefinition table, WbConnection conn)
   {
-    if (JdbcUtils.hasMinimumServerVersion(conn, "9.1"))
-    {
-      readColumnInfo(table, conn);
-    }
-
     if (JdbcUtils.hasMinimumServerVersion(conn, "8.0"))
     {
-      updateArrayTypes(table, conn);
+      readColumnInfo(table, conn);
     }
 
     updateSerials(table);
@@ -102,8 +95,7 @@ public class PostgresColumnEnhancer
       String defaultValue = col.getDefaultValue();
       if (dbmsType.endsWith("serial") && defaultValue != null)
       {
-        // The nextval() call is returned with a full qualified name if the
-        // sequence is not in the current schema.
+        // The nextval() call is returned with a fully qualified name if the sequence is not in the current schema.
         // to avoid calling WbConnection.getCurrentSchema() for each default value
         // I'm just checking for a . in the default value which would indicate a fully qualified sequence
         String expectedDefault = "nextval('" ;
@@ -133,105 +125,46 @@ public class PostgresColumnEnhancer
   }
 
   /**
-   * Adjust the display of dimensions for an array column.
+   * Read additional information about the table's columns that are not provided by the JDBC API.
    *
-   * Array columns are only reported with an internal array identifier e.g. "_int4" for an integer[] column.
-   * The {@link PostgresDataTypeResolver} already converts that to a properly formatted array, but
-   * isn't able to properly display multiple dimensions.
+   * The following additional information is retrieved from the database:
+   * <ul>
+   * <li>Collation</li>
+   * <li>Inheritance information</li>
+   * <li>Storage information</li>
+   * <li>Original array dimensions</li>
+   * </ul>
    *
-   * This method retrieves the information about the dimensions of an array
-   * and adjusts the display type accordingly.
+   * All the above is retrieved from <tt>pg_attribute</tt> and <tt>pg_collation</tt>.
    *
-   * @param table
-   * @param conn
+   * @param table - the table for which the information should be retrieved
+   * @param conn - the connection to use
    */
-  private void updateArrayTypes(TableDefinition table, WbConnection conn)
-  {
-    int arrayCols = 0;
-    for (ColumnIdentifier col : table.getColumns())
-    {
-      if (col.getDataType() == Types.ARRAY)
-      {
-        arrayCols ++;
-      }
-    }
-
-    if (arrayCols == 0) return;
-
-    String sql =
-      "select att.attname, att.attndims, pg_catalog.format_type(atttypid, NULL) as display_type \n" +
-      "from pg_attribute att \n" +
-      "  join pg_class tbl on tbl.oid = att.attrelid  \n" +
-      "  join pg_namespace ns on tbl.relnamespace = ns.oid  \n" +
-      "where tbl.relname = ?   \n" +
-      "  and ns.nspname = ? \n" +
-      "  and att.attndims > 0";
-
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    HashMap<String, ArrayDef> dims = new HashMap<>(table.getColumnCount());
-
-    String tname = table.getTable().getRawTableName();
-    String tschema = table.getTable().getRawSchema();
-    if (Settings.getInstance().getDebugMetadataSql())
-    {
-      LogMgr.logDebug("PostgresColumnEnhancer.updateArrayTypes()", "Retrieving array information using:\n" + SqlUtil.replaceParameters(sql, tname, tschema));
-    }
-
-    try
-    {
-      stmt = conn.getSqlConnection().prepareStatement(sql);
-      stmt.setString(1, tname);
-      stmt.setString(2, tschema);
-      rs = stmt.executeQuery();
-      while (rs.next())
-      {
-        ArrayDef def = new ArrayDef();
-        String colname = rs.getString(1);
-        def.numDims = rs.getInt(2);
-        def.formattedType = StringUtil.replace(rs.getString(3), "character varying", "varchar");
-        dims.put(colname, def);
-      }
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logError("PostgresColumnEnhancer.updateArrayTypes()", "Could not read array information using:\n" + SqlUtil.replaceParameters(sql, tname, tschema), ex);
-    }
-    finally
-    {
-      SqlUtil.closeAll(rs, stmt);
-    }
-
-    for (ColumnIdentifier col : table.getColumns())
-    {
-      ArrayDef def = dims.get(col.getColumnName());
-      if (def == null) continue;
-      String type = def.formattedType;
-      for (int i=0; i < def.numDims - 1; i++)
-      {
-        type += "[]";
-      }
-      col.setDbmsType(type);
-    }
-  }
-
   private void readColumnInfo(TableDefinition table, WbConnection conn)
   {
     PreparedStatement stmt = null;
     ResultSet rs = null;
 
+    boolean is91 = JdbcUtils.hasMinimumServerVersion(conn, "9.1");
+
     String sql =
-      "select att.attname, col.collcollate,  \n" +
-      "       case  \n" +
+      "select att.attname, \n" +
+      (is91 ?
+      "       col.collcolate, \n " :
+      "       null as collcolate, \n"
+      ) +
+      "       case \n" +
       "          when att.attlen = -1 then att.attstorage \n" +
       "          else null \n" +
       "       end as attstorage, \n" +
-      "       attinhcount \n" +
+      "       att.attinhcount, \n" +
+      "       att.attndims,\n " +
+      "       pg_catalog.format_type(att.atttypid, NULL) as display_type \n" +
       "from pg_attribute att  \n" +
       "  join pg_class tbl on tbl.oid = att.attrelid   \n" +
       "  join pg_namespace ns on tbl.relnamespace = ns.oid   \n" +
-      "  left join pg_collation col on att.attcollation = col.oid \n" +
+      (is91 ?
+      "  left join pg_collation col on att.attcollation = col.oid \n" : "" ) +
       "where tbl.relname = ? \n" +
       "  and ns.nspname = ? \n" +
       "  and not att.attisdropped";
@@ -257,13 +190,22 @@ public class PostgresColumnEnhancer
         String storage = rs.getString(3);
         int ancestorCount = rs.getInt(4);
 
+        int arrayDims = rs.getInt(5);
+        if (rs.wasNull()) arrayDims = -1;
+        String formattedType = rs.getString(6);
+
         ColumnIdentifier col = table.findColumn(colname);
-        if (col == null) continue;
+        if (col == null) continue; // should not happen
 
         if (StringUtil.isNonEmpty(collation))
         {
           col.setCollation(collation);
           col.setCollationExpression(" COLLATE \"" + collation + "\"");
+        }
+
+        if (arrayDims > 0)
+        {
+          updateArrayType(col, formattedType, arrayDims);
         }
 
         col.setInherited(ancestorCount > 0);
@@ -297,10 +239,17 @@ public class PostgresColumnEnhancer
       SqlUtil.closeAll(rs, stmt);
     }
   }
-  class ArrayDef
+
+  private void updateArrayType(ColumnIdentifier column, String formattedType, int numDims)
   {
-    int numDims;
-    String formattedType;
+    if (numDims <= 0) return;
+
+    String type = StringUtil.replace(formattedType, "character varying", "varchar");
+    for (int i = 0; i < numDims - 1; i++)
+    {
+      type += "[]";
+    }
+    column.setDbmsType(type);
   }
 
 }
