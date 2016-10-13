@@ -25,7 +25,6 @@ package workbench.storage;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
-
 import workbench.util.StringUtil;
 
 /**
@@ -92,12 +91,12 @@ public class BlobFormatterFactory
     }
     else if (meta.isOracle())
     {
-      // this might only work with Oracle 10g...
-      // and will probably fail on BLOBs > 4KB
+      // This will fail with BLOBs > 4KB
+      // But there is no way of specifying longer literals anyway
       DefaultBlobFormatter f = new DefaultBlobFormatter();
       f.setUseUpperCase(true);
-      f.setPrefix("to_blob(utl_raw.cast_to_raw('");
-      f.setSuffix("'))");
+      f.setPrefix("'");
+      f.setSuffix("'");
       return f;
     }
     else if (meta.isSqlServer())

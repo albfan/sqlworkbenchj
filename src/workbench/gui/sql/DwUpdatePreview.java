@@ -28,8 +28,10 @@ import java.awt.Dimension;
 import java.awt.Window;
 import java.sql.SQLException;
 import java.util.List;
+
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -78,6 +80,7 @@ public class DwUpdatePreview
 			buffer = new MessageBuffer(maxStatements);
 
 			SqlLiteralFormatter f = new SqlLiteralFormatter(dbConn);
+      f.createDbmsBlobLiterals(dbConn);
 
 			boolean lowMemory = false;
 			for (DmlStatement dml : stmts)

@@ -142,7 +142,7 @@ public class PostgresBlobFormatter
     byte[] buffer = getBytes(value);
     if (buffer == null) return value.toString();
 
-    StringBuilder result = new StringBuilder(buffer.length * 5 + 10);
+    StringBuilder result = new StringBuilder(buffer.length * 5 + 12);
     result.append("E'");
     for (int i = 0; i < buffer.length; i++)
     {

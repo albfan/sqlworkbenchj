@@ -150,9 +150,8 @@ public class PostgresColumnEnhancer
     String sql =
       "select att.attname, \n" +
       (is91 ?
-      "       col.collcolate, \n " :
-      "       null as collcolate, \n"
-      ) +
+      "       col.collcollate, \n " :
+      "       null as collcollate, \n" ) +
       "       case \n" +
       "          when att.attlen = -1 then att.attstorage \n" +
       "          else null \n" +

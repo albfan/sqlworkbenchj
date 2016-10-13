@@ -27,9 +27,7 @@ import java.lang.reflect.Method;
 import java.sql.Types;
 
 import workbench.log.LogMgr;
-
 import workbench.storage.DataConverter;
-
 import workbench.util.NumberStringCache;
 
 /**
@@ -122,7 +120,7 @@ public class OracleDataConverter
       for (byte v : b)
       {
         int c = (v < 0 ? 256 + v : v);
-        buffer.append(NumberStringCache.getHexString(c));
+        buffer.append(NumberStringCache.getHexString(c).toUpperCase());
       }
       newValue = buffer.toString();
     }
