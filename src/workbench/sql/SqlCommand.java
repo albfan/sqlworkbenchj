@@ -753,7 +753,10 @@ public class SqlCommand
         ResultSetConsumer consumer = runner.getConsumer();
         if (consumer != null && !alwaysBufferResults)
         {
-          result.addResultSet(rs);
+          if (!processEmbeddedResults(result, currentRetrievalData, false))
+          {
+            result.addResultSet(rs);
+          }
           consumer.consumeResult(result);
         }
         else
@@ -807,11 +810,15 @@ public class SqlCommand
             SqlUtil.closeResult(rs);
           }
 
+          result.addRowsProcessed(currentRetrievalData.getRowCount());
+
           if (runner.getStatementHook().displayResults())
           {
-            result.addDataStore(this.currentRetrievalData);
+            if (!processEmbeddedResults(result, currentRetrievalData, true))
+            {
+              result.addDataStore(this.currentRetrievalData);
+            }
           }
-          result.addRowsProcessed(currentRetrievalData.getRowCount());
         }
       }
 
@@ -874,6 +881,17 @@ public class SqlCommand
     }
 
     this.currentRetrievalData = null;
+  }
+
+  private boolean processEmbeddedResults(StatementRunnerResult result, DataStore data, boolean readData)
+  {
+    int count = 0;
+    if (currentConnection.getDbSettings().supportsEmbeddedResults())
+    {
+      ResultSetExtractor extractor = new ResultSetExtractor();
+      count = extractor.extractEmbeddedResults(currentConnection, result, data, readData);
+    }
+    return count > 0;
   }
 
   /**
