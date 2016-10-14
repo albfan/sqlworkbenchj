@@ -21,6 +21,8 @@
 package workbench.sql;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import workbench.log.LogMgr;
 
@@ -39,40 +41,45 @@ public class ResultSetExtractor
 
   public int extractEmbeddedResults(WbConnection conn, StatementRunnerResult result, DataStore data, boolean readData)
   {
+    if (data == null) return 0;
     if (data.getRowCount() == 0) return 0;
-    if (data.getColumnCount() != 1) return 0;
 
     int rowCount = data.getRowCount();
     int resultCount = 0;
     int totalRows = 0;
 
+    List<Integer> resultSetColumns = new ArrayList<>(1);
+    for (int col=0; col < data.getColumnCount(); col ++)
+    {
+      Class clz = data.getColumnClass(0);
+      if (clz.isAssignableFrom(ResultSet.class))
+      {
+        resultSetColumns.add(col);
+      }
+    }
+
+    if (resultSetColumns.isEmpty()) return 0;
+
     for (int row=0; row < rowCount; row++)
     {
-      Object value = data.getValue(row, 0);
-      if (value instanceof ResultSet)
+      for (int i=0; i < resultSetColumns.size(); i++)
       {
-        ResultSet rs = (ResultSet)value;
-        if (readData)
+        int col = resultSetColumns.get(i);
+
+        Object value = data.getValue(row, col);
+        // this should always work
+        if (value instanceof ResultSet)
         {
-          try
+          resultCount++;
+          ResultSet rs = (ResultSet)value;
+          if (readData)
           {
-            DataStore ds = new DataStore(rs, true);
-            result.addDataStore(ds);
-            totalRows += ds.getRowCount();
-            resultCount++;
+            totalRows += addDataStore(result, rs);
           }
-          catch (Exception ex)
+          else
           {
-            LogMgr.logError("ResultSetExtractor.extractEmbeddedResults()", "Could not read result", ex);
+            result.addResultSet(rs);
           }
-          finally
-          {
-            SqlUtil.closeResult(rs);
-          }
-        }
-        else
-        {
-          result.addResultSet(rs);
         }
       }
     }
@@ -83,6 +90,25 @@ public class ResultSetExtractor
     }
 
     return resultCount;
+  }
+
+  private int addDataStore(StatementRunnerResult result, ResultSet rs)
+  {
+    try
+    {
+      DataStore ds = new DataStore(rs, true);
+      result.addDataStore(ds);
+      return ds.getRowCount();
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ResultSetExtractor.extractEmbeddedResults()", "Could not read result", ex);
+    }
+    finally
+    {
+      SqlUtil.closeResult(rs);
+    }
+    return 0;
   }
 
 }
