@@ -2247,4 +2247,9 @@ public class DbSettings
   {
     return getBoolProperty("supports.embedded.results", false);
   }
+
+  public boolean refcursorIsEmbeddedResult()
+  {
+    return getBoolProperty("embedded.results.refcursor", false);
+  }
 }

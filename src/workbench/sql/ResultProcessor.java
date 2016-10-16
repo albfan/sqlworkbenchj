@@ -126,11 +126,20 @@ public class ResultProcessor
 
       String clzName = meta.getColumnClassName(1);
       Class clz = Class.forName(clzName);
-      if (clz.isAssignableFrom(ResultSet.class))
+
+      boolean isEmbeddedResult =  clz.isAssignableFrom(ResultSet.class);
+      if (!isEmbeddedResult && conn.getDbSettings().refcursorIsEmbeddedResult())
+      {
+        String typename = meta.getColumnTypeName(1);
+        isEmbeddedResult = conn.getDbSettings().getRefCursorTypeNames().contains(typename);
+      }
+      
+      if (isEmbeddedResult)
       {
         rs.next(); // initialize the iterator
         return true;
       }
+
     }
     catch (Throwable th)
     {
