@@ -662,6 +662,8 @@ public class SqlCommand
     int updateCount = -1;
     boolean moreResults = false;
 
+    ResultProcessor processor = new ResultProcessor(currentStatement, firstResult, currentConnection);
+
     if (hasResult)
     {
       moreResults = true;
@@ -679,17 +681,7 @@ public class SqlCommand
         updateCount = -1;
       }
 
-      try
-      {
-        moreResults = this.currentStatement.getMoreResults();
-      }
-      catch (Exception e)
-      {
-        // Some drivers throw errors if no result is available. In this case
-        // simply assume there are no more results.
-        LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", e);
-        moreResults = false;
-      }
+      moreResults = processor.checkForMoreResults();
     }
 
     if (currentConnection == null || currentConnection.isClosed() || currentConnection.getMetadata() == null)
@@ -697,9 +689,6 @@ public class SqlCommand
       LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
       return;
     }
-
-    // if no result was passed, we need to call getResultSet() immediately
-    boolean firstResultProcessed = (firstResult == null);
 
     boolean retrieveResultWarnings = currentConnection.getDbSettings().retrieveWarningsForEachResult();
     boolean multipleUpdateCounts = this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts();
@@ -724,22 +713,7 @@ public class SqlCommand
 
       if (moreResults)
       {
-        if (!firstResultProcessed)
-        {
-          rs = firstResult;
-          firstResultProcessed = true;
-        }
-        else
-        {
-          ResultSet newRs = this.currentStatement.getResultSet();
-          // workaround for a MySQL Driver bug that returns the same ResultSet over and over again
-          if (newRs == firstResult || newRs == rs)
-          {
-            LogMgr.logWarning("SqlCommand.processResults()", "Received the same ResultSet for the second time. Aborting!");
-            break;
-          }
-          rs = newRs;
-        }
+        rs = processor.getResult();
 
         if (rs == null) break;
 
@@ -753,10 +727,7 @@ public class SqlCommand
         ResultSetConsumer consumer = runner.getConsumer();
         if (consumer != null && !alwaysBufferResults)
         {
-          if (!processEmbeddedResults(result, currentRetrievalData, false))
-          {
-            result.addResultSet(rs);
-          }
+          result.addResultSet(rs);
           consumer.consumeResult(result);
         }
         else
@@ -814,10 +785,7 @@ public class SqlCommand
 
           if (runner.getStatementHook().displayResults())
           {
-            if (!processEmbeddedResults(result, currentRetrievalData, true))
-            {
-              result.addDataStore(this.currentRetrievalData);
-            }
+            result.addDataStore(this.currentRetrievalData);
           }
         }
       }
@@ -830,9 +798,9 @@ public class SqlCommand
 
       try
       {
-        moreResults = this.currentStatement.getMoreResults();
+        moreResults = processor.hasMoreResults();
       }
-      catch (Exception sql)
+      catch (SQLException sql)
       {
         // SQL Exceptions should be shown to the user
         LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", sql);
@@ -881,17 +849,6 @@ public class SqlCommand
     }
 
     this.currentRetrievalData = null;
-  }
-
-  private boolean processEmbeddedResults(StatementRunnerResult result, DataStore data, boolean readData)
-  {
-    int count = 0;
-    if (currentConnection.getDbSettings().supportsEmbeddedResults())
-    {
-      ResultSetExtractor extractor = new ResultSetExtractor();
-      count = extractor.extractEmbeddedResults(currentConnection, result, data, readData);
-    }
-    return count > 0;
   }
 
   /**

@@ -133,14 +133,7 @@ public class WbCallPostgresTest
 		runner.setConnection(con);
 		call.setStatementRunner(runner);
 		call.setConnection(con);
-    StatementParameterPrompter prompter = new StatementParameterPrompter()
-    {
-      @Override
-      public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-      {
-        return true;
-      }
-    };
+    StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) -> true;
     call.setParameterPrompter(prompter);
 		String cmd = "WbCall get_status(?,?)";
     StatementRunnerResult result = call.execute(cmd);
@@ -169,16 +162,13 @@ public class WbCallPostgresTest
 		runner.setConnection(con);
 		call.setStatementRunner(runner);
 		call.setConnection(con);
-    StatementParameterPrompter prompter = new StatementParameterPrompter()
+    StatementParameterPrompter prompter = (StatementParameters parms, boolean showNames) ->
     {
-      @Override
-      public boolean showParameterDialog(StatementParameters parms, boolean showNames)
-      {
-        parms.setParameterValue(0, "5");
-        parms.setParameterValue(1, "10");
-        return true;
-      }
+      parms.setParameterValue(0, "5");
+      parms.setParameterValue(1, "10");
+      return true;
     };
+
     call.setParameterPrompter(prompter);
 		String cmd = "WbCall sum_n_product(?,?,?,?)";
     StatementRunnerResult result = call.execute(cmd);

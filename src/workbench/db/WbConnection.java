@@ -94,7 +94,7 @@ public class WbConnection
   private DbMetadata metaData;
   private ConnectionProfile profile;
   private PreparedStatementPool preparedStatementPool;
-  private final List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<PropertyChangeListener>(1));
+  private final List<PropertyChangeListener> listeners = Collections.synchronizedList(new ArrayList<>(1));
 
   private OracleWarningsClearer oracleWarningsClearer;
   private boolean hasOracleContainers;

@@ -48,6 +48,7 @@ import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
 
 import workbench.sql.EndReadOnlyTrans;
+import workbench.sql.SqlCommand;
 import workbench.sql.commands.TransactionEndCommand;
 
 import workbench.util.CollectionUtil;
@@ -432,14 +433,14 @@ public class DbSettings
     return getProperty("import.insert", null);
   }
 
-  public List<String> getRefCursorTypeNames()
+  public Collection<String> getRefCursorTypeNames()
   {
-    return Settings.getInstance().getListProperty(prefix + "refcursor.typename", false, null);
+    return CollectionUtil.caseInsensitiveSet(getListProperty("refcursor.typename", null));
   }
 
   public int getRefCursorDataType()
   {
-    return Settings.getInstance().getIntProperty(prefix + "refcursor.typevalue", Integer.MIN_VALUE);
+    return getIntProperty("refcursor.typevalue", Integer.MIN_VALUE);
   }
 
   public boolean useWbProcedureCall()

@@ -28,6 +28,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -609,7 +610,6 @@ public class ProcedureDefinition
     StringBuilder call = new StringBuilder(150);
     CommandTester c = new CommandTester();
 
-
     StringBuilder paramNames = new StringBuilder(50);
 
     call.append(c.formatVerb(WbCall.VERB));
@@ -709,7 +709,7 @@ public class ProcedureDefinition
 
   public static boolean isRefCursor(WbConnection conn, String type)
   {
-    List<String> refTypes = conn.getDbSettings().getRefCursorTypeNames();
+    Collection<String> refTypes = conn.getDbSettings().getRefCursorTypeNames();
     return refTypes.contains(type);
   }
 
