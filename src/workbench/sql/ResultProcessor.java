@@ -59,7 +59,15 @@ public class ResultProcessor
     {
       if (containsEmbeddedResults && currentResult != null)
       {
-        return (ResultSet)currentResult.getObject(1);
+        try
+        {
+          return (ResultSet)currentResult.getObject(1);
+        }
+        catch (Throwable th)
+        {
+          containsEmbeddedResults = false;
+          LogMgr.logError("ResultProcessor.getResult()", "Could not retrieve embedded ResultSet", th);
+        }
       }
 
       if (currentResult != null)
@@ -133,7 +141,7 @@ public class ResultProcessor
         String typename = meta.getColumnTypeName(1);
         isEmbeddedResult = conn.getDbSettings().getRefCursorTypeNames().contains(typename);
       }
-      
+
       if (isEmbeddedResult)
       {
         rs.next(); // initialize the iterator
