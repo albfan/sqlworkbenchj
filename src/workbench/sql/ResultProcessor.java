@@ -55,28 +55,28 @@ public class ResultProcessor
 
   public ResultSet getResult()
   {
+    if (containsEmbeddedResults && currentResult != null)
+    {
+      try
+      {
+        return (ResultSet)currentResult.getObject(1);
+      }
+      catch (Throwable th)
+      {
+        containsEmbeddedResults = false;
+        LogMgr.logError("ResultProcessor.getResult()", "Could not retrieve embedded ResultSet", th);
+      }
+    }
+
+    if (currentResult != null)
+    {
+      ResultSet rs = currentResult;
+      currentResult = null;
+      return rs;
+    }
+
     try
     {
-      if (containsEmbeddedResults && currentResult != null)
-      {
-        try
-        {
-          return (ResultSet)currentResult.getObject(1);
-        }
-        catch (Throwable th)
-        {
-          containsEmbeddedResults = false;
-          LogMgr.logError("ResultProcessor.getResult()", "Could not retrieve embedded ResultSet", th);
-        }
-      }
-
-      if (currentResult != null)
-      {
-        ResultSet rs = currentResult;
-        currentResult = null;
-        return rs;
-      }
-
       ResultSet rs = currentStatement.getResultSet();
       containsEmbeddedResults = checkForEmbeddedResults(originalConnection, rs);
       if (containsEmbeddedResults)
