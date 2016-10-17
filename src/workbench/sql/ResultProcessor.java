@@ -25,10 +25,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import workbench.log.LogMgr;
-
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
@@ -135,7 +133,7 @@ public class ResultProcessor
       String clzName = meta.getColumnClassName(1);
       Class clz = Class.forName(clzName);
 
-      boolean isEmbeddedResult =  clz.isAssignableFrom(ResultSet.class);
+      boolean isEmbeddedResult =  ResultSet.class.isAssignableFrom(clz);
       if (!isEmbeddedResult && conn.getDbSettings().refcursorIsEmbeddedResult())
       {
         String typename = meta.getColumnTypeName(1);
