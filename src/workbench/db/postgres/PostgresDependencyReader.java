@@ -84,24 +84,27 @@ public class PostgresDependencyReader
   private final String tableSequenceSql =
     "select n.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
     "from pg_class s\n" +
-    "  join pg_depend d on d.objid=s.oid and d.classid='pg_class'::regclass and d.refclassid='pg_class'::regclass\n" +
-    "  join pg_class t on t.oid=d.refobjid\n" +
-    "  join pg_namespace n on n.oid=t.relnamespace\n" +
-    "  join pg_attribute a on a.attrelid=t.oid and a.attnum=d.refobjsubid\n" +
-    "where s.relkind='S' \n" +
-    "  and d.deptype='a' \n " +
+    "  join pg_namespace sn on sn.oid = s.relnamespace \n" +
+    "  join pg_depend d on d.refobjid = s.oid and d.refclassid='pg_class'::regclass \n" +
+    "  join pg_attrdef ad on ad.oid = d.objid and d.classid = 'pg_attrdef'::regclass\n" +
+    "  join pg_attribute col on col.attrelid = ad.adrelid and col.attnum = ad.adnum\n" +
+    "  join pg_class t on t.oid = ad.adrelid \n" +
+    "  join pg_namespace n on n.oid = t.relnamespace \n" +
+    "where s.relkind = 'S' \n" +
+    "  and d.deptype in ('a', 'n') \n " +
     "  and n.nspname = ? \n" +
     "  and t.relname = ?";
 
   private final String sequenceUsageSql =
     "select n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
     "from pg_class s\n" +
-    "  join pg_depend d on d.objid=s.oid and d.classid='pg_class'::regclass and d.refclassid='pg_class'::regclass\n" +
-    "  join pg_class cl on cl.oid = d.refobjid \n" +
-    "  join pg_namespace n on n.oid = cl.relnamespace\n" +
-    "  join pg_attribute a on a.attrelid = cl.oid and a.attnum=d.refobjsubid\n" +
-    "where s.relkind='S' \n" +
-    "  and d.deptype='a' \n " +
+    "  join pg_depend d on d.refobjid = s.oid and d.refclassid = 'pg_class'::regclass\n" +
+    "  join pg_attrdef ad on ad.oid = d.objid and d.classid = 'pg_attrdef'::regclass\n" +
+    "  join pg_attribute col on col.attrelid = ad.adrelid and col.attnum = ad.adnum\n" +
+    "  join pg_class cl on cl.oid = ad.adrelid \n" +
+    "  join pg_namespace n on n.oid = cl.relnamespace\n " +
+    "where s.relkind = 'S' \n" +
+    "  and d.deptype in ('a', 'n') \n " +
     "  and n.nspname = ? \n" +
     "  and s.relname = ?";
 
