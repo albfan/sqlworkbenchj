@@ -171,19 +171,24 @@ public class WbListDependencies
         objects = reader.getUsedObjects(currentConnection, toUse);
         titleKey = "TxtDepsUsesParm";
       }
-      DataStore ds = currentConnection.getMetadata().createTableListDataStore();
-      ds.setResultName(ResourceMgr.getFormattedString(titleKey, toUse.getObjectExpression(currentConnection)));
-      for (DbObject dbo : objects)
+
+      if (CollectionUtil.isNonEmpty(objects))
       {
-        int row = ds.addRow();
-        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, dbo.getCatalog());
-        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, dbo.getSchema());
-        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, dbo.getObjectName());
-        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, dbo.getObjectType());
-        ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, dbo.getComment());
+        DataStore ds = currentConnection.getMetadata().createTableListDataStore();
+        ds.setResultName(ResourceMgr.getFormattedString(titleKey, toUse.getObjectExpression(currentConnection)));
+        for (DbObject dbo : objects)
+        {
+          int row = ds.addRow();
+          ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, dbo.getCatalog());
+          ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, dbo.getSchema());
+          ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, dbo.getObjectName());
+          ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, dbo.getObjectType());
+          ds.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, dbo.getComment());
+        }
+        ds.resetStatus();
+        result.addDataStore(ds);
       }
-      ds.resetStatus();
-      result.addDataStore(ds);
+
     }
 
 		return result;
