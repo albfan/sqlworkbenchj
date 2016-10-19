@@ -28,9 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectComparator;
@@ -40,9 +37,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -134,8 +131,15 @@ public class OracleDependencyReader
   }
 
   @Override
-  public boolean supportsDependencies(String objectType)
+  public boolean supportsUsedByDependency(String objectType)
   {
+    return types.contains(objectType);
+  }
+
+  @Override
+  public boolean supportsIsUsingDependency(String objectType)
+  {
+    if ("table".equalsIgnoreCase(objectType)) return false;
     return types.contains(objectType);
   }
 

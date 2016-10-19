@@ -25,14 +25,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import workbench.WbManager;
-import workbench.log.LogMgr;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
 import workbench.db.importer.ArrayValueHandler;
-
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -73,7 +71,7 @@ public class PostgresArrayHandler
     }
     catch (Throwable t)
     {
-      LogMgr.logError("PgCopyImporter.createCopyManager()", "Could not create CopyManager", t);
+      LogMgr.logError("PostgresArrayHandler.initialize()", "Could not access PGObject", t);
     }
   }
 

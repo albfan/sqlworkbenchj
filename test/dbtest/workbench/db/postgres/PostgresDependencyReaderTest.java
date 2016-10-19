@@ -22,20 +22,17 @@ package workbench.db.postgres;
 
 import java.util.List;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-
-import workbench.db.DbObject;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
-import workbench.util.CollectionUtil;
-
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -107,11 +104,14 @@ public class PostgresDependencyReaderTest
   public void testSupportsDependencies()
   {
     PostgresDependencyReader reader = new PostgresDependencyReader();
-    List<String> types = CollectionUtil.arrayList("view", "table", "sequence");
+    List<String> types = CollectionUtil.arrayList("view", "table");
     for (String type : types)
     {
-      assertTrue(reader.supportsDependencies(type));
+      assertTrue(reader.supportsUsedByDependency(type));
+      assertTrue(reader.supportsIsUsingDependency(type));
     }
+    assertTrue(reader.supportsUsedByDependency("sequence"));
+    assertFalse(reader.supportsIsUsingDependency("sequence"));
   }
 
 }

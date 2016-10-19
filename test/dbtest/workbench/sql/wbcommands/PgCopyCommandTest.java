@@ -26,6 +26,8 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.db.postgres.PostgresTestUtil;
 
+import workbench.storage.DataStore;
+
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ParserType;
@@ -67,7 +69,7 @@ public class PgCopyCommandTest
 	}
 
   @Test
-  public void testExecute()
+  public void testCopyFrom()
     throws Exception
   {
     WbConnection conn = PostgresTestUtil.getPostgresConnection();
@@ -90,7 +92,7 @@ public class PgCopyCommandTest
     String parsedSql = parser.getCommand(0);
 
     assertEquals("commit", parser.getCommand(1));
-    
+
     // PgCopyCommand needs a StatementRunner reference
     // so run this statement through one
     StatementRunner runner = new StatementRunner();
@@ -104,6 +106,38 @@ public class PgCopyCommandTest
 
     String name = (String)TestUtil.getSingleQueryValue(conn, "select firstname from person where id = 1");
     assertEquals("Arthur", name);
+  }
+
+  @Test
+  public void testCopyTo()
+    throws Exception
+  {
+    WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
+    TestUtil.executeScript(conn,
+      "create table person (id integer, firstname text, lastname text);\n" +
+      "insert into person values (1, 'Arthur', 'Dent'), (2, 'Ford', 'Prefect');\n" +
+      "commit;");
+
+    String copy =
+      "copy person (id, firstname, lastname) to stdout with (format csv, delimiter ',');";
+
+    // PgCopyCommand needs a StatementRunner reference
+    // so run this statement through one
+    StatementRunner runner = new StatementRunner();
+    runner.setConnection(conn);
+    runner.runStatement(copy);
+    StatementRunnerResult result = runner.getResult();
+    assertTrue(result.isSuccess());
+
+    assertEquals(1, result.getDataStores().size());
+    DataStore ds = result.getDataStores().get(0);
+    assertNotNull(ds);
+    assertEquals(2, ds.getRowCount());
+
+    assertEquals("1,Arthur,Dent", ds.getValueAsString(0, 0));
+    assertEquals("2,Ford,Prefect", ds.getValueAsString(1, 0));
   }
 
 }

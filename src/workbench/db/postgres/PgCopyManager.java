@@ -26,6 +26,7 @@ package workbench.db.postgres;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,14 +43,17 @@ import workbench.db.WbConnection;
 import workbench.db.importer.StreamImporter;
 import workbench.db.importer.TextImportOptions;
 
+import workbench.storage.DataStore;
+import workbench.storage.DataStoreWriter;
+
 import workbench.util.FileUtil;
 
 /**
- * A class to use PostgreSQL's CopyManager to import a file.
+ * A class to use PostgreSQL's CopyManager API.
  *
  * @author Thomas Kellerer
  */
-public class PgCopyImporter
+public class PgCopyManager
   implements StreamImporter
 {
   private final Object lock = new Object();
@@ -60,7 +64,7 @@ public class PgCopyImporter
   private Method copyIn;
   private boolean useDefaultClassloader;
 
-  public PgCopyImporter(WbConnection conn)
+  public PgCopyManager(WbConnection conn)
   {
     this.connection = conn;
 
@@ -268,5 +272,31 @@ public class PgCopyImporter
     copySql.append(")");
 
     return copySql.toString();
+  }
+
+  public DataStore copyToStdOut(String sql)
+    throws SQLException
+  {
+    try
+    {
+      if (copyManager == null)
+      {
+        initialize();
+      }
+      Method copyOut = copyManager.getClass().getMethod("copyOut", String.class, Writer.class);
+      DataStoreWriter writer = new DataStoreWriter("output");
+      copyOut.invoke(copyManager, sql, writer);
+      writer.flush();
+      return writer.getResult();
+    }
+    catch (Throwable th)
+    {
+      if (th instanceof SQLException)
+      {
+        throw (SQLException)th;
+      }
+      LogMgr.logError("PgCopyManager.runCopyTo()", "Could not call copyOut()", th);
+    }
+    return null;
   }
 }

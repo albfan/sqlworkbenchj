@@ -26,10 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.CatalogChanger;
 import workbench.db.CatalogIdentifier;
 import workbench.db.ColumnIdentifier;
@@ -51,10 +47,11 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
-
 import workbench.gui.dbobjects.IsolationLevelChanger;
 import workbench.gui.dbobjects.objecttree.vertica.ProjectionListNode;
-
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.ResourceMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -639,12 +636,20 @@ public class TreeLoader
     model.nodeChanged(typeNode);
   }
 
-  private boolean supportsDependencies(ObjectTreeNode node)
+  private boolean supportsUsedByDependencies(ObjectTreeNode node)
   {
     if (dependencyLoader == null) return false;
     if (node == null) return false;
     if (node.getDbObject() == null) return false;
-    return dependencyLoader.supportsDependencies(node.getDbObject().getObjectType());
+    return dependencyLoader.supportsUsedByDependency(node.getDbObject().getObjectType());
+  }
+
+  private boolean supportsIsUsingDependencies(ObjectTreeNode node)
+  {
+    if (dependencyLoader == null) return false;
+    if (node == null) return false;
+    if (node.getDbObject() == null) return false;
+    return dependencyLoader.supportsIsUsingDependency(node.getDbObject().getObjectType());
   }
 
   private boolean hasIndexes(ObjectTreeNode node)
@@ -682,19 +687,26 @@ public class TreeLoader
   public boolean addDependencyNodes(ObjectTreeNode node)
   {
     if (node == null) return false;
-    if (supportsDependencies(node))
+    boolean supported = false;
+
+    if (supportsIsUsingDependencies(node))
     {
       node.setAllowsChildren(true);
       ObjectTreeNode usingNode = new ObjectTreeNode(ResourceMgr.getString("TxtDepsUses"), TYPE_DEPENDENCY_USING);
       usingNode.setAllowsChildren(true);
       node.add(usingNode);
+      supported = true;
+    }
 
+    if (supportsUsedByDependencies(node))
+    {
+      node.setAllowsChildren(true);
       ObjectTreeNode usedNode = new ObjectTreeNode(ResourceMgr.getString("TxtDepsUsedBy"), TYPE_DEPENDENCY_USED);
       usedNode.setAllowsChildren(true);
       node.add(usedNode);
-      return true;
+      supported = true;
     }
-    return false;
+    return supported;
   }
 
   private void addIndexNode(ObjectTreeNode node)
@@ -786,7 +798,7 @@ public class TreeLoader
     for (TriggerDefinition trg : triggers)
     {
       ObjectTreeNode node = new ObjectTreeNode(trg);
-      boolean supportsDeps = supportsDependencies(node);
+      boolean supportsDeps = supportsIsUsingDependencies(node) || supportsUsedByDependencies(node);
       node.setAllowsChildren(supportsDeps);
       addDependencyNodes(node);
       node.setChildrenLoaded(!supportsDeps);

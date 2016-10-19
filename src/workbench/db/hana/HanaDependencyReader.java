@@ -82,7 +82,13 @@ public class HanaDependencyReader
   }
 
   @Override
-  public boolean supportsDependencies(String objectType)
+  public boolean supportsUsedByDependency(String objectType)
+  {
+    return supportedTypes.contains(objectType);
+  }
+
+  @Override
+  public boolean supportsIsUsingDependency(String objectType)
   {
     return supportedTypes.contains(objectType);
   }

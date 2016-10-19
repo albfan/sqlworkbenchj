@@ -25,7 +25,9 @@ import java.sql.SQLException;
 
 import workbench.log.LogMgr;
 
-import workbench.db.postgres.PgCopyImporter;
+import workbench.db.postgres.PgCopyManager;
+
+import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -54,6 +56,7 @@ public class PgCopyCommand
     String copy = "";
 
     boolean fromStdin = false;
+    boolean toStdout = false;
     int dataStart = -1;
 
     SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Postgres, sql);
@@ -74,18 +77,56 @@ public class PgCopyCommand
         {
           fromStdin = true;
         }
+
+        if (token.getText().equalsIgnoreCase("stdout") && lastToken != null && lastToken.getText().equalsIgnoreCase("TO"))
+        {
+          toStdout = true;
+          break;
+        }
         lastToken = token;
       }
-
       copy += token.getText();
       token = lexer.getNextToken(true, true);
     }
 
-    if (!fromStdin)
+    if (fromStdin)
     {
-      return super.execute(sql);
+      return processCopyIn(sql, copy, dataStart);
     }
+    else if (toStdout)
+    {
+      return processCopyOut(sql);
+    }
+    return super.execute(sql);
+  }
 
+  private StatementRunnerResult processCopyOut(String sql)
+  {
+    StatementRunnerResult result = new StatementRunnerResult(sql);
+    try
+    {
+      runner.setSavepoint();
+      PgCopyManager pgCopy = new PgCopyManager(currentConnection);
+      DataStore ds = pgCopy.copyToStdOut(sql);
+      if (ds != null)
+      {
+        result.addDataStore(ds);
+        result.setSuccess();
+        appendSuccessMessage(result);
+      }
+      runner.releaseSavepoint();
+    }
+    catch (Exception ex)
+    {
+      runner.rollbackSavepoint();
+      addErrorInfo(result, sql, ex);
+      LogMgr.logUserSqlError("PgCopyCommand.processCopyOut()", sql, ex);
+    }
+    return result;
+  }
+
+  private StatementRunnerResult processCopyIn(String sql, String copy, int dataStart)
+  {
     StatementRunnerResult result = new StatementRunnerResult(copy);
     try
     {
@@ -93,7 +134,7 @@ public class PgCopyCommand
       StringReader reader = new StringReader(sql);
       reader.skip(dataStart);
 
-      PgCopyImporter pgCopy = new PgCopyImporter(currentConnection);
+      PgCopyManager pgCopy = new PgCopyManager(currentConnection);
       pgCopy.copyFromStdin(copy, reader);
       long rows = pgCopy.processStreamData();
       result.addUpdateCountMsg((int)rows);
@@ -105,7 +146,7 @@ public class PgCopyCommand
     {
       runner.rollbackSavepoint();
       addErrorInfo(result, copy, ex);
-      LogMgr.logUserSqlError("UpdatingCommnad.execute()", copy, ex);
+      LogMgr.logUserSqlError("PgCopyCommand.processCopyIn()", copy, ex);
     }
     return result;
   }

@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.db.CatalogChanger;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
 import workbench.db.ProcedureDefinition;
@@ -40,9 +37,9 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -336,7 +333,13 @@ public class SqlServerDependencyReader
   }
 
   @Override
-  public boolean supportsDependencies(String objectType)
+  public boolean supportsUsedByDependency(String objectType)
+  {
+    return supportedTypes.contains(objectType);
+  }
+
+  @Override
+  public boolean supportsIsUsingDependency(String objectType)
   {
     return supportedTypes.contains(objectType);
   }

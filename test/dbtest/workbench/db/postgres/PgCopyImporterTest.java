@@ -85,7 +85,7 @@ public class PgCopyImporterTest
 			"3|ÖÄÜöäü|Something\n";
 
 		TestUtil.writeFile(data, content, "UTF-8");
-		PgCopyImporter copy = new PgCopyImporter(conn);
+		PgCopyManager copy = new PgCopyManager(conn);
 
 		TableDefinition def = conn.getMetadata().getTableDefinition(new TableIdentifier("foo"));
 		BufferedReader in = EncodingUtil.createBufferedReader(data, "UTF-8");
@@ -154,7 +154,7 @@ public class PgCopyImporterTest
 	@Test
 	public void testCreateSql()
 	{
-		PgCopyImporter copy = new PgCopyImporter(null);
+		PgCopyManager copy = new PgCopyManager(null);
 		TableIdentifier tbl = new TableIdentifier("foo");
 		ColumnIdentifier id = new ColumnIdentifier("id");
 		ColumnIdentifier name = new ColumnIdentifier("name");

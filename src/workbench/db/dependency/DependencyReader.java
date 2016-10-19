@@ -48,5 +48,6 @@ public interface DependencyReader
    */
   List<DbObject> getUsedBy(WbConnection connection, DbObject base);
 
-  boolean supportsDependencies(String objectType);
+  boolean supportsUsedByDependency(String objectType);
+  boolean supportsIsUsingDependency(String objectType);
 }

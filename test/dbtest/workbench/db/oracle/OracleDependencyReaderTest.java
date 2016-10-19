@@ -23,22 +23,18 @@ package workbench.db.oracle;
 
 import java.util.List;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-
-import workbench.db.DbObject;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
-import workbench.sql.DelimiterDefinition;
-
-import workbench.util.CollectionUtil;
-
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.sql.DelimiterDefinition;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -140,11 +136,15 @@ public class OracleDependencyReaderTest
   public void testSupportsDependencies()
   {
     OracleDependencyReader reader = new OracleDependencyReader();
-    List<String> types = CollectionUtil.arrayList("view", "table", "procedure", "function");
+    List<String> types = CollectionUtil.arrayList("view", "procedure", "function");
     for (String type : types)
     {
-      assertTrue(reader.supportsDependencies(type));
+      assertTrue(reader.supportsIsUsingDependency(type));
+      assertTrue(reader.supportsUsedByDependency(type));
     }
+    assertTrue(reader.supportsUsedByDependency("table"));
+    assertFalse(reader.supportsIsUsingDependency("table"));
+
   }
 
 }

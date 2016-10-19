@@ -273,10 +273,17 @@ public class PostgresDependencyReader
     return result;
   }
 
+
   @Override
-  public boolean supportsDependencies(String objectType)
+  public boolean supportsUsedByDependency(String objectType)
   {
     return supportedTypes.contains(objectType);
   }
 
+  @Override
+  public boolean supportsIsUsingDependency(String objectType)
+  {
+    if ("sequence".equalsIgnoreCase(objectType)) return false;
+    return supportedTypes.contains(objectType);
+  }
 }

@@ -52,7 +52,7 @@ import workbench.db.importer.SpreadsheetFileParser;
 import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
-import workbench.db.postgres.PgCopyImporter;
+import workbench.db.postgres.PgCopyManager;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -583,7 +583,7 @@ public class WbImport
 					result.addErrorMessage("COPY only possible with -mode=insert");
 					return result;
 				}
-				PgCopyImporter pg = new PgCopyImporter(currentConnection);
+				PgCopyManager pg = new PgCopyManager(currentConnection);
 				if (pg.isSupported())
 				{
 					textParser.setStreamImporter(pg);
