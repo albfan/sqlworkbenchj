@@ -33,10 +33,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.DomainIdentifier;
@@ -47,7 +43,9 @@ import workbench.db.ObjectSourceOptions;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -186,7 +184,8 @@ public class PostgresTableSourceBuilder
         }
         if (StringUtil.isNonBlank(tableSpace))
         {
-          tableSql.append("\nTABLESPACE ");
+          if (tableSql.length() > 0) tableSql.append('\n');
+          tableSql.append("TABLESPACE ");
           tableSql.append(tableSpace);
         }
       }
@@ -430,7 +429,7 @@ public class PostgresTableSourceBuilder
         String defaultValue = col.getDefaultValue();
         // if the default value is shown as nextval, the sequence name is already visible
         if (defaultValue != null && defaultValue.toLowerCase().contains("nextval")) continue;
-        
+
         String colname = StringUtil.trimQuotes(col.getColumnName());
         sql = "select pg_get_serial_sequence('" + tblname + "', '" + colname + "')";
         rs = stmt.executeQuery(sql);
