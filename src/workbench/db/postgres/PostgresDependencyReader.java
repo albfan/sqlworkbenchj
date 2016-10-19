@@ -28,17 +28,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
-
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -82,18 +79,18 @@ public class PostgresDependencyReader
         "order by view_schema, view_name";
 
   private final String tableSequenceSql =
-    "select n.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
+    "select sn.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_namespace sn on sn.oid = s.relnamespace \n" +
     "  join pg_depend d on d.refobjid = s.oid and d.refclassid='pg_class'::regclass \n" +
     "  join pg_attrdef ad on ad.oid = d.objid and d.classid = 'pg_attrdef'::regclass\n" +
     "  join pg_attribute col on col.attrelid = ad.adrelid and col.attnum = ad.adnum\n" +
-    "  join pg_class t on t.oid = ad.adrelid \n" +
-    "  join pg_namespace n on n.oid = t.relnamespace \n" +
+    "  join pg_class tbl on tbl.oid = ad.adrelid \n" +
+    "  join pg_namespace ts on ts.oid = tbl.relnamespace \n" +
     "where s.relkind = 'S' \n" +
     "  and d.deptype in ('a', 'n') \n " +
-    "  and n.nspname = ? \n" +
-    "  and t.relname = ?";
+    "  and ts.nspname = ? \n" +
+    "  and tbl.relname = ?";
 
   private final String sequenceUsageSql =
     "select n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
