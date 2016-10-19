@@ -78,8 +78,8 @@ public class PostgresDependencyReader
         "where (table_schema, table_name) = (?, ?) \n" +
         "order by view_schema, view_name";
 
-  private final String tableSequenceSql =
-    "select sn.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
+  private final String sequencesUsedByTable =
+    "select distinct sn.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_namespace sn on sn.oid = s.relnamespace \n" +
     "  join pg_depend d on d.refobjid = s.oid and d.refclassid='pg_class'::regclass \n" +
@@ -92,8 +92,8 @@ public class PostgresDependencyReader
     "  and ts.nspname = ? \n" +
     "  and tbl.relname = ?";
 
-  private final String sequenceUsageSql =
-    "select n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
+  private final String tablesUsingSequence =
+    "select distinct n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_depend d on d.refobjid = s.oid and d.refclassid = 'pg_class'::regclass\n" +
     "  join pg_attrdef ad on ad.oid = d.objid and d.classid = 'pg_attrdef'::regclass\n" +
@@ -156,7 +156,7 @@ public class PostgresDependencyReader
 
     List<DbObject> objects = retrieveObjects(connection, base, searchUsed);
 
-    List<DbObject> sequences = retrieveObjects(connection, base, tableSequenceSql);
+    List<DbObject> sequences = retrieveObjects(connection, base, sequencesUsedByTable);
     objects.addAll(sequences);
 
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
@@ -191,7 +191,7 @@ public class PostgresDependencyReader
 
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
 
-    List<DbObject> tables = retrieveObjects(connection, base, sequenceUsageSql);
+    List<DbObject> tables = retrieveObjects(connection, base, tablesUsingSequence);
     objects.addAll(tables);
 
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
