@@ -155,17 +155,6 @@
 					</row>
 
 					<row>
-						<entry>Oracle</entry>
-						<entry><literal>oracle.jdbc.OracleDriver</literal></entry>
-						<entry>
-							<simplelist columns="1">
-                <member><literal>ojdbc7.jar</literal></member>
-								<member><ulink url="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"/></member>
-							</simplelist>
-						</entry>
-					</row>
-
-					<row>
 						<entry>H2 Database Engine</entry>
 						<entry><literal>org.h2.Driver</literal></entry>
 						<entry>
@@ -187,6 +176,23 @@
 						</entry>
 					</row>
 
+          <row>
+            <entry>Apache Derby</entry>
+            <entry>
+              <literal>org.apache.derby.jdbc.EmbeddedDriver</literal>
+            </entry>
+            <entry>
+              <simplelist columns="1">
+                <member>
+                  <literal>derby.jar</literal>
+                </member>
+                <member>
+                  <ulink url="http://db.apache.org/derby/"/>
+                </member>
+              </simplelist>
+            </entry>
+          </row>
+
 					<row>
 						<entry>IBM DB2</entry>
 						<entry><literal>com.ibm.db2.jcc.DB2Driver</literal></entry>
@@ -205,17 +211,6 @@
 							<simplelist columns="1">
 								<member><literal>jt400.jar</literal></member>
 								<member><ulink url="http://jt400.sourceforge.net/"/></member>
-							</simplelist>
-						</entry>
-					</row>
-
-					<row>
-						<entry>Apache Derby</entry>
-						<entry><literal>org.apache.derby.jdbc.EmbeddedDriver</literal></entry>
-						<entry>
-							<simplelist columns="1">
-								<member><literal>derby.jar</literal></member>
-								<member><ulink url="http://db.apache.org/derby/"/></member>
 							</simplelist>
 						</entry>
 					</row>
@@ -263,6 +258,23 @@
 							</simplelist>
 						</entry>
 					</row>
+
+          <row>
+            <entry>Oracle</entry>
+            <entry>
+              <literal>oracle.jdbc.OracleDriver</literal>
+            </entry>
+            <entry>
+              <simplelist columns="1">
+                <member>
+                  <literal>ojdbc7.jar</literal>
+                </member>
+                <member>
+                  <ulink url="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"/>
+                </member>
+              </simplelist>
+            </entry>
+          </row>
 
 					<row>
 						<entry>MariaDB</entry>
