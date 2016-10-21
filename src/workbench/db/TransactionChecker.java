@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import workbench.resource.Settings;
-
 import workbench.util.StringUtil;
 
 /**
@@ -41,18 +40,7 @@ public interface TransactionChecker
   /**
    * Dummy implementation that does no checking at all.
    */
-  TransactionChecker NO_CHECK = new TransactionChecker()
-  {
-    /**
-     * Always returns false.
-     * @return false
-     */
-    @Override
-    public boolean hasUncommittedChanges(WbConnection con)
-    {
-      return false;
-    }
-  };
+  TransactionChecker NO_CHECK = (WbConnection con) -> false;
 
   /**
    * Factory for creating a DBMS specific TransactionChecker instance.
