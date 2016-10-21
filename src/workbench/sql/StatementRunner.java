@@ -36,6 +36,9 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.WbManager;
+import workbench.db.ConnectionProfile;
+import workbench.db.TransactionChecker;
+import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -45,21 +48,14 @@ import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.ConnectionProfile;
-import workbench.db.TransactionChecker;
-import workbench.db.WbConnection;
-
-import workbench.storage.DataStore;
-import workbench.storage.DatastoreTransposer;
-import workbench.storage.RowActionMonitor;
-
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
-
+import workbench.storage.DataStore;
+import workbench.storage.DatastoreTransposer;
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
@@ -399,38 +395,41 @@ public class StatementRunner
 	{
 		if (currentConnection == null) return;
 		if (currentConnection.getAutoCommit()) return;
+    if (currentConnection.getDbSettings() == null) return;
 
-    EndReadOnlyTrans endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
-		if (endTransType == EndReadOnlyTrans.never) return;
+    EndReadOnlyTrans endTransType = EndReadOnlyTrans.never;
 
-		if (!shouldEndTransactionForCommand(currentCommand)) return;
-
-    TransactionChecker transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
-
-    if (transactionChecker == TransactionChecker.NO_CHECK)
+    try
     {
-      LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Ending read-only transactions has been configured, but there is no support for checking pending transactions for the current DBMS: " + currentConnection.getDatabaseProductName() + " (" + currentConnection.getDbId() + ")");
-    }
+      endTransType = currentConnection.getDbSettings().getAutoCloseReadOnlyTransactions();
+      if (endTransType == EndReadOnlyTrans.never) return;
 
-		if (!transactionChecker.hasUncommittedChanges(currentConnection))
-		{
-			LogMgr.logInfo("StatementRunner.endReadOnlyTransaction()", "Sending a " + endTransType.name() + " to end the current transaction started by: " + currentCommand);
-			try
-			{
-				if (endTransType == EndReadOnlyTrans.commit)
-				{
-					currentConnection.commit();
-				}
-				else
-				{
-					currentConnection.rollback();
-				}
-			}
-			catch (Exception ex)
-			{
-				LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Could not " + endTransType.name(), ex);
-			}
-		}
+      if (!shouldEndTransactionForCommand(currentCommand)) return;
+
+      TransactionChecker transactionChecker = TransactionChecker.Factory.createChecker(currentConnection);
+
+      if (transactionChecker == TransactionChecker.NO_CHECK)
+      {
+        LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Ending read-only transactions has been configured, but there is no support for checking pending transactions for the current DBMS: " + currentConnection.getDatabaseProductName() + " (" + currentConnection.getDbId() + ")");
+      }
+
+      if (!transactionChecker.hasUncommittedChanges(currentConnection))
+      {
+        LogMgr.logInfo("StatementRunner.endReadOnlyTransaction()", "Sending a " + endTransType.name() + " to end the current transaction started by: " + currentCommand);
+        if (endTransType == EndReadOnlyTrans.commit)
+        {
+          currentConnection.commit();
+        }
+        else
+        {
+          currentConnection.rollbackSilently();
+        }
+      }
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("StatementRunner.endReadOnlyTransaction()", "Could not end transaction using: " + endTransType, ex);
+    }
 	}
 
 	public StatementRunnerResult getResult()
