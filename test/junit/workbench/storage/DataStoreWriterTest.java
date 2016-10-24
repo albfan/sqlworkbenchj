@@ -21,7 +21,6 @@
 package workbench.storage;
 
 import workbench.WbTestCase;
-import workbench.console.DataStorePrinter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,6 +69,9 @@ public class DataStoreWriterTest
     writer.flush();
     DataStore ds = writer.getResult();
     assertNotNull(ds);
+//    DataStorePrinter printer = new DataStorePrinter(ds);
+//    printer.printTo(System.out);
+
     assertEquals(3, ds.getRowCount());
     assertEquals("first line", ds.getValueAsString(0, 0));
     assertEquals("second line", ds.getValueAsString(1, 0));
@@ -83,8 +85,8 @@ public class DataStoreWriterTest
     ds = writer.getResult();
 
     assertNotNull(ds);
-    DataStorePrinter printer = new DataStorePrinter(ds);
-    printer.printTo(System.out);
+//    DataStorePrinter printer = new DataStorePrinter(ds);
+//    printer.printTo(System.out);
 
     assertEquals(3, ds.getRowCount());
     assertEquals("first line", ds.getValueAsString(0, 0));

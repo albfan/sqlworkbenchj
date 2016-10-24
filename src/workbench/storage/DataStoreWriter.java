@@ -90,8 +90,8 @@ public class DataStoreWriter
     int lineLength = currentLine.indexOf("\n");
     String line = null;
 
-    if (addEmpty == false && lineLength < 1) return;
-    
+    if (addEmpty == false && lineLength == 0) return;
+
     if (lineLength < 1)
     {
       line = currentLine.toString();
