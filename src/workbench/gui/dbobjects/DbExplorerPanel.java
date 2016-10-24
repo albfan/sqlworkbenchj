@@ -428,7 +428,13 @@ public class DbExplorerPanel
 
 	private void retrieveAndShowSchemas(final boolean checkWorkspace)
   {
-    final List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter());
+    String catalog = null;
+    if (!switchCatalog)
+    {
+      catalog = getSelectedCatalog();
+    }
+    
+    final List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter(), catalog);
 
     WbSwingUtilities.invoke(() ->
     {
