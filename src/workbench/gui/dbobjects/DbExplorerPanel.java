@@ -428,12 +428,12 @@ public class DbExplorerPanel
 
 	private void retrieveAndShowSchemas(final boolean checkWorkspace)
   {
-    String catalog = null;
-    if (!switchCatalog)
+    String catalog = getSelectedCatalog();
+    if ("*".equals(catalog))
     {
-      catalog = getSelectedCatalog();
+      catalog = null;
     }
-    
+
     final List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter(), catalog);
 
     WbSwingUtilities.invoke(() ->
@@ -865,6 +865,8 @@ public class DbExplorerPanel
 					LogMgr.logError("DbExplorerPanel.actionPerformed()", "Could not switch catalog", ex);
 					WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(ex));
 				}
+        // if the catalog was changed, we need to re-retrieve the list of schemas
+        schemaRetrievePending = true;
 			}
 			retrieve();
 		}
