@@ -43,7 +43,9 @@ public class PostgresInheritanceReader
 {
   public List<InheritanceEntry> getChildren(WbConnection dbConnection, TableIdentifier table)
   {
-    if (table == null) return null;
+    List<InheritanceEntry> result = new ArrayList<>();
+
+    if (table == null) return result;
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -84,8 +86,6 @@ public class PostgresInheritanceReader
     // wenn putting the "?" expression directly into the prepareStatement() call, this generates an error with Java 8
     final String sqlToUse = is84 ? sql84 : sql83;
 
-    List<InheritanceEntry> result = new ArrayList<>();
-
     Savepoint sp = null;
     try
     {
@@ -114,7 +114,7 @@ public class PostgresInheritanceReader
     {
       dbConnection.rollback(sp);
       LogMgr.logError("PostgresInheritanceReader.getChildTables()", "Error retrieving table options using:\n" + SqlUtil.replaceParameters(sqlToUse, table.getSchema(), table.getTableName()), e);
-      return null;
+      return new ArrayList<>();
     }
     finally
     {

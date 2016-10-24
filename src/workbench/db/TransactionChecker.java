@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import workbench.resource.Settings;
+
 import workbench.util.StringUtil;
 
 /**
@@ -38,7 +39,7 @@ public interface TransactionChecker
   boolean hasUncommittedChanges(WbConnection con);
 
   /**
-   * Dummy implementation that does no checking at all.
+   * Dummy implementation that does no checking at all and always returns false.
    */
   TransactionChecker NO_CHECK = (WbConnection con) -> false;
 

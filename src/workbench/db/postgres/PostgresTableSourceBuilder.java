@@ -33,6 +33,10 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.DomainIdentifier;
@@ -43,9 +47,7 @@ import workbench.db.ObjectSourceOptions;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -89,6 +91,8 @@ public class PostgresTableSourceBuilder
 
   private void readTableOptions(TableIdentifier tbl)
   {
+    if (!JdbcUtils.hasMinimumServerVersion(dbConnection, "8.1")) return;
+
     ObjectSourceOptions option = tbl.getSourceOptions();
     StringBuilder inherit = readInherits(tbl);
 
@@ -98,16 +102,6 @@ public class PostgresTableSourceBuilder
     {
       if (tableSql.length() > 0) tableSql.append('\n');
       tableSql.append(inherit);
-    }
-
-    String optionsCol = null;
-    if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.1"))
-    {
-      optionsCol = "array_to_string(ct.reloptions, ', ')";
-    }
-    else
-    {
-      optionsCol = "null as reloptions";
     }
 
     String tempCol = null;
@@ -126,8 +120,8 @@ public class PostgresTableSourceBuilder
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String sql
-      = "select " + tempCol + ", ct.relkind, " + optionsCol + ", spc.spcname, own.rolname as owner \n" +
+    String sql =
+      "select " + tempCol + ", ct.relkind, array_to_string(ct.reloptions, ', '), spc.spcname, own.rolname as owner \n" +
       "from pg_catalog.pg_class ct \n" +
       "  join pg_catalog.pg_namespace cns on ct.relnamespace = cns.oid \n " +
       "  join pg_catalog.pg_roles own on ct.relowner = own.oid \n " +

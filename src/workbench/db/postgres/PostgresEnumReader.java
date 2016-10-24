@@ -40,6 +40,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.EnumIdentifier;
+import workbench.db.JdbcUtils;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 
@@ -175,6 +176,8 @@ public class PostgresEnumReader
 
   public Map<String, EnumIdentifier> getEnumInfo(WbConnection con, String schemaName, String namePattern)
   {
+    if (!JdbcUtils.hasMinimumServerVersion(con, "8.3")) return Collections.emptyMap();
+
     String sql = getSql(con, schemaName, namePattern);
 
     Statement stmt = null;
