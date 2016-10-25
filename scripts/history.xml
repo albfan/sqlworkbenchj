@@ -7,6 +7,8 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="3" type="fix">The source of a table was not shown when an old (unsupported) version of Postgres was used</entry>
+    <entry dev-build="3" type="fix">For SQL Server (and other DBMS supporting schemas and catalogs) the list of schemas was not properly refreshed when the database was changed in the DbExplorer's dropdowns</entry>
     <entry dev-build="2" type="fix">For Oracle, value literals for RAW columns where not created correctly</entry>
     <entry dev-build="2" type="fix">For Oracle, -clobAsFile for WbExport was not working for XML columns</entry>
     <entry dev-build="1" type="fix">For Oracle, overloaded procedures inside packages where no longer displayed.</entry>
@@ -51,7 +53,7 @@
     <entry dev-build="3" type="fix">Parsing of comments in SQL statements is now more lenient with invalid (nested) comments</entry>
     <entry dev-build="3" type="fix">When changing the position of SQL tabs with files loaded, the Workspace was not saved properly</entry>
     <entry dev-build="3" type="fix">For Progress OpenEdge, the SQL generated for sequences was invalid</entry>
-    <entry dev-build="3" type="fix">For Postgres, the implizit index for an exclusion constraint was incorrectly added to the souce of the table</entry>
+    <entry dev-build="3" type="fix">For Postgres, the implicit index for an exclusion constraint was incorrectly added to the souce of the table</entry>
     <entry dev-build="3" type="fix">The format of a hstore and array literals was not correct for generated SQL statements</entry>
     <entry dev-build="3" type="fix">For Oracle procedures from packages that contained only procedures without parameters were not displayed.</entry>
     <entry dev-build="2" type="fix">Implemented a workaround for the MariaDB JDBC driver that returns invalid object type names for tables ("BASE TABLE" instead of "TABLE")</entry>
