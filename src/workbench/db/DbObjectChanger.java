@@ -45,9 +45,11 @@ import workbench.util.StringUtil;
 public class DbObjectChanger
 {
   public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
+  public static final String PARAM_OLD_SIMPLE_NAME = "%old_simple_name%";
   public static final String PARAM_OLD_FQ_OBJECT_NAME = "%fq_object_name%";
   public static final String PARAM_NEW_FQ_OBJECT_NAME = "%new_fq_object_name%";
   public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
+  public static final String PARAM_NEW_SIMPLE_NAME = "%new_simple_name%";
 
   public static final String PARAM_OLD_SCHEMA_NAME = "%schema_name%";
   public static final String PARAM_NEW_SCHEMA_NAME = "%new_schema_name%";
@@ -181,13 +183,23 @@ public class DbObjectChanger
     String fqOld = SqlUtil.fullyQualifiedName(dbConnection, oldObject);
     String fqNew = SqlUtil.fullyQualifiedName(dbConnection, newObject);
 
+    sql = sql.replace(PARAM_OLD_SIMPLE_NAME, getSimpleName(oldObject.getObjectName()));
     sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldObject.getObjectExpression(dbConnection));
     sql = sql.replace(PARAM_OLD_FQ_OBJECT_NAME, fqOld);
+    sql = sql.replace(PARAM_NEW_SIMPLE_NAME, getSimpleName(newObject.getObjectName()));
     sql = sql.replace(PARAM_NEW_OBJECT_NAME, newObject.getObjectExpression(dbConnection));
     sql = sql.replace(PARAM_NEW_FQ_OBJECT_NAME, fqNew);
 
     sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, fqOld);
     return sql;
+  }
+
+  private String getSimpleName(String name)
+  {
+    if (StringUtil.isEmptyString(name)) return name;
+    int pos = name.indexOf('(');
+    if (pos < 0) return name;
+    return name.substring(0, pos);
   }
 
   public String getCommentSql(DbObject oldDefinition, DbObject newDefinition)
