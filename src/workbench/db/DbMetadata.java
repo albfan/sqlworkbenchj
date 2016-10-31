@@ -2672,7 +2672,7 @@ public class DbMetadata
   {
     if (this.isSqlServer)
     {
-      // the jTDS driver does not support getSchemas(String, String)
+      // only the Microsoft driver supports this, but not the jTDS driver
       return SqlServerUtil.isMicrosoftDriver(dbConnection);
     }
     return getDbSettings().supportsCatalogForGetSchemas();
