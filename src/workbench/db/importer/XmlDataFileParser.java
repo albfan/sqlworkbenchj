@@ -39,28 +39,26 @@ import java.util.Map;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.XmlRowDataConverter;
-
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
@@ -268,7 +266,7 @@ public class XmlDataFileParser
       else
       {
         String errorColumn = (this.columns[colIndex] != null ? this.columns[colIndex].getColumnName() : "n/a");
-        String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", errorColumn, tbl.getTableExpression());
+        String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", errorColumn, getSourceFilename(), tbl.getTableExpression());
         this.messages.append(msg);
         this.messages.appendNewLine();
         if (this.abortOnError)
@@ -322,7 +320,7 @@ public class XmlDataFileParser
       {
         if (ignoreMissingColumns || !abortOnError)
         {
-          String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", c.getColumnName(), this.tableName);
+          String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", c.getColumnName(), getSourceFilename(), this.tableName);
           LogMgr.logWarning("XmlDataFileParser.checkImportColumns()", "Ignoring table column " + c.getColumnName() + " because it is not present in the input file");
           this.hasWarnings = true;
           if (!ignoreMissingColumns) this.hasErrors = true;

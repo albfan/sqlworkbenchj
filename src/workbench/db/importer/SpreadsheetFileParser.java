@@ -35,18 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.TabularDataParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-
 import workbench.storage.RowActionMonitor;
-
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -205,7 +202,7 @@ public class SpreadsheetFileParser
         {
           if (this.abortOnError && !ignoreMissingColumns)
           {
-            String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), this.tableName);
+            String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
             this.messages.append(msg);
             this.messages.appendNewLine();
             this.hasErrors = true;
@@ -213,7 +210,7 @@ public class SpreadsheetFileParser
           }
           else
           {
-            String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), this.tableName);
+            String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), getSourceFilename(), this.tableName);
             LogMgr.logWarning("SpreadsheetFileParser.setColumns()", msg);
             this.hasWarnings = true;
             this.messages.append(msg);
