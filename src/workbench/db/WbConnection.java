@@ -40,16 +40,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import workbench.interfaces.DbExecutionListener;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleWarningsClearer;
-
+import workbench.interfaces.DbExecutionListener;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorReportLevel;
 import workbench.sql.StatementRunner;
@@ -57,7 +55,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
-
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlParsingUtil;
@@ -152,7 +149,10 @@ public class WbConnection
       }
       removeNewLines = db.removeNewLinesInSQL();
     }
-    lastAutocommitState = profile.getAutocommit();
+    if (profile != null)
+    {
+      lastAutocommitState = profile.getAutocommit();
+    }
   }
 
   public synchronized SqlParsingUtil getParsingUtil()
