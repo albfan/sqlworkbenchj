@@ -202,9 +202,9 @@ public class PostgresTableSourceBuilderTest
     TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
 
 		String source = builder.getTableSource(tbl, DropType.none, true);
-//		System.out.println(source);
+		System.out.println(source);
     assertTrue(source.startsWith("CREATE TABLE \"Foo_Bar\""));
-    assertTrue(source.contains("ALTER TABLE " + TEST_SCHEMA + ".\"Foo_Bar\""));
+    assertTrue(source.contains("ALTER TABLE \"Foo_Bar\""));
     assertTrue(source.contains("ADD CONSTRAINT \"Some_PK\""));
     assertTrue(source.contains("PRIMARY KEY (\"PK_id\", \"Other_Value\")"));
     assertTrue(source.contains("COMMENT ON TABLE \"Foo_Bar\""));
