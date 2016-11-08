@@ -193,6 +193,8 @@ keyword=(
 
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
+(WITHIN{wsp}GROUP)|
+(GROUPING{wsp}SETS)|
 
 (OWNED{wsp}BY)|
 "AFTER"|
@@ -361,7 +363,7 @@ keyword=(
 "OUT"|
 "OUTPUT"|
 "OVER"|
-"OVERLAPS"|
+
 "OVERLAY"|
 "OVERRIDING"|
 "OWNER"|
@@ -387,6 +389,8 @@ keyword=(
 "REVOKE"|
 "RIGHT"|
 "ROLLBACK"|
+"ROLLUP"|
+"CUBE"|
 "ROW"|
 "ROWS"|
 "RULE"|
@@ -403,7 +407,7 @@ keyword=(
 "SET"|
 "SHARE"|
 
-(SIMILAR{wsp}TO)|
+
 "SMALLINT"|
 "SNAPSHOT"|
 (START{wsp}TRANSACTION)|
@@ -412,7 +416,7 @@ keyword=(
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|
-"SYSTIMESTAMP"|
+
 "SYSDATE"|
 "TABLE"|
 "TEMPORARY"|
@@ -438,7 +442,7 @@ keyword=(
 "VALID"|
 "VALUES"|
 "VARCHAR"|
-"VARCHAR2"|
+
 "VARIABLE"|
 "VERBOSE"|
 "VERSION"|
@@ -477,7 +481,7 @@ keyword=(
 "WBXSLT"|
 "WINDOW"|
 "WHEN"|
-"WHENEVER"|
+
 "WHERE"|
 "WITH"|
 "WITHOUT"|
@@ -495,7 +499,7 @@ identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
-operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>"|"(+)")
+operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>")
 integer=([-+]?{digits})
 string=([\'](([^\']|\'\')*)[\'])
 

@@ -158,7 +158,7 @@ keyword=(
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
 (EXCEPT{wsp}ALL)|
-(PARTITION{wsp}BY)|
+
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|
 
@@ -193,6 +193,8 @@ keyword=(
 
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
+(WITHIN{wsp}GROUP)|
+(GROUPING{wsp}SETS)|
 
 (OWNED{wsp}BY)|
 "AFTER"|
@@ -309,7 +311,7 @@ keyword=(
 "JOIN"|
 "KEY"|
 "LANGUAGE"|
-"LATERAL"|
+
 "LAST"|
 "LEFT"|
 "LENGTH"|
@@ -360,8 +362,8 @@ keyword=(
 "OR"|
 "OUT"|
 "OUTPUT"|
-"OVER"|
-"OVERLAPS"|
+
+
 "OVERLAY"|
 "OVERRIDING"|
 "OWNER"|
@@ -387,6 +389,8 @@ keyword=(
 "REVOKE"|
 "RIGHT"|
 "ROLLBACK"|
+"ROLLUP"|
+"CUBE"|
 "ROW"|
 "ROWS"|
 "RULE"|
@@ -438,7 +442,7 @@ keyword=(
 "VALID"|
 "VALUES"|
 "VARCHAR"|
-"VARCHAR2"|
+
 "VARIABLE"|
 "VERBOSE"|
 "VERSION"|
@@ -495,7 +499,7 @@ identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
-operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>"|":=")
+operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"<="|">="|"=>"|":="|"&&"|"<<"|">>")
 integer=([-+]?{digits})
 string=([\'](([^\']|\'\')*)[\'])
 

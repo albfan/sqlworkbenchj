@@ -193,6 +193,8 @@ XXXX_DBMS_XXXX|
 (FOREIGN{wsp}DATA{wsp}WRAPPER)|
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
+(WITHIN{wsp}GROUP)|
+(GROUPING{wsp}SETS)|
 (DATABASE{wsp}LINK)|
 (OWNED{wsp}BY)|
 "AFTER"|
@@ -387,6 +389,8 @@ XXXX_DBMS_XXXX|
 "REVOKE"|
 "RIGHT"|
 "ROLLBACK"|
+"ROLLUP"|
+"CUBE"|
 "ROW"|
 "ROWS"|
 "RULE"|
@@ -495,7 +499,7 @@ identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r
 digit=([0-9])
 digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
-operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>"|"(+)")
+operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")
 integer=([-+]?{digits})
 string=([\'](([^\']|\'\')*)[\'])
 
