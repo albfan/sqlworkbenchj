@@ -25,8 +25,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+
+import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -89,22 +91,22 @@ public class ResultProcessor
     }
   }
 
-  public boolean checkForMoreResults()
+  public boolean hasMoreResults()
   {
     try
     {
-      return hasMoreResults();
+      return checkForMoreResults();
     }
-    catch (Exception ex)
+    catch (Throwable ex)
     {
-      // Some drivers throw errors if no result is available. In this case
-      // simply assume there are no more results.
-      LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", ex);
+      // Some drivers throw errors if no result is available.
+      // In this case simply assume there are no more results.
+      LogMgr.logWarning("ResultProcessor.checkForMoreResults()", "Error when calling getMoreResults()", ex);
       return false;
     }
   }
 
-  public boolean hasMoreResults()
+  private boolean checkForMoreResults()
     throws SQLException
   {
     if (containsEmbeddedResults && currentResult != null)

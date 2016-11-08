@@ -681,7 +681,7 @@ public class SqlCommand
         updateCount = -1;
       }
 
-      moreResults = processor.checkForMoreResults();
+      moreResults = processor.hasMoreResults();
     }
 
     if (currentConnection == null || currentConnection.isClosed() || currentConnection.getMetadata() == null)
@@ -796,28 +796,7 @@ public class SqlCommand
         return;
       }
 
-      try
-      {
-        moreResults = processor.hasMoreResults();
-      }
-      catch (SQLException sql)
-      {
-        // SQL Exceptions should be shown to the user
-        LogMgr.logError("SqlCommand.processResults()", "Error when calling getMoreResults()", sql);
-        String msg = StringUtil.trimToNull(sql.getMessage());
-        if (msg != null)
-        {
-          result.addWarning("\n" + msg + "\n");
-        }
-        break;
-      }
-      catch (Throwable th)
-      {
-        // Some drivers do not support getMoreResults() properly.
-        // So, this exception is simply ignored, so that processing can proceed normally
-        LogMgr.logWarning("SqlCommand.processResults()", "Error when calling getMoreResults()", th);
-        break;
-      }
+      moreResults = processor.hasMoreResults();
 
       if (multipleUpdateCounts)
       {
@@ -825,7 +804,7 @@ public class SqlCommand
         {
           updateCount = this.currentStatement.getUpdateCount();
         }
-        catch (Exception e)
+        catch (Throwable e)
         {
           LogMgr.logWarning("SqlCommand.processResult()", "Error when calling getUpdateCount(): " + ExceptionUtil.getDisplay(e));
           updateCount = -1;

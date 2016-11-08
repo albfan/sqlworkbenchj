@@ -36,9 +36,6 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.WbManager;
-import workbench.db.ConnectionProfile;
-import workbench.db.TransactionChecker;
-import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -48,14 +45,21 @@ import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.TransactionChecker;
+import workbench.db.WbConnection;
+
+import workbench.storage.DataStore;
+import workbench.storage.DatastoreTransposer;
+import workbench.storage.RowActionMonitor;
+
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
-import workbench.storage.DataStore;
-import workbench.storage.DatastoreTransposer;
-import workbench.storage.RowActionMonitor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
@@ -557,12 +561,12 @@ public class StatementRunner
 			messageOutput.printMessage(realSql);
 		}
 
-		long sqlExecStart = System.currentTimeMillis();
-
     List<WbAnnotation> annotations = WbAnnotation.readAllAnnotations(realSql, annotationTags);
     int crosstabIndex = annotations.indexOf(crossTab);
 
     currentCommand.setAlwaysBufferResults(crosstabIndex >= 0);
+
+    long sqlExecStart = System.currentTimeMillis();
 
 		if (realSql == null)
 		{
