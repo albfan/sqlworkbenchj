@@ -520,6 +520,54 @@ WHERE trigger_name not like 'BIN$%'
 FROM pg_trigger trg
  JOIN pg_class tbl on trg.tgrelid = tbl.oid
  JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
+WHERE NOT trg.tgisinternal
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>tbl.relname</string>
+    </void>
+    <void property="schemaField">
+      <string>ns.nspname</string>
+    </void>
+    <void property="orderBy">
+     <string>order by 1</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>PostgreSQL-8</string>
+   <object id="trg_list_pg8" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+     select trg.tgname,
+        CASE trg.tgtype::integer &amp; 66
+            WHEN 2 THEN 'BEFORE'
+            WHEN 64 THEN 'INSTEAD OF'
+            ELSE 'AFTER'
+        end as trigger_type,
+       case trg.tgtype::integer &amp; cast(28 as int2)
+         when 16 then 'UPDATE'
+         when 8 then 'DELETE'
+         when 4 then 'INSERT'
+         when 20 then 'INSERT, UPDATE'
+         when 28 then 'INSERT, UPDATE, DELETE'
+         when 24 then 'UPDATE, DELETE'
+         when 12 then 'INSERT, DELETE'
+       end as trigger_event,
+       ns.nspname||'.'||tbl.relname as trigger_table,
+       obj_description(trg.oid) as remarks,
+	     case
+          when trg.tgenabled='O' then 'ENABLED'
+	        else 'DISABLED'
+        end as status,
+        case trg.tgtype::integer &amp; 1
+          when 1 then 'ROW'::text
+          else 'STATEMENT'::text
+        end as trigger_level
+FROM pg_trigger trg
+ JOIN pg_class tbl on trg.tgrelid = tbl.oid
+ JOIN pg_namespace ns ON ns.oid = tbl.relnamespace
 WHERE trg.tgname not like 'RI_ConstraintTrigger%'
   AND trg.tgname not like 'pg_sync_pg%'
 </string>
@@ -534,6 +582,11 @@ WHERE trg.tgname not like 'RI_ConstraintTrigger%'
      <string>order by 1</string>
     </void>
    </object>
+  </void>
+
+  <void method="put">
+   <string>PostgreSQL-7</string>
+   <object idref="trg_list_pg8"/>
   </void>
 
   <void method="put">
