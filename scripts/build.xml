@@ -886,17 +886,22 @@
       <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
       <replacefilter token="(PACKAGE{wsp}BODY)|"/>
       <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SIMILAR{wsp}TO)|"/>
       <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
       <replacefilter token="(DISTINCT{wsp}ON)|"/>
       <replacefilter token="(CONNECT{wsp}BY)|"/>
       <replacefilter token="(START{wsp}WITH)|"/>
       <replacefilter token='"SIMILAR"|'/>
       <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"OVERLAPS"|'/>
+      <replacefilter token='"VARCHAR2"|'/>
       <replacefilter token='"DEPTH"|'/>
       <replacefilter token='"CYCLE"|'/>
       <replacefilter token='"DEPTH"|'/>
       <replacefilter token='"DEFERRABLE"|'/>
       <replacefilter token='"DEFERRED"|'/>
+      <replacefilter token='"WHENEVER"|'/>
+      <replacefilter token='"SYSTIMESTAMP"|'/>
       <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
       <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
@@ -904,6 +909,10 @@
       <replacefilter>
         <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>")]]></replacevalue>
       </replacefilter>
     </replace>
 
@@ -937,6 +946,11 @@
       <replacefilter token="(CONNECT{wsp}BY)|"/>
       <replacefilter token="(START{wsp}TRANSACTION)|"/>
       <replacefilter token="(SIMILAR{wsp}TO)|"/>
+      <replacefilter token="(PARTITION{wsp}BY)|"/>
+      <replacefilter token='"OVERLAPS"|'/>
+      <replacefilter token='"OVER"|'/>
+      <replacefilter token='"LATERAL"|'/>
+      <replacefilter token='"VARCHAR2"|'/>
       <replacefilter token='"SIMILAR"|'/>
       <replacefilter token='"CYCLE"|'/>
       <replacefilter token='"DEPTH"|'/>
@@ -960,8 +974,8 @@
         <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(`[^\r\n\t\f`]+`)]]></replacevalue>
       </replacefilter>
       <replacefilter>
-        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>"|"(+)")]]></replacetoken>
-        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>"|":=")]]></replacevalue>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"<="|">="|"=>"|":="|"&&"|"<<"|">>")]]></replacevalue>
       </replacefilter>
     </replace>
 
