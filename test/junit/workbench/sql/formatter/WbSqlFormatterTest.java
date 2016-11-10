@@ -51,6 +51,21 @@ public class WbSqlFormatterTest
 	}
 
   @Test
+  public void testArrayAlias()
+  {
+    String sql = "select col[1] as first_element from foo";
+
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    String formatted = f.getFormattedSql();
+    String expected = "SELECT col[1] AS first_element\nFROM foo";
+
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void nonStandardCreate()
   {
     String sql =

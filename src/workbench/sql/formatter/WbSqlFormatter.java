@@ -617,6 +617,7 @@ public class WbSqlFormatter
 		if (lastText.endsWith("'") && currentText.equals("}")) return false;
 		if (lastText.equals("''") && currentText.startsWith("'")) return false;
 		if (lastChar == '\'' && currChar == '\'') return false;
+		if (lastText.endsWith("]") && (current.isReservedWord() || current.isIdentifier() || current.isLiteral() || current.isOperator())) return true;
 
 		if (isCurrentOpenBracket && isDbFunction(lastText)) return false;
 		if (isCurrentOpenBracket && isDatatype(currentText)) return false;
