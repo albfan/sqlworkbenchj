@@ -31,9 +31,12 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -49,6 +52,7 @@ public class WbTriggerSource
 {
 	public static final String VERB = "WbTriggerSource";
   public static final String ARG_TRIGGER_NAME = "triggerName";
+  public static final String ARG_INCLUDE_DEPS = "includeDependent";
 
 	public WbTriggerSource()
 	{
@@ -56,6 +60,7 @@ public class WbTriggerSource
     cmdLine = new ArgumentParser();
     cmdLine.addArgument(CommonArgs.ARG_FILE);
     cmdLine.addArgument(ARG_TRIGGER_NAME);
+    cmdLine.addArgument(ARG_INCLUDE_DEPS, ArgumentType.BoolArgument);
     CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -78,10 +83,13 @@ public class WbTriggerSource
       return result;
     }
 
+    boolean includeDeps = true;
     String triggerName = null;
+
     if (cmdLine.hasArguments())
     {
       triggerName = cmdLine.getValue(ARG_TRIGGER_NAME);
+      includeDeps = cmdLine.getBoolean(ARG_INCLUDE_DEPS, true);
     }
     else
     {
@@ -92,10 +100,11 @@ public class WbTriggerSource
 
 		TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());
+    
 		String source = null;
 		if (trg != null)
 		{
-			source = reader.getTriggerSource(trg, true);
+			source = reader.getTriggerSource(trg, includeDeps);
 		}
 
 		if (source != null)
