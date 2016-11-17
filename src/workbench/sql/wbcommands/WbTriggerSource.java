@@ -23,6 +23,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import workbench.db.DbObject;
@@ -30,9 +31,12 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
+import workbench.util.WbFile;
 
 /**
  * Display the source code of a trigger.
@@ -44,10 +48,15 @@ public class WbTriggerSource
 	extends SqlCommand
 {
 	public static final String VERB = "WbTriggerSource";
+  public static final String ARG_TRIGGER_NAME = "triggerName";
 
 	public WbTriggerSource()
 	{
 		super();
+    cmdLine = new ArgumentParser();
+    cmdLine.addArgument(CommonArgs.ARG_FILE);
+    cmdLine.addArgument(ARG_TRIGGER_NAME);
+    CommonArgs.addEncodingParameter(cmdLine);
 	}
 
 	@Override
@@ -63,7 +72,23 @@ public class WbTriggerSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		DbObject object = new TableIdentifier(args, currentConnection);
+    cmdLine.parse(args);
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    String triggerName = null;
+    if (cmdLine.hasArguments())
+    {
+      triggerName = cmdLine.getValue(ARG_TRIGGER_NAME);
+    }
+    else
+    {
+      triggerName = args;
+    }
+
+    DbObject object = new TableIdentifier(triggerName, currentConnection);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());
@@ -75,8 +100,27 @@ public class WbTriggerSource
 
 		if (source != null)
 		{
-			result.addMessage(source);
 			result.setSuccess();
+      String fname = cmdLine.getValue(CommonArgs.ARG_FILE);
+      WbFile outFile = evaluateFileArgument(fname);
+      if (outFile != null)
+      {
+        try
+        {
+          String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
+          FileUtil.writeString(outFile, source, encoding, false);
+          result.addMessageByKey("MsgScriptWritten", outFile.getAbsolutePath());
+        }
+        catch (IOException io)
+        {
+          result.setFailure();
+          result.addMessage(io.getLocalizedMessage());
+        }
+      }
+      else
+      {
+        result.addMessage(source);
+      }
 		}
 		else
 		{

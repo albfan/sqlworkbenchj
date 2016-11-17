@@ -73,6 +73,7 @@ public class WbConnect
 		cmdLine.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
+    cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_DESCRIPTOR);
 		cmdLine.addArgument(AppArguments.ARG_ALT_DELIMITER);
 	}

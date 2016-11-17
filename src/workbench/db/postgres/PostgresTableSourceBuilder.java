@@ -33,10 +33,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.DomainIdentifier;
@@ -47,7 +43,9 @@ import workbench.db.ObjectSourceOptions;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -322,17 +320,9 @@ public class PostgresTableSourceBuilder
     StringBuilder storage = getColumnStorage(table, columns);
     String owner = getOwnerSql(table);
 
-    if (StringUtil.isEmptyString(enums) && StringUtil.isEmptyString(domains) &&
-      StringUtil.isEmptyString(sequences) && StringUtil.isEmptyString(children) &&
-      StringUtil.isEmptyString(owner) && StringUtil.isEmptyString(storage)) return null;
+    if (StringUtil.allEmpty(enums, domains, sequences, children, owner, storage)) return null;
 
-    int enumLen = (enums != null ? enums.length() : 0);
-    int domainLen = (domains != null ? domains.length() : 0);
-    int childLen = (children != null ? children.length() : 0);
-    int ownerLen = (owner != null ? owner.length() : 0);
-    int storageLen = (storage != null ? storage.length() : 0);
-
-    StringBuilder result = new StringBuilder(enumLen + domainLen + childLen + ownerLen + storageLen);
+    StringBuilder result = new StringBuilder(200);
 
     if (storage != null) result.append(storage);
     if (enums != null) result.append(enums);

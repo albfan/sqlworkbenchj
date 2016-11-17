@@ -24,16 +24,10 @@
 package workbench.sql.wbcommands;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import workbench.interfaces.ScriptGenerationMonitor;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.ResourceMgr;
 
 import workbench.db.DbObject;
 import workbench.db.ObjectScripter;
@@ -42,13 +36,14 @@ import workbench.db.ProcedureReader;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
-
-import workbench.storage.RowActionMonitor;
-
+import workbench.interfaces.ScriptGenerationMonitor;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.ResourceMgr;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -247,14 +242,12 @@ public class WbGenerateScript
 
 		result.setSuccess();
 
-		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
 		if (output != null)
 		{
-			Writer writer = null;
 			try
 			{
-				writer = EncodingUtil.createWriter(output, encoding, false);
-				writer.write(script.toString());
+        String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING, EncodingUtil.getDefaultEncoding());
+				FileUtil.writeString(output, script.toString(), encoding, false);
 				result.addMessageByKey("MsgScriptWritten", output.getAbsolutePath());
 			}
 			catch (IOException io)
@@ -262,10 +255,6 @@ public class WbGenerateScript
 				LogMgr.logError("WbGenerateScript.execute()", "Could not write outputfile", io);
 				result.setFailure();
 				result.addMessage(io.getLocalizedMessage());
-			}
-			finally
-			{
-				FileUtil.closeQuietely(writer);
 			}
 		}
 		else

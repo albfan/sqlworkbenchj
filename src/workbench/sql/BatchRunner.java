@@ -1240,6 +1240,7 @@ public class BatchRunner
 			boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
 			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
+			boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 
 			Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
 
@@ -1248,6 +1249,7 @@ public class BatchRunner
 			result.setDriverName(null);
 			result.setStoreExplorerSchema(false);
 			result.setRollbackBeforeDisconnect(rollback);
+      result.setIgnoreDropErrors(ignoreDrop);
 			result.setAlternateDelimiter(delim);
 			result.setTrimCharData(trimCharData);
 			result.setUseSeparateConnectionPerTab(separate);
