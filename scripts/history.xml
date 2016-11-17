@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-10-17">
+    <entry dev-build="3" type="enh">WbTriggerSource now also supports writing the source to a file</entry>
     <entry dev-build="3" type="enh">For Postgres, dependencies between triggers and tables are no shown in the DbExplorer and DbTree</entry>
     <entry dev-build="2" type="enh">For Postgres, functions defined as "returns setof refcursor" are now processed correctly when using "select * from function()"</entry>
     <entry dev-build="1" type="enh">For Postgres, it's now possible to import values into array columns if the source data is formatted as a Postgres array literal (WbImport and WbCopy)</entry>
@@ -10,7 +11,7 @@
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
     <entry dev-build="3" type="fix">For Postgres, the remarks for indexes were not retrieved correctly if indexes with the same name existed in different schemas</entry>
     <entry dev-build="3" type="fix">The formatter did not treat the := operator properly for MySQL</entry>
-    <entry dev-build="3" type="fix">The source of a table was not shown when an old (unsupported) version of Postgres was used</entry>
+    <entry dev-build="3" type="fix">For Postgres, the source of a table was not shown when an old (unsupported) version of Postgres was used</entry>
     <entry dev-build="3" type="fix">For SQL Server (and other DBMS supporting schemas and catalogs) the list of schemas was not properly refreshed when the database was changed in the DbExplorer's dropdowns</entry>
     <entry dev-build="2" type="fix">For Oracle, value literals for RAW columns where not created correctly</entry>
     <entry dev-build="2" type="fix">For Oracle, -clobAsFile for WbExport was not working for XML columns</entry>
