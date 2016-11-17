@@ -26,7 +26,6 @@ package workbench.sql.wbcommands;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
@@ -51,7 +50,7 @@ public class WbTriggerSource
 	extends SqlCommand
 {
 	public static final String VERB = "WbTriggerSource";
-  public static final String ARG_TRIGGER_NAME = "triggerName";
+  public static final String ARG_TRIGGER_NAME = "trigger";
   public static final String ARG_INCLUDE_DEPS = "includeDependent";
 
 	public WbTriggerSource()
@@ -96,11 +95,12 @@ public class WbTriggerSource
       triggerName = args;
     }
 
-    DbObject object = new TableIdentifier(triggerName, currentConnection);
+    TableIdentifier object = new TableIdentifier(triggerName, currentConnection);
+    object.adjustCatalogAndSchema(currentConnection);
 
 		TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());
-    
+
 		String source = null;
 		if (trg != null)
 		{

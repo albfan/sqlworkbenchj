@@ -32,11 +32,11 @@ import workbench.db.TableIdentifier;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -99,6 +99,7 @@ public class WbProcSource
 
 		TableIdentifier object = new TableIdentifier(procName, currentConnection);
 		object.adjustCase(currentConnection);
+    object.adjustCatalogAndSchema(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 		ProcedureDefinition def = reader.findProcedureByName(object);

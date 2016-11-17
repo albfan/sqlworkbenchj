@@ -26,7 +26,9 @@ package workbench.db;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import workbench.log.LogMgr;
+
 import workbench.storage.ColumnData;
 import workbench.storage.SqlLiteralFormatter;
 
@@ -81,14 +83,7 @@ public class ReferenceTableNavigation
     if (tbl == null) return null;
 
     TableIdentifier table = tbl.createCopy();
-    if (table.getSchema() == null)
-    {
-      table.setSchema(this.dbConn.getMetadata().getSchemaToUse());
-    }
-    if (table.getCatalog() == null)
-    {
-      table.setCatalog(this.dbConn.getMetadata().getCurrentCatalog());
-    }
+    table.adjustCatalogAndSchema(dbConn);
     table.adjustCase(dbConn);
     return dependencyTree.findLeafNodeForTable(table, fkName);
   }

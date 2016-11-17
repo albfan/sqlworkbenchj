@@ -32,11 +32,11 @@ import workbench.db.ViewReaderFactory;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
-
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 

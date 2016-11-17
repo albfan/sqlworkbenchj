@@ -445,7 +445,7 @@ public class TableIdentifier
     {
       String schemaToUse = this.schema;
       String currentSchema = null;
-      if (this.schema == null)
+      if (schemaToUse == null)
       {
         currentSchema = meta.getCurrentSchema();
         schemaToUse = currentSchema;
@@ -476,6 +476,20 @@ public class TableIdentifier
       return StringUtil.trim(catalogToUse);
     }
     return null;
+  }
+
+  public void adjustCatalogAndSchema(WbConnection conn)
+  {
+    if (conn == null) return;
+
+    if (catalog == null && conn.getDbSettings().supportsCatalogs())
+    {
+      setCatalog(conn.getCurrentCatalog());
+    }
+    if (schema == null && conn.getDbSettings().supportsSchemas())
+    {
+      setSchema(conn.getCurrentSchema());
+    }
   }
 
   public final void adjustCase(WbConnection conn)
@@ -1012,25 +1026,12 @@ public class TableIdentifier
     {
       return one.equals(other);
     }
+    
     TableIdentifier tbl1 = one.createCopy();
-    if (tbl1.getSchema() == null)
-    {
-      tbl1.setSchema(con.getCurrentSchema());
-    }
-    if (tbl1.getCatalog() == null)
-    {
-      tbl1.setCatalog(con.getCurrentCatalog());
-    }
+    tbl1.adjustCatalogAndSchema(con);
 
     TableIdentifier tbl2 = other.createCopy();
-    if (tbl2.getSchema() == null)
-    {
-      tbl2.setSchema(con.getCurrentSchema());
-    }
-    if (tbl2.getCatalog() == null)
-    {
-      tbl2.setCatalog(con.getCurrentCatalog());
-    }
+    tbl2.adjustCatalogAndSchema(con);
 
     String expr1 = tbl1.getTableExpression(con);
     String expr2 = tbl2.getTableExpression(con);
