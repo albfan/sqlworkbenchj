@@ -527,6 +527,17 @@ public class StatementRunner
 		if (VariablePool.getInstance().getParameterCount() > 0)
 		{
 			realSql = VariablePool.getInstance().replaceAllParameters(aSql);
+      if (Settings.getInstance().getLogParameterSubstitution())
+      {
+        if (StringUtil.equalString(aSql, realSql))
+        {
+          LogMgr.logDebug("StatementRunner.runStatement()", "No variables replaced for:\n" + aSql);
+        }
+        else
+        {
+          LogMgr.logDebug("StatementRunner.runStatement()", "Variable substitution:\n--- [statement before] ---\n" + aSql + "\n--- [statement after] ---\n" + realSql  + "\n--- [end] ---");
+        }
+      }
 		}
 
 		if (!currentCommand.isModificationAllowed(currentConnection, realSql))

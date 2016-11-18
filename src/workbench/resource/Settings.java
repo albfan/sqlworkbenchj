@@ -2886,6 +2886,11 @@ public class Settings
 		return "]";
 	}
 
+  public boolean getLogParameterSubstitution()
+  {
+    return getBoolProperty("workbench.sql.parameter.log.substitution", false);
+  }
+
 	/**
 	 * Return the maximum size of the log file (when using the built-in logging)
 	 * If this size is exceeded a new log file is created
