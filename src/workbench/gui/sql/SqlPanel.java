@@ -222,6 +222,7 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 
 import workbench.util.CollectionUtil;
+import workbench.util.DurationFormat;
 import workbench.util.DurationFormatter;
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
@@ -2198,7 +2199,7 @@ public class SqlPanel
       // replace the standard tooltip with the refresh information
       int interval = refreshMgr.getRefreshPeriod(panel);
       DurationFormatter formatter = new DurationFormatter();
-      String intDisplay = formatter.formatDuration(interval, false, false).trim();
+      String intDisplay = formatter.formatDuration(interval, DurationFormat.dynamic, false, false).trim();
       String msg = ResourceMgr.getFormattedString("MsgRefreshing", intDisplay, StringUtil.getCurrentTimestamp());
       resultTab.setToolTipTextAt(index, msg);
     }
@@ -3566,7 +3567,7 @@ public class SqlPanel
 				this.showLogPanel();
 			}
 
-      String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
+      String duration = df.formatDuration(lastScriptExecTime, Settings.getInstance().getDurationFormat(), (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
 
 			if (count > 1)
 			{

@@ -298,7 +298,7 @@ public class DwStatusBar
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
-		setExecTimeText(durationFormatter.formatDuration(time, false));
+		setExecTimeText(durationFormatter.formatDuration(time, Settings.getInstance().getDurationFormat(), false));
 	}
 
 	public void setExecutionTime(long millis)

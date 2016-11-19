@@ -25,6 +25,7 @@ package workbench.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+
 import workbench.resource.Settings;
 
 /**
@@ -59,13 +60,13 @@ public class DurationFormatter
 
   /**
    * Create a timing formatter using the decimal separator defined
-   * through the settings property <tt>workbench.gui.timining.decimal</tt>
+   * through the property {@link Settings#PROP_DURATION_DECIMAL}.
    *
    * @return a properly initialized DecimalFormat
    */
   public static DecimalFormat createTimingFormatter()
   {
-    String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
+    String sep = Settings.getInstance().getProperty(Settings.PROP_DURATION_DECIMAL, ".");
     return createTimingFormatter(sep.charAt(0));
   }
 
@@ -78,54 +79,97 @@ public class DurationFormatter
     }
   }
 
+  /**
+   * Formats the duration using a dynamic format.
+   *
+   * @param millis the duration to format
+   * @return the formatted duration
+   * @see DurationFormat#dynamic
+   */
   public String formatDuration(long millis)
   {
-    return formatDuration(millis, (millis < ONE_MINUTE), true);
+    return formatDuration(millis, DurationFormat.dynamic, (millis < ONE_MINUTE), true);
   }
 
-  public String formatDuration(long millis, boolean includeFractionalSeconds)
+  /**
+   * Formats the number of milliseconds according to the given DurationFormat.
+   *
+   * When using {@link DurationFormat#dynamic} <tt>includeFractionalSeconds</tt> controls if
+   * fractional seconds should be included.
+   *
+   * @param millis                   the duration to format
+   * @param format                   the format to use
+   * @param includeFractionalSeconds only used for format = dynamic, ignored otherwise
+   *
+   * @return the formatted duration
+   * @see Settings#getDurationFormat()
+   */
+  public String formatDuration(long millis, DurationFormat format, boolean includeFractionalSeconds)
   {
-    return formatDuration(millis, includeFractionalSeconds, true);
+    return formatDuration(millis, format, includeFractionalSeconds, true);
   }
 
-  public String formatDuration(long millis, boolean includeFractionalSeconds, boolean includeZeroSeconds)
+  /**
+   * Formats the number of milliseconds according to the given DurationFormat.
+   *
+   * When using {@link DurationFormat#dynamic} <tt>includeFractionalSeconds</tt> controls if
+   * fractional seconds should be included.
+   *
+   * @param millis                   the duration to format
+   * @param format                   the format to use
+   * @param includeFractionalSeconds only used for format = dynamic, ignored otherwise
+   * @param includeZeroSeconds       only used for format = dynamic, ignored otherwise
+   *
+   * @return the formatted duration
+   * @see Settings#getDurationFormat()
+   */
+  public String formatDuration(long millis, DurationFormat format, boolean includeFractionalSeconds, boolean includeZeroSeconds)
   {
-    long hours = (millis / ONE_HOUR);
-    millis -= (hours * ONE_HOUR);
-    long minutes = millis / ONE_MINUTE;
-    millis -= (minutes * ONE_MINUTE);
 
-    StringBuilder result = new StringBuilder(17);
+    StringBuilder result = new StringBuilder(20);
 
-    if (hours > 0)
+    if (format == DurationFormat.millis)
     {
-      result.append(hours);
-      result.append("h ");
+      result.append(Long.toString(millis));
+      result.append("ms");
     }
-
-    if (minutes == 0 && hours > 0 || minutes > 0)
+    else if (format == DurationFormat.seconds)
     {
-      result.append(minutes);
-      result.append("m ");
-    }
-
-    if (includeFractionalSeconds)
-    {
-      synchronized (numberFormatter)
-      {
-        result.append(numberFormatter.format(millis / 1000.0));
-      }
+      result.append(getDurationAsSeconds(millis));
     }
     else
     {
-      int seconds = (int)millis / 1000;
-      if (seconds > 0 || includeZeroSeconds)
+      long hours = (millis / ONE_HOUR);
+      millis -= (hours * ONE_HOUR);
+      long minutes = millis / ONE_MINUTE;
+      millis -= (minutes * ONE_MINUTE);
+
+      if (hours > 0)
       {
-        result.append(Long.toString(seconds));
-        result.append('s');
+        result.append(hours);
+        result.append("h ");
+      }
+
+      if (minutes == 0 && hours > 0 || minutes > 0)
+      {
+        result.append(minutes);
+        result.append("m ");
+      }
+
+      if (includeFractionalSeconds)
+      {
+        result.append(getDurationAsSeconds(millis));
+      }
+      else
+      {
+        int seconds = (int)millis / 1000;
+        if (seconds > 0 || includeZeroSeconds)
+        {
+          result.append(Long.toString(seconds));
+          result.append('s');
+        }
       }
     }
-
     return result.toString().trim();
   }
 }

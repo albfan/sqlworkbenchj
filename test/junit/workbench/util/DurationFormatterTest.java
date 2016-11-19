@@ -23,8 +23,9 @@
  */
 package workbench.util;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -34,7 +35,24 @@ public class DurationFormatterTest
 {
 
 	@Test
-	public void testGetDurationAsSeconds()
+	public void testFixedFormat()
+	{
+		DurationFormatter f = new DurationFormatter('.');
+    
+		long millis = 1234;
+    assertEquals("1234ms", f.formatDuration(millis, DurationFormat.millis, true));
+    assertEquals("1234ms", f.formatDuration(millis, DurationFormat.millis, false));
+
+    millis = DurationFormatter.ONE_SECOND + 500;
+    assertEquals("1.5s", f.formatDuration(millis, DurationFormat.seconds, false));
+    assertEquals("1.5s", f.formatDuration(millis, DurationFormat.seconds, true));
+
+    assertEquals("1.75s", f.formatDuration(DurationFormatter.ONE_SECOND + 750, DurationFormat.seconds, true));
+    assertEquals("0.25s", f.formatDuration(250, DurationFormat.seconds, true));
+  }
+
+	@Test
+	public void testDynamicFormat()
 	{
 		DurationFormatter f = new DurationFormatter('.');
 		long millis = DurationFormatter.ONE_SECOND + 500;
@@ -46,38 +64,38 @@ public class DurationFormatterTest
 		assertEquals("102.5s", s);
 
 		millis = DurationFormatter.ONE_HOUR * 3 + DurationFormatter.ONE_MINUTE * 12 + DurationFormatter.ONE_SECOND * 12 + 300;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("3h 12m 12.3s", s);
 
 		millis = DurationFormatter.ONE_HOUR * 26 + DurationFormatter.ONE_MINUTE * 12 + DurationFormatter.ONE_SECOND * 12 + 300;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("26h 12m 12.3s", s);
 
 		millis = DurationFormatter.ONE_MINUTE * 59 + DurationFormatter.ONE_SECOND * 59;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("59m 59s", s);
 
 		millis += DurationFormatter.ONE_SECOND;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("1h 0m 0s", s);
 
 		millis += 500;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("1h 0m 0.5s", s);
 
 		millis = DurationFormatter.ONE_MINUTE * 60 + DurationFormatter.ONE_SECOND * 59;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("1h 0m 59s", s);
 
 		millis = DurationFormatter.ONE_SECOND * 59;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("59s", s);
 
 		millis += DurationFormatter.ONE_SECOND;
-		s = f.formatDuration(millis, true);
+		s = f.formatDuration(millis, DurationFormat.dynamic, true);
 		assertEquals("1m 0s", s);
 
-    s = f.formatDuration(DurationFormatter.ONE_MINUTE, false, false);
+    s = f.formatDuration(DurationFormatter.ONE_MINUTE, DurationFormat.dynamic, false, false);
 		assertEquals("1m", s.trim());
 	}
 }

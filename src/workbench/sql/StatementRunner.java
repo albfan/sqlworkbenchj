@@ -98,7 +98,6 @@ public class StatementRunner
 	private boolean ignoreDropErrors;
 	protected CommandMapper cmdMapper;
   private SavepointStrategy useSavepoint = SavepointStrategy.whenConfigured;
-	private boolean logAllStatements;
 	private OutputPrinter messageOutput;
 	private boolean traceStatements;
 	private Savepoint savepoint;
@@ -123,10 +122,8 @@ public class StatementRunner
 		verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
 		errorLevel = Settings.getInstance().getStatementErrorReportLevel();
 		cmdMapper = new CommandMapper();
-		logAllStatements = Settings.getInstance().getLogAllStatements();
 		Settings.getInstance().addPropertyChangeListener(this,
       Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES,
-      Settings.PROPERTY_LOG_ALL_SQL,
       Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL);
 	}
 
@@ -226,10 +223,6 @@ public class StatementRunner
 		if (Settings.PROPERTY_CONSOLIDATE_LOG_MESSAGES.equals(evt.getPropertyName()))
 		{
 			this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
-		}
-		else if (Settings.PROPERTY_LOG_ALL_SQL.equals(evt.getPropertyName()))
-		{
-			logAllStatements = Settings.getInstance().getLogAllStatements();
 		}
 		else if (Settings.PROPERTY_ERROR_STATEMENT_LOG_LEVEL.equals(evt.getPropertyName()))
 		{
@@ -527,7 +520,7 @@ public class StatementRunner
 		if (VariablePool.getInstance().getParameterCount() > 0)
 		{
 			realSql = VariablePool.getInstance().replaceAllParameters(aSql);
-      if (Settings.getInstance().getLogParameterSubstitution())
+      if (Settings.getInstance().getLogParameterSubstitution() && LogMgr.isDebugEnabled())
       {
         if (StringUtil.equalString(aSql, realSql))
         {
@@ -617,7 +610,7 @@ public class StatementRunner
 		statementHook.postExec(this, realSql, result);
 		result.setExecutionDuration(time);
 
-		if (logAllStatements)
+		if (Settings.getInstance().getLogAllStatements())
 		{
 			logStatement(realSql, time, currentConnection);
 		}
@@ -677,7 +670,7 @@ public class StatementRunner
 			msg.append(')');
 		}
 
-		if (Settings.getInstance().getBoolProperty("workbench.sql.log.statements.clean", false))
+		if (Settings.getInstance().getBoolProperty(Settings.PROP_LOG_CLEAN_SQL, false))
 		{
 			msg.append(SqlUtil.makeCleanSql(sql, false, true));
 			msg.append(' ');

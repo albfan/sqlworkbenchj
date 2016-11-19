@@ -29,6 +29,7 @@ import java.util.List;
 
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
 
@@ -153,7 +154,7 @@ public class StatementRunnerResult
 	public String getFormattedDuration()
 	{
 		if (executionTime == -1) return null;
-		return timingFormatter.formatDuration(executionTime, (executionTime < DurationFormatter.ONE_MINUTE));
+		return timingFormatter.formatDuration(executionTime, Settings.getInstance().getDurationFormat(), (executionTime < DurationFormatter.ONE_MINUTE));
 	}
 
 	public String getTimingMessage()

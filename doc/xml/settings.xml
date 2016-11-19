@@ -918,6 +918,20 @@
       <para>Default: <literal>workbench.db.ignore.oracle=quit,exit,whenever,spool,rem,clear,break,btitle,column,change,repheader,repfooter,run,save,store,timing,ttitle</literal></para>
     </simplesect>
 
+    <simplesect id="options-exec-time-formattig">
+      <title>Controlling the format for execution time messages</title>
+      <para>
+        <property>Property: <literal>workbench.log.timing.format</literal></property>
+      </para>
+      <para>Possible values:</para>
+      <itemizedlist spacing="compact">
+        <listitem><literal>millis</literal> - always show the runtime in milliseconds, e.g. 1042ms</listitem>
+        <listitem><literal>seconds</literal> - always show the runtime in seconds including fractional values, e.g. 4.2s</listitem>
+        <listitem><literal>dynamic</literal> - display the values with hours, minutes, seconds but only displays parts that are relevant e.g. 10min 5s or 3h 5min 42s</listitem>
+      </itemizedlist>
+      <para>Default: <literal>dynamic</literal></para>
+    </simplesect>
+
 		<simplesect id="options-enable-shortinclude">
 			<title>Enabling short WbInclude</title>
 			<para>Property: <literal>workbench.db.supportshortinclude</literal></para>
@@ -1136,6 +1150,18 @@
         </para>
         <para>Default: <literal>false</literal></para>
       </simplesect>
+
+      <simplesect id="options-log-var-replacement">
+        <title>Logging of variable substitution</title>
+        <para>Property: <literal>workbench.sql.parameter.log.substitution</literal></para>
+        <para>
+          If this property is set to <literal>true</literal> the result
+          of replacing them in the SQL statements will be written to the
+          logfile if the <link linkend="settings-log-level">loglevel</link> is DEBUG.
+        </para>
+        <para>Default: <literal>false</literal></para>
+      </simplesect>
+
     </section>
 
   </section>

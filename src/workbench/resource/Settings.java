@@ -76,6 +76,7 @@ import workbench.sql.ErrorReportLevel;
 import workbench.sql.formatter.JoinWrapStyle;
 
 import workbench.util.CollectionUtil;
+import workbench.util.DurationFormat;
 import workbench.util.FileAttributeChanger;
 import workbench.util.FileDialogUtil;
 import workbench.util.FileUtil;
@@ -157,6 +158,11 @@ public class Settings
 	public static final String PROPERTY_CONSOLIDATE_LOG_MESSAGES = "workbench.gui.log.consolidate";
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	public static final String PROPERTY_SHOW_IGNORED_WARN = "workbench.sql.ignored.show.warning";
+  public static final String PROP_LOG_VARIABLE_SUBSTITUTION = "workbench.sql.parameter.log.substitution";
+  public static final String PROP_LOG_CLEAN_SQL = "workbench.sql.log.statements.clean";
+
+  public static final String PROP_DURATION_FORMAT = "workbench.log.timing.format";
+  public static final String PROP_DURATION_DECIMAL = "workbench.log.timing.decimal";
 
   /** The property that controls if the statement causing an error should be logged as well */
 	public static final String PROPERTY_ERROR_STATEMENT_LOG_LEVEL = "workbench.gui.log.errorstatement";
@@ -210,7 +216,7 @@ public class Settings
 		protected static final Settings instance = new Settings();
 	}
 
-	public static Settings getInstance()
+	public static final Settings getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
@@ -595,7 +601,7 @@ public class Settings
 		return new WbFile(getConfigDir(), "WbColumnOrder.xml");
 	}
 
-	public File getConfigDir()
+	public final File getConfigDir()
 	{
 		return this.configfile.getParentFile();
 	}
@@ -619,7 +625,6 @@ public class Settings
 	{
 		return new WbFile(getConfigDir(), "WbShortcuts.xml").getFullPath();
 	}
-
 
 	public String getMacroStorage()
 	{
@@ -816,7 +821,12 @@ public class Settings
 		return props.containsKey(key);
 	}
 
-	public boolean getLogAllStatements()
+  public final DurationFormat getDurationFormat()
+  {
+    return getEnumProperty(PROP_DURATION_FORMAT, DurationFormat.dynamic);
+  }
+
+	public final boolean getLogAllStatements()
 	{
 		return getBoolProperty(PROPERTY_LOG_ALL_SQL, false);
 	}
@@ -1614,7 +1624,7 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Editor">
-	public boolean getConsolidateLogMsg()
+	public final boolean getConsolidateLogMsg()
 	{
 		return getBoolProperty(PROPERTY_CONSOLIDATE_LOG_MESSAGES, false);
 	}
@@ -1789,7 +1799,7 @@ public class Settings
 		setProperty("workbench.gui.icon.cache.enabled", flag);
 	}
 
-	public DelimiterDefinition getAlternateDelimiter(WbConnection con, DelimiterDefinition defaultDelim)
+	public final DelimiterDefinition getAlternateDelimiter(WbConnection con, DelimiterDefinition defaultDelim)
 	{
 		DelimiterDefinition delim = null;
 		if (con != null && con.getProfile() != null)
@@ -1811,7 +1821,7 @@ public class Settings
 		return delim;
 	}
 
-	public DelimiterDefinition getAlternateDelimiter(DelimiterDefinition defaultDelim)
+	public final DelimiterDefinition getAlternateDelimiter(DelimiterDefinition defaultDelim)
 	{
 		String delim = getProperty("workbench.sql.alternatedelimiter", null);
 		if (StringUtil.isBlank(delim)) return defaultDelim;
@@ -2835,7 +2845,7 @@ public class Settings
 		return getIntProperty("workbench.gui.log.error.sql.maxlength", 150);
 	}
 
-	public ErrorReportLevel getStatementErrorReportLevel()
+	public final ErrorReportLevel getStatementErrorReportLevel()
 	{
     return getEnumProperty(PROPERTY_ERROR_STATEMENT_LOG_LEVEL, ErrorReportLevel.limited);
 	}
@@ -2886,9 +2896,9 @@ public class Settings
 		return "]";
 	}
 
-  public boolean getLogParameterSubstitution()
+  public final boolean getLogParameterSubstitution()
   {
-    return getBoolProperty("workbench.sql.parameter.log.substitution", false);
+    return getBoolProperty(PROP_LOG_VARIABLE_SUBSTITUTION, false);
   }
 
 	/**
@@ -3086,7 +3096,7 @@ public class Settings
 	}
 
 	@Override
-	public boolean getBoolProperty(String property, boolean defaultValue)
+	public final boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String sysValue = System.getProperty(property, null);
 		if (sysValue != null)
@@ -3125,13 +3135,13 @@ public class Settings
 		return System.getProperty(property, this.props.getProperty(property, aDefault));
 	}
 
-  public <E extends Enum<E>> E getEnumProperty(String key, E defaultValue)
+  public final <E extends Enum<E>> E getEnumProperty(String key, E defaultValue)
   {
     String value = getProperty(key, null);
     return getEnumValue(value, defaultValue);
   }
 
-  public <E extends Enum<E>> E getEnumValue(String value, E defaultValue)
+  public final <E extends Enum<E>> E getEnumValue(String value, E defaultValue)
   {
     if (value != null)
     {
@@ -3163,7 +3173,7 @@ public class Settings
 	}
 
 	@Override
-	public int getIntProperty(String aProperty, int defaultValue)
+	public final int getIntProperty(String aProperty, int defaultValue)
 	{
 		String sysValue = System.getProperty(aProperty, null);
 		if (sysValue != null)

@@ -312,6 +312,14 @@ SQLCMD</screen>
 			</para>
 		</section>
 
+    <section id="cmdline-parameter-showtiming">
+      <title>Show timing information</title>
+      <para>
+        The parameter <literal>-showTiming=true</literal> can be used to display the execution time of each query.
+        This is applicable for batch and console mode.
+      </para>
+    </section>
+
 		<section id="cmdline-parameter-progress">
 			<title>Controlling statement progress information</title>
 			<para>
@@ -320,7 +328,7 @@ SQLCMD</screen>
 				these messages will also be displayed on the console.
 			</para>
 		</section>
-
+    
 	</section>
 
 	<section id="script-interactive">

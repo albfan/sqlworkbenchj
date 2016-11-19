@@ -35,6 +35,7 @@ import workbench.sql.StatementHistory;
 import workbench.sql.WbAnnotation;
 
 import workbench.util.CollectionUtil;
+import workbench.util.DurationFormat;
 import workbench.util.DurationFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -155,7 +156,7 @@ public class ConsoleRefresh
   private void doRefresh(BatchRunner runner, String sql, int interval)
   {
     DurationFormatter formatter = new DurationFormatter();
-    String intDisplay = formatter.formatDuration(interval, false, false).trim();
+    String intDisplay = formatter.formatDuration(interval, DurationFormat.dynamic, false, false).trim();
 
     boolean clearScreen = ConsoleSettings.getClearScreenForRefresh();
     String quitMsg = ResourceMgr.getString("MsgRefreshQuit");
