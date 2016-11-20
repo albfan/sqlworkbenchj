@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2016-10-17">
+  <release build="-1" date="2016-11-20">
     <entry dev-build="3" type="enh">WbTriggerSource now also supports writing the source to a file</entry>
     <entry dev-build="3" type="enh">For Postgres, dependencies between triggers and tables are no shown in the DbExplorer and DbTree</entry>
     <entry dev-build="2" type="enh">For Postgres, functions defined as "returns setof refcursor" are now processed correctly when using "select * from function()"</entry>
