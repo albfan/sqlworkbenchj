@@ -233,6 +233,33 @@ public class WbCallOraTest
 		OracleTestUtil.cleanUpTestCase();
 	}
 
+  @Test
+  public void testImplicitResult()
+    throws Exception
+  {
+    String sql =
+      "declare\n" +
+      "    rc sys_refcursor;\n" +
+      "begin\n" +
+      "    open rc for select * from person;\n" +
+      "    dbms_sql.return_result(rc);\n" +
+      "end;\n";
+
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", con);
+
+		StatementRunner runner = new StatementRunner();
+    runner.setConnection(con);
+    runner.runStatement(sql);
+    StatementRunnerResult result = runner.getResult();
+    assertTrue(result.getMessages().toString(), result.isSuccess());
+    List<DataStore> data = result.getDataStores();
+    assertNotNull(data);
+    assertEquals(1, data.size());
+    assertEquals(2, data.get(0).getRowCount());
+  }
+
+
 	@Test
 	public void testOverload()
 		throws Exception
