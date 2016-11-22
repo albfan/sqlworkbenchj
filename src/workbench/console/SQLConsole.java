@@ -23,6 +23,8 @@
  */
 package workbench.console;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -30,19 +32,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import workbench.AppArguments;
-import workbench.WbManager;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
+import workbench.AppArguments;
+import workbench.RunMode;
+import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-
 import workbench.gui.WindowTitleBuilder;
 import workbench.gui.profiles.ProfileKey;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
 import workbench.sql.OutputPrinter;
@@ -63,18 +66,12 @@ import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbSysExec;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
-
 import workbench.util.ExceptionUtil;
 import workbench.util.PlatformHelper;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
-
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
-
-import workbench.RunMode;
 
 /**
  * A simple console interface for SQL Workbench/J
@@ -88,7 +85,7 @@ import workbench.RunMode;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements OutputPrinter, Runnable, SignalHandler
+	implements OutputPrinter, Runnable, SignalHandler, PropertyChangeListener
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private final ConsolePrompter prompter;
@@ -119,6 +116,7 @@ public class SQLConsole
     titleBuilder.setShowProfileGroup(false);
     titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
     titleBuilder.setShowNotConnected(false);
+    ConsoleSettings.getInstance().addChangeListener(this);
     CommandRegistry.getInstance().scanForExtensions();
   }
 
@@ -143,7 +141,8 @@ public class SQLConsole
 
 			currentPrompt = connectRunner(runner, currentPrompt);
 
-			ResultSetPrinter printer = createPrinter(cmdLine, optimizeColWidths, runner);
+			ResultSetPrinter printer = createPrinter(cmdLine, optimizeColWidths);
+      runner.setResultSetConsumer(printer);
 
 			loadHistory();
 
@@ -317,7 +316,7 @@ public class SQLConsole
     return sql;
   }
 
-	private ResultSetPrinter createPrinter(AppArguments cmdLine, boolean optimizeColWidths, BatchRunner runner)
+	private ResultSetPrinter createPrinter(AppArguments cmdLine, boolean optimizeColWidths)
 		throws SQLException
 	{
 		boolean bufferResults = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_BUFFER_RESULTS, true);
@@ -327,7 +326,6 @@ public class SQLConsole
 			printer = new ResultSetPrinter(System.out);
 			printer.setFormatColumns(optimizeColWidths);
 			printer.setPrintRowCount(true);
-			runner.setResultSetConsumer(printer);
 			ConsoleSettings.getInstance().addChangeListener(printer);
 		}
 		return printer;
@@ -776,5 +774,14 @@ public class SQLConsole
 			exit();
 		}
 	}
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    if (evt.getPropertyName().equals(ConsoleSettings.PROP_MAX_DISPLAY_SIZE) && runner != null)
+    {
+      runner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
+    }
+  }
 
 }
