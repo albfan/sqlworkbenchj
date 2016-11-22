@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.WbManager;
+import workbench.console.ConsoleSettings;
 import workbench.resource.Settings;
 
 import workbench.storage.DataStore;
@@ -117,6 +118,10 @@ public class WbRun
 			batchRunner.setExecutionController(runner.getExecutionController());
 			batchRunner.setOptimizeColWidths(true);
 			batchRunner.showResultSets(true);
+      if (WbManager.getInstance().isConsoleMode())
+      {
+        batchRunner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
+      }
 			batchRunner.setShowProgress(false);
 			batchRunner.setShowStatementWithResult(runner.getTraceStatements());
 			batchRunner.setShowStatementSummary(runner.getVerboseLogging());

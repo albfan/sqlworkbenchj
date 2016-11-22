@@ -28,6 +28,7 @@ import java.util.List;
 
 import workbench.AppArguments;
 import workbench.WbManager;
+import workbench.console.ConsoleSettings;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -251,6 +252,10 @@ public class WbInclude
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
 			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, showOutput);
 			batchRunner.showResultSets(showResults);
+      if (showResults && WbManager.getInstance().isConsoleMode())
+      {
+        batchRunner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
+      }
 			batchRunner.setOptimizeColWidths(showResults);
 			if (cmdLine.isArgPresent(WbImport.ARG_USE_SAVEPOINT))
 			{
