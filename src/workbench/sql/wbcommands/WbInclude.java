@@ -66,6 +66,7 @@ public class WbInclude
 	public static final String ARG_CHECK_ESCAPED_QUOTES = "checkEscapedQuotes";
 	public static final String ARG_PRINT_STATEMENTS = "printStatements";
 	public static final String ARG_DELIMITER = "delimiter";
+	public static final String ARG_LIMIT_DISPLAY = "useMaxDisplayLimit";
 
 	/*
 	 * I need to store the instance in a variable to be able to cancel the execution.
@@ -92,6 +93,10 @@ public class WbInclude
 		cmdLine.addArgument(ARG_REPLACE_USE_REGEX, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_REPLACE_IGNORECASE, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_PRINT_STATEMENTS, ArgumentType.BoolSwitch);
+    if (WbManager.getInstance().isConsoleMode())
+    {
+      cmdLine.addArgument(ARG_LIMIT_DISPLAY, ArgumentType.BoolArgument);
+    }
 		cmdLine.addArgument(AppArguments.ARG_SHOW_TIMING, ArgumentType.BoolSwitch);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -250,11 +255,16 @@ public class WbInclude
         batchRunner.setRetryHandler(runner.getRetryHandler());
       }
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
+      
 			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, showOutput);
 			batchRunner.showResultSets(showResults);
       if (showResults && WbManager.getInstance().isConsoleMode())
       {
-        batchRunner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
+        boolean limitDisplaySize = cmdLine.getBoolean(ARG_LIMIT_DISPLAY, true);
+        if (limitDisplaySize)
+        {
+          batchRunner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
+        }
       }
 			batchRunner.setOptimizeColWidths(showResults);
 			if (cmdLine.isArgPresent(WbImport.ARG_USE_SAVEPOINT))
