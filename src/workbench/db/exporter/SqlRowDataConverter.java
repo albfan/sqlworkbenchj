@@ -47,6 +47,10 @@ import workbench.storage.RowDataContainer;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 
+import workbench.sql.lexer.SQLLexer;
+import workbench.sql.lexer.SQLLexerFactory;
+import workbench.sql.lexer.SQLToken;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -60,13 +64,10 @@ import static workbench.db.exporter.ExportType.*;
 public class SqlRowDataConverter
   extends RowDataConverter
 {
-  // This instance can be re-used for several
-  // table exports from DataExporter, to prevent
-  // that one failed export for the requested type
-  // resets the export type for subsequent tables
-  // the requested sqlType is stored in sqlType
-  // Upon setting the ResultInfo in setResultInfo()
-  // the sqlTypeToUse is set accordingly and then
+  // This instance can be re-used for several table exports from DataExporter
+  // To prevent, that one failed export for the requested type resets the export type for subsequent tables
+  // the requested sqlType is stored in sqlType.
+  // Upon setting the ResultInfo in setResultInfo() the sqlTypeToUse is set accordingly and then
   // used in convertRowData()
   private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
   private ExportType sqlType = ExportType.SQL_INSERT;
@@ -89,6 +90,9 @@ public class SqlRowDataConverter
   private boolean transactionControl = true;
   private boolean includeIdentityCols;
   private boolean includeReadOnlyCols;
+  private boolean useMultiRowInserts;
+  private SQLLexer lexer;
+  private boolean firstRow = true;
 
   public SqlRowDataConverter(WbConnection con)
   {
@@ -103,6 +107,7 @@ public class SqlRowDataConverter
   {
     super.setOriginalConnection(con);
     this.literalFormatter = new SqlLiteralFormatter(con);
+    lexer = SQLLexerFactory.createLexer(con);
   }
 
   @Override
@@ -110,6 +115,11 @@ public class SqlRowDataConverter
   {
     super.setInfinityLiterals(literals);
     this.literalFormatter.setInfinityLiterals(literals);
+  }
+
+  public void setUseMultiRowInserts(boolean flag)
+  {
+    this.useMultiRowInserts = flag;
   }
 
   public void setTransactionControl(boolean flag)
@@ -212,6 +222,13 @@ public class SqlRowDataConverter
       end.append(lineTerminator);
     }
 
+    if (sqlTypeToUse == ExportType.SQL_INSERT && useMultiRowInserts)
+    {
+      end = new StringBuilder(5);
+      end.append(";");
+      end.append(lineTerminator);
+    }
+
     if (!transactionControl) return end;
 
     boolean writeCommit = true;
@@ -308,22 +325,55 @@ public class SqlRowDataConverter
     this.currentRow = rowIndex;
     this.currentRowData = row;
 
-    result.append(dml.getExecutableStatement(this.literalFormatter, this.originalConnection));
-    result.append(';');
-
-    if (doFormatting)
+    if (sqlTypeToUse == ExportType.SQL_INSERT && useMultiRowInserts)
     {
-      result.append(doubleLineTerminator);
+      dml.setFormatSql(false);
+    }
+    CharSequence sql = dml.getExecutableStatement(this.literalFormatter, this.originalConnection);
+
+    if (sqlTypeToUse == ExportType.SQL_INSERT && useMultiRowInserts)
+    {
+      if (firstRow)
+      {
+        if (doFormatting)
+        {
+          appendWithLinebreaks(result, sql);
+        }
+        else
+        {
+          result.append(sql);
+        }
+        firstRow = false;
+      }
+      else
+      {
+        result.append(',');
+        if (doFormatting)
+        {
+          result.append(lineTerminator);
+          result.append("  ");
+        }
+        result.append(extractValuesPart(sql));
+      }
     }
     else
     {
-      result.append(lineTerminator);
-    }
+      result.append(sql);
+      result.append(';');
+      if (doFormatting)
+      {
+        result.append(doubleLineTerminator);
+      }
+      else
+      {
+        result.append(lineTerminator);
+      }
 
-    if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
-    {
-      result.append("COMMIT;");
-      result.append(doubleLineTerminator);
+      if (this.commitEvery > 0 && ((rowIndex + 1) % commitEvery) == 0)
+      {
+        result.append("COMMIT;");
+        result.append(doubleLineTerminator);
+      }
     }
     return result;
   }
@@ -375,6 +425,8 @@ public class SqlRowDataConverter
   @Override
   public StringBuilder getStart()
   {
+    firstRow = true;
+
     if (sqlTypeToUse == ExportType.SQL_MERGE)
     {
       return getMergeStart();
@@ -563,6 +615,48 @@ public class SqlRowDataConverter
     {
       literalFormatter.setTreatClobAsFile(this, encoding);
     }
+  }
+
+  protected void appendWithLinebreaks(StringBuilder toAppend, CharSequence insert)
+  {
+    lexer.setInput(insert);
+    SQLToken token = lexer.getNextToken(true, true);
+    while (token != null)
+    {
+      if (token.getContents().equals("VALUES"))
+      {
+        toAppend.append(lineTerminator);
+        toAppend.append(token.getContents());
+        toAppend.append(lineTerminator);
+        toAppend.append(' ');
+      }
+      else
+      {
+        toAppend.append(token.getText());
+      }
+      token = lexer.getNextToken(true, true);
+    }
+  }
+
+  protected String extractValuesPart(CharSequence insert)
+  {
+    lexer.setInput(insert);
+    SQLToken token = lexer.getNextToken(false, false);
+    int valuesStart = -1; // the position of the first character after the VALUES clause
+    while (token != null)
+    {
+      if (token.getText().equalsIgnoreCase("VALUES"))
+      {
+        valuesStart = token.getCharEnd();
+      }
+      token = lexer.getNextToken(false, false);
+    }
+    if (valuesStart > -1)
+    {
+      String values = insert.subSequence(valuesStart, insert.length()).toString();
+      return values.trim();
+    }
+    return null;
   }
 
 }

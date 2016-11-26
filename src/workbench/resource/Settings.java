@@ -2500,7 +2500,12 @@ public class Settings
 	public String getClipboardDelimiter(boolean readable)
 	{
 		return getDelimiter("workbench.import.clipboard.fielddelimiter", "\\t", readable);
-	}
+  }
+
+  public boolean getUseMultirowInsertForClipboard()
+  {
+    return getBoolProperty("workbench.copy.clipboard.insert.multirow", false);
+  }
 
 	public void setDelimiter(String prop, String delim)
 	{

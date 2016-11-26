@@ -166,6 +166,58 @@ public class SqlRowDataConverterTest
 	}
 
 	@Test
+	public void testMultiRowInsert()
+		throws Exception
+	{
+		WbConnection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			TestUtil util = new TestUtil("testMultiRowInsert");
+			util.prepareEnvironment();
+      con = util.getConnection("sqlConverterTest");
+      String script =
+        "CREATE TABLE person (id integer primary key, name varchar(20));\n" +
+        "insert into person values (1, 'Arthur'), (2, 'Zaphod'), (3, 'Tricia');\n" +
+        "commit;\n";
+      TestUtil.executeScript(con, script);
+
+      TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("SELECT * FROM person");
+			DataStore ds = new DataStore(rs, true, null, 0, con);
+			ds.setUpdateTableToBeUsed(tbl);
+			ds.checkUpdateTable(con);
+			SqlRowDataConverter converter = new SqlRowDataConverter(con);
+			converter.setResultInfo(ds.getResultInfo());
+			converter.setCreateTable(false);
+      converter.setUseMultiRowInserts(true);
+
+			converter.setType(ExportType.SQL_INSERT);
+			String sql = converter.convertRowData(ds.getRow(0), 1).toString();
+			sql += converter.convertRowData(ds.getRow(1), 2);
+			sql += converter.convertRowData(ds.getRow(2), 3);
+      sql += converter.getEnd(3);
+      String expected =
+        "INSERT INTO PERSON (ID,NAME) \n" +
+        "VALUES\n" +
+        "  (1,'Arthur'),\n" +
+        "  (2,'Zaphod'),\n" +
+        "  (3,'Tricia');\n" +
+        "\n" +
+        "COMMIT;";
+      assertEquals(expected, sql.trim());
+		}
+		finally
+		{
+			con.disconnect();
+			SqlUtil.closeAll(rs, stmt);
+		}
+  }
+
+	@Test
 	public void testSqlGeneration()
 		throws Exception
 	{

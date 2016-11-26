@@ -24,6 +24,9 @@
 package workbench.util;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -65,17 +68,14 @@ public class WbDateFormatterTest
 		String source = "2012-01-01";
 		WbDateFormatter formatter = new WbDateFormatter("yyyy-MM-dd");
 
-		Calendar cal = Calendar.getInstance();
-		cal.set(2012, 0, 1, 0, 0, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		Date expected = cal.getTime();
-		Date result = formatter.parseDate(source);
+    LocalDate expected = LocalDate.of(2012, Month.JANUARY, 1);
+		LocalDate result = formatter.parseDate(source).toLocalDate();
 		assertEquals(expected, result);
-		expected = new Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
-		assertEquals(expected, formatter.parseDate(InfinityLiterals.PG_POSITIVE_LITERAL));
+		java.sql.Date infinity = new java.sql.Date(WbDateFormatter.DATE_POSITIVE_INFINITY);
+		assertEquals(infinity, formatter.parseDate(InfinityLiterals.PG_POSITIVE_LITERAL));
 
-    result = formatter.parseTimestamp(source);
-    assertEquals(cal.getTime(), result);
+    LocalDateTime ts = formatter.parseTimestamp(source).toLocalDateTime();
+    assertEquals(expected.atTime(0, 0, 0), ts);
 	}
 
   @Test

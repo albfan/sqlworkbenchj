@@ -458,6 +458,7 @@ public class ClipBoardCopier
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			converter.setType(type);
+      converter.setUseMultiRowInserts(Settings.getInstance().getUseMultirowInsertForClipboard());
 			converter.setTransactionControl(false);
 			converter.setIgnoreColumnStatus(true);
 
@@ -513,7 +514,16 @@ public class ClipBoardCopier
 				}
 				StringBuilder sql = converter.convertRowData(rowdata, row);
 				result.append(sql);
-				if (type != ExportType.SQL_MERGE && !StringUtil.endsWith(sql, '\n'))
+        boolean needsNewLine = false;
+        if (type == ExportType.SQL_INSERT)
+        {
+          needsNewLine = !Settings.getInstance().getUseMultirowInsertForClipboard();
+        }
+        else
+        {
+          needsNewLine = type != ExportType.SQL_MERGE && !StringUtil.endsWith(sql, '\n');
+        }
+				if (needsNewLine)
 				{
 					result.append('\n');
 				}
