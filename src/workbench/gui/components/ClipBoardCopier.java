@@ -458,7 +458,10 @@ public class ClipBoardCopier
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			converter.setType(type);
-      converter.setUseMultiRowInserts(Settings.getInstance().getUseMultirowInsertForClipboard());
+      if (data.getOriginalConnection().getDbSettings().supportsMultiRowInsert())
+      {
+        converter.setUseMultiRowInserts(Settings.getInstance().getUseMultirowInsertForClipboard());
+      }
 			converter.setTransactionControl(false);
 			converter.setIgnoreColumnStatus(true);
 
