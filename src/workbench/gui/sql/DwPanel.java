@@ -161,6 +161,7 @@ public class DwPanel
 	private boolean enableSqlInfo;
 	private boolean disconnected;
 	private boolean wasReUsed;
+  private boolean locked;
 
 	public DwPanel()
 	{
@@ -222,6 +223,16 @@ public class DwPanel
   public int getId()
   {
     return id;
+  }
+
+  public void setLocked(boolean flag)
+  {
+    this.locked = flag;
+  }
+  
+  public boolean isLocked()
+  {
+    return this.locked;
   }
 
 	public void setReUsed(boolean flag)

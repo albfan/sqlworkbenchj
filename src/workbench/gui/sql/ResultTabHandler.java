@@ -40,6 +40,7 @@ import workbench.gui.actions.CloseEmptyResultsAction;
 import workbench.gui.actions.CloseOtherResultsAction;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.DetachResultTabAction;
+import workbench.gui.actions.LockResultTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowSourceQueryAction;
 import workbench.gui.actions.SqlPanelReloadAction;
@@ -120,6 +121,8 @@ public class ResultTabHandler
     menu.add(new AutomaticReloadAction(client));
     menu.add(new CancelAutoReloadAction(client));
     menu.addSeparator();
+    LockResultTabAction lock = new LockResultTabAction(client);
+    menu.add(lock.getMenuItem());
 		menu.add(new DetachResultTabAction(client));
 		return menu;
 	}

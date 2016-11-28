@@ -23,9 +23,9 @@
  */
 package workbench.util;
 
-import java.awt.Color;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -35,6 +35,13 @@ public class HtmlUtilTest
 {
 
 	@Test
+  public void testCleanHTML()
+  {
+    assertEquals("foo", HtmlUtil.cleanHTML("<html>foo</html>"));
+    assertEquals("foo", HtmlUtil.cleanHTML("<html><i>foo</i></html>"));
+  }
+  
+  @Test
   public void testEscapeHTML()
 	{
 		String input = "<sometag> sometext";

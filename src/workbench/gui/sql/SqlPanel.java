@@ -1055,6 +1055,12 @@ public class SqlPanel
 		}
 	}
 
+	protected boolean isResultLocked(int index)
+	{
+		DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
+		return panel.isLocked();
+	}
+
 	protected boolean isResultModified(int index)
 	{
 		DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
@@ -1531,6 +1537,25 @@ public class SqlPanel
 		return fname;
 	}
 
+  public boolean toggleLockedResult()
+  {
+    DwPanel result = getCurrentResult();
+    if (result == null) return false;
+
+    result.setLocked(!result.isLocked());
+    int index = resultTab.getSelectedIndex();
+
+    String title = resultTab.getTitleAt(index);
+    if (result.isLocked())
+    {
+      resultTab.setTitleAt(index, "<html><i>" + title + "</i></html>");
+    }
+    else
+    {
+      resultTab.setTitleAt(index, HtmlUtil.cleanHTML(title));
+    }
+    return result.isLocked();
+  }
 
 	protected void updateTabTitle()
 	{
@@ -1634,7 +1659,7 @@ public class SqlPanel
     {
       currentData.endEdit();
     }
-    clearResultTabs();
+    clearResultTabs(false);
     for (ToolWindow window : resultWindows)
     {
       window.disconnect();
@@ -2893,23 +2918,36 @@ public class SqlPanel
 	{
 		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
 		{
-			if (!confirmDiscardChanges(i, true)) return;
+      if (!isResultLocked(i))
+      {
+        if (!confirmDiscardChanges(i, true)) return;
+      }
 		}
-		clearResultTabs();
+		clearResultTabs(true);
 	}
 
-	private int findFirstReused()
+	private int findResultToSelect()
 	{
+    int firstReused = -1;
+    int lastLocked = -1;
+
 		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
 		{
 			Component c = resultTab.getComponentAt(i);
 			if (c instanceof DwPanel)
 			{
 				DwPanel panel = (DwPanel)c;
-				if (panel.wasReUsed()) return i;
+				if (panel.wasReUsed() && firstReused == -1)
+        {
+          firstReused = i;
+        }
+        if (panel.isLocked())
+        {
+          lastLocked = i + 1;
+        }
 			}
 		}
-		return -1;
+    return Math.max(firstReused, lastLocked);
 	}
 
 	private void resetReuse()
@@ -2928,24 +2966,25 @@ public class SqlPanel
 	/**
 	 * Close all result tabs without asking
 	 */
-	public void clearResultTabs()
+	public void clearResultTabs(boolean keepLocked)
 	{
 		try
 		{
 			ignoreStateChange = true;
 			WbSwingUtilities.invoke(() ->
       {
-        while (resultTab.getTabCount() > 1)
+        for (int index=resultTab.getTabCount() - 2; index >= 0; index--)
         {
-          Component c = resultTab.getComponentAt(0);
+          Component c = resultTab.getComponentAt(index);
           if (c instanceof DwPanel)
           {
             DwPanel panel = (DwPanel)c;
+            if (keepLocked && panel.isLocked()) continue;
             refreshMgr.removeRefresh(panel);
             panel.removePropertyChangeListener(SqlPanel.this);
             panel.dispose();
           }
-          resultTab.removeTabAt(0);
+          resultTab.removeTabAt(index);
         }
         resultTab.setSelectedIndex(0);
         boolean wasNull = currentData == null;
@@ -3282,7 +3321,7 @@ public class SqlPanel
 			else
 			{
 				setLogText("");
-				clearResultTabs();
+				clearResultTabs(true);
 				firstResultIndex = 0;
 			}
 
@@ -3554,7 +3593,7 @@ public class SqlPanel
 				if (resultTab.getTabCount() - 1 == currentResultCount)
 				{
 					// this means at least one result was re-used
-					int index = findFirstReused();
+					int index = findResultToSelect();
 					if (index > -1) this.showResultPanel(index);
 				}
 				else if (firstResultIndex > 0)
@@ -3944,7 +3983,7 @@ public class SqlPanel
 		int maxNr = 0;
 		for (int i=0; i < count - 1; i++)
 		{
-			String title = this.resultTab.getTitleAt(i);
+			String title = HtmlUtil.cleanHTML(this.resultTab.getTitleAt(i));
 			if (title != null && title.startsWith(defaultTitle))
 			{
 				int nr = StringUtil.getIntValue(title.replaceAll("[^0-9]", ""), -1);
@@ -3957,34 +3996,34 @@ public class SqlPanel
 		return maxNr + 1;
 	}
 
-	private int addResultTab(DwPanel data)
-	{
+  private int addResultTab(DwPanel data)
+  {
 		int newIndex = this.resultTab.getTabCount() - 1;
-		WbTable tbl = data.getTable();
-		DataStore ds = (tbl != null ? tbl.getDataStore() : null);
-		String resultName = (ds != null ? ds.getResultName() : null);
-		if (StringUtil.isBlank(resultName))
-		{
-			resultName = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(getNextResultNumber());
-		}
-		else
-		{
-			tbl.setPrintHeader(resultName);
-		}
-		resultTab.insertTab(resultName, null, data, null, newIndex);
-		data.showGeneratingSQLAsTooltip();
-		data.setName("dwresult" + NumberStringCache.getNumberString(newIndex));
-		if (this.resultTab.getTabCount() == 2)
-		{
-			this.resultTab.setSelectedIndex(0);
-		}
-		data.checkLimitReachedDisplay();
+    WbTable tbl = data.getTable();
+    DataStore ds = (tbl != null ? tbl.getDataStore() : null);
+    String resultName = (ds != null ? ds.getResultName() : null);
+    if (StringUtil.isBlank(resultName))
+    {
+      resultName = ResourceMgr.getString("LblTabResult") + " " + NumberStringCache.getNumberString(getNextResultNumber());
+    }
+    else
+    {
+      tbl.setPrintHeader(resultName);
+    }
+    resultTab.insertTab(resultName, null, data, null, newIndex);
+    data.showGeneratingSQLAsTooltip();
+    data.setName("dwresult" + NumberStringCache.getNumberString(newIndex));
+    if (this.resultTab.getTabCount() == 2)
+    {
+      this.resultTab.setSelectedIndex(0);
+    }
+    data.checkLimitReachedDisplay();
 
-		TableAnnotationProcessor processor = new TableAnnotationProcessor();
-		processor.handleAnnotations(this, data, this.getRefreshMgr());
+    TableAnnotationProcessor processor = new TableAnnotationProcessor();
+    processor.handleAnnotations(this, data, this.getRefreshMgr());
     checkAutoRefreshIndicator(data);
-		return newIndex;
-	}
+    return newIndex;
+  }
 
 	public void setSelectedResultTab(int index)
 	{
@@ -4288,7 +4327,7 @@ public class SqlPanel
 		locked = false;
 		if (editor != null) editor.reset();
 		clearLog();
-		clearResultTabs();
+		clearResultTabs(false);
 
     // calling RefreshMgr.clear() is not really necessary
     // because clearResultTabs() should have unregistered any
