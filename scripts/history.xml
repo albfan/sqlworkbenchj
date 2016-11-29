@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-11-20">
+    <entry dev-build="4" type="enh">It's now possible to pin a result tab so that it doesn't get closed even if append mode is not enabled</entry>
+    <entry dev-build="4" type="enh">WbExport, WbImport, WbCopy and WbConfirm now support conditional execution</entry>
     <entry dev-build="3" type="enh">WbTriggerSource now also supports writing the source to a file</entry>
     <entry dev-build="3" type="enh">For Postgres, dependencies between triggers and tables are no shown in the DbExplorer and DbTree</entry>
     <entry dev-build="2" type="enh">For Postgres, functions defined as "returns setof refcursor" are now processed correctly when using "select * from function()"</entry>
