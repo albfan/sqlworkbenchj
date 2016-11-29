@@ -320,7 +320,7 @@ public class OracleFKHandler
   @Override
   public void initializeSharedCache()
   {
-    if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fk.useglobalcache", false) == true)
+    if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fk.useglobalcache", false))
     {
       synchronized (cache)
       {
