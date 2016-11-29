@@ -24,16 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DmlExpressionBuilder;
+import workbench.db.DmlExpressionType;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerUtil;
-
+import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -265,7 +264,7 @@ public class ImportDMLStatementBuilder
       colname = meta.quoteObjectname(colname);
       text.append(colname);
 
-      parms.append(builder.getDmlExpression(col));
+      parms.append(builder.getDmlExpression(col, DmlExpressionType.Import));
       colIndex ++;
     }
 

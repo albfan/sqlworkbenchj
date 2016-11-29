@@ -29,8 +29,8 @@ import workbench.db.postgres.PostgresExpressionBuilder;
  */
 public interface DmlExpressionBuilder
 {
-  String getDmlExpression(ColumnIdentifier column);
-  boolean isDmlExpressionDefined(String baseType);
+  String getDmlExpression(ColumnIdentifier column, DmlExpressionType forType);
+  boolean isDmlExpressionDefined(String baseType, DmlExpressionType forType);
 
   public static class Factory
   {

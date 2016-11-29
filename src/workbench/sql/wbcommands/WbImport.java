@@ -181,6 +181,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
+    ConditionCheck.addParameters(cmdLine);
 	}
 
   public static List<String> getSupportedSpreadSheetTypes()
@@ -286,6 +287,11 @@ public class WbImport
 			addWrongParamsMessage(result);
 			return result;
 		}
+
+    if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+    {
+      return result;
+    }
 
     imp = new DataImporter();
     imp.setConnection(currentConnection);

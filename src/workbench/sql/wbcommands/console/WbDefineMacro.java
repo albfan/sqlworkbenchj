@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.resource.ResourceMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.macros.MacroDefinition;
@@ -35,7 +34,6 @@ import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
 import workbench.sql.wbcommands.CommonArgs;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.FileUtil;
@@ -89,6 +87,11 @@ public class WbDefineMacro
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
+    
+    if (displayHelp(result))
+    {
+      return result;
+    }
 
 		if (!cmdLine.hasArguments())
 		{

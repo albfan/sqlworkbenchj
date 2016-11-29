@@ -47,6 +47,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
+import workbench.db.DmlExpressionType;
 import workbench.db.SequenceAdjuster;
 import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
@@ -2074,7 +2075,7 @@ public class DataImporter
         else pkAdded = true;
         where.append(colname);
         where.append(" = ");
-        where.append(builder.getDmlExpression(col));
+        where.append(builder.getDmlExpression(col, DmlExpressionType.Import));
         pkIndex ++;
         pkCount ++;
       }
@@ -2091,7 +2092,7 @@ public class DataImporter
         }
         sql.append(colname);
         sql.append(" = ");
-        sql.append(builder.getDmlExpression(col));
+        sql.append(builder.getDmlExpression(col, DmlExpressionType.Import));
         colIndex ++;
       }
     }

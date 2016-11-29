@@ -43,7 +43,7 @@
             <entry>The encoding of the input file specified with the <literal>-file</literal> parameter.</entry>
           </row>
           <row>
-            <entry>-expand</entry>
+            <entry>-autoExpand</entry>
             <entry>If <literal>true</literal> then the new macro is a macro that is expanded while typing</entry>
           </row>
         </tbody>

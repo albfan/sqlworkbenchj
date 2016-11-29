@@ -36,24 +36,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import workbench.interfaces.DataFileWriter;
-import workbench.interfaces.ErrorReporter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import java.util.Set;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
-
 import workbench.gui.components.BlobHandler;
-
+import workbench.interfaces.DataFileWriter;
+import workbench.interfaces.ErrorReporter;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-
+import workbench.util.CollectionUtil;
 import workbench.util.DefaultOutputFactory;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
@@ -135,6 +133,8 @@ public abstract class RowDataConverter
 
   protected boolean fixedHeader;
   protected boolean returnNulls;
+
+  protected Set<String> typesNeedingQuotes = CollectionUtil.caseInsensitiveSet();
 
   public RowDataConverter()
   {
@@ -640,12 +640,14 @@ public abstract class RowDataConverter
   public void setOriginalConnection(WbConnection conn)
   {
     this.originalConnection = conn;
+    this.typesNeedingQuotes.clear();
     if (originalConnection != null)
     {
       DbSettings dbs = this.originalConnection.getDbSettings();
       if (dbs != null)
       {
         this.convertDateToTimestamp = dbs.getConvertDateInExport();
+        this.typesNeedingQuotes.addAll(dbs.getExportTypesNeedingQuotes());
       }
     }
   }

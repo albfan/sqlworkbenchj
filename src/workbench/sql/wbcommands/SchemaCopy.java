@@ -133,15 +133,11 @@ class SchemaCopy
 		receiver.setTableCount(count);
 
 		Savepoint sp = null;
-		// if transaction control is disabled, QueryCopySource will not rollback each implicit transaction started
-		// by the select statements. In that case we should do it here in order to free resources
-		if (!copier.getReceiver().isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
-		{
-			sp = sourceConnection.setSavepoint();
-		}
 
 		try
 		{
+      sp = DataCopier.setSourceSavepoint(sourceConnection);
+
 			copier.beginMultiTableCopy(targetConnection);
 
 			for (TableIdentifier targetTable : toCopy)

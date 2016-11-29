@@ -222,7 +222,7 @@ public class TextRowDataConverter
         boolean quoteNulls = exporter == null ? false : exporter.getQuoteNulls();
         addQuote = value.isEmpty() ? quoteNulls : quoteAlways;
       }
-      else if (SqlUtil.isCharacterType(colType))
+      else if (needsQuoting(colType, dbmsType))
       {
         addQuote = needsQuotes(value);
 
@@ -259,6 +259,12 @@ public class TextRowDataConverter
     }
     result.append(lineEnding);
     return result;
+  }
+
+  private boolean needsQuoting(int colType, String dbmsType)
+  {
+    if (SqlUtil.isCharacterType(colType)) return true;
+    return typesNeedingQuotes.contains(dbmsType);
   }
 
   private boolean isClob(String dbmsType, int jdbcType, DbSettings dbs)

@@ -25,6 +25,7 @@ import java.sql.Types;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DefaultExpressionBuilder;
+import workbench.db.DmlExpressionType;
 import workbench.db.WbConnection;
 
 
@@ -38,9 +39,9 @@ public class PostgresExpressionBuilder
   }
 
   @Override
-  public String getDmlExpression(ColumnIdentifier column)
+  public String getDmlExpression(ColumnIdentifier column, DmlExpressionType typeFor)
   {
-    String expression = settings.getDmlExpressionValue(column.getDbmsType());
+    String expression = settings.getDmlExpressionValue(column.getDbmsType(), typeFor);
     if (expression != null)
     {
       return expression;

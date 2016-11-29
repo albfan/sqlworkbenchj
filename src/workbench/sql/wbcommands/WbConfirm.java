@@ -27,10 +27,8 @@ import java.sql.SQLException;
 
 import workbench.interfaces.ExecutionController;
 import workbench.resource.ResourceMgr;
-
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
@@ -57,6 +55,7 @@ public class WbConfirm
 		cmdLine.addArgument(PARAM_MSG);
 		cmdLine.addArgument(PARAM_YES);
 		cmdLine.addArgument(PARAM_NO);
+    ConditionCheck.addParameters(cmdLine);
 		this.isUpdatingCommand = false;
 	}
 
@@ -83,17 +82,22 @@ public class WbConfirm
 		String yes = null;
 		String no = null;
 
+    StatementRunnerResult result = new StatementRunnerResult();
 		if (cmdLine.hasArguments())
 		{
 			msg = cmdLine.getValue(PARAM_MSG);
 			yes = cmdLine.getValue(PARAM_YES);
 			no = cmdLine.getValue(PARAM_NO);
+
+      if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+      {
+        return result;
+      }
 		}
 		else
 		{
 			msg = StringUtil.trimQuotes(args);
 		}
-		StatementRunnerResult result = new StatementRunnerResult();
 		result.setStopScript(false);
 		result.setSuccess();
 

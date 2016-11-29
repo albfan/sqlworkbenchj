@@ -30,18 +30,15 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Map;
 
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-
 import workbench.db.WbConnection;
 import workbench.db.importer.DataReceiver;
 import workbench.db.importer.RowDataProducer;
-
+import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
-
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
@@ -122,12 +119,10 @@ public class QueryCopySource
     this.regularStop = false;
     Savepoint sp = null;
     RowDataReader reader = null;
+
     try
     {
-      if (receiver.isTransactionControlEnabled() && this.sourceConnection.supportsSavepoints() && this.sourceConnection.selectStartsTransaction())
-      {
-        sp = sourceConnection.setSavepoint();
-      }
+      sp = DataCopier.setSourceSavepoint(sourceConnection);
       this.retrieveStatement = this.sourceConnection.createStatementForQuery();
       rs = this.retrieveStatement.executeQuery(this.retrieveSql);
       ResultInfo info = new ResultInfo(rs.getMetaData(), this.sourceConnection);

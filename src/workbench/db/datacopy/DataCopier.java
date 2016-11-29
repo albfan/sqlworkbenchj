@@ -24,6 +24,7 @@
 package workbench.db.datacopy;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,12 +32,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.ObjectDropper;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -55,9 +50,12 @@ import workbench.db.importer.DataReceiver;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
-
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.ObjectDropper;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
-
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
@@ -899,4 +897,21 @@ public class DataCopier
     return log;
   }
 
+  public static Savepoint setSourceSavepoint(WbConnection source)
+    throws SQLException
+  {
+    if (useSavePointForSourceQuery(source))
+    {
+      return source.setSavepoint();
+    }
+    return null;
+  }
+
+  private static boolean useSavePointForSourceQuery(WbConnection source)
+  {
+    if (source == null) return false;
+    return source.getDbSettings().useSavePointForDML() &&
+          source.supportsSavepoints() &&
+          source.selectStartsTransaction();
+  }
 }

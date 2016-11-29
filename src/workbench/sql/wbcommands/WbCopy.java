@@ -110,6 +110,7 @@ public class WbCopy
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
 		CommonArgs.addTransactionControL(cmdLine);
+    ConditionCheck.addParameters(cmdLine);
 
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
@@ -184,6 +185,11 @@ public class WbCopy
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
+    
+    if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+    {
+      return result;
+    }
 
     synchronized (VERB)
     {

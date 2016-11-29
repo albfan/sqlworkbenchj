@@ -47,6 +47,7 @@ import java.util.Map;
 
 import workbench.db.DbSettings;
 import workbench.db.DmlExpressionBuilder;
+import workbench.db.DmlExpressionType;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.importer.ArrayValueHandler;
@@ -198,7 +199,7 @@ public class DmlStatement
             streamsToClose.add(in);
           }
         }
-        else if (useXmlApi && SqlUtil.isXMLType(type, dbmsType) && !builder.isDmlExpressionDefined(dbmsType) && (value instanceof String || value instanceof Clob))
+        else if (useXmlApi && SqlUtil.isXMLType(type, dbmsType) && !builder.isDmlExpressionDefined(dbmsType, DmlExpressionType.Any) && (value instanceof String || value instanceof Clob))
         {
           SQLXML xml = null;
           if (value instanceof Clob)

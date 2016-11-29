@@ -48,13 +48,14 @@ public class DefaultExpressionBuilder
   }
 
   @Override
-  public String getDmlExpression(ColumnIdentifier column)
+  public String getDmlExpression(ColumnIdentifier column, DmlExpressionType type)
   {
     if (settings == null)
     {
       return "?";
     }
-    String expression = settings.getDmlExpressionValue(column.getDbmsType());
+    String expression = settings.getDmlExpressionValue(column.getDbmsType(), type);
+
     if (expression == null)
     {
       return "?";
@@ -63,10 +64,10 @@ public class DefaultExpressionBuilder
   }
 
   @Override
-  public boolean isDmlExpressionDefined(String baseType)
+  public boolean isDmlExpressionDefined(String baseType, DmlExpressionType type)
   {
     if (settings == null) return false;
-    return settings.isDmlExpressionDefined(baseType);
+    return settings.isDmlExpressionDefined(baseType, type);
   }
 
 }

@@ -33,24 +33,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.Settings;
-
 import workbench.db.exporter.RowDataConverter;
 import workbench.db.importer.SetObjectStrategy;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.sqltemplates.TemplateHandler;
-
 import workbench.gui.dbobjects.TableSearchPanel;
-
-import workbench.storage.BlobLiteralType;
-import workbench.storage.DmlStatement;
-
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.Settings;
 import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.SqlCommand;
 import workbench.sql.commands.TransactionEndCommand;
-
+import workbench.storage.BlobLiteralType;
+import workbench.storage.DmlStatement;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -1033,16 +1028,21 @@ public class DbSettings
    * @see #isDmlExpressionDefined(java.lang.String)
    * @see DmlExpressionBuilder
    */
-  public String getDmlExpressionValue(String dbmsType)
+  public String getDmlExpressionValue(String dbmsType, DmlExpressionType expressionType)
   {
     if (dbmsType == null) return null;
     String cleanType = SqlUtil.getBaseTypeName(dbmsType);
-    return getProperty("dmlexpression." + cleanType.toLowerCase(), null);
+    String expression = getProperty("dmlexpression." + cleanType.toLowerCase(), null);
+    if (expressionType != DmlExpressionType.Any)
+    {
+      expression = getProperty("dmlexpression." + cleanType.toLowerCase() + "." + expressionType.toString().toLowerCase(), expression);
+    }
+    return expression;
   }
 
-  public boolean isDmlExpressionDefined(String dbmsType)
+  public boolean isDmlExpressionDefined(String dbmsType, DmlExpressionType expressionType)
   {
-    return getDmlExpressionValue(dbmsType) != null;
+    return getDmlExpressionValue(dbmsType, expressionType) != null;
   }
 
   /**
@@ -1455,6 +1455,11 @@ public class DbSettings
   {
     if (StringUtil.isBlank(type)) return null;
     return getProperty("alter." + getKeyValue(type) + ".rename", null);
+  }
+
+  public Collection<String> getExportTypesNeedingQuotes()
+  {
+    return getListProperty("export.quoting.needed");
   }
 
   /**
