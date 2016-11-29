@@ -130,6 +130,16 @@ public interface FKHandler
 
   void cancel();
 
+  default void initializeSharedCache()
+  {
+
+  }
+
+  default void clearSharedCache()
+  {
+
+  }
+
   public static class FkStatusInfo
   {
     public final boolean validated;

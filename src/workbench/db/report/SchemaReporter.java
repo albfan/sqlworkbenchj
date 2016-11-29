@@ -46,6 +46,7 @@ import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbObjectComparator;
 import workbench.db.DbSettings;
+import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -93,6 +94,7 @@ public class SchemaReporter
   private String reportTitle = null;
   private boolean fullObjectSource;
   private boolean generatePKNames;
+  private final FKHandler fkHandler;
 
   /**
    * Creates a new SchemaReporter for the supplied connection
@@ -104,6 +106,8 @@ public class SchemaReporter
     types = CollectionUtil.caseInsensitiveSet();
     types.addAll(conn.getMetadata().getTableTypes());
     types.addAll(this.dbConn.getDbSettings().getViewTypes());
+    fkHandler = FKHandler.createInstance(conn);
+    fkHandler.initializeSharedCache();
   }
 
   public void setProgressMonitor(RowActionMonitor mon)
@@ -179,7 +183,7 @@ public class SchemaReporter
   /**
    * Controls if system generated PK names should be generated to "readable" PK names.
    * @param flag
-   * @see ConstraintNameTester#isSystemConstraintName(java.lang.String) 
+   * @see ConstraintNameTester#isSystemConstraintName(java.lang.String)
    */
   public void setGenerateConstraintNames(boolean flag)
   {
@@ -270,6 +274,7 @@ public class SchemaReporter
     finally
     {
       FileUtil.closeQuietely(bw);
+      fkHandler.clearSharedCache();
     }
   }
 

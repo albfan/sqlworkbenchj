@@ -40,6 +40,7 @@ import workbench.resource.ResourceMgr;
 import workbench.db.ConnectionInfoBuilder;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
+import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -968,13 +969,25 @@ public class SchemaDiff
   public String getMigrateTargetXml()
   {
     StringWriter writer = new StringWriter(5000);
+
+    FKHandler sourceFK = FKHandler.createInstance(referenceDb);
+    FKHandler targetFK = FKHandler.createInstance(targetDb);
+
     try
     {
+      sourceFK.initializeSharedCache();
+      targetFK.initializeSharedCache();
+      
       this.writeXml(writer);
     }
     catch (Exception e)
     {
       LogMgr.logError("SchemaDiff.getMigrateTargetXml()", "Error getting XML", e);
+    }
+    finally
+    {
+      sourceFK.clearSharedCache();
+      targetFK.clearSharedCache();
     }
     return writer.toString();
   }
@@ -1141,9 +1154,8 @@ public class SchemaDiff
         out.write(xml.toString());
       }
     }
-    if (this.cancel) return;
-
     writeTag(out, null, "schema-diff", false);
+
   }
 
   private void appendSequenceDiff(Writer out, StringBuilder indent)

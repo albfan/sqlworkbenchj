@@ -27,6 +27,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.TreeMap;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -37,7 +39,10 @@ import workbench.db.WbConnection;
 
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
+import workbench.storage.filter.AndExpression;
+import workbench.storage.filter.StringEqualsComparator;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -53,6 +58,9 @@ public class OracleFKHandler
   extends DefaultFKHandler
 {
   final String baseSql;
+
+  private static final Map<String, DataStore> cache = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+  private static boolean cacheInitialized = false;
 
   private PreparedStatement retrievalStatement;
   private final String currentUser;
@@ -107,6 +115,12 @@ public class OracleFKHandler
   {
     try
     {
+      DataStore ds = getFromCache(tbl, exported);
+      if (ds != null)
+      {
+        return ds;
+      }
+
       if (exported)
       {
         return getExportedKeyList(tbl);
@@ -190,6 +204,49 @@ public class OracleFKHandler
     return result;
   }
 
+  private DataStore getFromCache(TableIdentifier tbl, boolean exported)
+  {
+    synchronized (cache)
+    {
+      if (cacheInitialized == false) return null;
+
+      DataStore fks = cache.get(tbl.getRawSchema());
+      if (fks == null)
+      {
+        fks = readUserFK(tbl.getRawSchema());
+        if (fks == null)
+        {
+          return null;
+        }
+        cache.put(tbl.getRawSchema(), fks);
+      }
+
+      try
+      {
+        DataStore result = fks.createCopy(false);
+        AndExpression filter = new AndExpression();
+        if (exported)
+        {
+          filter.addColumnExpression("pktable_schem", new StringEqualsComparator(), tbl.getRawSchema());
+          filter.addColumnExpression("pktable_name", new StringEqualsComparator(), tbl.getRawTableName());
+        }
+        else
+        {
+          filter.addColumnExpression("fktable_schem", new StringEqualsComparator(), tbl.getRawSchema());
+          filter.addColumnExpression("fktable_name", new StringEqualsComparator(), tbl.getRawTableName());
+        }
+        fks.applyFilter(filter);
+        result.copyFrom(fks);
+        sortResult(result);
+        return result;
+      }
+      finally
+      {
+        fks.clearFilter();
+      }
+    }
+  }
+
   private void sortResult(DataStore ds)
   {
     if (ds == null) return;
@@ -248,6 +305,83 @@ public class OracleFKHandler
         // nothing to do
       }
     }
+  }
+
+  @Override
+  public void clearSharedCache()
+  {
+    synchronized (cache)
+    {
+      cache.clear();
+      cacheInitialized = false;
+    }
+  }
+
+  @Override
+  public void initializeSharedCache()
+  {
+    if (Settings.getInstance().getBoolProperty("workbench.db.oracle.fk.useglobalcache", false) == true)
+    {
+      synchronized (cache)
+      {
+        DataStore ds = readUserFK(currentUser);
+        cache.put(currentUser, ds);
+        cacheInitialized = true;
+      }
+    }
+  }
+
+  private DataStore readUserFK(String owner)
+  {
+    // I'm not adding an ORDER BY because the statement is terribly slow anyway
+    // and an ORDER BY makes it even slower for large results
+    StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+    boolean addOwner = false;
+
+    if (owner.equalsIgnoreCase(currentUser))
+    {
+      sql.append(baseSql.replace(" all_c", " user_c"));
+    }
+    else
+    {
+      sql.append(baseSql);
+      sql.append("AND p.owner = ? \n");
+      sql.append("UNION ALL \n");
+      sql.append(baseSql);
+      sql.append("AND f.owner = ? \n");
+      addOwner = true;
+    }
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("OracleFKHandler.readAll()", "Retrieving foreign keys using:\n " + sql);
+    }
+
+    ResultSet rs;
+    DataStore result = null;
+    try
+    {
+      retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
+      if (addOwner)
+      {
+        retrievalStatement.setString(1, owner);
+        retrievalStatement.setString(2, owner);
+      }
+      rs = retrievalStatement.executeQuery();
+      result = processResult(rs);
+    }
+    catch (Exception ex)
+    {
+      return null;
+    }
+    finally
+    {
+      // the result set is closed by processResult
+      SqlUtil.closeStatement(retrievalStatement);
+      retrievalStatement = null;
+    }
+    sortResult(result);
+    return result;
   }
 
 }
