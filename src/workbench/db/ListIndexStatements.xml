@@ -390,6 +390,48 @@ WHERE idx.index_name not like 'BIN$%'
   </void>
 
   <void method="put">
+   <string>PostgreSQL-9</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+<string>
+select idx.relname as index_name,
+       null::text as index_schema,
+       ns.nspname as table_schema,
+       null as table_catalog,
+       tbl.relname as table_name,
+       case ind.indisunique
+          when true then 'YES'
+          else 'NO'
+       end as is_unique,
+       case ind.indisprimary
+          when true then 'YES'
+          else 'NO'
+       end as is_pk,
+       null::text as index_type,
+       (select string_agg(pg_get_indexdef(idx.oid,t.i,true), ',' order by t.i) from generate_series(1,ind.indnatts) as t(i))  as index_def,
+       ts.spcname as index_tablespace
+from pg_index ind
+  join pg_class idx on idx.oid = ind.indexrelid
+  join pg_class tbl on tbl.oid = ind.indrelid
+  left join pg_namespace ns on ns.oid = tbl.relnamespace
+  left join pg_tablespace ts ON ts.oid = idx.reltablespace
+where tbl.relkind = 'r'
+  and idx.relkind = 'i'
+</string>
+    </void>
+    <void property="schemaField">
+      <string>ns.nspname</string>
+    </void>
+    <void property="baseObjectNameField">
+      <string>tbl.relname</string>
+    </void>
+    <void property="objectNameField">
+     <string>idx.relname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">

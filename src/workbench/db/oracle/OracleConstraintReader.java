@@ -27,21 +27,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
-import workbench.log.LogMgr;
-
 import workbench.db.AbstractConstraintReader;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
-
-import workbench.sql.parser.ParserType;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
-
+import workbench.sql.parser.ParserType;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -110,11 +107,12 @@ public class OracleConstraintReader
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
-      LogMgr.logDebug("OracleConstraintReader.getTableConstraints", "Retrieving table constraints using:\n" + SqlUtil.replaceParameters(sql, table.getRawSchema(), table.getRawTableName()));
+      LogMgr.logDebug("OracleConstraintReader.getTableConstraints()", "Retrieving table constraints using:\n" + SqlUtil.replaceParameters(sql, table.getRawSchema(), table.getRawTableName()));
     }
 
     try
     {
+      long start = System.currentTimeMillis();
       stmt = dbConnection.getSqlConnection().prepareStatement(sql);
       stmt.setString(1, table.getRawSchema());
       stmt.setString(2, table.getRawTableName());
@@ -145,6 +143,8 @@ public class OracleConstraintReader
           result.add(c);
         }
       }
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("OracleConstraintReader.getTableConstraints()", "Retrieving table constraints for " + table.getFullyQualifiedName(null) + " took " + duration + "ms");
     }
     catch (Exception e)
     {

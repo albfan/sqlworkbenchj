@@ -35,14 +35,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import workbench.db.sqltemplates.TemplateHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-
-import workbench.db.sqltemplates.TemplateHandler;
-
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -65,9 +62,12 @@ public class JdbcIndexReader
   private static final String COL_NAME_STATUS = "STATUS";
   private static final String COL_NAME_TABLESPACE = "TABLESPACE";
 
+  private UniqueConstraintReader uniqueConstraintReader;
+
   public JdbcIndexReader(DbMetadata meta)
   {
     this.metaData = meta;
+    uniqueConstraintReader = ReaderFactory.getUniqueConstraintReader(meta.getWbConnection());
   }
 
   /**
@@ -865,13 +865,9 @@ public class JdbcIndexReader
       indexInfoProcessed();
     }
 
-    if (includeUniqueConstraints)
+    if (includeUniqueConstraints && uniqueConstraintReader != null)
     {
-      UniqueConstraintReader reader = ReaderFactory.getUniqueConstraintReader(metaData.getWbConnection());
-      if (reader != null)
-      {
-        reader.readUniqueConstraints(tbl, result, metaData.getWbConnection());
-      }
+      uniqueConstraintReader.readUniqueConstraints(tbl, result, metaData.getWbConnection());
     }
 
     return result;

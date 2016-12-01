@@ -30,18 +30,15 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DefaultFKHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
-
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -354,13 +351,14 @@ public class OracleFKHandler
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
-      LogMgr.logDebug("OracleFKHandler.readAll()", "Retrieving foreign keys using:\n " + sql);
+      LogMgr.logDebug("OracleFKHandler.readUserFK()", "Retrieving foreign keys using:\n " + sql);
     }
 
     ResultSet rs;
     DataStore result = null;
     try
     {
+      long start = System.currentTimeMillis();
       retrievalStatement = this.getConnection().getSqlConnection().prepareStatement(sql.toString());
       if (addOwner)
       {
@@ -369,6 +367,8 @@ public class OracleFKHandler
       }
       rs = retrievalStatement.executeQuery();
       result = processResult(rs);
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("OracleFKHandler.readUserFK()", "Retrieving foreign keys for " + owner + " took: " + duration + "ms");
     }
     catch (Exception ex)
     {

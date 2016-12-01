@@ -23,21 +23,24 @@
  */
 package workbench.db.oracle;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+import java.util.TreeMap;
 
 import workbench.db.ConstraintDefinition;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.UniqueConstraintReader;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.storage.DataStore;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -50,13 +53,62 @@ public class OracleUniqueConstraintReader
   implements UniqueConstraintReader
 {
 
+  private final Map<String, DataStore> constraintCache = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+
   @Override
   public void readUniqueConstraints(TableIdentifier table, List<IndexDefinition> indexList, WbConnection con)
   {
     if (CollectionUtil.isEmpty(indexList))  return;
     if (con == null) return;
 
+    DataStore constraints = retrieveConstraints(indexList, con);
+    if (constraints == null) return;
+
+    for (int row=0; row < constraints.getRowCount(); row++)
+    {
+      String idxName = constraints.getValueAsString(row, "index_name");
+      String consName = constraints.getValueAsString(row, "constraint_name");
+      String deferrable = constraints.getValueAsString(row, "deferrable");
+      String deferred = constraints.getValueAsString(row, "deferred");
+      String status = constraints.getValueAsString(row, "status");
+      String validated = constraints.getValueAsString(row, "validated");
+
+      IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, null);
+      if (def == null) continue;
+
+      if (def.isPrimaryKeyIndex())
+      {
+        def.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
+        def.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
+      }
+      else
+      {
+        ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
+        cons.setDeferrable(StringUtil.equalStringIgnoreCase("DEFERRABLE", deferrable));
+        cons.setInitiallyDeferred(StringUtil.equalStringIgnoreCase("DEFERRED", deferred));
+        cons.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
+        cons.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
+        def.setUniqueConstraint(cons);
+      }
+    }
+  }
+
+  private DataStore retrieveConstraints(List<IndexDefinition> indexList, WbConnection con)
+  {
+    if (CollectionUtil.isEmpty(indexList)) return null;
+    if (con == null) return null;
+
+    if (Settings.getInstance().getBoolProperty("workbench.db.oracle.uniqueconstraints.useglobalcache", false))
+    {
+      DataStore constraints = getConstraintsFromCache(indexList, con);
+      if (constraints != null)
+      {
+        return constraints;
+      }
+    }
+
     boolean hasMultipleSchemas = hasMultipleOwners(indexList);
+    boolean includeOwner = true;
 
     String consView = "all_constraints";
     if (!hasMultipleSchemas)
@@ -67,9 +119,11 @@ public class OracleUniqueConstraintReader
         if (StringUtil.isEmptyString(schema) || schema.equalsIgnoreCase(con.getCurrentUser()))
         {
           consView = "user_constraints";
+          includeOwner = false;
         }
       }
     }
+
     StringBuilder sql = new StringBuilder(500);
     sql.append(
       "-- SQL Workbench \n" +
@@ -84,7 +138,7 @@ public class OracleUniqueConstraintReader
     }
     else
     {
-      appendSingleOwnerQuery(sql, indexList);
+      appendSingleOwnerQuery(sql, indexList, includeOwner);
     }
 
     if (Settings.getInstance().getDebugMetadataSql())
@@ -95,37 +149,12 @@ public class OracleUniqueConstraintReader
     long start = System.currentTimeMillis();
     Statement stmt = null;
     ResultSet rs = null;
+    DataStore result = null;
     try
     {
       stmt = con.createStatement();
       rs = stmt.executeQuery(sql.toString());
-      while (rs.next())
-      {
-        String idxName = rs.getString(1);
-        String consName = rs.getString(2);
-        String deferrable = rs.getString("deferrable");
-        String deferred = rs.getString("deferred");
-        String status = rs.getString("status");
-        String validated = rs.getString("validated");
-
-        IndexDefinition def = IndexDefinition.findIndex(indexList, idxName, null);
-        if (def == null) continue;
-
-        if (def.isPrimaryKeyIndex())
-        {
-          def.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
-          def.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
-        }
-        else
-        {
-          ConstraintDefinition cons = ConstraintDefinition.createUniqueConstraint(consName);
-          cons.setDeferrable(StringUtil.equalStringIgnoreCase("DEFERRABLE", deferrable));
-          cons.setInitiallyDeferred(StringUtil.equalStringIgnoreCase("DEFERRED", deferred));
-          cons.setEnabled(StringUtil.equalStringIgnoreCase(status, "ENABLED"));
-          cons.setValid(StringUtil.equalStringIgnoreCase(validated, "VALIDATED"));
-          def.setUniqueConstraint(cons);
-        }
-      }
+      result = new DataStore(rs, true);
     }
     catch (SQLException se)
     {
@@ -137,16 +166,81 @@ public class OracleUniqueConstraintReader
     }
     long duration = System.currentTimeMillis() - start;
     LogMgr.logDebug("OracleUniqueConstraintReader.processIndexList()", "Retrieving unique constraints took: " + duration + "ms");
+    return result;
   }
 
-  private boolean hasMultipleOwners(List<IndexDefinition> indexList)
+  private DataStore getConstraintsFromCache(List<IndexDefinition> indexList, WbConnection con)
+  {
+    synchronized (constraintCache)
+    {
+      DataStore result = null;
+
+      Set<String> owners = getOwners(indexList);
+      for (String owner : owners)
+      {
+        DataStore ds = constraintCache.get(owner);
+        if (ds == null)
+        {
+          ds = getConstraintsForOwner(owner, con);
+        }
+        if (result == null)
+        {
+          result = ds.createCopy(true);
+        }
+        else
+        {
+          result.copyFrom(ds);
+        }
+      }
+      return result;
+    }
+  }
+
+  private DataStore getConstraintsForOwner(String owner, WbConnection con)
+  {
+    String sql =
+      "-- SQL Workbench \n" +
+      "select index_name, constraint_name, deferrable, deferred, status, validated \n" +
+      "from all_constraints \n" +
+      "where constraint_type = 'U'" +
+        "and index_owner = ?";
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    try
+    {
+      pstmt = con.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, owner);
+      rs = pstmt.executeQuery();
+      DataStore ds = new DataStore(rs, true);
+      constraintCache.put(owner, ds);
+      LogMgr.logDebug("OracleUniqueConstraintReader.getConstraintsForOwner()", "Caching unique constraint information for owner: " + owner);
+      return ds;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("OracleUniqueConstraintReader.getConstraintsForOwner()", "Could not retrieve constraints for owner " + owner, ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return null;
+  }
+
+  private Set<String> getOwners(List<IndexDefinition> indexList)
   {
     Set<String> owners = CollectionUtil.caseInsensitiveSet();
     for (IndexDefinition idx : indexList)
     {
       owners.add(idx.getSchema());
     }
-    return owners.size() > 1;
+    return owners;
+  }
+
+  private boolean hasMultipleOwners(List<IndexDefinition> indexList)
+  {
+    return getOwners(indexList).size() > 1;
   }
 
   private void appendMultiOwnerQuery(StringBuilder sql, List<IndexDefinition> indexList)
@@ -177,14 +271,18 @@ public class OracleUniqueConstraintReader
     sql.append(')');
   }
 
-  private void appendSingleOwnerQuery(StringBuilder sql, List<IndexDefinition> indexList)
+  private void appendSingleOwnerQuery(StringBuilder sql, List<IndexDefinition> indexList, boolean includeOwner)
   {
     String schema = SqlUtil.removeObjectQuotes(indexList.get(0).getSchema());
-    sql.append("nvl(index_owner,'");
-    sql.append(schema);
-    sql.append("') = '");
-    sql.append(schema);
-    sql.append("'\n  AND index_name IN (");
+    if (includeOwner)
+    {
+      sql.append("nvl(index_owner,'");
+      sql.append(schema);
+      sql.append("') = '");
+      sql.append(schema);
+      sql.append("'\n  AND");
+    }
+    sql.append(" index_name IN (");
 
     int nr = 0;
     // I have to check the constraints for all indexes regardless if the index is defined
