@@ -11,6 +11,8 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="4" type="fix">Feeback from connect scripts was not always shown in the message tab</entry>
+    <entry dev-build="4" type="fix">Error messages were not shown for errors that occurred in connect scripts</entry>
     <entry dev-build="3" type="fix">For Postgres, the remarks for indexes were not retrieved correctly if indexes with the same name existed in different schemas</entry>
     <entry dev-build="3" type="fix">The formatter did not treat the := operator properly for MySQL</entry>
     <entry dev-build="3" type="fix">For Postgres, the source of a table was not shown when an old (unsupported) version of Postgres was used</entry>
