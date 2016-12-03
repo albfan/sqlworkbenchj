@@ -237,7 +237,7 @@ public class MainWindow
 	private final WbTabbedPane sqlTab;
 	private final TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
-	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<JMenuBar>(15));
+	private final List<JMenuBar> panelMenus = Collections.synchronizedList(new ArrayList<>(15));
 
   private final Object workspaceLock = new Object();
 	private WbWorkspace currentWorkspace;
@@ -2039,6 +2039,9 @@ public class MainWindow
 
   private void logVariables()
   {
+    MainPanel current = this.getCurrentPanel();
+    if (current == null) return;
+
     StringBuilder msg = new StringBuilder();
 
     if (currentProfile != null)
@@ -2053,7 +2056,10 @@ public class MainWindow
       }
       appendVariables(msg, currentWorkspace.getVariables(), ResourceMgr.getString("TxtWorkspace"));
     }
-    showLogMessage(msg.toString());
+    if (msg.length() > 0)
+    {
+      current.appendToLog(msg.toString());
+    }
   }
 
   private void appendVariables(StringBuilder msg, Properties variables, String source)
