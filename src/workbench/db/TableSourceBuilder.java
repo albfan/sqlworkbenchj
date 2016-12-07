@@ -40,6 +40,9 @@ import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
 
+import workbench.sql.formatter.SqlFormatter;
+import workbench.sql.formatter.SqlFormatterFactory;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -773,6 +776,12 @@ public class TableSourceBuilder
     if (result.charAt(result.length() -1 ) != ';')
     {
       result.append(";\n");
+    }
+
+    if (dbConnection.getDbSettings().applyFormatForNativeTableSource())
+    {
+      SqlFormatter formatter = SqlFormatterFactory.createFormatter(dbConnection.getDbId());
+      return formatter.getFormattedSql(result.toString());
     }
 
     return result.toString();

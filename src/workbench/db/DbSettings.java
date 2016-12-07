@@ -33,19 +33,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.Settings;
+
 import workbench.db.exporter.RowDataConverter;
 import workbench.db.importer.SetObjectStrategy;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.gui.dbobjects.TableSearchPanel;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.Settings;
+
+import workbench.storage.BlobLiteralType;
+import workbench.storage.DmlStatement;
+
 import workbench.sql.EndReadOnlyTrans;
 import workbench.sql.SqlCommand;
 import workbench.sql.commands.TransactionEndCommand;
-import workbench.storage.BlobLiteralType;
-import workbench.storage.DmlStatement;
+
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
@@ -1392,6 +1397,16 @@ public class DbSettings
   public boolean getRetrieveTableSourceNeedsQuotes()
   {
     return getBoolProperty("retrieve.create.table.checkquotes", true);
+  }
+
+  public boolean applyFormatForNativeTableSource()
+  {
+    return applyFormatForNativeSource("table");
+  }
+
+  private boolean applyFormatForNativeSource(String type)
+  {
+    return getBoolProperty("retrieve.create." + type + ".reformat", false);
   }
 
   public boolean isSearchable(String dbmsType)
