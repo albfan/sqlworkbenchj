@@ -192,7 +192,6 @@ public class PostgresSequenceReader
     {
       this.dbConnection.rollback(sp);
       LogMgr.logError("PostgresSequenceReader.getSequences()", "Error retrieving sequences", e);
-      return null;
     }
     finally
     {

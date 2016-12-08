@@ -69,7 +69,6 @@ public class PostgresProcedureReader
     super(conn);
     try
     {
-      // all Postgres versions support Savepoinst (they were introduced with 8.0
       this.useSavepoint = conn.supportsSavepoints();
     }
     catch (Throwable th)
@@ -150,7 +149,10 @@ public class PostgresProcedureReader
 
       try
       {
-        sp = connection.setSavepoint();
+        if (useSavepoint)
+        {
+          sp = connection.setSavepoint();
+        }
         stmt = connection.createStatement();
         rs = stmt.executeQuery(sql);
         while (rs.next())
@@ -808,7 +810,7 @@ public class PostgresProcedureReader
     if (parallel == null) return false;
     return !parallel.equals("u");
   }
-  
+
   private String codeToParallelType(String code)
   {
     switch (code)

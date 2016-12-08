@@ -68,7 +68,7 @@ public class OracleSequenceReader
   {
     DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
     if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
-    ArrayList<SequenceDefinition> result = new ArrayList<>();
+    ArrayList<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
     for (int row = 0; row < ds.getRowCount(); row ++)
     {
       result.add(createDefinition(ds, row));

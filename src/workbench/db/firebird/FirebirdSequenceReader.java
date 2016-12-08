@@ -74,7 +74,7 @@ public class FirebirdSequenceReader
   {
     DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
     if (ds == null) return Collections.emptyList();
-    List<SequenceDefinition> result = new ArrayList<>();
+    List<SequenceDefinition> result = new ArrayList<>(ds.getRowCount());
 
     for (int row=0; row < ds.getRowCount(); row++)
     {

@@ -157,6 +157,10 @@ public class VerticaSequenceReader
     String sql = buildSql(schema, null);
     try
     {
+      if (dbConnection.getDbSettings().useSavePointForDML())
+      {
+        sp = dbConnection.setSavepoint();
+      }
       stmt = dbConnection.createStatementForQuery();
 
       rs = stmt.executeQuery(sql);
@@ -170,8 +174,7 @@ public class VerticaSequenceReader
     catch (SQLException e)
     {
       this.dbConnection.rollback(sp);
-      LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using sql:\n" + sql, e);
-      return result;
+      LogMgr.logError("VerticaSequenceReader.getSequences()", "Error retrieving sequences using:\n" + sql, e);
     }
     finally
     {

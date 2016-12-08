@@ -153,7 +153,6 @@ public class CubridSequenceReader
     catch (SQLException e)
     {
       LogMgr.logError("CubridSequenceReader.getSequences()", "Error retrieving sequences", e);
-      return null;
     }
     return result;
   }

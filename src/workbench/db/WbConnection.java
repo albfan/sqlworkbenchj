@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -118,6 +119,7 @@ public class WbConnection
   private DdlObjectInfo lastDdlObject;
   private SqlParsingUtil keywordUtil;
   private boolean pingAvailable = true;
+  private boolean supportsSavepoints = true;
 
   /**
    * Create a new wrapper connection around the original SQL connection.
@@ -135,6 +137,9 @@ public class WbConnection
     this.id = anId;
     this.profile = aProfile;
     setSqlConnection(aConn);
+
+    supportsSavepoints = supportsSavepoints();
+
     initKeepAlive();
 
     // removeComments and removeNewLines are properties that are needed each time a SQL statement is executed
@@ -153,6 +158,7 @@ public class WbConnection
       }
       removeNewLines = db.removeNewLinesInSQL();
     }
+
     if (profile != null)
     {
       lastAutocommitState = profile.getAutocommit();
@@ -706,7 +712,22 @@ public class WbConnection
     throws SQLException
   {
     if (this.getAutoCommit()) return null;
-    return this.sqlConnection.setSavepoint();
+    if (!supportsSavepoints) return null;
+
+    try
+    {
+      return this.sqlConnection.setSavepoint();
+    }
+    catch (SQLFeatureNotSupportedException ex)
+    {
+      LogMgr.logWarning("WbConnection.setSavepoint()", "Savepoints not supported", ex);
+      supportsSavepoints = false;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("WbConnection.setSavepoint()", "Could not set Savepoint", ex);
+    }
+    return null;
   }
 
   /**
