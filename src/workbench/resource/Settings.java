@@ -2141,14 +2141,7 @@ public class Settings
 
 	private void setIdentifierCase(String property, GeneratedIdentifierCase value)
 	{
-		if (value == GeneratedIdentifierCase.lower || value == GeneratedIdentifierCase.upper)
-		{
-			setProperty(property, value.name());
-		}
-		else
-		{
-			setProperty(property, null);
-		}
+    setProperty(property, value.name());
 	}
 
 	public GeneratedIdentifierCase getAutoCompletionPasteCase()
