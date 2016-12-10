@@ -35,11 +35,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import workbench.db.sqltemplates.TemplateHandler;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -67,7 +70,10 @@ public class JdbcIndexReader
   public JdbcIndexReader(DbMetadata meta)
   {
     this.metaData = meta;
-    uniqueConstraintReader = ReaderFactory.getUniqueConstraintReader(meta.getWbConnection());
+    if (meta != null && meta.getWbConnection() != null)
+    {
+      uniqueConstraintReader = ReaderFactory.getUniqueConstraintReader(meta.getWbConnection());
+    }
   }
 
   /**

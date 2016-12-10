@@ -386,6 +386,13 @@ public class ClipBoardCopier
 		}
 	}
 
+  private boolean supportsMultiRowInserts()
+  {
+    if (data == null) return false;
+    if (data.getOriginalConnection() == null) return false;
+    return data.getOriginalConnection().getDbSettings().supportsMultiRowInsert();
+  }
+  
 	public String createSqlString(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.data.getRowCount() <= 0) return null;
@@ -458,7 +465,7 @@ public class ClipBoardCopier
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setDateLiteralType(Settings.getInstance().getDefaultCopyDateLiteralType());
 			converter.setType(type);
-      if (data.getOriginalConnection().getDbSettings().supportsMultiRowInsert())
+      if (supportsMultiRowInserts())
       {
         converter.setUseMultiRowInserts(Settings.getInstance().getUseMultirowInsertForClipboard());
       }
