@@ -29,11 +29,18 @@ import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
 
+import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
+
 import workbench.storage.DataStore;
+import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.RegExComparator;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
+
+import workbench.util.ArgumentParser;
+import workbench.util.StringUtil;
 
 /**
  * Display all variables defined through {@link WbDefineVar}
@@ -44,10 +51,13 @@ public class WbListVars extends SqlCommand
 {
 	public static final String VERB = "WbVarList";
 	public static final String VERB_ALTERNATE = "WbListVars";
+	public static final String ARG_MATCH = "match";
 
   public WbListVars()
   {
     super();
+    this.cmdLine = new ArgumentParser();
+    this.cmdLine.addArgument(ARG_MATCH);
     this.isUpdatingCommand = false;
   }
 
@@ -76,12 +86,45 @@ public class WbListVars extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
+    String args = getCommandLine(aSql);
+
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
+    cmdLine.parse(args);
+
 		DataStore ds = VariablePool.getInstance().getVariablesDataStore();
 		ds.setResultName(ResourceMgr.getString("TxtVariables"));
+
+    ColumnExpression filter = null;
+    if (cmdLine.hasArguments())
+    {
+      String regex = cmdLine.getValue(ARG_MATCH);
+      if (StringUtil.isNonBlank(regex))
+      {
+        filter = new ColumnExpression(ds.getColumnName(0), new RegExComparator(), regex);
+      }
+    }
+    else if (StringUtil.isNonBlank(args))
+    {
+      QuickFilterExpressionBuilder builder = new QuickFilterExpressionBuilder();
+      filter = builder.buildExpression(args.trim(), ds.getColumnName(0), true);
+    }
+
+    if (filter != null)
+    {
+      ds.applyFilter(filter);
+      ds.sortByColumn(1, true);
+    }
+    ds.resetStatus();
+
 		CommandTester ct = new CommandTester();
-		ds.setGeneratingSql(ct.formatVerb(getVerb()));
+		ds.setGeneratingSql(ct.formatVerb(getVerb()) + args);
 		result.addDataStore(ds);
 		result.setSuccess();
+
 		return result;
 	}
 

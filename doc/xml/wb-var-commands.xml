@@ -100,7 +100,14 @@
     <title>Show defined script variables - WbVarList</title>
 
     <para>
-      This shows all defined variables.
+      This shows all defined variables when invoked without parameters. There are two ways to filter the result:
+    </para>
+    <para>
+      Supplying a simple wildcard value, e.g. <literal>WbVarList foo*</literal> to display variables where the name starts with <literal>foo</literal>
+    </para>
+    <para>
+      Using the parameter <literal>-match</literal> to define a regular expression only show variables where the name matches the regular expression,
+      e.g. <literal>WbVarList -match="^(foo|bar).*"</literal> to list all variables where the name starts with <literal>foo</literal> or <literal>bar</literal>.
     </para>
   </section>
 
