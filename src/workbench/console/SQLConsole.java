@@ -23,8 +23,6 @@
  */
 package workbench.console;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -85,7 +83,7 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class SQLConsole
-	implements OutputPrinter, Runnable, SignalHandler, PropertyChangeListener
+	implements OutputPrinter, Runnable, SignalHandler
 {
 	private static final String HISTORY_FILENAME = "sqlworkbench_history.txt";
 	private final ConsolePrompter prompter;
@@ -116,7 +114,6 @@ public class SQLConsole
     titleBuilder.setShowProfileGroup(false);
     titleBuilder.setShowURL(ConsoleSettings.termTitleIncludeUrl());
     titleBuilder.setShowNotConnected(false);
-    ConsoleSettings.getInstance().addChangeListener(this);
     CommandRegistry.getInstance().scanForExtensions();
   }
 
@@ -196,6 +193,7 @@ public class SQLConsole
 
 					try
 					{
+            runner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
 						prompter.resetExecuteAll();
 
 						if (verb.equalsIgnoreCase(WbHistory.VERB))
@@ -774,14 +772,5 @@ public class SQLConsole
 			exit();
 		}
 	}
-
-  @Override
-  public void propertyChange(PropertyChangeEvent evt)
-  {
-    if (evt.getPropertyName().equals(ConsoleSettings.PROP_MAX_DISPLAY_SIZE) && runner != null)
-    {
-      runner.setMaxColumnDisplayLength(ConsoleSettings.getMaxColumnDataWidth());
-    }
-  }
 
 }
