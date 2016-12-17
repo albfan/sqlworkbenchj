@@ -42,24 +42,24 @@ import workbench.util.EncodingUtil;
  *
  * @author Thomas Kellerer
  */
-public class EncodingPanel
+public class EncodingDropDown
 		extends JPanel
 		implements EncodingSelector
 {
 	protected JComboBox encodings = new JComboBox();
 	private JLabel label;
 
-	public EncodingPanel()
+	public EncodingDropDown()
 	{
 		this(Settings.getInstance().getDefaultFileEncoding(), true);
 	}
 
-	public EncodingPanel(String encoding)
+	public EncodingDropDown(String encoding)
 	{
 		this(encoding, true);
 	}
 
-	public EncodingPanel(final String encoding, boolean showLabel)
+	public EncodingDropDown(final String encoding, boolean showLabel)
 	{
 		super();
 		String[] charsets = EncodingUtil.getEncodings();

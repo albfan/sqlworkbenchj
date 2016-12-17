@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -62,7 +61,6 @@ import javax.swing.text.GapContent;
 
 import workbench.WbManager;
 import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.EncodingSelector;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.FormattableSql;
@@ -96,6 +94,7 @@ import workbench.gui.actions.ToggleCommentAction;
 import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.components.EncodingDropDown;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
@@ -911,21 +910,20 @@ public class EditorPanel
       lastDir = Settings.getInstance().getLastEditorDir();
       ff = ExtensionFileFilter.getTextFileFilter();
     }
+
     JFileChooser fc = new WbFileChooser(lastDir);
     fc.setSelectedFile(this.currentFile);
     fc.addChoosableFileFilter(ff);
-    JComponent p = EncodingUtil.createEncodingPanel();
-    p.setBorder(new EmptyBorder(0,5,0,0));
-    EncodingSelector selector = (EncodingSelector)p;
-    selector.setEncoding(fileEncoding != null ? fileEncoding : Settings.getInstance().getDefaultFileEncoding());
-    fc.setAccessory(p);
+    EncodingDropDown dd = new EncodingDropDown(fileEncoding != null ? fileEncoding : Settings.getInstance().getDefaultFileEncoding());
+    dd.setBorder(new EmptyBorder(0,5,0,0));
+    fc.setAccessory(dd);
 
     int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
     if (answer == JFileChooser.APPROVE_OPTION)
     {
       try
       {
-        String encoding = selector.getEncoding();
+        String encoding = dd.getEncoding();
         if (StringUtil.isEmptyString(encoding))
         {
           encoding = FileUtil.detectFileEncoding(fc.getSelectedFile());

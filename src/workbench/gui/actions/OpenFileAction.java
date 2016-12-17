@@ -24,21 +24,13 @@
 package workbench.gui.actions;
 
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.border.EmptyBorder;
 
-import workbench.interfaces.EncodingSelector;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
@@ -49,6 +41,7 @@ import workbench.resource.Settings;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FileEncodingAccessoryPanel;
 import workbench.gui.components.WbFileChooser;
 import workbench.gui.sql.SqlPanel;
 
@@ -57,6 +50,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbProperties;
 
 /**
  * Open a new file in the main window, with the option to open the file in a new tab
@@ -111,7 +105,8 @@ public class OpenFileAction
 			File lastDir = new File(Settings.getInstance().getLastSqlDir());
 			if (Settings.getInstance().getStoreScriptDirInWksp())
 			{
-				String dirname = window.getToolProperties(toolname).getProperty(lastDirKey, null);
+        WbProperties props = window.getToolProperties(toolname);
+				String dirname = props == null ? null : props.getProperty(lastDirKey, null);
 				if (StringUtil.isNonBlank(dirname))
 				{
 					lastDir = new File(dirname);
@@ -138,53 +133,20 @@ public class OpenFileAction
 			fc.setSettingsID("workbench.editor.file.opendialog");
 			fc.setMultiSelectionEnabled(true);
 
-			JPanel acc = new JPanel(new GridBagLayout());
-			JComponent encodingPanel = EncodingUtil.createEncodingPanel();
-			encodingPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
+      FileEncodingAccessoryPanel acc = new FileEncodingAccessoryPanel(window);
 
-			boolean rememberNewTabSetting = true;
-			JCheckBox newTab = null;
-			if (window != null)
-			{
-				GridBagConstraints c = new GridBagConstraints();
-				c.gridx = 0;
-				c.gridy = 0;
-				c.anchor = GridBagConstraints.NORTHEAST;
-				c.fill = GridBagConstraints.HORIZONTAL;
-				acc.add(encodingPanel, c);
-
-				newTab = new JCheckBox(ResourceMgr.getString("LblOpenNewTab"));
-				newTab.setToolTipText(ResourceMgr.getDescription("LblOpenNewTab"));
-
-				if (window.getCurrentSqlPanel() == null)
-				{
-					// DbExplorer is open, force open in new tab!
-					newTab.setSelected(true);
-					newTab.setEnabled(false);
-					rememberNewTabSetting = false;
-				}
-				else
-				{
-					newTab.setSelected(Settings.getInstance().getBoolProperty("workbench.file.newtab", false));
-				}
-
-				c.gridy++;
-				c.insets = new Insets(5, 0, 0, 0);
-				c.weighty = 1.0;
-				acc.add(newTab, c);
-			}
-
-			EncodingSelector selector = (EncodingSelector) encodingPanel;
-			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
-
-			fc.setAccessory(acc);
-      fc.setEncodingSelector(selector);
+      fc.addEncodingPanel(acc);
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 
+      boolean rememberNewTabSetting = window != null && window.getCurrentSqlPanel() != null;
+
 			int answer = fc.showOpenDialog(window);
+
+      GuiSettings.setAutoDetectFileEncoding(acc.getAutoDetect());
+      
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{
-				final String encoding = selector.getEncoding();
+				final String encoding = acc.getEncoding();
 
 				if (!GuiSettings.getFollowFileDirectory())
 				{
@@ -206,12 +168,13 @@ public class OpenFileAction
 				final boolean openInNewTab;
 				if (files.length == 1)
 				{
-					openInNewTab = newTab == null ? false : newTab.isSelected();
+					openInNewTab = acc.openInNewTab();
 				}
 				else
 				{
 					openInNewTab = true;
 				}
+
 				if (rememberNewTabSetting)
 				{
 					Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);

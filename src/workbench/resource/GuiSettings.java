@@ -31,10 +31,13 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
-import workbench.db.objectcache.ObjectCacheStorage;
-import workbench.gui.sql.FileReloadType;
 import workbench.interfaces.ResultReceiver;
 import workbench.log.LogMgr;
+
+import workbench.db.objectcache.ObjectCacheStorage;
+
+import workbench.gui.sql.FileReloadType;
+
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -1446,5 +1449,15 @@ public class GuiSettings
   public static boolean cleanupClipboardContent()
   {
     return Settings.getInstance().getBoolProperty("workbench.gui.editor.cleanup.clipboard", true);
+  }
+
+  public static boolean autoDetectFileEncoding()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.editor.file.open.detect.encoding", false);
+  }
+
+  public static void setAutoDetectFileEncoding(boolean flag)
+  {
+    Settings.getInstance().setProperty("workbench.editor.file.open.detect.encoding", flag);
   }
 }

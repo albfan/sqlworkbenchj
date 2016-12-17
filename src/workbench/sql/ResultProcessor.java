@@ -23,6 +23,7 @@ package workbench.sql;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 
 import workbench.log.LogMgr;
@@ -44,6 +45,7 @@ public class ResultProcessor
   private final Statement currentStatement;
   private ResultSet currentResult;
   private final WbConnection originalConnection;
+  private boolean supportsGetMoreResults = true;
 
   public ResultProcessor(Statement statement, ResultSet firstResult, WbConnection conn)
   {
@@ -95,7 +97,13 @@ public class ResultProcessor
   {
     try
     {
-      return checkForMoreResults();
+      return supportsGetMoreResults && checkForMoreResults();
+    }
+    catch (SQLFeatureNotSupportedException ex)
+    {
+      LogMgr.logWarning("ResultProcessor.checkForMoreResults()", "Error when calling getMoreResults()", ex);
+      supportsGetMoreResults = false;
+      return false;
     }
     catch (Throwable ex)
     {

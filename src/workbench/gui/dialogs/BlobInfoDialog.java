@@ -38,7 +38,7 @@ import workbench.resource.Settings;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.BlobHandler;
-import workbench.gui.components.EncodingPanel;
+import workbench.gui.components.EncodingDropDown;
 import workbench.gui.components.FlatButton;
 
 import workbench.util.ExceptionUtil;
@@ -215,7 +215,7 @@ public class BlobInfoDialog
     infoLabel = new javax.swing.JLabel();
     showAsTextButton = new FlatButton();
     saveAsButton = new FlatButton();
-    encodingPanel = new EncodingPanel(null, false);
+    encodingPanel = new EncodingDropDown(null, false);
     showImageButton = new FlatButton();
     uploadButton = new FlatButton();
     showHexButton = new FlatButton();
@@ -485,7 +485,7 @@ public class BlobInfoDialog
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JButton closeButton;
-  public workbench.gui.components.EncodingPanel encodingPanel;
+  public workbench.gui.components.EncodingDropDown encodingPanel;
   public javax.swing.JComboBox externalTools;
   public javax.swing.JButton externalViewer;
   public javax.swing.JLabel infoLabel;

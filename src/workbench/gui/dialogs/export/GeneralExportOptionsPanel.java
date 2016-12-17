@@ -36,7 +36,7 @@ import javax.swing.JTextField;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
-import workbench.gui.components.EncodingPanel;
+import workbench.gui.components.EncodingDropDown;
 import workbench.gui.components.FlatButton;
 
 import workbench.util.StringUtil;
@@ -156,7 +156,7 @@ public class GeneralExportOptionsPanel
   {
     GridBagConstraints gridBagConstraints;
 
-    encodingPanel = new EncodingPanel();
+    encodingPanel = new EncodingDropDown();
     dateFormatLabel = new JLabel();
     dateFormat = new JTextField();
     timestampFormatLabel = new JLabel();
@@ -241,7 +241,7 @@ public class GeneralExportOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JTextField dateFormat;
   private JLabel dateFormatLabel;
-  private EncodingPanel encodingPanel;
+  private EncodingDropDown encodingPanel;
   private JTextField nullString;
   private JLabel nullStringLabel;
   private JButton selectColumnsButton;

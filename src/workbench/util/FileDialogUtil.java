@@ -38,7 +38,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.EncodingPanel;
+import workbench.gui.components.EncodingDropDown;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbFileChooser;
 
@@ -81,7 +81,7 @@ public class FileDialogUtil
       this.encoding = Settings.getInstance().getDefaultDataEncoding();
     }
 
-    EncodingPanel encodingPanel = new EncodingPanel(this.encoding);
+    EncodingDropDown encodingPanel = new EncodingDropDown(this.encoding);
     encodingPanel.setBorder(new EmptyBorder(0,5,0,0));
     fc.setAccessory(encodingPanel);
 

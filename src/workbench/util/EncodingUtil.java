@@ -42,8 +42,6 @@ import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JComponent;
-
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -257,18 +255,6 @@ public class EncodingUtil
   public static String getDefaultEncoding()
   {
     return System.getProperty("file.encoding");
-  }
-
-  public static JComponent createEncodingPanel()
-  {
-    try
-    {
-      return (JComponent)Class.forName("workbench.gui.components.EncodingPanel").newInstance();
-    }
-    catch (Exception e)
-    {
-      return null;
-    }
   }
 
   public static void fetchEncodings()

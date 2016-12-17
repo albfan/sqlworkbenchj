@@ -225,7 +225,7 @@ public class GeneralImportOptionsPanel
   {
     java.awt.GridBagConstraints gridBagConstraints;
 
-    encodingPanel = new workbench.gui.components.EncodingPanel();
+    encodingPanel = new workbench.gui.components.EncodingDropDown();
     dateFormatLabel = new javax.swing.JLabel();
     timestampFormatLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
@@ -307,7 +307,7 @@ public class GeneralImportOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JComboBox dateFormat;
   private javax.swing.JLabel dateFormatLabel;
-  private workbench.gui.components.EncodingPanel encodingPanel;
+  private workbench.gui.components.EncodingDropDown encodingPanel;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JComboBox modeComboBox;
   private javax.swing.JLabel modeLabel;

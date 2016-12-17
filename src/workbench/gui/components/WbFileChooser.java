@@ -59,7 +59,8 @@ public class WbFileChooser
 {
 	private String windowSettingsId;
 	private JDialog dialog;
-  private EncodingSelector selector;
+  private FileEncodingAccessoryPanel encodingPanel;
+  private EncodingSelector encodingSelector;
 
 	public WbFileChooser()
 	{
@@ -95,9 +96,16 @@ public class WbFileChooser
 		return dialog;
 	}
 
-  public void setEncodingSelector(EncodingSelector component)
+  public void setEncodingSelector(EncodingSelector select)
   {
-    selector = component;
+    encodingSelector = select;
+  }
+
+  public void addEncodingPanel(FileEncodingAccessoryPanel comp)
+  {
+    encodingPanel = comp;
+    encodingSelector = comp;
+    super.setAccessory(comp);
   }
 
 	@Override
@@ -128,7 +136,36 @@ public class WbFileChooser
 				// ignore
 			}
 		}
+
+    if (encodingPanel != null && this.encodingPanel.getAutoDetect() && isSelectionChange(evt.getPropertyName()))
+    {
+      updateEncoding();
+    }
 	}
+
+  private boolean isSelectionChange(String propName)
+  {
+    return propName.equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY) ||
+           propName.equals(JFileChooser.SELECTED_FILES_CHANGED_PROPERTY);
+  }
+
+  private void updateEncoding()
+  {
+    List<String> encodings = getFileEncodings();
+    if (encodings.isEmpty())
+    {
+      encodingPanel.setEncoding(Settings.getInstance().getDefaultFileEncoding());
+    }
+    else if (encodings.size() == 1)
+    {
+      encodingPanel.setEncoding(encodings.get(0));
+    }
+    else
+    {
+      encodingPanel.setEncoding("");
+    }
+  }
+
 
 	public boolean validateInput()
 	{
@@ -198,9 +235,9 @@ public class WbFileChooser
 
   private boolean encodingMatches()
   {
-    if (selector == null) return true;
+    if (encodingSelector == null) return true;
 
-    String selectedEncoding = selector.getEncoding();
+    String selectedEncoding = encodingSelector.getEncoding();
     File[] files = getSelectedFiles();
 
     if (files == null || files.length == 0) return true;

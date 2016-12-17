@@ -108,12 +108,12 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="workbench.gui.components.EncodingPanel" name="encodingPanel">
+        <Component class="workbench.gui.components.EncodingDropDown" name="encodingPanel">
           <Properties>
             <Property name="labelVisible" type="boolean" value="false"/>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new EncodingPanel(null, false);"/>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new workbench.gui.components.EncodingDropDown(null, false);"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
