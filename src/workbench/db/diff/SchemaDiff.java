@@ -634,18 +634,6 @@ public class SchemaDiff
     }
   }
 
-  private String getSchemaForTargetTable(TableIdentifier refTable, List<TableIdentifier> targetTables)
-  {
-    if (targetSchema != null) return targetSchema;
-
-    TableIdentifier targetTable = TableIdentifier.findTableByNameAndSchema(targetTables, refTable);
-    if (targetTable != null) return targetTable.getRawSchema();
-    targetTable = TableIdentifier.findTableByName(targetTables, refTable);
-    if (targetTable != null) return targetTable.getRawSchema();
-
-    return null;
-  }
-
   private void processTableList(List<TableIdentifier> refTables, List<TableIdentifier> targetTables)
     throws SQLException
   {
@@ -678,29 +666,8 @@ public class SchemaDiff
         this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadTableInfo", tname), -1, -1);
       }
 
-      TableIdentifier tid = rid.createCopy();
-      tid.setSchema(getSchemaForTargetTable(rid, targetTables));
-      tid.setCatalog(null);
-
-      boolean isDefaultCase = referenceDb.getMetadata().isDefaultCase(rid.getTableName());
-
-      if (isDefaultCase || !targetDb.getMetadata().needsQuotes(tname))
-      {
-        // if the name does not need quoting, then adjust the case, otherwise use it as it is.
-        tid.setNeverAdjustCase(false);
-        tid.adjustCase(targetDb);
-      }
-
-      DiffEntry entry;
-      if (targetDb.getMetadata().objectExists(tid, rid.getType()))
-      {
-        tid.setType(rid.getType());
-        entry = new DiffEntry(rid, tid);
-      }
-      else
-      {
-        entry = new DiffEntry(rid, null);
-      }
+      TableIdentifier tid = findTargetTable(rid, targetTables);
+      DiffEntry entry = new DiffEntry(rid, tid);
       objectsToCompare.add(entry);
       refTableNames.add(tname);
     }
@@ -737,6 +704,32 @@ public class SchemaDiff
         }
       }
     }
+  }
+
+  private TableIdentifier findTargetTable(TableIdentifier refTable, List<TableIdentifier> targetTables)
+  {
+    boolean isDefaultCase = referenceDb.getMetadata().isDefaultCase(refTable.getTableName());
+
+    TableIdentifier tid = refTable.createCopy();
+
+    if (isDefaultCase || !targetDb.getMetadata().needsQuotes(refTable.getTableName()))
+    {
+      // if the name does not need quoting, then adjust the case, otherwise use it as it is.
+      tid.setNeverAdjustCase(false);
+      tid.adjustCase(targetDb);
+    }
+
+    tid.setSchema(targetSchema);
+    tid.setCatalog(null);
+
+    TableIdentifier tbl = TableIdentifier.findTableByNameAndSchema(targetTables, tid);
+    if (tbl != null) return tbl;
+
+    tbl = TableIdentifier.findTableByName(targetTables, tid);
+    if (tbl != null) return tbl;
+
+    tid.setType(refTable.getType());
+    return targetDb.getMetadata().findObject(tid);
   }
 
   private void processSequenceList(List<SequenceDefinition> refSeqs, List<SequenceDefinition> targetSeqs)
@@ -977,7 +970,7 @@ public class SchemaDiff
     {
       sourceFK.initializeSharedCache();
       targetFK.initializeSharedCache();
-      
+
       this.writeXml(writer);
     }
     catch (Exception e)

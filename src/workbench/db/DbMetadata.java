@@ -70,6 +70,7 @@ import workbench.db.oracle.OracleDataTypeResolver;
 import workbench.db.oracle.OracleObjectListEnhancer;
 import workbench.db.oracle.OracleTableDefinitionReader;
 import workbench.db.oracle.OracleTypeReader;
+import workbench.db.oracle.OracleUtils;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -1558,12 +1559,9 @@ public class DbMetadata
 
     ObjectListFilter filter = new ObjectListFilter(getDbId());
 
-    // When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
-    // materialized views twice, so we need to get rid of them.
-    // As mviews are automatically returned when TABLE is specified we can remove the mview type
-    if (isOracle && typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types))
+    if (isOracle)
     {
-      types = CollectionUtil.removeElement(types, MVIEW_NAME);
+      types = OracleUtils.adjustTableTypes(dbConnection, types);
     }
 
     String escape = dbConnection.getSearchStringEscape();

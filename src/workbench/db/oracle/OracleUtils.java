@@ -41,6 +41,8 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import static workbench.db.DbMetadata.*;
+
 /**
  * Utility methods for Oracle
  *
@@ -409,4 +411,20 @@ public class OracleUtils
     return Settings.getInstance().getBoolProperty(PROP_FIX_PLSQL_RESULTSET, true);
   }
 
+  public static String[] adjustTableTypes(WbConnection dbConnection, String[] types)
+  {
+    // When TABLE and MATERIALIZED VIEW is specified for getTables() the Oracle driver returns
+    // materialized views twice, so we need to get rid of them.
+    // As mviews are automatically returned when TABLE is specified we can remove the mview type
+    if (typeIncluded("TABLE", types) && typeIncluded(MVIEW_NAME, types))
+    {
+      types = CollectionUtil.removeElement(types, MVIEW_NAME);
+    }
+    else if (typeIncluded(MVIEW_NAME, types) && JdbcUtils.hasMiniumDriverVersion(dbConnection, "12.1"))
+    {
+      // the 12.x driver does not accept MATERIALIZED VIEW as a type any more
+      CollectionUtil.replaceElement(types, MVIEW_NAME, "TABLE");
+    }
+    return types;
+  }
 }

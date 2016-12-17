@@ -175,6 +175,19 @@ public class CollectionUtil
     return elements.toArray(new String[0]);
   }
 
+  public static void replaceElement(String[] array, String oldName, String newName)
+  {
+    if (array == null || oldName == null || newName == null) return;
+    for (int i=0; i < array.length; i++)
+    {
+      if (oldName.equals(array[i]))
+      {
+        array[i] = newName;
+        return;
+      }
+    }
+  }
+
   public static boolean containsAny(Set<String> haystack, Set<String> needles)
   {
     if (needles.stream().anyMatch((needle) -> (haystack.contains(needle)))) return true;
