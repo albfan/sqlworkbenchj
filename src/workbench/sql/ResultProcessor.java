@@ -157,6 +157,10 @@ public class ResultProcessor
       }
 
     }
+    catch (ClassNotFoundException cnf)
+    {
+      // ignore
+    }
     catch (Throwable th)
     {
       LogMgr.logWarning("ResultProcessor.checkForEmbeddedResults()", "Could not check for embedded resulst", th);
