@@ -297,6 +297,8 @@ public class MainWindow
 		nextTab = new NextTabAction(sqlTab);
 		prevTab = new PrevTabAction(sqlTab);
 
+		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
+
 		initMenu();
 
 		ResourceMgr.setWindowIcons(this, "workbench");
@@ -316,8 +318,6 @@ public class MainWindow
 		}
 
 		addWindowListener(this);
-
-		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
 
 		dropHandler = new DropHandler(this, sqlTab);
 		sqlTab.enableDragDropReordering(this);

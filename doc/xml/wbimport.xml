@@ -518,7 +518,6 @@
 					<row>
 						<entry>-badFile</entry>
 						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>If <literal>-continueOnError=true</literal> is used, you can specify a file
 								to which rejected rows are written. If the provided filename denotes a directory
 								a file with the name of the import table will be created in that directory.

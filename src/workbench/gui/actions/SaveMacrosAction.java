@@ -52,9 +52,12 @@ public class SaveMacrosAction
     this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
     this.setIcon(null);
     MacroStorage macros = MacroManager.getInstance().getMacros(macroClientId);
-    macros.addChangeListener(this);
-    String fname = macros.getCurrentMacroFilename();
-    setTooltip(fname);
+    if (macros != null)
+    {
+      macros.addChangeListener(this);
+      String fname = macros.getCurrentMacroFilename();
+      setTooltip(fname);
+    }
   }
 
   @Override
