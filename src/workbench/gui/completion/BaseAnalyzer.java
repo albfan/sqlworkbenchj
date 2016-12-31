@@ -279,7 +279,7 @@ public abstract class BaseAnalyzer
     {
       return null;
     }
-    
+
 		if (!dbConnection.getDbSettings().supportsSchemas())
 		{
 			// No schemas supported (e.g. MySQL) pretend a catalog is the same thing
@@ -693,9 +693,8 @@ public abstract class BaseAnalyzer
 		}
 		else
 		{
-			boolean keyWord = this.dbConnection != null && this.dbConnection.getMetadata().isKeyword(currentWord);
 			char separator = SqlUtil.getCatalogSeparator(this.dbConnection);
-			setOverwriteCurrentWord(!keyWord && currentWord.charAt(currentWord.length() - 1) != separator);
+			setOverwriteCurrentWord(currentWord.charAt(currentWord.length() - 1) != separator);
 		}
 	}
 
