@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2016, Thomas Kellerer
+ * Copyright 2002-2017, Thomas Kellerer
  *
  * Licensed under a modified Apache License, Version 2.0
  * that restricts the use for certain governments.
