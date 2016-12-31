@@ -13,6 +13,8 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="5" type="fix">Passing connection properties using -connectionProperties to WbCreateProfile did not work</entry>
+    <entry dev-build="5" type="fix">When using a profile specific macro file, opening a new window did not always work.</entry>
     <entry dev-build="5" type="fix">When using an Oracle 12.x JDBC driver, materialized views were always reported as missing with WbSchemaDiff</entry>
     <entry dev-build="4" type="fix">It was no longer possible to select "As Is" for the built-in SQL formatter</entry>
     <entry dev-build="4" type="fix">Several features in the DbExplorer did not work for Amazon Redshift</entry>

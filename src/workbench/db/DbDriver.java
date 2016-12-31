@@ -40,10 +40,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.postgres.PostgresUtil;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -382,7 +384,6 @@ public class DbDriver
       else
       {
         // Assume the driver class is available on the classpath
-        //LogMgr.logDebug("DbDriver.loadDriverClass()", "Assuming driver " + this.driverClass + " is in current classpath");
         drvClass = Class.forName(this.driverClass);
       }
 
@@ -456,6 +457,9 @@ public class DbDriver
   public Connection connect(String url, String user, String password, String id, Properties connProps)
     throws ClassNotFoundException, NoConnectionException, SQLException
   {
+    String loggingUrl = getURLForLogging(url);
+    String loggingUser = getUsernameForLogging(user);
+
     Connection conn = null;
     try
     {
@@ -542,14 +546,14 @@ public class DbDriver
     }
     catch (Throwable th)
     {
-      LogMgr.logError("DbDriver.connect()", "Error connecting to the database using URL=" + url + ", username=" + user, th);
+      LogMgr.logError("DbDriver.connect()", "Error connecting to the database using URL=" + loggingUrl + ", username=" + loggingUser, th);
       throw new SQLException(th.getMessage(), th);
     }
 
     if (conn == null)
     {
-      LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
-      throw new NoConnectionException("Driver did not return a connection for url=" + url);
+      LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + loggingUrl, null);
+      throw new NoConnectionException("Driver did not return a connection for url=" + loggingUrl);
     }
 
     return conn;
@@ -708,7 +712,7 @@ public class DbDriver
   {
     this.loadDriverClass();
     Properties props = new Properties();
-    LogMgr.logDebug("DbDriver.commandConnect()", "Sending command URL=" + url + " to database");
+    LogMgr.logDebug("DbDriver.commandConnect()", "Sending command URL=" + getURLForLogging(url) + " to database");
     this.driverClassInstance.connect(url, props);
   }
 
@@ -754,4 +758,29 @@ public class DbDriver
     return getId().compareTo(o.getId());
   }
 
+  static String getURLForLogging(ConnectionProfile profile)
+  {
+    if (profile == null) return "";
+    return getURLForLogging(profile.getUrl());
+  }
+
+  static String getURLForLogging(String url)
+  {
+    if (url == null) return "";
+    if (Settings.getInstance().getObfuscateDbInformation())
+    {
+      return JdbcUtils.extractDBType(url) + "****";
+    }
+    return url;
+  }
+
+  static String getUsernameForLogging(String user)
+  {
+    if (user == null) return "";
+    if (Settings.getInstance().getObfuscateDbInformation())
+    {
+      return "****";
+    }
+    return user;
+  }
 }

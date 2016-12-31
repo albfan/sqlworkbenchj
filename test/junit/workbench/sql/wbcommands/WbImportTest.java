@@ -48,6 +48,7 @@ import javax.xml.bind.DatatypeConverter;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.ResourceMgr;
+import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -4363,7 +4364,7 @@ public class WbImportTest
   }
 
   private WbConnection prepareDatabase()
-    throws SQLException, ClassNotFoundException
+    throws SQLException, ClassNotFoundException, SshException
   {
     util.emptyBaseDirectory();
     WbConnection wb = util.getConnection();

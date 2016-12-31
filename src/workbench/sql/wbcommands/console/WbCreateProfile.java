@@ -25,15 +25,20 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import workbench.AppArguments;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ConnectionDescriptor;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.StringUtil;
@@ -131,6 +136,15 @@ public class WbCreateProfile
 		boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 		boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
 		boolean savePwd = cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true);
+
+    Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
+
+    if (props != null && props.size() > 0)
+    {
+      Properties p = new Properties();
+      p.putAll(props);
+      profile.setConnectionProperties(p);
+    }
 
 		profile.setStorePassword(savePwd);
 		profile.setAutocommit(commit);

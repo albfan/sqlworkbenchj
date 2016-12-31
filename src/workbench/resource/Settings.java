@@ -157,6 +157,7 @@ public class Settings
 
 	public static final String PROPERTY_CONSOLIDATE_LOG_MESSAGES = "workbench.gui.log.consolidate";
 	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
+	public static final String PROPERTY_LOG_OBFUSCATE = "workbench.sql.log.obfuscate";
 	public static final String PROPERTY_SHOW_IGNORED_WARN = "workbench.sql.ignored.show.warning";
   public static final String PROP_LOG_VARIABLE_SUBSTITUTION = "workbench.sql.parameter.log.substitution";
   public static final String PROP_LOG_CLEAN_SQL = "workbench.sql.log.statements.clean";
@@ -826,7 +827,12 @@ public class Settings
     return getEnumProperty(PROP_DURATION_FORMAT, DurationFormat.dynamic);
   }
 
-	public final boolean getLogAllStatements()
+	public final boolean getObfuscateDbInformation()
+  {
+    return getBoolProperty(PROPERTY_LOG_OBFUSCATE, false);
+  }
+  
+  public final boolean getLogAllStatements()
 	{
 		return getBoolProperty(PROPERTY_LOG_ALL_SQL, false);
 	}

@@ -45,6 +45,11 @@ import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.PortForwarder;
+import workbench.ssh.SshConfig;
+import workbench.ssh.SshException;
+import workbench.ssh.SshManager;
+import workbench.ssh.UrlParser;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.shutdown.DbShutdownFactory;
@@ -80,6 +85,8 @@ public class ConnectionMgr
   private final static ConnectionMgr instance = new ConnectionMgr();
 
   private final Object driverLock = new Object();
+
+  private SshManager sshManager = new SshManager();
 
   private ConnectionMgr()
   {
@@ -158,7 +165,7 @@ public class ConnectionMgr
    * @throws UnsupportedClassVersionError  if the driver is for a different Java version
    */
   public WbConnection getConnection(ConnectionProfile profile, String connId)
-    throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException
+    throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException, SshException
   {
     if (this.activeConnections.containsKey(connId))
     {
@@ -168,7 +175,8 @@ public class ConnectionMgr
       connId = newId;
     }
 
-    LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + profile.getKey() + "] for driver=" + profile.getDriverclass() + " and URL=[" + profile.getUrl() + "]");
+    String loggingUrl = DbDriver.getURLForLogging(profile);
+    LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + profile.getKey() + "] for driver=" + profile.getDriverclass() + " and URL=[" + loggingUrl + "]");
     WbConnection conn = this.connect(profile, connId);
     conn.runPostConnectScript();
     String driverVersion = conn.getDriverVersion();
@@ -220,7 +228,7 @@ public class ConnectionMgr
   }
 
   WbConnection connect(ConnectionProfile profile, String anId)
-    throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException
+    throws ClassNotFoundException, SQLException, UnsupportedClassVersionError, NoConnectionException, SshException
   {
     String drvClass = profile.getDriverclass();
     String drvName = profile.getDriverName();
@@ -241,7 +249,8 @@ public class ConnectionMgr
       {
         DriverManager.setLoginTimeout(timeout);
       }
-      sqlConn = drv.connect(profile.getUrl(), profile.getLoginUser(), profile.getLoginPassword(), anId, getConnectionProperties(profile));
+      String url = initSSH(profile);
+      sqlConn = drv.connect(url, profile.getLoginUser(), profile.getLoginPassword(), anId, getConnectionProperties(profile));
     }
     finally
     {
@@ -265,6 +274,61 @@ public class ConnectionMgr
     }
 
     return conn;
+  }
+
+  private boolean usesSSH(ConnectionProfile profile)
+  {
+    return profile.getSshConfig() != null;
+  }
+
+  private boolean isLocalhost(String host)
+  {
+    return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
+  }
+
+  private String initSSH(ConnectionProfile profile)
+    throws SshException
+  {
+    if (!usesSSH(profile))
+    {
+      return profile.getUrl();
+    }
+
+    SshConfig config = profile.getSshConfig();
+
+    try
+    {
+      int localPort = config.getLocalPort();
+      String urlToUse = profile.getUrl();
+      UrlParser parser = new UrlParser(urlToUse);
+
+      // if no local the JDBC is already pointing to a URL that uses port forwarding
+      if (localPort <= 0 && !config.getRewriteURL() && isLocalhost(parser.getDatabaseServer()))
+      {
+        localPort = parser.getDatabasePort();
+      }
+
+      PortForwarder forwarder = sshManager.getForwarder(config.getHostname(), config.getUsername(), config.getPassword());
+      if (forwarder.isConnected() == false)
+      {
+        localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort);
+      }
+      else
+      {
+        localPort = forwarder.getLocalPort();
+      }
+
+      if (config.getRewriteURL())
+      {
+        urlToUse = parser.getLocalUrl(localPort);
+      }
+      return urlToUse;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("ConnectionMgr.initSSH()", "Could not initialize SSH tunnel", ex);
+      throw new SshException("Could not initialize SSH tunnel: "  + ex.getMessage(), ex);
+    }
   }
 
   private void copyPropsToSystem(ConnectionProfile profile)
@@ -535,7 +599,8 @@ public class ConnectionMgr
       }
       this.closeConnection(con);
     }
-    this.activeConnections.clear();
+    activeConnections.clear();
+    sshManager.disconnectAll();
     DbObjectCacheFactory.getInstance().clear();
   }
 
@@ -626,6 +691,12 @@ public class ConnectionMgr
       else
       {
         conn.shutdown();
+      }
+      ConnectionProfile profile = conn.getProfile();
+      if (usesSSH(profile))
+      {
+        SshConfig config = profile.getSshConfig();
+        sshManager.decrementUsage(config.getHostname(), config.getUsername());
       }
     }
     catch (Exception e)

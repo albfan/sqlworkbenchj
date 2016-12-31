@@ -66,6 +66,7 @@ import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.UrlParser;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -312,6 +313,7 @@ public class ConnectionEditorPanel
     tfTimeout = new IntegerPropertyEditor();
     jLabel1 = new javax.swing.JLabel();
     fetchSizeLabel = new javax.swing.JLabel();
+    sshConfig = new FlatButton();
     jPanel3 = new javax.swing.JPanel();
     workspaceFileLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);
@@ -728,6 +730,16 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(1, 15, 1, 0);
     jPanel2.add(fetchSizeLabel, gridBagConstraints);
 
+    sshConfig.setText(ResourceMgr.getString("LblSshConfig")); // NOI18N
+    sshConfig.setToolTipText(ResourceMgr.getString("d_LblSshConfig")); // NOI18N
+    sshConfig.addActionListener(formListener);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
+    jPanel2.add(sshConfig, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -1043,7 +1055,11 @@ public class ConnectionEditorPanel
     FormListener() {}
     public void actionPerformed(java.awt.event.ActionEvent evt)
     {
-      if (evt.getSource() == editConnectionScriptsButton)
+      if (evt.getSource() == sshConfig)
+      {
+        ConnectionEditorPanel.this.sshConfigActionPerformed(evt);
+      }
+      else if (evt.getSource() == editConnectionScriptsButton)
       {
         ConnectionEditorPanel.this.editConnectionScriptsButtonActionPerformed(evt);
       }
@@ -1210,6 +1226,27 @@ public class ConnectionEditorPanel
     ConnectionGuiHelper.testConnection(this, getProfile());
   }//GEN-LAST:event_testConnectionButtonActionPerformed
 
+  private void sshConfigActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_sshConfigActionPerformed
+  {//GEN-HEADEREND:event_sshConfigActionPerformed
+    ConnectionProfile profile = getProfile();
+
+    SshConfigPanel editor = new SshConfigPanel();
+    editor.setConfig(profile.getSshConfig(), UrlParser.canRewriteURL(profile.getUrl()));
+    Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
+    ValidatingDialog dialog = ValidatingDialog.createDialog(d, editor, "SSH Configuration", null, 0, false);
+
+    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.profile.ssh"))
+    {
+      dialog.setSize(400, 300);
+    }
+    dialog.setVisible(true);
+
+		if (!dialog.isCancelled())
+		{
+      profile.setSshConfig(editor.getConfig());
+		}
+  }//GEN-LAST:event_sshConfigActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
   protected javax.swing.JTextField altDelimiter;
@@ -1263,6 +1300,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JButton selectMacroFileButton;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
+  protected javax.swing.JButton sshConfig;
   protected javax.swing.JTextField tagList;
   protected javax.swing.JButton testConnectionButton;
   protected javax.swing.JTextField tfFetchSize;
@@ -1430,7 +1468,6 @@ public class ConnectionEditorPanel
 			changed = changed || editor.isChanged();
 			editor.applyChanges();
 		}
-
 
 		DbDriver current = getCurrentDriver();
 		String driverName = currentProfile.getDriverName();

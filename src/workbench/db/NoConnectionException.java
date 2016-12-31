@@ -36,4 +36,9 @@ public class NoConnectionException
     super(reason);
   }
 
+  public NoConnectionException(String reason, Throwable cause)
+  {
+    super(reason, cause);
+  }
+
 }

@@ -322,4 +322,12 @@ public class JdbcUtils
     String db = url.replaceFirst("[^:]+:([^:]+):[^:]+", "$1");
     return db;
   }
+
+  public static String extractDBType(String jdbcUrl)
+  {
+    if (StringUtil.isBlank(jdbcUrl)) return null;
+    int pos = jdbcUrl.indexOf(':', "jdbc:".length());
+    if (pos < 0) return jdbcUrl;
+    return jdbcUrl.substring(0, pos + 1);
+  }
 }

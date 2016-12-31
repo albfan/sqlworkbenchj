@@ -36,6 +36,7 @@ import java.util.TreeSet;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.ssh.SshConfig;
 
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -97,6 +98,11 @@ public class IniProfileStorage
   private static final String PROP_INFO_COLOR = ".info.color";
   private static final String PROP_SCHEMA_FILTER = ".schema.filter";
   private static final String PROP_CATALOG_FILTER = ".catalog.filter";
+  private static final String PROP_SSH_HOST = ".ssh.host";
+  private static final String PROP_SSH_USER = ".ssh.user";
+  private static final String PROP_SSH_PWD = ".ssh.pwd";
+  private static final String PROP_SSH_REWRITE_URL = ".ssh.rewrite_url";
+  private static final String PROP_SSH_LOCAL_PORT = ".ssh.localport";
 
   private static final String XML_PREFIX = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?><!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">";
 
@@ -180,9 +186,26 @@ public class IniProfileStorage
     boolean rememberExplorerSchema = props.getBoolProperty(PROP_PREFIX + key + PROP_REMEMEMBER_SCHEMA, false);
     boolean hideWarnings = props.getBoolProperty(PROP_PREFIX + key + PROP_HIDE_WARNINGS, false);
     boolean copyProps = props.getBoolProperty(PROP_PREFIX + key + PROP_COPY_PROPS, false);
+
     int idleTime = props.getIntProperty(PROP_PREFIX + key + PROP_IDLE_TIME, -1);
     int size = props.getIntProperty(PROP_PREFIX + key + PROP_FETCHSIZE, -1);
     int timeOut = props.getIntProperty(PROP_PREFIX + key + PROP_CONNECTION_TIMEOUT, -1);
+
+    String sshHost = props.getProperty(PROP_PREFIX + key + PROP_SSH_HOST, null);
+    String sshUser = props.getProperty(PROP_PREFIX + key + PROP_SSH_USER, null);
+    String sshPwd = props.getProperty(PROP_PREFIX + key + PROP_SSH_PWD, null);
+    int localPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_LOCAL_PORT, Integer.MIN_VALUE);
+    boolean rewriteSSHUrl = props.getBoolProperty(PROP_PREFIX + key + PROP_SSH_REWRITE_URL, false);
+    SshConfig config = null;
+    if (sshHost != null || sshPwd != null || sshUser != null || localPort != Integer.MIN_VALUE)
+    {
+      config = new SshConfig();
+      config.setHostname(sshHost);
+      config.setUsername(sshUser);
+      config.setPassword(sshPwd);
+      config.setRewriteURL(rewriteSSHUrl);
+      config.setLocalPort(localPort);
+    }
 
     Integer fetchSize = null;
     if (size >= 0)
@@ -261,6 +284,7 @@ public class IniProfileStorage
     profile.setInfoDisplayColor(color);
     profile.setSchemaFilter(schemaFilter);
     profile.setCatalogFilter(catalogFilter);
+    profile.setSshConfig(config);
 
     return profile;
   }
@@ -332,6 +356,16 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_MACROFILE, profile.getMacroFilename());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, profile.getPostConnectScript());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, profile.getPreDisconnectScript());
+
+    SshConfig config = profile.getSshConfig();
+    if (config != null)
+    {
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_HOST, config.getHostname());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_USER, config.getUsername());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_PWD, config.getPassword());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_REWRITE_URL, config.getRewriteURL());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_LOCAL_PORT, config.getLocalPort());
+    }
 
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally(), defaultValues.getStoreCacheLocally());
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_ROLLBACK_DISCONNECT, profile.getRollbackBeforeDisconnect(), defaultValues.getRollbackBeforeDisconnect());

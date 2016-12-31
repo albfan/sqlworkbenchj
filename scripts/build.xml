@@ -780,6 +780,7 @@
       <zipfileset dir="${scriptsrc}">
         <include name="log4j-sample.xml"/>
         <include name="SQLWorkbench.vbs"/>
+        <include name="sqlworkbench.cmd"/>
         <include name="sqlwbconsole.cmd"/>
         <include name="sqlworkbench.sh"/>
         <include name="sqlwbconsole.sh"/>

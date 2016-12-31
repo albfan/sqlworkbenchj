@@ -30,6 +30,7 @@ import java.sql.Statement;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -170,7 +171,7 @@ public class WbSchemaDiffTest
   }
 
   private void setupDatabase()
-    throws SQLException, ClassNotFoundException
+    throws SQLException, ClassNotFoundException, SshException
   {
     util = new TestUtil("schemaDiffTest");
 

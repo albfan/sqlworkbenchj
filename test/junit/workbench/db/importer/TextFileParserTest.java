@@ -25,20 +25,22 @@ package workbench.db.importer;
 
 
 import java.sql.SQLException;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.ssh.SshException;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
+import workbench.db.WbConnection;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-import workbench.db.ColumnIdentifier;
-import workbench.db.ConnectionMgr;
-import workbench.db.WbConnection;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -107,7 +109,7 @@ public class TextFileParserTest
 	}
 
 	private WbConnection prepareDatabase()
-		throws SQLException, ClassNotFoundException
+		throws SQLException, ClassNotFoundException, SshException
 	{
 		getTestUtil().emptyBaseDirectory();
 		WbConnection conn = getTestUtil().getConnection();

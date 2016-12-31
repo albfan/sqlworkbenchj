@@ -54,6 +54,7 @@ import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -431,7 +432,7 @@ public class BatchRunner
 	}
 
 	public void connect()
-		throws SQLException, ClassNotFoundException
+		throws SQLException, ClassNotFoundException, SshException
 	{
 		this.connection = null;
 

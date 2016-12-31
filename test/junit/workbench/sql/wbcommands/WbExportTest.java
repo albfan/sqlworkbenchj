@@ -35,6 +35,7 @@ import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -1518,7 +1519,7 @@ public class WbExportTest
   }
 
   private WbConnection prepareDatabase()
-    throws SQLException, ClassNotFoundException
+    throws SQLException, ClassNotFoundException, SshException
   {
     util.emptyBaseDirectory();
     WbConnection wb = util.getConnection();

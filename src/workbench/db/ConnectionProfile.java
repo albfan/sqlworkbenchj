@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.SshConfig;
 
 import workbench.db.postgres.PgPassReader;
 
@@ -116,6 +117,8 @@ public class ConnectionProfile
   private String lastSettingsKey;
   private String macroFileName;
   private final Set<String> tags = CollectionUtil.caseInsensitiveSet();
+
+  private SshConfig sshConfig;
 
   public ConnectionProfile()
   {
@@ -1035,6 +1038,7 @@ public class ConnectionProfile
     result.setPromptForUsername(this.promptForUsername);
     result.setStoreCacheLocally(this.storeCacheLocally);
     result.setMacroFilename(this.macroFileName);
+    result.setSshConfig(sshConfig == null ? null : sshConfig.createCopy());
     result.tags.addAll(tags);
     result.lastSettingsKey = this.lastSettingsKey;
     result.temporaryUsername = null;
@@ -1254,4 +1258,31 @@ public class ConnectionProfile
     return user.toLowerCase() + url.toLowerCase();
   }
 
+  public SshConfig getSshConfig()
+  {
+    return sshConfig;
+  }
+
+  public void setSshConfig(SshConfig config)
+  {
+    if (config == null)
+    {
+      changed = sshConfig != null;
+      sshConfig = null;
+    }
+    else
+    {
+      if (sshConfig != null)
+      {
+        sshConfig.copyFrom(config);
+        changed = sshConfig.isChanged();
+      }
+      else
+      {
+        sshConfig = config.createCopy();
+        changed = true;
+      }
+    }
+  }
+  
 }

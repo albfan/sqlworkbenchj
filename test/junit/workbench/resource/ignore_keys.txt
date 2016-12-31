@@ -1,3 +1,5 @@
+LblSshConfig
+LblSshHost
 LblTestConn
 LblGSTabName
 MsgProcessing
