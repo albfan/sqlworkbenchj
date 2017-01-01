@@ -74,6 +74,7 @@ public class SshConfigPanel
 
   private void clear()
   {
+    hostname.setText("");
     username.setText("");
     password.setText("");
     localPort.setText("");
@@ -82,12 +83,22 @@ public class SshConfigPanel
 
   public SshConfig getConfig()
   {
+    String host = hostname.getText();
+    String user = username.getText();
+    String port = localPort.getText();
+    String pwd = password.getText();
+
+    if (StringUtil.isBlank(host) && StringUtil.isBlank(user) && StringUtil.isBlank(port) && StringUtil.isBlank(pwd))
+    {
+      return null;
+    }
+
     SshConfig config = new SshConfig();
-    config.setHostname(hostname.getText());
-    config.setUsername(username.getText());
-    config.setPassword(password.getText());
+    config.setHostname(host);
+    config.setUsername(user);
+    config.setPassword(pwd);
     config.setRewriteURL(rewriteUrl.isSelected());
-    config.setLocalPort(StringUtil.getIntValue(localPort.getText(), 0));
+    config.setLocalPort(StringUtil.getIntValue(port, 0));
     return config;
   }
 

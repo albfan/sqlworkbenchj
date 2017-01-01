@@ -45,11 +45,9 @@ import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.ssh.PortForwarder;
 import workbench.ssh.SshConfig;
 import workbench.ssh.SshException;
 import workbench.ssh.SshManager;
-import workbench.ssh.UrlParser;
 
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.shutdown.DbShutdownFactory;
@@ -281,11 +279,6 @@ public class ConnectionMgr
     return profile.getSshConfig() != null;
   }
 
-  private boolean isLocalhost(String host)
-  {
-    return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
-  }
-
   private String initSSH(ConnectionProfile profile)
     throws SshException
   {
@@ -294,41 +287,7 @@ public class ConnectionMgr
       return profile.getUrl();
     }
 
-    SshConfig config = profile.getSshConfig();
-
-    try
-    {
-      int localPort = config.getLocalPort();
-      String urlToUse = profile.getUrl();
-      UrlParser parser = new UrlParser(urlToUse);
-
-      // if no local the JDBC is already pointing to a URL that uses port forwarding
-      if (localPort <= 0 && !config.getRewriteURL() && isLocalhost(parser.getDatabaseServer()))
-      {
-        localPort = parser.getDatabasePort();
-      }
-
-      PortForwarder forwarder = sshManager.getForwarder(config.getHostname(), config.getUsername(), config.getPassword());
-      if (forwarder.isConnected() == false)
-      {
-        localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort);
-      }
-      else
-      {
-        localPort = forwarder.getLocalPort();
-      }
-
-      if (config.getRewriteURL())
-      {
-        urlToUse = parser.getLocalUrl(localPort);
-      }
-      return urlToUse;
-    }
-    catch (Exception ex)
-    {
-      LogMgr.logError("ConnectionMgr.initSSH()", "Could not initialize SSH tunnel", ex);
-      throw new SshException("Could not initialize SSH tunnel: "  + ex.getMessage(), ex);
-    }
+    return sshManager.initializeSSHSession(profile);
   }
 
   private void copyPropsToSystem(ConnectionProfile profile)
