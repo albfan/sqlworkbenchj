@@ -115,17 +115,7 @@ public class HistoryTextField
 		this.setPrototypeDisplayValue(b);
 	}
 
-//
-//	public void setText(String s)
-//	{
-//    if (!StringUtil.equalString(s, getText()))
-//    {
-//      setSelectedItem(s);
-//      getEditor().setItem("");
-//    }
-//	}
-
-	public void setText(String s)
+  public void setText(String s)
 	{
     if (!StringUtil.equalString(s, getText()))
     {
@@ -133,13 +123,16 @@ public class HistoryTextField
     }
 	}
 
-//	public String getText()
-//	{
-//		Object item = getSelectedItem();
-//		if (item == null) item = getEditor().getItem();
-//		if (item == null) return null;
-//		return (String)item;
-//	}
+	public String getEditorText()
+	{
+    Component comp = getEditor().getEditorComponent();
+    if (comp instanceof JTextField)
+    {
+      JTextField tf = (JTextField)comp;
+      return tf.getText();
+    }
+    return (String)getEditor().getItem();
+  }
 
 	public String getText()
 	{

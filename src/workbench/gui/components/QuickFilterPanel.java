@@ -349,7 +349,7 @@ public class QuickFilterPanel
 	@Override
 	public void applyQuickFilter()
 	{
-		applyFilter(filterValue.getText(), true);
+		applyFilter(filterValue.getEditorText(), true);
 	}
 
   @Override
@@ -411,19 +411,15 @@ public class QuickFilterPanel
 
   private void setCaretPosition(final JTextField editor, final int pos)
   {
-    WbSwingUtilities.invokeLater(new Runnable()
+    WbSwingUtilities.invokeLater(() ->
     {
-      @Override
-      public void run()
+      if (editor.getCaretPosition() != pos)
       {
-        if (editor.getCaretPosition() != pos)
-        {
-          editor.setCaretPosition(pos);
-        }
-        if (editor.getSelectionStart() != editor.getSelectionEnd())
-        {
-          editor.select(pos, pos);
-        }
+        editor.setCaretPosition(pos);
+      }
+      if (editor.getSelectionStart() != editor.getSelectionEnd())
+      {
+        editor.select(pos, pos);
       }
     });
   }
@@ -570,31 +566,27 @@ public class QuickFilterPanel
     // ignore key events with Alt or Ctrl Modifiers
     if (WbAction.isAltPressed(e.getModifiers()) || WbAction.isCtrlPressed(e.getModifiers())) return;
 
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
-				{
-					// reset filter, do not change the input text
-					// resetting the filter does not change the cursor location in the edit field
-					// so there is no need to take care of that (as done in filterByEditorValue()
-					applyFilter(null, false);
-          e.consume();
-				}
-				else if (e.getKeyChar() == KeyEvent.VK_ENTER)
-				{
-					filterByEditorValue(true);
-          e.consume();
-				}
-				else if (autoFilterEnabled)
-				{
-					filterByEditorValue(false);
-          e.consume();
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      if (e.getKeyChar() == KeyEvent.VK_ESCAPE)
+      {
+        // reset filter, do not change the input text
+        // resetting the filter does not change the cursor location in the edit field
+        // so there is no need to take care of that (as done in filterByEditorValue()
+        applyFilter(null, false);
+        e.consume();
+      }
+      else if (e.getKeyChar() == KeyEvent.VK_ENTER)
+      {
+        filterByEditorValue(true);
+        e.consume();
+      }
+      else if (autoFilterEnabled)
+      {
+        filterByEditorValue(false);
+        e.consume();
+      }
+    });
 	}
 
 	@Override
