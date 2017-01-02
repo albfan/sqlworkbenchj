@@ -32,6 +32,7 @@ public class SshConfig
 
   private String sshHost;
   private String password;
+  private String temporaryPassword;
   private String username;
   private int localPort;
 
@@ -69,8 +70,14 @@ public class SshConfig
     }
   }
 
+  public void setTemporaryPassword(String pwd)
+  {
+    this.temporaryPassword = pwd;
+  }
+
   public String getPassword()
   {
+    if (temporaryPassword != null) return temporaryPassword;
     return password;
   }
 
