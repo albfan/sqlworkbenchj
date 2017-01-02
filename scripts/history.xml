@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-12-14">
+    <entry dev-build="5" type="enh">Support for SSH tunneling is now available</entry>
     <entry dev-build="5" type="enh">When loading a SQL script it's now possible to automatically detect the encoding</entry>
     <entry dev-build="4" type="enh">It's now possible filter the output of WbVarList</entry>
     <entry dev-build="4" type="enh">It's now possible to pin a result tab so that it doesn't get closed even if append mode is not enabled</entry>
@@ -13,6 +14,8 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="5" type="fix">Auto completion did not overwrite a partial table (or column) name if that part was a SQL keyword.</entry>
+    <entry dev-build="5" type="fix">Activating the object list filter in the DbExplorer by using the toolbar button did not work reliably.</entry>
     <entry dev-build="5" type="fix">Passing connection properties using -connectionProperties to WbCreateProfile did not work</entry>
     <entry dev-build="5" type="fix">When using a profile specific macro file, opening a new window did not always work.</entry>
     <entry dev-build="5" type="fix">When using an Oracle 12.x JDBC driver, materialized views were always reported as missing with WbSchemaDiff</entry>
