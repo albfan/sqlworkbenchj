@@ -103,6 +103,8 @@ public class IniProfileStorage
   private static final String PROP_SSH_PWD = ".ssh.pwd";
   private static final String PROP_SSH_REWRITE_URL = ".ssh.rewrite_url";
   private static final String PROP_SSH_LOCAL_PORT = ".ssh.localport";
+  private static final String PROP_SSH_PORT = ".ssh.port";
+  private static final String PROP_SSH_KEYFILE = ".ssh.keyfile";
 
   private static final String XML_PREFIX = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?><!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">";
 
@@ -194,10 +196,13 @@ public class IniProfileStorage
     String sshHost = props.getProperty(PROP_PREFIX + key + PROP_SSH_HOST, null);
     String sshUser = props.getProperty(PROP_PREFIX + key + PROP_SSH_USER, null);
     String sshPwd = props.getProperty(PROP_PREFIX + key + PROP_SSH_PWD, null);
+    String keyFile = props.getProperty(PROP_PREFIX + key + PROP_SSH_KEYFILE, null);
     int localPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_LOCAL_PORT, Integer.MIN_VALUE);
+    int sshPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_PORT, Integer.MIN_VALUE);
     boolean rewriteSSHUrl = props.getBoolProperty(PROP_PREFIX + key + PROP_SSH_REWRITE_URL, false);
+
     SshConfig config = null;
-    if (sshHost != null || sshPwd != null || sshUser != null || localPort != Integer.MIN_VALUE)
+    if (sshHost != null || sshPwd != null || sshUser != null || localPort != Integer.MIN_VALUE || keyFile != null || sshPort != Integer.MIN_VALUE)
     {
       config = new SshConfig();
       config.setHostname(sshHost);
@@ -205,6 +210,8 @@ public class IniProfileStorage
       config.setPassword(sshPwd);
       config.setRewriteURL(rewriteSSHUrl);
       config.setLocalPort(localPort);
+      config.setPrivateKeyFile(keyFile);
+      config.setSshPort(sshPort);
     }
 
     Integer fetchSize = null;
@@ -365,6 +372,8 @@ public class IniProfileStorage
       props.setProperty(PROP_PREFIX + key + PROP_SSH_PWD, config.getPassword());
       props.setProperty(PROP_PREFIX + key + PROP_SSH_REWRITE_URL, config.getRewriteURL());
       props.setProperty(PROP_PREFIX + key + PROP_SSH_LOCAL_PORT, config.getLocalPort());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_PORT, config.getSshPort());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_KEYFILE, config.getPrivateKeyFile());
     }
 
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally(), defaultValues.getStoreCacheLocally());

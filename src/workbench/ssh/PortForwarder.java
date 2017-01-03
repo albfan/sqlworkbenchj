@@ -20,6 +20,7 @@
  */
 package workbench.ssh;
 
+import java.io.File;
 import java.util.Properties;
 
 import workbench.log.LogMgr;
@@ -38,8 +39,7 @@ public class PortForwarder
 
   private String sshHost;
   private String sshUser;
-  private String sshPassword;
-  private String keyPass;
+  private String password;
   private String privateKeyFile;
 
   private Session session;
@@ -49,9 +49,21 @@ public class PortForwarder
   {
     this.sshHost = sshHost;
     this.sshUser = sshUser;
-    this.sshPassword = password;
+    this.password = password;
   }
 
+  public void setPrivateKeyFile(String keyFile)
+  {
+    this.privateKeyFile = null;
+    if (keyFile != null)
+    {
+      File f = new File(keyFile);
+      if (f.exists())
+      {
+        privateKeyFile = f.getAbsolutePath();
+      }
+    }
+  }
   /**
    * Forwards a local port to a remote port.
    *
@@ -84,8 +96,15 @@ public class PortForwarder
 
     long start = System.currentTimeMillis();
     LogMgr.logInfo("PortForwarder.startForwarding()", "Connecting to host: " + sshHost + " using username: " + sshUser);
+    if (privateKeyFile != null)
+    {
+      jsch.addIdentity(privateKeyFile, password);
+    }
     session = jsch.getSession(sshUser, sshHost, sshPort);
-    session.setPassword(sshPassword);
+    if (privateKeyFile == null)
+    {
+      session.setPassword(password);
+    }
     session.setConfig(props);
     session.connect();
     long duration = System.currentTimeMillis() - start;
@@ -99,6 +118,7 @@ public class PortForwarder
 
     return localPort;
   }
+
 
   public boolean isConnected()
   {

@@ -140,6 +140,7 @@ public class SshConfig
   {
     if (StringUtil.equalStringOrEmpty(privateKeyFile, keyFile) == false)
     {
+      this.changed = true;
       this.privateKeyFile = StringUtil.trimToNull(keyFile);
     }
   }
@@ -185,6 +186,7 @@ public class SshConfig
     setRewriteURL(config.getRewriteURL());
     setLocalPort(config.getLocalPort());
     setSshPort(config.getSshPort());
+    setPrivateKeyFile(config.getPrivateKeyFile());
   }
 
   public SshConfig createCopy()

@@ -20,6 +20,7 @@
  */
 package workbench.gui.profiles;
 
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -31,6 +32,8 @@ import javax.swing.JTextField;
 
 import workbench.resource.ResourceMgr;
 import workbench.ssh.SshConfig;
+
+import workbench.gui.components.WbFilePicker;
 
 import workbench.util.StringUtil;
 
@@ -45,6 +48,9 @@ public class SshConfigPanel
   public SshConfigPanel()
   {
     initComponents();
+    keyPassFile.setAllowMultiple(false);
+    keyPassFile.setLastDirProperty("workbench.ssh.keypass.lastdir");
+    keyPassFile.setToolTipText(labelKeyPass.getToolTipText());
   }
 
   public void setConfig(SshConfig config, boolean allowURLRewrite)
@@ -55,16 +61,20 @@ public class SshConfigPanel
       hostname.setText(StringUtil.coalesce(config.getHostname(), ""));
       username.setText(StringUtil.coalesce(config.getUsername(), ""));
       password.setText(StringUtil.coalesce(config.getPassword(), ""));
+      keyPassFile.setFilename(config.getPrivateKeyFile());
+
       int localPortNr = config.getLocalPort();
       if (localPortNr > 0)
       {
         localPort.setText(Integer.toString(localPortNr));
       }
+
       int port = config.getSshPort();
       if (port > 0 && port != 22)
       {
         sshPort.setText(Integer.toString(port));
       }
+      
       if (allowURLRewrite)
       {
         rewriteUrl.setSelected(config.getRewriteURL());
@@ -79,6 +89,7 @@ public class SshConfigPanel
 
   private void clear()
   {
+    keyPassFile.setFilename("");
     hostname.setText("");
     username.setText("");
     password.setText("");
@@ -107,6 +118,7 @@ public class SshConfigPanel
     config.setRewriteURL(rewriteUrl.isSelected());
     config.setLocalPort(StringUtil.getIntValue(localPortNr, 0));
     config.setSshPort(StringUtil.getIntValue(portText, 0));
+    config.setPrivateKeyFile(StringUtil.trimToNull(keyPassFile.getFilename()));
     return config;
   }
 
@@ -132,6 +144,8 @@ public class SshConfigPanel
     localPort = new JTextField();
     labelSshPort = new JLabel();
     sshPort = new JTextField();
+    keyPassFile = new WbFilePicker();
+    labelKeyPass = new JLabel();
 
     setLayout(new GridBagLayout());
 
@@ -174,7 +188,7 @@ public class SshConfigPanel
     labelPassword.setToolTipText(ResourceMgr.getString("d_LblSshPwd")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelPassword, gridBagConstraints);
@@ -182,7 +196,7 @@ public class SshConfigPanel
     password.setToolTipText(ResourceMgr.getString("d_LblSshPwd")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
@@ -192,7 +206,7 @@ public class SshConfigPanel
     rewriteUrl.setToolTipText(ResourceMgr.getString("d_LblSshRewriteUrl")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
@@ -205,7 +219,7 @@ public class SshConfigPanel
     labelLocalPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelLocalPort, gridBagConstraints);
@@ -213,7 +227,7 @@ public class SshConfigPanel
     localPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
@@ -237,12 +251,30 @@ public class SshConfigPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
     add(sshPort, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 11);
+    add(keyPassFile, gridBagConstraints);
+
+    labelKeyPass.setText(ResourceMgr.getString("LblSshKeyFile")); // NOI18N
+    labelKeyPass.setToolTipText(ResourceMgr.getString("d_LblSshKeyFile")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
+    add(labelKeyPass, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JTextField hostname;
+  private WbFilePicker keyPassFile;
   private JLabel labelHost;
+  private JLabel labelKeyPass;
   private JLabel labelLocalPort;
   private JLabel labelPassword;
   private JLabel labelSshPort;
