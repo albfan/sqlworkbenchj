@@ -30,6 +30,7 @@ public class SshConfig
 {
   private boolean changed;
 
+  private int sshPort = PortForwarder.DEFAULT_SSH_PORT;
   private String sshHost;
   private String password;
   private String temporaryPassword;
@@ -67,6 +68,20 @@ public class SshConfig
     {
       this.changed = true;
       this.sshHost = StringUtil.trimToNull(host);
+    }
+  }
+
+  public int getSshPort()
+  {
+    return sshPort;
+  }
+
+  public void setSshPort(int port)
+  {
+    if (port > 0 && port != sshPort)
+    {
+      changed = true;
+      sshPort = port;
     }
   }
 
@@ -169,6 +184,7 @@ public class SshConfig
     setPassword(config.getPassword());
     setRewriteURL(config.getRewriteURL());
     setLocalPort(config.getLocalPort());
+    setSshPort(config.getSshPort());
   }
 
   public SshConfig createCopy()
@@ -179,6 +195,7 @@ public class SshConfig
     copy.privateKeyFile = this.privateKeyFile;
     copy.rewriteURL = this.rewriteURL;
     copy.sshHost = this.sshHost;
+    copy.sshPort = this.sshPort;
     copy.username = this.username;
     copy.changed = this.changed;
     return copy;

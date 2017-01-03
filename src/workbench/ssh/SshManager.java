@@ -55,10 +55,10 @@ public class SshManager
         localPort = parser.getDatabasePort();
       }
 
-      PortForwarder forwarder = getForwarder(config.getHostname(), config.getUsername(), config.getPassword());
+      PortForwarder forwarder = getForwarder(config);
       if (forwarder.isConnected() == false)
       {
-        localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort);
+        localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort, config.getSshPort());
       }
       else
       {
@@ -78,16 +78,16 @@ public class SshManager
     }
   }
 
-  public PortForwarder getForwarder(String remoteHost, String user, String pwd)
+  public PortForwarder getForwarder(SshConfig config)
   {
-    String key = makeKey(remoteHost, user);
+    String key = makeKey(config.getHostname(), config.getUsername());
     PortForwarder forwarder = null;
     synchronized (lock)
     {
       Entry e = activeSessions.get(key);
       if (e == null)
       {
-        e = new Entry(new PortForwarder(remoteHost, user, pwd));
+        e = new Entry(new PortForwarder(config.getHostname(), config.getHostname(), config.getPassword()));
         forwarder = e.fwd;
         e.usageCount = 1;
         activeSessions.put(key, e);

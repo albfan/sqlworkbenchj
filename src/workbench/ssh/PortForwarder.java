@@ -34,6 +34,8 @@ import com.jcraft.jsch.Session;
  */
 public class PortForwarder
 {
+  public static final int DEFAULT_SSH_PORT = 22;
+
   private String sshHost;
   private String sshUser;
   private String sshPassword;
@@ -61,7 +63,7 @@ public class PortForwarder
   public int startFowarding(String remoteDbServer, int remoteDbPort)
     throws JSchException
   {
-    return startForwarding(remoteDbServer, remoteDbPort, 0);
+    return startForwarding(remoteDbServer, remoteDbPort, 0, DEFAULT_SSH_PORT);
   }
 
   /**
@@ -73,7 +75,7 @@ public class PortForwarder
    *
    * @return the local port  used for forwarding
    */
-  public int startForwarding(String remoteDbServer, int remoteDbPort, int localPortToUse)
+  public int startForwarding(String remoteDbServer, int remoteDbPort, int localPortToUse, int sshPort)
     throws JSchException
   {
     Properties props = new Properties();
@@ -82,7 +84,7 @@ public class PortForwarder
 
     long start = System.currentTimeMillis();
     LogMgr.logInfo("PortForwarder.startForwarding()", "Connecting to host: " + sshHost + " using username: " + sshUser);
-    session = jsch.getSession(sshUser, sshHost);
+    session = jsch.getSession(sshUser, sshHost, sshPort);
     session.setPassword(sshPassword);
     session.setConfig(props);
     session.connect();
