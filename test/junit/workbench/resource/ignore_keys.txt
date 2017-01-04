@@ -1,6 +1,7 @@
 LblSshConfig
 LblSshHost
 LblTestConn
+LblSshPort
 LblGSTabName
 MsgProcessing
 MnuTxtCopyAsSqlDelete
