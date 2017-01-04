@@ -34,6 +34,7 @@ import java.util.Properties;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.ssh.SshConfig;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -47,6 +48,7 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -65,6 +67,12 @@ public class BatchRunnerTest
 		super("BatchRunnerTest");
 		util = getTestUtil();
 	}
+
+  @After
+  public void tearDown()
+  {
+    util.emptyBaseDirectory();
+  }
 
 	@Test
 	public void testSingleCommand()
@@ -289,6 +297,44 @@ public class BatchRunnerTest
 		assertNotNull(drv);
 		String dir = cmdline.getValue("configdir");
 		assertEquals(".", dir);
+	}
+
+	@Test
+	public void testCreateSshProfile()
+		throws Exception
+	{
+		AppArguments cmdline = new AppArguments();
+		cmdline.parse("-sshHost=somehost -sshUser=arthur -sshRewriteURL=true -sshPassword=supersecret -autoCommit=false -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
+		ConnectionProfile p = BatchRunner.createCmdLineProfile(cmdline);
+		assertFalse(p.getAutocommit());
+    SshConfig config = p.getSshConfig();
+    assertNotNull(config);
+    assertEquals("somehost", config.getHostname());
+    assertEquals("arthur", config.getUsername());
+    assertEquals("supersecret", config.getPassword());
+    assertTrue(config.getRewriteURL());
+    assertNull(config.getPrivateKeyFile());
+
+    String baseDir = getTestUtil().getBaseDir();
+    WbFile pk = new WbFile(baseDir, "private.ppk");
+    TestUtil.writeFile(pk, "dummy content");
+
+		cmdline.parse(
+      "-sshHost=somehost -sshUser=arthur -sshPassword=supersecret -sshRewriteURL=false " +
+      "-sshPrivateKey='" + pk.getFullPath() + "' " +
+      "-sshLocalPort=12345 -sshPort=42 " +
+      "-url=jdbc:postgres://localhost/test -username=test -password=topsecret " +
+      "-driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
+		ConnectionProfile p2 = BatchRunner.createCmdLineProfile(cmdline);
+    config = p2.getSshConfig();
+    assertNotNull(config);
+    assertEquals("somehost", config.getHostname());
+    assertEquals("arthur", config.getUsername());
+    assertEquals("supersecret", config.getPassword());
+    assertFalse(config.getRewriteURL());
+    assertEquals(pk.getFullPath(), config.getPrivateKeyFile());
+    assertEquals(12345, config.getLocalPort());
+    assertEquals(42, config.getSshPort());
 	}
 
 	@Test

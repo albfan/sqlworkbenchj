@@ -54,6 +54,7 @@ import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.SshConfig;
 import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
@@ -429,6 +430,23 @@ public class BatchRunner
 			String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
 			profile.setInputPassword(pwd);
 		}
+
+    if (profile.needsSSHPasswordPrompt())
+    {
+      SshConfig config = profile.getSshConfig();
+      String key;
+
+      if (config.getPrivateKeyFile() == null)
+      {
+        key = "MsgInputSshPwd";
+      }
+      else
+      {
+        key = "MsgInputSshPassPhrase";
+      }
+			String pwd = controller.getPassword(ResourceMgr.getString(key));
+			config.setTemporaryPassword(pwd);
+    }
 	}
 
 	public void connect()
@@ -1161,21 +1179,36 @@ public class BatchRunner
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
   {
-    return createCmdLineProfile(cmdLine, null, null);
+    return createCmdLineProfile(cmdLine, null, null, true);
+  }
+  
+	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, boolean checkDriver)
+  {
+    return createCmdLineProfile(cmdLine, null, null, checkDriver);
   }
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection, String baseDir)
+  {
+    return createCmdLineProfile(cmdLine, currentConnection, baseDir, true);
+  }
+
+	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection, String baseDir, boolean checkDriver)
 	{
 		if (!hasConnectionArgument(cmdLine)) return null;
 
 		ConnectionProfile result = null;
 
 		String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
-		String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
-		if (driverclass == null)
-		{
-			driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
-		}
+		String driverclass = null;
+
+    if (checkDriver)
+    {
+      driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
+      if (driverclass == null)
+      {
+        driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
+      }
+    }
 
 		String descriptor = cmdLine.getValue(AppArguments.ARG_CONN_DESCRIPTOR);
 
@@ -1187,12 +1220,12 @@ public class BatchRunner
 				return null;
 			}
 
-			if (driverclass == null)
+			if (driverclass == null && checkDriver)
 			{
 				driverclass = ConnectionDescriptor.findDriverClassFromUrl(url);
 			}
 
-			if (driverclass == null)
+			if (driverclass == null && checkDriver)
 			{
 				LogMgr.logWarning("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
 				return null;
@@ -1202,7 +1235,7 @@ public class BatchRunner
 			String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
 			String jar = cmdLine.getValue(AppArguments.ARG_CONN_JAR);
 
-			if (jar != null)
+			if (jar != null && checkDriver)
 			{
 				WbFile jarFile = new WbFile(jar);
 				ConnectionMgr.getInstance().registerDriver(driverclass, jarFile.getFullPath());
@@ -1277,6 +1310,8 @@ public class BatchRunner
 				result.setConnectionProperties(p);
 			}
 
+      result.setSshConfig(getSshConfig(cmdLine));
+
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);
@@ -1302,6 +1337,31 @@ public class BatchRunner
 		}
 		return result;
 	}
+
+  private static SshConfig getSshConfig(ArgumentParser cmdLine)
+  {
+    String sshHost = cmdLine.getValue(AppArguments.ARG_CONN_SSH_HOST);
+    String sshUser = cmdLine.getValue(AppArguments.ARG_CONN_SSH_USER);
+    String sshPwd = cmdLine.getValue(AppArguments.ARG_CONN_SSH_PWD);
+    String sshKeyfile = cmdLine.getValue(AppArguments.ARG_CONN_SSH_KEYFILE);
+    String sshLocalPort = cmdLine.getValue(AppArguments.ARG_CONN_SSH_LOCAL_PORT);
+    String sshPort = cmdLine.getValue(AppArguments.ARG_CONN_SSH_PORT);
+
+    if (sshHost != null && sshUser != null)
+    {
+      SshConfig config = new SshConfig();
+      config.setUsername(sshUser);
+      config.setHostname(sshHost);
+      config.setPassword(sshPwd);
+      config.setPrivateKeyFile(sshKeyfile);
+      config.setRewriteURL(cmdLine.getBoolean(AppArguments.ARG_CONN_SSH_REWRITE_URL, false));
+      config.setLocalPort(StringUtil.getIntValue(sshLocalPort, 0));
+      config.setSshPort(StringUtil.getIntValue(sshPort, 0));
+      return config;
+    }
+
+    return null;
+  }
 
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{

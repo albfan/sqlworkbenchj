@@ -911,6 +911,23 @@ public class ConnectionProfile
     return user;
   }
 
+  public boolean needsSSHPasswordPrompt()
+  {
+    SshConfig config = getSshConfig();
+    if (config == null) return false;
+    
+    if (config.getPrivateKeyFile() != null)
+    {
+      String passphrase = ConnectionMgr.getInstance().getSshManager().getPassphrase(config);
+      if (passphrase != null)
+      {
+        config.setTemporaryPassword(passphrase);
+        return false;
+      }
+    }
+    return StringUtil.isBlank(config.getPassword());
+  }
+
   public boolean needsPasswordPrompt()
   {
     return getLoginPassword() == null && getStorePassword() == false;

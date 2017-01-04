@@ -25,8 +25,6 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import workbench.AppArguments;
 
@@ -34,7 +32,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 
-import workbench.sql.DelimiterDefinition;
+import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ConnectionDescriptor;
@@ -67,6 +65,11 @@ public class WbCreateProfile
 		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
 		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
 		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_HOST);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_KEYFILE, ArgumentType.Filename);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_PWD);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_USER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_REWRITE_URL, ArgumentType.BoolArgument);
 		cmdLine.addArgument("user");
 		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
 		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);
@@ -108,59 +111,16 @@ public class WbCreateProfile
 
     if (profile == null)
     {
-      profile = ConnectionProfile.createEmptyProfile();
-
-      String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
-      String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
-      String pwd = cmdLine.getValue(AppArguments.ARG_CONN_PWD);
-
-      if (StringUtil.isBlank(user))
-      {
-        user = cmdLine.getValue("user");
-      }
-
-      profile.setUrl(url);
-      profile.setUsername(user);
-      profile.setPassword(pwd);
+      profile = BatchRunner.createCmdLineProfile(cmdLine, false);
     }
 
     DbDriver drv = getDriverFromCommandline();
     profile.setDriver(drv);
 
 		profile.setTemporaryProfile(false);
-
-		boolean commit =  cmdLine.getBoolean(AppArguments.ARG_CONN_AUTOCOMMIT, false);
-		String delimDef = cmdLine.getValue(AppArguments.ARG_ALT_DELIMITER);
-		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(delimDef);
-		boolean trimCharData = cmdLine.getBoolean(AppArguments.ARG_CONN_TRIM_CHAR, false);
-		boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
-		boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
-		boolean savePwd = cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true);
-
-    Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
-
-    if (props != null && props.size() > 0)
-    {
-      Properties p = new Properties();
-      p.putAll(props);
-      profile.setConnectionProperties(p);
-    }
-
-		profile.setStorePassword(savePwd);
-		profile.setAutocommit(commit);
+		profile.setStorePassword(cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true));
 		profile.setStoreExplorerSchema(false);
-		profile.setRollbackBeforeDisconnect(rollback);
-		profile.setAlternateDelimiter(delim);
-		profile.setTrimCharData(trimCharData);
-		profile.setUseSeparateConnectionPerTab(separate);
-		profile.setEmptyStringIsNull(cmdLine.getBoolean(AppArguments.ARG_CONN_EMPTYNULL, false));
-		profile.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
-		profile.setDetectOpenTransaction(cmdLine.getBoolean(AppArguments.ARG_CONN_CHECK_OPEN_TRANS, false));
-		profile.setReadOnly(cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false));
-		int fetchSize = cmdLine.getIntValue(AppArguments.ARG_CONN_FETCHSIZE, -1);
-		profile.setDefaultFetchSize(fetchSize);
 
-		profile.setName(name);
 		String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
 		if (group != null)
 		{

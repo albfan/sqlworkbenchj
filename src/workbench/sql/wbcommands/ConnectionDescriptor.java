@@ -25,6 +25,7 @@ import java.util.List;
 
 import workbench.AppArguments;
 import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -78,6 +79,13 @@ public class ConnectionDescriptor
 		jarfile = null;
     boolean useCurrentDriver = false;
     String autoCommit = null;
+    String sshHost = null;
+    String sshUser = null;
+    String sshPwd = null;
+    String sshKeyfile = null;
+    String sshLocalPort = null;
+    String sshPort = null;
+    String sshRewriteURL = null;
 
 		for (String element : elements)
 		{
@@ -110,6 +118,34 @@ public class ConnectionDescriptor
 			{
 				jarfile = getValue(element);
 			}
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_HOST))
+      {
+        sshHost = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_USER))
+      {
+        sshUser = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_PWD))
+      {
+        sshPwd = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_REWRITE_URL))
+      {
+        sshRewriteURL = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_LOCAL_PORT))
+      {
+        sshLocalPort = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_PORT))
+      {
+        sshPort = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_KEYFILE))
+      {
+        sshKeyfile = getValue(element);
+      }
 		}
 
     if (url == null && currentConnection != null)
@@ -166,6 +202,19 @@ public class ConnectionDescriptor
       result.setAutocommit(StringUtil.stringToBool(autoCommit));
     }
 
+    if (sshHost != null && sshUser != null)
+    {
+      SshConfig config = new SshConfig();
+      config.setUsername(sshUser);
+      config.setHostname(sshHost);
+      config.setPassword(sshPwd);
+      config.setPrivateKeyFile(sshKeyfile);
+      config.setRewriteURL(StringUtil.stringToBool(sshRewriteURL));
+      config.setLocalPort(StringUtil.getIntValue(sshLocalPort, 0));
+      config.setSshPort(StringUtil.getIntValue(sshPort, 0));
+      result.setSshConfig(config);
+    }
+
 		result.setPassword(pwd);
 		result.setStorePassword(true);
 
@@ -176,12 +225,17 @@ public class ConnectionDescriptor
 		return result;
 	}
 
+  private boolean isParameter(String element, String parameterName)
+  {
+    return element.toLowerCase().startsWith(parameterName.toLowerCase() + "=");
+  }
+
 	private String getValue(String parameter)
 	{
 		if (StringUtil.isEmptyString(parameter)) return null;
 		int pos = parameter.indexOf('=');
 		if (pos == -1) return null;
-		return StringUtil.trimQuotes(parameter.substring(pos + 1).trim());
+		return StringUtil.trimToNull(StringUtil.trimQuotes(parameter.substring(pos + 1).trim()));
 	}
 
 	protected static String getUrlPrefix(String url)

@@ -65,6 +65,13 @@ public class AppArguments
   public static final String ARG_CONN_PROPS = "connectionProperties";
   public static final String ARG_CONN_DESCRIPTOR = "connection";
   public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
+  public static final String ARG_CONN_SSH_HOST = "sshHost";
+  public static final String ARG_CONN_SSH_USER = "sshUser";
+  public static final String ARG_CONN_SSH_KEYFILE = "sshPrivateKey";
+  public static final String ARG_CONN_SSH_PWD = "sshPassword";
+  public static final String ARG_CONN_SSH_REWRITE_URL = "sshRewriteURL";
+  public static final String ARG_CONN_SSH_LOCAL_PORT = "sshLocalPort";
+  public static final String ARG_CONN_SSH_PORT = "sshPort";
   public static final String ARG_CONN_SEPARATE = "separateConnection";
   public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
   public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
@@ -152,6 +159,15 @@ public class AppArguments
     addArgument(ARG_CONN_REMOVE_COMMENTS, ArgumentType.BoolArgument);
     addArgument(ARG_CONN_CHECK_OPEN_TRANS, ArgumentType.BoolArgument);
     addArgument(ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
+
+		addArgument(ARG_CONN_SSH_HOST);
+		addArgument(ARG_CONN_SSH_KEYFILE, ArgumentType.Filename);
+		addArgument(ARG_CONN_SSH_PWD);
+		addArgument(ARG_CONN_SSH_USER);
+		addArgument(ARG_CONN_SSH_REWRITE_URL, ArgumentType.BoolArgument);
+		addArgument(ARG_CONN_SSH_LOCAL_PORT);
+		addArgument(ARG_CONN_SSH_PORT);
+
     addArgument(ARG_SHOW_PUMPER, ArgumentType.BoolArgument);
     addArgument(ARG_IGNORE_DROP, ArgumentType.BoolArgument);
     addArgument(ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);

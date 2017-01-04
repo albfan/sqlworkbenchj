@@ -20,7 +20,9 @@
  */
 package workbench.sql.wbcommands;
 
+import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.ssh.SshConfig;
 
 import workbench.db.ConnectionProfile;
 
@@ -77,6 +79,32 @@ public class ConnectionDescriptorTest
     assertNotNull(jarPath);
     WbFile f = new WbFile(jarPath);
     assertEquals("xyz.jar", f.getName());
+
+    profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver, " +
+      "sshHost=somehost, sshUser=ford, sshLocalPort=56789, sshPort=44, sshPassword=supersecret", null);
+    assertNotNull(profile);
+    SshConfig config = profile.getSshConfig();
+    assertNotNull(config);
+    assertEquals("ford", config.getUsername());
+    assertEquals("somehost", config.getHostname());
+    assertEquals(56789, config.getLocalPort());
+    assertEquals(44, config.getSshPort());
+    assertEquals("supersecret", config.getPassword());
+    assertNull(config.getPrivateKeyFile());
+    assertFalse(config.getRewriteURL());
+
+    String baseDir = getTestUtil().getBaseDir();
+    WbFile pk = new WbFile(baseDir, "private.ppk");
+    TestUtil.writeFile(pk, "dummy content");
+
+    profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver, " +
+      "sshHost=somehost, sshUser=ford, sshLocalPort=56789, sshPort=44, sshPrivateKey='" + pk.getFullPath() + "', " +
+      "sshPassword=supersecret, sshRewriteURL=true", null);
+    assertNotNull(profile);
+    config = profile.getSshConfig();
+    assertNotNull(config);
+    assertEquals(pk.getFullPath(), config.getPrivateKeyFile());
+    assertTrue(config.getRewriteURL());
   }
 
 }

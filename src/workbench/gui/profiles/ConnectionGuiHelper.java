@@ -27,14 +27,17 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
+import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FeedbackWindow;
 import workbench.gui.components.ValidatingDialog;
-import workbench.resource.ResourceMgr;
-import workbench.ssh.SshConfig;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -51,7 +54,7 @@ public class ConnectionGuiHelper
     if (profile == null) return true;
 
     boolean needsDBPwd = profile.needsPasswordPrompt();
-    boolean needsSshPwd = needsSSHPwdPrompt(profile);
+    boolean needsSshPwd = profile.needsSSHPasswordPrompt();
 
     if (profile.getPromptForUsername())
     {
@@ -74,22 +77,6 @@ public class ConnectionGuiHelper
       return promptForSSHPassword(parent, profile);
     }
     return true;
-  }
-
-  private static boolean needsSSHPwdPrompt(ConnectionProfile profile)
-  {
-    SshConfig config = profile.getSshConfig();
-    if (config == null) return false;
-    if (config.getPrivateKeyFile() != null)
-    {
-      String passphrase = ConnectionMgr.getInstance().getSshManager().getPassphrase(config);
-      if (passphrase != null)
-      {
-        config.setTemporaryPassword(passphrase);
-        return false;
-      }
-    }
-    return StringUtil.isBlank(config.getPassword());
   }
 
   public static boolean promptUsername(Window parent, ConnectionProfile profile)
