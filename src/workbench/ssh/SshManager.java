@@ -23,8 +23,10 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.db.ConnectionProfile;
 import workbench.log.LogMgr;
+
+import workbench.db.ConnectionProfile;
+
 import workbench.util.StringUtil;
 
 /**
@@ -35,6 +37,7 @@ public class SshManager
 {
   private final Object lock = new Object();
   private Map<String, Entry> activeSessions = new HashMap<>();
+  private Map<String, String> passphrases = new HashMap<>();
 
   public String initializeSSHSession(ConnectionProfile profile)
     throws SshException
@@ -57,6 +60,10 @@ public class SshManager
       if (forwarder.isConnected() == false)
       {
         localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort, config.getSshPort());
+        if (config.getPrivateKeyFile() != null && config.hasTemporaryPassword())
+        {
+          passphrases.put(config.getPrivateKeyFile(), config.getPassword());
+        }
       }
       else
       {
@@ -74,6 +81,12 @@ public class SshManager
       LogMgr.logError("SshManager.initSSH()", "Could not initialize SSH tunnel", ex);
       throw new SshException("Could not initialize SSH tunnel: " + ex.getMessage(), ex);
     }
+  }
+
+  public String getPassphrase(SshConfig config)
+  {
+    if (config.getPrivateKeyFile() == null) return null;
+    return passphrases.get(config.getPrivateKeyFile());
   }
 
   public PortForwarder getForwarder(SshConfig config)

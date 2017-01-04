@@ -23,11 +23,11 @@ package workbench.ssh;
 import java.io.File;
 import java.util.Properties;
 
+import workbench.log.LogMgr;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
-import workbench.log.LogMgr;
 
 /**
  *
@@ -65,6 +65,7 @@ public class PortForwarder
       }
     }
   }
+  
   /**
    * Forwards a local port to a remote port.
    *

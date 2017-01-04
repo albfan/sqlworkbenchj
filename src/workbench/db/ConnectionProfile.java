@@ -1284,5 +1284,5 @@ public class ConnectionProfile
       }
     }
   }
-  
+
 }

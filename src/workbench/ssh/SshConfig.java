@@ -85,6 +85,16 @@ public class SshConfig
     }
   }
 
+  public boolean hasTemporaryPassword()
+  {
+    return this.temporaryPassword != null;
+  }
+
+  public void clearTemporaryPassword()
+  {
+    this.temporaryPassword = null;
+  }
+
   public void setTemporaryPassword(String pwd)
   {
     this.temporaryPassword = pwd;

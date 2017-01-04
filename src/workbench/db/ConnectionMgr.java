@@ -151,6 +151,11 @@ public class ConnectionMgr
     return profileMgr.getFile();
   }
 
+  public SshManager getSshManager()
+  {
+    return sshManager;
+  }
+  
   /**
    * Create a new connection to the database.
    *

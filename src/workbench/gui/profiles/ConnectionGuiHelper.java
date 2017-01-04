@@ -28,6 +28,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -52,16 +53,46 @@ public class ConnectionGuiHelper
   {
     if (profile == null) return true;
 
+    boolean needsDBPwd = profile.needsPasswordPrompt();
+    boolean needsSshPwd = needsSSHPwdPrompt(profile);
+
     if (profile.getPromptForUsername())
     {
-      return promptUsername(parent, profile);
+      boolean ok = promptUsername(parent, profile);
+      if (needsSshPwd && ok)
+      {
+        return promptForSSHPassword(parent, profile);
+      }
+      return ok;
     }
 
-    if (profile.needsPasswordPrompt())
+    // TODO: combine both passwords into a single prompt
+    if (needsDBPwd)
     {
       return promptPassword(parent, profile);
     }
+
+    if (needsSshPwd)
+    {
+      return promptForSSHPassword(parent, profile);
+    }
     return true;
+  }
+
+  private static boolean needsSSHPwdPrompt(ConnectionProfile profile)
+  {
+    SshConfig config = profile.getSshConfig();
+    if (config == null) return false;
+    if (config.getPrivateKeyFile() != null)
+    {
+      String passphrase = ConnectionMgr.getInstance().getSshManager().getPassphrase(config);
+      if (passphrase != null)
+      {
+        config.setTemporaryPassword(passphrase);
+        return true;
+      }
+    }
+    return StringUtil.isBlank(config.getPassword());
   }
 
   public static boolean promptUsername(Window parent, ConnectionProfile profile)
@@ -83,6 +114,29 @@ public class ConnectionGuiHelper
     String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
     if (StringUtil.isEmptyString(pwd)) return false;
     profile.setPassword(pwd);
+    return true;
+  }
+
+  public static boolean promptForSSHPassword(Window parent, ConnectionProfile profile)
+  {
+    if (profile == null) return false;
+    SshConfig config = profile.getSshConfig();
+    if (config == null) return true;
+
+    String key;
+
+    if (config.getPrivateKeyFile() == null)
+    {
+      key = "MsgInputSshPwd";
+    }
+    else
+    {
+      key = "MsgInputSshPassPhrase";
+    }
+
+    String pwd = WbSwingUtilities.getUserInputHidden(parent, key, "");
+    if (StringUtil.isEmptyString(pwd)) return false;
+    config.setTemporaryPassword(pwd);
     return true;
   }
 
