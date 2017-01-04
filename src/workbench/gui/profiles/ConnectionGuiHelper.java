@@ -27,17 +27,14 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import workbench.resource.ResourceMgr;
-import workbench.ssh.SshConfig;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FeedbackWindow;
 import workbench.gui.components.ValidatingDialog;
-
+import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -89,7 +86,7 @@ public class ConnectionGuiHelper
       if (passphrase != null)
       {
         config.setTemporaryPassword(passphrase);
-        return true;
+        return false;
       }
     }
     return StringUtil.isBlank(config.getPassword());
@@ -134,7 +131,7 @@ public class ConnectionGuiHelper
       key = "MsgInputSshPassPhrase";
     }
 
-    String pwd = WbSwingUtilities.getUserInputHidden(parent, key, "");
+    String pwd = WbSwingUtilities.getUserInputHidden(parent, ResourceMgr.getString(key), "");
     if (StringUtil.isEmptyString(pwd)) return false;
     config.setTemporaryPassword(pwd);
     return true;
