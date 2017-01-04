@@ -23,11 +23,11 @@ package workbench.ssh;
 import java.io.File;
 import java.util.Properties;
 
-import workbench.log.LogMgr;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import workbench.log.LogMgr;
 
 /**
  *
@@ -45,14 +45,15 @@ public class PortForwarder
   private Session session;
   private int localPort;
 
-  public PortForwarder(String sshHost, String sshUser, String password)
+  public PortForwarder(SshConfig config)
   {
-    this.sshHost = sshHost;
-    this.sshUser = sshUser;
-    this.password = password;
+    this.sshHost = config.getHostname();
+    this.sshUser = config.getUsername();
+    this.password = config.getPassword();
+    setPrivateKeyFile(config.getPrivateKeyFile());
   }
 
-  public void setPrivateKeyFile(String keyFile)
+  private void setPrivateKeyFile(String keyFile)
   {
     this.privateKeyFile = null;
     if (keyFile != null)

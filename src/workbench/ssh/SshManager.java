@@ -23,10 +23,8 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-
 import workbench.db.ConnectionProfile;
-
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -87,7 +85,7 @@ public class SshManager
       Entry e = activeSessions.get(key);
       if (e == null)
       {
-        e = new Entry(new PortForwarder(config.getHostname(), config.getHostname(), config.getPassword()));
+        e = new Entry(new PortForwarder(config));
         forwarder = e.fwd;
         e.usageCount = 1;
         activeSessions.put(key, e);
