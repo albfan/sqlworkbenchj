@@ -23,11 +23,11 @@ package workbench.ssh;
 import java.io.File;
 import java.util.Properties;
 
-import workbench.log.LogMgr;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import workbench.log.LogMgr;
 
 /**
  *
@@ -65,7 +65,7 @@ public class PortForwarder
       }
     }
   }
-  
+
   /**
    * Forwards a local port to a remote port.
    *
@@ -89,7 +89,7 @@ public class PortForwarder
    *
    * @return the local port  used for forwarding
    */
-  public int startForwarding(String remoteDbServer, int remoteDbPort, int localPortToUse, int sshPort)
+  public synchronized int startForwarding(String remoteDbServer, int remoteDbPort, int localPortToUse, int sshPort)
     throws JSchException
   {
     Properties props = new Properties();
@@ -122,7 +122,7 @@ public class PortForwarder
   }
 
 
-  public boolean isConnected()
+  public synchronized boolean isConnected()
   {
     return session != null && session.isConnected();
   }
@@ -132,9 +132,9 @@ public class PortForwarder
     return localPort;
   }
 
-  public void close()
+  public synchronized void close()
   {
-    if (session != null && session.isConnected())
+    if (isConnected())
     {
       LogMgr.logDebug("PortForwarder.close()", "Disconnecting ssh session to host: " + session.getHost());
       session.disconnect();

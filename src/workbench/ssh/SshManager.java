@@ -23,10 +23,8 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-
 import workbench.db.ConnectionProfile;
-
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -43,6 +41,7 @@ public class SshManager
     throws SshException
   {
     SshConfig config = profile.getSshConfig();
+    if (config == null) return profile.getUrl();
 
     try
     {
@@ -60,6 +59,9 @@ public class SshManager
       if (forwarder.isConnected() == false)
       {
         localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort, config.getSshPort());
+
+        // If the connection was successfull remember the passphrase for a private key file
+        // so the user is not asked multiple times for the same keystore.
         if (config.getPrivateKeyFile() != null && config.hasTemporaryPassword())
         {
           passphrases.put(config.getPrivateKeyFile(), config.getPassword());
