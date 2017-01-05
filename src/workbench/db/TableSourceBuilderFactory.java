@@ -24,6 +24,7 @@
 package workbench.db;
 
 import workbench.db.derby.DerbyTableSourceBuilder;
+import workbench.db.exasol.ExasolTableSourceBuilder;
 import workbench.db.firebird.FirebirdTableSourceBuilder;
 import workbench.db.h2database.H2TableSourceBuilder;
 import workbench.db.hana.HanaTableSourceBuilder;
@@ -88,6 +89,10 @@ public class TableSourceBuilderFactory
     if (con.getDbId().equals(DbMetadata.DBID_HANA))
     {
       return new HanaTableSourceBuilder(con);
+    }
+    if (con.getDbId().equals(DbMetadata.DBID_EXASOL))
+    {
+      return new ExasolTableSourceBuilder(con);
     }
     return new TableSourceBuilder(con);
   }

@@ -1018,15 +1018,11 @@ public class ColumnIdentifier
    */
   public static void sortByPosition(List<ColumnIdentifier> columnList)
   {
-    Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()
+    Comparator<ColumnIdentifier> c = (ColumnIdentifier o1, ColumnIdentifier o2) ->
     {
-      @Override
-      public int compare(ColumnIdentifier o1, ColumnIdentifier o2)
-      {
-        int pos1 = o1.getPosition();
-        int pos2 = o2.getPosition();
-        return pos1 - pos2;
-      }
+      int pos1 = o1.getPosition();
+      int pos2 = o2.getPosition();
+      return pos1 - pos2;
     };
     Collections.sort(columnList, c);
   }
