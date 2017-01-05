@@ -415,6 +415,7 @@ public class InputHandler
 	@Override
 	public void keyReleased(KeyEvent evt)
 	{
+    resetStatus();
 	}
 
 	public List<KeyStroke> getKeys(JMenu menu)

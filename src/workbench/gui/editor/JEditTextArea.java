@@ -2630,10 +2630,6 @@ public class JEditTextArea
 			{
 				LogMgr.logError("JEditTextArea.paste()", "Could not get string data from clipboard", th);
 			}
-
-      // This seems to be necessary for MacOS in order to make sure not "pending"
-      // control keys are registered in the InputHandler
-      inputHandler.resetStatus();
 		}
 	}
 
