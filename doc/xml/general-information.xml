@@ -129,7 +129,7 @@
     </section>
 
     <section id="jsh-licencse">
-      <title>JSch - Java Secure Chanell</title>
+      <title>JSch - Java Secure Chanel</title>
       <para>
         &wb-productname; includes the <ulink url="http://www.jcraft.com/jsch/">JSch</ulink> library to support SSH tunneling.
       </para>
