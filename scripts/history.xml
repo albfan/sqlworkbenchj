@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2016-12-14">
+    <entry dev-build="5" type="enh">Added basic support for EXAsol</entry>
     <entry dev-build="5" type="enh">Support for SSH tunneling is now available</entry>
     <entry dev-build="5" type="enh">When loading a SQL script it's now possible to automatically detect the encoding</entry>
     <entry dev-build="4" type="enh">It's now possible filter the output of WbVarList</entry>
