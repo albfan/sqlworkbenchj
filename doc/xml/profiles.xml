@@ -752,7 +752,133 @@
 
   <section id="profile-ssh">
     <title>Connecting through a SSH tunnel</title>
-    <para>Lorem ipsum.</para>
+    <indexterm><primary>Connection profile</primary><secondary>Configure SSH tunnel</secondary></indexterm>
+    <indexterm><primary>SSH Tunnel</primary><secondary>Setup</secondary></indexterm>
+    <para>
+      It is possible to setup a SSH tunnel to be used to connect to a database server that is not
+      directly reachable (without using a external tool like Putty to create the tunnel).
+    </para>
+    <para>
+      The configure a SSH tunnel click on the <guibutton>SSH</guibutton> button in the connection profile. The configuration
+      of the SSH tunnel consists of three parts:
+      <itemizedlist>
+        <listitem><simpara>Login information for the computer from which the database server can be reached</simpara></listitem>
+        <listitem><simpara>The mapping definition of a local port to the remote port of the database server</simpara></listitem>
+        <listitem><simpara>Rewriting the JDBC URL to make the driver connect to "localhost" and the local port established by the SSH tunnel</simpara></listitem>
+      </itemizedlist>
+    </para>
+    <section id="ssh-remote-login">
+      <title>Configure the remote login</title>
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1"/>
+          <colspec colname="c2" />
+          <thead valign="top">
+            <row>
+              <entry>Option</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry>SSH Hostname</entry>
+              <entry>This is the remote computer that is used to establish the SSH connection and from which the remote database server is reachable</entry>
+            </row>
+            <row>
+              <entry>SSH Port</entry>
+              <entry>The port for the SSH connection. If this is empty the default port 22 is used.</entry>
+            </row>
+            <row>
+              <entry>Username</entry>
+              <entry>The username on the SSH host to be used for the login.</entry>
+            </row>
+            <row>
+              <entry>Private key file</entry>
+              <entry>If the SSH host is configured to use authentication through a SSH key file, the path to the key file can be entered here</entry>
+            </row>
+            <row>
+              <entry>Password</entry>
+              <entry>
+                <para>This is either the password for the remote user login, or if a private key file is specified the passphrase
+                for that key file. If no password is provided, you will be prompted to enter one when connecting. </para>
+                <para>If a password is entered, it is <emphasis role="bold">always</emphasis> stored in the profile.</para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </section>
+
+    <section id="ssh-tunnel-config">
+      <title>Configure the tunnel</title>
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1"/>
+          <colspec colname="c2" />
+          <thead valign="top">
+            <row>
+              <entry>Option</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry>Local port</entry>
+              <entry>
+                <para>The local port to be used for the tunnel. If this is empty a port will be chose automatically.</para>
+                <para>
+                  Automatically choosing a local port only works for certain JDBC drivers where the structure of the
+                  JDBC URL is know and can be automatically rewritten.
+                </para>
+              </entry>
+            </row>
+            <row>
+              <entry>DB Hostname</entry>
+              <entry>The hostname (or IP address) of the database server. This is the name as the SSH host sees the database server.</entry>
+            </row>
+            <row>
+              <entry>DB Port</entry>
+              <entry>The port of the database server.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+      <para>
+        If the option "Rewrite JDBC URL" is selected, &wb-productname; will try to adjust the JDBC URL of the
+        connection profile to reflect the SSH settings. This only works for the following JDBC drivers:
+        <itemizedlist>
+          <listitem><simpara>PostgreSQL</simpara></listitem>
+          <listitem><simpara>Oracle</simpara></listitem>
+          <listitem><simpara>Microsoft SQL Server using the Microsoft JDBC driver or the jTDS driver</simpara></listitem>
+          <listitem><simpara>MySQL</simpara></listitem>
+          <listitem><simpara>All drivers that use the format <literal>jdbc:xxxxx://servername:port/...</literal></simpara></listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        If rewriting the JDBC URL was not successful, a local port <emphasis role="bold">must</emphasis> be specified
+        in the SSH configuration and the JDBC URL must be changed manually to use that port.
+      </para>
+      <para>
+        If no local port was given, the URL will contain the port 0 (zero) which will be replaced with the actual
+        port that was chosen when the SSH tunnel is established.
+      </para>
+      <para>
+        Setting up the SSH tunnel is essentially the same as manually creating a SSH tunnel using:
+<programlisting>ssh -p [SSHPort] -L[LocalPort]:[DB Hostname]:[DB Port] [SSH User]@[SSH Host]</programlisting>
+on the commandline and then changing the JDBC URL to use <literal>localhost</literal> and the local port.
+      </para>
+    </section>
+
+    <important>
+      <para id="ssh-keyfile-encryption">
+        <indexterm><primary>Problems</primary><secondary>Cipher not available</secondary></indexterm>
+        If you use a private key file with a strong encryption you might need to enable your Java installation
+        to use that encryption. To do this, download the JCE extension for strong encryption from
+        <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html"/> and
+        install it into your Java runtime.
+      </para>
+    </important>
+
   </section>
 
 	<section id="oracle-sysdba-connection">
