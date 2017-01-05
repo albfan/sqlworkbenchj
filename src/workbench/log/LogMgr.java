@@ -164,7 +164,11 @@ public class LogMgr
 	public static void logUserSqlError(Object caller, String sql, Throwable th)
 	{
 		String logMsg = "Error executing:\n" + sql + "\n  ";
-		if (th instanceof SQLException && !getLogger().levelEnabled(LogLevel.debug))
+    if (th instanceof java.sql.SQLFeatureNotSupportedException)
+    {
+      logError(caller, logMsg, th);
+    }
+    else if (th instanceof SQLException && !getLogger().levelEnabled(LogLevel.debug))
 		{
 			logMsg += ExceptionUtil.getDisplay(th);
 			logError(caller, logMsg, null);
