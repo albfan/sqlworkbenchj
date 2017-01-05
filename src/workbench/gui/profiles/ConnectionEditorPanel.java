@@ -66,6 +66,7 @@ import workbench.log.LogMgr;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.ssh.SshConfig;
 import workbench.ssh.UrlParser;
 
 import workbench.db.ConnectionMgr;
@@ -1231,19 +1232,31 @@ public class ConnectionEditorPanel
     ConnectionProfile profile = getProfile();
 
     SshConfigPanel editor = new SshConfigPanel();
-    editor.setConfig(profile.getSshConfig(), UrlParser.canRewriteURL(profile.getUrl()));
+    editor.setConfig(profile.getSshConfig(), tfURL.getText());
     Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
     ValidatingDialog dialog = ValidatingDialog.createDialog(d, editor, "SSH Configuration", null, 0, false);
 
-    if (!Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.edit.profile.ssh"))
+    String settingsId = "workbench.gui.edit.profile.ssh";
+    if (!Settings.getInstance().restoreWindowSize(dialog, settingsId))
     {
-      dialog.setSize(400, 300);
+      dialog.pack();
+      dialog.setSize((int)(dialog.getWidth() * 1.5), (int)(dialog.getHeight() * 1.1));
     }
+    WbSwingUtilities.center(dialog, d);
     dialog.setVisible(true);
+
+    Settings.getInstance().storeWindowSize(dialog, settingsId);
 
 		if (!dialog.isCancelled())
 		{
-      profile.setSshConfig(editor.getConfig());
+      SshConfig config = editor.getConfig();
+      profile.setSshConfig(config);
+      if (config != null && editor.rewriteURL())
+      {
+        UrlParser parser = new UrlParser(profile.getUrl());
+        String newUrl = parser.getLocalUrl(config.getLocalPort());
+        this.tfURL.setText(newUrl);
+      }
 		}
   }//GEN-LAST:event_sshConfigActionPerformed
 

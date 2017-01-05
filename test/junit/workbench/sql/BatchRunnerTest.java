@@ -312,7 +312,6 @@ public class BatchRunnerTest
     assertEquals("somehost", config.getHostname());
     assertEquals("arthur", config.getUsername());
     assertEquals("supersecret", config.getPassword());
-    assertTrue(config.getRewriteURL());
     assertNull(config.getPrivateKeyFile());
 
     String baseDir = getTestUtil().getBaseDir();
@@ -320,7 +319,7 @@ public class BatchRunnerTest
     TestUtil.writeFile(pk, "dummy content");
 
 		cmdline.parse(
-      "-sshHost=somehost -sshUser=arthur -sshPassword=supersecret -sshRewriteURL=false " +
+      "-sshHost=somehost -sshUser=arthur -sshPassword=supersecret " +
       "-sshPrivateKey='" + pk.getFullPath() + "' " +
       "-sshLocalPort=12345 -sshPort=42 " +
       "-url=jdbc:postgres://localhost/test -username=test -password=topsecret " +
@@ -331,7 +330,6 @@ public class BatchRunnerTest
     assertEquals("somehost", config.getHostname());
     assertEquals("arthur", config.getUsername());
     assertEquals("supersecret", config.getPassword());
-    assertFalse(config.getRewriteURL());
     assertEquals(pk.getFullPath(), config.getPrivateKeyFile());
     assertEquals(12345, config.getLocalPort());
     assertEquals(42, config.getSshPort());

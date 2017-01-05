@@ -20,12 +20,6 @@
  */
 package workbench.ssh;
 
-import java.util.Set;
-
-import workbench.db.DbMetadata;
-import workbench.db.JdbcUtils;
-
-import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -34,21 +28,12 @@ import workbench.util.StringUtil;
  */
 public class UrlParser
 {
-  private static Set<String> rewriteSupport = CollectionUtil.caseInsensitiveSet(
-    DbMetadata.DBID_PG,
-    DbMetadata.DBID_ORA,
-    DbMetadata.DBID_MS,
-    DbMetadata.DBID_MYSQL,
-    DbMetadata.DBID_FIREBIRD,
-    DbMetadata.DBID_DB2_LUW,
-    DbMetadata.DBID_VERTICA);
-
   // Stores JDBC URL prefixes that have more then elements in the "protocol" part of the URL
   private static final String LOCAL_IP = "127.0.0.1";
 
   private final String originalUrl;
-  private int remotePort = -1;
-  private String remoteServer;
+  private int dbPort = -1;
+  private String dbHostname;
 
   public UrlParser(String url)
   {
@@ -58,35 +43,33 @@ public class UrlParser
     getLocalUrl(LOCAL_IP, 0);
   }
 
-  public static boolean canRewriteURL(String url)
-  {
-    if (url == null) return false;
-    String dbId = JdbcUtils.getDbIdFromUrl(url);
-    return rewriteSupport.contains(dbId);
-  }
-
   public String getLocalUrl(int localPort)
   {
     return getLocalUrl(LOCAL_IP, localPort);
   }
 
+  public boolean isLocalURL()
+  {
+    return isLocalhost(dbHostname);
+  }
+
   public String getDatabaseServer()
   {
-    return remoteServer;
+    return dbHostname;
   }
 
   public boolean isDefaultPort()
   {
-    return remotePort < 0;
+    return dbPort < 0;
   }
 
   public int getDatabasePort()
   {
-    if (remotePort < 0)
+    if (dbPort < 0)
     {
       return getDefaultPort();
     }
-    return remotePort;
+    return dbPort;
   }
 
   private String getLocalUrl(String localHost, int localPort)
@@ -139,12 +122,12 @@ public class UrlParser
     if (colon > 0)
     {
       String port = hostAndPort.substring(colon + 1);
-      remoteServer = hostAndPort.substring(serverStart.length(), colon);
-      remotePort = StringUtil.getIntValue(port, -1);
+      dbHostname = hostAndPort.substring(serverStart.length(), colon);
+      dbPort = StringUtil.getIntValue(port, -1);
     }
     else
     {
-      remoteServer = hostAndPort.substring(serverStart.length());
+      dbHostname = hostAndPort.substring(serverStart.length());
     }
 
     String newUrl = originalUrl.substring(0, hostStart + serverStart.length());
@@ -166,13 +149,13 @@ public class UrlParser
       return originalUrl;
     }
 
-    remoteServer = originalUrl.substring(hostStart + 1, firstColon);
+    dbHostname = originalUrl.substring(hostStart + 1, firstColon);
     int secondColon = originalUrl.indexOf(':', firstColon + 1);
     if (secondColon > -1)
     {
       sidStart = secondColon;
       String port = originalUrl.substring(firstColon + 1, secondColon);
-      remotePort = StringUtil.getIntValue(port, -1);
+      dbPort = StringUtil.getIntValue(port, -1);
     }
 
     return originalUrl.substring(0, hostStart + 1) + host + ":" + localPort + originalUrl.substring(sidStart);
@@ -204,6 +187,12 @@ public class UrlParser
       return 1433;
     }
     return -1;
-
   }
+
+  private boolean isLocalhost(String host)
+  {
+    if (host == null) return false;
+    return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
+  }
+
 }

@@ -1181,7 +1181,7 @@ public class BatchRunner
   {
     return createCmdLineProfile(cmdLine, null, null, true);
   }
-  
+
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, boolean checkDriver)
   {
     return createCmdLineProfile(cmdLine, null, null, checkDriver);
@@ -1346,6 +1346,8 @@ public class BatchRunner
     String sshKeyfile = cmdLine.getValue(AppArguments.ARG_CONN_SSH_KEYFILE);
     String sshLocalPort = cmdLine.getValue(AppArguments.ARG_CONN_SSH_LOCAL_PORT);
     String sshPort = cmdLine.getValue(AppArguments.ARG_CONN_SSH_PORT);
+    String dbPort = cmdLine.getValue(AppArguments.ARG_CONN_SSH_DB_PORT);
+    String dbHost = cmdLine.getValue(AppArguments.ARG_CONN_SSH_DB_HOST);
 
     if (sshHost != null && sshUser != null)
     {
@@ -1354,9 +1356,10 @@ public class BatchRunner
       config.setHostname(sshHost);
       config.setPassword(sshPwd);
       config.setPrivateKeyFile(sshKeyfile);
-      config.setRewriteURL(cmdLine.getBoolean(AppArguments.ARG_CONN_SSH_REWRITE_URL, false));
       config.setLocalPort(StringUtil.getIntValue(sshLocalPort, 0));
       config.setSshPort(StringUtil.getIntValue(sshPort, 0));
+      config.setDbPort(StringUtil.getIntValue(dbPort,0));
+      config.setDbHostname(dbHost);
       return config;
     }
 

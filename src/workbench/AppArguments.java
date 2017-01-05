@@ -69,8 +69,9 @@ public class AppArguments
   public static final String ARG_CONN_SSH_USER = "sshUser";
   public static final String ARG_CONN_SSH_KEYFILE = "sshPrivateKey";
   public static final String ARG_CONN_SSH_PWD = "sshPassword";
-  public static final String ARG_CONN_SSH_REWRITE_URL = "sshRewriteURL";
   public static final String ARG_CONN_SSH_LOCAL_PORT = "sshLocalPort";
+  public static final String ARG_CONN_SSH_DB_PORT = "sshDBPort";
+  public static final String ARG_CONN_SSH_DB_HOST = "sshDBHost";
   public static final String ARG_CONN_SSH_PORT = "sshPort";
   public static final String ARG_CONN_SEPARATE = "separateConnection";
   public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
@@ -164,8 +165,9 @@ public class AppArguments
 		addArgument(ARG_CONN_SSH_KEYFILE, ArgumentType.Filename);
 		addArgument(ARG_CONN_SSH_PWD);
 		addArgument(ARG_CONN_SSH_USER);
-		addArgument(ARG_CONN_SSH_REWRITE_URL, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_SSH_LOCAL_PORT);
+		addArgument(ARG_CONN_SSH_DB_PORT);
+		addArgument(ARG_CONN_SSH_DB_HOST);
 		addArgument(ARG_CONN_SSH_PORT);
 
     addArgument(ARG_SHOW_PUMPER, ArgumentType.BoolArgument);

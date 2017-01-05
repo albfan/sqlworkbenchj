@@ -85,7 +85,8 @@ public class ConnectionDescriptor
     String sshKeyfile = null;
     String sshLocalPort = null;
     String sshPort = null;
-    String sshRewriteURL = null;
+    String sshDbHost = null;
+    String sshDbPort = null;
 
 		for (String element : elements)
 		{
@@ -130,13 +131,17 @@ public class ConnectionDescriptor
       {
         sshPwd = getValue(element);
       }
-      if (isParameter(element, AppArguments.ARG_CONN_SSH_REWRITE_URL))
-      {
-        sshRewriteURL = getValue(element);
-      }
       if (isParameter(element, AppArguments.ARG_CONN_SSH_LOCAL_PORT))
       {
         sshLocalPort = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_DB_PORT))
+      {
+        sshDbPort = getValue(element);
+      }
+      if (isParameter(element, AppArguments.ARG_CONN_SSH_DB_HOST))
+      {
+        sshDbHost = getValue(element);
       }
       if (isParameter(element, AppArguments.ARG_CONN_SSH_PORT))
       {
@@ -206,10 +211,11 @@ public class ConnectionDescriptor
     {
       SshConfig config = new SshConfig();
       config.setUsername(sshUser);
+      config.setDbHostname(sshDbHost);
+      config.setDbPort(StringUtil.getIntValue(sshDbPort,0));
       config.setHostname(sshHost);
       config.setPassword(sshPwd);
       config.setPrivateKeyFile(sshKeyfile);
-      config.setRewriteURL(StringUtil.stringToBool(sshRewriteURL));
       config.setLocalPort(StringUtil.getIntValue(sshLocalPort, 0));
       config.setSshPort(StringUtil.getIntValue(sshPort, 0));
       result.setSshConfig(config);

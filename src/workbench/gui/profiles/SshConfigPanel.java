@@ -28,10 +28,12 @@ import java.awt.Insets;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import workbench.resource.ResourceMgr;
 import workbench.ssh.SshConfig;
+import workbench.ssh.UrlParser;
 
 import workbench.gui.components.WbFilePicker;
 
@@ -53,12 +55,14 @@ public class SshConfigPanel
     keyPassFile.setToolTipText(labelKeyPass.getToolTipText());
   }
 
-  public void setConfig(SshConfig config, boolean allowURLRewrite)
+  public void setConfig(SshConfig config, String url)
   {
     clear();
+
     if (config != null)
     {
       hostname.setText(StringUtil.coalesce(config.getHostname(), ""));
+      dbHostname.setText(StringUtil.coalesce(config.getDbHostname(), ""));
       username.setText(StringUtil.coalesce(config.getUsername(), ""));
       password.setText(StringUtil.coalesce(config.getPassword(), ""));
       keyPassFile.setFilename(config.getPrivateKeyFile());
@@ -74,16 +78,18 @@ public class SshConfigPanel
       {
         sshPort.setText(Integer.toString(port));
       }
-      
-      if (allowURLRewrite)
+
+      int dbPortNr = config.getDbPort();
+      if (dbPortNr > 0)
       {
-        rewriteUrl.setSelected(config.getRewriteURL());
+        dbPort.setText(Integer.toString(dbPortNr));
       }
-      else
-      {
-        rewriteUrl.setEnabled(false);
-        rewriteUrl.setSelected(false);
-      }
+    }
+
+    UrlParser parser = new UrlParser(url);
+    if (parser.isLocalURL() == false)
+    {
+      rewriteUrl.setSelected(true);
     }
   }
 
@@ -91,6 +97,8 @@ public class SshConfigPanel
   {
     keyPassFile.setFilename("");
     hostname.setText("");
+    dbPort.setText("");
+    dbHostname.setText("");
     username.setText("");
     password.setText("");
     localPort.setText("");
@@ -98,15 +106,20 @@ public class SshConfigPanel
     rewriteUrl.setSelected(false);
   }
 
+  public boolean rewriteURL()
+  {
+    return rewriteUrl.isSelected();
+  }
+
   public SshConfig getConfig()
   {
-    String host = hostname.getText();
-    String user = username.getText();
-    String localPortNr = localPort.getText();
-    String portText = sshPort.getText();
+    String host = StringUtil.trimToNull(hostname.getText());
+    String user = StringUtil.trimToNull(username.getText());
+    String localPortNr = StringUtil.trimToNull(localPort.getText());
+    String portText = StringUtil.trimToNull(sshPort.getText());
     String pwd = password.getText();
 
-    if (StringUtil.isBlank(host) && StringUtil.isBlank(user) && StringUtil.isBlank(localPortNr) && StringUtil.isBlank(pwd))
+    if (host == null && user == null)
     {
       return null;
     }
@@ -115,10 +128,11 @@ public class SshConfigPanel
     config.setHostname(host);
     config.setUsername(user);
     config.setPassword(pwd);
-    config.setRewriteURL(rewriteUrl.isSelected());
     config.setLocalPort(StringUtil.getIntValue(localPortNr, 0));
     config.setSshPort(StringUtil.getIntValue(portText, 0));
     config.setPrivateKeyFile(StringUtil.trimToNull(keyPassFile.getFilename()));
+    config.setDbHostname(StringUtil.trimToNull(dbHostname.getText()));
+    config.setDbPort(StringUtil.getIntValue(dbPort.getText(), 0));
     return config;
   }
 
@@ -139,13 +153,18 @@ public class SshConfigPanel
     username = new JTextField();
     labelPassword = new JLabel();
     password = new JPasswordField();
-    rewriteUrl = new JCheckBox();
     labelLocalPort = new JLabel();
     localPort = new JTextField();
     labelSshPort = new JLabel();
     sshPort = new JTextField();
     keyPassFile = new WbFilePicker();
     labelKeyPass = new JLabel();
+    labelDbPort = new JLabel();
+    labelDbHostname = new JLabel();
+    dbHostname = new JTextField();
+    dbPort = new JTextField();
+    jSeparator1 = new JSeparator();
+    rewriteUrl = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -202,24 +221,12 @@ public class SshConfigPanel
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
     add(password, gridBagConstraints);
 
-    rewriteUrl.setText(ResourceMgr.getString("LblSshRewriteUrl")); // NOI18N
-    rewriteUrl.setToolTipText(ResourceMgr.getString("d_LblSshRewriteUrl")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(4, 1, 0, 0);
-    add(rewriteUrl, gridBagConstraints);
-
     labelLocalPort.setLabelFor(localPort);
     labelLocalPort.setText(ResourceMgr.getString("LblSshLocalPort")); // NOI18N
     labelLocalPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelLocalPort, gridBagConstraints);
@@ -227,7 +234,7 @@ public class SshConfigPanel
     localPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
@@ -267,12 +274,75 @@ public class SshConfigPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelKeyPass, gridBagConstraints);
+
+    labelDbPort.setLabelFor(dbHostname);
+    labelDbPort.setText(ResourceMgr.getString("LblSshDbHostname")); // NOI18N
+    labelDbPort.setToolTipText(ResourceMgr.getString("d_LblSshDbHostname")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
+    add(labelDbPort, gridBagConstraints);
+
+    labelDbHostname.setLabelFor(dbPort);
+    labelDbHostname.setText(ResourceMgr.getString("LblSshDbPort")); // NOI18N
+    labelDbHostname.setToolTipText(ResourceMgr.getString("d_LblSshDbPort")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
+    add(labelDbHostname, gridBagConstraints);
+
+    dbHostname.setToolTipText(ResourceMgr.getString("d_LblSshDbHostname")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 11);
+    add(dbHostname, gridBagConstraints);
+
+    dbPort.setToolTipText(ResourceMgr.getString("d_LblSshDbPort")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 11);
+    add(dbPort, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(8, 5, 5, 11);
+    add(jSeparator1, gridBagConstraints);
+
+    rewriteUrl.setSelected(true);
+    rewriteUrl.setText(ResourceMgr.getString("LblSshRewriteUrl")); // NOI18N
+    rewriteUrl.setToolTipText(ResourceMgr.getString("d_LblSshRewriteUrl")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(7, 1, 0, 0);
+    add(rewriteUrl, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JTextField dbHostname;
+  private JTextField dbPort;
   private JTextField hostname;
+  private JSeparator jSeparator1;
   private WbFilePicker keyPassFile;
+  private JLabel labelDbHostname;
+  private JLabel labelDbPort;
   private JLabel labelHost;
   private JLabel labelKeyPass;
   private JLabel labelLocalPort;

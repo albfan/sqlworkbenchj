@@ -56,7 +56,17 @@ import javax.swing.text.Segment;
 import javax.swing.text.Utilities;
 
 import workbench.WbManager;
+import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.EditorStatusbar;
+import workbench.interfaces.TextChangeListener;
+import workbench.interfaces.TextSelectionListener;
+import workbench.interfaces.Undoable;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
+
 import workbench.db.QuoteHandler;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
@@ -68,14 +78,7 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
 import workbench.gui.menu.TextPopup;
-import workbench.interfaces.ClipboardSupport;
-import workbench.interfaces.EditorStatusbar;
-import workbench.interfaces.TextChangeListener;
-import workbench.interfaces.TextSelectionListener;
-import workbench.interfaces.Undoable;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.Settings;
+
 import workbench.util.MemoryWatcher;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -2627,6 +2630,10 @@ public class JEditTextArea
 			{
 				LogMgr.logError("JEditTextArea.paste()", "Could not get string data from clipboard", th);
 			}
+
+      // This seems to be necessary for MacOS in order to make sure not "pending"
+      // control keys are registered in the InputHandler
+      inputHandler.resetStatus();
 		}
 	}
 

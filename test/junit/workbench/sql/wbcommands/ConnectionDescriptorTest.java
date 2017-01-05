@@ -91,7 +91,6 @@ public class ConnectionDescriptorTest
     assertEquals(44, config.getSshPort());
     assertEquals("supersecret", config.getPassword());
     assertNull(config.getPrivateKeyFile());
-    assertFalse(config.getRewriteURL());
 
     String baseDir = getTestUtil().getBaseDir();
     WbFile pk = new WbFile(baseDir, "private.ppk");
@@ -99,12 +98,11 @@ public class ConnectionDescriptorTest
 
     profile = def.parseDefinition("username=Arthur, url=jdbc:somedb:someparameter, password=MyPassword, driverjar=xyz.jar, driver=com.foobar.Driver, " +
       "sshHost=somehost, sshUser=ford, sshLocalPort=56789, sshPort=44, sshPrivateKey='" + pk.getFullPath() + "', " +
-      "sshPassword=supersecret, sshRewriteURL=true", null);
+      "sshPassword=supersecret", null);
     assertNotNull(profile);
     config = profile.getSshConfig();
     assertNotNull(config);
     assertEquals(pk.getFullPath(), config.getPrivateKeyFile());
-    assertTrue(config.getRewriteURL());
   }
 
 }

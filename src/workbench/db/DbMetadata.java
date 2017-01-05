@@ -126,6 +126,7 @@ public class DbMetadata
   public static final String DBID_HANA = "hdb";
   public static final String DBID_CUBRID = "cubrid";
   public static final String DBID_INFORMIX = "informix_dynamic_server";
+  public static final String DBID_EXASOL = "exasolution";
 
   public static final String MVIEW_NAME = "MATERIALIZED VIEW";
   private final String[] EMPTY_STRING_ARRAY = new String[]{};

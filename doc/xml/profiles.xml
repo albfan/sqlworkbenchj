@@ -750,11 +750,16 @@
 
   </section>
 
+  <section id="profile-ssh">
+    <title>Connecting through a SSH tunnel</title>
+    <para>Lorem ipsum.</para>
+  </section>
+
 	<section id="oracle-sysdba-connection">
 		<title>Connect to Oracle with SYSDBA privilege</title>
 		<para>
 			Connecting to Oracle with SYSDBA privilege can be done by checking the option <literal>as SYSDBA</literal> next to the username.
-      when using this option, you have to use an Oracle user account that is allowed to connect as SYSDBA (e.g. SYS).
+      When using this option, you have to use an Oracle user account that is allowed to connect as SYSDBA (e.g. <literal>SYS</literal>).
 		</para>
 	</section>
 

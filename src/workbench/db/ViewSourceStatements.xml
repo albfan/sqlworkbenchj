@@ -561,5 +561,20 @@ FROM _SYSTEM.SYS_TABLES
    </object>
   </void>
 
+ <void method="put">
+   <string>EXASolution</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select view_text from exa_all_views</string>
+    </void>
+    <void property="objectNameField">
+     <string>VIEW_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>VIEW_SCHEMA</string>
+    </void>
+   </object>
+  </void>
+
  </object>
 </java>

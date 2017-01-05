@@ -24,6 +24,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Collection;
 
 import workbench.WbManager;
 import workbench.console.ConsoleSettings;
@@ -35,6 +36,7 @@ import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 
 /**
@@ -60,7 +62,8 @@ import workbench.util.ExceptionUtil;
 public class WbDescribeObject
 	extends SqlCommand
 {
-	public static final String VERB = "DESC";
+	public static final String VERB = "WbDescribe";
+	public static final String VERB_SHORT = "DESC";
 	public static final String VERB_LONG = "DESCRIBE";
 	public static final String ARG_DEPEND = "dependencies";
 	public static final String ARG_OBJECT = "object";
@@ -73,6 +76,12 @@ public class WbDescribeObject
 		cmdLine.addArgument(ARG_DEPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_OBJECT, ArgumentType.TableArgument);
 	}
+
+  @Override
+  public Collection<String> getAllVerbs()
+  {
+    return CollectionUtil.arrayList(VERB, VERB_SHORT, VERB_LONG);
+  }
 
 	@Override
 	public String getVerb()

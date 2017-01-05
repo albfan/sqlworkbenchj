@@ -428,5 +428,20 @@ WHERE P.procid = B.procid
     </object>
   </void>
 
+  <void method="put">
+   <string>EXASolution</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>select function_text from EXA_ALL_FUNCTIONS</string>
+      </void>
+      <void property="objectNameField">
+        <string>function_name</string>
+      </void>
+      <void property="schemaField">
+        <string>function_schema</string>
+      </void>
+    </object>
+  </void>
+
  </object>
 </java>

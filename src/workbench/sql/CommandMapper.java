@@ -411,7 +411,6 @@ public class CommandMapper
 			{
 				passThrough.add(v);
 			}
-
 		}
 
 		// this is stored in an instance variable for performance

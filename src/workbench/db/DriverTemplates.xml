@@ -440,6 +440,23 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
+     <string>com.exasol.jdbc.EXADriver</string>
+    </void>
+    <void property="library">
+     <string>exajdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>EXASolution</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:exa:hostname:8563</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
      <string>net.ucanaccess.jdbc.UcanaccessDriver</string>
     </void>
     <void property="libraryList">

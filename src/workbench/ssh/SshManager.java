@@ -23,8 +23,10 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.db.ConnectionProfile;
 import workbench.log.LogMgr;
+
+import workbench.db.ConnectionProfile;
+
 import workbench.util.StringUtil;
 
 /**
@@ -49,16 +51,10 @@ public class SshManager
       String urlToUse = profile.getUrl();
       UrlParser parser = new UrlParser(urlToUse);
 
-      // if no local port is used, we assume the JDBC URL is configure to use port forwarding
-      if (localPort <= 0 && !config.getRewriteURL() && isLocalhost(parser.getDatabaseServer()))
-      {
-        localPort = parser.getDatabasePort();
-      }
-
       PortForwarder forwarder = getForwarder(config);
       if (forwarder.isConnected() == false)
       {
-        localPort = forwarder.startForwarding(parser.getDatabaseServer(), parser.getDatabasePort(), localPort, config.getSshPort());
+        localPort = forwarder.startForwarding(config.getDbHostname(), config.getDbPort(), localPort, config.getSshPort());
 
         // If the connection was successfull remember the passphrase for a private key file
         // so the user is not asked multiple times for the same keystore.
@@ -72,7 +68,7 @@ public class SshManager
         localPort = forwarder.getLocalPort();
       }
 
-      if (config.getRewriteURL())
+      if (config.getLocalPort() == 0)
       {
         urlToUse = parser.getLocalUrl(localPort);
       }
@@ -161,11 +157,6 @@ public class SshManager
   private String makeKey(String host, String user)
   {
     return StringUtil.coalesce(user, "<noname>") + "@" + host;
-  }
-
-  private boolean isLocalhost(String host)
-  {
-    return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
   }
 
   private static class Entry

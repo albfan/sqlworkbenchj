@@ -69,7 +69,8 @@ public class WbCreateProfile
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_KEYFILE, ArgumentType.Filename);
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_PWD);
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_USER);
-		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_REWRITE_URL, ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_DB_HOST);
+		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_DB_PORT);
 		cmdLine.addArgument("user");
 		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
 		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);

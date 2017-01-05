@@ -37,7 +37,8 @@ public class SshConfig
   private String username;
   private int localPort;
 
-  private boolean rewriteURL;
+  private int dbPort;
+  private String dbHostname;
 
   private String privateKeyFile;
 
@@ -155,21 +156,32 @@ public class SshConfig
     }
   }
 
-  /**
-   * Controls if the JDBC URL from the profile should automatically be re-written.
-   *
-   * If true, the database servername from the profile's JDBC URL will be rewritten
-   * to point to "localhost" and the port used for the SSH tunnel.
-   */
-  public boolean getRewriteURL()
+  public int getDbPort()
   {
-    return rewriteURL;
+    return dbPort;
   }
 
-  public void setRewriteURL(boolean doRewrite)
+  public void setDbPort(int port)
   {
-    this.changed = this.changed || this.rewriteURL != doRewrite;
-    this.rewriteURL = doRewrite;
+    if (port > 0 && port != dbPort)
+    {
+      changed = true;
+      dbPort = port;
+    }
+  }
+
+  public String getDbHostname()
+  {
+    return dbHostname;
+  }
+
+  public void setDbHostname(String hostname)
+  {
+    if (StringUtil.equalStringOrEmpty(dbHostname, hostname) == false)
+    {
+      this.changed = true;
+      this.dbHostname = hostname;
+    }
   }
 
   public boolean isValid()
@@ -193,9 +205,10 @@ public class SshConfig
     setHostname(config.getHostname());
     setUsername(config.getUsername());
     setPassword(config.getPassword());
-    setRewriteURL(config.getRewriteURL());
     setLocalPort(config.getLocalPort());
     setSshPort(config.getSshPort());
+    setDbHostname(config.getDbHostname());
+    setDbPort(config.getDbPort());
     setPrivateKeyFile(config.getPrivateKeyFile());
   }
 
@@ -205,11 +218,12 @@ public class SshConfig
     copy.localPort = this.localPort;
     copy.password = this.password;
     copy.privateKeyFile = this.privateKeyFile;
-    copy.rewriteURL = this.rewriteURL;
     copy.sshHost = this.sshHost;
     copy.sshPort = this.sshPort;
     copy.username = this.username;
     copy.changed = this.changed;
+    copy.dbPort = this.dbPort;
+    copy.dbHostname = this.dbHostname;
     return copy;
   }
 }
