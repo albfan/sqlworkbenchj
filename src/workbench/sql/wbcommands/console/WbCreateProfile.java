@@ -101,19 +101,7 @@ public class WbCreateProfile
 			return result;
 		}
 
-		ConnectionProfile profile = null;
-		String descriptor = cmdLine.getValue(AppArguments.ARG_CONN_DESCRIPTOR);
-
-		if (StringUtil.isNonBlank(descriptor))
-		{
-			ConnectionDescriptor parser = new ConnectionDescriptor();
-			profile = parser.parseDefinition(descriptor, null);
-		}
-
-    if (profile == null)
-    {
-      profile = BatchRunner.createCmdLineProfile(cmdLine, false);
-    }
+		ConnectionProfile profile = BatchRunner.createCmdLineProfile(cmdLine, false);
 
     DbDriver drv = getDriverFromCommandline();
     profile.setDriver(drv);
