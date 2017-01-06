@@ -118,6 +118,7 @@ public class WbCreateProfile
     DbDriver drv = getDriverFromCommandline();
     profile.setDriver(drv);
 
+    profile.setName(name);
 		profile.setTemporaryProfile(false);
 		profile.setStorePassword(cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true));
 		profile.setStoreExplorerSchema(false);
