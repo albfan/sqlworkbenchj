@@ -70,6 +70,7 @@ import workbench.sql.BatchRunner;
 import workbench.sql.CommandRegistry;
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
+import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 
 import workbench.util.DeadlockMonitor;
 import workbench.util.FileUtil;
@@ -678,7 +679,15 @@ public final class WbManager
       }
       else
       {
-        prof = BatchRunner.createCmdLineProfile(this.cmdLine);
+        try
+        {
+          prof = BatchRunner.createCmdLineProfile(this.cmdLine);
+        }
+        catch (InvalidConnectionDescriptor icd)
+        {
+          LogMgr.logError("WbManager.openNewWindow()", "Invalid connection descriptor specified", icd);
+          prof = null;
+        }
       }
 
       if (prof != null)

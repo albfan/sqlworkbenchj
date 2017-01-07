@@ -23,12 +23,10 @@
  */
 package workbench.db;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.ssh.SshException;
 
 import org.junit.Test;
 
@@ -74,7 +72,7 @@ public class TypeMapperTest
 
 	@Test
 	public void testDbMapping()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		try
 		{

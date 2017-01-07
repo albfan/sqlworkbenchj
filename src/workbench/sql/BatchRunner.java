@@ -1178,21 +1178,25 @@ public class BatchRunner
 	}
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine)
+    throws InvalidConnectionDescriptor
   {
     return createCmdLineProfile(cmdLine, null, null, true);
   }
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, boolean checkDriver)
+    throws InvalidConnectionDescriptor
   {
     return createCmdLineProfile(cmdLine, null, null, checkDriver);
   }
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection, String baseDir)
+    throws InvalidConnectionDescriptor
   {
     return createCmdLineProfile(cmdLine, currentConnection, baseDir, true);
   }
 
 	public static ConnectionProfile createCmdLineProfile(ArgumentParser cmdLine, WbConnection currentConnection, String baseDir, boolean checkDriver)
+    throws InvalidConnectionDescriptor
 	{
 		if (!hasConnectionArgument(cmdLine)) return null;
 
@@ -1257,16 +1261,8 @@ public class BatchRunner
 		}
 		else
 		{
-			try
-			{
-				ConnectionDescriptor parser = new ConnectionDescriptor();
-				result = parser.parseDefinition(descriptor, currentConnection);
-			}
-			catch (InvalidConnectionDescriptor icd)
-			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Invalid connection descriptor: " + descriptor, icd);
-				return null;
-			}
+      ConnectionDescriptor parser = new ConnectionDescriptor();
+      result = parser.parseDefinition(descriptor, currentConnection);
 		}
 
 		try
@@ -1390,7 +1386,14 @@ public class BatchRunner
 		ConnectionProfile profile = null;
 		if (profilename == null)
 		{
-			profile = createCmdLineProfile(cmdLine);
+      try
+      {
+        profile = createCmdLineProfile(cmdLine);
+      }
+      catch (InvalidConnectionDescriptor ex)
+      {
+        LogMgr.logError("BatchRunner.createBatchRunner()", "Invalid connection descriptor specified", ex);
+      }
 		}
 		else
 		{

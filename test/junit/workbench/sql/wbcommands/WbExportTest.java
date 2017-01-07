@@ -29,13 +29,11 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -1519,7 +1517,7 @@ public class WbExportTest
   }
 
   private WbConnection prepareDatabase()
-    throws SQLException, ClassNotFoundException, SshException
+		throws Exception
   {
     util.emptyBaseDirectory();
     WbConnection wb = util.getConnection();

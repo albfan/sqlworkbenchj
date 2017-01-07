@@ -36,7 +36,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Date;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -48,7 +47,6 @@ import javax.xml.bind.DatatypeConverter;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.ResourceMgr;
-import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -4364,7 +4362,7 @@ public class WbImportTest
   }
 
   private WbConnection prepareDatabase()
-    throws SQLException, ClassNotFoundException, SshException
+		throws Exception
   {
     util.emptyBaseDirectory();
     WbConnection wb = util.getConnection();

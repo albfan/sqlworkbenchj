@@ -24,13 +24,11 @@
 package workbench.db.importer;
 
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.ssh.SshException;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -109,7 +107,7 @@ public class TextFileParserTest
 	}
 
 	private WbConnection prepareDatabase()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		getTestUtil().emptyBaseDirectory();
 		WbConnection conn = getTestUtil().getConnection();

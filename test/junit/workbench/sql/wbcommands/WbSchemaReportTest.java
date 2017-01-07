@@ -24,11 +24,9 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.sql.SQLException;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.ssh.SshException;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -409,7 +407,7 @@ public class WbSchemaReportTest
   }
 
   private void setupDatabase()
-    throws SQLException, ClassNotFoundException, SshException
+		throws Exception
   {
     util = new TestUtil("schemaReportTest");
     this.source = util.getConnection();

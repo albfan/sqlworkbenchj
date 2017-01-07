@@ -24,12 +24,10 @@
 package workbench.db.diff;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.ssh.SshException;
 
 import workbench.db.WbConnection;
 
@@ -256,7 +254,7 @@ public class SchemaDiffTest
 	}
 
 	private void setupCheckTest()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		TestUtil util = getTestUtil();
 		util.emptyBaseDirectory();
@@ -285,7 +283,7 @@ public class SchemaDiffTest
 	}
 
 	private void setupGrantTestDb()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		TestUtil util = getTestUtil();
 		util.emptyBaseDirectory();
@@ -313,7 +311,7 @@ public class SchemaDiffTest
 	}
 
 	private void setupIndexDiffTestDb()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		TestUtil util = getTestUtil();
 		util.emptyBaseDirectory();
@@ -349,7 +347,7 @@ public class SchemaDiffTest
 	}
 
 	private void setupBaseDatabase()
-		throws SQLException, ClassNotFoundException, SshException
+		throws Exception
 	{
 		TestUtil util = getTestUtil();
 		util.emptyBaseDirectory();

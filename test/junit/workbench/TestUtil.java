@@ -72,6 +72,7 @@ import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
+import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
@@ -207,13 +208,13 @@ public class TestUtil
 	 * Return a connection to an HSQL memory Database with the given name
 	 */
 	public WbConnection getHSQLConnection(String dbName)
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		return getHSQLConnection(dbName, "");
 	}
 
 	public WbConnection getHSQLConnection(String dbName, String urlParameters)
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		ArgumentParser parser = new AppArguments();
 		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + urlParameters + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
@@ -226,7 +227,7 @@ public class TestUtil
 	}
 
 	public WbConnection getHSQLConnection(File db, String dbName)
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		ArgumentParser parser = new AppArguments();
 		parser.parse("-url='jdbc:hsqldb:" + db.getAbsolutePath() + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
@@ -243,7 +244,7 @@ public class TestUtil
 	 * @see TestUtil#TestUtil(String)
 	 */
 	public WbConnection getConnection()
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		return getConnection(this.testName);
 	}
@@ -253,7 +254,7 @@ public class TestUtil
 	 * @see TestUtil#TestUtil(String)
 	 */
 	public WbConnection getConnection(String db)
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		ArgumentParser parser = new AppArguments();
 		parser.parse("-url='jdbc:h2:mem:" + db + "' -username=sa -driver=org.h2.Driver");
@@ -298,7 +299,7 @@ public class TestUtil
 	 * The name of the profile is the file name (without the file path)
 	 */
 	public WbConnection getConnection(File db)
-		throws SQLException, ClassNotFoundException, SshException
+		throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		return getConnection(db, "WbUnitTest", false);
 	}
@@ -309,7 +310,7 @@ public class TestUtil
 	 * The name of the profile is the file name (without the file path)
 	 */
 	public WbConnection getConnection(File db, String id, boolean mvcc)
-    throws SQLException, ClassNotFoundException, SshException
+    throws SQLException, ClassNotFoundException, SshException, InvalidConnectionDescriptor
 	{
 		ArgumentParser parser = new AppArguments();
 		String option = (mvcc ? ";MVCC=true" : "");

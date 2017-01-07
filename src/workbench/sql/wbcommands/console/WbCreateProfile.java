@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import workbench.AppArguments;
+import workbench.log.LogMgr;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -36,6 +37,7 @@ import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ConnectionDescriptor;
+import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -71,7 +73,6 @@ public class WbCreateProfile
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_USER);
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_DB_HOST);
 		cmdLine.addArgument(AppArguments.ARG_CONN_SSH_DB_PORT);
-		cmdLine.addArgument("user");
 		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
 		cmdLine.addArgument(AppArguments.ARG_CONN_EMPTYNULL);
 		cmdLine.addArgument(AppArguments.ARG_ALT_DELIMITER);
@@ -93,7 +94,13 @@ public class WbCreateProfile
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
+    if (displayHelp(result))
+    {
+      return result;
+    }
+
 		cmdLine.parse(getCommandLine(sql));
+
 		String name = cmdLine.getValue(WbStoreProfile.ARG_PROFILE_NAME);
 		if (StringUtil.isBlank(name))
 		{
@@ -101,28 +108,36 @@ public class WbCreateProfile
 			return result;
 		}
 
-		ConnectionProfile profile = BatchRunner.createCmdLineProfile(cmdLine, false);
+    try
+    {
+      ConnectionProfile profile = BatchRunner.createCmdLineProfile(cmdLine, false);
 
-    DbDriver drv = getDriverFromCommandline();
-    profile.setDriver(drv);
+      DbDriver drv = getDriverFromCommandline();
+      profile.setDriver(drv);
 
-    profile.setName(name);
-		profile.setTemporaryProfile(false);
-		profile.setStorePassword(cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true));
-		profile.setStoreExplorerSchema(false);
+      profile.setName(name);
+      profile.setTemporaryProfile(false);
+      profile.setStorePassword(cmdLine.getBoolean(WbStoreProfile.ARG_SAVE_PASSWORD, true));
+      profile.setStoreExplorerSchema(false);
 
-		String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
-		if (group != null)
-		{
-			profile.setGroup(group);
-		}
+      String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
+      if (group != null)
+      {
+        profile.setGroup(group);
+      }
 
-		ConnectionMgr.getInstance().addProfile(profile);
-		ConnectionMgr.getInstance().saveProfiles();
-		ConnectionMgr.getInstance().saveDrivers();
+      ConnectionMgr.getInstance().addProfile(profile);
+      ConnectionMgr.getInstance().saveProfiles();
+      ConnectionMgr.getInstance().saveDrivers();
+      result.addMessageByKey("MsgProfileAdded", profile.getKey().toString());
 
-		result.addMessageByKey("MsgProfileAdded", profile.getKey().toString());
-		return result;
+    }
+    catch (InvalidConnectionDescriptor icd)
+    {
+      LogMgr.logError("WbCreateProfile.execute()", "Invalid connection descriptor specified", icd);
+      result.addErrorMessageByKey("ErrInvalidConnection");
+    }
+    return result;
 	}
 
   private DbDriver getDriverFromCommandline()
