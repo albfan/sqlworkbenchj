@@ -20,6 +20,8 @@
  */
 package workbench.ssh;
 
+import java.util.Objects;
+
 import workbench.util.StringUtil;
 
 /**
@@ -226,4 +228,34 @@ public class SshConfig
     copy.dbHostname = this.dbHostname;
     return copy;
   }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 19 * hash + this.sshPort;
+    hash = 19 * hash + Objects.hashCode(this.sshHost);
+    hash = 19 * hash + Objects.hashCode(this.username);
+    hash = 19 * hash + this.dbPort;
+    hash = 19 * hash + Objects.hashCode(this.dbHostname);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+
+    SshConfig other = (SshConfig)obj;
+    if (this.sshPort != other.sshPort) return false;
+    if (this.dbPort != other.dbPort) return false;
+    if (!StringUtil.equalStringIgnoreCase(this.sshHost, other.sshHost)) return false;
+    if (!Objects.equals(this.username, other.username)) return false;
+    if (!StringUtil.equalStringIgnoreCase(this.dbHostname, other.dbHostname)) return false;
+    
+    return true;
+  }
+
 }

@@ -27,8 +27,6 @@ import workbench.log.LogMgr;
 
 import workbench.db.ConnectionProfile;
 
-import workbench.util.StringUtil;
-
 /**
  *
  * @author Thomas Kellerer
@@ -36,7 +34,7 @@ import workbench.util.StringUtil;
 public class SshManager
 {
   private final Object lock = new Object();
-  private Map<String, Entry> activeSessions = new HashMap<>();
+  private Map<SshConfig, Entry> activeSessions = new HashMap<>();
   private Map<String, String> passphrases = new HashMap<>();
 
   public String initializeSSHSession(ConnectionProfile profile)
@@ -89,17 +87,16 @@ public class SshManager
 
   public PortForwarder getForwarder(SshConfig config)
   {
-    String key = makeKey(config.getHostname(), config.getUsername());
     PortForwarder forwarder = null;
     synchronized (lock)
     {
-      Entry e = activeSessions.get(key);
+      Entry e = activeSessions.get(config);
       if (e == null)
       {
         e = new Entry(new PortForwarder(config));
         forwarder = e.fwd;
         e.usageCount = 1;
-        activeSessions.put(key, e);
+        activeSessions.put(config, e);
       }
       else
       {
@@ -110,34 +107,36 @@ public class SshManager
     return forwarder;
   }
 
-  public void decrementUsage(String remoteHost, String user)
+  public void decrementUsage(SshConfig config)
   {
+    if (config == null) return;
+
     synchronized (lock)
     {
-      String key = makeKey(remoteHost, user);
-      Entry e = activeSessions.get(key);
+      Entry e = activeSessions.get(config);
       if (e != null)
       {
         e.usageCount --;
         if (e.usageCount == 0)
         {
           e.fwd.close();
-          activeSessions.remove(key);
+          activeSessions.remove(config);
         }
       }
     }
   }
 
-  public void disconnect(String remoteHost, String user)
+  public void disconnect(SshConfig config)
   {
+    if (config == null) return;
+    
     synchronized (lock)
     {
-      String key = makeKey(remoteHost, user);
-      Entry e = activeSessions.get(key);
+      Entry e = activeSessions.get(config);
       if (e != null)
       {
         e.fwd.close();
-        activeSessions.remove(key);
+        activeSessions.remove(config);
       }
     }
   }
@@ -152,11 +151,6 @@ public class SshManager
       }
       activeSessions.clear();
     }
-  }
-
-  private String makeKey(String host, String user)
-  {
-    return StringUtil.coalesce(user, "<noname>") + "@" + host;
   }
 
   private static class Entry

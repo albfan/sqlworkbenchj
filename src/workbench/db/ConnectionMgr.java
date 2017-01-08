@@ -45,7 +45,6 @@ import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.ssh.SshConfig;
 import workbench.ssh.SshException;
 import workbench.ssh.SshManager;
 
@@ -155,7 +154,7 @@ public class ConnectionMgr
   {
     return sshManager;
   }
-  
+
   /**
    * Create a new connection to the database.
    *
@@ -279,15 +278,10 @@ public class ConnectionMgr
     return conn;
   }
 
-  private boolean usesSSH(ConnectionProfile profile)
-  {
-    return profile.getSshConfig() != null;
-  }
-
   private String initSSH(ConnectionProfile profile)
     throws SshException
   {
-    if (!usesSSH(profile))
+    if (profile.getSshConfig() == null)
     {
       return profile.getUrl();
     }
@@ -657,11 +651,7 @@ public class ConnectionMgr
         conn.shutdown();
       }
       ConnectionProfile profile = conn.getProfile();
-      if (usesSSH(profile))
-      {
-        SshConfig config = profile.getSshConfig();
-        sshManager.decrementUsage(config.getHostname(), config.getUsername());
-      }
+      sshManager.decrementUsage(profile.getSshConfig());
     }
     catch (Exception e)
     {
