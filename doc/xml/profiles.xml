@@ -759,10 +759,10 @@
       directly reachable (without using a external tool like Putty to create the tunnel).
     </para>
     <para>
-      The configure a SSH tunnel click on the <guibutton>SSH</guibutton> button in the connection profile. The configuration
+      To configure a SSH tunnel click on the <guibutton>SSH</guibutton> button in the connection profile. The configuration
       of the SSH tunnel consists of three parts:
       <itemizedlist>
-        <listitem><simpara>Login information for the computer from which the database server can be reached</simpara></listitem>
+        <listitem><simpara>Login information for the computer from which the database server can be reached (the "SSH host")</simpara></listitem>
         <listitem><simpara>The mapping definition of a local port to the remote port of the database server</simpara></listitem>
         <listitem><simpara>Rewriting the JDBC URL to make the driver connect to "localhost" and the local port established by the SSH tunnel</simpara></listitem>
       </itemizedlist>
@@ -799,9 +799,29 @@
             <row>
               <entry>Password</entry>
               <entry>
-                <para>This is either the password for the remote user login, or if a private key file is specified the passphrase
+                <para>This is either the password for the remote user login, or, if a private key file is specified, the passphrase
                 for that key file. If no password is provided, you will be prompted to enter one when connecting. </para>
                 <para>If a password is entered, it is <emphasis role="bold">always</emphasis> stored in the profile.</para>
+                <para>
+                  If no password is entered, you will be prompted for one when the connection is established. If the password
+                  is used as a passphrase for a private key file, the entered password will be remembered until the application is closed.
+                  It will be (re)used for other tunnels using the same private key file.
+                </para>
+              </entry>
+            </row>
+            <row>
+              <entry>Authenticate through SSH agent</entry>
+              <entry>
+                <para>
+                  If this option is enabled &wb-productname; will try to use a running SSH agent to authenticate
+                  against the SSH host. Supported agents are <literal>pageant.exe</literal> for Windows&reg; and <literal>ssh-agent</literal>
+                  for Linux systems. In this case supplying a private key file or a password is not necessary, but the user name is still required.
+                </para>
+                <para>
+                  In order to be able to communicate with the SSH agent, additional libraries are needed, which can be
+                  downloaded from <ulink url="http://www.sql-workbench.net/jna.zip"/>. Please unzip the archive and
+                  put the two jar files into the directory where <literal>sqlworkbench.jar</literal> is located.
+                </para>
               </entry>
             </row>
           </tbody>
@@ -878,6 +898,11 @@ on the commandline and then changing the JDBC URL to use <literal>localhost</lit
         install it into your Java runtime.
       </para>
     </important>
+
+    <para>
+      If multiple profiles use the same SSH tunnel definition &wb-productname; will only open one tunnel even
+      if multiple windows using different profiles are used.
+    </para>
 
   </section>
 
