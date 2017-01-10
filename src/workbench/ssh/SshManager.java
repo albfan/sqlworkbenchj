@@ -23,9 +23,11 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.log.LogMgr;
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
 
 import workbench.db.ConnectionProfile;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -129,7 +131,7 @@ public class SshManager
   public void disconnect(SshConfig config)
   {
     if (config == null) return;
-    
+
     synchronized (lock)
     {
       Entry e = activeSessions.get(config);
@@ -162,6 +164,20 @@ public class SshManager
     {
       this.fwd = fwd;
     }
+  }
+
+  public static boolean canUseAgent()
+  {
+    try
+    {
+      Connector connector = ConnectorFactory.getDefault().createConnector();
+      return connector != null;
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logDebug("SshManager.canUseAgent()", "Could not access agent connector", th);
+    }
+    return false;
   }
 
 

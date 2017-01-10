@@ -39,6 +39,8 @@ public class SshConfig
   private String username;
   private int localPort;
 
+  private boolean tryAgent;
+
   private int dbPort;
   private String dbHostname;
 
@@ -133,10 +135,6 @@ public class SshConfig
 
   public void setUsername(String user)
   {
-    if ("Thomas".equals(user))
-    {
-      Thread.dumpStack();
-    }
     if (StringUtil.equalStringOrEmpty(username, user) == false)
     {
       this.changed = true;
@@ -201,6 +199,17 @@ public class SshConfig
     return changed;
   }
 
+  public boolean getTryAgent()
+  {
+    return tryAgent;
+  }
+
+  public void setTryAgent(boolean flag)
+  {
+    changed = changed || flag != tryAgent;
+    tryAgent = flag;
+  }
+
   public void copyFrom(SshConfig config)
   {
     if (config == this) return;
@@ -212,6 +221,7 @@ public class SshConfig
     setDbHostname(config.getDbHostname());
     setDbPort(config.getDbPort());
     setPrivateKeyFile(config.getPrivateKeyFile());
+    setTryAgent(config.getTryAgent());
   }
 
   public SshConfig createCopy()
@@ -226,6 +236,7 @@ public class SshConfig
     copy.changed = this.changed;
     copy.dbPort = this.dbPort;
     copy.dbHostname = this.dbHostname;
+    copy.tryAgent = this.tryAgent;
     return copy;
   }
 
@@ -254,7 +265,7 @@ public class SshConfig
     if (!StringUtil.equalStringIgnoreCase(this.sshHost, other.sshHost)) return false;
     if (!Objects.equals(this.username, other.username)) return false;
     if (!StringUtil.equalStringIgnoreCase(this.dbHostname, other.dbHostname)) return false;
-    
+
     return true;
   }
 

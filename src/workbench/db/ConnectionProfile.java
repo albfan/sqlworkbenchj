@@ -34,17 +34,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.db.postgres.PgPassReader;
+import workbench.gui.profiles.ProfileKey;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.ssh.SshConfig;
-
-import workbench.db.postgres.PgPassReader;
-
-import workbench.gui.profiles.ProfileKey;
-
 import workbench.sql.DelimiterDefinition;
-
+import workbench.ssh.SshConfig;
 import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -915,6 +911,8 @@ public class ConnectionProfile
   {
     SshConfig config = getSshConfig();
     if (config == null) return false;
+
+    if (config.getTryAgent() == true) return false;
     
     if (config.getPrivateKeyFile() != null)
     {

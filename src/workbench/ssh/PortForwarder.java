@@ -22,10 +22,16 @@ package workbench.ssh;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.Vector;
 
+import com.jcraft.jsch.Identity;
+import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
+import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 
 import workbench.log.LogMgr;
 
@@ -45,11 +51,14 @@ public class PortForwarder
   private Session session;
   private int localPort;
 
+  private boolean tryAgent;
+
   public PortForwarder(SshConfig config)
   {
     this.sshHost = config.getHostname();
     this.sshUser = config.getUsername();
     this.password = config.getPassword();
+    this.tryAgent = config.getTryAgent();
     setPrivateKeyFile(config.getPrivateKeyFile());
   }
 
@@ -98,15 +107,21 @@ public class PortForwarder
 
     long start = System.currentTimeMillis();
     LogMgr.logInfo("PortForwarder.startForwarding()", "Connecting to host: " + sshHost + " using username: " + sshUser);
-    if (privateKeyFile != null)
+
+    boolean useAgent = tryAgent && tryAgent(jsch);
+
+    if (!useAgent && privateKeyFile != null)
     {
       jsch.addIdentity(privateKeyFile, password);
     }
+
     session = jsch.getSession(sshUser, sshHost, sshPort);
-    if (privateKeyFile == null)
+
+    if (!useAgent && privateKeyFile == null)
     {
       session.setPassword(password);
     }
+    
     session.setConfig(props);
     session.connect();
     long duration = System.currentTimeMillis() - start;
@@ -121,6 +136,29 @@ public class PortForwarder
     return localPort;
   }
 
+  private boolean tryAgent(JSch jsh)
+  {
+    try
+    {
+      Connector connector = ConnectorFactory.getDefault().createConnector();
+      if (connector == null) return false;
+
+      IdentityRepository irepo = new RemoteIdentityRepository(connector);
+      if (irepo == null) return false;
+      Vector<Identity> identities = irepo.getIdentities();
+      if (identities.size() > 0)
+      {
+        LogMgr.logInfo("PortForwarder.tryAgent()", "Using " + identities.size() + " identities from agent: " + connector.getName());
+        jsh.setIdentityRepository(irepo);
+        return true;
+      }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("PortForwarder.tryAgent()", "Error when accessing agent", th);
+    }
+    return false;
+  }
 
   public synchronized boolean isConnected()
   {

@@ -37,7 +37,6 @@ import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.ssh.SshConfig;
-
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -101,7 +100,7 @@ public class IniProfileStorage
   private static final String PROP_SSH_HOST = ".ssh.host";
   private static final String PROP_SSH_USER = ".ssh.user";
   private static final String PROP_SSH_PWD = ".ssh.pwd";
-  private static final String PROP_SSH_REWRITE_URL = ".ssh.rewrite_url";
+  private static final String PROP_SSH_TRY_AGENT = ".ssh.try.agent";
   private static final String PROP_SSH_LOCAL_PORT = ".ssh.localport";
   private static final String PROP_SSH_PORT = ".ssh.port";
   private static final String PROP_SSH_KEYFILE = ".ssh.keyfile";
@@ -203,6 +202,7 @@ public class IniProfileStorage
     int localPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_LOCAL_PORT, Integer.MIN_VALUE);
     int dbPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_DB_PORT, Integer.MIN_VALUE);
     int sshPort = props.getIntProperty(PROP_PREFIX + key + PROP_SSH_PORT, Integer.MIN_VALUE);
+    boolean tryAgent = props.getBoolProperty(PROP_PREFIX + key + PROP_SSH_TRY_AGENT, false);
 
     SshConfig config = null;
     if (sshHost != null || sshPwd != null || sshUser != null || keyFile != null || dbHost != null ||
@@ -217,6 +217,7 @@ public class IniProfileStorage
       config.setSshPort(sshPort);
       config.setDbHostname(dbHost);
       config.setDbPort(dbPort);
+      config.setTryAgent(tryAgent);
     }
 
     Integer fetchSize = null;
@@ -380,6 +381,7 @@ public class IniProfileStorage
       props.setProperty(PROP_PREFIX + key + PROP_SSH_KEYFILE, config.getPrivateKeyFile());
       props.setProperty(PROP_PREFIX + key + PROP_SSH_DB_HOST, config.getDbHostname());
       props.setProperty(PROP_PREFIX + key + PROP_SSH_DB_PORT, config.getDbPort());
+      props.setProperty(PROP_PREFIX + key + PROP_SSH_TRY_AGENT, config.getTryAgent());
     }
 
     setNonDefaultProperty(props, PROP_PREFIX + key + PROP_STORECACHE, profile.getStoreCacheLocally(), defaultValues.getStoreCacheLocally());
