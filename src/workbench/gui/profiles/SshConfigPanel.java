@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 
 import workbench.resource.ResourceMgr;
 import workbench.ssh.SshConfig;
+import workbench.ssh.SshManager;
 import workbench.ssh.UrlParser;
 
 import workbench.gui.components.WbFilePicker;
@@ -53,6 +54,11 @@ public class SshConfigPanel
     keyPassFile.setAllowMultiple(false);
     keyPassFile.setLastDirProperty("workbench.ssh.keypass.lastdir");
     keyPassFile.setToolTipText(labelKeyPass.getToolTipText());
+    if (!SshManager.canUseAgent())
+    {
+      useAgent.setEnabled(false);
+      useAgent.setToolTipText(ResourceMgr.getString("d_LblSshAgentNotAvailable"));
+    }
   }
 
   public void setConfig(SshConfig config, String url)
@@ -66,7 +72,10 @@ public class SshConfigPanel
       username.setText(StringUtil.coalesce(config.getUsername(), ""));
       password.setText(StringUtil.coalesce(config.getPassword(), ""));
       keyPassFile.setFilename(config.getPrivateKeyFile());
-
+      if (useAgent.isEnabled())
+      {
+        useAgent.setSelected(config.getTryAgent());
+      }
       int localPortNr = config.getLocalPort();
       if (localPortNr > 0)
       {
@@ -103,6 +112,7 @@ public class SshConfigPanel
     password.setText("");
     localPort.setText("");
     sshPort.setText("");
+    useAgent.setSelected(false);
     rewriteUrl.setSelected(false);
   }
 
@@ -133,6 +143,7 @@ public class SshConfigPanel
     config.setPrivateKeyFile(StringUtil.trimToNull(keyPassFile.getFilename()));
     config.setDbHostname(StringUtil.trimToNull(dbHostname.getText()));
     config.setDbPort(StringUtil.getIntValue(dbPort.getText(), 0));
+    config.setTryAgent(useAgent.isSelected());
     return config;
   }
 
@@ -165,6 +176,7 @@ public class SshConfigPanel
     dbPort = new JTextField();
     jSeparator1 = new JSeparator();
     rewriteUrl = new JCheckBox();
+    useAgent = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -226,7 +238,7 @@ public class SshConfigPanel
     labelLocalPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelLocalPort, gridBagConstraints);
@@ -234,7 +246,7 @@ public class SshConfigPanel
     localPort.setToolTipText(ResourceMgr.getString("d_LblSshLocalPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
@@ -280,7 +292,7 @@ public class SshConfigPanel
     labelDbPort.setToolTipText(ResourceMgr.getString("d_LblSshDbHostname")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelDbPort, gridBagConstraints);
@@ -290,7 +302,7 @@ public class SshConfigPanel
     labelDbHostname.setToolTipText(ResourceMgr.getString("d_LblSshDbPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(labelDbHostname, gridBagConstraints);
@@ -298,7 +310,7 @@ public class SshConfigPanel
     dbHostname.setToolTipText(ResourceMgr.getString("d_LblSshDbHostname")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
@@ -307,14 +319,14 @@ public class SshConfigPanel
     dbPort.setToolTipText(ResourceMgr.getString("d_LblSshDbPort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(5, 5, 0, 11);
     add(dbPort, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(8, 5, 5, 11);
@@ -325,13 +337,23 @@ public class SshConfigPanel
     rewriteUrl.setToolTipText(ResourceMgr.getString("d_LblSshRewriteUrl")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(7, 1, 0, 0);
     add(rewriteUrl, gridBagConstraints);
+
+    useAgent.setText(ResourceMgr.getString("LblSshUseAgent")); // NOI18N
+    useAgent.setToolTipText(ResourceMgr.getString("d_LblSshUseAgent")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(4, 1, 0, 0);
+    add(useAgent, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -353,6 +375,7 @@ public class SshConfigPanel
   private JPasswordField password;
   private JCheckBox rewriteUrl;
   private JTextField sshPort;
+  private JCheckBox useAgent;
   private JTextField username;
   // End of variables declaration//GEN-END:variables
 }
