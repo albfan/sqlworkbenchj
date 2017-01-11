@@ -23,11 +23,12 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
+import workbench.log.LogMgr;
 
 import workbench.db.ConnectionProfile;
-import workbench.log.LogMgr;
+
+import com.jcraft.jsch.agentproxy.Connector;
+import com.jcraft.jsch.agentproxy.ConnectorFactory;
 
 /**
  *
@@ -81,10 +82,35 @@ public class SshManager
     }
   }
 
+  public int getLocalPort(SshConfig config)
+  {
+    if (config == null) return -1;
+    PortForwarder forwarder = findForwarder(config);
+    if (forwarder != null)
+    {
+      return forwarder.getLocalPort();
+    }
+    return -1;
+  }
+
   public String getPassphrase(SshConfig config)
   {
     if (config.getPrivateKeyFile() == null) return null;
     return passphrases.get(config.getPrivateKeyFile());
+  }
+
+  private PortForwarder findForwarder(SshConfig config)
+  {
+    PortForwarder forwarder = null;
+    synchronized (lock)
+    {
+      Entry e = activeSessions.get(config);
+      if (e != null)
+      {
+        forwarder = e.fwd;
+      }
+    }
+    return forwarder;
   }
 
   public PortForwarder getForwarder(SshConfig config)

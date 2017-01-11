@@ -105,7 +105,7 @@ public class ConnectionInfoBuilder
       SshConfig ssh = conn.getProfile().getSshConfig();
       if (ssh != null)
       {
-        url += " (" + ssh.getInfo() + ")";
+        url += " (" + ssh.getInfoString() + ")";
       }
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductName") + ":" + boldEnd + wbmeta.getProductName() + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductVersion") + ":" + boldEnd + dbVersion + lineEnd);

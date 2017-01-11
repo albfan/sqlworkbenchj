@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
 
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -162,6 +163,12 @@ public class ConnectionInfo
 			tip.append(this.sourceConnection.getDatabaseVersion().toString());
 			tip.append("<br>");
 			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
+      SshConfig sshConfig = sourceConnection.getProfile().getSshConfig();
+      if (sshConfig != null)
+      {
+        tip.append("<br>");
+        tip.append(sshConfig.getInfoString());
+      }
 			tip.append("</html>");
 			infoText.setToolTipText(tip.toString());
 		}

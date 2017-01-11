@@ -23,6 +23,8 @@ package workbench.ssh;
 import java.io.Serializable;
 import java.util.Objects;
 
+import workbench.db.ConnectionMgr;
+
 import workbench.util.StringUtil;
 
 /**
@@ -271,9 +273,17 @@ public class SshConfig
     return true;
   }
 
-  public String getInfo()
+  public String getInfoString()
   {
-    String info = sshHost + " > " + dbHostname;
+    int currentPort = ConnectionMgr.getInstance().getSshManager().getLocalPort(this);
+    String info = "SSH: ";
+    if (currentPort > 0)
+    {
+      info += "localhost:" + currentPort + " > ";
+    }
+    info += sshHost;
+    if (sshPort != 22) info += ":" + sshPort;
+    info += " > " + dbHostname;
     if (dbPort > 0) info += ":" + dbPort;
     return info;
   }
