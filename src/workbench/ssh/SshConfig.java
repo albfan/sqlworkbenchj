@@ -20,6 +20,7 @@
  */
 package workbench.ssh;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import workbench.util.StringUtil;
@@ -29,6 +30,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class SshConfig
+  implements Serializable
 {
   private boolean changed;
 
