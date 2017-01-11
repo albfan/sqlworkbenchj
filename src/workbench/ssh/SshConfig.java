@@ -271,4 +271,10 @@ public class SshConfig
     return true;
   }
 
+  public String getInfo()
+  {
+    String info = sshHost + " > " + dbHostname;
+    if (dbPort > 0) info += ":" + dbPort;
+    return info;
+  }
 }
