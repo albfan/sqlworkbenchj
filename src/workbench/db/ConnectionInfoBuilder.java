@@ -26,12 +26,10 @@ package workbench.db;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.ssh.SshConfig;
-
-import workbench.db.report.TagWriter;
-
 import workbench.util.StringUtil;
 
 /**
@@ -101,19 +99,18 @@ public class ConnectionInfoBuilder
       }
       String dbVersion = conn.getDatabaseVersion().toString();
 
-      String url = conn.getUrl();
-      SshConfig ssh = conn.getProfile().getSshConfig();
-      if (ssh != null)
-      {
-        url += " (" + ssh.getInfoString() + ")";
-      }
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductName") + ":" + boldEnd + wbmeta.getProductName() + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductVersion") + ":" + boldEnd + dbVersion + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDbProductInfo") + ":" + boldEnd + productVersion + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoName") + ":" + boldEnd + driverName + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoClass") + ":" + boldEnd + conn.getProfile().getDriverclass() + lineEnd);
       content.append(lineStart + boldStart + ResourceMgr.getString("LblDriverInfoVersion") + ":" + boldEnd + conn.getDriverVersion() + lineEnd);
-      content.append(lineStart + boldStart + ResourceMgr.getString("LblDbURL") + ":" + boldEnd + url + lineEnd);
+      content.append(lineStart + boldStart + ResourceMgr.getString("LblDbURL") + ":" + boldEnd + conn.getUrl() + lineEnd);
+      SshConfig ssh = conn.getProfile().getSshConfig();
+      if (ssh != null)
+      {
+        content.append(lineStart + boldStart + "SSH:" + boldEnd + ssh.getInfoString() + lineEnd);
+      }
       content.append(space + boldStart + "Isolation Level:" + boldEnd + isolationlevel + newLine);
       content.append(space + boldStart + ResourceMgr.getString("LblUsername") + ":" + boldEnd + username + newLine);
 

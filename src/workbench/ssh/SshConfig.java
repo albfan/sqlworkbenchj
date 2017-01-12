@@ -24,7 +24,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import workbench.db.ConnectionMgr;
-
 import workbench.util.StringUtil;
 
 /**
@@ -276,7 +275,7 @@ public class SshConfig
   public String getInfoString()
   {
     int currentPort = ConnectionMgr.getInstance().getSshManager().getLocalPort(this);
-    String info = "SSH: ";
+    String info = "";
     if (currentPort > 0)
     {
       info += "localhost:" + currentPort + " > ";

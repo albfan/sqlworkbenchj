@@ -39,16 +39,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import workbench.resource.IconMgr;
-import workbench.resource.ResourceMgr;
-import workbench.ssh.SshConfig;
-
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.tools.ConnectionInfoPanel;
+import workbench.resource.IconMgr;
+import workbench.resource.ResourceMgr;
+import workbench.ssh.SshConfig;
 
 /**
  * @author  Thomas Kellerer
@@ -166,7 +164,7 @@ public class ConnectionInfo
       SshConfig sshConfig = sourceConnection.getProfile().getSshConfig();
       if (sshConfig != null)
       {
-        tip.append("<br>");
+        tip.append("<br>SSH: ");
         tip.append(sshConfig.getInfoString());
       }
 			tip.append("</html>");
