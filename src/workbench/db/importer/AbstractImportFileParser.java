@@ -33,20 +33,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.JobErrorHandler;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.modifier.ImportValueModifier;
-
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.JobErrorHandler;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.RowActionMonitor;
-
 import workbench.util.BlobDecoder;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
@@ -102,9 +99,11 @@ public abstract class AbstractImportFileParser
   protected RowActionMonitor rowMonitor;
   protected boolean ignoreMissingColumns;
   protected boolean clobsAreFilenames;
+  protected boolean ignoreAllNullRows;
 
   public AbstractImportFileParser()
   {
+    ignoreAllNullRows = Settings.getInstance().getBoolProperty("workbench.import.ignore.all_nulls", true);
   }
 
   public AbstractImportFileParser(File aFile)
@@ -627,5 +626,16 @@ public abstract class AbstractImportFileParser
       importColumns.get(index).setColumnFilter(null);
     }
   }
+
+  protected boolean isOnlyNull(Object[] row)
+  {
+    if (row == null) return true;
+    for (Object obj : row)
+    {
+      if (obj != null) return false;
+    }
+    return true;
+  }
+
 
 }

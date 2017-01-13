@@ -729,7 +729,12 @@ public class TextFileParser
         }
 
         if (this.cancelImport) break;
-
+        if (ignoreAllNullRows && isOnlyNull(rowData))
+        {
+          receiver.nextRowSkipped();
+          continue;
+        }
+        
         try
         {
           if (includeLine) receiver.processRow(rowData);

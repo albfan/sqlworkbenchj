@@ -685,6 +685,12 @@ public class SpreadsheetFileParser
 
       if (this.cancelImport) break;
 
+      if (ignoreAllNullRows && isOnlyNull(rowData))
+      {
+        receiver.nextRowSkipped();
+        continue;
+      }
+
       try
       {
         if (includeRow) receiver.processRow(rowData);
