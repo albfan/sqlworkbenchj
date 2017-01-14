@@ -39,15 +39,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.exporter.BlobMode;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.TabularDataParser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.exporter.BlobMode;
+
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.CsvLineParser;
@@ -729,12 +731,13 @@ public class TextFileParser
         }
 
         if (this.cancelImport) break;
-        if (ignoreAllNullRows && isOnlyNull(rowData))
+        
+        if (includeLine && ignoreAllNullRows && isOnlyNull(rowData))
         {
           receiver.nextRowSkipped();
-          continue;
+          includeLine = false;
         }
-        
+
         try
         {
           if (includeLine) receiver.processRow(rowData);
