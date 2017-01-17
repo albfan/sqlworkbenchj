@@ -30,9 +30,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.DropType;
@@ -44,7 +41,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -513,6 +511,11 @@ public class OracleTableSourceBuilder
           {
             colOptions.append(" COMPRESS ");
             colOptions.append(compress);
+          }
+
+          if ("LOB".equals(deduplication))
+          {
+            colOptions.append(" DEDUPLICATE");
           }
         }
 
