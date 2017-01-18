@@ -51,6 +51,46 @@ public class WbSqlFormatterTest
 	}
 
   @Test
+  public void testWindowAlias()
+  {
+    String sql = "select id, row_number() over w from foo window w as (partition by x order by y) order by id";
+
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerSelect(100);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT id, ROW_NUMBER() OVER w\n" +
+      "FROM foo\n" +
+      "WINDOW w AS (PARTITION BY x ORDER BY y)\n" +
+      "ORDER BY id";
+
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+    sql = "select id, row_number() over w1, count(*) over w2 from foo \n" +
+      "window w1 as (partition by x order by y), \n" +
+      "       w2 as (partition by a)\n" +
+      "order by id";
+    f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setFunctionCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerSelect(100);
+    formatted = f.getFormattedSql();
+    expected =
+      "SELECT id, row_number() OVER w1, count(*) OVER w2\n" +
+      "FROM foo\n" +
+      "WINDOW w1 AS (PARTITION BY x ORDER BY y),\n" +
+      "       w2 AS (PARTITION BY a)\n" +
+      "ORDER BY id";
+
+		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testArrayAlias()
   {
     String sql = "select col[1] as first_element from foo";

@@ -57,19 +57,18 @@ public class WbSqlFormatter
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
-		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY");
+		"RIGHT JOIN", "START WITH", "CONNECT BY", "OUTER APPLY", "CROSS APPLY", "WINDOW");
 
 	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.unmodifiableSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
+  // keywords terminating a HAVING clause
 	public static final Set<String> HAVING_TERMINAL = CollectionUtil.unmodifiableSet(
 		"ORDER BY", "GROUP BY", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", "WINDOW", ";");
 
 	// keywords terminating a WHERE clause
 	public static final Set<String> WHERE_TERMINAL = CollectionUtil.unmodifiableSet(HAVING_TERMINAL, "HAVING", "WITH");
-
-	// keywords terminating a HAVING clause
 
 	// keywords terminating the FROM part
 	public static final Set<String> FROM_TERMINAL = CollectionUtil.unmodifiableSet(WHERE_TERMINAL, "WHERE", "START WITH", "CONNECT BY");
@@ -821,6 +820,66 @@ public class WbSqlFormatter
 		}
 		return null;
 	}
+
+  private SQLToken processWindowDef(SQLToken last)
+  {
+    // this is the window keyword
+    int bracketCount = 0;
+    boolean afterWindow = false;
+    SQLToken t = lexer.getNextToken(true, false);
+    while (t != null)
+    {
+      if ("(".equals(t.getText()))
+      {
+        bracketCount++;
+      }
+      else if (")".equals(t.getText()) && bracketCount > 0)
+      {
+        bracketCount--;
+        if (bracketCount == 0)
+        {
+          afterWindow = true;
+        }
+      }
+
+      if (",".equals(t.getText()) && bracketCount == 0 && commaAfterLineBreak)
+      {
+        appendNewline();
+        indent(7);
+      }
+
+      if (needsWhitespace(last, t))
+      {
+        appendText(' ');
+      }
+
+      appendTokenText(t);
+
+      if (",".equals(t.getText()) && bracketCount == 0 && !commaAfterLineBreak)
+      {
+        appendNewline();
+        indent(7);
+      }
+
+      last = t;
+
+      t = lexer.getNextToken(true, false);
+
+      if (t != null && afterWindow)
+      {
+        if (t.isReservedWord())
+        {
+          return t;
+        }
+        if (",".equals(t.getText()))
+        {
+          afterWindow = false;
+        }
+      }
+    }
+    return null;
+  }
+
 
 	private SQLToken processJoin(SQLToken last)
 	{
@@ -1786,6 +1845,15 @@ public class WbSqlFormatter
 					firstToken = false;
 					continue;
 				}
+
+        if (word.equals("WINDOW"))
+        {
+          lastToken = t;
+          t = processWindowDef(t);
+          if (t == null) return;
+          firstToken = false;
+          continue;
+        }
 
 				if (word.equals("GROUP BY"))
 				{
