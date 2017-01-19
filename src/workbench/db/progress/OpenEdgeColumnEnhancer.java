@@ -33,7 +33,7 @@ import workbench.resource.Settings;
 
 import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
@@ -54,7 +54,7 @@ public class OpenEdgeColumnEnhancer
   @Override
   public void updateColumnDefinition(TableDefinition table, WbConnection conn)
   {
-    if (Settings.getInstance().getBoolProperty("workbench.db." + DbMetadata.DBID_OPENEDGE + ".remarks.columns.retrieve", true))
+    if (Settings.getInstance().getBoolProperty("workbench.db." + DBID.OPENEDGE.getId() + ".remarks.columns.retrieve", true))
     {
       updateColumnRemarks(table, conn);
     }

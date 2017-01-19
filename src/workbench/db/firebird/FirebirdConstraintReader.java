@@ -24,7 +24,7 @@
 package workbench.db.firebird;
 
 import workbench.db.AbstractConstraintReader;
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 
 /**
  * An implementation of {@link AbstractConstraintReader} for the
@@ -46,7 +46,7 @@ public class FirebirdConstraintReader
 
   public FirebirdConstraintReader()
   {
-    super(DbMetadata.DBID_FIREBIRD);
+    super(DBID.Firebird.getId());
   }
 
   @Override

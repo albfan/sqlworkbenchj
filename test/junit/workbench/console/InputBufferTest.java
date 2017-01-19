@@ -26,7 +26,7 @@ package workbench.console;
 
 import workbench.WbTestCase;
 
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 
 import org.junit.Test;
 
@@ -49,7 +49,7 @@ public class InputBufferTest
 	public void testAddLine()
 	{
 		InputBuffer buffer = new InputBuffer();
-		buffer.setDbId(DbMetadata.DBID_ORA);
+		buffer.setDbId(DBID.Oracle.getId());
 
 		boolean result = buffer.addLine("select * ");
 		assertFalse(result);

@@ -52,6 +52,7 @@ import workbench.storage.RowActionMonitor;
 
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.CommonArgs;
+import workbench.sql.wbcommands.ConditionCheck;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 
 import workbench.util.ArgumentParser;
@@ -1209,4 +1210,20 @@ public class SqlCommand
     return getVerb();
   }
 
+	protected boolean checkConditions(StatementRunnerResult result)
+	{
+    if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+    {
+      return false;
+    }
+
+		ConditionCheck.Result check = ConditionCheck.checkConditions(cmdLine, currentConnection);
+		if (check.isOK())
+		{
+			return true;
+		}
+		result.addMessage(ConditionCheck.getMessage(getVerb(), check));
+		result.setSuccess();
+		return false;
+	}
 }

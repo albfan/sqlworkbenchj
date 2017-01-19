@@ -1217,7 +1217,7 @@ public class DbSettings
 
   public boolean isTableSourceRetrievalCustomized()
   {
-    if (getDbId().equals(DbMetadata.DBID_ORA))
+    if (DBID.Oracle.isDB(getDbId()))
     {
       if (OracleUtils.getUseOracleDBMSMeta(OracleUtils.DbmsMetadataTypes.table)) return true;
     }

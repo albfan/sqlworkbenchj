@@ -32,7 +32,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
@@ -142,7 +142,7 @@ public class Db2SequenceReader
     String schemaCol;
     String baseSql;
 
-    if (dbid.equals(DbMetadata.DBID_DB2_ISERIES))
+    if (DBID.DB2_ISERIES.isDB(dbid))
     {
       // Host system on AS/400
       baseSql =
@@ -161,7 +161,7 @@ public class Db2SequenceReader
       nameCol = "sequence_name";
       schemaCol = "sequence_schema";
     }
-    else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
+    else if (DBID.DB2_ZOS.isDB(dbid))
     {
       // Host system on z/OS
       baseSql =

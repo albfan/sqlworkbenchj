@@ -109,7 +109,7 @@ public class WbSysExec
       return result;
     }
 
-		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+    if (!checkConditions(result))
 		{
 			return result;
 		}
@@ -120,14 +120,6 @@ public class WbSysExec
 		{
 			String prg = cmdLine.getValue(ARG_PROGRAM);
 			String doc = cmdLine.getValue(ARG_DOCUMENT);
-
-			ConditionCheck.Result check = ConditionCheck.checkConditions(cmdLine);
-			if (!check.isOK())
-			{
-				result.addMessage(ConditionCheck.getMessage("ErrExec", check));
-				result.setSuccess();
-				return result;
-			}
 
 			if (StringUtil.isNonBlank(doc) && Desktop.isDesktopSupported())
 			{

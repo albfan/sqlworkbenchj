@@ -377,15 +377,15 @@ public class JdbcTableDefinitionReader
     {
       return new MySQLColumnEnhancer();
     }
-    if (con.getDbId().equals(DbMetadata.DBID_DB2_LUW))
+    if (DBID.DB2_LUW.isDB(con))
     {
       return new Db2ColumnEnhancer();
     }
-    if (con.getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+    if (DBID.DB2_ISERIES.isDB(con))
     {
       return new Db2iColumnEnhancer();
     }
-    if (con.getDbId().equals("informix_dynamic_server"))
+    if (DBID.Informix.isDB(con))
     {
       return new InformixColumnEnhancer();
     }
@@ -405,11 +405,11 @@ public class JdbcTableDefinitionReader
     {
       return new HsqlColumnEnhancer();
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_OPENEDGE))
+    if (DBID.OPENEDGE.isDB(con))
     {
       return new OpenEdgeColumnEnhancer();
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_HANA))
+    if (DBID.HANA.isDB(con))
     {
       return new HanaColumnEnhancer();
     }

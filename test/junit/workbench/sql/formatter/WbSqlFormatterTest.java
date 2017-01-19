@@ -29,7 +29,7 @@ import workbench.WbTestCase;
 import workbench.resource.GeneratedIdentifierCase;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -55,7 +55,7 @@ public class WbSqlFormatterTest
   {
     String sql = "select id, row_number() over w from foo window w as (partition by x order by y) order by id";
 
-    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setColumnsPerSelect(100);
@@ -73,7 +73,7 @@ public class WbSqlFormatterTest
       "window w1 as (partition by x order by y), \n" +
       "       w2 as (partition by a)\n" +
       "order by id";
-    f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setFunctionCase(GeneratedIdentifierCase.lower);
@@ -95,7 +95,7 @@ public class WbSqlFormatterTest
   {
     String sql = "select col[1] as first_element from foo";
 
-    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
     String formatted = f.getFormattedSql();
@@ -112,7 +112,7 @@ public class WbSqlFormatterTest
       "create temp table testtable distkey(dw_eff_dt) as\n" +
       "select max(dw_eff_dt) from ba_ab_test_page_agg_daily;";
 
-    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setIndentWhereCondition(true);
@@ -133,7 +133,7 @@ public class WbSqlFormatterTest
   public void testCreateTableWithType()
   {
     String sql = "create unlogged table foobar (id integer)";
-		WbSqlFormatter f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setIndentWhereCondition(true);
@@ -147,7 +147,7 @@ public class WbSqlFormatterTest
 		assertEquals(expected, formatted);
 
     sql = "create temporary view foo as select * from bar;";
-		f = new WbSqlFormatter(sql, 150, DbMetadata.DBID_PG);
+		f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
 		f.setKeywordCase(GeneratedIdentifierCase.upper);
 		f.setIdentifierCase(GeneratedIdentifierCase.lower);
     f.setIndentWhereCondition(true);
@@ -1717,7 +1717,7 @@ public class WbSqlFormatterTest
       ")\n" +
       "select * \n" +
       "from dates";
-	  f = new WbSqlFormatter(sql, 50, DbMetadata.DBID_PG);
+	  f = new WbSqlFormatter(sql, 50, DBID.Postgres.getId());
     f.setFunctionCase(GeneratedIdentifierCase.lower);
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     f.setIdentifierCase(GeneratedIdentifierCase.lower);
@@ -2581,14 +2581,14 @@ public class WbSqlFormatterTest
 				"                          WHEN 1 THEN 0\n" +
 				"                          ELSE 1\n" +
 				"                        END";
-			f = new WbSqlFormatter(sql, 10, DbMetadata.DBID_MS);
+			f = new WbSqlFormatter(sql, 10, DBID.SQL_Server.getId());
 
 			formatted = f.getFormattedSql();
 //			System.out.println("************** result:\n" + formatted + "\n********** expected:\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 
 			sql = "SELECT ber.nachname AS ber_nachname, \n" + "       ber.nummer AS ber_nummer \n" + "FROM table a WHERE (x in (select bla,bla,alkj,aldk,alkjd,dlaj,alkjdaf from blub 1, blub2, blub3 where x=1 and y=2 and z=3 and a=b and c=d) or y = 5)" + " and a *= b and b = c";
-			f = new WbSqlFormatter(sql, 10, DbMetadata.DBID_MS);
+			f = new WbSqlFormatter(sql, 10, DBID.SQL_Server.getId());
 			formatted = f.getFormattedSql();
 			expected = "SELECT ber.nachname AS ber_nachname,\n" + "       ber.nummer AS ber_nummer\n" + "FROM TABLE a\n" + "WHERE (x IN (SELECT bla,\n" + "                    bla,\n" + "                    alkj,\n" + "                    aldk,\n" + "                    alkjd,\n" + "                    dlaj,\n" + "                    alkjdaf\n" + "             FROM blub 1,\n" + "                  blub2,\n" + "                  blub3\n" + "             WHERE x = 1\n" + "             AND   y = 2\n" + "             AND   z = 3\n" + "             AND   a = b\n" + "             AND   c = d) OR y = 5)\n" + "AND   a *= b\n" + "AND   b = c";
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
@@ -2606,7 +2606,7 @@ public class WbSqlFormatterTest
 				"FROM a,\n" +
         "     b\n" +
 				"WHERE a.id = b.id (+)";
-			f = new WbSqlFormatter(sql, 10, DbMetadata.DBID_ORA);
+			f = new WbSqlFormatter(sql, 10, DBID.Oracle.getId());
 			formatted = f.getFormattedSql();
 			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
@@ -2640,7 +2640,7 @@ public class WbSqlFormatterTest
   public void testSelectFromFunction()
   {
     String sql = "select n from generate_series(1, 1, 1) AS x(n)";
-		WbSqlFormatter f = new WbSqlFormatter(sql, 100, DbMetadata.DBID_PG);
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100, DBID.Postgres.getId());
     f.setFunctionCase(GeneratedIdentifierCase.lower);
     f.setKeywordCase(GeneratedIdentifierCase.upper);
     String formatted = f.getFormattedSql();

@@ -35,7 +35,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
 import workbench.db.exporter.InfinityLiterals;
@@ -124,7 +124,7 @@ public class SqlLiteralFormatter
   public SqlLiteralFormatter(String dbid)
   {
     isDbId = true;
-    isOracle = DbMetadata.DBID_ORA.equals(dbid);
+    isOracle = DBID.Oracle.isDB(dbid);
     setDateLiteralType(dbid);
     checkDBMSTypes = true;
   }

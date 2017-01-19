@@ -88,6 +88,10 @@
 	<section id="import-general-parameters">
 		<title>General parameters</title>
 
+    <para>
+      <literal>WbImport</literal> supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
+
     <indexterm><primary>Import</primary><secondary>parameters</secondary></indexterm>
 		<para>The WbImport command has the following syntax</para>
 		<informaltable frame="all">

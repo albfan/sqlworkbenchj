@@ -109,7 +109,7 @@ public class ReaderFactory
     {
       return new MySqlProcedureReader(meta.getWbConnection());
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_TERADATA))
+    if (DBID.Teradata.isDB(meta.getDbId()))
     {
       return new TeradataProcedureReader(meta.getWbConnection());
     }
@@ -117,11 +117,11 @@ public class ReaderFactory
     {
       return new MonetDbProcedureReader(meta.getWbConnection());
     }
-    if (meta.getDbId().equals("informix_dynamic_server") && Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.procedurelist.usecustom", true))
+    if (DBID.Informix.isDB(meta.getDbId()) && Settings.getInstance().getBoolProperty("workbench.db.informix_dynamic_server.procedurelist.usecustom", true))
     {
       return new InformixProcedureReader(meta.getWbConnection());
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_HANA))
+    if (DBID.HANA.isDB(meta.getDbId()))
     {
       return new HanaProcedureReader(meta.getWbConnection());
     }
@@ -159,11 +159,11 @@ public class ReaderFactory
     {
       return new Db2SequenceReader(con, meta.getDbId());
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_CUBRID))
+    if (DBID.Cubrid.isDB(meta.getDbId()))
     {
       return new CubridSequenceReader(con);
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_VERTICA))
+    if (DBID.Vertica.isDB(meta.getDbId()))
     {
       return new VerticaSequenceReader(con);
     }
@@ -224,11 +224,11 @@ public class ReaderFactory
     {
       return new MonetDbIndexReader(meta);
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_DB2_LUW))
+    if (DBID.DB2_LUW.isDB(meta.getDbId()))
     {
       return new Db2IndexReader(meta);
     }
-    if (meta.getDbId().equals(DbMetadata.DBID_TERADATA))
+    if (DBID.Teradata.isDB(meta.getDbId()))
     {
       return new TeradataIndexReader(meta);
     }
@@ -262,7 +262,7 @@ public class ReaderFactory
     {
       return new FirebirdConstraintReader();
     }
-    if (DbMetadata.DBID_H2.equals(dbid))
+    if (DBID.H2.isDB(dbid))
     {
       return new H2ConstraintReader();
     }

@@ -27,8 +27,10 @@ import java.sql.SQLException;
 
 import workbench.interfaces.ExecutionController;
 import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
@@ -89,11 +91,11 @@ public class WbConfirm
 			yes = cmdLine.getValue(PARAM_YES);
 			no = cmdLine.getValue(PARAM_NO);
 
-      if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+      if (!checkConditions(result))
       {
         return result;
       }
-		}
+    }
 		else
 		{
 			msg = StringUtil.trimQuotes(args);

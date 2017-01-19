@@ -109,11 +109,11 @@ public interface SynonymReader
       {
         return new IngresSynonymReader();
       }
-      if (conn.getDbId().equals(DbMetadata.DBID_HANA))
+      if (DBID.HANA.isDB(conn))
       {
         return new HanaSynonymReader();
       }
-      if (conn.getDbId().equals(DbMetadata.DBID_OPENEDGE))
+      if (DBID.OPENEDGE.isDB(conn))
       {
         return new OpenEdgeSynonymReader();
       }

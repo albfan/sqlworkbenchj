@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.db.AbstractConstraintReader;
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.WbConnection;
 
 /**
@@ -67,8 +67,8 @@ public class Db2ConstraintReader
   {
     super(conn.getDbId());
     String dbid = conn.getDbId();
-    isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
-    isAS400 = dbid.equals(DbMetadata.DBID_DB2_ISERIES);
+    isHostDB2 = equals(DBID.DB2_ZOS.isDB(dbid));
+    isAS400 = equals(DBID.DB2_ISERIES.isDB(dbid));
     catalogSeparator = conn.getMetadata().getCatalogSeparator();
   }
 

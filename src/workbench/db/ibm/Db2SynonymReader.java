@@ -32,7 +32,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -73,8 +73,8 @@ public class Db2SynonymReader
   {
     String sql = "";
 
-    boolean isHostDB2 = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS);
-    boolean isISeries = con.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES);
+    boolean isHostDB2 = DBID.DB2_ZOS.isDB(con);
+    boolean isISeries = DBID.DB2_ISERIES.isDB(con);
 
     if (isISeries)
     {

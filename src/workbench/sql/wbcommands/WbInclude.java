@@ -158,11 +158,6 @@ public class WbInclude
       }
 		}
 
-		if (!ConditionCheck.isCommandLineOK(result, cmdLine))
-		{
-			return result;
-		}
-
 		if (!checkConditions(result))
 		{
 			return result;
@@ -255,7 +250,7 @@ public class WbInclude
         batchRunner.setRetryHandler(runner.getRetryHandler());
       }
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
-      
+
 			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, showOutput);
 			batchRunner.showResultSets(showResults);
       if (showResults && WbManager.getInstance().isConsoleMode())
@@ -354,18 +349,6 @@ public class WbInclude
 		{
 			batchRunner.cancel();
 		}
-	}
-
-	private boolean checkConditions(StatementRunnerResult result)
-	{
-		ConditionCheck.Result check = ConditionCheck.checkConditions(cmdLine);
-		if (check.isOK())
-		{
-			return true;
-		}
-		result.addMessage(ConditionCheck.getMessage("ErrInclude", check));
-		result.setSuccess();
-		return false;
 	}
 
 	@Override

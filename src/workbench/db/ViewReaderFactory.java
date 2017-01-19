@@ -53,7 +53,7 @@ public class ViewReaderFactory
     {
       return new SqlServerViewReader(con);
     }
-    if (con.getDbId().equals(DbMetadata.DBID_HANA))
+    if (DBID.HANA.isDB(con))
     {
       return new HanaViewReader(con);
     }

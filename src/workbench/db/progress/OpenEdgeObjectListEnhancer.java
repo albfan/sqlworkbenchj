@@ -31,6 +31,7 @@ import java.util.TreeMap;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DBID;
 import workbench.db.DbMetadata;
 import workbench.db.ObjectListEnhancer;
 import workbench.db.WbConnection;
@@ -52,7 +53,7 @@ public class OpenEdgeObjectListEnhancer
   @Override
   public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
   {
-    if (Settings.getInstance().getBoolProperty("workbench.db." + DbMetadata.DBID_OPENEDGE + ".remarks.object.retrieve", false))
+    if (Settings.getInstance().getBoolProperty("workbench.db." + DBID.OPENEDGE.getId() + ".remarks.object.retrieve", false))
     {
       updateObjectRemarks(con, result, aCatalog, aSchema, objects);
     }

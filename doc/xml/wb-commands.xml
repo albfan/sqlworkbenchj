@@ -225,6 +225,11 @@ $$ LANGUAGE plpgsql;
       you will have to use the long version of the command using the <literal>-file</literal> and <literal>-delimiter</literal>
       parameters.
     </para>
+
+    <para>
+      <literal>WbInclude</literal> supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
+
     <para>The command supports the following parameters:</para>
 
     <informaltable frame="all">
@@ -363,9 +368,6 @@ from person/
         </tbody>
       </tgroup>
     </informaltable>
-    <para>
-      <literal>WbInclude</literal> also supports <link linkend="conditional-exec">conditional execution</link>
-    </para>
 
     <section id="command-include-examples">
       <title>Examples</title>
@@ -391,6 +393,9 @@ from person/
       The following &wb-productname; commands support conditional execution based on variables:
 			<itemizedlist>
         <listitem><literal><link linkend="command-wbinclude">WbInclude</link></literal></listitem>
+        <listitem><literal><link linkend="command-wbcopy">WbCopy</link></literal></listitem>
+        <listitem><literal><link linkend="command-import">WbImport</link></literal></listitem>
+        <listitem><literal><link linkend="command-export">WbExport</link></literal></listitem>
         <listitem><literal><link linkend="command-wbexec">WbSysExec</link></literal></listitem>
       </itemizedlist>
     </para>
@@ -1250,6 +1255,10 @@ WHERE id=42;</programlisting>
       individually, a second format is available using the standard &wb-productname; parameter handling:
     </para>
 
+    <para>
+      <literal>WbSysExec</literal> supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
+
     <informaltable frame="all">
       <tgroup cols="2"  align="left">
         <colspec colname="c1" colwidth="4cm" />
@@ -1277,10 +1286,6 @@ WHERE id=42;</programlisting>
         </tbody>
       </tgroup>
     </informaltable>
-
-    <para>
-      <literal>WbSysExec</literal> also supports <link linkend="conditional-exec">conditional execution</link>
-    </para>
 
     <para>
       To run an internal Windows command using the second format, use the following syntax:

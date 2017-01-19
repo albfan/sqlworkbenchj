@@ -107,27 +107,6 @@ import workbench.util.VersionNumber;
 public class DbMetadata
   implements QuoteHandler
 {
-  public static final String DBID_ORA = "oracle";
-  public static final String DBID_PG = "postgresql";
-  public static final String DBID_MS = "microsoft_sql_server";
-  public static final String DBID_VERTICA = "vertica_database";
-  public static final String DBID_MYSQL = "mysql";
-  public static final String DBID_FIREBIRD = "firebird";
-  public static final String DBID_DB2_LUW = "db2";  // Linux, Unix, Windows
-  public static final String DBID_DB2_ISERIES = "db2i";  // AS/400 iSeries
-  public static final String DBID_DB2_ZOS = "db2h";  // z/OS
-  public static final String DBID_SQLITE = "sqlite";
-  public static final String DBID_SQL_ANYWHERE = "sql_anywhere";
-  public static final String DBID_TERADATA = "teradata";
-  public static final String DBID_H2 = "h2";
-  public static final String DBID_HSQLDB = "hsql_database_engine";
-  public static final String DBID_DERBY = "apache_derby";
-  public static final String DBID_OPENEDGE = "openedge";
-  public static final String DBID_HANA = "hdb";
-  public static final String DBID_CUBRID = "cubrid";
-  public static final String DBID_INFORMIX = "informix_dynamic_server";
-  public static final String DBID_EXASOL = "exasolution";
-
   public static final String MVIEW_NAME = "MATERIALIZED VIEW";
   private final String[] EMPTY_STRING_ARRAY = new String[]{};
 
@@ -282,7 +261,7 @@ public class DbMetadata
       // product name that is reported with the 1.5 driver.
       // Otherwise the DBID would look something like:
       // firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
-      dbId = DBID_FIREBIRD;
+      dbId = DBID.Firebird.getId();
 
       // because the dbId is already initialized, we need to log it here
       LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
@@ -318,13 +297,13 @@ public class DbMetadata
       procedureReader = new Db2ProcedureReader(dbConnection, getDbId());
 
       // Generated columns are not available on the host version...
-      if (getDbId().equals(DBID_DB2_LUW))
+      if (getDbId().equals(DBID.DB2_LUW.getId()))
       {
         extenders.add(new DB2TypeReader());
         appenders.add(new DB2TempTableReader());
       }
 
-      if (getDbId().equals(DBID_DB2_ISERIES))
+      if (getDbId().equals(DBID.DB2_ISERIES.getId()))
       {
         objectListEnhancer = new Db2iObjectListEnhancer();
       }
@@ -372,7 +351,7 @@ public class DbMetadata
     else if (productLower.contains("informix") || Settings.getInstance().getInformixProductNames().contains(productName))
     {
       // use the same DBID regardless of the product name reported by the server
-      dbId = DBID_INFORMIX;
+      dbId = DBID.Informix.getId();
       dataTypeResolver = new InformixDataTypeResolver();
     }
     else if (productLower.equals("vertica database"))
@@ -383,7 +362,7 @@ public class DbMetadata
     else if (productLower.contains("openedge"))
     {
       // Progress returns a different name through JDBC and ODBC
-      dbId = DBID_OPENEDGE;
+      dbId = DBID.OPENEDGE.getId();
       objectListEnhancer = new OpenEdgeObjectListEnhancer();
       sequenceReader = new OpenEdgeSequenceReader(aConnection);
       if (Settings.getInstance().getBoolProperty("workbench.db.openedge.check.defaultschema", true))
@@ -856,14 +835,14 @@ public class DbMetadata
   public boolean isMySql() { return this.isMySql; }
   public boolean isMariaDB() { return this.isMariaDB; }
   public boolean isPostgres() { return this.isPostgres; }
-  public boolean isVertica() { return getDbId().equals(DBID_VERTICA); }
+  public boolean isVertica() { return getDbId().equals(DBID.Vertica.getId()); }
   public boolean isOracle() { return this.isOracle; }
   public boolean isHsql() { return this.isHsql; }
   public boolean isFirebird() { return this.isFirebird; }
   public boolean isSqlServer() { return this.isSqlServer; }
   public boolean isApacheDerby() { return this.isApacheDerby; }
   public boolean isH2() { return this.isH2; }
-  public boolean isDB2LuW() { return this.getDbId().equals(DBID_DB2_LUW); }
+  public boolean isDB2LuW() { return this.getDbId().equals(DBID.DB2_LUW.getId()); }
 
   /**
    * Clears the cached list of catalogs to ignore.

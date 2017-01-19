@@ -32,7 +32,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ConstraintDefinition;
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.UniqueConstraintReader;
@@ -57,10 +57,10 @@ public class DB2UniqueConstraintReader
 
     String dbid = con.getDbId();
     // Not supported for db2 iSeries
-    if (dbid.equals(DbMetadata.DBID_DB2_ISERIES)) return;
+    if (DBID.DB2_ISERIES.isDB(dbid)) return;
 
     StringBuilder sql = new StringBuilder(500);
-    if (dbid.equals(DbMetadata.DBID_DB2_LUW))
+    if (DBID.DB2_LUW.isDB(dbid))
     {
       // DB2 LUW
       sql.append(
@@ -76,7 +76,7 @@ public class DB2UniqueConstraintReader
         ") t \n " +
         "where (");
     }
-    else if (dbid.equals(DbMetadata.DBID_DB2_ZOS))
+    else if (DBID.DB2_ZOS.isDB(dbid))
     {
       // DB2 host
       sql.append(

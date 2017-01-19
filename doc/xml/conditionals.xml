@@ -70,6 +70,33 @@
           </para>
         </entry>
       </row>
+
+      <row>
+        <entry>-isDBMS</entry>
+        <entry>
+          <para>
+            The command is only executed if the current connection is against the specified DBMS. The value supplied
+            is the <link linkend="dbid">DBID</link> that is used internally by &wb-productname;, e.g. <literal>-isDBMS=postgresql</literal>
+          </para>
+          <para>
+            This parameter supports auto-completion.
+          </para>
+        </entry>
+      </row>
+
+      <row>
+        <entry>-isNotDBMS</entry>
+        <entry>
+          <para>
+            The command is only executed if the current connection is not against the specified DBMS. The value supplied
+            is the <link linkend="dbid">DBID</link> that is used internally by &wb-productname; e.g. <literal>-isNotDBMS=postgresql</literal>
+          </para>
+          <para>
+            This parameter supports auto-completion.
+          </para>
+        </entry>
+      </row>
+
     </tbody>
   </tgroup>
 </informaltable>

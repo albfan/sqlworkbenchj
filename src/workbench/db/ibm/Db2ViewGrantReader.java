@@ -23,7 +23,7 @@
  */
 package workbench.db.ibm;
 
-import workbench.db.DbMetadata;
+import workbench.db.DBID;
 import workbench.db.ViewGrantReader;
 
 /**
@@ -37,7 +37,7 @@ public class Db2ViewGrantReader
 
   public Db2ViewGrantReader(String dbid)
   {
-    isHostDB2 = dbid.equals(DbMetadata.DBID_DB2_ZOS);
+    isHostDB2 = DBID.DB2_ZOS.isDB(dbid);
   }
 
   @Override

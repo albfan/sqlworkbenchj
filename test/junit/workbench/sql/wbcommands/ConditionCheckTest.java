@@ -59,17 +59,17 @@ public class ConditionCheckTest
 
       cmdLine.parse("-ifEquals=\"do_update=y\"");
 
-      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine);
+      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine, null);
       assertTrue(result.isOK());
 
       VariablePool.getInstance().setParameterValue("do_update", "n");
-      result = ConditionCheck.checkConditions(cmdLine);
+      result = ConditionCheck.checkConditions(cmdLine, null);
       assertFalse(result.isOK());
       assertEquals("do_update", result.getVariable());
       assertEquals("y", result.getExpectedValue());
       assertEquals(ConditionCheck.PARAM_IF_EQUALS, result.getFailedCondition());
-      String msg = ConditionCheck.getMessage("ErrInclude", result);
-      assertEquals("Script not executed because variable \"do_update\" is not equal to y", msg);
+      String msg = ConditionCheck.getMessage(WbInclude.VERB, result);
+      assertEquals(WbInclude.VERB + " not executed because variable \"do_update\" is not equal to y", msg);
     }
     finally
     {
@@ -90,18 +90,18 @@ public class ConditionCheckTest
 
       cmdLine.parse("-ifNotEquals=\"do_update=n\"");
 
-      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine);
+      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine, null);
       assertTrue(result.isOK());
 
       VariablePool.getInstance().setParameterValue("do_update", "n");
-      result = ConditionCheck.checkConditions(cmdLine);
+      result = ConditionCheck.checkConditions(cmdLine, null);
       assertFalse(result.isOK());
       assertEquals("do_update", result.getVariable());
       assertEquals("n", result.getExpectedValue());
       assertEquals(ConditionCheck.PARAM_IF_NOTEQ, result.getFailedCondition());
-      String msg = ConditionCheck.getMessage("ErrInclude", result);
+      String msg = ConditionCheck.getMessage(WbInclude.VERB, result);
       System.out.println(msg);
-      assertEquals("Script not executed because variable \"do_update\" is equal to n", msg);
+      assertEquals(WbInclude.VERB + " not executed because variable \"do_update\" is equal to n", msg);
     }
     finally
     {
@@ -122,18 +122,18 @@ public class ConditionCheckTest
 
       cmdLine.parse("-ifNotEmpty=do_update");
 
-      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine);
+      ConditionCheck.Result result = ConditionCheck.checkConditions(cmdLine, null);
       assertTrue(result.isOK());
 
       VariablePool.getInstance().setParameterValue("do_update", null);
-      result = ConditionCheck.checkConditions(cmdLine);
+      result = ConditionCheck.checkConditions(cmdLine, null);
       assertFalse(result.isOK());
       assertEquals("do_update", result.getVariable());
       assertNull(result.getExpectedValue());
       assertEquals(ConditionCheck.PARAM_IF_NOTEMPTY, result.getFailedCondition());
-      String msg = ConditionCheck.getMessage("ErrInclude", result);
+      String msg = ConditionCheck.getMessage(WbInclude.VERB, result);
       System.out.println(msg);
-      assertEquals("Script not executed because variable \"do_update\" is empty or not defined", msg);
+      assertEquals(WbInclude.VERB + " not executed because variable \"do_update\" is empty or not defined", msg);
     }
     finally
     {

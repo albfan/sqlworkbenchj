@@ -24,7 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+
 import workbench.db.ColumnIdentifier;
+import workbench.db.DBID;
 import workbench.db.DbMetadata;
 import workbench.db.DmlExpressionBuilder;
 import workbench.db.DmlExpressionType;
@@ -32,7 +35,7 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerUtil;
-import workbench.log.LogMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -47,8 +50,8 @@ public class ImportDMLStatementBuilder
   private final TableIdentifier targetTable;
   private final List<ColumnIdentifier> targetColumns;
   private List<ColumnIdentifier> keyColumns;
-  private final Set<String> upsertRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_HANA, DbMetadata.DBID_H2, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
-  private final Set<String> ignoreRequiresPK = CollectionUtil.caseInsensitiveSet(DbMetadata.DBID_CUBRID, DbMetadata.DBID_MYSQL, DbMetadata.DBID_SQL_ANYWHERE, DbMetadata.DBID_SQLITE);
+  private final Set<String> upsertRequiresPK = CollectionUtil.caseInsensitiveSet(DBID.Cubrid.getId(), DBID.MySQL.getId(), DBID.HANA.getId(), DBID.H2.getId(), DBID.SQL_Anywhere.getId(), DBID.SQLite.getId());
+  private final Set<String> ignoreRequiresPK = CollectionUtil.caseInsensitiveSet(DBID.Cubrid.getId(), DBID.MySQL.getId(), DBID.SQL_Anywhere.getId(), DBID.SQLite.getId());
 
   ImportDMLStatementBuilder(WbConnection connection, TableIdentifier target, List<ColumnIdentifier> columns, ColumnFilter filter, boolean adjustColumnNameCase)
   {
@@ -72,8 +75,8 @@ public class ImportDMLStatementBuilder
   {
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
     if (dbConn.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(dbConn, "9.5")) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    if (DBID.SQLite.isDB(dbConn)) return true;
+    if (DBID.SQL_Anywhere.isDB(dbConn) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
 
     return false;
   }
@@ -96,12 +99,12 @@ public class ImportDMLStatementBuilder
     if (dbConn.getMetadata().isOracle() && JdbcUtils.hasMinimumServerVersion(dbConn, "11.2") ) return true;
     if (dbConn.getMetadata().isDB2LuW()) return true;
     if (dbConn.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(dbConn)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
+    if (DBID.DB2_ZOS.isDB(dbConn) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    if (DBID.Cubrid.isDB(dbConn)) return true;
     if (dbConn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(dbConn, "2.0")) return true;
     if (dbConn.getMetadata().isMySql()) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
+    if (DBID.SQLite.isDB(dbConn)) return true;
+    if (DBID.SQL_Anywhere.isDB(dbConn) && JdbcUtils.hasMinimumServerVersion(dbConn, "10.0")) return true;
 
     return false;
   }
@@ -124,14 +127,14 @@ public class ImportDMLStatementBuilder
     if (connection.getMetadata().isOracle()) return true;
     if (connection.getMetadata().isDB2LuW()) return true;
     if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_DB2_ZOS) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_HANA)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_CUBRID)) return true;
+    if (DBID.DB2_ZOS.isDB(connection) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
+    if (DBID.HANA.isDB(connection)) return true;
+    if (DBID.Cubrid.isDB(connection)) return true;
     if (connection.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(connection, "2.0")) return true;
     if (connection.getMetadata().isH2()) return true;
     if (connection.getMetadata().isMySql()) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_SQLITE)) return true;
-    if (connection.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
+    if (DBID.SQLite.isDB(connection)) return true;
+    if (DBID.SQL_Anywhere.isDB(connection) && JdbcUtils.hasMinimumServerVersion(connection, "10.0")) return true;
 
     return false;
   }
@@ -303,7 +306,7 @@ public class ImportDMLStatementBuilder
     {
       return createMySQLUpsert(columnConstants, insertSqlStart, true);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
+    if (DBID.Cubrid.isDB(dbConn))
     {
       return createMySQLUpsert(columnConstants, insertSqlStart, true);
     }
@@ -319,7 +322,7 @@ public class ImportDMLStatementBuilder
     {
       return createDB2LuWUpsert(columnConstants, true);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS))
+    if (DBID.DB2_ZOS.isDB(dbConn))
     {
       return createDB2zOSUpsert(columnConstants, true);
     }
@@ -327,11 +330,11 @@ public class ImportDMLStatementBuilder
     {
       return createSqlServerUpsert(columnConstants, true);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE))
+    if (DBID.SQLite.isDB(dbConn))
     {
       return createInsertStatement(columnConstants, "INSERT OR IGNORE ");
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE))
+    if (DBID.SQL_Anywhere.isDB(dbConn))
     {
       return createSQLAnywhereStatement(columnConstants, true);
     }
@@ -364,15 +367,15 @@ public class ImportDMLStatementBuilder
     {
       return createDB2LuWUpsert(columnConstants, false);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_DB2_ZOS))
+    if (DBID.DB2_ZOS.isDB(dbConn))
     {
       return createDB2zOSUpsert(columnConstants, false);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_HANA))
+    if (DBID.HANA.isDB(dbConn))
     {
       return createHanaUpsert(columnConstants);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_CUBRID))
+    if (DBID.Cubrid.isDB(dbConn))
     {
       return createMySQLUpsert(columnConstants, null, false);
     }
@@ -384,11 +387,11 @@ public class ImportDMLStatementBuilder
     {
       return createOracleMerge(columnConstants);
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQLITE))
+    if (DBID.SQLite.isDB(dbConn))
     {
       return createInsertStatement(columnConstants, "INSERT OR REPLACE ");
     }
-    if (dbConn.getDbId().equals(DbMetadata.DBID_SQL_ANYWHERE))
+    if (DBID.SQL_Anywhere.isDB(dbConn))
     {
       return createSQLAnywhereStatement(columnConstants, false);
     }

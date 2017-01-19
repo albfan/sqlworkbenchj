@@ -20,9 +20,10 @@
  */
 package workbench.sql.parser;
 
-import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
 import workbench.resource.Settings;
+
+import workbench.db.DBID;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -47,25 +48,25 @@ public enum ParserType
 		if (dbid == null) return Standard;
 
 		// This will properly handle Postgres' dollar quoting
-		if (DbMetadata.DBID_PG.equals(dbid)) return Postgres;
-		if ("vertica_database".equals(dbid)) return Postgres;
+    if (DBID.Postgres.isDB(dbid)) return Postgres;
+    if (DBID.Vertica.isDB(dbid)) return Postgres;
 
 		// This will allow mixing the standard delimiter with the alternate delimiter
-		if (DbMetadata.DBID_ORA.equals(dbid)) return Oracle;
+    if (DBID.Oracle.isDB(dbid)) return Oracle;
 
 		// This will properly deal with the stupid [..] "quotes" in T-SQL
-		if (DbMetadata.DBID_MS.equals(dbid)) return SqlServer;
+    if (DBID.SQL_Server.isDB(dbid)) return SqlServer;
 		if ("adaptive_server_enterprise".equals(dbid)) return SqlServer;
 		if ("excel".equals(dbid)) return SqlServer;
 
 		// This will use a different lexer that supports MySQL's stupid backticks
 		// and non-standard line comments
-		if (DbMetadata.DBID_MYSQL.equals(dbid)) return MySQL;
+    if (DBID.MySQL.isDB(dbid)) return MySQL;
 
 		// SQLite also allows these stupid [...] quoting style
 		// As currently this is the only thing that makes the Lexer for SQL server
 		// different from the standard Lexer I'm using it for SQLite as well.
-		if ("sqlite".equals(dbid)) return SqlServer;
+		if (DBID.SQLite.isDB(dbid)) return SqlServer;
 
 		String name = Settings.getInstance().getProperty("workbench.db." + dbid + ".parsertype", null);
 

@@ -74,11 +74,11 @@ public class TableSourceBuilderFactory
     {
       return new HsqlTableSourceBuilder(con);
     }
-    else if (con.getDbId().equals(DbMetadata.DBID_DB2_LUW))
+    else if (DBID.DB2_LUW.isDB(con))
     {
       return new Db2TableSourceBuilder(con);
     }
-    if (con.getDbId().equals("informix_dynamic_server"))
+    if (DBID.Informix.isDB(con))
     {
       return new InformixTableSourceBuilder(con);
     }
@@ -86,11 +86,11 @@ public class TableSourceBuilderFactory
     {
       return new FirebirdTableSourceBuilder(con);
     }
-    if (con.getDbId().equals(DbMetadata.DBID_HANA))
+    if (DBID.HANA.isDB(con))
     {
       return new HanaTableSourceBuilder(con);
     }
-    if (con.getDbId().equals(DbMetadata.DBID_EXASOL))
+    if (DBID.Exasol.isDB(con))
     {
       return new ExasolTableSourceBuilder(con);
     }

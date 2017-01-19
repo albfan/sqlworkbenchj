@@ -28,6 +28,9 @@ import java.util.List;
 
 import workbench.AppArguments;
 import workbench.WbManager;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
@@ -36,11 +39,12 @@ import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.importer.TableStatements;
+
 import workbench.gui.profiles.ProfileKey;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
@@ -185,12 +189,12 @@ public class WbCopy
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
-    
-    if (!ConditionCheck.isCommandLineOK(result, cmdLine))
+
+    if (!checkConditions(result))
     {
       return result;
     }
-
+    
     synchronized (VERB)
     {
       runId = ++runCount;

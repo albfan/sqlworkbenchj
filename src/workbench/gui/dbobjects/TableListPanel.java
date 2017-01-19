@@ -82,6 +82,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
+import workbench.db.DBID;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
@@ -643,7 +644,7 @@ public class TableListPanel
         displayTab.removeAll();
         addBaseObjectPanels();
         addDataPanel();
-        if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
+        if (DBID.Vertica.isDB(dbConnection))
         {
           displayTab.add(ResourceMgr.getString("TxtDbExplorerProjections"), projections);
         }
@@ -1002,7 +1003,7 @@ public class TableListPanel
 	{
 		if (dbConnection == null) return;
 
-		if (dbConnection.getDbId().equals(DbMetadata.DBID_VERTICA))
+		if (DBID.Vertica.isDB(dbConnection))
 		{
 			projections.setConnection(dbConnection);
 		}

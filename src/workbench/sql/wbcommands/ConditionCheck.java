@@ -22,9 +22,13 @@
  */
 package workbench.sql.wbcommands;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DBID;
+import workbench.db.WbConnection;
 
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
@@ -47,15 +51,31 @@ public class ConditionCheck
 	public static final String PARAM_IF_NOTEQ = "ifNotEquals";
 	public static final String PARAM_IF_EMPTY = "ifEmpty";
 	public static final String PARAM_IF_NOTEMPTY = "ifNotEmpty";
+	public static final String PARAM_IS_DBMS = "isDBMS";
+	public static final String PARAM_ISNOT_DBMS = "isNotDBMS";
 
 	private static final List<String> arguments = CollectionUtil.arrayList(
-		PARAM_IF_DEF, PARAM_IF_NOTDEF, PARAM_IF_EQUALS, PARAM_IF_NOTEQ, PARAM_IF_EMPTY, PARAM_IF_NOTEMPTY);
+		PARAM_IF_DEF, PARAM_IF_NOTDEF, PARAM_IF_EQUALS, PARAM_IF_NOTEQ, PARAM_IF_EMPTY, PARAM_IF_NOTEMPTY,
+    PARAM_IS_DBMS, PARAM_ISNOT_DBMS);
 
 	public static void addParameters(ArgumentParser cmdLine)
 	{
+    List<String> knownDbIds = new ArrayList<>();
+    for (DBID id : DBID.values())
+    {
+      knownDbIds.add(id.getId());
+    }
+
 		for (String arg : arguments)
 		{
-			cmdLine.addArgument(arg);
+      if (arg.equals(PARAM_IS_DBMS) || arg.equals(PARAM_ISNOT_DBMS))
+      {
+        cmdLine.addArgument(arg, knownDbIds);
+      }
+      else
+      {
+        cmdLine.addArgument(arg);
+      }
 		}
 	}
 
@@ -93,10 +113,12 @@ public class ConditionCheck
 	 * Check if the condition specified on the commandline is met.
 	 *
 	 * @param cmdLine the parameter to check
-	 * @return null if the condition is met,
+   * @param conn    the current connection (needed for isDBMS and isNotDBMS)
+   *
+	 * @return {@link #OK} if the condition is met,
 	 *         the parameter where the check failed otherwise
 	 */
-	public static Result checkConditions(ArgumentParser cmdLine)
+	public static Result checkConditions(ArgumentParser cmdLine, WbConnection conn)
 	{
 		if (cmdLine.isArgPresent(PARAM_IF_DEF))
 		{
@@ -165,12 +187,39 @@ public class ConditionCheck
 				return new Result(PARAM_IF_NOTEQ, elements[0], elements[1]);
 			}
 		}
+
+    if (cmdLine.isArgPresent(PARAM_IS_DBMS))
+    {
+      String currentDB = (conn == null ? "N/A" : conn.getDbId());
+      String dbid = cmdLine.getValue(PARAM_IS_DBMS);
+      if (currentDB.equalsIgnoreCase(dbid))
+      {
+        return OK;
+      }
+			return new Result(PARAM_IS_DBMS, currentDB, dbid);
+    }
+
+    if (cmdLine.isArgPresent(PARAM_ISNOT_DBMS))
+    {
+      if (conn == null)
+      {
+        return OK;
+      }
+      String dbid = cmdLine.getValue(PARAM_ISNOT_DBMS);
+      String currentDB = (conn == null ? "N/A" : conn.getDbId());
+      if (!currentDB.equalsIgnoreCase(dbid))
+      {
+        return OK;
+      }
+			return new Result(PARAM_ISNOT_DBMS, currentDB, dbid);
+    }
+
 		return OK;
 	}
 
-	public static String getMessage(String msgPrefix, Result check)
+	public static String getMessage(String command, Result check)
 	{
-		String action = ResourceMgr.getString(msgPrefix + "Action");
+		String action = ResourceMgr.getFormattedString("Err_NotExecuted", command);
 		return ResourceMgr.getFormattedString("Err_" + check.getFailedCondition(), action, check.getVariable(), check.getExpectedValue());
 	}
 

@@ -33,6 +33,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.DBID;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
@@ -135,7 +136,7 @@ public class Db2ProcedureReader
   {
     StringBuilder sql = new StringBuilder(100);
 
-    if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ISERIES))
+    if (DBID.DB2_ISERIES.isDB(connection))
     {
       // DB2 iSeries, AS/400
       sql.append(
@@ -156,7 +157,7 @@ public class Db2ProcedureReader
       SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern, connection);
       SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern, connection);
     }
-    else if (this.connection.getMetadata().getDbId().equals(DbMetadata.DBID_DB2_ZOS))
+    else if (DBID.DB2_ZOS.isDB(connection))
     {
       // DB Host, z/OS
       sql.append(
