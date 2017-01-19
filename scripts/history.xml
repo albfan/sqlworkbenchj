@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-01-14">
+    <entry dev-build="6" type="enh">Conditional execution of Workbench commands now support -isDBMS and -isNotDBMS</entry>
     <entry dev-build="5" type="enh">Added basic support for EXAsol</entry>
     <entry dev-build="5" type="enh">Added support for SSH tunneling per connection profile</entry>
     <entry dev-build="5" type="enh">When loading a SQL script it's now possible to automatically detect the encoding</entry>
