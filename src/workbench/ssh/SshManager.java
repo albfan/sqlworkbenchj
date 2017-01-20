@@ -22,14 +22,16 @@ package workbench.ssh;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import workbench.log.LogMgr;
+
+import workbench.db.ConnectionProfile;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.agentproxy.Connector;
 import com.jcraft.jsch.agentproxy.ConnectorFactory;
-
-import workbench.db.ConnectionProfile;
-import workbench.log.LogMgr;
 
 /**
  *
@@ -39,7 +41,7 @@ public class SshManager
 {
   private final Object lock = new Object();
   private Map<SshConfig, Entry> activeSessions = new HashMap<>();
-  private Map<String, String> passphrases = new HashMap<>();
+  private Map<String, String> passphrases = new ConcurrentHashMap<>();
 
   public String initializeSSHSession(ConnectionProfile profile)
     throws SshException
