@@ -67,19 +67,21 @@ public class HsqlColumnEnhancer
     String tablename = table.getTable().getRawTableName();
     String schema = table.getTable().getRawSchema();
 
-    String sql = "select column_name, " +
-                "        generation_expression, " +
-                "        is_generated, " +
-                "        is_identity, " +
-                "        identity_generation, " +
-                "        identity_start, " +
-                "        identity_increment " +
-                "from information_schema.columns \n" +
-                "where table_name = ? \n" +
-                "and table_schema = ? \n" +
-                "and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))  \n";
+    String sql =
+      "select column_name, \n" +
+      "       generation_expression, \n" +
+      "       is_generated, \n" +
+      "       is_identity, \n" +
+      "       identity_generation, \n" +
+      "       identity_start, \n" +
+      "       identity_increment, \n" +
+      "       data_type, \n" +
+      "       character_maximum_length \n" +
+      "from information_schema.columns \n" +
+      "where table_name = ? \n" +
+      "and table_schema = ? \n" +
+      "and (is_generated = 'ALWAYS' OR (is_identity = 'YES' AND identity_generation IS NOT NULL))";
 
-    Map<String, String> expressions = new HashMap<>();
     Map<String, SequenceDefinition> sequences = getColumnSequences(conn, table.getTable());
 
     try
@@ -97,7 +99,11 @@ public class HsqlColumnEnhancer
         String isIdentity = rs.getString(4);
         String identityExpr = rs.getString(5);
 
+        ColumnIdentifier col = ColumnIdentifier.findColumnInList(table.getColumns(), colname);
+        if (col == null) continue;
+
         String columnExpression = null;
+        
         if (sequences.containsKey(colname))
         {
           SequenceDefinition def = sequences.get(colname);
@@ -125,27 +131,21 @@ public class HsqlColumnEnhancer
             columnExpression += " (START WITH " + start + " INCREMENT BY " + inc + ")";
           }
         }
-        if (StringUtil.isBlank(columnExpression)) continue;
-        expressions.put(colname, columnExpression);
+
+        if (StringUtil.isNonBlank(columnExpression))
+        {
+          col.setDefaultValue(null);
+          col.setComputedColumnExpression(columnExpression);
+        }
       }
     }
     catch (Exception e)
     {
-      LogMgr.logError("HsqlColumnEnhancer.updateComputedColumns()", "Error retrieving remarks", e);
+      LogMgr.logError("HsqlColumnEnhancer.updateComputedColumns()", "Error updating column information", e);
     }
     finally
     {
       SqlUtil.closeAll(rs, stmt);
-    }
-
-    for (ColumnIdentifier col : table.getColumns())
-    {
-      String expr = expressions.get(col.getColumnName());
-      if (StringUtil.isNonBlank(expr))
-      {
-        col.setDefaultValue(null);
-        col.setComputedColumnExpression(expr);
-      }
     }
   }
 

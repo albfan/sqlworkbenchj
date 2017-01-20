@@ -51,6 +51,7 @@ import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
 import workbench.db.hana.HanaSequenceReader;
 import workbench.db.hana.HanaTableDefinitionReader;
+import workbench.db.hsqldb.HsqlDataTypeResolver;
 import workbench.db.hsqldb.HsqlTypeReader;
 import workbench.db.ibm.DB2TempTableReader;
 import workbench.db.ibm.DB2TypeReader;
@@ -248,6 +249,7 @@ public class DbMetadata
     else if (productLower.contains("hsql"))
     {
       this.isHsql = true;
+      this.dataTypeResolver = new HsqlDataTypeResolver();
       if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.2"))
       {
         extenders.add(new HsqlTypeReader());
