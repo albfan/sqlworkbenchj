@@ -36,12 +36,12 @@ import workbench.storage.SqlLiteralFormatter;
  *
  * @author Thomas Kellerer
  */
-public class PostgresMergeGenerator
+public class PostgresWriteableCTEGenerator
   implements MergeGenerator
 {
   private SqlLiteralFormatter formatter;
 
-  public PostgresMergeGenerator()
+  public PostgresWriteableCTEGenerator()
   {
     this.formatter = new SqlLiteralFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
   }

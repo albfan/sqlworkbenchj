@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import workbench.db.AnsiSQLMergeGenerator;
+import workbench.db.DBID;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.db.firebird.Firebird20MergeGenerator;
@@ -39,7 +40,7 @@ import workbench.db.mssql.SqlServerMergeGenerator;
 import workbench.db.mysql.MySQLMergeGenerator;
 import workbench.db.oracle.OracleMergeGenerator;
 import workbench.db.postgres.Postgres95MergeGenerator;
-import workbench.db.postgres.PostgresMergeGenerator;
+import workbench.db.postgres.PostgresWriteableCTEGenerator;
 import workbench.resource.Settings;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
@@ -50,6 +51,8 @@ import workbench.util.CollectionUtil;
  */
 public interface MergeGenerator
 {
+  final String PG_CTE_TYPE = "postgres-cte";
+
   /**
    * Generate a single MERGE statment (or something equivalent depending on the DBMS)
    * based on the passed data.
@@ -140,27 +143,29 @@ public interface MergeGenerator
     {
       if (type == null) return null;
 
-      if ("oracle".equals(type))
+      type = type.toLowerCase();
+
+      if (DBID.Oracle.isDB(type))
       {
         return new OracleMergeGenerator();
       }
 
-      if (type.equals("postgres-9.5"))
+      if (DBID.Postgres.isDB(type) || type.equals("postgres"))
       {
         return new Postgres95MergeGenerator();
       }
 
-      if (type.equals("postgres") || type.equals("postgresql"))
+      if (type.equals("postgres-cte"))
       {
-        return new PostgresMergeGenerator();
+        return new PostgresWriteableCTEGenerator();
       }
 
-      if ("mysql".equals(type))
+      if (DBID.MySQL.isDB(type))
       {
         return new MySQLMergeGenerator();
       }
 
-      if ("microsoft_sql_server".equals(type) || "sqlserver".equals(type))
+      if (DBID.SQL_Server.isDB(type) || "sqlserver".equals(type))
       {
         return new SqlServerMergeGenerator(type);
       }
@@ -180,7 +185,7 @@ public interface MergeGenerator
         return new H2MergeGenerator();
       }
 
-      if ("firebird".equals(type))
+      if (DBID.Firebird.isDB(type))
       {
         if (Settings.getInstance().getBoolProperty("workbench.db.firebird.mergegenerator.use.ansi", true))
         {
@@ -194,7 +199,8 @@ public interface MergeGenerator
 
     public static List<String> getSupportedTypes()
     {
-      return CollectionUtil.arrayList("ansi", "db2", "firebird", "h2", "hsqldb", "mysql", "oracle", "postgres", "postgres-9.5", "sqlserver");
+      return CollectionUtil.arrayList("ansi", "db2", DBID.Firebird.getId(),
+        DBID.H2.getId(), "hsqldb", DBID.MySQL.getId(), DBID.Oracle.getId(), "postgres", PG_CTE_TYPE, "sqlserver");
     }
 
     public static String getTypeForDBID(String dbid)

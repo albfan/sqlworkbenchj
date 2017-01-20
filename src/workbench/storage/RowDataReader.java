@@ -35,15 +35,15 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
+import workbench.db.DBID;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+import workbench.db.hsqldb.HsqlDataConverter;
 import workbench.db.mssql.SqlServerDataConverter;
 import workbench.db.oracle.OracleDataConverter;
 import workbench.db.postgres.PostgresDataConverter;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -516,6 +516,10 @@ public class RowDataReader
     if (meta.isPostgres())
     {
       return PostgresDataConverter.getInstance();
+    }
+    if (DBID.HSQLDB.isDB(conn) && HsqlDataConverter.convertBit())
+    {
+      return HsqlDataConverter.getInstance();
     }
     return null;
   }

@@ -33,12 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.WbManager;
-import workbench.interfaces.ProgressReporter;
-import workbench.interfaces.ResultSetConsumer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
@@ -48,14 +43,16 @@ import workbench.db.exporter.ExportType;
 import workbench.db.exporter.InfinityLiterals;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.exporter.WrongFormatFileException;
-
+import workbench.interfaces.ProgressReporter;
+import workbench.interfaces.ResultSetConsumer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.RowActionMonitor;
-
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterEscapeType;
@@ -621,7 +618,21 @@ public class WbExport
 			exporter.setChrFunction(cmdLine.getValue(ARG_CHARFUNC));
 			exporter.setConcatFunction(cmdLine.getValue(ARG_CONCAT_FUNCTION));
 			exporter.setConcatString(cmdLine.getValue(ARG_CONCAT_OPERATOR));
-			exporter.setMergeType(cmdLine.getValue(ARG_MERGE_TYPE, currentConnection.getDbId()));
+
+      String mergeType = cmdLine.getValue(ARG_MERGE_TYPE);
+      if (StringUtil.isBlank(mergeType))
+      {
+        if (currentConnection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(currentConnection, "9.5"))
+        {
+          mergeType = "postgres-9.5";
+        }
+        else
+        {
+          mergeType = currentConnection.getDbId();
+        }
+      }
+
+      exporter.setMergeType(mergeType);
 
 			CommonArgs.setCommitEvery(exporter, cmdLine);
 

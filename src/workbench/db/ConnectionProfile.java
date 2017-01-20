@@ -41,6 +41,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.ssh.SshConfig;
+import workbench.ssh.SshManager;
 import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -913,16 +914,22 @@ public class ConnectionProfile
     if (config == null) return false;
 
     if (config.getTryAgent() == true) return false;
-    
+    SshManager sshManager = ConnectionMgr.getInstance().getSshManager();
+
+    // Assume that non-encrypted key files don't need a passphrase
+    if (!sshManager.needsPassphrase(config)) return false;
+
     if (config.getPrivateKeyFile() != null)
     {
-      String passphrase = ConnectionMgr.getInstance().getSshManager().getPassphrase(config);
+      // Check for cached passphrases for this config
+      String passphrase = sshManager.getPassphrase(config);
       if (passphrase != null)
       {
         config.setTemporaryPassword(passphrase);
         return false;
       }
     }
+
     return StringUtil.isBlank(config.getPassword());
   }
 

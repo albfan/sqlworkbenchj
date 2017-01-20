@@ -209,7 +209,7 @@
 						<entry>-type</entry>
 						<entry>
 							<para>
-								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xlsm, xls, xlsx, html, json</literal>
+								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, sqlmerge, xml, ods, xlsm, xls, xlsx, html, json</literal>
 							</para>
 							<para>
 								Defines the type of the output file. <literal>sqlinsert</literal>
@@ -220,6 +220,11 @@
 								statement for every <literal>INSERT</literal> statement. To create this
 								kind of script, use the <literal>sqldeleteinsert</literal> type.
 							</para>
+              <para>
+                <literal>sqlmerge</literal> will generate statements that will result in <literal>INSERT</literal>
+                or <literal>UPDATE</literal> type of statements. The exact syntax depends on the current database.
+                To select a syntax for a different DBMS, use the parameter <literal>-mergeType</literal>.
+              </para>
 							<para>
 								In order for this to work properly the table needs to have keycolumns defined,
 								or you have to define the keycolumns manually using the <literal>-keycolumns</literal>

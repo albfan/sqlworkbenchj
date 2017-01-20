@@ -23,12 +23,13 @@ package workbench.ssh;
 import java.util.HashMap;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-
-import workbench.db.ConnectionProfile;
-
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.agentproxy.Connector;
 import com.jcraft.jsch.agentproxy.ConnectorFactory;
+
+import workbench.db.ConnectionProfile;
+import workbench.log.LogMgr;
 
 /**
  *
@@ -79,6 +80,33 @@ public class SshManager
     {
       LogMgr.logError("SshManager.initSSH()", "Could not initialize SSH tunnel", ex);
       throw new SshException("Could not initialize SSH tunnel: " + ex.getMessage(), ex);
+    }
+  }
+
+  public boolean needsPassphrase(SshConfig config)
+  {
+    if (config == null) return false;
+
+    String privateKeyFile = config.getPrivateKeyFile();
+    if (privateKeyFile == null) return false;
+
+    KeyPair kpair = null;
+    try
+    {
+      JSch jsch = new JSch();
+      kpair = KeyPair.load(jsch, privateKeyFile);
+      return kpair.isEncrypted();
+    }
+    catch (Throwable th)
+    {
+      return true;
+    }
+    finally
+    {
+      if (kpair != null)
+      {
+        kpair.dispose();
+      }
     }
   }
 
