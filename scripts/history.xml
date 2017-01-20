@@ -16,6 +16,7 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="6" type="fix">For HSQLDB BIT columns were not displayed correctly.</entry>
     <entry dev-build="6" type="fix">For Oracle, the DEDUPLICATION option was not shown for LOB columns</entry>
     <entry dev-build="5" type="fix">Auto completion did not overwrite a partial table (or column) name if that part was a SQL keyword.</entry>
     <entry dev-build="5" type="fix">Activating the object list filter in the DbExplorer by using the toolbar button did not work reliably.</entry>
