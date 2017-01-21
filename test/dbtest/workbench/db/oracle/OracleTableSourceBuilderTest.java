@@ -336,26 +336,24 @@ public class OracleTableSourceBuilderTest
 			"  B1   BLOB, \n" +
 			"  B2   BLOB, \n" +
 			"  B3   BLOB, \n" +
-			"  B4   BLOB \n" +
+			"  B4   BLOB, \n" +
+			"  B5   CLOB \n" +
 			") \n" +
-			"LOB (B1) STORE AS SECUREFILE ( DISABLE STORAGE IN ROW RETENTION NONE COMPRESS MEDIUM NOCACHE ), \n" +
-			"LOB (B2) STORE AS SECUREFILE ( ENABLE STORAGE IN ROW RETENTION AUTO COMPRESS HIGH CACHE READS ), \n" +
-			"LOB (B3) STORE AS SECUREFILE ( ENABLE STORAGE IN ROW RETENTION MIN 1000 NOCOMPRESS CACHE ), \n" +
-			"LOB (B4) STORE AS BASICFILE ( ENABLE STORAGE IN ROW NOCACHE )";
-		try
-		{
-			TestUtil.executeScript(con, sql);
-			TableIdentifier foo = con.getMetadata().findTable(new TableIdentifier("FOO"));
-			String source = foo.getSource(con).toString().trim();
-			assertTrue(source.contains("LOB (B1) STORE AS SECUREFILE (DISABLE STORAGE IN ROW RETENTION NONE COMPRESS MEDIUM NOCACHE)"));
-			assertTrue(source.contains("LOB (B2) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION AUTO COMPRESS HIGH CACHE READS)"));
-			assertTrue(source.contains("LOB (B3) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION MIN 1000 NOCOMPRESS CACHE)"));
-			assertTrue(source.contains("LOB (B4) STORE AS BASICFILE (ENABLE STORAGE IN ROW NOCACHE)"));
-		}
-		finally
-		{
-			TestUtil.executeScript(con, "drop table foo cascade constraints");
-		}
+			"LOB (B1) STORE AS SECUREFILE (DISABLE STORAGE IN ROW RETENTION NONE COMPRESS MEDIUM NOCACHE ), \n" +
+			"LOB (B2) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION AUTO COMPRESS HIGH CACHE READS ), \n" +
+			"LOB (B3) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION MIN 1000 NOCOMPRESS CACHE ), \n" +
+			"LOB (B4) STORE AS BASICFILE (ENABLE STORAGE IN ROW NOCACHE), \n" +
+      "LOB (B5) STORE AS SECUREFILE (ENABLE STORAGE IN ROW CACHE DEDUPLICATE);";
+
+    TestUtil.executeScript(con, sql);
+    TableIdentifier foo = con.getMetadata().findTable(new TableIdentifier("FOO"));
+    String source = foo.getSource(con).toString().trim();
+    System.out.println(source);
+    assertTrue(source.contains("LOB (B1) STORE AS SECUREFILE (DISABLE STORAGE IN ROW RETENTION NONE COMPRESS MEDIUM NOCACHE)"));
+    assertTrue(source.contains("LOB (B2) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION AUTO COMPRESS HIGH CACHE READS)"));
+    assertTrue(source.contains("LOB (B3) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION MIN 1000 NOCOMPRESS CACHE)"));
+    assertTrue(source.contains("LOB (B4) STORE AS BASICFILE (ENABLE STORAGE IN ROW NOCACHE)"));
+    assertTrue(source.contains("LOB (B5) STORE AS SECUREFILE (ENABLE STORAGE IN ROW RETENTION AUTO NOCOMPRESS DEDUPLICATE CACHE)"));
 	}
 
 }

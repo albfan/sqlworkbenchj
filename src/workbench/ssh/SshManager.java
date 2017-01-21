@@ -25,8 +25,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.ConnectionProfile;
+
+import workbench.util.WbFile;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
@@ -41,7 +44,8 @@ public class SshManager
 {
   private final Object lock = new Object();
   private Map<SshConfig, Entry> activeSessions = new HashMap<>();
-  private Map<String, String> passphrases = new ConcurrentHashMap<>();
+  private final Map<String, String> passphrases = new ConcurrentHashMap<>(2);
+  private final Map<String, Boolean> encrypedKeys = new HashMap<>();
 
   public String initializeSSHSession(ConnectionProfile profile)
     throws SshException
@@ -92,22 +96,48 @@ public class SshManager
     String privateKeyFile = config.getPrivateKeyFile();
     if (privateKeyFile == null) return false;
 
-    KeyPair kpair = null;
-    try
+    boolean doCheck = Settings.getInstance().getBoolProperty("workbench.ssh.check.encrypted.keyfile", true);
+    if (doCheck == false) return true;
+
+    WbFile keyFile = new WbFile(privateKeyFile);
+    if (!keyFile.exists()) return false;
+
+    String filePath = keyFile.getFullPath();
+
+    synchronized (encrypedKeys)
     {
-      JSch jsch = new JSch();
-      kpair = KeyPair.load(jsch, privateKeyFile);
-      return kpair.isEncrypted();
-    }
-    catch (Throwable th)
-    {
-      return true;
-    }
-    finally
-    {
-      if (kpair != null)
+      Boolean isEncryped = encrypedKeys.get(filePath);
+
+      if (isEncryped != null)
       {
-        kpair.dispose();
+        return isEncryped;
+      }
+
+      KeyPair kpair = null;
+      try
+      {
+        JSch jsch = new JSch();
+        kpair = KeyPair.load(jsch, filePath);
+        boolean encrypted = kpair.isEncrypted();
+        encrypedKeys.put(filePath, encrypted);
+
+        if (!encrypted)
+        {
+          LogMgr.logDebug("SshManager.needsPassphrase()", "Key file " + filePath + " is not encrypted. Assuming no passphrase is required");
+        }
+
+        return encrypted;
+      }
+      catch (Throwable th)
+      {
+        return true;
+      }
+      finally
+      {
+        if (kpair != null)
+        {
+          kpair.dispose();
+        }
       }
     }
   }
