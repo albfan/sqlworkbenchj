@@ -24,17 +24,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
-import workbench.db.ConnectionProfile;
-
-import workbench.util.WbFile;
-
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.agentproxy.Connector;
 import com.jcraft.jsch.agentproxy.ConnectorFactory;
+
+import workbench.db.ConnectionProfile;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.WbFile;
 
 /**
  *
@@ -45,7 +43,6 @@ public class SshManager
   private final Object lock = new Object();
   private Map<SshConfig, Entry> activeSessions = new HashMap<>();
   private final Map<String, String> passphrases = new ConcurrentHashMap<>(2);
-  private final Map<String, Boolean> encrypedKeys = new HashMap<>();
 
   public String initializeSSHSession(ConnectionProfile profile)
     throws SshException
@@ -104,40 +101,33 @@ public class SshManager
 
     String filePath = keyFile.getFullPath();
 
-    synchronized (encrypedKeys)
+    KeyPair kpair = null;
+    try
     {
-      Boolean isEncryped = encrypedKeys.get(filePath);
+      long start = System.currentTimeMillis();
+      JSch jsch = new JSch();
+      kpair = KeyPair.load(jsch, filePath);
+      boolean encrypted = kpair.isEncrypted();
+      long duration = System.currentTimeMillis() - start;
 
-      if (isEncryped != null)
+      LogMgr.logDebug("SshManager.needsPassphrase()", "Checking for encrypted key file took: " + duration + "ms");
+
+      if (!encrypted)
       {
-        return isEncryped;
+        LogMgr.logInfo("SshManager.needsPassphrase()", "Key file " + filePath + " is not encrypted. Assuming no passphrase is required");
       }
 
-      KeyPair kpair = null;
-      try
+      return encrypted;
+    }
+    catch (Throwable th)
+    {
+      return true;
+    }
+    finally
+    {
+      if (kpair != null)
       {
-        JSch jsch = new JSch();
-        kpair = KeyPair.load(jsch, filePath);
-        boolean encrypted = kpair.isEncrypted();
-        encrypedKeys.put(filePath, encrypted);
-
-        if (!encrypted)
-        {
-          LogMgr.logDebug("SshManager.needsPassphrase()", "Key file " + filePath + " is not encrypted. Assuming no passphrase is required");
-        }
-
-        return encrypted;
-      }
-      catch (Throwable th)
-      {
-        return true;
-      }
-      finally
-      {
-        if (kpair != null)
-        {
-          kpair.dispose();
-        }
+        kpair.dispose();
       }
     }
   }

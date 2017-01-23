@@ -106,7 +106,7 @@ public class PortForwarder
     JSch jsch = new JSch();
 
     long start = System.currentTimeMillis();
-    LogMgr.logInfo("PortForwarder.startForwarding()", "Connecting to host: " + sshHost + " using username: " + sshUser);
+    LogMgr.logDebug("PortForwarder.startForwarding()", "Connecting to SSH host: " + sshHost + ":" + sshPort + " using username: " + sshUser);
 
     boolean useAgent = tryAgent && tryAgent(jsch);
 
@@ -121,11 +121,11 @@ public class PortForwarder
     {
       session.setPassword(password);
     }
-    
+
     session.setConfig(props);
     session.connect();
     long duration = System.currentTimeMillis() - start;
-    LogMgr.logDebug("PortForwarder.startForwarding()", "Connected to host: " + sshHost + " using username: " + sshUser + " (" + duration + "ms)");
+    LogMgr.logInfo("PortForwarder.startForwarding()", "Connected to SSH host: " + sshHost + ":" + sshPort + " using username: " + sshUser + " (" + duration + "ms)");
 
     if (localPortToUse < 0) localPortToUse = 0;
 
