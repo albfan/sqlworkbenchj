@@ -23,13 +23,17 @@
  */
 package workbench.db.mssql;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -123,6 +127,47 @@ public class SqlServerUtil
     {
       LogMgr.logWarning("SqlServerUtil.setCatalog()", "Could not change database", ex);
     }
+  }
 
+  public static String getVersion(WbConnection conn)
+  {
+    if (conn.isBusy()) return null;
+
+    Statement stmt = null;
+    ResultSet rs = null;
+    String version = null;
+
+    try
+    {
+      stmt = conn.createStatement();
+      rs = stmt.executeQuery("select @@version");
+      if (rs.next())
+      {
+        String info = rs.getString(1);
+        List<String> lines = StringUtil.getLines(info);
+        if (CollectionUtil.isNonEmpty(lines))
+        {
+          version = StringUtil.trimToNull(lines.get(0));
+        }
+      }
+    }
+    catch (Throwable ex)
+    {
+      LogMgr.logWarning("SqlServerUtil.getVersion()", "Could not retrieve database version using @@version" , ex);
+      try
+      {
+        version = conn.getMetadata().getJdbcMetaData().getDatabaseProductVersion();
+      }
+      catch (Throwable th)
+      {
+        // ignore
+      }
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+
+    return version;
   }
 }

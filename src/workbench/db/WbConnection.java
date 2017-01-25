@@ -41,16 +41,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import workbench.interfaces.DbExecutionListener;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
+import workbench.db.mssql.SqlServerUtil;
 import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleWarningsClearer;
-
+import workbench.interfaces.DbExecutionListener;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.ErrorReportLevel;
@@ -59,7 +58,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
-
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlParsingUtil;
@@ -1341,18 +1339,25 @@ public class WbConnection
     {
       try
       {
-        DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
-        dbProductVersion = jdbcmeta.getDatabaseProductVersion();
-        if (dbProductVersion != null)
+        if (metaData.isSqlServer() && Settings.getInstance().getBoolProperty("workbench.db." + DBID.SQL_Server.getId() + ".useversionfunction", true))
         {
-          Matcher matcher = StringUtil.PATTERN_CRLF.matcher(dbProductVersion);
-          dbProductVersion = matcher.replaceAll(" ");
+          dbProductVersion = SqlServerUtil.getVersion(this);
+        }
+        else
+        {
+          DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
+          dbProductVersion = jdbcmeta.getDatabaseProductVersion();
+          if (dbProductVersion != null)
+          {
+            Matcher matcher = StringUtil.PATTERN_CRLF.matcher(dbProductVersion);
+            dbProductVersion = matcher.replaceAll(" ");
+          }
         }
       }
       catch (Throwable e)
       {
         LogMgr.logWarning("WbConnection.getDatabaseProductVersion()", "Error retrieving DB product ersion (" + ExceptionUtil.getDisplay(e) + ")");
-        dbProductVersion = "";
+        dbProductVersion = "N/A";
       }
     }
     return dbProductVersion;
