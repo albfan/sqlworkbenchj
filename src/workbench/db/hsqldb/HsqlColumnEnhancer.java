@@ -103,7 +103,7 @@ public class HsqlColumnEnhancer
         if (col == null) continue;
 
         String columnExpression = null;
-        
+
         if (sequences.containsKey(colname))
         {
           SequenceDefinition def = sequences.get(colname);
@@ -171,14 +171,12 @@ public class HsqlColumnEnhancer
       String sql =
         "SELECT column_name, sequence_catalog, sequence_schema, sequence_name \n" +
         "FROM information_schema.system_column_sequence_usage \n" +
-        "WHERE table_catalog = ? \n" +
-        "  AND table_schema = ? \n " +
+        "WHERE table_schema = ? \n " +
         "  AND table_name = ? ";
 
       pstmt = conn.getSqlConnection().prepareStatement(sql);
-      pstmt.setString(1, tbl.getCatalog());
-      pstmt.setString(2, tbl.getSchema());
-      pstmt.setString(3, tbl.getTableName());
+      pstmt.setString(1, tbl.getSchema());
+      pstmt.setString(2, tbl.getTableName());
 
       rs = pstmt.executeQuery();
       while (rs.next())

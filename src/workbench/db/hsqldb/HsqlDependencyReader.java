@@ -28,13 +28,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -56,8 +59,7 @@ public class HsqlDependencyReader
       "from information_schema.view_table_usage vtu \n" +
       "  left join information_schema.views v on (v.table_catalog, v.table_schema, v.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
       "  left join information_schema.tables t on (t.table_catalog, t.table_schema, t.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
-      "where vtu.view_catalog = ? \n" +
-      "  and vtu.view_schema = ? \n" +
+      "where vtu.view_schema = ? \n" +
       "  and vtu.view_name = ? ";
 
    private final String searchUsedSql =
@@ -68,8 +70,7 @@ public class HsqlDependencyReader
       "from information_schema.view_table_usage vtu \n" +
       "  left join information_schema.views v on (v.table_catalog, v.table_schema, v.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
       "  left join information_schema.tables t on (t.table_catalog, t.table_schema, t.table_name) = (vtu.table_catalog, vtu.table_schema, vtu.table_name) \n" +
-      "where vtu.table_catalog = ? \n" +
-      "  and table_schema = ? \n" +
+      "where table_schema = ? \n" +
       "  and table_name = ?";
 
   public HsqlDependencyReader()
@@ -108,9 +109,8 @@ public class HsqlDependencyReader
     try
     {
       pstmt = connection.getSqlConnection().prepareStatement(sql);
-      pstmt.setString(1, base.getCatalog());
-      pstmt.setString(2, base.getSchema());
-      pstmt.setString(3, base.getObjectName());
+      pstmt.setString(1, base.getSchema());
+      pstmt.setString(2, base.getObjectName());
 
       rs = pstmt.executeQuery();
       while (rs.next())

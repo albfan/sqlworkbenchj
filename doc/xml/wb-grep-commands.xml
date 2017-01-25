@@ -270,7 +270,7 @@
               </para>
             </entry>
           </row>
-          <row id="command-grepdata-types">
+          <row id="command-grepdata-columns">
             <entry>-columns</entry>
             <entry>
               <para>

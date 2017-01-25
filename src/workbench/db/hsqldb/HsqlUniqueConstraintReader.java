@@ -66,7 +66,7 @@ public class HsqlUniqueConstraintReader
         "     and tc.table_catalog = idx.table_cat\n" +
         "  where tc.constraint_type = 'UNIQUE'\n" +
         ") t \n" +
-        "where (table_catalog, table_schema, table_name) = (?,?,?)";
+        "where (table_schema, table_name) = (?,?)";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
@@ -79,9 +79,8 @@ public class HsqlUniqueConstraintReader
     try
     {
       pstmt = con.getSqlConnection().prepareStatement(baseSql);
-      pstmt.setString(1, table.getCatalog());
-      pstmt.setString(2, table.getSchema());
-      pstmt.setString(3, table.getTableName());
+      pstmt.setString(1, table.getSchema());
+      pstmt.setString(2, table.getTableName());
 
       rs = pstmt.executeQuery();
       while (rs.next())
