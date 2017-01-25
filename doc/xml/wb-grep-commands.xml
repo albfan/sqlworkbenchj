@@ -270,6 +270,17 @@
               </para>
             </entry>
           </row>
+          <row id="command-grepdata-types">
+            <entry>-columns</entry>
+            <entry>
+              <para>
+                By default <literal>WbGrepData</literal> will search all
+                columns of a table (or view). If you want to limit the search
+                to some columns only, you can define a list of column names to
+                be included. Wildcards are not supported.
+              </para>
+            </entry>
+          </row>
           <row id="command-grepdata-clob">
             <entry>-retrieveCLOB</entry>
             <entry>
