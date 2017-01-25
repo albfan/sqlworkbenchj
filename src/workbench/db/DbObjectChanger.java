@@ -28,12 +28,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import workbench.log.LogMgr;
-
 import workbench.db.mssql.SqlServerTableSourceBuilder;
 import workbench.db.oracle.OracleTableSourceBuilder;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -184,8 +182,10 @@ public class DbObjectChanger
     String fqNew = SqlUtil.fullyQualifiedName(dbConnection, newObject);
 
     sql = sql.replace(PARAM_OLD_SIMPLE_NAME, getSimpleName(oldObject.getObjectName()));
+    sql = sql.replace(PARAM_OLD_SCHEMA_NAME, getSimpleName(oldObject.getSchema()));
     sql = sql.replace(PARAM_OLD_OBJECT_NAME, oldObject.getObjectExpression(dbConnection));
     sql = sql.replace(PARAM_OLD_FQ_OBJECT_NAME, fqOld);
+    sql = sql.replace(PARAM_NEW_SCHEMA_NAME, getSimpleName(newObject.getSchema()));
     sql = sql.replace(PARAM_NEW_SIMPLE_NAME, getSimpleName(newObject.getObjectName()));
     sql = sql.replace(PARAM_NEW_OBJECT_NAME, newObject.getObjectExpression(dbConnection));
     sql = sql.replace(PARAM_NEW_FQ_OBJECT_NAME, fqNew);
