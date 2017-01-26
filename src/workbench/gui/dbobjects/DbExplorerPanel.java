@@ -50,11 +50,23 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
+import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Reloadable;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -69,16 +81,7 @@ import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.objecttree.ObjectFinder;
 import workbench.gui.sql.PanelTitleSetter;
 import workbench.gui.sql.PanelType;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Reloadable;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.GuiSettings;
-import workbench.resource.IconMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.util.ExceptionUtil;
 import workbench.util.HtmlUtil;
 import workbench.util.NumberStringCache;
@@ -246,6 +249,9 @@ public class DbExplorerPanel
 
 			KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 			focusManager.addPropertyChangeListener("focusOwner", this);
+
+      // If this is not set, the DbTree can't be expanded all the way if the DbExplorer is hidden
+      setMinimumSize(new Dimension(10,10));
 		}
 		catch (Throwable e)
 		{

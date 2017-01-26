@@ -27,14 +27,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyListener;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import workbench.db.search.ServerSideTableSearcher;
-import workbench.db.search.TableDataSearcher;
-import workbench.gui.components.TextComponentMouseListener;
+
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.search.ServerSideTableSearcher;
+import workbench.db.search.TableDataSearcher;
+
+import workbench.gui.components.TextComponentMouseListener;
 
 /**
  *
@@ -58,7 +62,6 @@ public class ServerSideTableSearchPanel
 	private void initComponents()
 	{
     searchText = new JTextField();
-    searchText.setMinimumSize(new java.awt.Dimension(100, 20));
 		searchText.addMouseListener(new TextComponentMouseListener());
 		String tip = ResourceMgr.getDescription("LblSearchTableSqlCriteria");
 		searchText.setToolTipText(tip);

@@ -32,7 +32,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -157,14 +156,10 @@ public class TableSearchPanel
 
 		startButton = new JButton();
 		startButton.setText(ResourceMgr.getString("LblStartSearch"));
-		startButton.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent evt)
-			{
-				startSearch();
-			}
-		});
+		startButton.addActionListener((ActionEvent evt) ->
+    {
+      startSearch();
+    });
 		buttonPanel.add(startButton);
 
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -644,7 +639,7 @@ public class TableSearchPanel
     tableNames = new WbTable(true, false, false);
     selectButtonPanel = new javax.swing.JPanel();
     selectAllButton = new FlatButton();
-    jPanel2 = new javax.swing.JPanel();
+    filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 32767));
     selectNoneButton = new FlatButton();
     statusInfo = new WbStatusLabel();
     entryPanel = new javax.swing.JPanel();
@@ -662,7 +657,9 @@ public class TableSearchPanel
     setLayout(new java.awt.BorderLayout());
 
     jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-    jSplitPane1.setDividerLocation(200);
+    jSplitPane1.setMinimumSize(new java.awt.Dimension(30, 54));
+
+    resultTabPane.setMinimumSize(new java.awt.Dimension(30, 34));
 
     resultScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -675,6 +672,7 @@ public class TableSearchPanel
 
     jSplitPane1.setRightComponent(resultTabPane);
 
+    tablePane.setMinimumSize(new java.awt.Dimension(30, 52));
     tablePane.setLayout(new java.awt.BorderLayout());
 
     tableNames.setModel(this.tableListModel);
@@ -693,11 +691,7 @@ public class TableSearchPanel
       }
     });
     selectButtonPanel.add(selectAllButton);
-
-    jPanel2.setMaximumSize(new java.awt.Dimension(5, 0));
-    jPanel2.setMinimumSize(new java.awt.Dimension(4, 0));
-    jPanel2.setPreferredSize(new java.awt.Dimension(4, 0));
-    selectButtonPanel.add(jPanel2);
+    selectButtonPanel.add(filler1);
 
     selectNoneButton.setText(ResourceMgr.getString("LblSelectNone"));
     selectNoneButton.addActionListener(new java.awt.event.ActionListener()
@@ -716,6 +710,8 @@ public class TableSearchPanel
     add(jSplitPane1, java.awt.BorderLayout.CENTER);
     add(statusInfo, java.awt.BorderLayout.SOUTH);
 
+    entryPanel.setMinimumSize(new java.awt.Dimension(30, 27));
+    entryPanel.setPreferredSize(new java.awt.Dimension(30, 27));
     entryPanel.setLayout(new java.awt.GridBagLayout());
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
@@ -836,7 +832,7 @@ public class TableSearchPanel
   protected javax.swing.JPanel criteriaContainer;
   protected javax.swing.JPanel entryPanel;
   protected javax.swing.JCheckBox excludeClobs;
-  protected javax.swing.JPanel jPanel2;
+  protected javax.swing.Box.Filler filler1;
   protected javax.swing.JPanel jPanel3;
   protected javax.swing.JSeparator jSeparator1;
   protected javax.swing.JSeparator jSeparator2;
