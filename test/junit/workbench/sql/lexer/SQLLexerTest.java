@@ -63,6 +63,22 @@ public class SQLLexerTest
 	}
 
   @Test
+  public void testInvalidIdentifiers()
+    throws Exception
+  {
+    StandardLexer l = new StandardLexer("select \"\" from foo;");
+    SQLToken t = l.getNextToken(false, false);
+    assertNotNull(t);
+    t = l.getNextToken(false, false);
+    assertNotNull(t);
+    assertTrue(t.isIdentifier());
+
+    t = l.getNextToken(false, false);
+    assertNotNull(t);
+    assertEquals("FROM", t.getContents());
+  }
+
+  @Test
   public void testDanglingQuotes()
     throws Exception
   {
