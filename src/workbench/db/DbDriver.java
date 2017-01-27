@@ -40,12 +40,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.postgres.PostgresUtil;
-
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -160,7 +158,7 @@ public class DbDriver
       return FileUtil.isDLLAvailable(MS_AUTHDLL) == false;
     }
 
-    return Settings.getInstance().getBoolProperty("workbench.dbdriver.fixlibrarypath", false);
+    return Settings.getInstance().getBoolProperty("workbench.dbdriver.fixlibrarypath", true);
   }
 
   private String findAuthDLLDir()
@@ -172,19 +170,19 @@ public class DbDriver
     WbFile f = buildFile(libraryList.get(0));
     String jarDir = f.getAbsoluteFile().getParent();
 
-    // This is the default layout when installing the driver
-    // The driver's directory will be added anyway
-    WbFile authDir = null;
-    if (is64Bit)
-    {
-      authDir = new WbFile(jarDir, "auth\\x64");
-    }
-    else
-    {
-      authDir = new WbFile(jarDir, "auth\\x86");
-    }
+    String archDir = is64Bit ? "x64" : "x86";
+    WbFile authDir = new WbFile(jarDir, "auth\\" + archDir);
 
+    if (!authDir.exists())
+    {
+      // newer builds of the driver put the jar files into a sub-directory
+      authDir = new WbFile(jarDir, "..\\auth\\" + archDir);
+    }
     File authDLL = new File(authDir, MS_AUTHDLL);
+
+    // we don not need to check the jar file's directory.
+    // That will be added anyway
+    
     if (authDLL.exists())
     {
       return authDir.getFullPath();

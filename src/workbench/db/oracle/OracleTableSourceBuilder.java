@@ -30,9 +30,6 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.DropType;
@@ -44,7 +41,8 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -156,6 +154,7 @@ public class OracleTableSourceBuilder
       "       atb.logging, \n" +
       "       atb.iot_type, \n" +
       "       atb.partitioned, \n" +
+      "       atb.read_only, \n" +
       (supportsArchives ?
       "       fat.flashback_archive_name, \n" :
       "       null as flashback_archive_name, \n") +
@@ -245,6 +244,22 @@ public class OracleTableSourceBuilder
           if (options.length() > 0) options.append('\n');
           options.append("ENABLE ROW MOVEMENT");
           tbl.getSourceOptions().addConfigSetting("row_movement", "enabled");
+        }
+
+        String readOnly = rs.getString("read_only");
+        if ("YES".equals(readOnly))
+        {
+          String alter = "ALTER TABLE " + tbl.getTableExpression(dbConnection) + " READ ONLY;";
+          String addSQL = tbl.getSourceOptions().getAdditionalSql();
+          if (StringUtil.isBlank(addSQL))
+          {
+            addSQL = alter;
+          }
+          else
+          {
+            addSQL += "\n" + alter;
+          }
+          tbl.getSourceOptions().setAdditionalSql(addSQL);
         }
 
         String duration = rs.getString("duration");

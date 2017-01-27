@@ -24,25 +24,22 @@
 package workbench.db.oracle;
 
 
+import org.junit.AfterClass;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.resource.Settings;
-
 import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
-
+import workbench.resource.Settings;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  *
@@ -117,6 +114,35 @@ public class OracleTableSourceBuilderTest
 		finally
 		{
 			TestUtil.executeScript(con, "drop table iot1 cascade constraints purge");
+		}
+	}
+	@Test
+	public void testReadOnly()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull("Oracle not available", con);
+
+		try
+		{
+			String sql =
+				"create table no_writes \n" +
+				"( \n" +
+				"  id1 integer not null, \n" +
+				"  id2 integer not null, \n" +
+				"  some_column integer \n" +
+				");\n" +
+        "alter table no_writes read only;";
+			TestUtil.executeScript(con, sql);
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+			TableDefinition tbl = con.getMetadata().getTableDefinition(new TableIdentifier("NO_WRITES"));
+			String tableSource = builder.getTableSource(tbl.getTable(), tbl.getColumns());
+//			System.out.println(tableSource);
+      assertTrue(tableSource.contains("ALTER TABLE NO_WRITES READ ONLY"));
+		}
+		finally
+		{
+			TestUtil.executeScript(con, "drop table no_writes cascade constraints purge");
 		}
 	}
 
