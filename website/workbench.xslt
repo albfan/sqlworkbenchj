@@ -74,11 +74,13 @@
         </xsl:for-each>
       </ul>
 
+      <!--
       <div id="ttip">
         <a target="_blank" href="https://www.campact.de/ttip-ebi/">
           <img border="0" style="margin-top:50px;" src="ttip.jpg" alt="Stop TTIP"/>
         </a>
       </div>
+      -->
 
     </div>
 
@@ -232,7 +234,7 @@
 
         <div id="main">
           <xsl:if test="$imageName">
-          
+
             <h3 style="padding-top:1em"><xsl:value-of select="@title"/></h3>
              <div style="float:left">
                  <xsl:if test="$next">
@@ -381,15 +383,15 @@
   </xsl:template>
 
   <xsl:template match="zip-office-link">
-    <a href="Workbench-Build{$buildNumber}-with-office-libs.zip">Generic package including libraries to read and write office (ods,xls,xlsx) documents</a>
+    <a href="Workbench-Build{$buildNumber}-with-optional-libs.zip">Generic package including all optional libraries</a>
   </xsl:template>
 
   <xsl:template match="mac-link">
-    <a href="Workbench-Build{$buildNumber}-MacJava8.tgz">Download package for MacOS</a>
+    <a href="Workbench-Build{$buildNumber}-Mac.tgz">Download package for MacOS</a>
   </xsl:template>
 
   <xsl:template match="mac-office-link">
-    <a href="Workbench-Build{$buildNumber}-MacJava7-with-office-libs.tgz">MacOS including libraries to read and write office (ods,xls,xlsx) documents</a>
+    <a href="Workbench-Build{$buildNumber}-Mac-with-optional-libs.tgz">MacOS including all optional libraries</a>
   </xsl:template>
 
   <xsl:template match="build-number">
@@ -408,7 +410,7 @@
           <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>
         </li>
         <li>
-          <a href="Workbench-Build{$devBuildNumber}-with-office-libs.zip">Download development build including office libraries</a>
+          <a href="Workbench-Build{$devBuildNumber}-with-optional-libs.zip">Download development with optional libraries</a>
         </li>
         <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>
@@ -452,13 +454,13 @@
         <xsl:value-of select="concat(translate($back,'.','_'),'.html')"/>
       </xsl:if>
     </xsl:variable>
-    
+
     <xsl:variable name="nextLink">
       <xsl:if test="$next">
         <xsl:value-of select="concat(translate($next,'.','_'),'.html')"/>
       </xsl:if>
     </xsl:variable>
-    
+
     <a href="{$fname}">
       <xsl:value-of select="."/>
     </a>

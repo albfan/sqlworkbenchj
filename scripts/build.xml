@@ -593,8 +593,8 @@
     <move todir="${root}/release/build${build.number}">
       <fileset dir="${distdir}">
         <include name="WorkbenchSrc-Build${build.number}.zip"/>
-        <include name="Workbench-Build${build.number}.zip"/>
-        <include name="Workbench-Build${build.number}-MacJava8.tgz"/>
+        <include name="Workbench-Build${build.number}*.zip"/>
+        <include name="Workbench-Build${build.number}*.tgz"/>
       </fileset>
     </move>
 
@@ -678,7 +678,7 @@
 
   <target name="mac-package" depends="init,publish,bundleapp">
 
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava8.tgz">
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
       <tarfileset dir="${bundledir}">
         <include name="**/*"/>
         <exclude name="**/JavaAppLauncher"/>
@@ -698,7 +698,7 @@
       </tarfileset>
     </tar>
 
-    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-MacJava8-with-office-libs.tgz">
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac-with-optional-libs.tgz">
       <tarfileset dir="${bundledir}">
         <include name="**/*"/>
         <exclude name="**/JavaAppLauncher"/>
@@ -720,6 +720,9 @@
         <include name="*.jar"/>
       </tarfileset>
       <tarfileset dir="../libs/odf" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset dir="../libs/jna" prefix="SQLWorkbenchJ.app/Contents/Java">
         <include name="*.jar"/>
       </tarfileset>
     </tar>
@@ -761,7 +764,7 @@
       </zipfileset>
     </zip>
 
-    <zip zipfile="${distdir}/Workbench-Build${build.number}-with-office-libs.zip">
+    <zip zipfile="${distdir}/Workbench-Build${build.number}-with-optional-libs.zip">
       <zipfileset dir="${distdir}">
         <include name="${jarfile}"/>
         <include name="SQLWorkbench-Manual.pdf"/>
@@ -770,6 +773,9 @@
         <include name="*.jar"/>
       </zipfileset>
       <zipfileset dir="../libs/odf">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="../libs/jna">
         <include name="*.jar"/>
       </zipfileset>
       <zipfileset dir="../launcher">
