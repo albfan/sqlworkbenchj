@@ -65,6 +65,7 @@ public class OdsReader
   private MessageBuffer messages = new MessageBuffer();
   private final ValueConverter converter = new ValueConverter();
   private boolean emptyStringIsNull;
+  private boolean useNativeDateTime;
 
   public OdsReader(File odsFile, int sheetIndex, String name)
   {
@@ -82,6 +83,7 @@ public class OdsReader
     {
       worksheetIndex = 0;
     }
+    useNativeDateTime = Settings.getInstance().getBoolProperty("workbench.import.ods.usegetdate", true);
   }
 
   @Override
@@ -257,53 +259,34 @@ public class OdsReader
       Cell cell = rowData.getCellByIndex(col);
       String type = cell.getValueType();
       Object value = null;
+
       if ("boolean".equals(type))
       {
         value = cell.getBooleanValue();
       }
       else if ("time".equals(type))
       {
-        String text = cell.getDisplayText();
-        try
+        if (useNativeDateTime)
         {
-          value = converter.parseTime(text);
+          value = getTime(cell);
         }
-        catch (Exception ex)
+        else
         {
-          LogMgr.logError("OdsReader.getRowValues()", "Could not parse time value: " + text, ex);
-          Calendar cal = cell.getTimeValue();
-          if (cal != null)
+          String text = cell.getDisplayText();
+          try
           {
-            value = new java.sql.Time(cal.getTime().getTime());
+            value = converter.parseTime(text);
+          }
+          catch (Exception ex)
+          {
+            LogMgr.logWarning("OdsReader.getRowValues()", "Could not parse time value: " + text, ex);
+            value = getTime(cell);
           }
         }
       }
       else if ("date".equals(type))
       {
-        String fmt = cell.getFormatString();
-        String text = cell.getDisplayText();
-        try
-        {
-          SimpleDateFormat formatter = new SimpleDateFormat(fmt);
-          java.util.Date udt = formatter.parse(text);
-          if (isTimestampFormat(fmt))
-          {
-            value = new java.sql.Timestamp(udt.getTime());
-          }
-          else
-          {
-            value = new java.sql.Date(udt.getTime());
-          }
-        }
-        catch (Exception ex)
-        {
-          LogMgr.logError("OdsReader.getRowValues()", "Could not parse date format: " + fmt, ex);
-          Calendar cal = cell.getDateValue();
-          if (cal != null)
-          {
-            value = cal.getTime();
-          }
-        }
+        value = getDate(cell);
       }
       else if ("float".equals(type))
       {
@@ -330,13 +313,77 @@ public class OdsReader
       {
         nullCount ++;
       }
+
       result.add(value);
     }
+    
     if (nullCount == result.size())
     {
       result.clear();
     }
+
     return result;
+  }
+
+  private java.sql.Time getTime(Cell cell)
+  {
+    Calendar cal = cell.getTimeValue();
+    if (cal != null)
+    {
+      return new java.sql.Time(cal.getTime().getTime());
+    }
+    return null;
+  }
+
+  private Object getDate(Cell cell)
+  {
+    String fmt = cell.getFormatString();
+    if (useNativeDateTime)
+    {
+      return getDateValue(cell, fmt);
+    }
+    try
+    {
+      SimpleDateFormat formatter = new SimpleDateFormat(fmt);
+      String text = cell.getDisplayText();
+      java.util.Date udt = formatter.parse(text);
+      Object result = null;
+      if (isTimestampFormat(fmt))
+      {
+        result = new java.sql.Timestamp(udt.getTime());
+      }
+      else
+      {
+        result = new java.sql.Date(udt.getTime());
+      }
+      return result;
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logWarning("OdsReader.getRowValues()", "Could not parse date format: " + fmt, ex);
+      return getDateValue(cell, fmt);
+    }
+  }
+
+  private Object getDateValue(Cell cell, String fmt)
+  {
+    java.util.Date udt = null;
+    Calendar cal = cell.getDateValue();
+    if (cal != null)
+    {
+      udt = cal.getTime();
+    }
+
+    if (udt == null) return null;
+
+    if (isTimestampFormat(fmt))
+    {
+      return new java.sql.Timestamp(udt.getTime());
+    }
+    else
+    {
+      return new java.sql.Date(udt.getTime());
+    }
   }
 
   private boolean isNullString(String value)
