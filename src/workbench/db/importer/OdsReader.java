@@ -65,7 +65,6 @@ public class OdsReader
   private MessageBuffer messages = new MessageBuffer();
   private final ValueConverter converter = new ValueConverter();
   private boolean emptyStringIsNull;
-  private boolean useNativeDateTime;
 
   public OdsReader(File odsFile, int sheetIndex, String name)
   {
@@ -83,7 +82,6 @@ public class OdsReader
     {
       worksheetIndex = 0;
     }
-    useNativeDateTime = Settings.getInstance().getBoolProperty("workbench.import.ods.usegetdate", true);
   }
 
   @Override
@@ -266,22 +264,15 @@ public class OdsReader
       }
       else if ("time".equals(type))
       {
-        if (useNativeDateTime)
+        String text = cell.getDisplayText();
+        try
         {
-          value = getTime(cell);
+          value = converter.parseTime(text);
         }
-        else
+        catch (Exception ex)
         {
-          String text = cell.getDisplayText();
-          try
-          {
-            value = converter.parseTime(text);
-          }
-          catch (Exception ex)
-          {
-            LogMgr.logWarning("OdsReader.getRowValues()", "Could not parse time value: " + text, ex);
-            value = getTime(cell);
-          }
+          LogMgr.logWarning("OdsReader.getRowValues()", "Could not parse time value: " + text, ex);
+          value = getTime(cell);
         }
       }
       else if ("date".equals(type))
@@ -316,7 +307,7 @@ public class OdsReader
 
       result.add(value);
     }
-    
+
     if (nullCount == result.size())
     {
       result.clear();
@@ -338,25 +329,18 @@ public class OdsReader
   private Object getDate(Cell cell)
   {
     String fmt = cell.getFormatString();
-    if (useNativeDateTime)
+
+    if (isTimestampFormat(fmt) == false)
     {
       return getDateValue(cell, fmt);
     }
+
     try
     {
       SimpleDateFormat formatter = new SimpleDateFormat(fmt);
       String text = cell.getDisplayText();
       java.util.Date udt = formatter.parse(text);
-      Object result = null;
-      if (isTimestampFormat(fmt))
-      {
-        result = new java.sql.Timestamp(udt.getTime());
-      }
-      else
-      {
-        result = new java.sql.Date(udt.getTime());
-      }
-      return result;
+      return new java.sql.Date(udt.getTime());
     }
     catch (Exception ex)
     {
