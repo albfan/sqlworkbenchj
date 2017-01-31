@@ -1406,6 +1406,7 @@ public class BatchRunner
 				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
 				LogMgr.logError("BatchRunner.createBatchRunner()", msg, null);
 			}
+      
 			boolean readOnly = cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false);
 			if (readOnly)
 			{
@@ -1413,6 +1414,11 @@ public class BatchRunner
 				// Reset the changed flag to make sure the "modified" profile is not saved
 				profile.resetChangedFlags();
 			}
+
+      if (cmdLine.isArgPresent(AppArguments.ARG_IGNORE_DROP))
+      {
+        profile.setIgnoreDropErrors(cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP));
+      }
 		}
 
 		if (cmdLine.hasUnknownArguments())
@@ -1425,12 +1431,6 @@ public class BatchRunner
 				System.err.println(err.toString());
 			}
 			LogMgr.logWarning("BatchRunner.createBatchRunner()", err.toString());
-		}
-
-		if (profile != null)
-		{
-			boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, true);
-			profile.setIgnoreDropErrors(ignoreDrop);
 		}
 
 		String success = cmdLine.getValue(AppArguments.ARG_SUCCESS_SCRIPT);
