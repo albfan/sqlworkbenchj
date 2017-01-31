@@ -897,8 +897,6 @@ public class BatchRunner
           {
             lastError = result.getErrorDescriptor();
             errorStatementIndex = commandIndex;
-
-            LogMgr.logError("BatchRunner.execute()", feedback, null);
             errorCount++;
             if (parser.getScriptFile() != null)
             {
@@ -1406,7 +1404,7 @@ public class BatchRunner
 				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
 				LogMgr.logError("BatchRunner.createBatchRunner()", msg, null);
 			}
-      
+
 			boolean readOnly = cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false);
 			if (readOnly)
 			{
