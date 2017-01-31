@@ -51,6 +51,27 @@ public class WbSqlFormatterTest
 	}
 
   @Test
+  public void testPostgresOperators()
+  {
+    String sql = "select * from foo where x @> array[1,2,3] and name ~* 'foo' and doc ->> 'abc' and xxx ?-| yyy";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerSelect(100);
+    f.setIndentWhereCondition(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "SELECT *\n" +
+      "FROM foo\n" +
+      "WHERE x @> ARRAY[1,2,3]\n" +
+      "  AND name ~* 'foo'\n" +
+      "  AND doc ->> 'abc'\n" +
+      "  AND xxx ?-| yyy";
+		System.out.println("***** output ***** \n" + formatted + "\n----------- expected --------- \n" + expected + "\n*****************");
+    assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testWindowAlias()
   {
     String sql = "select id, row_number() over w from foo window w as (partition by x order by y) order by id";
@@ -86,7 +107,7 @@ public class WbSqlFormatterTest
       "       w2 AS (PARTITION BY a)\n" +
       "ORDER BY id";
 
-		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+//		System.out.println("*************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
 		assertEquals(expected, formatted);
   }
 
@@ -807,7 +828,7 @@ public class WbSqlFormatterTest
 				"  [D6]        [smalldatetime] NULL,\n" +
 				"  CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ([Id] ASC)\n" +
 				")";
-//		System.out.println("************ \n" + expected + "\n ----------\n" + formatted + "\n-------------------");
+//		System.out.println("************ expected: \n" + expected + "\n ----------\n" + formatted + "\n-------------------");
 		assertEquals(expected, formatted);
 
 		sql = "CREATE TABLE [dbo].[DDD]( [Id] [int] NOT NULL, [DayId] [int] NOT NULL, [MonthId] [int] NOT NULL, [YearId] [int] NOT NULL, [D1] [datetime] NOT NULL, [D2] [datetime] NOT NULL, [D3] [date] NOT NULL, [D4] [date] NOT NULL, [D5] [time](7) NOT NULL, [D6] [smalldatetime] NULL, CONSTRAINT [PK_DDD] PRIMARY KEY CLUSTERED ( [Id] ASC ))";
@@ -2608,7 +2629,7 @@ public class WbSqlFormatterTest
 				"WHERE a.id = b.id (+)";
 			f = new WbSqlFormatter(sql, 10, DBID.Oracle.getId());
 			formatted = f.getFormattedSql();
-			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			assertEquals(expected, formatted.toString().trim());
 		}
 		catch (Exception e)

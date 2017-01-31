@@ -340,7 +340,7 @@ public class OdsReader
       SimpleDateFormat formatter = new SimpleDateFormat(fmt);
       String text = cell.getDisplayText();
       java.util.Date udt = formatter.parse(text);
-      return new java.sql.Date(udt.getTime());
+      return new java.sql.Timestamp(udt.getTime());
     }
     catch (Exception ex)
     {

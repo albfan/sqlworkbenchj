@@ -525,8 +525,8 @@ public class SqlUtilTest
 		assertEquals("Not enough columns", 2, l.size());
 		assertEquals("Wrong first column", "col1", l.get(0));
 
-		sql = "SELECT distinct on (col1, col2), col3 from mytable";
-		l = SqlUtil.getSelectColumns(sql, true,null);
+		sql = "SELECT distinct on (col1, col2) col1, col2, col3 from mytable";
+		l = SqlUtil.getSelectColumns(sql, true, null);
 		assertEquals("Not enough columns", 3, l.size());
 		assertEquals("Wrong first column", "col1", l.get(0));
 		assertEquals("Wrong first column", "col2", l.get(1));

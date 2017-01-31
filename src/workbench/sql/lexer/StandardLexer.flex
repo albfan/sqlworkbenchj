@@ -266,7 +266,6 @@ keyword=(
 "DESCRIBE"|
 "DISCONNECT"|
 "DISTINCT"|
-"DO"|
 "DOMAIN"|
 "DOUBLE"|
 "DROP"|

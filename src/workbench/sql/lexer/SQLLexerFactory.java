@@ -86,6 +86,9 @@ public class SQLLexerFactory
 			case SqlServer:
 				lexer = new SqlServerLexer(input);
 				break;
+			case Postgres:
+				lexer = new PostgresLexer(input);
+				break;
 			default:
 				lexer = new StandardLexer(input);
 		}

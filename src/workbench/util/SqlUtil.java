@@ -41,6 +41,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -49,9 +53,10 @@ import workbench.db.DropType;
 import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.TextContainer;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
+
+import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
+
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
@@ -59,8 +64,6 @@ import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.storage.DataStore;
-import workbench.storage.ResultInfo;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -875,9 +878,22 @@ public class SqlUtil
       // Skip a potential DISTINCT at the beginning
       if (t.getContents().equals("DISTINCT") || t.getContents().equals("DISTINCT ON"))
       {
-        // Postgres DISTINCT ON extension...
-        ignoreFirstBracket = t.getContents().equals("DISTINCT ON");
+        if (t.getContents().equals("DISTINCT ON"))
+        {
+          // Postgres DISTINCT ON extension...
+          // skip the opening parenthesis
+          t = lexer.getNextToken(false, false);
+
+          // find the closing parenthesis
+          while (t != null && !t.getContents().equals(")"))
+          {
+            t = lexer.getNextToken(false, false);
+          }
+        }
+
+        // skip to next token
         t = lexer.getNextToken(false, false);
+
         if (t == null) return Collections.emptyList();
       }
 
@@ -896,8 +912,7 @@ public class SqlUtil
         {
           bracketCount --;
         }
-        else if ( (bracketCount == 0 || (ignoreFirstBracket && bracketCount == 1))
-          && (",".equals(v) || WbSqlFormatter.SELECT_TERMINAL.contains(v)))
+        else if (bracketCount == 0 && (",".equals(v) || WbSqlFormatter.SELECT_TERMINAL.contains(v)))
         {
           String col = select.substring(lastColStart, t.getCharBegin());
 

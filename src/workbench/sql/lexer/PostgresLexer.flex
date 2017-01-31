@@ -1,10 +1,10 @@
-/* NonStandardLexer.java is a generated file.  You probably want to
- * edit NonStandardLexer.lex to make changes.  Use JFlex to generate it.
- * To generate NonStandardLexer.java
+/* PostgresLexer.java is a generated file.  You probably want to
+ * edit PostgresLexer.lex to make changes.  Use JFlex to generate it.
+ * To generate PostgresLexer.java
  * Install <a href="http://jflex.de/">JFlex</a> v1.3.2 or later.
  * Once JFlex is in your classpath run<br>
- * <code>java JFlex.Main NonStandardLexer.lex</code><br>
- * You will then have a file called NonStandardLexer.java
+ * <code>java JFlex.Main PostgresLexer.lex</code><br>
+ * You will then have a file called PostgresLexer.java
  */
 
 /*
@@ -32,10 +32,10 @@ import java.io.*;
 import workbench.util.CharSequenceReader;
 
 /**
- * NonStandardLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
+ * PostgresLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
  *  <CODE>
  *  <PRE>
- *  NonStandardLexer shredder = new NonStandardLexer(System.in);
+ *  PostgresLexer shredder = new PostgresLexer(System.in);
  *  SQLToken t;
  *  while ((t = shredder.getNextToken()) != null){
  *      System.out.println(t);
@@ -50,7 +50,7 @@ import workbench.util.CharSequenceReader;
 
 %public
 %implements SQLLexer
-%class NonStandardLexer
+%class PostgresLexer
 %function getNextToken
 %type SQLToken
 %column
@@ -136,12 +136,12 @@ import workbench.util.CharSequenceReader;
     }
   }
 
-	NonStandardLexer(String source)
+	PostgresLexer(String source)
 	{
 		this(new StringReader(source));
 	}
 
-	NonStandardLexer(CharSequence source)
+	PostgresLexer(CharSequence source)
 	{
 		this(new CharSequenceReader(source));
 	}
@@ -151,9 +151,9 @@ import workbench.util.CharSequenceReader;
 wsp = [ \r\n\t\f]+
 
 keyword=(
-
+"CLUSTER"|"DISCARD"|"DEALLOCATE"|"DO"|"(IMPORT{wsp}FOREIGN{wsp}SCHEMA)"|"VACUUM"|
 (ALTER{wsp}SESSION)|
-(CONNECT{wsp}BY)|
+
 (PRIMARY{wsp}KEY)|
 (FOREIGN{wsp}KEY)|
 (UNION{wsp}ALL)|
@@ -161,14 +161,14 @@ keyword=(
 (PARTITION{wsp}BY)|
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|
-(PACKAGE{wsp}BODY)|
-(TYPE{wsp}BODY)|
+
+
 (CREATE{wsp}OR{wsp}REPLACE)|
-(CREATE{wsp}OR{wsp}ALTER)|
+
 (IS{wsp}NOT{wsp}NULL)|
-(FLASHBACK{wsp}ARCHIVE)|
+
 (MATERIALIZED{wsp}VIEW)|
-(MATERIALIZED{wsp}VIEW{wsp}LOG)|
+
 (START{wsp}WITH)|
 (OUTER{wsp}JOIN)|
 (CROSS{wsp}JOIN)|
@@ -189,13 +189,13 @@ keyword=(
 (CHARACTER{wsp}VARYING)|
 (DISTINCT{wsp}ON)|
 (PRIMARY{wsp}KEY)|
-(SNAPSHOT{wsp}LOG)|
+
 (FOREIGN{wsp}DATA{wsp}WRAPPER)|
 (IF{wsp}EXISTS)|
 (IF{wsp}NOT{wsp}EXISTS)|
 (WITHIN{wsp}GROUP)|
 (GROUPING{wsp}SETS)|
-(DATABASE{wsp}LINK)|
+
 (OWNED{wsp}BY)|
 "AFTER"|
 "AGGREGATE"|
@@ -402,7 +402,7 @@ keyword=(
 "SEQUENCE"|
 "SERIALIZABLE"|
 "SESSION"|
-"SESSION_USER"|
+
 "SET"|
 "SHARE"|
 "SIMILAR"|
@@ -415,8 +415,8 @@ keyword=(
 "SUBSTRING"|
 "SUM"|
 "SYNONYM"|
-"SYSTIMESTAMP"|
-"SYSDATE"|
+
+
 "TABLE"|
 "TEMPORARY"|
 (GLOBAL{wsp}TEMPORARY)|
@@ -441,7 +441,7 @@ keyword=(
 "VALID"|
 "VALUES"|
 "VARCHAR"|
-"VARCHAR2"|
+
 "VARIABLE"|
 "VERBOSE"|
 "VERSION"|
@@ -500,7 +500,7 @@ digits=({digit}+)
 separator=([\(\)\[\]\,\;\:\*])
 operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="
 integer=([-+]?{digits})
-string=([\'](([^\']|\'\'|\\\')*)[\'])
+string=([\'](([^\']|\'\')*)[\'])
 
 bitstring=("B"[\']([01]+)[\'])
 stringerror=([\'](([^\r\n\'])*)[\r\n])
