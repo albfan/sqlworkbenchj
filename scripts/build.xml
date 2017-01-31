@@ -875,8 +875,36 @@
 					file="../src/workbench/sql/lexer/BaseLexer.flex"
           tofile="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
 
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/PostgresLexer.flex"/>
+
     <replace file="../src/workbench/sql/lexer/StandardLexer.flex">
       <replacefilter token="XXXX_DBMS_XXXX|"/>
+    </replace>
+
+    <replace file="../src/workbench/sql/lexer/PostgresLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>PostgresLexer</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|" value='"CLUSTER"|"DISCARD"|"DEALLOCATE"|"DO"|"(IMPORT{wsp}FOREIGN{wsp}SCHEMA)"|"VACUUM"|'/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token='"VARCHAR2"|'/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(DATABASE{wsp}LINK)|"/>
+      <replacefilter token='"SYSDATE"|'/>
+      <replacefilter token='"SYSTIMESTAMP"|'/>
+      <replacefilter token='"SESSION_USER"|'/>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="]]></replacevalue>
+      </replacefilter>
     </replace>
 
     <replace file="../src/workbench/sql/lexer/SqlServerLexer.flex">
@@ -915,8 +943,8 @@
       <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
       <replacefilter token="(DATABASE{wsp}LINK)|"/>
       <replacefilter>
-        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
-        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
+        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")]]></replacetoken>
+        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
       </replacefilter>
       <replacefilter>
         <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
@@ -934,6 +962,10 @@
       <replacefilter>
         <replacetoken>string=([\'](([^\']|\'\')*)[\'])</replacetoken>
         <replacevalue>string=([\'](([^\']|\'\'|\\\')*)[\'])</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="]]></replacevalue>
       </replacefilter>
     </replace>
 
@@ -978,8 +1010,8 @@
         <replacevalue>linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)</replacevalue>
       </replacefilter>
       <replacefilter>
-        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")]]></replacetoken>
-        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]+\")|(`[^\r\n\t\f`]+`)]]></replacevalue>
+        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")]]></replacetoken>
+        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")|(`[^\r\n\t\f`]+`)]]></replacevalue>
       </replacefilter>
       <replacefilter>
         <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
@@ -991,6 +1023,12 @@
       <jvmarg value="-Xmx256m"/>
       <arg value="-q"/>
       <arg value="../src/workbench/sql/lexer/StandardLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/PostgresLexer.flex"/>
     </java>
 
     <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
