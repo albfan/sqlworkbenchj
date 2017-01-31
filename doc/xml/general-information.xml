@@ -195,13 +195,6 @@
       </informaltable>
     </section>
 
-    <section id="iharder-license">
-      <title>iHarder - Base64 implementation</title>
-      <para>
-        &wb-productname; uses the Base64 implementation from <ulink url="http://iharder.net/base64"/>
-      </para>
-    </section>
-
     <section id="icons">
       <title>Icons</title>
       <para>Some icons are taken from Tango project: <ulink url="http://tango.freedesktop.org/Tango_Icon_Library"/></para>
