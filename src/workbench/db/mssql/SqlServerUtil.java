@@ -125,7 +125,7 @@ public class SqlServerUtil
     }
     catch (SQLException ex)
     {
-      LogMgr.logWarning("SqlServerUtil.setCatalog()", "Could not change database", ex);
+      LogMgr.logWarning("SqlServerUtil.changeDatabase()", "Could not change database", ex);
     }
   }
 
