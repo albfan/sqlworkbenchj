@@ -76,8 +76,9 @@ public class OracleTablePartition
       "       partitioning_key_count, \n" +
       "       subpartitioning_type, \n" +
       "       subpartitioning_key_count, \n" +
-      "       def_subpartition_count " +
-      (supportsIntervals ? "\n,       interval, \n" : "") +
+      "       def_subpartition_count, " +
+      "       " + (supportsIntervals ? "interval" : "null as interval") + ", \n" +
+      "       " + (supportsRefPartitions ? "ref_ptn_constraint_name" : "null as ref_ptn_constraint_name") + ", \n" +
       "       def_tablespace_name \n " +
       "from all_part_tables pt \n" +
       "where pt.owner = ? \n" +

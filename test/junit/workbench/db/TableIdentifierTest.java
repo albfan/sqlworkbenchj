@@ -29,15 +29,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-
-import workbench.util.StringUtil;
-
-import org.junit.Test;
-
 import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
+import org.junit.Test;
+
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -341,6 +339,10 @@ public class TableIdentifierTest
 		tbl.setUseInlinePK(true);
 		t2 = tbl.createCopy();
 		assertTrue(t2.getUseInlinePK());
+
+    tbl.setUseInlineFK(true);
+    t2 = tbl.createCopy();
+    assertTrue(t2.getUseInlineFK());
 	}
 
 	@Test

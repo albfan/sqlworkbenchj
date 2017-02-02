@@ -26,17 +26,15 @@ package workbench.db.oracle;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -141,11 +139,35 @@ public class OracleTablePartitionTest
 			"    SUBPARTITION RSP_2_SUB_1 VALUES ('N') , \n" +
 			"    SUBPARTITION RSP_2_SUB_2 VALUES ('L')  \n" +
 			"  ) \n" +
-			");";
+			");\n" +
+      "\n"+
+      "CREATE TABLE wb_ref_part_main\n" +
+      "(\n" +
+      "   id          integer not null,\n" +
+      "   part_key    integer not null,\n" +
+      "   data varchar(100), \n" +
+      "   constraint pk_main primary key (id)\n" +
+      ")\n" +
+      "partition by list (part_key) \n" +
+      "(\n" +
+      "  partition part_1 values (1),\n" +
+      "  partition part_2 values (2),\n" +
+      "  partition part_3 values (3),\n" +
+      "  partition part_4 values (4)\n" +
+      ");\n" +
+      "\n" +
+      "CREATE TABLE wb_ref_part_detail \n" +
+      "(\n" +
+      "   id integer,\n" +
+      "   main_id integer not null, \n" +
+      "   constraint pk_detail primary key (id),\n" +
+      "   CONSTRAINT fk_detail_main FOREIGN KEY (main_id) REFERENCES wb_ref_part_main(id) \n" +
+      ")\n" +
+      "partition by reference (fk_detail_main);";
 
 		try
 		{
-			TestUtil.executeScript(con, sql, false);
+			TestUtil.executeScript(con, sql, true);
 			partitioningAvailable = true;
 		}
 		catch (SQLException e)
@@ -278,4 +300,23 @@ public class OracleTablePartitionTest
 			")";
 		assertEquals(expected, reader.getSourceForTableDefinition().trim());
 	}
+
+  @Test
+  public void testReferencePartition()
+    throws Exception
+  {
+    if (!partitioningAvailable) return;
+
+    WbConnection con = OracleTestUtil.getOracleConnection();
+    assertNotNull("Oracle not available", con);
+
+    TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("WB_REF_PART_DETAIL"));
+		assertNotNull(tbl);
+    String source = tbl.getSource(con).toString();
+//    System.out.println(source);
+    assertTrue(source.contains("CONSTRAINT FK_DETAIL_MAIN FOREIGN KEY (MAIN_ID) REFERENCES WB_REF_PART_MAIN (ID)"));
+    assertTrue(source.contains("PARTITION BY REFERENCE (FK_DETAIL_MAIN)"));
+    assertTrue(source.contains("PARTITION PART_1"));
+  }
+
 }

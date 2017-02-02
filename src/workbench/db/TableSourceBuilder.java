@@ -30,19 +30,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.Settings;
-
 import workbench.db.sqltemplates.ColumnDefinitionTemplate;
 import workbench.db.sqltemplates.ConstraintNameTester;
 import workbench.db.sqltemplates.FkTemplate;
 import workbench.db.sqltemplates.PkTemplate;
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.sql.formatter.SqlFormatterFactory;
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -331,6 +328,10 @@ public class TableSourceBuilder
     if (nativeSql != null) return nativeSql;
 
     readTableOptions(table, columns);
+    if (table.getUseInlineFK() && fkDefinitions == null)
+    {
+      fkDefinitions = getForeignKeys(table);
+    }
 
     if (CollectionUtil.isEmpty(columns)) return StringUtil.EMPTY_STRING;
 
@@ -400,12 +401,12 @@ public class TableSourceBuilder
       result.append(pkSql);
     }
 
-    if (includeFk && getCreateInlineFKConstraints())
+    if (table.getUseInlineFK() || (includeFk  && getCreateInlineFKConstraints()))
     {
       StringBuilder fk = getFkSource(table, fkDefinitions, true);
       if (fk.length() > 0)
       {
-        result.append(",\n").append(COL_INDENT);
+        result.append(",\n");
         result.append(fk);
       }
     }

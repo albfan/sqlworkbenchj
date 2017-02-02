@@ -27,10 +27,8 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.db.objectcache.DbObjectCacheFactory;
-
+import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -64,6 +62,7 @@ public class TableIdentifier
   private boolean commentWasInitialized;
   private boolean retrieveFkSource;
   private boolean useInlinePK;
+  private boolean useInlineFK;
   private boolean useTableNameOnlyInExpression;
   private boolean pkInitialized;
 
@@ -212,6 +211,16 @@ public class TableIdentifier
     return this.sourceOptions;
   }
 
+  public boolean getUseInlineFK()
+  {
+    return useInlineFK;
+  }
+
+  public void setUseInlineFK(boolean flag)
+  {
+    this.useInlineFK = flag;
+  }
+
   public boolean getUseInlinePK()
   {
     return useInlinePK;
@@ -348,6 +357,7 @@ public class TableIdentifier
     copy.tableComment = this.tableComment;
     copy.sourceOptions = this.sourceOptions == null ? null : sourceOptions.createCopy();
     copy.useInlinePK = this.useInlinePK;
+    copy.useInlineFK = this.useInlineFK;
     copy.owner = this.owner;
     copy.realTable = this.realTable == null ? null : realTable.createCopy();
     copy.useTableNameOnlyInExpression = this.useTableNameOnlyInExpression;
@@ -1026,7 +1036,7 @@ public class TableIdentifier
     {
       return one.equals(other);
     }
-    
+
     TableIdentifier tbl1 = one.createCopy();
     tbl1.adjustCatalogAndSchema(con);
 

@@ -30,13 +30,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -62,7 +61,9 @@ public abstract class AbstractOraclePartition
   protected String objectOwner;
   protected String defaultUserTablespace;
   protected String currentUser;
+  protected String refPartitionConstraint;
   protected boolean retrievePartitionsForLocalIndex;
+  protected boolean supportsRefPartitions;
 
   public AbstractOraclePartition(WbConnection conn)
     throws SQLException
@@ -77,6 +78,7 @@ public abstract class AbstractOraclePartition
     useCompression = retrieveCompression && is11r1;
     supportsIntervals = is11r1;
     currentUser = conn.getMetadata().getCurrentSchema();
+    supportsRefPartitions = is11r1;
   }
 
   public void retrieve(DbObject object, WbConnection conn)
@@ -117,6 +119,11 @@ public abstract class AbstractOraclePartition
   {
     if (columns == null) return Collections.emptyList();
     return Collections.unmodifiableList(columns);
+  }
+
+  public boolean isRefPartition()
+  {
+    return "REFERENCE".equalsIgnoreCase(type);
   }
 
   public String getPartitionType()
@@ -169,7 +176,13 @@ public abstract class AbstractOraclePartition
       result.append("PARTITION BY ");
       result.append(type);
       result.append(' ');
-      if (columns != null)
+      if (refPartitionConstraint != null)
+      {
+        result.append('(');
+        result.append(SqlUtil.quoteObjectname(refPartitionConstraint));
+        result.append(')');
+      }
+      else if (columns != null)
       {
         result.append('(');
         result.append(StringUtil.listToString(columns, ','));
@@ -270,6 +283,7 @@ public abstract class AbstractOraclePartition
         int partCount = rs.getInt("PARTITION_COUNT");
         partitions = new ArrayList<>(partCount);
         tableSpace = rs.getString("DEF_TABLESPACE_NAME");
+        refPartitionConstraint = rs.getString("REF_PTN_CONSTRAINT_NAME");
         objectOwner = dbObject.getSchema();
       }
     }
@@ -277,6 +291,12 @@ public abstract class AbstractOraclePartition
     {
       SqlUtil.closeAll(rs, pstmt);
     }
+    
+    if (isRefPartition() && dbObject instanceof TableIdentifier)
+    {
+      ((TableIdentifier)dbObject).setUseInlineFK(true);
+    }
+
     if (subKeyCount > 0)
     {
       retrieveSubColumns(dbObject, conn);
