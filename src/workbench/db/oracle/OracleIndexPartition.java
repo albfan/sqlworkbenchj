@@ -44,6 +44,7 @@ public class OracleIndexPartition
     throws SQLException
   {
     this(conn, false);
+    supportsRefPartitions = false;
   }
 
   protected OracleIndexPartition(WbConnection conn, boolean retrieveCompression)
@@ -105,7 +106,8 @@ public class OracleIndexPartition
       "       subpartitioning_type, \n" +
       "       subpartitioning_key_count, \n" +
       "       def_subpartition_count, \n" +
-      "       def_tablespace_name \n" +
+      "       def_tablespace_name, \n" +
+      "       null as ref_ptn_constraint_name \n" +
       "from all_part_indexes \n" +
       "where owner = ? \n" +
       "  and index_name = ? ";

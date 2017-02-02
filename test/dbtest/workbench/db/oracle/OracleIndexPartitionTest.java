@@ -143,7 +143,7 @@ public class OracleIndexPartitionTest
 		assertEquals(4, parts.size());
 		assertEquals("LOCAL", reader.getLocality());
 		String sql = reader.getSourceForIndexDefinition().trim();
-		System.out.println(sql);
+//		System.out.println(sql);
 		String expected = "LOCAL\n" +
              "(\n" +
              "  PARTITION WB_LIST_PART_1,\n" +
