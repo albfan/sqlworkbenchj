@@ -16,6 +16,7 @@
     <entry dev-build="1" type="enh">A new annotation (@WbCrossTab) is available to create simple crosstabs (aka "pivot") from query results.</entry>
     <entry dev-build="1" type="enh">Improved editing of Postgres' hstore result columns.</entry>
     <entry dev-build="1" type="enh">For SQL Server, the object dependencies now include named default constraints and custom data types</entry>
+    <entry dev-build="6" type="fix">For Oracle the DDL for tables using reference partitioning was not generated correctly</entry>
     <entry dev-build="6" type="fix">In batch mode when specifying a connection profile using -profile, the setting to ignore drop errors from the profile was ignored</entry>
     <entry dev-build="6" type="fix">The width of the DbTree was limited if the DbExplorer panel was also displayed</entry>
     <entry dev-build="6" type="fix">For HSQLDB, BIT columns were not displayed correctly.</entry>
