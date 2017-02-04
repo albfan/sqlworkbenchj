@@ -35,13 +35,13 @@
   </Company_Info>
   <Program_Info>
     <Program_Name>SQL Workbench/J</Program_Name>
-    <Program_Version>121</Program_Version>
+    <Program_Version>122</Program_Version>
     <Program_Type>Freeware</Program_Type>
     <Program_Release_Status>New Release</Program_Release_Status>
     <Program_Category_Class>Business::Databases &amp; Tools</Program_Category_Class>
-    <Program_Release_Year>2016</Program_Release_Year>
-    <Program_Release_Month>07</Program_Release_Month>
-    <Program_Release_Day>31</Program_Release_Day>
+    <Program_Release_Year>2017</Program_Release_Year>
+    <Program_Release_Month>02</Program_Release_Month>
+    <Program_Release_Day>04</Program_Release_Day>
     <Program_Cost_Other>0.00</Program_Cost_Other>
     <Program_Cost_Other_Code></Program_Cost_Other_Code>
     <Program_Cost_Dollars>0.00</Program_Cost_Dollars>
@@ -93,7 +93,7 @@
       <Application_XML_File_URL>http://www.sql-workbench.net/workbench_pad.xml</Application_XML_File_URL>
     </Application_URLs>
     <Download_URLs>
-      <Primary_Download_URL>http://www.sql-workbench.net/Workbench-Build121.zip</Primary_Download_URL>
+      <Primary_Download_URL>http://www.sql-workbench.net/Workbench-Build122.zip</Primary_Download_URL>
       <Secondary_Download_URL></Secondary_Download_URL>
       <Additional_Download_URL_1></Additional_Download_URL_1>
       <Additional_Download_URL_2></Additional_Download_URL_2>
