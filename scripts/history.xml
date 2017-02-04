@@ -28,7 +28,7 @@
     <entry dev-build="5" type="fix">When using an Oracle 12.x JDBC driver, materialized views were always reported as missing with WbSchemaDiff</entry>
     <entry dev-build="4" type="fix">It was no longer possible to select "As Is" for the built-in SQL formatter</entry>
     <entry dev-build="4" type="fix">Several features in the DbExplorer did not work for Amazon Redshift</entry>
-    <entry dev-build="4" type="fix">Feeback from connect scripts was not always shown in the message tab</entry>
+    <entry dev-build="4" type="fix">Feedback from connect scripts was not always shown in the message tab</entry>
     <entry dev-build="4" type="fix">Error messages were not shown for errors that occurred in connect scripts</entry>
     <entry dev-build="3" type="fix">For Postgres, the remarks for indexes were not retrieved correctly if indexes with the same name existed in different schemas</entry>
     <entry dev-build="3" type="fix">The formatter did not treat the := operator properly for MySQL</entry>
