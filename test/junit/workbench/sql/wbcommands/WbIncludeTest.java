@@ -24,28 +24,19 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
-import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
-import workbench.TestUtil;
-import workbench.WbTestCase;
-
-import workbench.db.ConnectionMgr;
-import workbench.db.WbConnection;
-
-import workbench.sql.StatementRunner;
-import workbench.sql.StatementRunnerResult;
-import workbench.sql.VariablePool;
-
-import workbench.util.EncodingUtil;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
+import workbench.db.ConnectionMgr;
+import workbench.db.WbConnection;
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.VariablePool;
+import workbench.storage.DataStore;
 
 /**
  *
@@ -86,9 +77,7 @@ public class WbIncludeTest
       String encoding = "ISO-8859-1";
       File scriptFile = new File(util.getBaseDir(), "test_1.sql");
 
-      Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
-      w.write("insert into include_test (some_name) values ('one');\n");
-      w.close();
+      TestUtil.writeFile(scriptFile, "insert into include_test (some_name) values ('one');", encoding);
 
       String sql = "WbInclude -ifDefined=foobar -file='" + scriptFile.getAbsolutePath() + "'";
 
@@ -147,23 +136,20 @@ public class WbIncludeTest
     {
       WbConnection con = runner.getConnection();
 
-      Statement stmt = con.createStatement();
-      stmt.execute("create table include_test (some_name varchar(100))");
-      con.commit();
+      TestUtil.executeScript(con,
+        "create table include_test (some_name varchar(100));\n" +
+        "commit;");
 
       String encoding = "ISO-8859-1";
       File scriptFile = new File(util.getBaseDir(), "test_1.sql");
 
-      Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
-      w.write("insert into include_test (some_name) values ('one');\n");
-      w.close();
+      TestUtil.writeFile(scriptFile, "insert into include_test (some_name) values ('one');", encoding);
 
       scriptFile = new File(util.getBaseDir(), "test_2.sql");
 
-      w = EncodingUtil.createWriter(scriptFile, encoding, false);
-      w.write("insert into include_test (some_name) values ('two');\n");
-      w.write("commit;\n");
-      w.close();
+      TestUtil.writeFile(scriptFile,
+        "insert into include_test (some_name) values ('two');\n"+
+        "commit;\n", encoding);
 
       String sql = "WbInclude -file='" + util.getBaseDir() + "/test*.sql'";
 
@@ -171,16 +157,8 @@ public class WbIncludeTest
       StatementRunnerResult result = runner.getResult();
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
-      Object o = TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
-      if (o instanceof Number)
-      {
-        int count = ((Number)o).intValue();
-        assertEquals(2, count);
-      }
-      else
-      {
-        fail("No count returned");
-      }
+      int count = TestUtil.getNumberValue(con, "select count(*) from include_test");
+      assertEquals(2, count);
     }
     finally
     {
@@ -196,35 +174,24 @@ public class WbIncludeTest
     {
       WbConnection con = runner.getConnection();
 
-      Statement stmt = con.createStatement();
-      stmt.execute("create table include_test (file_name varchar(100))");
-      con.commit();
+      TestUtil.executeScript(con,
+        "create table include_test (file_name varchar(100));\n" +
+        "commit;");
 
       String encoding = "ISO-8859-1";
       File scriptFile = new File(util.getBaseDir(), "test.sql");
 
-      Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
-      w.write("insert into include_test (file_name) values ('" + scriptFile.getAbsolutePath() + "');\n");
-      w.write("commit;\n");
-      w.close();
+      TestUtil.writeFile(scriptFile,
+        "insert into include_test (file_name) values ('" + scriptFile.getAbsolutePath() + "');\n"+
+        "commit;\n", encoding);
 
       String sql = "-- comment\n\n@test.sql\n";
       runner.runStatement(sql);
       StatementRunnerResult result = runner.getResult();
       assertEquals("Statement not executed", true, result.isSuccess());
 
-      ResultSet rs = stmt.executeQuery("select count(*) from include_test");
-
-      if (rs.next())
-      {
-        int count = rs.getInt(1);
-        assertEquals("Rows not inserted", 1, count);
-      }
-      else
-      {
-        fail("Select failed");
-      }
-      rs.close();
+      int count = TestUtil.getNumberValue(con, "select count(*) from include_test");
+      assertEquals("Rows not inserted", 1, count);
     }
     finally
     {
@@ -263,38 +230,31 @@ public class WbIncludeTest
 
       File include1 = new File(subdir1, "include1.sql");
 
-      Statement stmt = con.createStatement();
-      stmt.execute("create table include_test (file_name varchar(100))");
-      con.commit();
+      TestUtil.executeScript(con,
+        "create table include_test (id integer, file_name varchar(100));\n" +
+        "commit;\n");
 
       String encoding = "ISO-8859-1";
-      Writer w = EncodingUtil.createWriter(include1, encoding, false);
-      w.write("insert into include_test (file_name) values ('" + include1.getAbsolutePath() + "');\n");
-      w.write("commit;\n");
-      w.close();
+
+      TestUtil.writeFile(include1,
+        "insert into include_test (id, file_name) values (1, '" + include1.getAbsolutePath() + "');\n" +
+        "commit;\n", encoding);
 
       File main = new File(util.getBaseDir(), "main.sql");
-      w = EncodingUtil.createWriter(main, encoding, false);
-      w.write("insert into include_test (file_name) values ('" + main.getAbsolutePath() + "');\n");
-      w.write("commit;\n");
-      w.write("@./" + subdir1.getName() + "/" + include1.getName() + "\n");
-      w.close();
+
+      TestUtil.writeFile(main,
+        "insert into include_test (id, file_name) values (2, '" + main.getAbsolutePath() + "');\n" +
+        "commit;\n" +
+        "@./" + subdir1.getName() + "/" + include1.getName() + "\n", encoding);
 
       runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n");
       StatementRunnerResult result = runner.getResult();
       assertEquals("Runner not successful", true, result.isSuccess());
 
-      ResultSet rs = stmt.executeQuery("select * from include_test");
-      List files = new ArrayList();
-      while (rs.next())
-      {
-        files.add(rs.getString(1));
-      }
-      rs.close();
-      assertEquals("Not enough values retrieved", 2, files.size());
-      assertEquals("Main file not run", true, files.contains(main.getAbsolutePath()));
-      assertEquals("Second file not run", true, files.contains(include1.getAbsolutePath()));
-      stmt.close();
+      DataStore ds = TestUtil.getQueryResult(con, "select file_name from include_test order by id");
+      assertEquals("Not enough values retrieved", 2, ds.getRowCount());
+      assertEquals("Main file not run", main.getAbsolutePath(), ds.getValueAsString(1, 0));
+      assertEquals("Second file not run", include1.getAbsolutePath(), ds.getValueAsString(0, 0));
     }
     finally
     {

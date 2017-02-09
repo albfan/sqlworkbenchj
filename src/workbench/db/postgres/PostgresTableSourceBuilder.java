@@ -102,28 +102,55 @@ public class PostgresTableSourceBuilder
       tableSql.append(inherit);
     }
 
-    String tempCol = null;
+    String persistenceCol = null;
     if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1"))
     {
-      tempCol = "ct.relpersistence";
+      persistenceCol = "ct.relpersistence";
     }
     else if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4"))
     {
-      tempCol = "case when ct.relistemp then 't' else null::char end as relpersitence";
+      persistenceCol = "case when ct.relistemp then 't' else null::char end as relpersitence";
     }
     else
     {
-      tempCol = "null::char as relpersistence";
+      persistenceCol = "null::char as relpersistence";
+    }
+
+    String spcnameCol;
+    String defaultTsCol;
+    String defaultTsQuery;
+
+    boolean showNonStandardTablespace = dbConnection.getDbSettings().getBoolProperty("show.nonstandard.tablespace", true);
+
+    if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.0"))
+    {
+      spcnameCol = "spc.spcname";
+      defaultTsCol = "ts.default_tablespace";
+      defaultTsQuery =
+      "  cross join (\n" +
+      "    select ts.spcname as default_tablespace\n" +
+      "    from pg_database d\n" +
+      "      join pg_tablespace ts on ts.oid = d.dattablespace\n" +
+      "    where d.datname = current_database()\n" +
+      "  ) ts \n ";
+    }
+    else
+    {
+      spcnameCol = "null as spcname";
+      defaultTsCol = "null as default_tablespace";
+      defaultTsQuery = "";
+      showNonStandardTablespace = false;
     }
 
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+
     String sql =
-      "select " + tempCol + ", ct.relkind, array_to_string(ct.reloptions, ', '), spc.spcname, own.rolname as owner \n" +
+      "select " + persistenceCol + ", ct.relkind, array_to_string(ct.reloptions, ', ') as options, " + spcnameCol + ", own.rolname as owner, " + defaultTsCol + " \n" +
       "from pg_catalog.pg_class ct \n" +
       "  join pg_catalog.pg_namespace cns on ct.relnamespace = cns.oid \n " +
       "  join pg_catalog.pg_roles own on ct.relowner = own.oid \n " +
-      "  left join pg_catalog.pg_tablespace spc on spc.oid = ct.reltablespace \n" +
+      "  left join pg_catalog.pg_tablespace spc on spc.oid = ct.reltablespace \n" + defaultTsQuery +
       " where cns.nspname = ? \n" +
       "   and ct.relname = ?";
 
@@ -134,20 +161,31 @@ public class PostgresTableSourceBuilder
       pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
       pstmt.setString(1, tbl.getRawSchema());
       pstmt.setString(2, tbl.getRawTableName());
+
       if (Settings.getInstance().getDebugMetadataSql())
       {
         LogMgr.logDebug("PostgresTableSourceBuilder.readTableOptions()", "Retrieving table options using:\n" +
            SqlUtil.replaceParameters(sql, tbl.getSchema(), tbl.getTableName()));
       }
+
       rs = pstmt.executeQuery();
+
       if (rs.next())
       {
-        String persistence = rs.getString(1);
-        String type = rs.getString(2);
-        String tblSettings = rs.getString(3);
-        String tableSpace = rs.getString(4);
+        String persistence = rs.getString("relpersistence");
+        String type = rs.getString("relkind");
+        String settings = rs.getString("options");
+        String tableSpace = rs.getString("spcname");
         String owner = rs.getString("owner");
+        String defaultTablespace = rs.getString("default_tablespace");
+
+        if (showNonStandardTablespace && !"pg_default".equals(defaultTablespace) && StringUtil.isEmptyString(tableSpace))
+        {
+          tableSpace = defaultTablespace;
+        }
+
         tbl.setOwner(owner);
+        tbl.setTablespace(tableSpace);
 
         if (StringUtil.isNonEmpty(persistence))
         {
@@ -161,19 +199,21 @@ public class PostgresTableSourceBuilder
               break;
           }
         }
+
         if ("f".equalsIgnoreCase(type))
         {
           option.setTypeModifier("FOREIGN");
         }
-        tbl.setTablespace(tableSpace);
-        if (StringUtil.isNonEmpty(tblSettings))
+
+        if (StringUtil.isNonEmpty(settings))
         {
-          setConfigSettings(tblSettings, option);
+          setConfigSettings(settings, option);
           if (tableSql.length() > 0) tableSql.append('\n');
           tableSql.append("WITH (");
-          tableSql.append(tblSettings);
+          tableSql.append(settings);
           tableSql.append(")");
         }
+
         if (StringUtil.isNonBlank(tableSpace))
         {
           if (tableSql.length() > 0) tableSql.append('\n');

@@ -49,27 +49,11 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import workbench.WbManager;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.DbExecutionNotifier;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
-import workbench.interfaces.TableDeleteListener;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.GuiSettings;
-import workbench.resource.IconMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
-
 import workbench.gui.MainWindow;
 import workbench.gui.PanelReloader;
 import workbench.gui.WbSwingUtilities;
@@ -87,10 +71,23 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.sql.AutomaticRefreshMgr;
 import workbench.gui.sql.DwPanel;
-
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.DbExecutionNotifier;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.interfaces.TableDeleteListener;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.GuiSettings;
+import workbench.resource.IconMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.sql.EndReadOnlyTrans;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
-
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
@@ -481,7 +478,9 @@ public class TableDataPanel
 
 	private void setSavepoint()
 	{
-		if (dbConnection.getDbSettings().useSavePointForDML() && !DbExplorerSettings.isOwnTransaction(dbConnection))
+		if (dbConnection.getDbSettings().useSavePointForDML()
+      && !DbExplorerSettings.isOwnTransaction(dbConnection)
+      && dbConnection.getDbSettings().getAutoCloseReadOnlyTransactions() == EndReadOnlyTrans.never)
 		{
 			try
 			{
@@ -765,6 +764,8 @@ public class TableDataPanel
 
 	private void rollbackIfNeeded()
 	{
+    if (dbConnection.getDbSettings().getAutoCloseReadOnlyTransactions() != EndReadOnlyTrans.never) return;
+
 		if (DbExplorerSettings.isOwnTransaction(dbConnection))
 		{
 			this.dbConnection.rollbackSilently();
@@ -778,6 +779,8 @@ public class TableDataPanel
 
 	private void commitRetrieveIfNeeded()
 	{
+    if (dbConnection.getDbSettings().getAutoCloseReadOnlyTransactions() != EndReadOnlyTrans.never) return;
+
 		if (DbExplorerSettings.isOwnTransaction(dbConnection))
 		{
 			if (this.dbConnection.selectStartsTransaction())

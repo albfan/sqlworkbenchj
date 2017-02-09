@@ -52,18 +52,16 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import workbench.console.DataStorePrinter;
-import workbench.resource.Settings;
-import workbench.ssh.SshException;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import workbench.console.DataStorePrinter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
-
-import workbench.storage.DataStore;
-
+import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.StatementRunner;
@@ -73,7 +71,8 @@ import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.wbcommands.InvalidConnectionDescriptor;
-
+import workbench.ssh.SshException;
+import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
@@ -82,9 +81,6 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  *
@@ -552,6 +548,28 @@ public class TestUtil
 		return result.intValue();
 	}
 
+  public static DataStore getQueryResult(WbConnection conn, String query)
+  {
+    Statement stmt = null;
+    ResultSet rs = null;
+    DataStore result = null;
+    try
+    {
+      stmt = conn.createStatement();
+      rs = stmt.executeQuery(query);
+      result = new DataStore(rs, conn, true);
+    }
+    catch (Exception e)
+    {
+      result = null;
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
+    return result;
+  }
+  
 	public static Object getSingleQueryValue(WbConnection conn, String query)
 	{
 		Statement stmt = null;

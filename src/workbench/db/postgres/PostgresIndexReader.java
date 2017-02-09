@@ -136,13 +136,13 @@ public class PostgresIndexReader
       }
       sql.append(')');
 
-      if (Settings.getInstance().getDebugMetadataSql())
-      {
-        LogMgr.logDebug("PostgresIndexReader.getIndexSource1()", "Using sql: " + sql.toString());
-      }
-
       if (indexCount > 0)
       {
+        if (Settings.getInstance().getDebugMetadataSql())
+        {
+          LogMgr.logDebug("PostgresIndexReader.getIndexSource1()", "Using sql: " + sql.toString());
+        }
+
         sp = con.setSavepoint();
         stmt = con.createStatementForQuery();
 
@@ -174,7 +174,7 @@ public class PostgresIndexReader
     catch (Exception e)
     {
       con.rollback(sp);
-      LogMgr.logError("PostgresIndexReader.getIndexSource1()", "Error retrieving source", e);
+      LogMgr.logError("PostgresIndexReader.getIndexSource1()", "Error retrieving index source using: " + sql, e);
       source = new StringBuilder(ExceptionUtil.getDisplay(e));
     }
     finally
