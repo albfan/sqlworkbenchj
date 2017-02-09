@@ -25,7 +25,6 @@ package workbench;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -37,8 +36,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -52,16 +49,18 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
 import workbench.console.DataStorePrinter;
+import workbench.resource.Settings;
+import workbench.ssh.SshException;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ErrorInformationReader;
 import workbench.db.ReaderFactory;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
+
+import workbench.storage.DataStore;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.StatementRunner;
@@ -71,8 +70,7 @@ import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.wbcommands.InvalidConnectionDescriptor;
-import workbench.ssh.SshException;
-import workbench.storage.DataStore;
+
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.DdlObjectInfo;
@@ -81,6 +79,9 @@ import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  *
@@ -569,7 +570,7 @@ public class TestUtil
     }
     return result;
   }
-  
+
 	public static Object getSingleQueryValue(WbConnection conn, String query)
 	{
 		Statement stmt = null;
@@ -593,128 +594,6 @@ public class TestUtil
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
-	}
-
-	public void prepareSource(WbFile sourceDb)
-		throws SQLException, ClassNotFoundException
-	{
-		Connection con = null;
-		Statement stmt = null;
-
-		try
-		{
-			Class.forName("org.h2.Driver");
-			con = DriverManager.getConnection("jdbc:h2:" + sourceDb.getFullPath(), "sa", "");
-			stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Harry', 'Handsome')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (2, 'Mary', 'Moviestar')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (3, 'Major', 'Bug')");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (4, 'General', 'Failure')");
-			con.commit();
-			stmt.close();
-			con.close();
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-			try { con.close(); } catch (Throwable th) {}
-		}
-	}
-
-	public void prepareTarget(WbFile targetDb)
-		throws SQLException, ClassNotFoundException
-	{
-		Connection con = DriverManager.getConnection("jdbc:h2:" + targetDb.getFullPath(), "sa", "");
-		Statement stmt = null;
-		try
-		{
-			Class.forName("org.h2.Driver");
-			stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
-			con.commit();
-			stmt.close();
-			con.close();
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-			try { con.close(); } catch (Throwable th) {}
-		}
-	}
-
-	public void createProfiles(WbFile sourceDb, WbFile targetDb)
-		throws FileNotFoundException
-	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>  \n" +
-             "<java version=\"1.5.0_08\" class=\"java.beans.XMLDecoder\">  \n" +
-             "	 \n" +
-             " <object class=\"java.util.ArrayList\">  \n" +
-             "  <void method=\"add\">  \n" +
-             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
-             "    <void property=\"driverclass\">  \n" +
-             "     <string>org.h2.Driver</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"name\">  \n" +
-             "     <string>SourceConnection</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"url\">  \n" +
-             "     <string>" + "jdbc:h2:" + StringUtil.replace(sourceDb.getFullPath(), "\\", "/") + "</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"username\">  \n" +
-             "     <string>sa</string>  \n" +
-             "    </void>  \n" +
-             "   </object>  \n" +
-             "  </void>  \n" +
-             "	 \n" +
-             "  <void method=\"add\">  \n" +
-             "   <object class=\"workbench.db.ConnectionProfile\">  \n" +
-             "    <void property=\"driverclass\">  \n" +
-             "     <string>org.h2.Driver</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"name\">  \n" +
-             "     <string>TargetConnection</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"url\">  \n" +
-             "     <string>" + "jdbc:h2:" + StringUtil.replace(targetDb.getFullPath(), "\\", "/") + "</string>  \n" +
-             "    </void>  \n" +
-             "    <void property=\"username\">  \n" +
-             "     <string>sa</string>  \n" +
-             "    </void>  \n" +
-             "   </object>  \n" +
-             "  </void>  \n" +
-             "	 \n" +
-             " </object>  \n" +
-             "</java> ";
-		try (PrintWriter writer = new PrintWriter(new FileOutputStream(new File(getBaseDir(), "WbProfiles.xml"))))
-		{
-			writer.println(xml);
-		}
-		// Make sure the new profiles are read
-		ConnectionMgr.getInstance().reloadProfiles();
-	}
-
-	/**
-	 * If the given SQL command is a CREATE TABLE command, return
-	 * the table that is created, otherwise return null;
-	 */
-	public static String getCreateTable(CharSequence sql)
-	{
-		try
-		{
-			SQLLexer lexer = SQLLexerFactory.createLexer(sql);
-			SQLToken t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("CREATE")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("TABLE")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null) return null;
-			return t.getContents();
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
 	}
 
 	public static Map<String, String> getNameSpaces(String xml, String rootTag)
@@ -744,7 +623,8 @@ public class TestUtil
 	public static String cleanupSql(CharSequence sql)
 	{
 		if (StringUtil.isBlank(sql)) return "";
-			SQLLexer lexer = SQLLexerFactory.createLexer(sql);
+
+    SQLLexer lexer = SQLLexerFactory.createLexer(sql);
 		StringBuilder result = new StringBuilder(sql.length());
 		SQLToken last = null;
 		SQLToken t = lexer.getNextToken(false, true);

@@ -337,14 +337,16 @@ public class WbExportTest
     assertEquals(4, p.getSize());
 
     String create1 = p.getCommand(0);
+    DdlObjectInfo info = SqlUtil.getDDLObjectInfo(create1, connection);
     assertEquals("CREATE", SqlUtil.getSqlVerb(create1));
-    assertEquals("TABLE", SqlUtil.getCreateType(create1));
-    assertEquals("JUNIT_TEST", TestUtil.getCreateTable(create1));
+    assertEquals("TABLE", info.getObjectType());
+    assertEquals("JUNIT_TEST", info.getObjectName());
 
     String create2 = p.getCommand(2);
+    info = SqlUtil.getDDLObjectInfo(create2, connection);
     assertEquals("CREATE", SqlUtil.getSqlVerb(create2));
-    assertEquals("TABLE", SqlUtil.getCreateType(create2));
-    assertEquals("PERSON", TestUtil.getCreateTable(create2));
+    assertEquals("TABLE", info.getObjectType());
+    assertEquals("PERSON", info.getObjectName());
   }
 
   @Test

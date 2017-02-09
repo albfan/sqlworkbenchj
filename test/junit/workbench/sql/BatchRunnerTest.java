@@ -41,11 +41,10 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
 import workbench.db.WbConnection;
 
-import workbench.gui.profiles.ProfileKey;
-
 import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 import org.junit.After;
@@ -444,11 +443,35 @@ public class BatchRunnerTest
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 			ConnectionMgr.getInstance().clearProfiles();
-			WbFile targetDb  = new WbFile(util.getBaseDir(), "brTargetdb");
-			WbFile sourceDb  = new WbFile(util.getBaseDir(), "brSourcedb");
-			util.createProfiles(sourceDb, targetDb);
-			util.prepareSource(sourceDb);
-			util.prepareTarget(targetDb);
+
+      WbFile targetDb = new WbFile(util.getBaseDir(), "brTargetdb");
+      WbFile sourceDb = new WbFile(util.getBaseDir(), "brSourcedb");
+
+      ConnectionProfile sourceProfile = new ConnectionProfile("SourceConnection",
+        "org.h2.Driver", "jdbc:h2:" + StringUtil.replace(sourceDb.getFullPath(), "\\", "/"), "sa", null);
+
+      ConnectionProfile targetProfile = new ConnectionProfile("TargetConnection",
+        "org.h2.Driver", "jdbc:h2:" + StringUtil.replace(targetDb.getFullPath(), "\\", "/"), "sa", null);
+
+      ConnectionMgr.getInstance().addProfile(sourceProfile);
+      ConnectionMgr.getInstance().addProfile(targetProfile);
+
+			WbConnection target = ConnectionMgr.getInstance().getConnection(targetProfile, "TestBatchRunnerTarget");
+
+      TestUtil.executeScript(target,
+        "CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50));\n" +
+        "commit;");
+
+			WbConnection source = ConnectionMgr.getInstance().getConnection(sourceProfile, "TestBatchRunnerSource");
+
+      TestUtil.executeScript(source,
+        "CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50));\n" +
+        "insert into person (id, firstname, lastname) values (1, 'Harry', 'Handsome');\n" +
+        "insert into person (id, firstname, lastname) values (2, 'Mary', 'Moviestar');\n" +
+        "insert into person (id, firstname, lastname) values (3, 'Major', 'Bug');\n" +
+        "insert into person (id, firstname, lastname) values (4, 'General', 'Failure');\n" +
+        "commit;\n");
+
 			WbFile script = new WbFile(util.getBaseDir(), "copydata.sql");
 			String command = "WbCopy -sourceProfile='SourceConnection' -targetProfile='TargetConnection' -sourceTable=person -targetTable=person;";
 			TestUtil.writeFile(script, command);
@@ -461,7 +484,6 @@ public class BatchRunnerTest
 			runner.connect();
 			runner.execute();
 			assertTrue(runner.isSuccess());
-			WbConnection target = ConnectionMgr.getInstance().getConnection(new ProfileKey("TargetConnection"), "CopyCheck");
 			stmt = target.createStatement();
 			rs = stmt.executeQuery("select count(*) from person");
 			if (rs.next())
