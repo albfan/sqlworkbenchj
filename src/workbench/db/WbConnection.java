@@ -41,15 +41,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import workbench.interfaces.DbExecutionListener;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.mssql.SqlServerUtil;
 import workbench.db.objectcache.DbObjectCache;
 import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.db.oracle.OracleUtils;
 import workbench.db.oracle.OracleWarningsClearer;
-import workbench.interfaces.DbExecutionListener;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.DelimiterDefinition;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.ErrorReportLevel;
@@ -58,6 +60,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.preparedstatement.PreparedStatementPool;
+
 import workbench.util.DdlObjectInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlParsingUtil;
@@ -1339,7 +1342,7 @@ public class WbConnection
     {
       try
       {
-        if (metaData.isSqlServer() && Settings.getInstance().getBoolProperty("workbench.db." + DBID.SQL_Server.getId() + ".useversionfunction", true))
+        if (metaData != null && metaData.isSqlServer() && Settings.getInstance().getBoolProperty("workbench.db." + DBID.SQL_Server.getId() + ".useversionfunction", true))
         {
           dbProductVersion = SqlServerUtil.getVersion(this);
         }

@@ -30,14 +30,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.JdbcIndexReader;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
@@ -87,20 +89,33 @@ public class PostgresIndexReader
     String schema = "'" + table.getRawSchema() + "'";
 
     StringBuilder sql = new StringBuilder(50 + count * 20);
+
     if (JdbcUtils.hasMinimumServerVersion(con, "8.0"))
     {
       sql.append(
-        "SELECT indexdef, indexname, tablespace, obj_description((quote_ident(schemaname)||'.'||quote_ident(indexname))::regclass, 'pg_class') \n" +
-        "FROM pg_indexes \n" +
-        "WHERE (schemaname, indexname) IN (");
+        "SELECT i.indexdef, \n" +
+        "       i.indexname, \n" +
+        "       i.tablespace, \n" +
+        "       obj_description((quote_ident(i.schemaname)||'.'||quote_ident(i.indexname))::regclass, 'pg_class') as remarks, \n" +
+        "       ts.default_tablespace \n" +
+        "FROM pg_indexes i \n" +
+        "  cross join (\n" +
+        "    select ts.spcname as default_tablespace\n" +
+        "    from pg_database d\n" +
+        "      join pg_tablespace ts on ts.oid = d.dattablespace\n" +
+        "    where d.datname = current_database()\n" +
+        "  ) ts \n " +
+        "WHERE (i.schemaname, i.indexname) IN (");
     }
     else
     {
       sql.append(
-        "SELECT indexdef, indexname, null::text as tablespace, null::text as remarks \n" +
+        "SELECT indexdef, indexname, null::text as tablespace, null::text as remarks, null::text as default_tablespace \n" +
         "FROM pg_indexes \n" +
         "WHERE (schemaname, indexname) IN (");
     }
+
+    boolean showNonStandardTablespace = con.getDbSettings().getBoolProperty("show.nonstandard.tablespace", true);
 
     String nl = Settings.getInstance().getInternalEditorLineEnding();
 
@@ -149,10 +164,17 @@ public class PostgresIndexReader
         rs = stmt.executeQuery(sql.toString());
         while (rs.next())
         {
-          source.append(rs.getString(1));
+          source.append(rs.getString("indexdef"));
 
-          String idxName = rs.getString(2);
-          String tblSpace = rs.getString(3);
+          String idxName = rs.getString("indexname");
+          String tblSpace = rs.getString("tablespace");
+          String defaultTablespace = rs.getString("default_tablespace");
+
+          if (showNonStandardTablespace && !"pg_default".equals(defaultTablespace) && StringUtil.isEmptyString(tblSpace))
+          {
+            tblSpace = defaultTablespace;
+          }
+
           if (StringUtil.isNonEmpty(tblSpace))
           {
             IndexDefinition idx = findIndexByName(indexList, idxName);
@@ -162,7 +184,7 @@ public class PostgresIndexReader
           }
           source.append(';');
           source.append(nl);
-          String remarks = rs.getString(4);
+          String remarks = rs.getString("remarks");
           if (StringUtil.isNonBlank(remarks))
           {
             source.append("COMMENT ON INDEX " + SqlUtil.quoteObjectname(idxName) + " IS '" + SqlUtil.escapeQuotes(remarks) + "'");
@@ -246,8 +268,14 @@ public class PostgresIndexReader
 
     StringBuilder sql = new StringBuilder(50 + count * 20);
     sql.append(
-      "SELECT indexname, tablespace, obj_description((quote_ident(schemaname)||'.'||quote_ident(indexname))::regclass, 'pg_class') as remarks \n" +
-      "FROM pg_indexes \n" +
+      "SELECT i.indexname, coalesce(i.tablespace, ts.default_tablespace), obj_description((quote_ident(i.schemaname)||'.'||quote_ident(i.indexname))::regclass, 'pg_class') as remarks \n" +
+      "FROM pg_indexes i \n" +
+      "  cross join (\n" +
+      "    select nullif(ts.spcname, 'pg_default') as default_tablespace\n" +
+      "    from pg_database d\n" +
+      "      join pg_tablespace ts on ts.oid = d.dattablespace\n" +
+      "    where d.datname = current_database()\n" +
+      "  ) ts \n " +
       "WHERE (schemaname, indexname) IN (");
 
     int indexCount = 0;
