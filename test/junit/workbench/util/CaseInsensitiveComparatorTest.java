@@ -48,7 +48,7 @@ public class CaseInsensitiveComparatorTest
 	public void testSetIgnoreQuotes()
 	{
 		CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
-		comp.setIgnoreQuotes(true);
+		comp.setIgnoreSQLQuotes(true);
 		assertEquals(0, comp.compare("\"foo\"", "FOO"));
 		assertEquals(0, comp.compare("'foo'", "\"FOO\""));
 		Set<String> values = new TreeSet<String>(comp);

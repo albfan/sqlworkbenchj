@@ -26,8 +26,6 @@ package workbench.util;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import workbench.WbManager;
-
 import workbench.db.objectcache.DbObjectCacheFactory;
 
 /**
@@ -48,7 +46,7 @@ public class CaseInsensitiveComparator
   {
   }
 
-  public void setIgnoreQuotes(boolean flag)
+  public void setIgnoreSQLQuotes(boolean flag)
   {
     this.ignoreQuotes = flag;
   }
@@ -72,7 +70,7 @@ public class CaseInsensitiveComparator
     if (value2 == null) return 1;
     if (ignoreQuotes)
     {
-      return StringUtil.trimQuotes(value1).compareToIgnoreCase(StringUtil.trimQuotes(value2));
+      return SqlUtil.removeObjectQuotes(value1).compareToIgnoreCase(SqlUtil.removeObjectQuotes(value2));
     }
     return value1.compareToIgnoreCase(value2);
   }

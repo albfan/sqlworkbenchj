@@ -25,12 +25,13 @@ package workbench.db.oracle;
 
 import java.sql.Types;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import workbench.WbTestCase;
+
+import workbench.db.oracle.OracleDataTypeResolver;
 
 /**
  *
@@ -44,11 +45,6 @@ public class OracleDataTypeResolverTest
 		super("OracleDataTypeResolverTest");
 	}
 
-	@Before
-	public void setUp()
-	{
-	}
-
 	@Test
 	public void testGetSqlTypeDisplay()
 	{
@@ -60,6 +56,9 @@ public class OracleDataTypeResolverTest
 		assertEquals("NVARCHAR(300)", resolver.getSqlTypeDisplay("NVARCHAR", Types.VARCHAR, 300, -1, OracleDataTypeResolver.CharSemantics.Byte));
 		assertEquals("CHAR(5)", resolver.getSqlTypeDisplay("CHAR", Types.CHAR, 5, -1, OracleDataTypeResolver.CharSemantics.Byte));
 		assertEquals("NUMBER(10,2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, 2));
+		assertEquals("NUMBER(10,-2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 10, -2));
+		assertEquals("NUMBER(*,-2)", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, Integer.MAX_VALUE, -2));
+		assertEquals("NUMBER", resolver.getSqlTypeDisplay("NUMBER", Types.NUMERIC, 0, 0));
 
 		String display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleDataTypeResolver.CharSemantics.Byte);
 		assertEquals("VARCHAR(200)", display);

@@ -32,9 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
@@ -44,7 +41,8 @@ import workbench.db.JdbcUtils;
 import workbench.db.PkDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -152,6 +150,10 @@ public class OracleTableDefinitionReader
         ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), oraTypes.fixColumnType(sqlType, typeName));
 
         int size = rs.getInt("COLUMN_SIZE");
+        if (rs.wasNull())
+        {
+          size = Integer.MAX_VALUE;
+        }
         int digits = rs.getInt("DECIMAL_DIGITS");
         if (rs.wasNull()) digits = -1;
 
@@ -402,12 +404,12 @@ public class OracleTableDefinitionReader
       "                         'NVARCHAR2', t.char_length, \n" +
       "                         'CHAR', t.char_length, \n" +
       "                         'NCHAR', t.char_length, \n" +
-      "                         'NUMBER', nvl(t.data_precision, 38), \n" +  // if data_precision is NULL for NUMBERs this is the same as 38
+      "                         'NUMBER', t.data_precision, \n" +
       "                         'FLOAT', t.data_precision, \n" +
       "                         'REAL', t.data_precision, \n" +
       "            t.data_length) AS column_size,  \n" +
       "     case \n" +
-      "        when t.data_type = 'NUMBER' and t.data_precision is null then -127 \n" +
+      "        when t.data_type = 'NUMBER' and t.data_precision is null then coalesce(t.data_scale,-127) \n" +
       "        else t.data_scale \n" +
       "     end AS decimal_digits,  \n" +
       "     DECODE(t.nullable, 'N', 0, 1) AS nullable, \n" +

@@ -23,16 +23,18 @@
  */
 package workbench.db.oracle;
 
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.AfterClass;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObjectComparator;
 import workbench.db.IndexColumn;
@@ -42,16 +44,9 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
-
 import workbench.util.SqlUtil;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  *
@@ -170,7 +165,7 @@ public class OracleTableDefinitionReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		Settings.getInstance().setConvertOracleTypes(true);
 		Statement stmt = null;
@@ -179,10 +174,8 @@ public class OracleTableDefinitionReaderTest
 			stmt = con.createStatement();
 			stmt.executeUpdate("INSERT INTO person (id, first_name, last_name) values (1, 'Arthur', 'Dent')");
 			con.commit();
-			ResultSet rs = stmt.executeQuery("SELECT rowid, id FROM person");
-			DataStore ds = new DataStore(rs.getMetaData(), con);
-			ds.initData(rs);
-			rs.close();
+
+			DataStore ds = TestUtil.getQueryResult(con, "SELECT rowid, id FROM person");
 			Object id = ds.getValue(0, 0);
 			assertTrue(id instanceof String);
 		}
@@ -193,11 +186,50 @@ public class OracleTableDefinitionReaderTest
 	}
 
 	@Test
+	public void testNumberColumns()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		assertNotNull(con);
+
+    TestUtil.executeScript(con,
+      "create table number_test \n" +
+      "(\n" +
+      "  n_plain number, \n" +
+      "  n_max number(38,2), \n" +
+      "  n_star number(*,2), \n" +
+      "  n_two number(10,2), \n" +
+      "  n_minus number(10,-2), \n" +
+      "  n_int integer\n" +
+      ");");
+    List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("NUMBER_TEST"));
+    assertNotNull(columns);
+    assertEquals(6, columns.size());
+    ColumnIdentifier plain = ColumnIdentifier.findColumnInList(columns, "N_PLAIN");
+    assertEquals("NUMBER", plain.getDbmsType());
+
+    ColumnIdentifier max = ColumnIdentifier.findColumnInList(columns, "N_MAX");
+    assertEquals("NUMBER(38,2)", max.getDbmsType());
+
+    ColumnIdentifier star = ColumnIdentifier.findColumnInList(columns, "N_STAR");
+    assertEquals("NUMBER(*,2)", star.getDbmsType());
+
+    ColumnIdentifier two = ColumnIdentifier.findColumnInList(columns, "N_TWO");
+    assertEquals("NUMBER(10,2)", two.getDbmsType());
+
+    ColumnIdentifier minus = ColumnIdentifier.findColumnInList(columns, "N_MINUS");
+    assertEquals("NUMBER(10,-2)", minus.getDbmsType());
+
+    ColumnIdentifier intcol = ColumnIdentifier.findColumnInList(columns, "N_INT");
+    assertEquals("NUMBER", intcol.getDbmsType());
+	}
+
+	@Test
 	public void testStupidTimestamp()
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
-		if (con == null) return;
+		assertNotNull(con);
 
 		List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("TS_TEST"));
 		assertNotNull(columns);

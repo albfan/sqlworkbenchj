@@ -27,22 +27,19 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.AfterClass;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import workbench.TestUtil;
 import workbench.WbTestCase;
-
 import workbench.db.ColumnIdentifier;
+import workbench.db.ConstraintType;
 import workbench.db.TableConstraint;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import workbench.db.ConstraintType;
 
 /**
  *

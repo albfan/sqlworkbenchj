@@ -27,12 +27,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DataTypeResolver;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -152,7 +150,7 @@ public class OracleDataTypeResolver
     }
     else if ("NUMBER".equalsIgnoreCase(dbmsName))
     {
-      if (digits < 0 || size == 0)
+      if (digits == -127 || size == 0 || (size == Integer.MAX_VALUE && digits == 0))
       {
         return "NUMBER";
       }
@@ -162,7 +160,7 @@ public class OracleDataTypeResolver
       }
       else
       {
-        return "NUMBER(" + size + "," + digits + ")";
+        return "NUMBER(" + (size == Integer.MAX_VALUE ? "*" : size) + "," + digits + ")";
       }
     }
     else if (sqlType == Types.VARBINARY && "RAW".equals(dbmsName))

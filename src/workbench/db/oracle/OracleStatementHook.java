@@ -35,13 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-
-import workbench.db.WbConnection;
-
-import workbench.storage.DataStore;
-
 import workbench.sql.StatementHook;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
@@ -50,8 +46,9 @@ import workbench.sql.commands.TransactionEndCommand;
 import workbench.sql.lexer.SQLLexer;
 import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
+import workbench.sql.parser.ParserType;
 import workbench.sql.wbcommands.CommandTester;
-
+import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -128,7 +125,7 @@ public class OracleStatementHook
   private PreparedStatement statisticsStmt;
   private final Object lock = new Object();
   private CommandTester wbTester = new CommandTester();
-  private final SQLLexer lexer = SQLLexerFactory.createLexer();
+  private final SQLLexer lexer = SQLLexerFactory.createLexer(ParserType.Oracle, "");
 
   public OracleStatementHook()
   {
@@ -152,7 +149,7 @@ public class OracleStatementHook
     if (showRealPlan)
     {
       sql = adjustSql(sql);
-      LogMgr.logDebug("OracleStatementHook.preExec()", "Using sql:\n" + sql);
+      LogMgr.logDebug("OracleStatementHook.preExec()", "Using modified SQL to display the real execution plan:\n" + sql);
 
       if (!useStatisticsHint())
       {
@@ -248,23 +245,10 @@ public class OracleStatementHook
   {
     lastExplainID = UUID.randomUUID().toString();
 
-    if (!useStatisticsHint())
+    if (useStatisticsHint())
     {
-      // no hint for gathering statistics is necessary
-
-      if (showStatistics)
-      {
-        // if statistics should be displayed we have to get the execution plan.
-        // AFTER retrieving the statistics. In that case we must make the SQL "identifiable" using a unique prefix
-        return getIDPrefix() + "  " + sql;
-      }
-
-      // we don't show statistics so we can directly call dbms_xplan() after running the statement
-      // as the session is modified using changeStatisticsLevel() there is no need to add the gather_plan_statistics hint
-      return sql;
+      sql = injectHint(sql);
     }
-
-    sql = injectHint(sql);
 
     if (showStatistics)
     {
@@ -278,6 +262,15 @@ public class OracleStatementHook
     return sql;
   }
 
+  /**
+   * Inject the gather_plan_statistics hint into the SQL.
+   *
+   * The hint is injected after the first verb of the statement.
+   * For CTEs it is injected to the main query i.e. the one following the CTE.
+   *
+   * @param sql
+   * @return the SQL string with the hint injected
+   */
   protected String injectHint(String sql)
   {
     boolean addComment = false;
@@ -290,6 +283,10 @@ public class OracleStatementHook
       lexer.setInput(sql);
       verb = lexer.getNextToken(false, false);
       if (verb == null) return getIDPrefix() + "  " + sql;
+      if ("with".equalsIgnoreCase(verb.getContents()))
+      {
+        verb = SqlUtil.skipCTE(lexer);
+      }
       secondElement = lexer.getNextToken(true, false);
     }
 

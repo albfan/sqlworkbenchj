@@ -35,18 +35,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import workbench.interfaces.ErrorReporter;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
-
+import workbench.interfaces.ErrorReporter;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
@@ -54,7 +52,6 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
-
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
@@ -204,7 +201,7 @@ public class TableDataDiff
     else
     {
       CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
-      comp.setIgnoreQuotes(true);
+      comp.setIgnoreSQLQuotes(true);
       this.alternateKeys = new TreeMap<>(comp);
       this.alternateKeys.putAll(mapping);
     }

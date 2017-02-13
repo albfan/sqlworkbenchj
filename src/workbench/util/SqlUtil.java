@@ -41,10 +41,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.interfaces.TextContainer;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -53,10 +49,9 @@ import workbench.db.DropType;
 import workbench.db.QuoteHandler;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-
-import workbench.storage.DataStore;
-import workbench.storage.ResultInfo;
-
+import workbench.interfaces.TextContainer;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.sql.ErrorDescriptor;
 import workbench.sql.formatter.WbSqlFormatter;
 import workbench.sql.lexer.SQLLexer;
@@ -64,6 +59,8 @@ import workbench.sql.lexer.SQLLexerFactory;
 import workbench.sql.lexer.SQLToken;
 import workbench.sql.parser.ParserType;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -971,7 +968,7 @@ public class SqlUtil
     return result;
   }
 
-  private static SQLToken skipCTE(SQLLexer lexer)
+  public static SQLToken skipCTE(SQLLexer lexer)
   {
     SQLToken token = lexer.getNextToken(false, false);
     int bracketCount = 0;

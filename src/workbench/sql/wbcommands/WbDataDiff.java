@@ -33,10 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -45,13 +41,13 @@ import workbench.db.compare.TableDeleteSync;
 import workbench.db.compare.TableDiffStatus;
 import workbench.db.exporter.BlobMode;
 import workbench.db.importer.TableDependencySorter;
-
-import workbench.storage.RowActionMonitor;
-import workbench.storage.SqlLiteralFormatter;
-
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
+import workbench.storage.RowActionMonitor;
+import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CaseInsensitiveComparator;
@@ -155,7 +151,7 @@ public class WbDataDiff
 		}
 
 		CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
-		comp.setIgnoreQuotes(true);
+		comp.setIgnoreSQLQuotes(true);
 
 		for (String def : list)
 		{
@@ -169,7 +165,7 @@ public class WbDataDiff
 			}
 			else
 			{
-				result.addWarning(ResourceMgr.getFormattedString("ErrIgnoringArg", def, PARAM_ALTERNATE_KEYS));
+				result.addWarning(ResourceMgr.getFormattedString("ErrIgnoringArg", PARAM_ALTERNATE_KEYS, def));
 			}
 		}
 		return map;
