@@ -106,7 +106,7 @@ public class VerticaProjectionReader
     return null;
   }
 
-  public DataStore getProjectionCopies(String projectionBasename)
+  public DataStore getProjectionCopies(String projectionBasename, String schema)
     throws SQLException
   {
     String sql =
@@ -121,7 +121,9 @@ public class VerticaProjectionReader
       "       round(ps.ros_used_bytes/1024/1024,2) as ros_mb \n" +
       "FROM projections p \n" +
       "  left outer join projection_storage ps using (projection_id) \n" +
-      "WHERE decode(p.node_name,null,ps.node_name,'',ps.node_name,p.node_name) = ps.node_name and p.projection_basename = ? \n" +
+      "WHERE decode(p.node_name,null,ps.node_name,'',ps.node_name,p.node_name) = ps.node_name \n" +
+      "  and p.projection_basename = ? \n" +
+      "  and p.projection_schema = ? \n" +
       "ORDER BY p.projection_name, node ";
 
     if (Settings.getInstance().getDebugMetadataSql())
@@ -135,6 +137,7 @@ public class VerticaProjectionReader
     {
       pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
       pstmt.setString(1, projectionBasename);
+      pstmt.setString(2, schema);
       rs = pstmt.executeQuery();
       DataStore ds = new DataStore(rs, true);
       return ds;
@@ -150,7 +153,7 @@ public class VerticaProjectionReader
     return null;
   }
 
-  public DataStore getProjectionColumns(String projectionName)
+  public DataStore getProjectionColumns(String projectionName, String schema)
     throws SQLException
   {
     String sql =
@@ -170,7 +173,10 @@ public class VerticaProjectionReader
       "       pc.statistics_updated_timestamp \n" +
       "FROM projection_columns pc \n" +
       " left outer join column_storage ps using (projection_id,column_id) \n" +
-      "WHERE pc.projection_id = (select projection_id FROM projections WHERE projection_basename = ? limit 1) \n" +
+      "WHERE pc.projection_id = (select projection_id FROM projections \n" +
+      "                          WHERE projection_basename = ? \n" +
+      "                            and projection_schema = ? \n" +
+      "                            limit 1) \n" +
       "GROUP BY 1,2,3,4,5,6,7,8,13,14 \n" +
       "ORDER BY pc.column_position ";
 
@@ -185,6 +191,7 @@ public class VerticaProjectionReader
     {
       pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
       pstmt.setString(1, projectionName);
+      pstmt.setString(2, schema);
       rs = pstmt.executeQuery();
       DataStore ds = new DataStore(rs, true);
       return ds;

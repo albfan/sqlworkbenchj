@@ -66,7 +66,7 @@ public class BuddyListNode
     reader.setConnection(conn);
     try
     {
-      DataStore buddies = reader.getProjectionCopies(projection.getName());
+      DataStore buddies = reader.getProjectionCopies(projection.getName(), projection.getBaseTable().getSchema());
       for (int row = 0; row < buddies.getRowCount(); row ++)
       {
         String name = buddies.getValueAsString(row, "name");

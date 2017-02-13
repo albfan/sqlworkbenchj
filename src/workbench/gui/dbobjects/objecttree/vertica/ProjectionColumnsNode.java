@@ -60,7 +60,7 @@ public class ProjectionColumnsNode
     reader.setConnection(conn);
     try
     {
-      DataStore columns = reader.getProjectionColumns(projection.getName());
+      DataStore columns = reader.getProjectionColumns(projection.getName(), projection.getBaseTable().getSchema());
       for (int row = 0; row < columns.getRowCount(); row ++)
       {
         String colName = columns.getValueAsString(row, "projection_column_name");

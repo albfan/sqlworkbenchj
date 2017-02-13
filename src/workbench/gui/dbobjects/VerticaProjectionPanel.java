@@ -226,16 +226,16 @@ public class VerticaProjectionPanel
 		return projectionReader.getProjectionList(table);
 	}
 
-	private DataStore getProjectionCopiesDataStore(String basename)
+	private DataStore getProjectionCopiesDataStore(String basename, String schema)
 		throws SQLException
 	{
-		return projectionReader.getProjectionCopies(basename);
+		return projectionReader.getProjectionCopies(basename, schema);
 	}
 
-	private DataStore getProjectionColumnsDataStore(String projectionName)
+	private DataStore getProjectionColumnsDataStore(String projectionName, String schema)
 		throws SQLException
 	{
-		return projectionReader.getProjectionColumns(projectionName);
+		return projectionReader.getProjectionColumns(projectionName, schema);
 	}
 
 	public void dispose()
@@ -250,8 +250,8 @@ public class VerticaProjectionPanel
 		{
 			int selected = Math.max(0, projectionList.getSelectedRow());
 			String basename = projectionList.getValueAsString(selected, 0);
-
-			final DataStoreTableModel model = new DataStoreTableModel(getProjectionCopiesDataStore(basename));
+      String schema = currentTable.getSchema();
+			final DataStoreTableModel model = new DataStoreTableModel(getProjectionCopiesDataStore(basename, schema));
 			WbSwingUtilities.invoke(() ->
       {
         projectionBuddies.setModel(model, true);
@@ -270,8 +270,9 @@ public class VerticaProjectionPanel
 		{
 			int selected = Math.max(0, projectionList.getSelectedRow());
 			String basename = projectionList.getValueAsString(selected, 0);
+      String schema = currentTable.getSchema();
 
-			final DataStoreTableModel model = new DataStoreTableModel(getProjectionColumnsDataStore(basename));
+			final DataStoreTableModel model = new DataStoreTableModel(getProjectionColumnsDataStore(basename, schema));
 			WbSwingUtilities.invoke(() ->
       {
         projectionColumns.setModel(model, true);
