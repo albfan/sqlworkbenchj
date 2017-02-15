@@ -55,42 +55,42 @@ public class DB2UniqueConstraintReader
     if (CollectionUtil.isEmpty(indexList))  return;
     if (con == null) return;
 
-    String dbid = con.getDbId();
-    // Not supported for db2 iSeries
-    if (DBID.DB2_ISERIES.isDB(dbid)) return;
-
     StringBuilder sql = new StringBuilder(500);
-    if (DBID.DB2_LUW.isDB(dbid))
+
+    switch (DBID.fromConnection(con))
     {
-      // DB2 LUW
-      sql.append(
-        "select indname, indschema, constname \n " +
-        "from ( \n" +
-        "  select ind.indname, ind.indschema, tc.constname \n" +
-        "  from syscat.indexes ind \n" +
-        "    join syscat.tabconst tc \n " +
-        "      on ind.tabschema = tc.tabschema \n " +
-        "     and ind.tabname = tc.tabname \n " +
-        "     and tc.constname = ind.indname \n" +
-        "  where type = 'U' \n" +
-        ") t \n " +
-        "where (");
-    }
-    else if (DBID.DB2_ZOS.isDB(dbid))
-    {
-      // DB2 host
-      sql.append(
-        "select indname, indschema, constname \n" +
-        "from ( \n" +
-        "  select ind.name as indname, ind.creator as indschema, tc.constname  \n" +
-        "  from sysibm.sysindexes ind \n" +
-        "    join sysibm.systabconst tc \n " +
-        "      on ind.tbcreator = tc.tbcreator \n " +
-        "     and ind.tbname = tc.tbname \n " +
-        "     and tc.constname = ind.name \n" +
-        "  where type = 'U' \n " +
-        ") t\n " +
-        "where (");
+      case DB2_LUW:
+        sql.append(
+          "select indname, indschema, constname \n " +
+          "from ( \n" +
+          "  select ind.indname, ind.indschema, tc.constname \n" +
+          "  from syscat.indexes ind \n" +
+          "    join syscat.tabconst tc \n " +
+          "      on ind.tabschema = tc.tabschema \n " +
+          "     and ind.tabname = tc.tabname \n " +
+          "     and tc.constname = ind.indname \n" +
+          "  where type = 'U' \n" +
+          ") t \n " +
+          "where (");
+        break;
+
+      case DB2_ZOS:
+        // DB2 host
+        sql.append(
+          "select indname, indschema, constname \n" +
+          "from ( \n" +
+          "  select ind.name as indname, ind.creator as indschema, tc.constname  \n" +
+          "  from sysibm.sysindexes ind \n" +
+          "    join sysibm.systabconst tc \n " +
+          "      on ind.tbcreator = tc.tbcreator \n " +
+          "     and ind.tbname = tc.tbname \n " +
+          "     and tc.constname = ind.name \n" +
+          "  where type = 'U' \n " +
+          ") t\n " +
+          "where (");
+      default:
+        // Not yet supported for db2 iSeries
+        return;
     }
 
     boolean first = true;

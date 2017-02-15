@@ -63,13 +63,13 @@ public class Db2iColumnEnhancer
     String sql =
       "select column_name, \n" +
       "       column_text \n" +
-      "from qsys2.syscolumns \n" +
+      "from qsys2" + conn.getMetadata().getCatalogSeparator() + "syscolumns \n" +
       "where table_schema = ? \n" +
       "  and table_name  = ?";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
-      LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column comments:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
+      LogMgr.logInfo("Db2iColumnEnhancer.updateComputedColumns()", "Query to retrieve column comments:\n" + SqlUtil.replaceParameters(sql, schema, tablename));
     }
 
     try
@@ -94,7 +94,7 @@ public class Db2iColumnEnhancer
     }
     catch (Exception e)
     {
-      LogMgr.logError("Db2ColumnEnhancer.updateComputedColumns()", "Error retrieving column comments using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
+      LogMgr.logError("Db2iColumnEnhancer.updateComputedColumns()", "Error retrieving column comments using:\n" + SqlUtil.replaceParameters(sql, schema, tablename), e);
     }
     finally
     {

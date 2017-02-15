@@ -25,6 +25,7 @@ package workbench.db.ibm;
 
 import workbench.db.DBID;
 import workbench.db.ViewGrantReader;
+import workbench.db.WbConnection;
 
 /**
  * A class to read view grants for DB2
@@ -33,21 +34,40 @@ import workbench.db.ViewGrantReader;
 public class Db2ViewGrantReader
   extends ViewGrantReader
 {
-  private final boolean isHostDB2;
+  private final DBID id;
+  private final char catalogSeparator;
 
-  public Db2ViewGrantReader(String dbid)
+  public Db2ViewGrantReader(WbConnection conn)
   {
-    isHostDB2 = DBID.DB2_ZOS.isDB(dbid);
+    id = DBID.fromConnection(conn);
+    catalogSeparator = conn.getMetadata().getCatalogSeparator();
   }
 
   @Override
   public String getViewGrantSql()
   {
-    if (isHostDB2)
+    switch (id)
     {
-      return getHostSQL();
+      case DB2_ISERIES:
+        return getDB2iSQL();
+      case DB2_ZOS:
+        return getHostSQL();
+      default:
+        return getLUWSql();
     }
-    return getLUWSql();
+  }
+
+  private String getDB2iSQL()
+  {
+    return
+      "select trim(grantee), \n" +
+      "       privilege_type as privilege, \n" +
+      "       is_grantable, \n" +
+      "       table_name, \n" +
+      "       table_schema \n" +
+      "from qsys2" + catalogSeparator + "systabauth \n" +
+      "where table_name = ?\n" +
+      "  and table_schema = ?";
   }
 
   private String getHostSQL()

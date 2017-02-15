@@ -46,55 +46,35 @@ public class TableSourceBuilderFactory
 
   public static TableSourceBuilder getBuilder(WbConnection con)
   {
-    if (con.getMetadata().isPostgres())
+    switch (DBID.fromConnection(con))
     {
-      return new PostgresTableSourceBuilder(con);
+      case Postgres:
+        return new PostgresTableSourceBuilder(con);
+      case Derby:
+        return new DerbyTableSourceBuilder(con);
+      case Oracle:
+        return new OracleTableSourceBuilder(con);
+      case H2:
+        return new H2TableSourceBuilder(con);
+      case MySQL:
+        return new MySQLTableSourceBuilder(con);
+      case SQL_Server:
+        return new SqlServerTableSourceBuilder(con);
+      case HSQLDB:
+        return new HsqlTableSourceBuilder(con);
+      case DB2_LUW:
+        return new Db2TableSourceBuilder(con);
+      case Informix:
+        return new InformixTableSourceBuilder(con);
+      case Firebird:
+        return new FirebirdTableSourceBuilder(con);
+      case HANA:
+        return new HanaTableSourceBuilder(con);
+      case Exasol:
+        return new ExasolTableSourceBuilder(con);
+      default:
+        return new TableSourceBuilder(con);
     }
-    else if (con.getMetadata().isApacheDerby())
-    {
-      return new DerbyTableSourceBuilder(con);
-    }
-    else if (con.getMetadata().isOracle())
-    {
-      return new OracleTableSourceBuilder(con);
-    }
-    else if (con.getMetadata().isH2())
-    {
-      return new H2TableSourceBuilder(con);
-    }
-    else if (con.getMetadata().isMySql())
-    {
-      return new MySQLTableSourceBuilder(con);
-    }
-    else if (con.getMetadata().isSqlServer())
-    {
-      return new SqlServerTableSourceBuilder(con);
-    }
-    else if (con.getMetadata().isHsql())
-    {
-      return new HsqlTableSourceBuilder(con);
-    }
-    else if (DBID.DB2_LUW.isDB(con))
-    {
-      return new Db2TableSourceBuilder(con);
-    }
-    if (DBID.Informix.isDB(con))
-    {
-      return new InformixTableSourceBuilder(con);
-    }
-    if (con.getMetadata().isFirebird())
-    {
-      return new FirebirdTableSourceBuilder(con);
-    }
-    if (DBID.HANA.isDB(con))
-    {
-      return new HanaTableSourceBuilder(con);
-    }
-    if (DBID.Exasol.isDB(con))
-    {
-      return new ExasolTableSourceBuilder(con);
-    }
-    return new TableSourceBuilder(con);
   }
 
 }

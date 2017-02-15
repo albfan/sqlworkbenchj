@@ -150,7 +150,7 @@ public class Db2ProcedureReader
          "        ELSE " + DatabaseMetaData.procedureResultUnknown + "  \n" +
          "      END as PROCEDURE_TYPE, \n" +
          "      specific_name \n" +
-         "FROM qsys2.sysroutines \n" +
+         "FROM qsys2" + connection.getMetadata().getCatalogSeparator() + "sysroutines \n" +
          "WHERE function_origin <> ('B')"
       );
 

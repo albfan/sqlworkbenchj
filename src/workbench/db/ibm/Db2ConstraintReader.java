@@ -43,7 +43,7 @@ public class Db2ConstraintReader
     "where tbname = ? " +
     "  and tbowner = ?";
 
-  private final String AS400_TABLE_SQL =
+  private final String DB2I_TABLE_SQL =
     "select chk.constraint_name, '('||chk.check_clause||')' \n" +
     "from  qsys2.syschkcst chk \n" +
     "  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
@@ -57,18 +57,14 @@ public class Db2ConstraintReader
     "  AND tabname = ? " +
     "  and tabschema = ?";
 
-  private final boolean isHostDB2;
-  private final boolean isAS400; // aka iSeries
-
-  private Pattern sysname = Pattern.compile("^SQL[0-9]+");
-  private char catalogSeparator;
+  private final DBID dbid;
+  private final Pattern sysname = Pattern.compile("^SQL[0-9]+");
+  private final char catalogSeparator;
 
   public Db2ConstraintReader(WbConnection conn)
   {
     super(conn.getDbId());
-    String dbid = conn.getDbId();
-    isHostDB2 = equals(DBID.DB2_ZOS.isDB(dbid));
-    isAS400 = equals(DBID.DB2_ISERIES.isDB(dbid));
+    dbid = DBID.fromConnection(conn);
     catalogSeparator = conn.getMetadata().getCatalogSeparator();
   }
 
@@ -89,9 +85,15 @@ public class Db2ConstraintReader
   @Override
   public String getTableConstraintSql()
   {
-    if (isHostDB2) return HOST_TABLE_SQL;
-    if (isAS400) return AS400_TABLE_SQL.replace("qsys2.", "qsys2" + catalogSeparator);
-    return LUW_TABLE_SQL;
+    switch (dbid)
+    {
+      case DB2_ZOS:
+        return HOST_TABLE_SQL;
+      case DB2_ISERIES:
+        return DB2I_TABLE_SQL.replace("qsys2.", "qsys2" + catalogSeparator);
+      default:
+        return LUW_TABLE_SQL;
+    }
   }
 
   @Override

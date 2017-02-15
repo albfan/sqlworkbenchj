@@ -45,7 +45,8 @@ public enum DBID
   HANA("hdb"),
   Cubrid("cubrid"),
   Informix("informix_dynamic_server"),
-  Exasol("exasolution");
+  Exasol("exasolution"),
+  Unknown("_$unknown$_");
 
   private String dbid;
 
@@ -68,5 +69,20 @@ public enum DBID
   {
     if (conn == null) return false;
     return this.dbid.equalsIgnoreCase(conn.getDbId());
+  }
+
+  public static DBID fromConnection(WbConnection conn)
+  {
+    if (conn == null) return Unknown;
+    return fromID(conn.getDbId());
+  }
+
+  public static DBID fromID(String dbid)
+  {
+    for (DBID id : values())
+    {
+      if (id.isDB(dbid)) return id;
+    }
+    return Unknown;
   }
 }

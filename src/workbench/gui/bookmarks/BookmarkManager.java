@@ -240,13 +240,9 @@ public class BookmarkManager
 				long start = System.currentTimeMillis();
 				BookmarkGroup updated = updateBookmarks(win, panel);
 				long duration = System.currentTimeMillis() - start;
-				if (updated == null)
+				if (updated != null)
 				{
-					LogMgr.logDebug("BookmarManager.updateInBackground()", "Panel '" + panel.getTabTitle() + "' was up to date");
-				}
-				else
-				{
-					LogMgr.logDebug("BookmarManager.updateInBackground()",
+					LogMgr.logDebug("BookmarkManager.updateInBackground()",
 						"Panel '" + panel.getTabTitle() + "' was updated in "  + duration + "ms (" + updated.getBookmarks().size() + " bookmarks)");
 				}
 

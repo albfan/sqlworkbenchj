@@ -41,30 +41,33 @@ public interface SequenceAdjuster
   {
     public static SequenceAdjuster getSequenceAdjuster(WbConnection conn)
     {
-      if (conn == null) return null;
-      if (conn.getMetadata().isPostgres())
+      switch (DBID.fromConnection(conn))
       {
-        return new PostgresSequenceAdjuster();
-      }
-      if (conn.getMetadata().isH2())
-      {
-        return new H2SequenceAdjuster();
-      }
-      if (conn.getMetadata().isHsql() && JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
-      {
-        return new HsqlSequenceAdjuster();
-      }
-      if (conn.getDbId().equals("db2"))
-      {
-        return new Db2SequenceAdjuster();
-      }
-      if (conn.getMetadata().isFirebird() && JdbcUtils.hasMinimumServerVersion(conn, "3.0"))
-      {
-        return new FirebirdSequenceAdjuster();
+        case Postgres:
+          return new PostgresSequenceAdjuster();
+
+        case H2:
+          return new H2SequenceAdjuster();
+
+        case HSQLDB:
+          if (JdbcUtils.hasMinimumServerVersion(conn, "2.0"))
+          {
+            return new HsqlSequenceAdjuster();
+          }
+          break;
+
+        case DB2_LUW:
+          return new Db2SequenceAdjuster();
+
+        case Firebird:
+          if (JdbcUtils.hasMinimumServerVersion(conn, "3.0"))
+          {
+            return new FirebirdSequenceAdjuster();
+          }
+          break;
       }
       return null;
     }
   }
-
 
 }

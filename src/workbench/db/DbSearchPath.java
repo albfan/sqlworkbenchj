@@ -84,15 +84,15 @@ public interface DbSearchPath
   {
     public static DbSearchPath getSearchPathHandler(WbConnection con)
     {
-      if (con != null && con.getMetadata().isPostgres())
+      switch (DBID.fromConnection(con))
       {
-        return PG_HANDLER;
+        case Postgres:
+          return PG_HANDLER;
+        case DB2_ISERIES:
+          return new Db2SearchPath();
+        default:
+          return DEFAULT_HANDLER;
       }
-      else if (con.getDbId().equals("db2i"))
-      {
-        return new Db2SearchPath();
-      }
-      return DEFAULT_HANDLER;
     }
   }
 }

@@ -23,19 +23,23 @@
  */
 package workbench.db.ibm;
 
-import org.junit.After;
-import org.junit.Test;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import org.junit.Before;
+
 import workbench.TestUtil;
+import workbench.WbTestCase;
+
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
+
 import workbench.util.StringUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
-import workbench.WbTestCase;
 
 /**
  *
@@ -127,14 +131,7 @@ public class FakeDb2SequenceReaderTest
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2");
 		reader.setQuoteKeyword(true);
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
-		Collections.sort(result, new Comparator<DbObject>()
-		{
-			@Override
-			public int compare(DbObject o1, DbObject o2)
-			{
-				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
-			}
-		});
+		Collections.sort(result, (DbObject o1, DbObject o2) -> StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true));
 
 		assertNotNull(result);
 		assertEquals(2, result.size());
@@ -155,14 +152,7 @@ public class FakeDb2SequenceReaderTest
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2i");
 		reader.setQuoteKeyword(true);
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
-		Collections.sort(result, new Comparator<DbObject>()
-		{
-			@Override
-			public int compare(DbObject o1, DbObject o2)
-			{
-				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
-			}
-		});
+		Collections.sort(result, (DbObject o1, DbObject o2) -> StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true));
 
 		assertNotNull(result);
 		assertEquals(2, result.size());
@@ -183,14 +173,7 @@ public class FakeDb2SequenceReaderTest
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2h");
 		reader.setQuoteKeyword(true);
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
-		Collections.sort(result, new Comparator<DbObject>()
-		{
-			@Override
-			public int compare(DbObject o1, DbObject o2)
-			{
-				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
-			}
-		});
+		Collections.sort(result, (DbObject o1, DbObject o2) -> StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true));
 
 		assertNotNull(result);
 		assertEquals(2, result.size());

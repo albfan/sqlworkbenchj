@@ -51,14 +51,14 @@ public class Db2SequenceReader
   implements SequenceReader
 {
   private WbConnection connection;
-  private final String dbid;
+  private final DBID dbid;
   private boolean quoteKeyword;
   private char catalogSeparator;
 
   public Db2SequenceReader(WbConnection conn, String useId)
   {
     this.connection = conn;
-    dbid = useId;
+    dbid = DBID.fromID(useId);
     catalogSeparator = conn.getMetadata().getCatalogSeparator();
   }
 
@@ -142,64 +142,61 @@ public class Db2SequenceReader
     String schemaCol;
     String baseSql;
 
-    if (DBID.DB2_ISERIES.isDB(dbid))
+    switch (dbid)
     {
-      // Host system on AS/400
-      baseSql =
-      "SELECT SEQUENCE_NAME, \n" +
-      "       SEQUENCE_SCHEMA \n, " +
-      "       0 as START, \n" +
-      "       minimum_value as MINVALUE, \n" +
-      "       maximum_value as MAXVALUE, \n" +
-      "       INCREMENT, \n" +
-      "       case cycle when 'YES' then 'Y' else 'N' end as CYCLE, \n" +
-      "       case ORDER when 'YES' then 'Y' else 'N' end as ORDER, \n" +
-      "       CACHE, \n" +
-      "       data_type, \n" +
-      "       long_comment as remarks \n" +
-      "FROM   qsys2" + catalogSeparator + "syssequences \n";
-      nameCol = "sequence_name";
-      schemaCol = "sequence_schema";
-    }
-    else if (DBID.DB2_ZOS.isDB(dbid))
-    {
-      // Host system on z/OS
-      baseSql =
-      "SELECT NAME AS SEQNAME, \n" +
-      "       SCHEMA AS SEQUENCE_SCHEMA, \n" +
-      "       START, \n" +
-      "       MINVALUE, \n" +
-      "       MAXVALUE, \n" +
-      "       INCREMENT, \n" +
-      "       CYCLE, \n" +
-      "       ORDER, \n" +
-      "       CACHE, \n" +
-      "       DATATYPEID, \n" +
-      "       REMARKS \n" +
-      "FROM   SYSIBM.SYSSEQUENCES \n";
-
-      nameCol = "name";
-      schemaCol = "schema";
-    }
-    else
-    {
-      // LUW Version
-      baseSql =
-      "SELECT SEQNAME AS SEQUENCE_NAME, \n" +
-      "       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
-      "       START, \n" +
-      "       MINVALUE, \n" +
-      "       MAXVALUE, \n" +
-      "       INCREMENT, \n" +
-      "       CYCLE, \n" +
-      "       ORDER, \n" +
-      "       CACHE, \n" +
-      "       DATATYPEID, \n" +
-      "       REMARKS  \n" +
-      "FROM   syscat.sequences \n";
-
-      nameCol = "seqname";
-      schemaCol = "seqschema";
+      case DB2_ISERIES:
+        // Host system on AS/400
+        baseSql =
+          "SELECT SEQUENCE_NAME, \n" +
+          "       SEQUENCE_SCHEMA \n, " +
+          "       0 as START, \n" +
+          "       minimum_value as MINVALUE, \n" +
+          "       maximum_value as MAXVALUE, \n" +
+          "       INCREMENT, \n" +
+          "       case cycle when 'YES' then 'Y' else 'N' end as CYCLE, \n" +
+          "       case ORDER when 'YES' then 'Y' else 'N' end as ORDER, \n" +
+          "       CACHE, \n" +
+          "       data_type, \n" +
+          "       long_comment as remarks \n" +
+          "FROM   qsys2" + catalogSeparator + "syssequences \n";
+        nameCol = "sequence_name";
+        schemaCol = "sequence_schema";
+        break;
+      case DB2_ZOS:
+        // Host system on z/OS
+        baseSql =
+          "SELECT NAME AS SEQNAME, \n" +
+          "       SCHEMA AS SEQUENCE_SCHEMA, \n" +
+          "       START, \n" +
+          "       MINVALUE, \n" +
+          "       MAXVALUE, \n" +
+          "       INCREMENT, \n" +
+          "       CYCLE, \n" +
+          "       ORDER, \n" +
+          "       CACHE, \n" +
+          "       DATATYPEID, \n" +
+          "       REMARKS \n" +
+          "FROM   SYSIBM.SYSSEQUENCES \n";
+        nameCol = "name";
+        schemaCol = "schema";
+        break;
+      default:
+        // LUW Version
+        baseSql =
+          "SELECT SEQNAME AS SEQUENCE_NAME, \n" +
+          "       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
+          "       START, \n" +
+          "       MINVALUE, \n" +
+          "       MAXVALUE, \n" +
+          "       INCREMENT, \n" +
+          "       CYCLE, \n" +
+          "       ORDER, \n" +
+          "       CACHE, \n" +
+          "       DATATYPEID, \n" +
+          "       REMARKS  \n" +
+          "FROM   syscat.sequences \n";
+        nameCol = "seqname";
+        schemaCol = "seqschema";
     }
 
     boolean whereAdded = false;

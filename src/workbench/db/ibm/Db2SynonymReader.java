@@ -73,35 +73,32 @@ public class Db2SynonymReader
   {
     String sql = "";
 
-    boolean isHostDB2 = DBID.DB2_ZOS.isDB(con);
-    boolean isISeries = DBID.DB2_ISERIES.isDB(con);
+    DBID dbid = DBID.fromConnection(con);
 
-    if (isISeries)
+    switch (dbid)
     {
-      char catalogSeparator = con.getMetadata().getCatalogSeparator();
-      sql =
-        "SELECT base_table_schema, base_table_name \n" +
-        "FROM qsys2" + catalogSeparator + "systables \n" +
-        " WHERE table_type = 'A' \n" +
-        "   AND table_name = ? \n" +
-        "   AND table_owner = ?";
-    }
-    else if (isHostDB2)
-    {
-      sql =
-        "SELECT tbcreator, tbname \n" +
-        "FROM sysibm.syssynonyms \n" +
-        "WHERE name = ? \n" +
-        "  AND creator = ?";
-    }
-    else
-    {
-      sql =
-        "SELECT base_tabschema, base_tabname \n" +
-        "FROM syscat.tables \n" +
-        "WHERE type = 'A' \n" +
-        "  and tabname = ? \n" +
-        "  and tabschema = ?";
+      case DB2_ISERIES:
+        sql =
+          "SELECT base_table_schema, base_table_name \n" +
+          "FROM qsys2" + con.getMetadata().getCatalogSeparator() + "systables \n" +
+          "WHERE table_type = 'A' \n" +
+          "  AND table_name = ? \n" +
+          "  AND table_schema = ?";
+        break;
+      case DB2_ZOS:
+        sql =
+          "SELECT tbcreator, tbname \n" +
+          "FROM sysibm.syssynonyms \n" +
+          "WHERE name = ? \n" +
+          "  AND creator = ?";
+        break;
+      default:
+        sql =
+          "SELECT base_tabschema, base_tabname \n" +
+          "FROM syscat.tables \n" +
+          "WHERE type = 'A' \n" +
+          "  and tabname = ? \n" +
+          "  and tabschema = ?";
     }
 
     if (Settings.getInstance().getDebugMetadataSql())

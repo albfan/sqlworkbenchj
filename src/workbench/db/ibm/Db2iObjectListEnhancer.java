@@ -91,7 +91,7 @@ public class Db2iObjectListEnhancer
     StringBuilder sql = new StringBuilder(50);
     sql.append(
       "select table_schema, table_name, table_text\n" +
-      "from qsys2.systables t\n");
+      "from qsys2" + con.getMetadata().getCatalogSeparator() + "systables t\n");
 
     boolean whereAdded = false;
     if (schema != null)
@@ -131,7 +131,7 @@ public class Db2iObjectListEnhancer
         type = requestedType;
         if (Settings.getInstance().getDebugMetadataSql())
         {
-          LogMgr.logInfo("Db2iServerObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + sql);
+          LogMgr.logInfo("Db2iObjectListEnhancer.updateObjectRemarks()", "Retrieving table remarks using:\n" + sql);
         }
         stmt = con.createStatementForQuery();
         rs = stmt.executeQuery(sql.toString());
@@ -149,7 +149,7 @@ public class Db2iObjectListEnhancer
     }
     catch (Exception e)
     {
-      LogMgr.logError("Db2iServerObjectListEnhancer.updateObjectRemarks()", "Error retrieving remarks using:\n " + SqlUtil.replaceParameters(sql, schema, type), e);
+      LogMgr.logError("Db2iObjectListEnhancer.updateObjectRemarks()", "Error retrieving remarks using:\n " + SqlUtil.replaceParameters(sql, schema, type), e);
     }
     finally
     {
