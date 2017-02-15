@@ -72,6 +72,7 @@ import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 
+import workbench.util.CollectionUtil;
 import workbench.util.DeadlockMonitor;
 import workbench.util.FileUtil;
 import workbench.util.MacOSHelper;
@@ -893,16 +894,19 @@ public final class WbManager
       }
     }
 
-    String varFile = cmdLine.getValue(AppArguments.ARG_VAR_FILE, null);
-    if (StringUtil.isNonBlank(varFile))
+    List<String> files = cmdLine.getListValue(AppArguments.ARG_VAR_FILE);
+    if (CollectionUtil.isNonEmpty(files))
     {
-      try
+      for (String file : files)
       {
-        VariablePool.getInstance().readFromFile(StringUtil.trimQuotes(varFile), null);
-      }
-      catch (Exception e)
-      {
-        LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error reading variable definition from file: " + varFile, e);
+        try
+        {
+          VariablePool.getInstance().readFromFile(StringUtil.trimQuotes(file), null);
+        }
+        catch (Exception e)
+        {
+          LogMgr.logError("WbManager.readVariablesFromCommandline()", "Error reading variable definition from file: " + file, e);
+        }
       }
     }
 
