@@ -34,6 +34,8 @@ import workbench.log.LogMgr;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 
+import workbench.sql.VariablePool;
+
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -163,6 +165,23 @@ public class WbManagerTest
 			assertTrue("Could not delete logfile", logfile.delete());
 		}
 	}
+
+	@Test
+	public void testVarFile()
+		throws Exception
+	{
+    TestUtil util = new TestUtil(getName());
+    util.emptyBaseDirectory();
+    WbFile varfile = new WbFile(util.getBaseDir(), "vars.txt");
+    TestUtil.writeFile(varfile,
+      "answer=42\n" +
+      "name=Arthur");
+
+    WbManager.prepareForTest(new String[] {"-varFile='" + varfile.getFullPath() + "'"});
+
+    assertEquals("42", VariablePool.getInstance().getParameterValue("answer"));
+    assertEquals("Arthur", VariablePool.getInstance().getParameterValue("name"));
+  }
 
 	@Test
 	public void testPropfile()
