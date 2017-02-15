@@ -23,10 +23,11 @@
  */
 package workbench.db.oracle;
 
-import static org.junit.Assert.*;
+import workbench.WbTestCase;
+
 import org.junit.Test;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -76,7 +77,8 @@ public class OracleStatementHookTest
 			"from foo)\n" +
 			"select * from foobar";
 		result = hook.injectHint(sql);
-		assertTrue(result.startsWith("with /*+ gather_plan_statistics */ foobar as"));
+		assertTrue(result.startsWith("with foobar as"));
+		assertTrue(result.endsWith("select /*+ gather_plan_statistics */ * from foobar"));
 	}
 
 }

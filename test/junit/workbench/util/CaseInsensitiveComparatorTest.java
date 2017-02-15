@@ -25,8 +25,10 @@ package workbench.util;
 
 import java.util.Set;
 import java.util.TreeSet;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -50,8 +52,7 @@ public class CaseInsensitiveComparatorTest
 		CaseInsensitiveComparator comp = new CaseInsensitiveComparator();
 		comp.setIgnoreSQLQuotes(true);
 		assertEquals(0, comp.compare("\"foo\"", "FOO"));
-		assertEquals(0, comp.compare("'foo'", "\"FOO\""));
-		Set<String> values = new TreeSet<String>(comp);
+		Set<String> values = new TreeSet<>(comp);
 		values.add("foo");
 		values.add("FOO");
 		assertEquals(1, values.size());
@@ -62,10 +63,6 @@ public class CaseInsensitiveComparatorTest
 		assertTrue(values.contains("foo"));
 		assertTrue(values.contains("\"foo\""));
 		assertTrue(values.contains("FOO"));
-
-		values.add("'BAR'");
-		assertTrue(values.contains("bar"));
-		assertEquals(3, values.size());
 	}
 
 	@Test
