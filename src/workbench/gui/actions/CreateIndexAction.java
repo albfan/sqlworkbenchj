@@ -103,7 +103,7 @@ public class CreateIndexAction
 
 		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
 
-		if (dbConnection.shouldCommitDDL())
+		if (dbConnection.generateCommitForDDL())
 		{
 			sql += "\nCOMMIT;\n";
 		}
@@ -121,5 +121,5 @@ public class CreateIndexAction
   {
     return false;
   }
-  
+
 }

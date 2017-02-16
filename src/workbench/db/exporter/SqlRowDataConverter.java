@@ -237,7 +237,7 @@ public class SqlRowDataConverter
       writeCommit = false;
     }
 
-    if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
+    if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.generateCommitForDDL())
     {
       if (end == null) end = new StringBuilder(12);
       end.append(lineTerminator);

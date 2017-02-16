@@ -1787,7 +1787,7 @@ public class TableListPanel
 				sql = builder.getTableSource(selectedTable, dropType, true, dbConnection.getDbSettings().getGenerateTableGrants());
 			}
 
-			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())
+			if (sql != null && dbConnection.generateCommitForDDL())
 			{
 				sql = sql.toString() + "\nCOMMIT;\n";
 			}

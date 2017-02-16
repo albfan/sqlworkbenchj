@@ -293,7 +293,7 @@ public class ObjectScripter
       }
     }
 
-    if (includeCommitIfNeeded && commitNeeded && this.dbConnection.getDbSettings().ddlNeedsCommit())
+    if (includeCommitIfNeeded && commitNeeded && this.dbConnection.generateCommitForDDL())
     {
       output.append(nl);
       output.append("COMMIT");

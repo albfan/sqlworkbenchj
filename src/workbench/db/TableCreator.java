@@ -308,9 +308,8 @@ public class TableCreator
 
   private boolean needsCommit()
   {
-    return connection.getDbSettings().ddlNeedsCommit() &&
-           connection.getDbSettings().commitCreateTable(creationType) &&
-           !this.connection.getAutoCommit();
+    return connection.shouldCommitDDL() &&
+           connection.getDbSettings().commitCreateTable(creationType);
   }
 
   /**

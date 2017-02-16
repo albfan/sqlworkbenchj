@@ -365,11 +365,7 @@ public class DbObjectChanger
 
   private boolean needsCommit()
   {
-    if (settings.ddlNeedsCommit())
-    {
-      return dbConnection == null ? true : dbConnection.getAutoCommit() == false;
-    }
-    return false;
+    return dbConnection == null ? false : dbConnection.generateCommitForDDL();
   }
 
   /**

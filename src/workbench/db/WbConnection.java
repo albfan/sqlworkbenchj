@@ -1469,19 +1469,40 @@ public class WbConnection
    */
   protected boolean getDDLNeedsCommit()
   {
+    if (metaData == null) return false;
     return this.metaData.getDbSettings().ddlNeedsCommit();
   }
 
   /**
-   * Checks if DDL statement need a commit for this connection.
+   * Checks if DDL statements need a commit for this connection.
    *
-   * @return false if autocommit is on or the DBMS does not support DDL transactions
-   * @see #getDDLNeedsCommit()
+   * @return false - if autocommit is on or the DBMS does not support DDL transactions<br>
+   *         true - if the DBMS supports transactional DBMS and autocommit is disabled
+   *
+   * @see DbSettings#ddlNeedsCommit()
+   * @see DbSettings#alwaysCommitDDL()
    */
   public boolean shouldCommitDDL()
   {
     if (this.getAutoCommit()) return false;
     return this.getDDLNeedsCommit();
+  }
+
+  /**
+   * Checks if DDL statements should be generated for a script.
+   *
+   * @return false - if autocommit is on or the DBMS does not support DDL transactions<br>
+   *         true - if the DBMS supports transactional DBMS and autocommit is disabled or {@link DbSettings#alwaysCommitDDL()} is true
+   *
+   * @see DbSettings#ddlNeedsCommit()
+   * @see DbSettings#alwaysCommitDDL()
+   */
+  public boolean generateCommitForDDL()
+  {
+    boolean transactionalDDL = this.getDDLNeedsCommit();
+    if (transactionalDDL && getDbSettings() != null && getDbSettings().alwaysCommitDDL()) return true;
+    if (this.getAutoCommit()) return false;
+    return transactionalDDL;
   }
 
 

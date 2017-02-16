@@ -379,7 +379,7 @@ public class DbObjectSourcePanel
   {
     if (dbConnection == null) return;
 
-    if (dbConnection.getDbSettings().ddlNeedsCommit() && !dbConnection.getAutoCommit())
+    if (dbConnection.generateCommitForDDL())
     {
       DelimiterDefinition delim = dbConnection.getAlternateDelimiter();
       appendText("\nCOMMIT");

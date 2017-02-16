@@ -156,7 +156,7 @@ public class GenericObjectDropper
     if (this.connection == null) throw new NullPointerException("No connection!");
     if (this.objects == null || this.objects.isEmpty()) return null;
 
-    boolean needCommit = transactional && this.connection.shouldCommitDDL();
+    boolean needCommit = transactional && this.connection.generateCommitForDDL();
     int count = this.objects.size();
     StringBuffer result = new StringBuffer(count * 40);
     for (int i=0; i < count; i++)

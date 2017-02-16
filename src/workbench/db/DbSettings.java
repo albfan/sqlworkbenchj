@@ -329,6 +329,18 @@ public class DbSettings
   }
 
   /**
+   * Returns true if DDL statements should always be committed (for DBMS that support that)
+   * regardless if the connection is in autocommit or not.
+   *
+   * <br/>
+   * The related property is: <tt>workbench.db.[dbid].ddl.commit.always</tt>
+   */
+  public boolean alwaysCommitDDL()
+  {
+    return getBoolProperty("ddl.commit.always", false);
+  }
+
+  /**
    * Returns true if object names should never be quoted.
    *
    */

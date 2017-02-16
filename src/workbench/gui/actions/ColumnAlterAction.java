@@ -178,7 +178,7 @@ public class ColumnAlterAction
 				result.append('\n');
 			}
 		}
-		if (dbConnection.getDbSettings().ddlNeedsCommit())
+		if (dbConnection.generateCommitForDDL())
 		{
 			result.append("\nCOMMIT;\n");
 		}
