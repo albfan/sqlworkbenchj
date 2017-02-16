@@ -115,10 +115,9 @@ public class DbObjectChangerTest
 		changed.put(table, newTable);
 		sql = changer.getAlterScript(changed);
 		ScriptParser p = new ScriptParser(sql);
-		assertEquals(3, p.getSize());
+		assertEquals(2, p.getSize());
 		assertEquals("COMMENT ON TABLE person_address IS 'new comment'", p.getCommand(0));
 		assertEquals("ALTER TABLE person_address RENAME TO pers_addr", p.getCommand(1));
-		assertEquals("COMMIT", p.getCommand(2));
 
 		table = new TableIdentifier("public", "bar");
 		newTable = new TableIdentifier("foo", "bar");
@@ -130,7 +129,7 @@ public class DbObjectChangerTest
 		changed.put(table, newTable);
 		sql = changer.getAlterScript(changed);
 		p = new ScriptParser(sql);
-		assertEquals(2, p.getSize());
+		assertEquals(1, p.getSize());
 		assertEquals("ALTER TABLE public.bar SET SCHEMA foo", p.getCommand(0));
 	}
 
