@@ -1489,20 +1489,21 @@ public class WbConnection
   }
 
   /**
-   * Checks if DDL statements should be generated for a script.
-   *
-   * @return false - if autocommit is on or the DBMS does not support DDL transactions<br>
-   *         true - if the DBMS supports transactional DBMS and autocommit is disabled or {@link DbSettings#alwaysCommitDDL()} is true
+   * Checks if a commit should be appended to DDL scripts.
    *
    * @see DbSettings#ddlNeedsCommit()
-   * @see DbSettings#alwaysCommitDDL()
+   * @see DbSettings#getDDLScriptCommitType()
    */
   public boolean generateCommitForDDL()
   {
     boolean transactionalDDL = this.getDDLNeedsCommit();
-    if (transactionalDDL && getDbSettings() != null && getDbSettings().alwaysCommitDDL()) return true;
-    if (this.getAutoCommit()) return false;
-    return transactionalDDL;
+    if (!transactionalDDL) return false;
+
+    GenerateDDLCommit generateType = getDbSettings() == null ? GenerateDDLCommit.whenNeeded : getDbSettings().getDDLScriptCommitType();
+    if (generateType == GenerateDDLCommit.always) return true;
+    if (generateType == GenerateDDLCommit.never) return false;
+
+    return this.getAutoCommit() == false;
   }
 
 

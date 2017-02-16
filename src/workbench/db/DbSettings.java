@@ -329,15 +329,26 @@ public class DbSettings
   }
 
   /**
-   * Returns true if DDL statements should always be committed (for DBMS that support that)
-   * regardless if the connection is in autocommit or not.
+   * Returns when COMMIT statements should be generated in DDL scripts for DBMS that support transactional DDL.
    *
+   * The default is <tt>whenNeeded</tt>
+   * 
    * <br/>
-   * The related property is: <tt>workbench.db.[dbid].ddl.commit.always</tt>
+   * The related property is: <tt>workbench.db.[dbid].ddl.commit.type</tt>
+   *
+   * @see WbConnection#generateCommitForDDL()
    */
-  public boolean alwaysCommitDDL()
+  public GenerateDDLCommit getDDLScriptCommitType()
   {
-    return getBoolProperty("ddl.commit.always", false);
+    String type = getProperty("ddl.commit.type", GenerateDDLCommit.whenNeeded.name());
+    try
+    {
+      return GenerateDDLCommit.valueOf(type);
+    }
+    catch (Exception ex)
+    {
+      return GenerateDDLCommit.whenNeeded;
+    }
   }
 
   /**
