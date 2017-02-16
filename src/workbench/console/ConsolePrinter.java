@@ -32,15 +32,12 @@ import java.util.Set;
 
 import javax.swing.SwingConstants;
 
+import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.exporter.TextRowDataConverter;
-
 import workbench.storage.RowData;
-
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -67,6 +64,7 @@ public abstract class ConsolePrinter
 	protected abstract String getColumnName(int col);
 	protected abstract int getColumnType(int col);
   protected String nullString;
+  protected boolean showResultName = true;
 
 	public ConsolePrinter()
 	{
@@ -74,6 +72,11 @@ public abstract class ConsolePrinter
 		converter.setDefaultNumberFormatter(Settings.getInstance().createDefaultDecimalFormatter());
     nullString = ConsoleSettings.getNullString();
 	}
+
+  public void setShowResultName(boolean showResultName)
+  {
+    this.showResultName = showResultName;
+  }
 
   public void setNullString(String displayValue)
   {
@@ -125,7 +128,7 @@ public abstract class ConsolePrinter
 
 		String resultName = getResultName();
 
-		if (StringUtil.isNonBlank(resultName))
+		if (showResultName && StringUtil.isNonBlank(resultName))
 		{
 			pw.println("---- " + resultName);
 		}
@@ -159,7 +162,7 @@ public abstract class ConsolePrinter
 			for (int i=0; i < getColumnCount(); i++)
 			{
 				if (!isColumnIncluded(i)) continue;
-        
+
 				if (currentCol > 0) pw.print("-+-");
 				pw.print(StringUtil.padRight("-", columnWidths.get(Integer.valueOf(i)), '-'));
 				currentCol ++;

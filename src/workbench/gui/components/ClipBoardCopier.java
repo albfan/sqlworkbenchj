@@ -38,23 +38,19 @@ import javax.swing.table.TableColumnModel;
 
 import workbench.WbManager;
 import workbench.console.DataStorePrinter;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
-
 import workbench.gui.WbSwingUtilities;
-
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
-
 import workbench.util.CharacterRange;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -161,6 +157,7 @@ public class ClipBoardCopier
         printer.setNullString(GuiSettings.getDisplayNullString());
 				printer.setFormatColumns(true);
 				printer.setPrintRowCount(false);
+        printer.setShowResultName(GuiSettings.copyToClipboardFormattedTextWithResultName());
 				if (columnsToCopy != null)
 				{
 					List<String> colNames =new ArrayList<>(columnsToCopy.size());
@@ -392,7 +389,7 @@ public class ClipBoardCopier
     if (data.getOriginalConnection() == null) return false;
     return data.getOriginalConnection().getDbSettings().supportsMultiRowInsert();
   }
-  
+
 	public String createSqlString(final ExportType type, boolean selectedOnly, final boolean showSelectColumns)
 	{
 		if (this.data.getRowCount() <= 0) return null;
