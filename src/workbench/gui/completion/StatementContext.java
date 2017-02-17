@@ -135,6 +135,10 @@ public class StatementContext
 		{
 			verbAnalyzer = new CteAnalyzer(conn, sql, pos);
 		}
+    else if ("USE".equalsIgnoreCase(verb) && conn.getDbSettings().supportsUseDBStatement())
+    {
+      verbAnalyzer = new UseAnalyzer(conn, sql, pos);
+    }
 		return verbAnalyzer;
 	}
 

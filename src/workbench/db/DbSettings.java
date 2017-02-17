@@ -332,7 +332,7 @@ public class DbSettings
    * Returns when COMMIT statements should be generated in DDL scripts for DBMS that support transactional DDL.
    *
    * The default is <tt>whenNeeded</tt>
-   * 
+   *
    * <br/>
    * The related property is: <tt>workbench.db.[dbid].ddl.commit.type</tt>
    *
@@ -2294,5 +2294,10 @@ public class DbSettings
   public boolean refcursorIsEmbeddedResult()
   {
     return getBoolProperty("embedded.results.refcursor", false);
+  }
+
+  public boolean supportsUseDBStatement()
+  {
+    return getBoolProperty("sql.supports.usedb", false);
   }
 }
