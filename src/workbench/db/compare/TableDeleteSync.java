@@ -53,8 +53,8 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataReader;
 import workbench.storage.RowDataReaderFactory;
 import workbench.storage.SqlLiteralFormatter;
-import workbench.util.CollectionUtil;
 
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -506,7 +506,7 @@ public class TableDeleteSync
     for (int i=0; i < info.getColumnCount(); i++)
     {
       if (i > 0) sql.append(',');
-      sql.append(referenceConnection.getMetadata().quoteObjectname(info.getColumnName(i)));
+      appendReferenceIdentifier(sql, info.getColumnName(i));
     }
     sql.append(" FROM ");
     sql.append(this.referenceTable.getTableExpression(referenceConnection));
@@ -519,7 +519,7 @@ public class TableDeleteSync
       for (int c=0; c < info.getColumnCount(); c++)
       {
         if (c > 0) sql.append(" AND ");
-        sql.append(referenceConnection.getMetadata().quoteObjectname(info.getColumnName(c)));
+        appendReferenceIdentifier(sql, info.getColumnName(c));
         sql.append(" = ");
         Object value = rows.get(row).getValue(c);
         ColumnIdentifier col = info.getColumn(c);
@@ -529,6 +529,19 @@ public class TableDeleteSync
       sql.append(") ");
     }
     return sql.toString();
+  }
+
+  private void appendReferenceIdentifier(StringBuilder sql, String name)
+  {
+    name = targetConnection.getMetadata().removeQuotes(name);
+    if (targetConnection.getMetadata().needsQuotes(name))
+    {
+      sql.append(referenceConnection.getMetadata().quoteObjectname(name));
+    }
+    else
+    {
+      sql.append(name);
+    }
   }
 
   private void writeEnd(Writer out)
