@@ -2,7 +2,10 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-02-04">
+    <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
+    <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="1" type="fix">WbDataDiff failed when using -includeDeletes=true and the comparison was done between two DBMS that stored object names differently (e.g. UPPER vs. lowercase)</entry>
     <entry dev-build="1" type="fix">The parameter -varFile did not work anymore</entry>
     <entry dev-build="1" type="fix">For Oracle, the "realplan" option for autotrace did not work for queries starting with a common table expression (WITH)</entry>
     <entry dev-build="1" type="fix">For Oracle, NUMBER columns with a negative scale e.g. NUMBER(10,-2) were not displayed correctly</entry>
