@@ -1734,7 +1734,8 @@ public class MainWindow
 		if (currentProfile == null) return;
 		WbFile macroFile = currentProfile.getMacroFile();
 
-		MacroManager.getInstance().getMacros(getMacroClientId()).removeChangeListener(this);
+    MacroManager.getInstance().removeChangeListener(this, getMacroClientId());
+
 		if (macroFile != null && macroFile.exists())
 		{
 			MacroManager.getInstance().loadMacros(getMacroClientId(), macroFile);
@@ -1744,7 +1745,7 @@ public class MainWindow
 			MacroManager.getInstance().loadDefaultMacros(getMacroClientId());
 		}
 		macroListChanged();
-		MacroManager.getInstance().getMacros(getMacroClientId()).addChangeListener(this);
+		MacroManager.getInstance().addChangeListener(this, getMacroClientId());
 	}
 
 	/**

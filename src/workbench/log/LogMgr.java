@@ -128,6 +128,11 @@ public class LogMgr
 		getLogger().logMessage(LogLevel.trace, caller, message, null);
 	}
 
+	public static void logTrace(Object caller, CharSequence message, Throwable th)
+	{
+		getLogger().logMessage(LogLevel.trace, caller, message, th);
+	}
+
 	public static void logDebug(Object caller, CharSequence message, Throwable th)
 	{
 		getLogger().logMessage(LogLevel.debug, caller, message, th);

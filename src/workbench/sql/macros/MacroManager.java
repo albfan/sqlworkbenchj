@@ -32,6 +32,7 @@ import java.util.TreeMap;
 
 import javax.swing.KeyStroke;
 
+import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.resource.StoreableKeyStroke;
@@ -176,8 +177,8 @@ public class MacroManager
 		if (storage == null)
 		{
 			storage = allMacros.get(getDefaultMacroFile().getFullPath());
-			LogMgr.logError("MacroManager.getStorage()", "No macros registered for clientId=" + macroClientId + ". Using default macros!", new Exception("Client not initialized"));
-      LogMgr.logInfo("MacroManager.getStorage()", "Current macro clients: " + macroClients + ", current storages: " + allMacros);
+			LogMgr.logTrace("MacroManager.getStorage()", "No macros registered for clientId=" + macroClientId + ". Using default macros!", new Exception("Client not initialized"));
+      LogMgr.logTrace("MacroManager.getStorage()", "Current macro clients: " + macroClients + ", current storages: " + allMacros);
 		}
 		return storage;
 	}
@@ -190,6 +191,24 @@ public class MacroManager
 		if (macro == null) return null;
 		return macro.getText();
 	}
+
+  public void addChangeListener(MacroChangeListener listener, int clientId)
+  {
+    MacroStorage storage = getMacros(clientId);
+    if (storage != null)
+    {
+      storage.addChangeListener(listener);
+    }
+  }
+
+  public void removeChangeListener(MacroChangeListener listener, int clientId)
+  {
+    MacroStorage storage = getMacros(clientId);
+    if (storage != null)
+    {
+      storage.removeChangeListener(listener);
+    }
+  }
 
 	public synchronized MacroStorage getMacros(int clientId)
 	{
