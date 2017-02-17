@@ -433,6 +433,11 @@ public class WbWorkspace
   private WbProperties readProperties(ZipEntry entry)
   {
     WbProperties props = new WbProperties(null, 1);
+    if (entry == null)
+    {
+      return props;
+    }
+    
     try
     {
       InputStream in = this.archive.getInputStream(entry);

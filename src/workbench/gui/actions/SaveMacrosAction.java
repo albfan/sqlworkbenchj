@@ -85,7 +85,7 @@ public class SaveMacrosAction
   public void dispose()
   {
     super.dispose();
-    MacroManager.getInstance().getMacros(macroClientId).removeChangeListener(this);
+    MacroManager.getInstance().removeChangeListener(this, macroClientId);
   }
 
 }

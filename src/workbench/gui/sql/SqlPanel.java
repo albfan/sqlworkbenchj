@@ -60,6 +60,7 @@ import workbench.interfaces.Connectable;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.DbUpdater;
+import workbench.interfaces.Disposable;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.Exporter;
 import workbench.interfaces.FilenameChangeListener;
@@ -4369,13 +4370,9 @@ public class SqlPanel
 		{
 			for (Object o : actions)
 			{
-				if (o instanceof WbAction)
+				if (o instanceof Disposable)
 				{
-					((WbAction)o).dispose();
-				}
-				else if (o instanceof WbMenu)
-				{
-					((WbMenu)o).dispose();
+					((Disposable)o).dispose();
 				}
 			}
 			this.actions.clear();

@@ -42,6 +42,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import workbench.interfaces.Disposable;
 import workbench.resource.GuiSettings;
 import workbench.resource.IconMgr;
 import workbench.resource.PlatformShortcuts;
@@ -64,6 +65,7 @@ import workbench.util.StringUtil;
  */
 public class WbAction
 	extends AbstractAction
+  implements Disposable
 {
 	private static final String MAIN_MENU_ITEM = "MainMenuItem";
 	private static final String MENU_SEPARATOR = "MenuSep";
@@ -751,6 +753,7 @@ public class WbAction
 		return hash;
 	}
 
+  @Override
 	public void dispose()
 	{
 		delegate = null;

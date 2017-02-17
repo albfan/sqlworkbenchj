@@ -33,6 +33,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import workbench.interfaces.Disposable;
+
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
@@ -44,6 +46,7 @@ import workbench.util.NumberStringCache;
  */
 public class WbMenu
 	extends JMenu
+  implements Disposable
 {
 	private String parentMenuId;
 	private boolean createSeparator;
@@ -115,6 +118,7 @@ public class WbMenu
 		super.removeAll();
 	}
 
+  @Override
 	public void dispose()
 	{
 		WbSwingUtilities.removeAllListeners(this);
