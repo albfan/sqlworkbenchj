@@ -30,12 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.WbManager;
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.TabularDataParser;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.OdfHelper;
@@ -53,10 +47,13 @@ import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.db.postgres.PgCopyManager;
-
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.TabularDataParser;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
@@ -337,10 +334,11 @@ public class WbImport
 			return result;
 		}
 
+    boolean multiFileImport = (dir != null && inputFile == null);
+
 		String badFile = cmdLine.getValue(ARG_BADFILE);
 		if (badFile != null)
 		{
-			boolean multiFileImport = (dir != null && inputFile == null);
 			File bf = new File(badFile);
 			if (multiFileImport && !bf.isDirectory())
 			{
@@ -532,7 +530,7 @@ public class WbImport
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
-			initParser(table, textParser, result);
+			initParser(table, textParser, result, multiFileImport);
 			if (!result.isSuccess())
 			{
 				textParser.done();
@@ -710,7 +708,7 @@ public class WbImport
 				spreadSheetParser.setInputFile(inputFile);
 			}
 
-			initParser(table, spreadSheetParser, result);
+			initParser(table, spreadSheetParser, result, multiFileImport);
 			if (!result.isSuccess())
 			{
 				spreadSheetParser.done();
@@ -859,7 +857,7 @@ public class WbImport
 		return result;
 	}
 
-	private void initParser(String tableName, TabularDataParser parser, StatementRunnerResult result)
+	private void initParser(String tableName, TabularDataParser parser, StatementRunnerResult result, boolean isMultifile)
 	{
 		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 		boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
@@ -891,6 +889,9 @@ public class WbImport
 			result.setFailure();
 			return;
 		}
+
+    // don't check the columns if this is a multi-file import
+    if (isMultifile) return;
 
 		// read column definition from header line
 		// if no header was specified, the text parser
