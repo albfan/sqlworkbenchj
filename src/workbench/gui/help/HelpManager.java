@@ -306,7 +306,12 @@ public class HelpManager
 
 	public static void showDateFormatHelp()
 	{
-		showHelpFile("options", "options-data-formatting");
+		showHelpFile("options", "options-date-format");
+	}
+
+	public static void showNumberFormatHelp()
+	{
+		showHelpFile("options", "options-number-format");
 	}
 
 }

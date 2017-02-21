@@ -50,6 +50,14 @@ public class DataFormattingOptionsPanel
 	{
 		super();
 		initComponents();
+    WbSwingUtilities.setMinimumSize(decimalField, 5);
+    WbSwingUtilities.setMinimumSize(groupSeparator, 5);
+    WbSwingUtilities.setMinimumSize(maxDigitsField, 5);
+    WbSwingUtilities.setMinimumSize(intFormat, 25);
+    WbSwingUtilities.setMinimumSize(decimalFormat, 25);
+    WbSwingUtilities.setMinimumSize(timeFormat, 25);
+    WbSwingUtilities.setMinimumSize(timestampFormatTextField, 25);
+    WbSwingUtilities.setMinimumSize(dateFormatTextField, 25);
 	}
 
 	@Override
@@ -63,6 +71,9 @@ public class DataFormattingOptionsPanel
 		timeFormat.setText(Settings.getInstance().getDefaultTimeFormat());
 		maxDigitsField.setText(Integer.toString(Settings.getInstance().getMaxFractionDigits()));
 		oraDateFix.setSelected(Settings.getInstance().fixOracleDateType());
+    groupSeparator.setText(Settings.getInstance().getDecimalGroupCharacter());
+    intFormat.setText(Settings.getInstance().getIntegerFormatString());
+    decimalFormat.setText(Settings.getInstance().getDecimalFormatString());
 	}
 
 	@Override
@@ -72,7 +83,10 @@ public class DataFormattingOptionsPanel
 		Settings.getInstance().setDefaultTimeFormat(this.timeFormat.getText());
 		Settings.getInstance().setDefaultTimestampFormat(this.timestampFormatTextField.getText());
 		Settings.getInstance().setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
-		Settings.getInstance().setDecimalSymbol(this.decimalField.getText());
+    Settings.getInstance().setDecimalSymbol(StringUtil.trimToNull(this.decimalField.getText()));
+		Settings.getInstance().setDecimalGroupCharacter(groupSeparator.getText());
+    Settings.getInstance().setDecimalFormatString(StringUtil.trimToNull(decimalFormat.getText()));
+    Settings.getInstance().setIntegerFormatString(StringUtil.trimToNull(intFormat.getText()));
 		Settings.getInstance().setFixOracleDateType(oraDateFix.isSelected());
 	}
 
@@ -143,16 +157,25 @@ public class DataFormattingOptionsPanel
 
     dateFormatLabel = new javax.swing.JLabel();
     dateFormatTextField = new javax.swing.JTextField();
-    decimalLabel = new javax.swing.JLabel();
-    decimalField = new javax.swing.JTextField();
-    maxDigitsLabel = new javax.swing.JLabel();
-    maxDigitsField = new NumberField();
     timestampFormatLabel = new javax.swing.JLabel();
     timestampFormatTextField = new javax.swing.JTextField();
     timeFormatLabel = new javax.swing.JLabel();
     timeFormat = new javax.swing.JTextField();
     oraDateFix = new javax.swing.JCheckBox();
     helpLabel = new javax.swing.JLabel();
+    jSeparator1 = new javax.swing.JSeparator();
+    jPanel2 = new javax.swing.JPanel();
+    decimalLabel = new javax.swing.JLabel();
+    decimalField = new javax.swing.JTextField();
+    groupSeparator = new javax.swing.JTextField();
+    groupLabel = new javax.swing.JLabel();
+    maxDigitsLabel = new javax.swing.JLabel();
+    intFormatLabel = new javax.swing.JLabel();
+    decimalFormatLabel = new javax.swing.JLabel();
+    decimalFormat = new javax.swing.JTextField();
+    intFormat = new javax.swing.JTextField();
+    maxDigitsField = new NumberField();
+    numberFormatHelp = new javax.swing.JLabel();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -166,42 +189,9 @@ public class DataFormattingOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 9);
+    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 11);
     add(dateFormatTextField, gridBagConstraints);
-
-    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
-    decimalLabel.setToolTipText(ResourceMgr.getDescription("LblDecimalSymbol"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
-    add(decimalLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 79);
-    add(decimalField, gridBagConstraints);
-
-    maxDigitsLabel.setText(ResourceMgr.getString("LblMaxDigits")); // NOI18N
-    maxDigitsLabel.setToolTipText(ResourceMgr.getDescription("LblMaxDigits"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
-    add(maxDigitsLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 79);
-    add(maxDigitsField, gridBagConstraints);
 
     timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat")); // NOI18N
     timestampFormatLabel.setToolTipText(ResourceMgr.getDescription("LblTimestampFormat"));
@@ -214,9 +204,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 9);
+    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 11);
     add(timestampFormatTextField, gridBagConstraints);
 
     timeFormatLabel.setText(ResourceMgr.getString("LblTimeFormat")); // NOI18N
@@ -230,10 +219,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 79);
+    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 11);
     add(timeFormat, gridBagConstraints);
 
     oraDateFix.setText(ResourceMgr.getString("LblOraDataTS")); // NOI18N
@@ -251,17 +238,121 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
     add(oraDateFix, gridBagConstraints);
 
-    helpLabel.setText(ResourceMgr.getString("LblFmtDateHelp")); // NOI18N
+    helpLabel.setText(ResourceMgr.getString("LblFmtHelp")); // NOI18N
     helpLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     helpLabel.addMouseListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(14, 0, 0, 0);
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
     add(helpLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new java.awt.Insets(11, 0, 8, 0);
+    add(jSeparator1, gridBagConstraints);
+
+    jPanel2.setLayout(new java.awt.GridBagLayout());
+
+    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
+    decimalLabel.setToolTipText(ResourceMgr.getDescription("LblDecimalSymbol"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
+    jPanel2.add(decimalLabel, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 9);
+    jPanel2.add(decimalField, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 9);
+    jPanel2.add(groupSeparator, gridBagConstraints);
+
+    groupLabel.setText(ResourceMgr.getString("LblDecimalGroup")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanel2.add(groupLabel, gridBagConstraints);
+
+    maxDigitsLabel.setText(ResourceMgr.getString("LblMaxDigits")); // NOI18N
+    maxDigitsLabel.setToolTipText(ResourceMgr.getDescription("LblMaxDigits"));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanel2.add(maxDigitsLabel, gridBagConstraints);
+
+    intFormatLabel.setText(ResourceMgr.getString("LblIntegerFormat")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanel2.add(intFormatLabel, gridBagConstraints);
+
+    decimalFormatLabel.setText(ResourceMgr.getString("LblDecimalFormat")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
+    jPanel2.add(decimalFormatLabel, gridBagConstraints);
+
+    decimalFormat.setToolTipText(ResourceMgr.getString("d_LblDecimalFormat")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 9);
+    jPanel2.add(decimalFormat, gridBagConstraints);
+
+    intFormat.setToolTipText(ResourceMgr.getString("d_LblIntegerFormat")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 9);
+    jPanel2.add(intFormat, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 9);
+    jPanel2.add(maxDigitsField, gridBagConstraints);
+
+    numberFormatHelp.setText(ResourceMgr.getString("LblFmtHelp")); // NOI18N
+    numberFormatHelp.addMouseListener(this);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
+    jPanel2.add(numberFormatHelp, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 56);
+    add(jPanel2, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -271,6 +362,10 @@ public class DataFormattingOptionsPanel
     if (evt.getSource() == helpLabel)
     {
       DataFormattingOptionsPanel.this.helpLabelMouseClicked(evt);
+    }
+    else if (evt.getSource() == numberFormatHelp)
+    {
+      DataFormattingOptionsPanel.this.numberFormatHelpMouseClicked(evt);
     }
   }
 
@@ -295,15 +390,29 @@ public class DataFormattingOptionsPanel
     HelpManager.showDateFormatHelp();
   }//GEN-LAST:event_helpLabelMouseClicked
 
+  private void numberFormatHelpMouseClicked(java.awt.event.MouseEvent evt)//GEN-FIRST:event_numberFormatHelpMouseClicked
+  {//GEN-HEADEREND:event_numberFormatHelpMouseClicked
+    HelpManager.showNumberFormatHelp();
+  }//GEN-LAST:event_numberFormatHelpMouseClicked
+
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel dateFormatLabel;
   private javax.swing.JTextField dateFormatTextField;
   private javax.swing.JTextField decimalField;
+  private javax.swing.JTextField decimalFormat;
+  private javax.swing.JLabel decimalFormatLabel;
   private javax.swing.JLabel decimalLabel;
+  private javax.swing.JLabel groupLabel;
+  private javax.swing.JTextField groupSeparator;
   private javax.swing.JLabel helpLabel;
+  private javax.swing.JTextField intFormat;
+  private javax.swing.JLabel intFormatLabel;
+  private javax.swing.JPanel jPanel2;
+  private javax.swing.JSeparator jSeparator1;
   private javax.swing.JTextField maxDigitsField;
   private javax.swing.JLabel maxDigitsLabel;
+  private javax.swing.JLabel numberFormatHelp;
   private javax.swing.JCheckBox oraDateFix;
   private javax.swing.JTextField timeFormat;
   private javax.swing.JLabel timeFormatLabel;

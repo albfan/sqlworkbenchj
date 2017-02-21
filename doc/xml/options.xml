@@ -1089,6 +1089,14 @@
 			</para>
 		</blockquote></simplesect>
 
+		<simplesect id="options-decimal-group">
+			<title>Group separator</title><blockquote>
+			<para>
+				The character to be used to separate groups inside a number. This is only used when a format string
+        is also specified that includes the placeholder for the group character.
+			</para>
+		</blockquote></simplesect>
+
 		<simplesect id="options-decimal-digits">
 			<title>Decimal digits</title><blockquote>
 			<para>Define the maximum number of digits which will be displayed for
@@ -1101,6 +1109,40 @@
       <para>
         If this value is set to 0 (zero) values will be display with as many digits as available.
       </para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-number-format">
+			<title>Decimal/Integer format</title><blockquote>
+			<para>
+
+			</para>
+			<para>Define the format for displaying integers or numbers with decimals.
+        For details on the format of this option, please refer to the
+				documentation of the <ulink url="http://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html"><literal>DecimalFormat</literal></ulink> class.
+			</para>
+			<para>
+				Here is an overview of the letters and their meaning that can be used to format
+				the date and timestamp values. Be aware that case matters!
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Character</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+              <row><entry>0 (zero)</entry><entry>Digit, a zero is shown as a zero</entry></row>
+							<row><entry>#</entry><entry>Digit, zeroes are suppressed</entry></row>
+							<row><entry>.</entry><entry>Marks the position where the decimal separator should be displayed</entry></row>
+							<row><entry>,</entry><entry>Marks the position where the grouping symbol should be displayed</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+
 		</blockquote></simplesect>
 
 	</section>

@@ -1924,19 +1924,39 @@ public class WbTable
 		int maxDigits = sett.getMaxFractionDigits();
 		boolean fixedDigits = sett.getUsedFixedDigits();
 
+    String decimalFormat = sett.getDecimalFormatString();
+    String intFormat = sett.getIntegerFormatString();
+
 		char sep = sett.getDecimalSymbol().charAt(0);
+    char groupSymbol = sett.getDecimalGroupCharacter().charAt(0);
 
 		this.setDefaultRenderer(Object.class, new ToolTipRenderer());
 
 		this.setDefaultRenderer(byte[].class, new BlobColumnRenderer());
 
-		TableCellRenderer numberRenderer = new NumberColumnRenderer(maxDigits, sep, fixedDigits);
+		TableCellRenderer numberRenderer;
+    if (StringUtil.isNonBlank(decimalFormat))
+    {
+      numberRenderer = new NumberColumnRenderer(decimalFormat, sep, groupSymbol);
+    }
+    else
+    {
+      numberRenderer = new NumberColumnRenderer(maxDigits, sep, fixedDigits);
+    }
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);
 		this.setDefaultRenderer(BigDecimal.class, numberRenderer);
 
-		TableCellRenderer intRenderer = new NumberColumnRenderer();
+		TableCellRenderer intRenderer;
+    if (StringUtil.isNonBlank(intFormat))
+    {
+      intRenderer = new NumberColumnRenderer(intFormat, sep, groupSymbol);
+    }
+    else
+    {
+      intRenderer = new NumberColumnRenderer();
+    }
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
 

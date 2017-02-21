@@ -175,6 +175,9 @@ public class Settings
 	public static final String PROPERTY_DECIMAL_DIGITS = "workbench.gui.display.maxfractiondigits";
 	public static final String PROPERTY_FIXED_DIGITS = "workbench.gui.display.decimal.digits.fixed";
 	public static final String PROPERTY_DECIMAL_SEP = "workbench.gui.display.decimal.separator";
+	public static final String PROPERTY_DECIMAL_GROUP = "workbench.gui.display.decimal.group";
+	public static final String PROPERTY_DECIMAL_FORMAT = "workbench.gui.display.decimal.format";
+	public static final String PROPERTY_INTEGER_FORMAT = "workbench.gui.display.integer.format";
 
 	public static final String PROP_JOIN_COMPLETION_USE_PARENS = "workbench.gui.sql.join.completion.use.parenthesis";
 	public static final String PROP_JOIN_COMPLETION_PREFER_USING = "workbench.gui.sql.join.completion.prefer.using";
@@ -831,7 +834,7 @@ public class Settings
   {
     return getBoolProperty(PROPERTY_LOG_OBFUSCATE, false);
   }
-  
+
   public final boolean getLogAllStatements()
 	{
 		return getBoolProperty(PROPERTY_LOG_ALL_SQL, false);
@@ -2839,6 +2842,42 @@ public class Settings
 	public void setDecimalSymbol(String aSep)
 	{
 		this.props.setProperty(PROPERTY_DECIMAL_SEP, aSep);
+	}
+
+	public String getDecimalGroupCharacter()
+	{
+    String val = getProperty(PROPERTY_DECIMAL_GROUP, ",");
+    if (StringUtil.isEmptyString(val))
+    {
+      val = ",";
+    }
+		return val;
+	}
+
+	public void setDecimalGroupCharacter(String aSep)
+	{
+		this.props.setProperty(PROPERTY_DECIMAL_GROUP, aSep);
+	}
+
+	public void setDecimalFormatString(String format)
+	{
+		this.props.setProperty(PROPERTY_DECIMAL_FORMAT, format);
+	}
+
+	public String getDecimalFormatString()
+	{
+		return getProperty(PROPERTY_DECIMAL_FORMAT, null);
+	}
+
+
+	public void setIntegerFormatString(String format)
+	{
+		this.props.setProperty(PROPERTY_INTEGER_FORMAT, format);
+	}
+
+	public String getIntegerFormatString()
+	{
+		return getProperty(PROPERTY_INTEGER_FORMAT, null);
 	}
 
 	// </editor-fold>

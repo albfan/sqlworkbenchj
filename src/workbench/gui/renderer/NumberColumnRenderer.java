@@ -58,6 +58,13 @@ public class NumberColumnRenderer
 		this.setHorizontalAlignment(GuiSettings.getNumberDataAlignment());
 	}
 
+	public NumberColumnRenderer(String format, char decimal, char groupCharacter)
+	{
+		super();
+		formatter = new WbNumberFormatter(format, decimal, groupCharacter);
+		this.setHorizontalAlignment(GuiSettings.getNumberDataAlignment());
+	}
+
 	@Override
 	public void prepareDisplay(Object aValue)
 	{

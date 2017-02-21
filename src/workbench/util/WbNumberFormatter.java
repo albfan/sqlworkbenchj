@@ -37,10 +37,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class WbNumberFormatter
 {
-  private final DecimalFormat decimalFormatter;
-  private final char decimalSeparator;
+  private final DecimalFormat formatter;
+  private final char decimalSymbol;
   private final int maxDigits;
   private final boolean fixedDigits;
+  private final boolean alwaysUseFormatter;
 
   public WbNumberFormatter(char sep)
   {
@@ -52,31 +53,44 @@ public class WbNumberFormatter
     this(maxDigits, sep, false);
   }
 
-  public WbNumberFormatter(int maxDigits, char sep, boolean fixedDigits)
+  public WbNumberFormatter(int maxDigits, char decimal, boolean fixedDigits)
   {
     char filler = fixedDigits ? '0' : '#';
-    this.decimalSeparator = sep;
+    decimalSymbol = decimal;
     String pattern = StringUtil.padRight("0.", maxDigits > 0 ? maxDigits + 2 : 22, filler);
     DecimalFormatSymbols symb = new DecimalFormatSymbols();
-    symb.setDecimalSeparator(sep);
-    this.decimalFormatter = new DecimalFormat(pattern, symb);
+    symb.setDecimalSeparator(decimal);
+    formatter = new DecimalFormat(pattern, symb);
     this.maxDigits = maxDigits;
     this.fixedDigits = fixedDigits;
+    alwaysUseFormatter = false;
+  }
+
+  public WbNumberFormatter(String pattern, char decimal, char groupSymbol)
+  {
+    decimalSymbol = decimal;
+    DecimalFormatSymbols symb = new DecimalFormatSymbols();
+    symb.setDecimalSeparator(decimalSymbol);
+    symb.setGroupingSeparator(groupSymbol);
+    formatter = new DecimalFormat(pattern, symb);
+    maxDigits = 0;
+    fixedDigits = false;
+    alwaysUseFormatter = true;
   }
 
   public char getDecimalSymbol()
   {
-    return decimalSeparator;
+    return decimalSymbol;
   }
 
   /**
-   * Returns a pattern suitable to be applied for a DecimalFormat isntance.
+   * Returns a pattern suitable to be applied for a DecimalFormat instance.
    *
    * @return  the pattern;
    */
   public String toFormatterPattern()
   {
-    return decimalFormatter.toPattern();
+    return formatter.toPattern();
   }
 
   private boolean isInteger(Number n)
@@ -95,7 +109,14 @@ public class WbNumberFormatter
 
     String formatted = null;
 
-    if (value instanceof BigDecimal)
+    if (alwaysUseFormatter)
+    {
+      synchronized (this.formatter)
+      {
+        formatted =  formatter.format(value);
+      }
+    }
+    else if (value instanceof BigDecimal)
     {
       formatted = format((BigDecimal)value);
     }
@@ -105,21 +126,21 @@ public class WbNumberFormatter
     }
     else
     {
-      synchronized (this.decimalFormatter)
+      synchronized (this.formatter)
       {
-        formatted = decimalFormatter.format(value);
+        formatted = formatter.format(value);
       }
     }
+
     return formatted;
   }
 
   /**
    * Format a BigDecimal value according to the settings.
    *
-   * A BigDecimal cannot be formatted using DecimalFormat, so this method
-   * applies the formatting rules manually.
-   * maxDigits is used for "maximum" number of digits. If there are less digits,
-   * the formatted value will not be padded with zeros
+   * DecimalFormat does not preserve the real number of digits for a BigDecimal.
+   * If no maximum digits are defineed, this method will return a string with
+   * all digits that are available (essentially the result of BigDecimal.toPlainString())
    *
    * @param value  the value to format
    * @return the formatted value
@@ -127,7 +148,7 @@ public class WbNumberFormatter
   private String format(BigDecimal value)
   {
     String display = value.toPlainString();
-    if (maxDigits <= 0 && decimalSeparator == '.') return display; // no maximum given
+    if (maxDigits <= 0 && decimalSymbol == '.') return display; // no maximum given
 
     int scale = value.scale();
     if (scale <= 0 && !fixedDigits) return display; // no decimal digits, nothing to do
@@ -158,29 +179,29 @@ public class WbNumberFormatter
         sb.append(display);
         if (digits == 0)
         {
-          sb.append(decimalSeparator);
+          sb.append(decimalSymbol);
         }
 
         for (int i=0; i < num; i++)
         {
           sb.append('0');
         }
-        if (decimalSeparator != '.' && digits > 0)
+        if (decimalSymbol != '.' && digits > 0)
         {
-          sb.setCharAt(pos, decimalSeparator);
+          sb.setCharAt(pos, decimalSymbol);
         }
         return sb.toString();
       }
     }
 
-    if (decimalSeparator != '.' )
+    if (decimalSymbol != '.' )
     {
       // this is a little bit faster than using a StringBuilder and setCharAt()
       // and as numbers will not contain any two byte characters theres nothing
       // to worry about encoding.
       int pos = display.lastIndexOf('.');
       char[] ca = display.toCharArray();
-      ca[pos] = decimalSeparator;
+      ca[pos] = decimalSymbol;
       display = new String(ca);
     }
 
