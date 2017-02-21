@@ -1093,13 +1093,14 @@
 			<title>Group separator</title><blockquote>
 			<para>
 				The character to be used to separate groups inside a number. This is only used when a format string
-        is also specified that includes the placeholder for the group character.
+        is specified, that includes the placeholder for the group character.
 			</para>
 		</blockquote></simplesect>
 
 		<simplesect id="options-decimal-digits">
 			<title>Decimal digits</title><blockquote>
-			<para>Define the maximum number of digits which will be displayed for
+			<para>
+        Define the maximum number of digits which will be displayed for
 				numeric columns. This only affects the display of the number, not the storage or retrieval.
         Internally they are still stored as the DBMS returned them. To see the internal
 				value, leave the mouse cursor over the cell. The tool tip which is
@@ -1120,9 +1121,12 @@
         For details on the format of this option, please refer to the
 				documentation of the <ulink url="http://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html"><literal>DecimalFormat</literal></ulink> class.
 			</para>
+      <para>
+        If a format string is defined, the "Decimal digits" option will not be used. The number of decimal digits
+        has to be controlled through the format string in that case.
+      </para>
 			<para>
-				Here is an overview of the letters and their meaning that can be used to format
-				the date and timestamp values. Be aware that case matters!
+				Here is an overview of the characters that can be used to format numbers:
 				<informaltable frame="all">
 					<tgroup cols="2" align="left">
 						<colspec colname="c1" colwidth="1cm" />
