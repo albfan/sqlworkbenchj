@@ -2217,7 +2217,7 @@ public class WbImportTest
   }
 
   @Test
-  public void testMultiFileSingleTableImportWithHeader()
+  public void testMultiFileSingleTableImportSkipColumns()
     throws Exception
   {
     int rowCount = 10;
@@ -2267,6 +2267,56 @@ public class WbImportTest
     if (!importFile.delete())
     {
       fail("Could not delete input file: " + importFile.getCanonicalPath());
+    }
+  }
+
+  @Test
+  public void testMultiFileSingleTableImportWithHeader()
+    throws Exception
+  {
+    int rowCount = 10;
+    util.emptyBaseDirectory();
+
+    File file1  = new File(this.basedir, "multi_test1_head.data");
+    PrintWriter out = new PrintWriter(new FileWriter(file1));
+    out.println("nr\tfirst_name\tlast_name");
+    for (int i = 0; i < 5; i++)
+    {
+      out.print(Integer.toString(i));
+      out.print('\t');
+      out.println("First" + i + "\tLastname" + i);
+    }
+    out.close();
+
+    File file2  = new File(this.basedir, "multi_test2_head.data");
+    out = new PrintWriter(new FileWriter(file2));
+    out.println("nr\tvorname\tnachname");
+    for (int i = 5; i < rowCount; i++)
+    {
+      out.print(Integer.toString(i));
+      out.print('\t');
+      out.println("First" + i + "\tLastname" + i);
+    }
+    out.close();
+
+    TestUtil.executeScript(connection,
+      "DELETE FROM junit_test;\n" +
+      "commit;");
+
+    StatementRunnerResult result = importCmd.execute("wbimport -header=true -continueonerror=false -sourcedir='" + file1.getParent() + "' -type=text -extension=data -table=junit_test");
+    assertTrue("Export failed: " + result.getMessages().toString(), result.isSuccess());
+
+    int count = TestUtil.getNumberValue(connection, "select count(*) from junit_test");
+    assertEquals("Not enough values in table junit_test", rowCount, count);
+
+    if (!file1.delete())
+    {
+      fail("Could not delete input file: " + file1.getCanonicalPath());
+    }
+
+    if (!file2.delete())
+    {
+      fail("Could not delete input file: " + file2.getCanonicalPath());
     }
   }
 
