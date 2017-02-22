@@ -5,109 +5,6 @@
     All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
   </para></important>
 
-  <section id="command-gendrop">
-    <title>Generate DROP statement with dependencies - WbGenerateDrop</title>
-    <para>
-      The command <literal>WbGenerateDrop</literal> can be used to generate a SQL script for a table that
-      will drop all foreign keys referencing that table, then a <literal>DROP</literal> statement for that table
-      and the statements to re-created the foreign keys referencing that table.
-    </para>
-    <para>
-      This is useful if you need to re-create a table but don't want to manually delete all referencing
-      foreign keys, especially if the DBMS does not support a cascading DROP.
-    </para>
-    <para>
-      This is also available in the <link linkend="dbexplorer-gendrop">DbExplorer's context menu</link> as "Generate DROP script".
-    </para>
-    <para>
-      The command supports the following parameters.
-
-			<informaltable frame="all">
-				<tgroup cols="2" align="left">
-					<colspec colname="c1"  colwidth="2.5cm" />
-					<colspec colname="c2"/>
-					<thead>
-						<row>
-							<entry>Parameter</entry>
-							<entry>Description</entry>
-						</row>
-					</thead>
-					<tbody valign="top">
-						<row>
-							<entry>-tables</entry>
-							<entry>
-								<para>
-									A comma separated list of tables, e.g. <literal>-tables=customer,invoice</literal>. The parameter
-                  supports specifying tables using wildcards <literal>-tables=cust%,inv%</literal>.
-								</para>
-							</entry>
-						</row>
-						<row>
-							<entry>-includeCreate</entry>
-							<entry>
-                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the foreign keys of the table(s).
-                  By specifying <literal>-includeCreate=false</literal> only the statements to drop the foreign key and to drop the
-                  table(s) will be created.
-								</para>
-							</entry>
-						</row>
-						<row>
-							<entry>-onlyForeignkeys</entry>
-							<entry>
-                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-                  When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
-                  statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
-                  and no statements to re-create the foreign keys will be generated. Setting this parameter to <literal>true</literal>
-                  implies <literal>-includeCreate=false</literal>.
-								</para>
-							</entry>
-						</row>
-						<row>
-							<entry>-sortByType</entry>
-							<entry>
-                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
-								<para>
-                  Usually the generated SQL script will be ordered by the type of statements. So first all statements
-                  to drop constraints will be listed, then the drop table statements, then the statements to re-create all foreign keys.
-                  When specifying <literal>-sortByType=false</literal>, then the script will be ordered by table: first
-                  all statements for the first table, then all statements for the second table and so on.
-								</para>
-							</entry>
-						</row>
-
-						<row>
-							<entry>-outputFile</entry>
-							<entry>
-								<para>
-                  Defines the file into which all statements are written. If multiple tables are selected
-                  using the <literal>-tables</literal> parameter, all statements will be written into this
-                  file.
-								</para>
-							</entry>
-						</row>
-						<row>
-							<entry>-outputDir</entry>
-							<entry>
-								<para>
-                  Specifies an output directory into which one script per selected table will be written.
-                  The script files are named <literal>drop_XXX.sql</literal>, where XXX is the name of
-                  the respective table. If this parameter is used, <literal>-outputFile</literal> is ignored.
-								</para>
-							</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</informaltable>
-    </para>
-    <para>
-      If neither <literal>-outputFile</literal> nor <literal>-outputDir</literal> is specified, the output
-      is written to the message panel.
-    </para>
-  </section>
-
   <section id="command-genscript">
     <title>Generate SQL script for database objects - WbGenerateScript</title>
     <para>
@@ -258,7 +155,12 @@
     <para>
 			This command will show the source for a single table. The name of the table
 			is given as an argument to the command:
-			<programlisting>WbTableSource person</programlisting>
+			<programlisting>WbTableSource person;</programlisting>
+      It is possible to provide wildcards for the table name:
+			<programlisting>WbTableSource p%;</programlisting>
+      This command is mainly intended to quickly look at a table's source, e.g. when running in console mode.
+      To generate the DDL for multiple tables including depending objects or to save the generated SQL into a file,
+      please use <link linkend="command-genscript">WbGenerateScript</link>.
 		</para>
   </section>
 
@@ -318,6 +220,109 @@
         <listitem><literal>-file</literal> - the name of the output file</listitem>
         <listitem><literal>-encoding</literal> - the encoding to be used for the file</listitem>
       </itemizedlist>
+    </para>
+  </section>
+
+  <section id="command-gendrop">
+    <title>Generate DROP statement with dependencies - WbGenerateDrop</title>
+    <para>
+      The command <literal>WbGenerateDrop</literal> can be used to generate a SQL script for a table that
+      will drop all foreign keys referencing that table, then a <literal>DROP</literal> statement for that table
+      and the statements to re-created the foreign keys referencing that table.
+    </para>
+    <para>
+      This is useful if you need to re-create a table but don't want to manually delete all referencing
+      foreign keys, especially if the DBMS does not support a cascading DROP.
+    </para>
+    <para>
+      This is also available in the <link linkend="dbexplorer-gendrop">DbExplorer's context menu</link> as "Generate DROP script".
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-tables</entry>
+							<entry>
+								<para>
+									A comma separated list of tables, e.g. <literal>-tables=customer,invoice</literal>. The parameter
+                  supports specifying tables using wildcards <literal>-tables=cust%,inv%</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeCreate</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the foreign keys of the table(s).
+                  By specifying <literal>-includeCreate=false</literal> only the statements to drop the foreign key and to drop the
+                  table(s) will be created.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-onlyForeignkeys</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
+                  statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
+                  and no statements to re-create the foreign keys will be generated. Setting this parameter to <literal>true</literal>
+                  implies <literal>-includeCreate=false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sortByType</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  Usually the generated SQL script will be ordered by the type of statements. So first all statements
+                  to drop constraints will be listed, then the drop table statements, then the statements to re-create all foreign keys.
+                  When specifying <literal>-sortByType=false</literal>, then the script will be ordered by table: first
+                  all statements for the first table, then all statements for the second table and so on.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-outputFile</entry>
+							<entry>
+								<para>
+                  Defines the file into which all statements are written. If multiple tables are selected
+                  using the <literal>-tables</literal> parameter, all statements will be written into this
+                  file.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-outputDir</entry>
+							<entry>
+								<para>
+                  Specifies an output directory into which one script per selected table will be written.
+                  The script files are named <literal>drop_XXX.sql</literal>, where XXX is the name of
+                  the respective table. If this parameter is used, <literal>-outputFile</literal> is ignored.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+    <para>
+      If neither <literal>-outputFile</literal> nor <literal>-outputDir</literal> is specified, the output
+      is written to the message panel.
     </para>
   </section>
 
