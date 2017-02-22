@@ -27,15 +27,13 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
 
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.NumberField;
+import workbench.gui.help.HelpManager;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.NumberField;
-import workbench.gui.help.HelpManager;
-
 import workbench.util.StringUtil;
 
 /**
@@ -334,6 +332,7 @@ public class DataFormattingOptionsPanel
     jPanel2.add(maxDigitsField, gridBagConstraints);
 
     numberFormatHelp.setText(ResourceMgr.getString("LblFmtHelp")); // NOI18N
+    numberFormatHelp.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     numberFormatHelp.addMouseListener(this);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;

@@ -393,7 +393,7 @@ from person/
       The following &wb-productname; commands support conditional execution based on variables:
 			<itemizedlist>
         <listitem><literal><link linkend="command-wbinclude">WbInclude</link></literal></listitem>
-        <listitem><literal><link linkend="command-wbcopy">WbCopy</link></literal></listitem>
+        <listitem><literal><link linkend="command-copy">WbCopy</link></literal></listitem>
         <listitem><literal><link linkend="command-import">WbImport</link></literal></listitem>
         <listitem><literal><link linkend="command-export">WbExport</link></literal></listitem>
         <listitem><literal><link linkend="command-wbexec">WbSysExec</link></literal></listitem>
