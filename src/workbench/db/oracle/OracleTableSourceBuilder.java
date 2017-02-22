@@ -490,7 +490,7 @@ public class OracleTableSourceBuilder
 
         if (!StringUtil.equalStringIgnoreCase(tbspace, tbl.getTablespace()))
         {
-          colOptions.append("TABLESPACE");
+          colOptions.append("TABLESPACE ");
           colOptions.append(tbspace);
           colOptions.append(' ');
         }
