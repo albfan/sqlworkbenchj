@@ -24,7 +24,7 @@
 package workbench.util;
 
 import java.awt.Desktop;
-import java.io.UnsupportedEncodingException;
+import java.io.File;
 import java.net.URI;
 import java.net.URLEncoder;
 
@@ -32,6 +32,7 @@ import workbench.db.ConnectionInfoBuilder;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -90,15 +91,9 @@ public class BrowserLauncher
   }
 
   private static String urlEncode(String str)
+    throws Exception
   {
-    try
-    {
-      return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
-    }
-    catch (UnsupportedEncodingException e)
-    {
-      throw new RuntimeException(e);
-    }
+    return URLEncoder.encode(str, "UTF-8").replace("+", "%20");
   }
 
   public static void openURL(String url)
@@ -110,6 +105,29 @@ public class BrowserLauncher
   public static void openURL(final URI url)
     throws Exception
   {
+    final URI realURI;
+
+    String urlString = url.toString();
+
+    if (urlString.indexOf('#') > -1 && GuiSettings.useHTMLRedirectForAnchor())
+    {
+      File tmpfile = File.createTempFile("sqlwb_show_help", ".html");
+      tmpfile.deleteOnExit();
+
+      String redirect =
+        "<html><head>\n" +
+        "<meta http-equiv=\"refresh\" content=\"0;url=" + urlString + "\"/>\n" +
+        "</head></html>";
+
+      FileUtil.writeString(tmpfile, redirect, "UTF-8", false);
+      realURI = tmpfile.toURI();
+      LogMgr.logDebug("BrowserLauncher.openURL", "Redirecting to an anchor using intermediate URL: " + realURI.toString());
+    }
+    else
+    {
+      realURI = url;
+    }
+
     if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
     {
       WbThread t = new WbThread("OpenBrowser")
@@ -120,7 +138,7 @@ public class BrowserLauncher
           try
           {
             LogMgr.logDebug("BrowserLauncher.openURL", "Opening URL: " + url.toString());
-            Desktop.getDesktop().browse(url);
+            Desktop.getDesktop().browse(realURI);
           }
           catch (Exception e)
           {
@@ -134,7 +152,7 @@ public class BrowserLauncher
     else
     {
       LogMgr.logError("BrowserLauncher.openURL()", "Desktop not supported!", null);
-      WbSwingUtilities.showErrorMessage("Desktop not supported by your Java version");
+      WbSwingUtilities.showErrorMessage("Starting the browser is not supported by your Java installation");
     }
   }
 }

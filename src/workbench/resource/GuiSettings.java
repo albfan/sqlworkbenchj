@@ -1463,4 +1463,8 @@ public class GuiSettings
     return Settings.getInstance().getBoolProperty("workbench.copy.clipboard.formatted.text.include.name", false);
   }
 
+  public static boolean useHTMLRedirectForAnchor()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.help.use.redirect.for.anchor", true);
+  }
 }
