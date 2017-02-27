@@ -30,6 +30,12 @@ import java.util.List;
 import java.util.Set;
 
 import workbench.WbManager;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.TabularDataParser;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.OdfHelper;
@@ -47,13 +53,10 @@ import workbench.db.importer.TableStatements;
 import workbench.db.importer.TextFileParser;
 import workbench.db.importer.XmlDataFileParser;
 import workbench.db.postgres.PgCopyManager;
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.TabularDataParser;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ArgumentValue;
@@ -891,7 +894,7 @@ public class WbImport
 		}
 
     // don't check the columns if this is a multi-file import
-    if (isMultifile) return;
+    if (isMultifile && StringUtil.isBlank(filecolumns) && CollectionUtil.isEmpty(toImport)) return;
 
 		// read column definition from header line
 		// if no header was specified, the text parser

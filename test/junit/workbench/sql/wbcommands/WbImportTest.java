@@ -2187,12 +2187,7 @@ public class WbImportTest
     stmt.executeUpdate("DELETE FROM junit_test");
     this.connection.commit();
 
-    StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=gaga -table=junit_test");
-    String msg = result.getMessages().toString();
-    assertFalse(result.isSuccess());
-    assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
-
-    result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
+    StatementRunnerResult result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
     assertTrue("Export failed: " + result.getMessages().toString(), result.isSuccess());
 
     ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
