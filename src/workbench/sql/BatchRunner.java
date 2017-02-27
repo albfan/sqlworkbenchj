@@ -45,6 +45,12 @@ import workbench.console.ConsoleSettings;
 import workbench.console.ConsoleStatusBar;
 import workbench.console.DataStorePrinter;
 import workbench.console.RowDisplay;
+import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.GenericRowMonitor;
+import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
@@ -54,26 +60,15 @@ import workbench.interfaces.SqlHistoryProvider;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.ssh.SshConfig;
-import workbench.ssh.SshException;
-
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.GenericRowMonitor;
-import workbench.gui.profiles.ProfileKey;
-
-import workbench.storage.DataStore;
-import workbench.storage.RowActionMonitor;
-
 import workbench.sql.parser.ParserType;
 import workbench.sql.parser.ScriptParser;
 import workbench.sql.wbcommands.ConnectionDescriptor;
 import workbench.sql.wbcommands.InvalidConnectionDescriptor;
 import workbench.sql.wbcommands.WbConnect;
-
+import workbench.ssh.SshConfig;
+import workbench.ssh.SshException;
+import workbench.storage.DataStore;
+import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.CollectionUtil;
 import workbench.util.DurationFormatter;
@@ -136,7 +131,7 @@ public class BatchRunner
   private ErrorDescriptor lastError;
   private int errorStatementIndex;
   private ScriptErrorHandler retryHandler;
-  private int maxColumnLength = Integer.MAX_VALUE;
+  private int maxDisplaySize = Integer.MAX_VALUE;
 
 	public BatchRunner()
 	{
@@ -175,7 +170,7 @@ public class BatchRunner
 
   public void setMaxColumnDisplayLength(int maxLength)
   {
-    this.maxColumnLength = maxLength;
+    this.maxDisplaySize = maxLength;
   }
 
   public void setRetryHandler(ScriptErrorHandler handler)
@@ -1088,7 +1083,7 @@ public class BatchRunner
 			if (ds != null)
 			{
 				DataStorePrinter printer = new DataStorePrinter(ds);
-        printer.setMaxDataLength(maxColumnLength);
+        printer.setMaxDisplaySize(maxDisplaySize);
 				printer.setFormatColumns(optimizeCols);
 				printer.setPrintRowCount(showRowCount);
 				printer.setPrintRowsAsLine(rowsAsLine);

@@ -30,9 +30,7 @@ import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-
 import workbench.storage.*;
-
 import workbench.util.StringUtil;
 
 /**
@@ -57,7 +55,7 @@ public class DataStorePrinter
 		this.data = source;
 	}
 
-  public void setMaxDataLength(int maxLength)
+  public void setMaxDisplaySize(int maxLength)
   {
     this.maxDataLength = maxLength;
   }
@@ -95,7 +93,7 @@ public class DataStorePrinter
 		for (int i=0; i < data.getColumnCount(); i++)
 		{
 			int dataWidth = getMaxDataWidth(i);
-			int width = Math.min(dataWidth, maxDataLength);
+			int width = getDataWidthToUse(dataWidth);
 			widths.put(Integer.valueOf(i), Integer.valueOf(width));
 		}
 		return widths;
@@ -119,13 +117,20 @@ public class DataStorePrinter
 				if (len > width) width = len;
 			}
 		}
-		return Math.min(width, maxDataLength);
+		return getDataWidthToUse(width);
 	}
+
+  private int getDataWidthToUse(int width)
+  {
+    if (maxDataLength <= 0) return width;
+    return Math.min(width, maxDataLength);
+  }
 
   @Override
   protected String getDisplayValue(RowData row, int col)
   {
     String value = super.getDisplayValue(row, col);
+    if (maxDataLength <= 0) return value;
     return StringUtil.getMaxSubstring(value, maxDataLength - longValueSuffix.length(), longValueSuffix);
   }
 

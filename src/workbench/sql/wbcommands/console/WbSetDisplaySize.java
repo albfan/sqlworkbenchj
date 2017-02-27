@@ -24,62 +24,40 @@
 package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
-import java.util.Set;
 
 import workbench.RunMode;
 import workbench.console.ConsoleSettings;
-import workbench.console.RowDisplay;
-import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
- * A SQL command to control the output format in console mode.
+ * A SQL command to control the maximum output length for values in console mode.
  *
  * @author  Thomas Kellerer
  */
-public class WbDisplay
+public class WbSetDisplaySize
 	extends SqlCommand
 {
-	public static final String VERB = "WbDisplay";
-  private final Set<String> tabularKeywords = CollectionUtil.caseInsensitiveSet("tab", "tabular", "row");
-  private final Set<String> recordKeywords = CollectionUtil.caseInsensitiveSet("record", "form", "single");
+	public static final String VERB = "WbSetDisplaySize";
 
 	@Override
-	public StatementRunnerResult execute(String sql)
+	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String param = StringUtil.trim(getCommandLine(sql));
-
+		String param = getCommandLine(aSql);
     if (StringUtil.isBlank(param))
     {
-			RowDisplay current = ConsoleSettings.getInstance().getRowDisplay();
-			String currentDisp = "tab";
-
-			if (current == RowDisplay.Form)
-			{
-				currentDisp = "record";
-			}
-
-			result.setSuccess();
-			String msg = ResourceMgr.getFormattedString("ErrDispWrongArgument", currentDisp);
-			result.addMessage(msg);
+      String size = Settings.getInstance().getProperty(ConsoleSettings.PROP_MAX_DISPLAY_SIZE, "");
+      result.addMessage("Maximum display length is: " + size);
     }
-    else if (tabularKeywords.contains(param))
-		{
-			result.setSuccess();
-			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.SingleLine);
-			result.addMessageByKey("MsgDispChangeRow");
-		}
-		else if (recordKeywords.contains(param))
-		{
-			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.Form);
-			result.addMessageByKey("MsgDispChangeForm");
-		}
-
+    else if (StringUtil.isNumber(param))
+    {
+      Settings.getInstance().setProperty(ConsoleSettings.PROP_MAX_DISPLAY_SIZE, param);
+      result.addMessage("Maximum display length set to: " + param);
+    }
 		return result;
 	}
 

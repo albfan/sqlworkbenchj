@@ -31,12 +31,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
-
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.IgnoredCommand;
@@ -121,9 +119,9 @@ import workbench.sql.wbcommands.console.WbListDrivers;
 import workbench.sql.wbcommands.console.WbListMacros;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
+import workbench.sql.wbcommands.console.WbSetDisplaySize;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
-
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
@@ -212,6 +210,7 @@ public class CommandMapper
 		addCommand(new WbDisconnect());
 		addCommand(new WbDisplay());
 		addCommand(new WbToggleDisplay());
+		addCommand(new WbSetDisplaySize());
 		addCommand(new WbRun());
 		addCommand(new WbHistory());
 		addCommand(new WbListMacros());
