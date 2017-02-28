@@ -44,6 +44,16 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.gui.dialogs.export.ExportOptions;
+import workbench.gui.dialogs.export.HtmlOptions;
+import workbench.gui.dialogs.export.SpreadSheetOptions;
+import workbench.gui.dialogs.export.SqlOptions;
+import workbench.gui.dialogs.export.TextOptions;
+import workbench.gui.dialogs.export.XmlOptions;
 import workbench.interfaces.Committer;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ErrorReporter;
@@ -52,24 +62,10 @@ import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.db.ColumnIdentifier;
-import workbench.db.ConnectionProfile;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-
-import workbench.gui.dialogs.export.ExportOptions;
-import workbench.gui.dialogs.export.HtmlOptions;
-import workbench.gui.dialogs.export.SpreadSheetOptions;
-import workbench.gui.dialogs.export.SqlOptions;
-import workbench.gui.dialogs.export.TextOptions;
-import workbench.gui.dialogs.export.XmlOptions;
-
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
-
 import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
@@ -654,7 +650,14 @@ public class DataExporter
    */
   public void setBlobIdColumns(List<String> columns)
   {
-    this.blobIdCols = columns;
+    if (columns == null)
+    {
+      this.blobIdCols = null;
+    }
+    else
+    {
+      this.blobIdCols = new ArrayList<>(columns);
+    }
   }
 
   List<String> getBlobIdColumns()
