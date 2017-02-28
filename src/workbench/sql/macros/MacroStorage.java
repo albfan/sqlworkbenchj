@@ -250,7 +250,7 @@ public class MacroStorage
         if (o2 == null) return 1;
         return o1.getName().compareToIgnoreCase(o2.getName());
       };
-			Collections.sort(groups, comp);
+			groups.sort(comp);
 			modified = true;
 		}
 
@@ -259,7 +259,7 @@ public class MacroStorage
 	{
 		synchronized (lock)
 		{
-			Collections.sort(groups, new Sorter());
+			groups.sort(new Sorter());
 			for (int i=0; i < groups.size(); i++)
 			{
 				groups.get(i).setSortOrder(i);

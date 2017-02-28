@@ -25,7 +25,6 @@ package workbench.gui.profiles;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -93,7 +92,7 @@ class ProfileListModel
 	private void sortList(List<ConnectionProfile> toSort)
 	{
 		if (toSort == null) return;
-		Collections.sort(toSort, ConnectionProfile.getNameComparator());
+		toSort.sort(ConnectionProfile.getNameComparator());
 	}
 
 	public void profileChanged(ConnectionProfile profile)
@@ -443,7 +442,7 @@ class ProfileListModel
 		// Make sure the default group is added as the first item!
 		List<String> groups = new ArrayList<>();
 		groups.addAll(groupMap.keySet());
-		Collections.sort(groups, CaseInsensitiveComparator.INSTANCE);
+		groups.sort(CaseInsensitiveComparator.INSTANCE);
 
 		for (String group : groups)
 		{

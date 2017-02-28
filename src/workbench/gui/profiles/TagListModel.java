@@ -23,7 +23,6 @@ package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.ListModel;
@@ -31,6 +30,8 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import workbench.resource.GuiSettings;
+
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
 /**
@@ -49,7 +50,7 @@ public class TagListModel
   {
     elements = new ArrayList<>(allElements);
     filtered = new ArrayList<>(elements.size());
-    Collections.sort(elements);
+    elements.sort(CaseInsensitiveComparator.INSTANCE);
   }
 
   public void clear()
@@ -110,7 +111,7 @@ public class TagListModel
       elements.removeAll(filtered);
     }
 
-    Collections.sort(elements);
+    elements.sort(CaseInsensitiveComparator.INSTANCE);
     fireDataChanged();
   }
 

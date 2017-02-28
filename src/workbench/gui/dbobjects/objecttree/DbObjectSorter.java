@@ -20,7 +20,6 @@
  */
 package workbench.gui.dbobjects.objecttree;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -91,6 +90,6 @@ public class DbObjectSorter
     if (objects == null) return;
     DbObjectSorter sorter = new DbObjectSorter(useNaturalSort);
     sorter.setIncludeType(includeType);
-    Collections.sort(objects, sorter);
+    objects.sort(sorter);
   }
 }

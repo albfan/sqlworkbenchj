@@ -129,7 +129,7 @@ public class WbProperties
     }
     else
     {
-      Collections.sort(keys, sortComparator);
+      keys.sort(sortComparator);
     }
     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
     String lastKey = null;

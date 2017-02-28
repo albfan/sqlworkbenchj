@@ -22,9 +22,12 @@ package workbench.gui.dbobjects.objecttree;
 
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.ResourceMgr;
 
 import workbench.db.CatalogChanger;
 import workbench.db.CatalogIdentifier;
@@ -47,11 +50,10 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
+
 import workbench.gui.dbobjects.IsolationLevelChanger;
 import workbench.gui.dbobjects.objecttree.vertica.ProjectionListNode;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.ResourceMgr;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -594,7 +596,7 @@ public class TreeLoader
 
     ObjectNameSorter sorter = new ObjectNameSorter();
     sorter.setUseNaturalSort(DbTreeSettings.useNaturalSort());
-    Collections.sort(objects, sorter);
+    objects.sort(sorter);
 
     for (TableIdentifier tbl : objects)
     {
@@ -890,7 +892,7 @@ public class TreeLoader
 
     ObjectNameSorter sorter = new ObjectNameSorter();
     sorter.setUseNaturalSort(DbTreeSettings.useNaturalSort());
-    Collections.sort(objects, sorter);
+    objects.sort(sorter);
 
     for (DbObject obj : objects)
     {
@@ -964,7 +966,7 @@ public class TreeLoader
       connection.getObjectCache().addReferencedTables(tbl, fklist);
     }
 
-    Collections.sort(fklist, (DependencyNode o1, DependencyNode o2) -> o1.getTable().compareTo(o2.getTable()));
+    fklist.sort((DependencyNode o1, DependencyNode o2) -> o1.getTable().compareTo(o2.getTable()));
 
     for (DependencyNode fk : fklist)
     {

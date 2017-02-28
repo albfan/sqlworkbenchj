@@ -1241,7 +1241,7 @@ public class JdbcIndexReader
       SqlUtil.closeAll(rs, stmt);
     }
     processIndexList(result);
-    Collections.sort(result, IndexDefinition.getNameSorter());
+    result.sort(IndexDefinition.getNameSorter());
     return result;
   }
 

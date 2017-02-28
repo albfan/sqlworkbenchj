@@ -83,15 +83,8 @@ public class LnFManager
 				lnfList.add(lnf);
 			}
 		}
-		Comparator<LnFDefinition> nameComp = new Comparator<LnFDefinition>()
-		{
-			@Override
-			public int compare(LnFDefinition first, LnFDefinition second)
-			{
-				return StringUtil.compareStrings(first.getName(), second.getName(), true);
-			}
-		};
-		Collections.sort(lnfList, nameComp);
+		Comparator<LnFDefinition> nameComp = (LnFDefinition first, LnFDefinition second) -> StringUtil.compareStrings(first.getName(), second.getName(), true);
+		lnfList.sort(nameComp);
 	}
 
 	public void removeDefinition(LnFDefinition lnf)

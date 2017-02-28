@@ -524,7 +524,7 @@ public class FileUtil
     }
 
     Comparator<File> fnameSorter = (File o1, File o2) -> o1.getName().compareToIgnoreCase(o2.getName());
-    Collections.sort(result, fnameSorter);
+    result.sort(fnameSorter);
 
     return result;
   }

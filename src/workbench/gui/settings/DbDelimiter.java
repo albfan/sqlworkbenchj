@@ -21,7 +21,6 @@
 package workbench.gui.settings;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -108,15 +107,8 @@ public class DbDelimiter
 			def.setDelimiter(delim);
 			result.add(def);
 		}
-		Comparator<DbDelimiter> comp = new Comparator<DbDelimiter>()
-		{
-			@Override
-			public int compare(DbDelimiter o1, DbDelimiter o2)
-			{
-				return o1.displayName.compareToIgnoreCase(o2.displayName);
-			}
-		};
-		Collections.sort(result, comp);
+		Comparator<DbDelimiter> comp = (DbDelimiter o1, DbDelimiter o2) -> o1.displayName.compareToIgnoreCase(o2.displayName);
+		result.sort(comp);
 		DbDelimiter all = new DbDelimiter("*", ResourceMgr.getString("TxtDefault"));
 		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(null);
 		if (delim != null)

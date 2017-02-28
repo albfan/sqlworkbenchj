@@ -21,7 +21,6 @@
 package workbench.gui.toolbar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -57,7 +56,7 @@ public class ConfigureToolbarPanel
     removeItem.setText("");
 
     allActions = new ArrayList<>(actions);
-    Collections.sort(allActions, (WbAction o1, WbAction o2) -> StringUtil.compareStrings(o1.getMenuLabel(), o2.getMenuLabel(), true));
+    allActions.sort((WbAction o1, WbAction o2) -> StringUtil.compareStrings(o1.getMenuLabel(), o2.getMenuLabel(), true));
 
     allActionList.setCellRenderer(new ActionRenderer());
     configuredActions.setCellRenderer(new ActionRenderer());

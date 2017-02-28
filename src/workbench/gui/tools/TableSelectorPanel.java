@@ -35,7 +35,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -297,7 +296,7 @@ public class TableSelectorPanel
 			tableSelector.removeItemListener(this);
 			List<TableIdentifier> tables = dbConnection.getMetadata().getSelectableObjectsList(null, currentSchema);
 
-			Collections.sort(tables, new ObjectNameSorter());
+			tables.sort(new ObjectNameSorter());
 			tableSelector.removeAllItems();
 
 			if (allowNewTable)

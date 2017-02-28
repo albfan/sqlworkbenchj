@@ -24,7 +24,6 @@
 package workbench.db;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -41,7 +40,7 @@ public class ProfileGroupMap
 
     // If the complete list is sorted by name at the beginning
     // the sublists per group will be sorted automatically.
-    Collections.sort(profiles, ConnectionProfile.getNameComparator());
+    profiles.sort(ConnectionProfile.getNameComparator());
 
     for (ConnectionProfile profile : profiles)
     {

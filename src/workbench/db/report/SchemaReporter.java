@@ -31,7 +31,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -278,10 +277,6 @@ public class SchemaReporter
     }
   }
 
-  private void sortTableObjects()
-  {
-    Collections.sort(objects, new DbObjectComparator());
-  }
   /**
    *  Write the XML into the supplied output
    */
@@ -290,7 +285,7 @@ public class SchemaReporter
   {
     this.cancel = false;
 
-    sortTableObjects();
+    objects.sort(new DbObjectComparator());
     if (proceduresIncluded() && this.procedures.isEmpty()) this.retrieveProcedures();
     if (this.cancel) return;
 

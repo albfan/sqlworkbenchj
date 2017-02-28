@@ -420,7 +420,7 @@ public class ReportTable
     };
     List<ReportColumn> result = new ArrayList<>(columns.size());
     result.addAll(columns);
-    Collections.sort(result, comp);
+    result.sort(comp);
     return result;
   }
 

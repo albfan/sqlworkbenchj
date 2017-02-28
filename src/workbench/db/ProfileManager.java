@@ -79,7 +79,7 @@ public class ProfileManager
     {
       result.add(profile.getKey().toString());
     }
-    Collections.sort(result, CaseInsensitiveComparator.INSTANCE);
+    result.sort(CaseInsensitiveComparator.INSTANCE);
     return result;
   }
 
