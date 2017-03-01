@@ -28,14 +28,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.SequenceDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
@@ -46,7 +50,7 @@ import workbench.util.SqlUtil;
 public class PostgresDependencyReader
   implements DependencyReader
 {
-  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence", "trigger", "function");
+  private final Set<String> supportedTypes = CollectionUtil.caseInsensitiveSet("table", "view", "sequence", "trigger", "function", "type");
 
   private final String typeCase =
       "       CASE cl.relkind \n" +
@@ -59,6 +63,12 @@ public class PostgresDependencyReader
       "          WHEN 't' THEN 'TOAST'\n" +
       "          WHEN 'f' THEN 'FOREIGN TABLE'\n" +
       "       END AS object_type, \n";
+
+  private final String proArgs =
+    "       coalesce(array_to_string(p.proallargtypes, ';'), array_to_string(p.proargtypes, ';')) as arg_types, \n" +
+    "       array_to_string(p.proargnames, ';') as arg_names, \n" +
+    "       array_to_string(p.proargmodes, ';') as arg_modes, \n" +
+    "       p.oid::text as proc_id \n";
 
   private final String searchUsed =
       "select vtu.table_schema, \n" +
@@ -78,7 +88,27 @@ public class PostgresDependencyReader
         "where (table_schema, table_name) = (?, ?) \n" +
         "order by view_schema, view_name";
 
-  private final String sequencesUsedByTable =
+  private String typesUsedByFunction =
+    "select distinct ts.nspname as type_schema, typ.typname as type_name, 'TYPE', obj_description(typ.oid) as remarks \n" +
+    "from pg_proc c \n" +
+    "  join pg_namespace n on n.oid = c.pronamespace \n" +
+    "  join pg_depend d on d.objid = c.oid and d.refclassid = 'pg_type'::regclass \n" +
+    "  join pg_type typ on typ.oid = d.refobjid \n" +
+    "  join pg_namespace ts on ts.oid = typ.typnamespace \n" +
+    "where n.nspname = ? \n" +
+    "  and c.proname = ?";
+
+  private final String functionsUsingType =
+    "select distinct n.nspname as function_schema, p.proname as function_name, 'FUNCTION', obj_description(p.oid) as remarks, \n" + proArgs +
+    "from pg_proc p \n" +
+    "  join pg_namespace n on n.oid = p.pronamespace \n" +
+    "  join pg_depend d on d.objid = p.oid and d.classid = 'pg_proc'::regclass \n" +
+    "  join pg_type typ on typ.oid = d.refobjid \n" +
+    "  join pg_namespace ts on ts.oid = typ.typnamespace \n" +
+    "where ts.nspname = ? \n" +
+    "  and typ.typname = ? \n";
+
+  private static final String sequencesUsedByTable =
     "select distinct sn.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_namespace sn on sn.oid = s.relnamespace \n" +
@@ -105,12 +135,12 @@ public class PostgresDependencyReader
     "  and n.nspname = ? \n" +
     "  and s.relname = ?";
 
-  private static final String triggerImplementationFunction =
-    "SELECT trgsch.nspname as function_schema, proc.proname as function_name, 'FUNCTION', obj_description(proc.oid) as remarks \n" +
+  private final String triggerImplementationFunction =
+    "SELECT trgsch.nspname as function_schema, proc.proname as function_name, 'FUNCTION', obj_description(proc.oid) as remarks, " + proArgs +
     "FROM pg_trigger trg  \n" +
     "  JOIN pg_class tbl ON tbl.oid = trg.tgrelid  \n" +
-    "  JOIN pg_proc proc ON proc.oid = trg.tgfoid \n" +
-    "  JOIN pg_namespace trgsch ON trgsch.oid = proc.pronamespace \n" +
+    "  JOIN pg_proc p ON p.oid = trg.tgfoid \n" +
+    "  JOIN pg_namespace trgsch ON trgsch.oid = p.pronamespace \n" +
     "  JOIN pg_namespace tblsch ON tblsch.oid = tbl.relnamespace \n" +
     "WHERE tblsch.nspname =  ? \n" +
     "  AND trg.tgname = ? ";
@@ -135,8 +165,11 @@ public class PostgresDependencyReader
     "WHERE tblsch.nspname = ? \n" +
     "  and proc.proname = ? ";
 
-  public PostgresDependencyReader()
+  private final PostgresProcedureReader procReader;
+
+  public PostgresDependencyReader(WbConnection conn)
   {
+    procReader = new PostgresProcedureReader(conn);
   }
 
   @Override
@@ -146,7 +179,7 @@ public class PostgresDependencyReader
 
     if (base.getObjectType().equalsIgnoreCase("function"))
     {
-      return Collections.emptyList();
+      return retrieveObjects(connection, base, typesUsedByFunction);
     }
 
     if (base.getObjectType().equalsIgnoreCase("trigger"))
@@ -193,6 +226,12 @@ public class PostgresDependencyReader
 
     List<DbObject> tables = retrieveObjects(connection, base, tablesUsingSequence);
     objects.addAll(tables);
+
+    if (base.getObjectType().equalsIgnoreCase("type"))
+    {
+      List<DbObject> types = retrieveObjects(connection, base, functionsUsingType);
+      objects.addAll(types);
+    }
 
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
     if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
@@ -249,6 +288,16 @@ public class PostgresDependencyReader
           seq.setComment(remarks);
           result.add(seq);
         }
+        else if (type.equals("FUNCTION"))
+        {
+          String types = rs.getString("arg_types");
+          String args = rs.getString("arg_names");
+          String modes = rs.getString("arg_modes");
+          String procId = rs.getString("proc_id");
+          ProcedureDefinition proc = procReader.createDefinition(schema, name, args, types, modes, procId);
+          proc.setComment(remarks);
+          result.add(proc);
+        }
         else
         {
           TableIdentifier tbl = new TableIdentifier(null, schema, name);
@@ -272,7 +321,6 @@ public class PostgresDependencyReader
     }
     return result;
   }
-
 
   @Override
   public boolean supportsUsedByDependency(String objectType)

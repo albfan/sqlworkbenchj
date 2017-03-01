@@ -22,17 +22,20 @@ package workbench.db.postgres;
 
 import java.util.List;
 
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
-
 import workbench.TestUtil;
 import workbench.WbTestCase;
+
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+
 import workbench.util.CollectionUtil;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -76,7 +79,7 @@ public class PostgresDependencyReaderTest
     TableIdentifier v1 = conn.getMetadata().findObject(new TableIdentifier("v1"));
     TableIdentifier v2 = conn.getMetadata().findObject(new TableIdentifier("v2"));
 
-    PostgresDependencyReader reader = new PostgresDependencyReader();
+    PostgresDependencyReader reader = new PostgresDependencyReader(conn);
     List<DbObject> usedBy = reader.getUsedBy(conn, t1);
     assertNotNull(usedBy);
     assertEquals(2, usedBy.size());
@@ -103,7 +106,7 @@ public class PostgresDependencyReaderTest
   @Test
   public void testSupportsDependencies()
   {
-    PostgresDependencyReader reader = new PostgresDependencyReader();
+    PostgresDependencyReader reader = new PostgresDependencyReader(null);
     List<String> types = CollectionUtil.arrayList("view", "table");
     for (String type : types)
     {

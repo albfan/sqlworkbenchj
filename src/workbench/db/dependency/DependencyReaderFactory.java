@@ -48,7 +48,7 @@ public class DependencyReaderFactory
 
     if (connection.getMetadata().isPostgres() && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
     {
-      return new PostgresDependencyReader();
+      return new PostgresDependencyReader(connection);
     }
 
     if (connection.getMetadata().isSqlServer() && SqlServerUtil.isSqlServer2008(connection))

@@ -530,12 +530,7 @@ public class ProcedureDefinition
     {
       return this.dbmsProcType;
     }
-
-//    if (this.isPackageProcedure())
-//    {
-//      return "PACKAGE";
-//    }
-
+    
     if (this.isOracleObjectType())
     {
       return "TYPE";

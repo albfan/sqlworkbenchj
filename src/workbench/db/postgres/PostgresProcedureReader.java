@@ -129,7 +129,7 @@ public class PostgresProcedureReader
     return i;
   }
 
-  protected PGTypeLookup getTypeLookup()
+  public PGTypeLookup getTypeLookup()
   {
     if (pgTypes == null)
     {
@@ -296,34 +296,20 @@ public class PostgresProcedureReader
         String schema = rs.getString("proc_schema");
         String name = rs.getString("proc_name");
         String remark = rs.getString("remarks");
-        String args = rs.getString("arg_types");
-        String names = rs.getString("arg_names");
+        String argTypes = rs.getString("arg_types");
+        String argNames = rs.getString("arg_names");
         String modes = rs.getString("arg_modes");
         String type = rs.getString("proc_type");
         String procId = rs.getString("procid");
         int row = ds.addRow();
 
-        if (modes == null)
-        {
-          // modes will be null if all arguments are IN arguments
-          modes = args.replaceAll("[0-9]+", "i");
-        }
-        PGProcName pname = new PGProcName(name, args, modes, getTypeLookup());
-
-        ProcedureDefinition def = new ProcedureDefinition(null, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
-
-        List<String> argNames = StringUtil.stringToList(names, ";", true, true);
-        List<String> argTypes = StringUtil.stringToList(args, ";", true, true);
-        List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
-        List<ColumnIdentifier> cols = convertToColumns(argNames, argTypes, argModes);
-        def.setParameters(cols);
-        def.setDisplayName(pname.getFormattedName());
+        ProcedureDefinition def = createDefinition(schema, name, argNames, argTypes, modes, procId);
         def.setDbmsProcType(type);
         def.setComment(remark);
         def.setInternalIdentifier(procId);
         ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, null);
         ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
-        ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, showParametersInName ? pname.getFormattedName() : name);
+        ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, showParametersInName ? def.getDisplayName() : name);
         ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, java.sql.DatabaseMetaData.procedureReturnsResult);
         ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
         ds.getRow(row).setUserObject(def);
@@ -343,6 +329,27 @@ public class PostgresProcedureReader
     {
       SqlUtil.closeAll(rs, stmt);
     }
+  }
+
+  public ProcedureDefinition createDefinition(String schema, String name, String args, String types, String modes, String procId)
+  {
+    if (modes == null)
+    {
+      // modes will be null if all arguments are IN arguments
+      modes = types.replaceAll("[0-9]+", "i");
+    }
+    PGProcName pname = new PGProcName(name, types, modes, getTypeLookup());
+
+    ProcedureDefinition def = new ProcedureDefinition(null, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
+
+    List<String> argNames = StringUtil.stringToList(args, ";", true, true);
+    List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
+    List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
+    List<ColumnIdentifier> cols = convertToColumns(argNames, argTypes, argModes);
+    def.setParameters(cols);
+    def.setDisplayName(pname.getFormattedName());
+    def.setInternalIdentifier(procId);
+    return def;
   }
 
   @Override
