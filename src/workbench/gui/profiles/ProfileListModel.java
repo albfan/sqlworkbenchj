@@ -37,13 +37,12 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.ProfileGroupMap;
 import workbench.db.ProfileManager;
-
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
@@ -198,11 +197,29 @@ class ProfileListModel
 			while (itr.hasNext())
 			{
 				ConnectionProfile profile = itr.next();
-				if (!profile.getName().toLowerCase().contains(value))
+        String name = StringUtil.coalesce(profile.getName(), "").toLowerCase();
+        String url = StringUtil.coalesce(profile.getUrl(), "").toLowerCase();
+        String user = StringUtil.coalesce(profile.getUsername(), "").toLowerCase();
+
+        boolean keep = false;
+
+				if (name.contains(value))
 				{
-					filtered.add(profile);
-					itr.remove();
+          keep = true;
 				}
+        if (GuiSettings.getIncludeJDBCUrlInProfileSearch() && url.contains(value))
+        {
+          keep = true;
+        }
+        if (GuiSettings.getIncludeUsernameInProfileSearch()&& user.contains(value))
+        {
+          keep = true;
+        }
+        if (!keep)
+        {
+          filtered.add(profile);
+          itr.remove();
+        }
 			}
 		}
 		buildTree();

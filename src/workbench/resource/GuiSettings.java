@@ -1467,4 +1467,15 @@ public class GuiSettings
   {
     return Settings.getInstance().getBoolProperty("workbench.gui.help.use.redirect.for.anchor", true);
   }
+
+	public static boolean getIncludeJDBCUrlInProfileSearch()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.profile.filter.include.url", false);
+	}
+
+	public static boolean getIncludeUsernameInProfileSearch()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.profile.filter.include.username", false);
+	}
+
 }
