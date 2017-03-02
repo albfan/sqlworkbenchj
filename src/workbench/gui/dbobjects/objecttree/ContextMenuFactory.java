@@ -28,13 +28,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import workbench.interfaces.WbSelectionModel;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
-
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CountTableRowsAction;
@@ -48,7 +44,8 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.WbPopupMenu;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
 import workbench.gui.sql.PasteType;
-
+import workbench.interfaces.WbSelectionModel;
+import workbench.resource.ResourceMgr;
 import workbench.util.CollectionUtil;
 
 /**
@@ -138,6 +135,7 @@ class ContextMenuFactory
       EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", (MainWindow)window, true);
       showSelect.setPasteType(PasteType.insert);
       showSelect.setObjectList(dbTree);
+      showSelect.setUseColumnListForTableData(DbTreeSettings.useColumnListForTableDataDisplay(dbTree.getConnection().getDbId()));
       menu.add(showSelect);
 		}
 

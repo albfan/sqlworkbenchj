@@ -44,9 +44,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
-import workbench.interfaces.NullableEditor;
-import workbench.resource.GuiSettings;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.MultilineWrapAction;
 import workbench.gui.actions.RestoreDataAction;
@@ -55,7 +52,8 @@ import workbench.gui.actions.SetNullAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.gui.renderer.WrapEnabledEditor;
-
+import workbench.interfaces.NullableEditor;
+import workbench.resource.GuiSettings;
 import workbench.util.WbDateFormatter;
 
 /**
@@ -95,7 +93,7 @@ public class WbCellEditor
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		restoreValue = new RestoreDataAction(this);
-		contextMenu = new TextComponentMouseListener();
+		contextMenu = new TextComponentMouseListener(editor);
 		setNull = new SetNullAction(this);
 		multilineWrapAction = new MultilineWrapAction(this, this.getEditor(), GuiSettings.PROP_WRAP_MULTILINE_EDITOR);
 
@@ -106,7 +104,6 @@ public class WbCellEditor
 		contextMenu.addAction(selectFk);
 		contextMenu.addAction(restoreValue);
 		contextMenu.addAction(multilineWrapAction);
-		editor.addMouseListener(contextMenu);
 		editor.addMouseListener(this);
 	}
 

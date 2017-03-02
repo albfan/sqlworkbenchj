@@ -25,6 +25,9 @@ package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -34,25 +37,22 @@ import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import workbench.interfaces.FilenameChangeListener;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DependencyNode;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
-
 import workbench.gui.MainWindow;
+import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbMenuItem;
-import workbench.gui.dbobjects.objecttree.DbTreeSettings;
 import workbench.gui.sql.PanelContentSender;
 import workbench.gui.sql.PasteType;
-
+import workbench.interfaces.FilenameChangeListener;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 
@@ -74,6 +74,7 @@ public class EditorTabSelectMenu
 	private boolean withClipboard;
   private DbObjectList objectList;
   private PasteType pasteType = PasteType.overwrite;
+  private boolean useColumnListForTableSelect = true;
 
 	public EditorTabSelectMenu(String label, String tooltipKeyNewTab, String tooltipKeyTab, MainWindow parent)
 	{
@@ -93,6 +94,11 @@ public class EditorTabSelectMenu
 			parentWindow.addTabChangeListener(this);
 		}
 	}
+
+  public void setUseColumnListForTableData(boolean flag)
+  {
+    this.useColumnListForTableSelect = flag;
+  }
 
   public void setPasteType(PasteType type)
   {
@@ -154,7 +160,7 @@ public class EditorTabSelectMenu
 			JMenuItem clipboard = new WbMenuItem(ResourceMgr.getString("MnuTxtStmtClip"));
 			clipboard.setToolTipText(ResourceMgr.getDescription("MnuTxtStmtClip", true));
 			clipboard.setActionCommand(CMD_CLIPBOARD);
-			clipboard.addActionListener(target);
+			clipboard.addActionListener(target == null ? this : target);
 			this.add(clipboard);
 		}
 
@@ -248,26 +254,13 @@ public class EditorTabSelectMenu
 
 	private void showTableData(final int panelIndex, final PasteType type)
 	{
-    WbConnection conn = objectList.getConnection();
-
     TableIdentifier tbl = objectList.getObjectTable();
-
-    if (tbl == null) return;
 
     final PanelContentSender sender = new PanelContentSender(this.parentWindow, tbl.getTableName());
 
     try
     {
-      List<ColumnIdentifier> columns = new ArrayList<>();
-
-      if (DbTreeSettings.useColumnListForTableDataDisplay(conn.getDbId()))
-      {
-        TableDefinition selectedTable = objectList.getCurrentTableDefinition();
-        columns = selectedTable.getColumns();
-      }
-
-      TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
-      final String sql = builder.getSelectForTableData(tbl, columns, true);
+      final String sql = buildSqlForTable();
 
       if (sql == null) return;
 
@@ -280,6 +273,25 @@ public class EditorTabSelectMenu
     {
       LogMgr.logError("EditorTabSelectMenu.showTableData()", "Could not build SELECT statement", ex);
     }
+  }
+
+  private String buildSqlForTable()
+  {
+    WbConnection conn = objectList.getConnection();
+
+    TableIdentifier tbl = objectList.getObjectTable();
+    if (tbl == null) return null;
+
+    List<ColumnIdentifier> columns = new ArrayList<>();
+    if (useColumnListForTableSelect)
+    {
+      TableDefinition selectedTable = objectList.getCurrentTableDefinition();
+      columns = selectedTable.getColumns();
+    }
+
+    TableSelectBuilder builder = new TableSelectBuilder(conn, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+    final String sql = builder.getSelectForTableData(tbl, columns, true);
+    return sql;
   }
 
 	@Override
@@ -298,6 +310,20 @@ public class EditorTabSelectMenu
       {
         LogMgr.logError("TableListPanel().actionPerformed()", "Error when accessing editor tab", ex);
       }
+    }
+    else if (CMD_CLIPBOARD.equals(command))
+		{
+      boolean ctrlPressed = WbAction.isCtrlPressed(e);
+      String sql = buildSqlForTable();
+      if (sql == null) return;
+
+      if (ctrlPressed)
+      {
+        sql = CreateSnippetAction.makeJavaString(sql, true);
+      }
+      StringSelection sel = new StringSelection(sql);
+      Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
+      clp.setContents(sel, sel);
     }
   }
 }

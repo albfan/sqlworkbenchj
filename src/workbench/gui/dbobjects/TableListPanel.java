@@ -33,8 +33,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -67,20 +65,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import workbench.WbManager;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.ListSelectionControl;
-import workbench.interfaces.ObjectDropListener;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
-import workbench.interfaces.ShareableDisplay;
-import workbench.interfaces.WbSelectionModel;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-
 import workbench.db.ColumnIdentifier;
 import workbench.db.DBID;
 import workbench.db.DbMetadata;
@@ -95,7 +79,6 @@ import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSelectBuilder;
 import workbench.db.TableSourceBuilder;
 import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerReader;
@@ -103,7 +86,6 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
-
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AlterObjectAction;
@@ -111,7 +93,6 @@ import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CountTableRowsAction;
 import workbench.gui.actions.CreateDropScriptAction;
 import workbench.gui.actions.CreateDummySqlAction;
-import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
@@ -131,11 +112,23 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
-
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.ObjectDropListener;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.interfaces.ShareableDisplay;
+import workbench.interfaces.WbSelectionModel;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
+import static workbench.storage.NamedSortDefinition.*;
 import workbench.storage.SortDefinition;
-
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
@@ -143,8 +136,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
-
-import static workbench.storage.NamedSortDefinition.*;
 
 
 /**
@@ -2181,23 +2172,6 @@ public class TableListPanel
     return new TableDefinition(selectedTable, columns);
   }
 
-  private String buildSqlForTable(boolean withComment)
-	{
-    TableDefinition tbl = getCurrentTableDefinition();
-    if (tbl == null) return null;
-
-    TableSelectBuilder builder = new TableSelectBuilder(dbConnection);
-    String sql = builder.getSelectForTableData(tbl.getTable(), tbl.getColumns(), withComment);
-
-		if (sql == null)
-		{
-			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replace("%table%", this.selectedTable.getTableName());
-			WbSwingUtilities.showErrorMessage(this, msg);
-			return null;
-		}
-    return sql;
-	}
-
 	/**
 	 * Invoked when the type dropdown changes or one of the additional actions
 	 * is invoked that are put into the context menu of the table list
@@ -2227,25 +2201,6 @@ public class TableListPanel
 			if (tbl != null)
 			{
 				selectTable(tbl);
-			}
-		}
-		else
-		{
-			String command = e.getActionCommand();
-
-			if (EditorTabSelectMenu.CMD_CLIPBOARD.equals(command))
-			{
-				boolean ctrlPressed = WbAction.isCtrlPressed(e);
-				String sql = buildSqlForTable(false);
-				if (sql == null) return;
-
-				if (ctrlPressed)
-				{
-					sql = CreateSnippetAction.makeJavaString(sql, true);
-				}
-				StringSelection sel = new StringSelection(sql);
-				Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clp.setContents(sel, sel);
 			}
 		}
 	}

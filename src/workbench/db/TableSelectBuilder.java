@@ -26,12 +26,9 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.log.LogMgr;
-
 import workbench.db.sqltemplates.TemplateHandler;
-
+import workbench.log.LogMgr;
 import workbench.sql.ResultNameAnnotation;
-
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -170,7 +167,7 @@ public class TableSelectBuilder
       select.append(table.getTableName());
       select.append('\n');
     }
-    select.append(sql);
+    select.append(sql.trim());
     select.append(';');
     return select.toString();
   }

@@ -32,18 +32,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import workbench.interfaces.Replaceable;
-import workbench.interfaces.Searchable;
-import workbench.resource.ResourceMgr;
-
 import workbench.db.WbConnection;
-
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.FindDataAction;
 import workbench.gui.actions.FindDataAgainAction;
 import workbench.gui.actions.ReplaceDataAction;
 import workbench.gui.editor.SearchResult;
-
+import workbench.interfaces.Replaceable;
+import workbench.interfaces.Searchable;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
@@ -51,7 +48,6 @@ import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.RegExComparator;
-
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
@@ -186,32 +182,24 @@ public class TableReplacer
 	protected void scrollTo(final Position pos)
 	{
 		final int row = pos.getRow();
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				client.scrollToRow(row);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      client.scrollToRow(row);
+    });
 	}
 	protected void highlightPosition(final Position pos)
 	{
 		final int row = pos.getRow();
 		int col = pos.getColumn();
 		final int realCol = (this.client.isStatusColumnVisible() ? col + 1 : col);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				client.clearSelection();
-				if (pos.isValid())
-				{
-					client.selectCell(row, realCol);
-				}
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      client.clearSelection();
+      if (pos.isValid())
+      {
+        client.selectCell(row, realCol);
+      }
+    });
 	}
 
 	@Override
@@ -296,7 +284,7 @@ public class TableReplacer
 	}
 
 	@Override
-	public int replaceAll(String value, String replacement, boolean selectedText,
+	public void replaceAll(String value, String replacement, boolean selectedText,
 		boolean ignoreCase, boolean wholeWord,
 		boolean useRegex)
 	{
@@ -306,10 +294,10 @@ public class TableReplacer
 		{
 			rows = this.client.getSelectedRows();
 		}
-		int replaced = 0;
+
 		try
 		{
-			replaced = this.replacer.replaceAll(value, replacement, rows, ignoreCase, wholeWord, useRegex);
+			int replaced = this.replacer.replaceAll(value, replacement, rows, ignoreCase, wholeWord, useRegex);
 			if (replaced > 0)
 			{
 				fireTableChanged();
@@ -319,7 +307,6 @@ public class TableReplacer
 		{
 			WbSwingUtilities.showErrorMessage(client, e.getMessage());
 		}
-		return replaced;
 	}
 
 	@Override
@@ -339,15 +326,11 @@ public class TableReplacer
 		WbConnection con = (ds != null ? ds.getOriginalConnection() : null);
 		final boolean readOnly = (con == null ? true : con.isSessionReadOnly());
 		final boolean hasData = (client.getRowCount() > 0);
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				findAction.setEnabled(hasData);
-				replaceAction.setEnabled(hasData && !readOnly);
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      findAction.setEnabled(hasData);
+      replaceAction.setEnabled(hasData && !readOnly);
+    });
 	}
 
   @Override

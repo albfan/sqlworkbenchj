@@ -36,13 +36,11 @@ import java.awt.event.WindowListener;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.EscAction;
-
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -399,23 +397,19 @@ public class ReplacePanel
 
 			final boolean criteriaAdded = hasSelectedText;
 
-			EventQueue.invokeLater(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					if (criteriaAdded)
-					{
-						((HistoryTextField)replaceValue).selectAll();
-						((HistoryTextField)replaceValue).requestFocus();
-					}
-					else
-					{
-						((HistoryTextField)searchCriteria).selectAll();
-						((HistoryTextField)searchCriteria).requestFocus();
-					}
-				}
-			});
+			EventQueue.invokeLater(() ->
+      {
+        if (criteriaAdded)
+        {
+          ((HistoryTextField)replaceValue).selectAll();
+          ((HistoryTextField)replaceValue).requestFocus();
+        }
+        else
+        {
+          ((HistoryTextField)searchCriteria).selectAll();
+          ((HistoryTextField)searchCriteria).requestFocus();
+        }
+      });
 			this.dialog.setVisible(true);
 		}
 		catch (Exception e)

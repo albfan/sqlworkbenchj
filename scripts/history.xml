@@ -6,6 +6,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="1" type="fix">"Put SELECT into Clipboard" did not work any longer in the DbTree or DbExplorer</entry>
     <entry dev-build="1" type="fix">Using -sourceDir to import multiple files into a single table did not work if -fileColumns was not specified</entry>
     <entry dev-build="1" type="fix">WbDataDiff failed when using -includeDeletes=true and the comparison was done between two DBMS that stored object names differently (e.g. UPPER vs. lowercase)</entry>
     <entry dev-build="1" type="fix">The parameter -varFile did not work anymore</entry>
