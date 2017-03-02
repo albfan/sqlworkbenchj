@@ -70,7 +70,7 @@ public class PostgresDependencyReader
     "       array_to_string(p.proargmodes, ';') as arg_modes, \n" +
     "       p.oid::text as proc_id \n";
 
-  private final String searchUsed =
+  private final String tablesUsedByView =
       "select vtu.table_schema, \n" +
       "       vtu.table_name, \n" + typeCase +
       "       obj_description(cl.oid) as remarks\n" +
@@ -79,7 +79,7 @@ public class PostgresDependencyReader
       "where (view_schema, view_name) = (?, ?) \n" +
       "order by view_schema, view_name";
 
-  private final String searchUsedBy =
+  private final String viewsUsingTable =
         "select vtu.view_schema, \n" +
         "       vtu.view_name, \n" + typeCase +
         "       obj_description(cl.oid) as remarks\n" +
@@ -108,6 +108,32 @@ public class PostgresDependencyReader
     "where ts.nspname = ? \n" +
     "  and typ.typname = ? \n";
 
+  private final String tablesUsingType =
+    "select distinct n.nspname as table_schema, \n " +
+    "       cl.relname as table_name, \n" +
+    "       " + typeCase +
+    "       obj_description(cl.oid) as remarks  \n" +
+    "from pg_class cl  \n" +
+    "  join pg_namespace n on n.oid = cl.relnamespace  \n" +
+    "  join pg_depend d on d.objid = cl.oid and d.classid = 'pg_class'::regclass  \n" +
+    "  join pg_type t on t.oid = d.refobjid  \n" +
+    "  join pg_namespace tn on tn.oid = t.typnamespace \n" +
+    "where d.deptype in ('a', 'n')" +
+    "  and cl.relkind in ('r', 'v', 'f') \n" +
+    "  and tn.nspname = ? \n" +
+    "  and t.typname = ? \n";
+
+  private final String typesUsedByTable =
+    "select distinct tn.nspname as type_schema, t.typname as type_name, 'TYPE' as object_type, obj_description(t.oid) as remarks \n" +
+    "from pg_class c \n" +
+    "  join pg_namespace n on n.oid = c.relnamespace \n" +
+    "  join pg_depend d on d.objid = c.oid and d.classid = 'pg_class'::regclass \n" +
+    "  join pg_type t on t.oid = d.refobjid \n" +
+    "  join pg_namespace tn on tn.oid = t.typnamespace\n" +
+    "where d.deptype in ('a', 'n') \n" +
+    "  and n.nspname = ? \n"+
+    "  and c.relname = ? ";
+
   private static final String sequencesUsedByTable =
     "select distinct sn.nspname as sequence_schema, s.relname as sequence_name, 'SEQUENCE', obj_description(s.oid) as remarks\n" +
     "from pg_class s\n" +
@@ -123,7 +149,10 @@ public class PostgresDependencyReader
     "  and tbl.relname = ?";
 
   private final String tablesUsingSequence =
-    "select distinct n.nspname as table_schema, cl.relname as table_name, " + typeCase + " obj_description(cl.oid) as remarks\n" +
+    "select distinct n.nspname as table_schema, \n" +
+    "       cl.relname as table_name, \n" +
+    "       " + typeCase +
+    "       obj_description(cl.oid) as remarks\n" +
     "from pg_class s\n" +
     "  join pg_depend d on d.refobjid = s.oid and d.refclassid = 'pg_class'::regclass\n" +
     "  join pg_attrdef ad on ad.oid = d.objid and d.classid = 'pg_attrdef'::regclass\n" +
@@ -177,23 +206,31 @@ public class PostgresDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    if (base.getObjectType().equalsIgnoreCase("function"))
+    String objectType = base.getObjectType().toLowerCase();
+
+    if (objectType.equals("function"))
     {
       return retrieveObjects(connection, base, typesUsedByFunction);
     }
 
-    if (base.getObjectType().equalsIgnoreCase("trigger"))
+    if (objectType.equals("trigger"))
     {
       return getTriggerFunction(connection, base);
     }
 
-    List<DbObject> objects = retrieveObjects(connection, base, searchUsed);
+    List<DbObject> objects = retrieveObjects(connection, base, tablesUsedByView);
 
     List<DbObject> sequences = retrieveObjects(connection, base, sequencesUsedByTable);
     objects.addAll(sequences);
 
+    if (objectType.equals("table") ||objectType.equals("view") || objectType.equals("materialized view"))
+    {
+      List<DbObject> types = retrieveObjects(connection, base, typesUsedByTable);
+      objects.addAll(types);
+    }
+
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
-    if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
+    if (base instanceof TableIdentifier && objectType.equals("table"))
     {
       List<TableIdentifier> parents = reader.getParents(connection, (TableIdentifier)base);
       for (TableIdentifier tbl : parents)
@@ -212,29 +249,33 @@ public class PostgresDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
 
-    if (base.getObjectType().equalsIgnoreCase("trigger"))
+    String objectType = base.getObjectType().toLowerCase();
+
+    if (objectType.equals("trigger"))
     {
       return retrieveObjects(connection, base, triggerTable);
     }
 
-    if (base.getObjectType().equalsIgnoreCase("function"))
+    if (objectType.equals("function"))
     {
       return retrieveObjects(connection, base, triggersUsingFunction);
     }
 
-    List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
+    List<DbObject> objects = retrieveObjects(connection, base, viewsUsingTable);
 
     List<DbObject> tables = retrieveObjects(connection, base, tablesUsingSequence);
     objects.addAll(tables);
 
-    if (base.getObjectType().equalsIgnoreCase("type"))
+    if (objectType.equals("type"))
     {
+      tables = retrieveObjects(connection, base, tablesUsingType);
+      objects.addAll(tables);
       List<DbObject> types = retrieveObjects(connection, base, functionsUsingType);
       objects.addAll(types);
     }
 
     PostgresInheritanceReader reader = new PostgresInheritanceReader();
-    if (base instanceof TableIdentifier && base.getObjectType().equalsIgnoreCase("table"))
+    if (base instanceof TableIdentifier && objectType.equals("table"))
     {
       List<InheritanceEntry> children = reader.getChildren(connection, (TableIdentifier)base);
       for (InheritanceEntry entry : children)
