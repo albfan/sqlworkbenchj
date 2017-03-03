@@ -23,15 +23,12 @@ package workbench.gui.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 
+import workbench.gui.menu.RecentFileManager;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.ResourceMgr;
-
-import workbench.gui.menu.RecentFileManager;
-
 import workbench.sql.macros.MacroFileSelector;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
-
 import workbench.util.WbFile;
 
 /**
@@ -76,8 +73,12 @@ public class SaveMacrosAction
   {
     EventQueue.invokeLater(() ->
     {
-      String fname = MacroManager.getInstance().getMacros(macroClientId).getCurrentMacroFilename();
-      setTooltip(fname);
+      MacroStorage macros = MacroManager.getInstance().getMacros(macroClientId);
+      if (macros != null)
+      {
+        String fname = macros.getCurrentMacroFilename();
+        setTooltip(fname);
+      }
     });
   }
 

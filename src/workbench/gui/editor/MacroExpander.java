@@ -28,15 +28,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 
+import workbench.gui.editor.actions.NextWord;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
-
-import workbench.gui.editor.actions.NextWord;
-
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
-import workbench.sql.macros.MacroStorage;
 
 /**
  *
@@ -59,7 +56,7 @@ public class MacroExpander
 	public MacroExpander(int clientId, JEditTextArea textArea)
 	{
 		macroClientId = clientId;
-		MacroManager.getInstance().getMacros(macroClientId).addChangeListener(this);
+		MacroManager.getInstance().addChangeListener(this, macroClientId);
 		macros = MacroManager.getInstance().getExpandableMacros(macroClientId);
 		maxTypingPause = GuiSettings.getMaxExpansionPause();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXPAND_MAXDURATION);
@@ -68,11 +65,7 @@ public class MacroExpander
 
 	public void dispose()
 	{
-		MacroStorage storage = MacroManager.getInstance().getMacros(macroClientId);
-		if (storage != null)
-		{
-			storage.removeChangeListener(this);
-		}
+		MacroManager.getInstance().removeChangeListener(this, macroClientId);
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
