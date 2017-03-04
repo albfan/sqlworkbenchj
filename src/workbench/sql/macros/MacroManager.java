@@ -162,7 +162,7 @@ public class MacroManager
     WbFile f = new WbFile(filename);
     return f.equals(getDefaultMacroFile()) == false;
   }
-  
+
 	private MacroStorage getStorage(int macroClientId)
 	{
 		String fname = getClientfilename(macroClientId);
@@ -170,8 +170,6 @@ public class MacroManager
 		if (storage == null)
 		{
 			storage = allMacros.get(getDefaultMacroFile().getFullPath());
-			LogMgr.logTrace("MacroManager.getStorage()", "No macros registered for clientId=" + macroClientId + ". Using default macros!", new Exception("Client not initialized"));
-      LogMgr.logTrace("MacroManager.getStorage()", "Current macro clients: " + macroClients + ", current storages: " + allMacros);
 		}
 		return storage;
 	}
