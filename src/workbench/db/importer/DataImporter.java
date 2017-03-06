@@ -198,13 +198,6 @@ public class DataImporter
     this.isOracle = this.dbConn.getMetadata().isOracle();
     this.useSetNull = this.dbConn.getDbSettings().useSetNull();
 
-    // apparently the JDBC/ODBC bridge does not support setObject(x, null) so always use setNull()
-    // regardless of the DBMS
-    if (dbConn.getProfile() != null && StringUtil.equalString(dbConn.getProfile().getDriverclass(), "sun.jdbc.odbc.JdbcOdbcDriver"))
-    {
-      this.useSetNull = true;
-    }
-
     this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
     this.arrayHandler = ArrayValueHandler.Factory.getInstance(aConn);
   }
