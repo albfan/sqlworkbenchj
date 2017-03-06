@@ -32,25 +32,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumnModel;
 
 import workbench.WbManager;
 import workbench.console.DataStorePrinter;
+import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
+
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowData;
+
 import workbench.util.CharacterRange;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -580,9 +583,9 @@ public class ClipBoardCopier
 		ColumnIdentifier[] originalCols = this.data.getColumns();
 		ColumnSelectorPanel panel = new ColumnSelectorPanel(originalCols, includeHeader, selectedOnly, showHeaderSelection, showSelectedRowsSelection, showTextFormat);
 		panel.selectAll();
-		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this.client), panel, ResourceMgr.getString("MsgSelectColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    boolean ok = WbSwingUtilities.getOKCancel(ResourceMgr.getString("MsgSelectColumnsWindowTitle"), SwingUtilities.getWindowAncestor(this.client), panel);
 
-		if (choice == JOptionPane.OK_OPTION)
+		if (ok)
 		{
 			result.columns = panel.getSelectedColumns();
 			result.includeHeaders = panel.includeHeader();

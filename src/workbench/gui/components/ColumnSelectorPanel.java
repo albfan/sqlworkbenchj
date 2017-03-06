@@ -23,9 +23,9 @@
  */
 package workbench.gui.components;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -37,6 +37,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
@@ -78,27 +79,32 @@ public class ColumnSelectorPanel
 					boolean showFormatCheckBox)
 	{
 		super();
-		this.setLayout(new BorderLayout());
+    this.setLayout(new GridBagLayout());
 		this.selectTable = new JTable();
-		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		this.selectTable.setRowSelectionAllowed(false);
 		this.selectTable.setColumnSelectionAllowed(false);
 		this.model = new ColumnSelectTableModel(columns);
 		this.selectTable.setModel(this.model);
 
-		TableColumnModel colMod = this.selectTable.getColumnModel();
-		TableColumn col = colMod.getColumn(0);
-		col.setPreferredWidth(150);
-		col.setMinWidth(50);
-		col = colMod.getColumn(1);
-		col.setPreferredWidth(65);
-		col.setMinWidth(35);
-
 		WbScrollPane scroll = new WbScrollPane(this.selectTable);
 		this.infoPanel = new JPanel();
 		configureInfoPanel();
-		this.add(this.infoPanel, BorderLayout.NORTH);
-		this.add(scroll, BorderLayout.CENTER);
+
+		GridBagConstraints mainC = new GridBagConstraints();
+    mainC.gridx = 0;
+    mainC.gridy = 0;
+    mainC.anchor = GridBagConstraints.NORTH;
+    mainC.weightx = 0.0;
+    mainC.weighty = 0.0;
+
+		this.add(infoPanel, mainC);
+    mainC.gridy ++;
+    mainC.weighty = 1.0;
+    mainC.weightx = 1.0;
+    mainC.anchor = GridBagConstraints.NORTHWEST;
+    mainC.fill = GridBagConstraints.BOTH;
+
+		this.add(scroll, mainC);
 
 		selectAll = new FlatButton(ResourceMgr.getString("LblSelectAll"));
 		selectNone = new FlatButton(ResourceMgr.getString("LblSelectNone"));
@@ -154,10 +160,37 @@ public class ColumnSelectorPanel
 		optionPanel.add(cbxPanel, c);
 
 		optionPanel.setBorder(new EmptyBorder(5, 0, 10, 0));
-		this.add(optionPanel, BorderLayout.SOUTH);
-		Dimension d = new Dimension(300, 250);
-		this.setPreferredSize(d);
+
+    mainC.gridy ++;
+    mainC.weighty = 0.0;
+    mainC.weightx = 0.0;
+    mainC.anchor = GridBagConstraints.NORTH;
+    mainC.fill = GridBagConstraints.NONE;
+
+		this.add(optionPanel, mainC);
+    adjustSize(scroll);
 	}
+
+  private void adjustSize(JScrollPane scroll)
+  {
+		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+
+    FontMetrics fm = selectTable.getFontMetrics(selectTable.getFont());
+    selectTable.setRowHeight(fm.getHeight());
+		TableColumnModel colMod = this.selectTable.getColumnModel();
+
+    TableColumn col = colMod.getColumn(1);
+    int labelWidth = fm.stringWidth(model.selectLabel);
+    col.setPreferredWidth((int)(labelWidth * 1.3));
+    col.setMaxWidth((int)(labelWidth * 1.3));
+    col.setMinWidth((int)(labelWidth * 1.3));
+
+    Dimension ps = scroll.getPreferredSize();
+    int rows = Math.max(10, selectTable.getRowCount() + 2);
+    int height = (selectTable.getRowHeight() * rows) + (selectTable.getRowCount() * selectTable.getRowMargin());
+    Dimension preferred = new Dimension( (int)(ps.getWidth()), (int)(height * 1.2));
+    scroll.setPreferredSize(preferred);
+  }
 
 	protected void configureInfoPanel()
 	{
