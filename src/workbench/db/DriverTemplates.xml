@@ -324,13 +324,30 @@
      <string>org.postgresql.Driver</string>
     </void>
     <void property="library">
-     <string>postgresql-9.3-1101.jdbc4.jar</string>
+     <string>postgresql-42.0.0.jar</string>
     </void>
     <void property="name">
      <string>PostgreSQL</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:postgresql://host:port/name_of_database</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.amazon.redshift.jdbc.Driver</string>
+    </void>
+    <void property="library">
+     <string>RedshiftJDBC42-1.2.1.1001.jar</string>
+    </void>
+    <void property="name">
+     <string>Amazon Redshift</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:redshift://endpoint:port/database</string>
     </void>
    </object>
   </void>
