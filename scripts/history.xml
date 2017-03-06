@@ -7,6 +7,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="1" type="fix">The dialog to select columns for copying them to the clipboard did not display all options on Mac OSX.</entry>
     <entry dev-build="1" type="fix">Changing between connection profiles that had a non-standard macro file and profiles using the standard macro file could lead to a situation where the standard macros were no longer available.</entry>
     <entry dev-build="1" type="fix">"Put SELECT into Clipboard" did not work any longer in the DbTree or DbExplorer</entry>
     <entry dev-build="1" type="fix">Using -sourceDir to import multiple files into a single table did not work if -fileColumns was not specified</entry>
