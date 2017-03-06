@@ -200,7 +200,7 @@ public class DataImporter
 
     // apparently the JDBC/ODBC bridge does not support setObject(x, null) so always use setNull()
     // regardless of the DBMS
-    if (dbConn.getProfile().getDriverclass().equals("sun.jdbc.odbc.JdbcOdbcDriver"))
+    if (dbConn.getProfile() != null && StringUtil.equalString(dbConn.getProfile().getDriverclass(), "sun.jdbc.odbc.JdbcOdbcDriver"))
     {
       this.useSetNull = true;
     }
