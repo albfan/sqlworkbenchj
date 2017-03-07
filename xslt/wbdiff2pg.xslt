@@ -11,6 +11,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
 <xsl:param name="stmt-terminator">;</xsl:param>
 <xsl:param name="proc-terminator">;</xsl:param>
+  <xsl:param name="dropViews">false</xsl:param>
 
 <xsl:strip-space elements="*"/>
 
@@ -22,6 +23,12 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 <xsl:variable name="target-schema" select="/schema-diff/compare-settings/reference-schema"/>
 
 <xsl:template match="/">
+
+    <xsl:message>
+Supported parameters:
+
+* dropViews       - if true, views be created using DROP and CREATE instead of CREATE OR REPLACE (current value: <xsl:value-of select="$dropViews"/>)
+    </xsl:message>
 
   <xsl:text>-- Add sequences</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -42,9 +49,63 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:value-of select="$stmt-terminator"/>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
+
   <xsl:if test="count(/schema-diff/create-sequence/sequence-def) &gt; 0">
      <xsl:value-of select="$newline"/>
   </xsl:if>
+
+  <xsl:text>-- Enums</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/add-object/object-def[@object-type='ENUM']">
+    <xsl:text>CREATE TYPE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="object-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="object-name"/>
+    </xsl:call-template>
+    <xsl:text> AS ENUM (</xsl:text>
+    <xsl:for-each select="object-details/enum-values/enum-value">
+      <xsl:text>'</xsl:text>
+      <xsl:value-of select="."/>
+      <xsl:text>'</xsl:text>
+      <xsl:if test="position() &lt; last()">
+        <xsl:text>,</xsl:text>
+      </xsl:if>
+    </xsl:for-each>
+    <xsl:text>);</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:value-of select="$newline"/>
+
+  <xsl:text>-- Types</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/add-type">
+    <xsl:text>CREATE TYPE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="type-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="type-name"/>
+    </xsl:call-template>
+    <xsl:text> AS</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>(</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="column-def">
+      <xsl:sort select="dbms-position"/>
+      <xsl:call-template name="write-column-definition"/>
+      <xsl:if test="position() &lt; last()">
+        <xsl:text>,</xsl:text>
+      </xsl:if>
+      <xsl:value-of select="$newline"/>
+    </xsl:for-each>
+    <xsl:text>);</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:value-of select="$newline"/>
 
   <xsl:text>-- Add Tables without Foreign Keys</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -194,6 +255,39 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
      <xsl:value-of select="$newline"/>
   </xsl:if>
 
+  <xsl:text>-- Drop enums</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/drop-object/object-def">
+    <xsl:text>DROP TYPE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="object-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="object-name"/>
+    </xsl:call-template>
+    <xsl:text> CASCADE</xsl:text><xsl:value-of select="$stmt-terminator"/>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:value-of select="$newline"/>
+
+  <xsl:text>-- Drop types</xsl:text>
+  <xsl:value-of select="$newline"/>
+  <xsl:for-each select="/schema-diff/drop-type">
+    <xsl:text>DROP TYPE </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="type-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="type-name"/>
+    </xsl:call-template>
+    <xsl:text> CASCADE</xsl:text><xsl:value-of select="$stmt-terminator"/>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:value-of select="$newline"/>
+
+  <xsl:value-of select="$newline"/>
   <xsl:text>-- Drop tables</xsl:text>
   <xsl:value-of select="$newline"/>
   <xsl:for-each select="/schema-diff/drop-table">
@@ -208,7 +302,7 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:text> CASCADE</xsl:text><xsl:value-of select="$stmt-terminator"/>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
-    <xsl:value-of select="$newline"/>
+  <xsl:value-of select="$newline"/>
 
   <xsl:text>-- Drop views</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -491,7 +585,22 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
 
 <!-- re-create a view -->
 <xsl:template match="view-def">
-  <xsl:text>CREATE OR REPLACE VIEW </xsl:text>
+  <xsl:if test="$dropViews = 'true'">
+    <xsl:text>DROP VIEW IF EXISTS </xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="view-schema"/>
+    </xsl:call-template>
+    <xsl:text>.</xsl:text>
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="view-name"/>
+    </xsl:call-template>
+    <xsl:text>;</xsl:text>
+  <xsl:value-of select="$newline"/>
+    <xsl:text>CREATE VIEW </xsl:text>
+  </xsl:if>
+  <xsl:if test="$dropViews = 'false'">
+    <xsl:text>CREATE OR REPLACE VIEW </xsl:text>
+  </xsl:if>
   <xsl:call-template name="write-object-name">
     <xsl:with-param name="objectname" select="view-schema"/>
   </xsl:call-template>
@@ -535,33 +644,15 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
   <xsl:value-of select="$newline"/>
   <xsl:for-each select="column-def">
     <xsl:sort select="dbms-position"/>
-    <xsl:variable name="colname">
-      <xsl:call-template name="write-object-name">
-        <xsl:with-param name="objectname" select="column-name"/>
-      </xsl:call-template>
-    </xsl:variable>
-    <xsl:text>  </xsl:text>
-    <xsl:variable name="nullable">
-      <xsl:if test="nullable = 'false'">
-        <xsl:text> NOT NULL</xsl:text>
-      </xsl:if>
-    </xsl:variable>
-    <xsl:variable name="defaultvalue">
-      <xsl:if test="string-length(default-value) &gt; 0">
-        <xsl:text> DEFAULT </xsl:text>
-        <xsl:value-of select="default-value"/>
-      </xsl:if>
-    </xsl:variable>
-    <xsl:copy-of select="$colname"/>
-    <xsl:text> </xsl:text>
-    <xsl:value-of select="dbms-data-type"/>
-    <xsl:value-of select="$nullable"/>
-    <xsl:value-of select="$defaultvalue"/>
+    
+    <xsl:call-template name="write-column-definition"/>
+
     <xsl:if test="position() &lt; last()">
       <xsl:text>,</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
   </xsl:for-each>
+
   <xsl:value-of select="$newline"/>
   <xsl:text>)</xsl:text><xsl:value-of select="$stmt-terminator"/>
   <xsl:value-of select="$newline"/>
@@ -590,6 +681,31 @@ Author: Thomas Kellerer, Henri Tremblay, Rogelio León Anaya
     <xsl:value-of select="$newline"/>
   </xsl:if>
 
+</xsl:template>
+
+<xsl:template name="write-column-definition">
+  <xsl:variable name="colname">
+    <xsl:call-template name="write-object-name">
+      <xsl:with-param name="objectname" select="column-name"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:text>  </xsl:text>
+  <xsl:variable name="nullable">
+    <xsl:if test="nullable = 'false'">
+      <xsl:text> NOT NULL</xsl:text>
+    </xsl:if>
+  </xsl:variable>
+  <xsl:variable name="defaultvalue">
+    <xsl:if test="string-length(default-value) &gt; 0">
+      <xsl:text> DEFAULT </xsl:text>
+      <xsl:value-of select="default-value"/>
+    </xsl:if>
+  </xsl:variable>
+  <xsl:copy-of select="$colname"/>
+  <xsl:text> </xsl:text>
+  <xsl:value-of select="dbms-data-type"/>
+  <xsl:value-of select="$nullable"/>
+  <xsl:value-of select="$defaultvalue"/>
 </xsl:template>
 
 <xsl:template name="drop-fk">
