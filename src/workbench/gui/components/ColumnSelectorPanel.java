@@ -23,6 +23,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
@@ -37,9 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -49,6 +48,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 
+
 /**
  *
  * @author  Thomas Kellerer
@@ -57,7 +57,7 @@ public class ColumnSelectorPanel
 	extends JPanel
 	implements ActionListener
 {
-	private JTable selectTable;
+	private JTable columnTable;
 	protected JPanel infoPanel;
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
@@ -80,34 +80,39 @@ public class ColumnSelectorPanel
 	{
 		super();
     this.setLayout(new GridBagLayout());
-		this.selectTable = new JTable();
-		this.selectTable.setRowSelectionAllowed(false);
-		this.selectTable.setColumnSelectionAllowed(false);
+		this.columnTable = new JTable();
+		this.columnTable.setRowSelectionAllowed(false);
+		this.columnTable.setColumnSelectionAllowed(false);
 		this.model = new ColumnSelectTableModel(columns);
-		this.selectTable.setModel(this.model);
+		this.columnTable.setModel(this.model);
 
-		WbScrollPane scroll = new WbScrollPane(this.selectTable);
-		this.infoPanel = new JPanel();
+    adjustColumnWidths();
+
+		WbScrollPane scroll = new WbScrollPane(this.columnTable);
+    this.infoPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 		configureInfoPanel();
 
 		GridBagConstraints mainC = new GridBagConstraints();
     mainC.gridx = 0;
     mainC.gridy = 0;
     mainC.anchor = GridBagConstraints.NORTH;
-    mainC.weightx = 0.0;
+    mainC.weightx = 1.0;
     mainC.weighty = 0.0;
-
+    mainC.fill = GridBagConstraints.HORIZONTAL;
+    mainC.insets = new Insets(5,0,5,0);
 		this.add(infoPanel, mainC);
+
     mainC.gridy ++;
     mainC.weighty = 1.0;
     mainC.weightx = 1.0;
     mainC.anchor = GridBagConstraints.NORTHWEST;
     mainC.fill = GridBagConstraints.BOTH;
+    mainC.insets = new Insets(0,0,10,0);
 
 		this.add(scroll, mainC);
 
-		selectAll = new FlatButton(ResourceMgr.getString("LblSelectAll"));
-		selectNone = new FlatButton(ResourceMgr.getString("LblSelectNone"));
+		selectAll = new JButton(ResourceMgr.getString("LblSelectAll"));
+		selectNone = new JButton(ResourceMgr.getString("LblSelectNone"));
 		selectAll.addActionListener(this);
 		selectNone.addActionListener(this);
 
@@ -116,16 +121,16 @@ public class ColumnSelectorPanel
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
-		c.weightx = 0.5;
+		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.EAST;
-		c.insets = new Insets(0, 0, 0, 5);
+		c.insets = new Insets(0, 0, 5, 5);
 		optionPanel.add(selectAll, c);
 
 		c.gridx = 1;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		c.weightx = 0.5;
-		c.insets = new Insets(0, 5, 0, 0);
+		c.weightx = 1.0;
+		c.insets = new Insets(0, 5, 5, 0);
 		optionPanel.add(selectNone, c);
 
 		JPanel cbxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
@@ -153,56 +158,67 @@ public class ColumnSelectorPanel
 
 		c.gridx = 0;
 		c.gridy = 1;
-		c.insets = new Insets(3, 0, 0, 3);
+		c.insets = new Insets(5, 0, 5, 0);
 		c.anchor = GridBagConstraints.CENTER;
 		c.weightx = 1;
 		c.gridwidth = 2;
 		optionPanel.add(cbxPanel, c);
-
-		optionPanel.setBorder(new EmptyBorder(5, 0, 10, 0));
 
     mainC.gridy ++;
     mainC.weighty = 0.0;
     mainC.weightx = 0.0;
     mainC.anchor = GridBagConstraints.NORTH;
     mainC.fill = GridBagConstraints.NONE;
+    mainC.insets = new Insets(5, 0, 10, 0);
 
 		this.add(optionPanel, mainC);
-    adjustSize(scroll);
-	}
-
-  private void adjustSize(JScrollPane scroll)
-  {
-		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-
-    FontMetrics fm = selectTable.getFontMetrics(selectTable.getFont());
-    selectTable.setRowHeight(fm.getHeight());
-		TableColumnModel colMod = this.selectTable.getColumnModel();
-
-    TableColumn col = colMod.getColumn(1);
-    int labelWidth = fm.stringWidth(model.selectLabel);
-    col.setPreferredWidth((int)(labelWidth * 1.3));
-    col.setMaxWidth((int)(labelWidth * 1.3));
-    col.setMinWidth((int)(labelWidth * 1.3));
 
     Dimension ps = scroll.getPreferredSize();
-    int rows = Math.max(10, selectTable.getRowCount() + 2);
-    int height = (selectTable.getRowHeight() * rows) + (selectTable.getRowCount() * selectTable.getRowMargin());
-    Dimension preferred = new Dimension( (int)(ps.getWidth()), (int)(height * 1.2));
+    int rows = Math.max(10, columnTable.getRowCount() + 2);
+    int height = (columnTable.getRowHeight() * rows) + (columnTable.getRowCount() * columnTable.getRowMargin());
+    Dimension preferred = new Dimension(ps.width, (int)(height * 1.1));
     scroll.setPreferredSize(preferred);
+    scroll.setMinimumSize(columnTable.getPreferredSize());
+	}
+
+  private void adjustColumnWidths()
+  {
+		columnTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+    FontMetrics fm = columnTable.getFontMetrics(columnTable.getFont());
+    columnTable.setRowHeight(fm.getHeight());
+		TableColumnModel colMod = this.columnTable.getColumnModel();
+
+    TableColumn nameCol = colMod.getColumn(0);
+    int nameWidth = fm.stringWidth(model.colLabel);
+    for (int row=0; row < columnTable.getRowCount(); row ++)
+    {
+      String name = columnTable.getValueAt(row, 0).toString();
+      int w = fm.stringWidth(name);
+      if (w > nameWidth)
+      {
+        nameWidth = w;
+      }
+    }
+    nameCol.setPreferredWidth((int)(nameWidth * 1.2));
+    nameCol.setMinWidth(nameWidth);
+
+    TableColumn labelCol = colMod.getColumn(1);
+    int labelWidth = (int)(fm.stringWidth(model.selectLabel) * 1.2);
+    labelCol.setPreferredWidth(labelWidth);
+    labelCol.setMaxWidth(labelWidth);
+    labelCol.setMinWidth(labelWidth);
   }
 
 	protected void configureInfoPanel()
 	{
-		String msg = ResourceMgr.getString("MsgSelectColumns");
-		JLabel infoLabel = new JLabel(msg);
-		this.infoPanel.add(infoLabel);
+		this.infoPanel.add(new JLabel(ResourceMgr.getString("MsgSelectColumns")), BorderLayout.LINE_START);
 	}
 
 	public void setSelectionLabel(String label)
 	{
 		this.model.selectLabel = label;
-		TableColumnModel colMod = this.selectTable.getColumnModel();
+		TableColumnModel colMod = this.columnTable.getColumnModel();
 		TableColumn col = colMod.getColumn(1);
 		col.setHeaderValue(label);
 	}
@@ -312,7 +328,7 @@ public class ColumnSelectorPanel
 			this.model.selectNone();
 		}
 		TableModelEvent evt = new TableModelEvent(model);
-		this.selectTable.tableChanged(evt);
+		this.columnTable.tableChanged(evt);
 	}
 }
 
