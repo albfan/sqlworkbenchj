@@ -71,7 +71,7 @@ public class WbListDependencies
 		cmdLine.addArgument(CommonArgs.ARG_CATALOG, ArgumentType.CatalogArgument);
 		cmdLine.addArgument(ARG_OBJECT_NAME, ArgumentType.TableArgument);
     cmdLine.addArgument(ARG_DEPENDENCE_TYPE, CollectionUtil.arrayList(TYPE_USES, TYPE_USED_BY));
-    cmdLine.addArgument(ARG_OBJECT_TYPE);
+    cmdLine.addArgument(ARG_OBJECT_TYPE, ArgumentType.ObjectTypeArgument);
 	}
 
 	@Override
