@@ -33,17 +33,20 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.interfaces.ImportFileParser;
 import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.db.importer.modifier.ImportValueModifier;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.BlobDecoder;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
@@ -307,7 +310,11 @@ public abstract class AbstractImportFileParser
 
     // we can't verify the table without a connection
     // not having one isn't an error if we are importing the clipboard into a DataStore
-    if (this.connection == null) return null;
+    if (this.connection == null)
+    {
+      LogMgr.logWarning("AbstractImportFileParser.getTargetTable()", "Can't verify target: " + tableName);
+      return null;
+    }
 
     TableIdentifier table = createTargetTableId();
 

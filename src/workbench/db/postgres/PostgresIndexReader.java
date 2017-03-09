@@ -58,7 +58,7 @@ import workbench.util.StringUtil;
 public class PostgresIndexReader
   extends JdbcIndexReader
 {
-  private static final String PROP_RETRIEVE_TABLESPACE = "workbench.db.postgres.tablespace.retrieve.index";
+  private static final String PROP_RETRIEVE_DETAILS = "workbench.db.postgres.index.retrieve.details";
 
   public PostgresIndexReader(DbMetadata meta)
   {
@@ -236,25 +236,26 @@ public class PostgresIndexReader
   {
     // only make this dependent on the property to actually retrieve the tablespace, because
     // we know that Postgres supports table spaces
-    return Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true);
+    return Settings.getInstance().getBoolProperty(PROP_RETRIEVE_DETAILS, true);
   }
 
   /**
    * Enhance the retrieved indexes with additional information.
    *
-   * Currently this only reads the tablespace for each index.
-   * Reading the tablespace information can be turned off using the config setting {@link PROP_RETRIEVE_TABLESPACE}
+   * Currently this reads comments, tablespace and index type details.
+   *
+   * Reading of the details can be turned off using the config setting {@link #PROP_RETRIEVE_DETAILS}
    *
    * @param tbl        the table for which the indexes were retrieved
    * @param indexDefs  the list of retrieved indexes
    *
    * @see IndexDefinition#setTablespace(java.lang.String)
-   * @see PostgresIndexReader#PROP_RETRIEVE_TABLESPACE
+   * @see PostgresIndexReader#PROP_RETRIEVE_DETAILS
    */
   @Override
   public void processIndexList(Collection<IndexDefinition> indexDefs)
   {
-    if (!Settings.getInstance().getBoolProperty(PROP_RETRIEVE_TABLESPACE, true)) return;
+    if (!Settings.getInstance().getBoolProperty(PROP_RETRIEVE_DETAILS, true)) return;
 
     if (CollectionUtil.isEmpty(indexDefs)) return;
 
@@ -268,15 +269,25 @@ public class PostgresIndexReader
 
     StringBuilder sql = new StringBuilder(50 + count * 20);
     sql.append(
-      "SELECT i.indexname, coalesce(i.tablespace, ts.default_tablespace), obj_description((quote_ident(i.schemaname)||'.'||quote_ident(i.indexname))::regclass, 'pg_class') as remarks \n" +
-      "FROM pg_indexes i \n" +
-      "  cross join (\n" +
-      "    select nullif(ts.spcname, 'pg_default') as default_tablespace\n" +
-      "    from pg_database d\n" +
-      "      join pg_tablespace ts on ts.oid = d.dattablespace\n" +
-      "    where d.datname = current_database()\n" +
-      "  ) ts \n " +
-      "WHERE (schemaname, indexname) IN (");
+      "SELECT i.relname AS indexname, \n" +
+      "       coalesce(t.spcname, ts.default_tablespace) as tablespace, \n" +
+      "       obj_description(i.oid) as remarks, \n" +
+      "       am.amname as index_type \n" +
+      "FROM pg_index x \n" +
+      "  JOIN pg_class i ON i.oid = x.indexrelid \n" +
+      "  JOIN pg_class c ON c.oid = x.indrelid \n" +
+      "  JOIN pg_am am on am.oid = i.relam \n" +
+      "  LEFT JOIN pg_namespace n ON n.oid = c.relnamespace \n" +
+      "  LEFT JOIN pg_tablespace t ON t.oid = i.reltablespace \n" +
+      "  cross join ( \n" +
+      "    select nullif(ts.spcname, 'pg_default') as default_tablespace \n" +
+      "    from pg_database d \n" +
+      "      join pg_tablespace ts on ts.oid = d.dattablespace \n" +
+      "    where d.datname = current_database() \n" +
+      "  ) ts \n" +
+      "WHERE c.relkind in ('r', 'm')  \n" +
+      "  AND i.relkind = 'i' \n" +
+      "and (n.nspname, i.relname) IN (");
 
     int indexCount = 0;
     for (IndexDefinition index : indexDefs)
@@ -311,12 +322,14 @@ public class PostgresIndexReader
         String idxName = rs.getString(1);
         String tblSpace = rs.getString(2);
         String remarks = rs.getString(3);
+        String type = rs.getString(4);
         IndexDefinition idx = findIndexByName(indexDefs, idxName);
         if (StringUtil.isNonEmpty(tblSpace))
         {
           idx.setTablespace(tblSpace);
         }
         idx.setComment(remarks);
+        idx.setIndexType(type);
       }
       con.releaseSavepoint(sp);
     }
