@@ -459,7 +459,7 @@
 
   </section>
 
-  <section id="command-listschema">
+  <section id="command-listdeps">
     <title>Show dependency information - WbListDependencies</title>
 
     <para>
