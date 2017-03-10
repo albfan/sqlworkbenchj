@@ -94,24 +94,33 @@ public class ResultProcessor
   }
 
   public boolean hasMoreResults()
+    throws SQLException
   {
     try
     {
       return supportsGetMoreResults && checkForMoreResults();
     }
-    catch (SQLFeatureNotSupportedException ex)
+    catch (SQLFeatureNotSupportedException | AbstractMethodError ex)
     {
-      LogMgr.logWarning("ResultProcessor.checkForMoreResults()", "Error when calling getMoreResults()", ex);
+      LogMgr.logWarning("ResultProcessor.hasMoreResults()", "Error when calling getMoreResults()", ex);
       supportsGetMoreResults = false;
-      return false;
+    }
+    catch (SQLException sql)
+    {
+      // assume that SQLException indicates a real user error
+      LogMgr.logError("ResultProcessor.hasMoreResults()", "Error when calling getMoreResults()", sql);
+      if (!originalConnection.getDbSettings().ignoreSQLErrorsForGetMoreResults())
+      {
+        throw sql;
+      }
     }
     catch (Throwable ex)
     {
       // Some drivers throw errors if no result is available.
       // In this case simply assume there are no more results.
-      LogMgr.logWarning("ResultProcessor.checkForMoreResults()", "Error when calling getMoreResults()", ex);
-      return false;
+      LogMgr.logWarning("ResultProcessor.hasMoreResults()", "Error when calling getMoreResults()", ex);
     }
+    return false;
   }
 
   private boolean checkForMoreResults()

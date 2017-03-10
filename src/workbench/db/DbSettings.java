@@ -2300,4 +2300,9 @@ public class DbSettings
   {
     return getBoolProperty("sql.supports.usedb", false);
   }
+
+  public boolean ignoreSQLErrorsForGetMoreResults()
+  {
+    return getBoolProperty("getmoreresults.ignore.sqlerrors", false);
+  }
 }
