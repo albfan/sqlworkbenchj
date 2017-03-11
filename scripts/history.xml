@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-02-04">
+    <entry dev-build="1" type="enh">WbImport and WbExport now support the -locale parameter to define the locale used for parsing and formatting dates and timestamps</entry>
     <entry dev-build="1" type="enh">For Postgres, the type of an index (btree, brin, gist, gin, ...) is now shown in the DbExplorer</entry>
     <entry dev-build="1" type="enh">For Postgres, TYPEs are now included in the dependency display</entry>
     <entry dev-build="1" type="enh">The formatting of numbers can now be controlled in more detail</entry>
