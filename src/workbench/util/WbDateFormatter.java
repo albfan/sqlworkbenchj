@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,9 +60,16 @@ public class WbDateFormatter
   private boolean containsTimeFields;
 
   private final String timeFields = "ahKkHmsSAnNVzOXxZ";
+  private Locale localeToUse;
 
   public WbDateFormatter(String pattern)
   {
+    applyPattern(pattern, false);
+  }
+
+  public WbDateFormatter(String pattern, Locale locale)
+  {
+    localeToUse = locale;
     applyPattern(pattern, false);
   }
 
@@ -73,6 +81,11 @@ public class WbDateFormatter
   public WbDateFormatter()
   {
     applyPattern(StringUtil.ISO_DATE_FORMAT);
+  }
+
+  public void setLocale(Locale locale)
+  {
+    localeToUse = locale;
   }
 
   public void setIllegalDateIsNull(boolean flag)
@@ -118,7 +131,16 @@ public class WbDateFormatter
     {
       builder.appendFraction(ChronoField.MICRO_OF_SECOND, 0, len - 1, true);
     }
-    this.formatter = builder.toFormatter().withResolverStyle(ResolverStyle.SMART);
+    DateTimeFormatter dtf = null;
+    if (localeToUse != null)
+    {
+      dtf = builder.toFormatter(localeToUse);
+    }
+    else
+    {
+      dtf = builder.toFormatter();
+    }
+    this.formatter = dtf.withResolverStyle(ResolverStyle.SMART);
     this.pattern = pattern;
     this.containsTimeFields = checkForTimeFields();
   }

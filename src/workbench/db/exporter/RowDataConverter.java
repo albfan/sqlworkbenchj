@@ -35,22 +35,27 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbSettings;
-import workbench.db.WbConnection;
-import workbench.gui.components.BlobHandler;
 import workbench.interfaces.DataFileWriter;
 import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
+import workbench.db.WbConnection;
+
+import workbench.gui.components.BlobHandler;
+
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
+
 import workbench.util.CollectionUtil;
 import workbench.util.DefaultOutputFactory;
 import workbench.util.EncodingUtil;
@@ -117,6 +122,7 @@ public abstract class RowDataConverter
 
   private long maxBlobFilesPerDir;
   private long blobsWritten;
+  private Locale localeToUse;
 
   protected DataExporter exporter;
   private Map<Integer, Boolean> multilineInfo;
@@ -141,6 +147,11 @@ public abstract class RowDataConverter
     defaultDateFormatter = new WbDateFormatter(Settings.getInstance().getDefaultDateFormat());
     defaultTimestampFormatter = new WbDateFormatter(Settings.getInstance().getDefaultTimestampFormat());
     defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
+  }
+
+  public void setLocale(Locale locale)
+  {
+    this.localeToUse = locale;
   }
 
   public void setExporter(DataExporter exporter)
@@ -738,21 +749,29 @@ public abstract class RowDataConverter
   public void setDefaultDateFormat(String format)
   {
     if (StringUtil.isEmptyString(format)) return;
-    WbDateFormatter formatter = new WbDateFormatter(format);
+    WbDateFormatter formatter = new WbDateFormatter(format, localeToUse);
     this.setDefaultDateFormatter(formatter);
   }
 
   public void setDefaultTimestampFormat(String format)
   {
     if (StringUtil.isEmptyString(format)) return;
-    WbDateFormatter formatter = new WbDateFormatter(format);
+    WbDateFormatter formatter = new WbDateFormatter(format, localeToUse);
     this.setDefaultTimestampFormatter(formatter);
   }
 
   public void setDefaultTimeFormat(String format)
   {
     if (StringUtil.isEmptyString(format)) return;
-    SimpleDateFormat formatter = new SimpleDateFormat(format);
+    SimpleDateFormat formatter;
+    if (localeToUse == null)
+    {
+      formatter = new SimpleDateFormat(format);
+    }
+    else
+    {
+      formatter = new SimpleDateFormat(format, localeToUse);
+    }
     setDefaultTimeFormatter(formatter);
   }
 

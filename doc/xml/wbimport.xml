@@ -68,7 +68,7 @@
     </para>
 
     <para>
-      You can tell if the needed libraries are installed if you invoke the <link linkend="command-completion">auto-completion</link>
+      You can tell if the needed libraries are installed if you invoke the <link linkend="command-completion">code-completion</link>
       after typing the <literal>-type=</literal> parameter. If the types XLS or ODS are presented in the drop down, the libraries installed.
     </para>
 
@@ -93,7 +93,7 @@
     </para>
 
     <indexterm><primary>Import</primary><secondary>parameters</secondary></indexterm>
-		<para>The WbImport command has the following syntax</para>
+		<para>The WbImport supports the following parameters</para>
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
 				<colspec colname="c1" colwidth="4cm" />
@@ -113,6 +113,9 @@
                   Defines the type of the input file. This is only needed if the input file has a non-standard file extensions.
                   If this parameter is not specified, the import type is derived from the input file's extension.
               </para>
+              <para>
+                This parameter supports code-completion. If invoked, it will only display available import types.
+              </para>
 						</entry>
 					</row>
 
@@ -130,6 +133,9 @@
                 For some DBMS, the additional modes: '<literal>upsert</literal>' and '<literal>insertIgnore</literal>'
                 are supported. For details please refer to the <link linkend="import-native-upsert">native upsert</link>
                 and <link linkend="import-native-insert-ignore">native insertIgnore</link> explanation.
+              </para>
+              <para>
+                This parameter supports code-completion.
               </para>
             </entry>
           </row>
@@ -154,7 +160,7 @@
 								<literal>-sourcedir</literal> parameter
 							</para>
               <para>
-                This parameter supports auto-completion.
+                This parameter supports code-completion.
               </para>
 						</entry>
 					</row>
@@ -369,6 +375,9 @@
 							is necessary for DBMS that support schemas, and you want to import
 							the data into a different schema, then the current one.
 						</entry>
+            <para>
+              This parameter supports code-completion.
+            </para>
 					</row>
 
 					<row>
@@ -376,11 +385,13 @@
 						<entry>
               <para>Defines the encoding of the input file (and possible CLOB files)</para>
               <para>
-                If auto-completion is invoked for this parameter, it will show a list of encodings
+                If code-completion is invoked for this parameter, it will show a list of encodings
                 defined through the configuration property <literal>workbench.export.defaultencodings</literal>
                 This is a comma-separated list that can be changed using
-                <link linkend="command-setconfig"><literal>WbSetConfig</literal></link>
+                <link linkend="command-setconfig"><literal>WbSetConfig</literal></link>. If this property is
+                not defined, all available encodings will be shown.
               </para>
+
             </entry>
 					</row>
 
@@ -518,7 +529,6 @@
 						</entry>
 					</row>
 
-
 					<row>
 						<entry>-badFile</entry>
 						<entry>
@@ -577,7 +587,6 @@
                 To store different values than 0/1 in the target column, use the parameters
                 <literal>-numericFalse</literal> and <literal>-numericTrue</literal>
               </para>
-              <para>This parameter is ignored for spreadsheet imports</para>
 						</entry>
 					</row>
 
@@ -613,9 +622,9 @@
 										</listitem>
 								</itemizedlist>
 							</para>
-              <para>This parameter is ignored for spreadsheet imports</para>
             </entry>
           </row>
+
 					<row>
 						<entry>-literalsFalse -literalsTrue</entry>
 						<entry>
@@ -645,7 +654,97 @@
 										</listitem>
 								</itemizedlist>
 							</para>
-              <para>This parameter is ignored for spreadsheet imports</para>
+						</entry>
+					</row>
+
+          <row>
+            <entry id="import-date-format">-dateFormat</entry>
+            <entry>
+              <para>The <link linkend="options-date-format">format</link> for date columns.</para>
+              <para>
+                This is only used for text imports and spreadsheet imports using
+                <link linkend="import-excel-stringdates">-stringDates=true</link>
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry id="import-timestamp-format">-timestampFormat</entry>
+            <entry>
+              <para>
+                The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
+              </para>
+              <para>
+                This is only used for text imports and spreadsheet imports using
+                <link linkend="import-excel-stringdates">-stringDates=true</link>
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry id="import-locale">-locale</entry>
+            <entry>
+              <para>
+                The locale (language) to be used for parsing date and timestamp values.
+              </para>
+              <para>
+                This is only used for text imports and spreadsheet imports using
+                <link linkend="import-excel-stringdates">-stringDates=true</link>
+              </para>
+              <para>
+                This parameter supports code-completion.
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry id="import-illegal-date">-illegalDateIsNull</entry>
+            <entry>
+              <para>
+                If this is set to <literal>true</literal>, illegal dates (such as February, 31st) or malformed dates
+                inside the input file will be treated as a null value.
+              </para>
+              <para>This is only used for text and spreadsheet imports</para>
+            </entry>
+          </row>
+
+					<row>
+						<entry id="import-trim">-trimValues</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls whether leading and trailing whitespace are removed from the input values
+								before they are stored in the database. When used in combination with
+								<literal>-emptyStringIsNull=true</literal> this means that a column value that contains
+								only whitespace will be stored as <literal>NULL</literal> in the database.
+							</para>
+							<para>
+								The default value for this parameter can be controlled
+								in the <link linkend="import-text-trimvalues">settings file</link>
+								and it will be displayed if you run <literal>WbImport</literal> without any parameters.
+							</para>
+							<para>
+								Note that, input values for non character columns (such as numbers or date columns) are
+								always trimmed before converting them to their target datatype.
+							</para>
+              <para>This is only used for text and spreadsheet imports</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="import-emptystring">-emptyStringIsNull</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls whether input values for character type columns
+								with a length of zero are treated as <literal>NULL</literal> (value <literal>true</literal>)
+								or as an empty string.
+							</para>
+							<para>
+								The default value for this parameter is <literal>true</literal>
+							</para>
+							<para>
+								Note that, input values for non character columns (such as numbers or date columns) that are
+								empty or consist only of whitespace will always be treated as <literal>NULL</literal>.
+							</para>
+              <para>This is only used for text and spreadsheet imports</para>
 						</entry>
 					</row>
 
@@ -818,7 +917,7 @@
 					</row>
 
 					<row>
-						<entry>-columnWidths</entry>
+						<entry id="text-import-colwidth">-columnWidths</entry>
 						<entry>
 							<para>
 								In order to import files that do not have a delimiter but have a fixed
@@ -844,32 +943,7 @@
 					</row>
 
 					<row>
-						<entry id="import-date-format">-dateFormat</entry>
-						<entry>
-							<para>The <link linkend="options-date-format">format</link> for date columns.</para>
-						</entry>
-					</row>
-					<row>
-						<entry id="import-timestamp-format">-timestampFormat</entry>
-						<entry>
-							<para>
-								The <link linkend="options-date-format">format</link> for datetime (or timestamp) columns in the input file.
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-illegalDateIsNull</entry>
-						<entry>
-							<para>
-								If this is set to <literal>true</literal>, illegal dates (such as February, 31st) or malformed dates
-                inside the input file will be treated as a null value.
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry id="import-quote-char">-quoteChar</entry>
+						<entry id="text-import-quote-char">-quoteChar</entry>
 						<entry>
 							<para>
 								The character which was used to quote values where the delimiter is contained.
@@ -881,7 +955,7 @@
 					</row>
 
 					<row>
-						<entry>-quoteAlways</entry>
+						<entry id="text-import-quote-always">-quoteAlways</entry>
 
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -900,7 +974,7 @@
 					</row>
 
 					<row>
-						<entry>-quoteCharEscaping</entry>
+						<entry id="text-import-quote-escape">-quoteCharEscaping</entry>
 						<entry>
 							<para>Possible values: <literal>none</literal>, <literal>escape</literal>, <literal>duplicate</literal></para>
 							<para>
@@ -994,7 +1068,7 @@
 					</row>
 
 					<row>
-						<entry>-lineFilter</entry>
+						<entry id="text-import-linefilter">-lineFilter</entry>
 						<entry>
 							<para>
 								This defines a filter on the level of the whole input row (rather than
@@ -1011,53 +1085,12 @@
 					</row>
 
 					<row>
-						<entry>-emptyStringIsNull</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								Controls whether input values for character type columns
-								with a length of zero are treated as <literal>NULL</literal> (value <literal>true</literal>)
-								or as an empty string.
-							</para>
-							<para>
-								The default value for this parameter is <literal>true</literal>
-							</para>
-							<para>
-								Note that, input values for non character columns (such as numbers or date columns) that are
-								empty or consist only of whitespace will always be treated as <literal>NULL</literal>.
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-nullString</entry>
+						<entry id="text-import-nullstring">-nullString</entry>
 						<entry>
 							<para>
                 Defines the string value that in the input file to denote a <literal>NULL</literal> value.
                 The value of this is case-sensitive, so <literal>-nullString=NULL</literal> is
                 different to <literal>-nullString=null</literal>
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-trimValues</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								Controls whether leading and trailing whitespace are removed from the input values
-								before they are stored in the database. When used in combination with
-								<literal>-emptyStringIsNull=true</literal> this means that a column value that contains
-								only whitespace will be stored as <literal>NULL</literal> in the database.
-							</para>
-							<para>
-								The default value for this parameter can be controlled
-								in the <link linkend="import-text-trimvalues">settings file</link>
-								and it will be displayed if you run <literal>WbImport</literal> without any parameters.
-							</para>
-							<para>
-								Note that, input values for non character columns (such as numbers or date columns) are
-								always trimmed before converting them to their target datatype.
 							</para>
 						</entry>
 					</row>

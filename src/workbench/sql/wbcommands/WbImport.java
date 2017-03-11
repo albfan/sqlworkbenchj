@@ -741,7 +741,7 @@ public class WbImport
 		ValueConverter converter = null;
 		try
 		{
-			converter = CommonArgs.getConverter(cmdLine);
+			converter = CommonArgs.getConverter(cmdLine, result);
 		}
 		catch (Exception e)
 		{

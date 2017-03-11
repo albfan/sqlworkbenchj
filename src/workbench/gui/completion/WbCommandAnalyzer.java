@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -248,6 +249,11 @@ public class WbCommandAnalyzer
 				this.elements = getChangeSets(cmd, args);
 				changeCase = false;
 			}
+			else if (parameter.equalsIgnoreCase(CommonArgs.ARG_LOCALE))
+			{
+				this.elements = getLocales();
+				changeCase = false;
+			}
 			else if (parameter.equalsIgnoreCase(WbImport.ARG_SHEET_NAME) || parameter.equalsIgnoreCase(WbExport.ARG_TARGET_SHEET_NAME))
 			{
 				this.useSheetIndex = false;
@@ -423,6 +429,22 @@ public class WbCommandAnalyzer
 		}
 		return null;
 	}
+
+	private List getLocales()
+  {
+    Locale[] available = Locale.getAvailableLocales();
+    List<String> result = new ArrayList<>(available.length);
+    for (Locale l : available)
+    {
+      String s = l.toString();
+      if (StringUtil.isNonEmpty(s))
+      {
+        result.add(s);
+      }
+    }
+    Collections.sort(result);
+    return result;
+  }
 
 	private List getChangeSets(SqlCommand wbRunLb, ArgumentParser cmdLine)
 	{

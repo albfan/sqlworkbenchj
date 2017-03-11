@@ -39,21 +39,12 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.ConnectionProfile;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.gui.dialogs.export.ExportOptions;
-import workbench.gui.dialogs.export.HtmlOptions;
-import workbench.gui.dialogs.export.SpreadSheetOptions;
-import workbench.gui.dialogs.export.SqlOptions;
-import workbench.gui.dialogs.export.TextOptions;
-import workbench.gui.dialogs.export.XmlOptions;
 import workbench.interfaces.Committer;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ErrorReporter;
@@ -62,10 +53,24 @@ import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionProfile;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+
+import workbench.gui.dialogs.export.ExportOptions;
+import workbench.gui.dialogs.export.HtmlOptions;
+import workbench.gui.dialogs.export.SpreadSheetOptions;
+import workbench.gui.dialogs.export.SqlOptions;
+import workbench.gui.dialogs.export.TextOptions;
+import workbench.gui.dialogs.export.XmlOptions;
+
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
+
 import workbench.util.CharacterEscapeType;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
@@ -182,6 +187,7 @@ public class DataExporter
   private boolean quoteNulls;
 
   private Point dataOffset;
+  private Locale localeToUse;
 
 
   /**
@@ -235,6 +241,11 @@ public class DataExporter
         this.trimCharData = profile.getTrimCharData();
       }
     }
+  }
+
+  public void setLocale(Locale locale)
+  {
+    this.localeToUse = locale;
   }
 
   @Override
@@ -897,7 +908,8 @@ public class DataExporter
     timeFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
     try
     {
-      timeFormatter = new SimpleDateFormat(timeFormat == null ? Settings.getInstance().getDefaultTimeFormat() : timeFormat);
+      Locale l = localeToUse == null ? Locale.getDefault(Locale.Category.FORMAT) : localeToUse;
+      timeFormatter = new SimpleDateFormat(timeFormat == null ? Settings.getInstance().getDefaultTimeFormat() : timeFormat, l);
     }
     catch (IllegalArgumentException i)
     {
@@ -917,7 +929,7 @@ public class DataExporter
     dateFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
     try
     {
-      dateFormatter = new WbDateFormatter(this.dateFormat == null ? Settings.getInstance().getDefaultDateFormat() : dateFormat);
+      dateFormatter = new WbDateFormatter(this.dateFormat == null ? Settings.getInstance().getDefaultDateFormat() : dateFormat, localeToUse);
     }
     catch (IllegalArgumentException i)
     {
@@ -943,7 +955,7 @@ public class DataExporter
     dateTimeFormat = StringUtil.isBlank(aFormat) ? null : aFormat;
     try
     {
-      dateTimeFormatter = new WbDateFormatter(dateTimeFormat == null ? Settings.getInstance().getDefaultTimestampFormat() : dateTimeFormat);
+      dateTimeFormatter = new WbDateFormatter(dateTimeFormat == null ? Settings.getInstance().getDefaultTimestampFormat() : dateTimeFormat, localeToUse);
     }
     catch (Exception e)
     {

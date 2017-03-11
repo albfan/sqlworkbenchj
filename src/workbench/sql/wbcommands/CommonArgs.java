@@ -24,16 +24,20 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
+import java.util.Locale;
 
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.db.DropType;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.ImportMode;
+
+import workbench.sql.StatementRunnerResult;
 
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
@@ -67,6 +71,7 @@ public class CommonArgs
 	public static final String ARG_QUOTE_ESCAPE = "quoteCharEscaping";
 	public static final String ARG_AUTO_BOOLEAN = "booleanToNumber";
 	public static final String ARG_DATE_FORMAT = "dateFormat";
+	public static final String ARG_LOCALE = "locale";
 	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
 	public static final String ARG_DECIMAL_CHAR = "decimal";
 	public static final String ARG_NUMERIC_TRUE = "numericTrue";
@@ -310,13 +315,39 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_TRUE_LITERALS);
 		cmdLine.addArgument(ARG_NUMERIC_FALSE);
 		cmdLine.addArgument(ARG_NUMERIC_TRUE);
+    cmdLine.addArgument(ARG_LOCALE);
 	}
 
-	public static ValueConverter getConverter(ArgumentParser cmdLine)
+  public static Locale getLocale(ArgumentParser cmdLine, StatementRunnerResult result)
+  {
+    String localeName = cmdLine.getValue(ARG_LOCALE);
+    Locale locale = null;
+    if (StringUtil.isNonBlank(localeName))
+    {
+      try
+      {
+        locale = new Locale(localeName);
+        // check if this is valid, it will throw an exception when
+        // an invalid language was specified
+        locale.getISO3Language();
+      }
+      catch (Exception ex)
+      {
+        locale = null;
+        LogMgr.logWarning("CommmonArgs.getLocale()", "Illegale locale " + localeName + " ignored", ex);
+        String msg = ResourceMgr.getFormattedString("ErrIllegalLocaleIgnore", localeName);
+        result.addWarning(msg);
+      }
+    }
+    return locale;
+  }
+
+	public static ValueConverter getConverter(ArgumentParser cmdLine, StatementRunnerResult result)
 		throws IllegalArgumentException
 	{
 		ValueConverter converter = new ValueConverter();
 		converter.setAutoConvertBooleanNumbers(cmdLine.getBoolean(ARG_AUTO_BOOLEAN, true));
+    converter.setLocale(getLocale(cmdLine, result));
 
 		String format = null;
 		try

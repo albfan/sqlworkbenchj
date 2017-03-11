@@ -629,13 +629,27 @@
 					</row>
 
 					<row>
-						<entry>-timestampFormat</entry>
+						<entry id="export-timestamp-format">-timestampFormat</entry>
 						<entry>
 							The <link linkend="options-date-format">format</link> to be used when writing
 							datetime (or timestamp) columns into the output file. This parameter is ignored
 							for SQL exports.
 						</entry>
 					</row>
+
+          <row>
+            <entry id="export-locale">-locale</entry>
+            <entry>
+              <para>
+                The locale (language) to be used when formatting date and timestamp values. The language will only be
+                relevant if the date or timestamp format contains placeholders that are language dependent
+                (e.g. the name of the month or weekday).
+              </para>
+              <para>
+                This parameter supports code-completion.
+              </para>
+            </entry>
+          </row>
 
 					<row>
 						<entry id="export-blob-type">-blobType</entry>

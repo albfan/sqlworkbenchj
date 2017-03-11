@@ -34,6 +34,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import workbench.log.LogMgr;
@@ -171,6 +172,13 @@ public class ValueConverter
     {
       this.setDefaultTimestampFormat(aTimeStampFormat);
     }
+  }
+
+  public void setLocale(Locale locale)
+  {
+    dateFormatter.setLocale(locale);
+    timestampFormatter.setLocale(locale);
+    formatter.setLocale(locale);
   }
 
   public void setIllegalDateIsNull(boolean flag)

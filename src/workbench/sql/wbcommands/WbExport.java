@@ -33,6 +33,12 @@ import java.util.Map;
 import java.util.Set;
 
 import workbench.WbManager;
+import workbench.interfaces.ProgressReporter;
+import workbench.interfaces.ResultSetConsumer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
@@ -43,16 +49,14 @@ import workbench.db.exporter.ExportType;
 import workbench.db.exporter.InfinityLiterals;
 import workbench.db.exporter.PoiHelper;
 import workbench.db.exporter.WrongFormatFileException;
-import workbench.interfaces.ProgressReporter;
-import workbench.interfaces.ResultSetConsumer;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.sql.SqlCommand;
-import workbench.sql.StatementRunnerResult;
+
 import workbench.storage.DataStore;
 import workbench.storage.MergeGenerator;
 import workbench.storage.RowActionMonitor;
+
+import workbench.sql.SqlCommand;
+import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.CharacterEscapeType;
@@ -178,6 +182,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_QUOTECHAR);
 		cmdLine.addArgument(ARG_DATEFORMAT);
 		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
+    cmdLine.addArgument(CommonArgs.ARG_LOCALE);
 		cmdLine.addArgument(ARG_TIMEFORMAT);
 		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
 		cmdLine.addArgument(ARG_FIXED_DIGITS);
@@ -473,6 +478,9 @@ public class WbExport
 		exporter.setIncludeReadOnlyCols(cmdLine.getBoolean(ARG_INCLUDE_READONLY, true));
 
 		this.continueOnError = cmdLine.getBoolean(ARG_CONTINUE_ON_ERROR, false);
+
+    // The locale needs to be set before setting the formats!
+    exporter.setLocale(CommonArgs.getLocale(cmdLine, result));
 
 		String format = cmdLine.getValue(ARG_DATEFORMAT);
 		if (format != null) exporter.setDateFormat(format);
