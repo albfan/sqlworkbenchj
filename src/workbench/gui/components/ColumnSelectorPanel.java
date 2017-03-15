@@ -202,6 +202,7 @@ public class ColumnSelectorPanel
       }
     }
 		optimizer.optimizeAllColWidth(min, max, true);
+    columnTable.getTableHeader().setReorderingAllowed(false);
   }
 
 	protected void configureInfoPanel()
