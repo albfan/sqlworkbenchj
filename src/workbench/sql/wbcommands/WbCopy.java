@@ -194,7 +194,7 @@ public class WbCopy
     {
       return result;
     }
-    
+
     synchronized (VERB)
     {
       runId = ++runCount;
@@ -288,7 +288,7 @@ public class WbCopy
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
 			{
-				result.addErrorMessage(copier.getMessages().toString());
+        result.addMessage(copier.getMessages());
 				return result;
 			}
 

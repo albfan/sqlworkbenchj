@@ -43,6 +43,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.Committer;
+import workbench.interfaces.ImportFileParser;
+import workbench.interfaces.Interruptable;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
@@ -53,17 +62,11 @@ import workbench.db.TableCreator;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.Committer;
-import workbench.interfaces.ImportFileParser;
-import workbench.interfaces.Interruptable;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.ColumnData;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.EncodingUtil;
@@ -1676,12 +1679,17 @@ public class DataImporter
         this.keyColumns = null;
       }
 
+      String tableMsg = null;
       if (this.parser != null)
       {
-        String msg = ResourceMgr.getFormattedString("MsgImportingFile", this.parser.getSourceFilename(), this.targetTable.getTableName());
-        this.messages.append(msg);
-        this.messages.appendNewLine();
+        tableMsg = ResourceMgr.getFormattedString("MsgImportingFile", this.parser.getSourceFilename(), this.targetTable.getTableName());
       }
+      else
+      {
+        tableMsg = ResourceMgr.getFormattedString("MsgImportingTableData", this.targetTable.getTableName());
+      }
+      this.messages.append(tableMsg);
+      this.messages.appendNewLine();
 
       if (this.createTarget)
       {
@@ -1772,7 +1780,7 @@ public class DataImporter
       if (this.reportInterval == 0 && this.progressMonitor != null)
       {
         this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-        this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + targetTable + " (" + this.getModeString() + ")",-1,-1);
+        this.progressMonitor.setCurrentObject(ResourceMgr.getFormattedString("MsgImportingTableData", targetTable + " (" + this.getModeString() + ")"),-1,-1);
       }
 
       if (LogMgr.isInfoEnabled())

@@ -33,6 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.ObjectDropper;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
@@ -50,12 +56,9 @@ import workbench.db.importer.DataReceiver;
 import workbench.db.importer.DeleteType;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.TableStatements;
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.ObjectDropper;
-import workbench.interfaces.ProgressReporter;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
+
 import workbench.storage.RowActionMonitor;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
