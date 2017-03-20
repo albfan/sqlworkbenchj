@@ -157,7 +157,8 @@ public class ColumnSelectorPanel
 
 		if (showFormatCheckBox)
 		{
-			formatText = new JCheckBox("Format text");
+			formatText = new JCheckBox(ResourceMgr.getString("LblCopyFormatTxt"));
+      formatText.setToolTipText(ResourceMgr.getDescription("LblCopyFormatTxt"));
 			cbxPanel.add(formatText);
 		}
 
