@@ -184,8 +184,6 @@ public class WbTable
 	private WbCellEditor multiLineEditor;
 	private TableCellRenderer multiLineRenderer;
 	private SortHeaderRenderer sortRenderer;
-  private TableCellRenderer originalBooleanRenderer;
-  private boolean useCheckboxRenderer;
 
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
@@ -696,19 +694,6 @@ public class WbTable
 			}
 		}
 	}
-
-  public void useCheckboxRenderer(boolean flag)
-  {
-    useCheckboxRenderer = flag;
-    if (flag && originalBooleanRenderer != null)
-    {
-      setDefaultRenderer(Boolean.class, originalBooleanRenderer);
-    }
-    else
-    {
-      setDefaultRenderer(null, originalBooleanRenderer);
-    }
-  }
 
 	public void useMultilineTooltip(boolean flag)
 	{
@@ -1865,12 +1850,7 @@ public class WbTable
 	@Override
 	protected void createDefaultRenderers()
 	{
-    if (defaultRenderersByColumnClass == null)
-    {
-      super.createDefaultRenderers();
-      originalBooleanRenderer = getDefaultRenderer(Boolean.class);
-      defaultRenderersByColumnClass = new UIDefaults();
-    }
+    defaultRenderersByColumnClass = new UIDefaults();
 		initDefaultRenderers();
 	}
 
@@ -1981,10 +1961,6 @@ public class WbTable
 		this.setDefaultRenderer(Integer.class, intRenderer);
 
     this.setDefaultRenderer(String.class, new StringColumnRenderer());
-    if (useCheckboxRenderer && originalBooleanRenderer != null)
-    {
-      setDefaultRenderer(Boolean.class, originalBooleanRenderer);
-    }
     initTypeSpecificRenderer();
 	}
 

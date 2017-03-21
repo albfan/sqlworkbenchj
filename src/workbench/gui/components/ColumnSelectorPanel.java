@@ -39,17 +39,17 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 
-import workbench.gui.renderer.RendererSetup;
+
 
 
 /**
@@ -60,7 +60,7 @@ public class ColumnSelectorPanel
 	extends JPanel
 	implements ActionListener
 {
-	private WbTable columnTable;
+	private JTable columnTable;
 	protected JPanel infoPanel;
 	private ColumnSelectTableModel model;
 	private JButton selectAll;
@@ -83,11 +83,9 @@ public class ColumnSelectorPanel
 	{
 		super();
     this.setLayout(new GridBagLayout());
-		this.columnTable = new WbTable();
-    this.columnTable.setRendererSetup(new RendererSetup(false));
+		this.columnTable = new JTable();
 		this.columnTable.setRowSelectionAllowed(false);
 		this.columnTable.setColumnSelectionAllowed(false);
-    this.columnTable.useCheckboxRenderer(true);
 		this.model = new ColumnSelectTableModel(columns);
 		this.columnTable.setModel(this.model);
 
@@ -180,31 +178,58 @@ public class ColumnSelectorPanel
 		this.add(optionPanel, mainC);
 
     Dimension ps = scroll.getPreferredSize();
-    int rows = Math.max(10, columnTable.getRowCount() + 2);
+    int rows = Math.min(10, columnTable.getRowCount() + 2);
     int height = (columnTable.getRowHeight() * rows) + (columnTable.getRowCount() * columnTable.getRowMargin());
     Dimension preferred = new Dimension(ps.width, (int)(height * 1.1));
     scroll.setPreferredSize(preferred);
-    scroll.setMinimumSize(columnTable.getPreferredSize());
 	}
 
   private void adjustColumnWidths()
   {
-		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(columnTable);
     Font f = columnTable.getFont();
-    int min = GuiSettings.getMinColumnWidth();
-    int max = GuiSettings.getMaxColumnWidth();
+    if (f == null) return;
 
-    if (f != null)
-    {
-      FontMetrics fm = columnTable.getFontMetrics(f);
-      if (fm != null)
-      {
-        max = fm.stringWidth("M") * 40;
-      }
-    }
-		optimizer.optimizeAllColWidth(min, max, true);
+    FontMetrics fm = columnTable.getFontMetrics(f);
+    if (fm == null) return;
+    
+    int max = fm.stringWidth("M") * 40;
+    int min = fm.stringWidth("M") * 5;
+
+    TableColumnModel colMod = columnTable.getColumnModel();
+    int addWidth = columnTable.getIntercellSpacing().width + 4 + colMod.getColumnMargin();
+
+    int colWidth = calculateColumnWidths(0, min, max, addWidth, fm);
+    TableColumn col = colMod.getColumn(0);
+    col.setPreferredWidth(colWidth);
     columnTable.getTableHeader().setReorderingAllowed(false);
   }
+
+	private int calculateColumnWidths(int col, int minWidth, int maxWidth, int addWidth, FontMetrics fm)
+	{
+		int rowCount = columnTable.getRowCount();
+
+    String header = columnTable.getColumnName(col);
+    int optWidth = Math.max(minWidth, fm.stringWidth(header));
+
+		for (int row = 0; row < rowCount; row++)
+		{
+      int stringWidth = 0;
+
+      Object value = columnTable.getValueAt(row, col);
+      if (value != null)
+      {
+        String s = value.toString();
+        stringWidth = fm.stringWidth(s);
+      }
+			optWidth = Math.max(optWidth, stringWidth + addWidth);
+		}
+
+		if (maxWidth > 0)
+		{
+			optWidth = Math.min(optWidth, maxWidth);
+		}
+		return optWidth;
+	}
 
 	protected void configureInfoPanel()
 	{
