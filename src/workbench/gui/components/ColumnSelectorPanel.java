@@ -49,9 +49,6 @@ import workbench.resource.ResourceMgr;
 
 import workbench.db.ColumnIdentifier;
 
-
-
-
 /**
  *
  * @author  Thomas Kellerer
@@ -191,7 +188,7 @@ public class ColumnSelectorPanel
 
     FontMetrics fm = columnTable.getFontMetrics(f);
     if (fm == null) return;
-    
+
     int max = fm.stringWidth("M") * 40;
     int min = fm.stringWidth("M") * 5;
 
