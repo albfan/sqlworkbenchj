@@ -53,6 +53,7 @@ import workbench.gui.components.WbFilePicker;
 import workbench.gui.editor.BracketCompleter;
 import workbench.gui.sql.FileReloadType;
 
+import workbench.util.EncodingUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -71,6 +72,10 @@ public class EditorOptionsPanel
 		TextFieldWidthAdjuster adjuster = new TextFieldWidthAdjuster();
 		adjuster.adjustAllFields(this);
 		defaultDir.setSelectDirectoryOnly(true);
+    String[] charsets = EncodingUtil.getEncodings();
+
+    DefaultComboBoxModel model = new DefaultComboBoxModel(charsets);
+    encodings.setModel(model);
 	}
 
 	@Override
@@ -143,6 +148,9 @@ public class EditorOptionsPanel
 			wheelScrollLines.setText(Integer.toString(lines));
 		}
 		WbSwingUtilities.makeEqualWidth(externalLineEnding, internalLineEnding);
+
+    String encoding = Settings.getInstance().getDefaultFileEncoding();
+    encodings.setSelectedItem(encoding);
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -206,6 +214,8 @@ public class EditorOptionsPanel
       default:
         set.setAutoSaveExternalFiles(AutoFileSaveType.ask);
     }
+    String encoding = (String)encodings.getSelectedItem();
+    set.setDefaultFileEncoding(encoding);
 	}
 
   @Override
@@ -269,6 +279,8 @@ public class EditorOptionsPanel
     rightClickMovesCursor = new JCheckBox();
     jLabel3 = new JLabel();
     autoFileSave = new JComboBox<>();
+    jLabel4 = new JLabel();
+    encodings = new JComboBox<>();
 
     setLayout(new GridBagLayout());
 
@@ -551,6 +563,23 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new Insets(3, 8, 0, 0);
     add(autoFileSave, gridBagConstraints);
+
+    jLabel4.setText(ResourceMgr.getString("LblFileEncoding")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 0, 0, 0);
+    add(jLabel4, gridBagConstraints);
+
+    encodings.setModel(new DefaultComboBoxModel<>(new String[] { "ISO-8859-1", "UTF-8" }));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(5, 11, 0, 0);
+    add(encodings, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -575,6 +604,7 @@ public class EditorOptionsPanel
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
   private JLabel electricScrollLabel;
+  private JComboBox<String> encodings;
   private JComboBox externalLineEnding;
   private JLabel externalLineEndingLabel;
   private JCheckBox followCurrentDir;
@@ -586,6 +616,7 @@ public class EditorOptionsPanel
   private JLabel jLabel1;
   private JLabel jLabel2;
   private JLabel jLabel3;
+  private JLabel jLabel4;
   private JPanel jPanel1;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;

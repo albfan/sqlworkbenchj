@@ -75,6 +75,11 @@ public class EncodingDropDown
 		}
 		encodings.setModel(model);
 
+    if (encoding != null)
+    {
+      setEncoding(encoding);
+    }
+
 		this.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
