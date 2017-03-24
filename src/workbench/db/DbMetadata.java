@@ -1984,6 +1984,8 @@ public class DbMetadata
         return result;
       }
 
+      LogMgr.logDebug("DbMetadata.findTable()", "getObjects() for " + tbl.getTableExpression() + " returned " + ds.getRowCount() + " objects");
+
       // if nothing was found there is nothing we can do to guess the correct
       // "searching strategy" for the current DBMS
     }

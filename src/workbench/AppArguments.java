@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.sql.wbcommands.CommonArgs;
 import workbench.sql.wbcommands.CommonDiffParameters;
 import workbench.sql.wbcommands.WbCopy;
 
@@ -202,6 +203,7 @@ public class AppArguments
     addArgument(WbCopy.PARAM_SOURCEPROFILE_GROUP);
     addArgument(WbCopy.PARAM_TARGETPROFILE);
     addArgument(WbCopy.PARAM_TARGETPROFILE_GROUP);
+    addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolSwitch);
 
     addArgument(CommonDiffParameters.PARAM_SOURCE_CONN);
     addArgument(CommonDiffParameters.PARAM_SOURCEPROFILE);
