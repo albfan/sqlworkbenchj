@@ -37,6 +37,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.regex.Matcher;
@@ -169,6 +170,7 @@ public class EncodingUtil
           i++;
         }
       }
+      Arrays.sort(charsets, StringUtil.NATURAL_COMPARATOR);
     }
     return charsets;
   }

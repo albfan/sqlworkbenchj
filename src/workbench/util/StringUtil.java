@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,8 @@ public class StringUtil
   // when doing copy & paste from there this yields an invalid character
   // see makePlainLinefeed()
   private static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n)|(\n\r)|(\r)|(\u000b)");
+
+  public static final Comparator<String> NATURAL_COMPARATOR = (String o1, String o2) -> naturalCompare(o1, o2, true);
 
   public static StringBuilder emptyBuilder()
   {

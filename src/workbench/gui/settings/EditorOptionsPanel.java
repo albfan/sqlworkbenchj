@@ -72,16 +72,12 @@ public class EditorOptionsPanel
 		TextFieldWidthAdjuster adjuster = new TextFieldWidthAdjuster();
 		adjuster.adjustAllFields(this);
 		defaultDir.setSelectDirectoryOnly(true);
-    String[] charsets = EncodingUtil.getEncodings();
-
-    DefaultComboBoxModel model = new DefaultComboBoxModel(charsets);
-    encodings.setModel(model);
+    EncodingUtil.fetchEncodings();
 	}
 
 	@Override
 	public void restoreSettings()
 	{
-
 		String[] items = new String[] {
 			ResourceMgr.getString("LblLTDefault"),
 			ResourceMgr.getString("LblLTDos"),
@@ -148,6 +144,11 @@ public class EditorOptionsPanel
 			wheelScrollLines.setText(Integer.toString(lines));
 		}
 		WbSwingUtilities.makeEqualWidth(externalLineEnding, internalLineEnding);
+    
+    String[] charsets = EncodingUtil.getEncodings();
+
+    DefaultComboBoxModel model = new DefaultComboBoxModel(charsets);
+    encodings.setModel(model);
 
     String encoding = Settings.getInstance().getDefaultFileEncoding();
     encodings.setSelectedItem(encoding);

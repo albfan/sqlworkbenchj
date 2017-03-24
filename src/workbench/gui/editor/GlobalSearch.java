@@ -35,7 +35,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -242,16 +241,7 @@ public class GlobalSearch
   {
     int count = window.getTabCount();
 
-    Comparator<String> naturalSort = new Comparator<String>()
-    {
-      @Override
-      public int compare(String o1, String o2)
-      {
-        return StringUtil.naturalCompare(o1, o2, true);
-      }
-    };
-
-    SortedMap<String, SearchAndReplace> replacerList = new TreeMap<>(naturalSort);
+    SortedMap<String, SearchAndReplace> replacerList = new TreeMap<>(StringUtil.NATURAL_COMPARATOR);
 
     for (int i = 0; i < count; i++)
     {
