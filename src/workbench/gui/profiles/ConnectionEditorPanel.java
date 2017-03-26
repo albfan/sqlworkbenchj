@@ -188,8 +188,6 @@ public class ConnectionEditorPanel
 		this.confirmUpdates.addActionListener(this);
 		this.readOnly.addActionListener(this);
 		this.cbxPromptUsername.addActionListener(this);
-		((FlatButton)editConnectionScriptsButton).setCustomInsets(FlatButton.LARGER_MARGIN);
-		((FlatButton)editFilterButton).setCustomInsets(FlatButton.LARGER_MARGIN);
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
 		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
 		WbSwingUtilities.setMinimumSize(altDelimiter, 5);
@@ -337,8 +335,8 @@ public class ConnectionEditorPanel
     jSeparator3 = new javax.swing.JSeparator();
     timeoutpanel = new javax.swing.JPanel();
     jPanel6 = new javax.swing.JPanel();
-    editConnectionScriptsButton = new FlatButton();
-    editFilterButton = new FlatButton();
+    editConnectionScriptsButton = new javax.swing.JButton();
+    editFilterButton = new javax.swing.JButton();
     editVariablesButton = new javax.swing.JButton();
     filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
     testConnectionButton = new javax.swing.JButton();
@@ -684,7 +682,6 @@ public class ConnectionEditorPanel
     extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps")); // NOI18N
     extendedProps.setToolTipText(ResourceMgr.getString("d_LblConnExtendedProps")); // NOI18N
     extendedProps.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-    extendedProps.setIconTextGap(10);
     extendedProps.addMouseListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
@@ -734,7 +731,6 @@ public class ConnectionEditorPanel
     sshConfig.setText(ResourceMgr.getString("LblSshConfig")); // NOI18N
     sshConfig.setToolTipText(ResourceMgr.getString("d_LblSshConfig")); // NOI18N
     sshConfig.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-    sshConfig.setIconTextGap(10);
     sshConfig.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
@@ -976,7 +972,6 @@ public class ConnectionEditorPanel
     editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts")); // NOI18N
     editConnectionScriptsButton.setToolTipText(ResourceMgr.getString("d_LblConnScripts")); // NOI18N
     editConnectionScriptsButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-    editConnectionScriptsButton.setIconTextGap(10);
     editConnectionScriptsButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -987,7 +982,6 @@ public class ConnectionEditorPanel
     editFilterButton.setText(ResourceMgr.getString("LblSchemaFilterBtn")); // NOI18N
     editFilterButton.setToolTipText(ResourceMgr.getString("d_LblSchemaFilterBtn")); // NOI18N
     editFilterButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-    editFilterButton.setIconTextGap(10);
     editFilterButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -998,7 +992,6 @@ public class ConnectionEditorPanel
 
     editVariablesButton.setText(ResourceMgr.getString("TxtVariables")); // NOI18N
     editVariablesButton.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-    editVariablesButton.setIconTextGap(10);
     editVariablesButton.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
