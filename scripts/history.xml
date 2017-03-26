@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-03-12">
+    <entry dev-build="2" type="enh">The default encoding used for files in the editor can now be changed in the options dialog</entry>
     <entry dev-build="1" type="enh">WbImport and WbExport now support the -locale parameter to define the locale used for parsing and formatting dates and timestamps</entry>
     <entry dev-build="1" type="enh">For Postgres, the type of an index (btree, brin, gist, gin, ...) is now shown in the DbExplorer</entry>
     <entry dev-build="1" type="enh">For Postgres, TYPEs are now included in the dependency display</entry>
@@ -9,6 +10,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="2" type="fix">WbCopy did not work if there was another object (e.g. a sequence or view) in the source database with the same name as the table specified with -sourceTable</entry>
     <entry dev-build="1" type="fix">The dialog to select columns for copying them to the clipboard did not display all options on Mac OSX.</entry>
     <entry dev-build="1" type="fix">Changing between connection profiles that had a non-standard macro file and profiles using the standard macro file could lead to a situation where the standard macros were no longer available.</entry>
     <entry dev-build="1" type="fix">"Put SELECT into Clipboard" did not work any longer in the DbTree or DbExplorer</entry>
