@@ -733,6 +733,8 @@ public class ConnectionEditorPanel
 
     sshConfig.setText(ResourceMgr.getString("LblSshConfig")); // NOI18N
     sshConfig.setToolTipText(ResourceMgr.getString("d_LblSshConfig")); // NOI18N
+    sshConfig.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+    sshConfig.setIconTextGap(10);
     sshConfig.addActionListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
@@ -1257,6 +1259,7 @@ public class ConnectionEditorPanel
         String newUrl = parser.getLocalUrl(config.getLocalPort());
         this.tfURL.setText(newUrl);
       }
+      checkSSHIcon();
 		}
   }//GEN-LAST:event_sshConfigActionPerformed
 
@@ -1541,6 +1544,16 @@ public class ConnectionEditorPanel
 		cbStorePassword.setEnabled(!prompt);
 	}
 
+  private void checkSSHIcon()
+  {
+    sshConfig.setIcon(null);
+    SshConfig config = getProfile().getSshConfig();
+    if (config != null)
+    {
+      sshConfig.setIcon(IconMgr.getInstance().getLabelIcon("tick"));
+    }
+  }
+
 	private void checkScriptsAndFilters()
 	{
 		editConnectionScriptsButton.setIcon(null);
@@ -1613,6 +1626,7 @@ public class ConnectionEditorPanel
 			this.infoColor.setSelectedColor(c);
 			checkExtendedProps();
 			checkScriptsAndFilters();
+      checkSSHIcon();
 			checkOracle();
 			checkUncommitted();
 			checkPromptUsername();
