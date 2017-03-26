@@ -155,7 +155,8 @@ WHERE id=42;</p>
       <li><image-link title="Table definition" name="table_definition.png" back="DataPumper.png" next="TableSource.png">DbExplorer displaying table definition</image-link></li>
       <li><image-link title="SQL source for table definition" name="TableSource.png" back="table_definition.png" next="ViewSource.png">DbExplorer displaying table source</image-link></li>
       <li><image-link title="SQL Source Display" name="ViewSource.png" back="TableSource.png" next="FkDisplay.png">DbExplorer displaying the source of a VIEW</image-link></li>
-      <li><image-link title="Foreign key display" name="FkDisplay.png" back="ViewSource.png" next="screenshots">DbExplorer displaying foreign key relationships</image-link></li>
+      <li><image-link title="Foreign key display" name="FkDisplay.png" back="ViewSource.png" next="dependencies.png">DbExplorer displaying foreign key relationships</image-link></li>
+      <li><image-link title="Object dependencies" name="dependencies.png" back="FkDisplay.png" next="screenshots">DbExplorer displaying object dependencies</image-link></li>
      </ul>
     </content>
   </page>
