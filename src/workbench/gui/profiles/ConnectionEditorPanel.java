@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -49,6 +50,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -80,7 +82,6 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.ExtensionFileFilter;
-import workbench.gui.components.FlatButton;
 import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.MapEditor;
 import workbench.gui.components.PasswordPropertyEditor;
@@ -190,9 +191,24 @@ public class ConnectionEditorPanel
 		this.cbxPromptUsername.addActionListener(this);
 		WbSwingUtilities.setMinimumSize(tfFetchSize, 5);
 		WbSwingUtilities.setMinimumSize(tfTimeout, 5);
-		WbSwingUtilities.setMinimumSize(altDelimiter, 5);
+    WbSwingUtilities.setMinimumSize(altDelimiter, 5);
+
+    alignHeight(tfPwd, showPassword);
+    alignHeight(tfWorkspaceFile, selectWkspButton);
+    alignHeight(icon, selectIconButton);
+    alignHeight(macroFile, selectMacroFileButton);
+    
 		this.initEditorList();
 	}
+
+  private void alignHeight(JTextField text, JButton button)
+  {
+    Dimension pf = text.getPreferredSize();
+    Dimension pwdSize = button.getPreferredSize();
+    Dimension size = new Dimension(pwdSize.width, pf.height + 2);
+    button.setSize(size);
+    button.setPreferredSize(size);
+  }
 
 	public JComponent getInitialFocusComponent()
 	{
@@ -285,7 +301,7 @@ public class ConnectionEditorPanel
     lblDriver = new javax.swing.JLabel();
     lblUrl = new javax.swing.JLabel();
     jSeparator2 = new javax.swing.JSeparator();
-    showPassword = new FlatButton();
+    showPassword = new javax.swing.JButton();
     wbOptionsPanel = new javax.swing.JPanel();
     cbStorePassword = new BooleanPropertyEditor();
     rollbackBeforeDisconnect = new BooleanPropertyEditor();
@@ -320,15 +336,15 @@ public class ConnectionEditorPanel
     altDelimLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
-    selectWkspButton = new FlatButton();
+    selectWkspButton = new javax.swing.JButton();
     jLabel3 = new javax.swing.JLabel();
     jPanel4 = new javax.swing.JPanel();
     icon = new StringPropertyEditor();
-    selectIconButton = new FlatButton();
+    selectIconButton = new javax.swing.JButton();
     jLabel4 = new javax.swing.JLabel();
     jPanel5 = new javax.swing.JPanel();
     macroFile = new StringPropertyEditor();
-    selectMacroFileButton = new FlatButton();
+    selectMacroFileButton = new javax.swing.JButton();
     altDelimiter = new StringPropertyEditor();
     jLabel2 = new javax.swing.JLabel();
     tagList = new StringPropertyEditor();
