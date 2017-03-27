@@ -307,12 +307,12 @@ public class ConnectionEditorPanel
     jPanel2 = new javax.swing.JPanel();
     tfFetchSize = new IntegerPropertyEditor();
     cbAutocommit = new BooleanPropertyEditor();
-    extendedProps = new FlatButton();
+    extendedProps = new javax.swing.JButton();
     timeoutLabel = new javax.swing.JLabel();
     tfTimeout = new IntegerPropertyEditor();
     jLabel1 = new javax.swing.JLabel();
     fetchSizeLabel = new javax.swing.JLabel();
-    sshConfig = new FlatButton();
+    sshConfig = new javax.swing.JButton();
     jPanel3 = new javax.swing.JPanel();
     workspaceFileLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);

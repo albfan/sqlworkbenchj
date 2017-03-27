@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -40,6 +41,7 @@ import java.util.regex.Pattern;
 import workbench.resource.Settings;
 
 import workbench.db.exporter.InfinityLiterals;
+
 
 /**
  *
@@ -161,40 +163,33 @@ public class WbDateFormatter
 
   public String formatTime(java.sql.Time time)
   {
+    if (time == null) return "";
+
     return formatter.format(time.toLocalTime());
   }
 
   public String formatUtilDate(java.util.Date date)
   {
-    if (infinityLiterals != null)
+    if (date == null) return "";
+
+    String result = getInfinityValue(date.getTime());
+    if (result != null)
     {
-      long dt = (date == null ? 0 : date.getTime());
-      if (dt == DATE_POSITIVE_INFINITY)
-      {
-        return infinityLiterals.getPositiveInfinity();
-      }
-      else if (dt == DATE_NEGATIVE_INFINITY)
-      {
-        return infinityLiterals.getNegativeInfinity();
-      }
+      return result;
     }
+
     LocalDateTime ldt = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     return formatter.format(ldt);
   }
 
   public String formatDate(java.sql.Date date)
   {
-    if (infinityLiterals != null)
+    if (date == null) return "";
+
+    String result = getInfinityValue(date.getTime());
+    if (result != null)
     {
-      long dt = (date == null ? 0 : date.getTime());
-      if (dt == DATE_POSITIVE_INFINITY)
-      {
-        return infinityLiterals.getPositiveInfinity();
-      }
-      else if (dt == DATE_NEGATIVE_INFINITY)
-      {
-        return infinityLiterals.getNegativeInfinity();
-      }
+      return result;
     }
 
     // If the pattern for a java.sql.Date contains time fields DateTimeFormatter will
@@ -211,11 +206,10 @@ public class WbDateFormatter
     return formatter.format(date.toLocalDate());
   }
 
-  public String formatTimestamp(java.sql.Timestamp ts)
+  private String getInfinityValue(long dt)
   {
     if (infinityLiterals != null)
     {
-      long dt = (ts == null ? 0 : ts.getTime());
       if (dt == DATE_POSITIVE_INFINITY)
       {
         return infinityLiterals.getPositiveInfinity();
@@ -225,8 +219,38 @@ public class WbDateFormatter
         return infinityLiterals.getNegativeInfinity();
       }
     }
+    return null;
+  }
 
+  public String formatTimestamp(java.time.LocalDate ts)
+  {
+    if (ts == null) return "";
+
+    return formatter.format(ts);
+  }
+
+  public String formatTimestamp(java.sql.Timestamp ts)
+  {
+    if (ts == null) return "";
+
+    String result = getInfinityValue(ts.getTime());
+    if (result != null)
+    {
+      return result;
+    }
     return formatter.format(ts.toLocalDateTime());
+  }
+
+  public String formatTimestamp(java.time.LocalDateTime ts)
+  {
+    if (ts == null) return "";
+
+    String result = getInfinityValue(ts.toEpochSecond(ZoneOffset.from(ts)));
+    if (result != null)
+    {
+      return result;
+    }
+    return formatter.format(ts);
   }
 
   public java.sql.Time parseTimeQuitely(String source)
@@ -250,6 +274,9 @@ public class WbDateFormatter
 
   public java.sql.Date parseDateQuietely(String source)
   {
+    source = StringUtil.trimToNull(source);
+    if (source == null) return null;
+    
     try
     {
       return parseDate(source);
@@ -263,13 +290,16 @@ public class WbDateFormatter
   public java.sql.Date parseDate(String source)
     throws DateTimeParseException
   {
+    source = StringUtil.trimToNull(source);
+    if (source == null) return null;
+
     if (infinityLiterals != null)
     {
-      if (source.trim().equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
+      if (source.equalsIgnoreCase(infinityLiterals.getPositiveInfinity()))
       {
         return new java.sql.Date(DATE_POSITIVE_INFINITY);
       }
-      if (source.trim().equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
+      if (source.equalsIgnoreCase(infinityLiterals.getNegativeInfinity()))
       {
         return new java.sql.Date(DATE_NEGATIVE_INFINITY);
       }
@@ -302,6 +332,8 @@ public class WbDateFormatter
   public java.sql.Timestamp parseTimestamp(String source)
     throws DateTimeParseException
   {
+    if (source == null) return null;
+
     if (!containsTimeFields)
     {
       // a format mask that does not include time values cannot be parsed using LocalDateTime

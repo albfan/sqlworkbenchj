@@ -230,7 +230,7 @@ public class RowDataReader
         }
         else if (type == Types.DATE)
         {
-          value = rs.getDate(i+1);
+          value = readDateValue(rs, i+1);
         }
         else if (useGetStringForBit && type == Types.BIT)
         {
@@ -355,17 +355,17 @@ public class RowDataReader
    * Read a timestamp value from the current row and given column.
    * <br/>
    * <br/>
-   * This is made a separate method to allow DBMS specifc implementations of the RowDataReader to
-   * tread timestamps differently.<br/>
+   * This is made a separate method to allow DBMS specifc implementations of the RowDataReader to  read timestamps differently.<br/>
    * <br/>
    * Currently this is used to adjust the timezone information returned by the Oracle driver
    * (see {@linkplain OracleRowDataReader#readTimestampValue(java.sql.ResultSet, int)})
    *
    * @param rs      the ResultSet to read from
-   * @param column  the timestamp column
+   * @param column  the column index (1-based) to read
    * @return the value retrieved.
    *
    * @throws SQLException
+   * @see OracleRowDataReader#readTimestampValue(java.sql.ResultSet, int)
    */
   protected Object readTimestampValue(ResultSet rs, int column)
     throws SQLException
@@ -382,6 +382,12 @@ public class RowDataReader
       }
       throw ex;
     }
+  }
+
+  protected Object readDateValue(ResultSet rs, int column)
+    throws SQLException
+  {
+    return rs.getDate(column);
   }
 
   private void addStream(Closeable in)
