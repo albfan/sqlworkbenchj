@@ -175,7 +175,7 @@ public class ColumnSelectorPanel
 		this.add(optionPanel, mainC);
 
     Dimension ps = scroll.getPreferredSize();
-    int rows = Math.min(10, columnTable.getRowCount() + 2);
+    int rows = Math.min(10, columnTable.getRowCount() + 4);
     int height = (columnTable.getRowHeight() * rows) + (columnTable.getRowCount() * columnTable.getRowMargin());
     Dimension preferred = new Dimension(ps.width, (int)(height * 1.1));
     scroll.setPreferredSize(preferred);
