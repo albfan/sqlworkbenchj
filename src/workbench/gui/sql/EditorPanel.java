@@ -596,7 +596,6 @@ public class EditorPanel
       this.reset();
     }
     fireFilenameChanged(null);
-    checkFileActions();
 
     return true;
   }

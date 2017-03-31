@@ -680,10 +680,12 @@ public class SqlPanel
 		return this.editor;
 	}
 
-	public void clearSqlHistory(boolean removeEditorText)
+	public void clearSqlHistory()
 	{
-		if (this.sqlHistory != null) this.sqlHistory.clear();
-		this.editor.setText("");
+		if (this.sqlHistory != null)
+    {
+      this.sqlHistory.clear();
+    }
 	}
 
 	public boolean closeFile(boolean emptyEditor)
@@ -694,17 +696,20 @@ public class SqlPanel
 	public boolean closeFile(boolean emptyEditor, boolean checkUnsaved)
 	{
 		if (this.editor == null) return true;
+
 		if (checkUnsaved)
 		{
 			boolean canClose = this.checkAndSaveFile();
 			if (!canClose) return false;
 		}
+
 		if (this.editor.closeFile(emptyEditor))
     {
 			this.selectEditorLater();
-			this.clearSqlHistory(false);
+			this.clearSqlHistory();
 			return true;
     }
+    
 		return false;
 	}
 

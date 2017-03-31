@@ -62,7 +62,7 @@ public class PanelWorkspaceHandler
 		catch (Exception e)
 		{
 			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index=" + index);
-			client.clearSqlHistory(false);
+			client.clearSqlHistory();
 		}
 
 		client.setTabName(w.getTabTitle(index));
@@ -143,7 +143,7 @@ public class PanelWorkspaceHandler
 
 		w.setMaxRows(index, client.statusBar.getMaxRows());
 		w.setQueryTimeout(index, client.statusBar.getQueryTimeout());
-    
+
 		if (client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() == ExternalFileHandling.link)
 		{
 			w.setExternalFileName(index, client.getCurrentFileName());
