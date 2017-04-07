@@ -174,6 +174,7 @@ public class ColumnSelectorPanel
 
 		this.add(optionPanel, mainC);
 
+    columnTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     Dimension ps = scroll.getPreferredSize();
     int rows = Math.min(10, columnTable.getRowCount() + 4);
     int height = (columnTable.getRowHeight() * rows) + (columnTable.getRowCount() * columnTable.getRowMargin());
@@ -195,18 +196,25 @@ public class ColumnSelectorPanel
     TableColumnModel colMod = columnTable.getColumnModel();
     int addWidth = columnTable.getIntercellSpacing().width + 4 + colMod.getColumnMargin();
 
-    int colWidth = calculateColumnWidths(0, min, max, addWidth, fm);
+    int colWidth = calculateColumnWidths(0, min, max, addWidth, fm, true);
     TableColumn col = colMod.getColumn(0);
     col.setPreferredWidth(colWidth);
+
+    colWidth = (int)(calculateColumnWidths(1, min, max, addWidth, fm, false) * 1.15);
+    col = colMod.getColumn(1);
+    col.setPreferredWidth(colWidth);
+
     columnTable.getTableHeader().setReorderingAllowed(false);
   }
 
-	private int calculateColumnWidths(int col, int minWidth, int maxWidth, int addWidth, FontMetrics fm)
+	private int calculateColumnWidths(int col, int minWidth, int maxWidth, int addWidth, FontMetrics fm, boolean checkData)
 	{
 		int rowCount = columnTable.getRowCount();
 
     String header = columnTable.getColumnName(col);
     int optWidth = Math.max(minWidth, fm.stringWidth(header));
+
+    if (!checkData) return optWidth + addWidth;
 
 		for (int row = 0; row < rowCount; row++)
 		{

@@ -1959,6 +1959,7 @@ public class WbTable
     }
 		this.setDefaultRenderer(BigInteger.class, intRenderer);
 		this.setDefaultRenderer(Integer.class, intRenderer);
+		this.setDefaultRenderer(Long.class, intRenderer);
 
     this.setDefaultRenderer(String.class, new StringColumnRenderer());
     initTypeSpecificRenderer();
