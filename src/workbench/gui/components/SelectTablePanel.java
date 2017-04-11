@@ -23,17 +23,17 @@
  */
 package workbench.gui.components;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 
 import workbench.interfaces.ValidatingComponent;
@@ -82,39 +82,42 @@ public class SelectTablePanel
 	 */
 	@SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+  private void initComponents()
+  {
+    GridBagConstraints gridBagConstraints;
 
     jLabel1 = new JLabel();
     tables = new JComboBox();
 
+    setLayout(new GridBagLayout());
+
     jLabel1.setText(ResourceMgr.getString("MsgEnterUpdateTable")); // NOI18N
     jLabel1.setVerticalAlignment(SwingConstants.TOP);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.insets = new Insets(5, 2, 0, 2);
+    add(jLabel1, gridBagConstraints);
 
+    tables.setModel(new DefaultComboBoxModel(new String[] { "person", "orders", "customer_type", "address", " " }));
     tables.addActionListener(this);
-
-    GroupLayout layout = new GroupLayout(this);
-    this.setLayout(layout);
-    layout.setHorizontalGroup(
-      layout.createParallelGroup(Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(jLabel1, GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
-        .addGap(20, 20, 20))
-      .addComponent(tables, 0, 222, Short.MAX_VALUE)
-    );
-    layout.setVerticalGroup(
-      layout.createParallelGroup(Alignment.LEADING)
-      .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
-        .addComponent(jLabel1, GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
-        .addPreferredGap(ComponentPlacement.RELATED)
-        .addComponent(tables, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-        .addContainerGap())
-    );
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(10, 2, 10, 2);
+    add(tables, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
 
-  public void actionPerformed(java.awt.event.ActionEvent evt) {
-    if (evt.getSource() == tables) {
+  public void actionPerformed(ActionEvent evt)
+  {
+    if (evt.getSource() == tables)
+    {
       SelectTablePanel.this.tablesActionPerformed(evt);
     }
   }// </editor-fold>//GEN-END:initComponents
