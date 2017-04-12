@@ -251,13 +251,17 @@ public class SshManager
       Connector connector = ConnectorFactory.getDefault().createConnector();
       if (connector != null)
       {
-        LogMgr.logDebug("SShManager.canUseAgend()", "SSH agent connector " + connector.getName() + " available: " + connector.isAvailable());
+        LogMgr.logInfo("SShManager.canUseAgend()", "SSH agent connector " + connector.getName() + " available: " + connector.isAvailable());
+      }
+      else
+      {
+        LogMgr.logInfo("SshManager.canUseAgent()", "No agent connector available");
       }
       return connector != null;
     }
     catch (Throwable th)
     {
-      LogMgr.logDebug("SshManager.canUseAgent()", "Could not access agent connector", th);
+      LogMgr.logWarning("SshManager.canUseAgent()", "Can not create agent connector (" + th.getClass().getName() + " " + th.getMessage() + ")");
     }
     return false;
   }
