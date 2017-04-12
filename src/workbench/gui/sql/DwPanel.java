@@ -229,7 +229,7 @@ public class DwPanel
   {
     this.locked = flag;
   }
-  
+
   public boolean isLocked()
   {
     return this.locked;
@@ -658,15 +658,28 @@ public class DwPanel
 
 	private void fireUpdateTableChanged()
 	{
-		TableIdentifier table = null;
-
-		if (this.getTable() != null)
-		{
-			DataStore ds = this.getTable().getDataStore();
-			if (ds != null) table = ds.getUpdateTable();
-		}
-		if (table != null) firePropertyChange(PROP_UPDATE_TABLE, null, table.getTableExpression());
+    String tablename = getUpdateTable();
+		if (tablename != null)
+    {
+      firePropertyChange(PROP_UPDATE_TABLE, null, tablename);
+    }
 	}
+
+  private String getUpdateTable()
+  {
+    TableIdentifier table = null;
+
+    if (this.getTable() != null)
+    {
+      DataStore ds = this.getTable().getDataStore();
+      if (ds != null) table = ds.getUpdateTable();
+    }
+    if (table != null)
+    {
+      return table.getTableExpression();
+    }
+    return null;
+  }
 
 	public void setReadOnly(boolean aFlag)
 	{
@@ -1246,7 +1259,7 @@ public class DwPanel
 
 		if (!this.startEdit(true)) return;
 
-		setStatusMessage(ResourceMgr.getString("MsgCalcDependencies"));
+		setStatusMessage(ResourceMgr.getFormattedString("MsgCalcDependencies", getUpdateTable()));
 		final Component c = this;
 		WbSwingUtilities.showWaitCursor(this);
 
@@ -1730,7 +1743,7 @@ public class DwPanel
 		else
 		{
 			String msg = null;
-			TableIdentifier tbl = (this.dataTable.getDataStore() != null ? this.dataTable.getDataStore().getUpdateTable() : null);
+			String tbl = getUpdateTable();
 			if (tbl == null)
 			{
 				msg = ResourceMgr.getString("MsgNoUpdateTable");
@@ -1738,7 +1751,7 @@ public class DwPanel
 			else if (!this.hasUpdateableColumns())
 			{
 				msg = ResourceMgr.getString("MsgNoUpdateColumns");
-				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
+				msg = StringUtil.replace(msg, "%table%", tbl);
 			}
 			WbSwingUtilities.showErrorMessage(w, msg);
 		}
