@@ -24,15 +24,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
+import workbench.db.ConnectionProfile;
+
+import workbench.util.WbFile;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.KeyPair;
 import com.jcraft.jsch.agentproxy.Connector;
 import com.jcraft.jsch.agentproxy.ConnectorFactory;
-
-import workbench.db.ConnectionProfile;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.WbFile;
 
 /**
  *
@@ -247,6 +249,10 @@ public class SshManager
     try
     {
       Connector connector = ConnectorFactory.getDefault().createConnector();
+      if (connector != null)
+      {
+        LogMgr.logDebug("SShManager.canUseAgend()", "SSH agent connector " + connector.getName() + " available: " + connector.isAvailable());
+      }
       return connector != null;
     }
     catch (Throwable th)
