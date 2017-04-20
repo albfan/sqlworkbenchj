@@ -122,7 +122,7 @@ WHERE id=42;</p>
       <li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
       <li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
       <li><a target="_blank" href="http://www.teradata.com">Teradata</a> (<a target="_blank" href="http://www.teradata.com/DownloadCenter/Forum158-1.aspx">Download JDBC driver</a>)</li>
-      <li><a target="_blank" href="http://www.luciddb.org/">LucidDB</a></li>
+      <!--<li><a target="_blank" href="http://luciddb.sourceforge.net/">LucidDB</a></li>-->
       <li><a target="_blank" href="http://www.cubrid.org/">Cubrid</a></li>
     </ul>
     <p>If you find that not all features (especially in the DbExplorer) work for your DBMS, please feel free to contact me.</p>
