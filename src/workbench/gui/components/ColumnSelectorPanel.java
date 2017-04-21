@@ -196,7 +196,7 @@ public class ColumnSelectorPanel
     TableColumnModel colMod = columnTable.getColumnModel();
     int addWidth = columnTable.getIntercellSpacing().width + 4 + colMod.getColumnMargin();
 
-    int colWidth = calculateColumnWidths(0, min, max, addWidth, fm, true);
+    int colWidth = (int)(calculateColumnWidths(0, min, max, addWidth, fm, true) * 1.15);
     TableColumn col = colMod.getColumn(0);
     col.setPreferredWidth(colWidth);
 
