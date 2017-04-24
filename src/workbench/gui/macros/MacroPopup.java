@@ -50,6 +50,15 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
+import workbench.interfaces.FileActions;
+import workbench.interfaces.MacroChangeListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.QuickFilter;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -62,16 +71,10 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.editor.MacroExpander;
 import workbench.gui.sql.SqlPanel;
-import workbench.interfaces.FileActions;
-import workbench.interfaces.MacroChangeListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.QuickFilter;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.StringUtil;
 
 /**
@@ -338,6 +341,7 @@ public class MacroPopup
 
 	public void workspaceChanged()
 	{
+    macroListChanged();
 		if (useWorkspace())
 		{
 			restoreExpandedGroups();
