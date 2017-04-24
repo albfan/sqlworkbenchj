@@ -10,6 +10,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="2" type="fix">SSH tunneling did not work with Oracle service based URLs</entry>
     <entry dev-build="2" type="fix">If the MacroPopup was open and a profile with a different macro file was loaded, the macros in the popup weren't re-loaded</entry>
     <entry dev-build="2" type="fix">WbCopy did not work if there was another object (e.g. a sequence or view) in the source database with the same name as the table specified with -sourceTable</entry>
     <entry dev-build="1" type="fix">The dialog to select columns for copying them to the clipboard did not display all options on Mac OSX.</entry>
