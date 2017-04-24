@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.ssh.SshConfig;
+
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -69,6 +70,7 @@ public class IniProfileStorage
   private static final String PROP_GROUP = ".group";
   private static final String PROP_TAGS = ".tags";
   private static final String PROP_WORKSPACE = ".workspace";
+  private static final String PROP_DEFAULT_DIR = ".default.dir";
   private static final String PROP_ICON = ".icon";
   private static final String PROP_CONNECTION_TIMEOUT = ".connection.timeout";
   private static final String PROP_HIDE_WARNINGS = ".hide.warnings";
@@ -162,6 +164,7 @@ public class IniProfileStorage
     String postConnect = props.getProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, null);
     String preDisconnect = props.getProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, null);
     String idleScript = props.getProperty(PROP_PREFIX + key + PROP_SCRIPT_IDLE, null);
+    String scriptDir = props.getProperty(PROP_PREFIX + key + PROP_DEFAULT_DIR, null);
     String xmlProps = props.getProperty(PROP_PREFIX + key + PROP_CONN_PROPS, null);
     String xmlVars = props.getProperty(PROP_PREFIX + key + PROP_CONN_VARS, null);
     String colorValue = props.getProperty(PROP_PREFIX + key + PROP_INFO_COLOR, null);
@@ -298,6 +301,7 @@ public class IniProfileStorage
     profile.setSchemaFilter(schemaFilter);
     profile.setCatalogFilter(catalogFilter);
     profile.setSshConfig(config);
+    profile.setDefaulDirectory(scriptDir);
 
     return profile;
   }
@@ -369,6 +373,7 @@ public class IniProfileStorage
     props.setProperty(PROP_PREFIX + key + PROP_MACROFILE, profile.getMacroFilename());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_CONNECT, profile.getPostConnectScript());
     props.setProperty(PROP_PREFIX + key + PROP_SCRIPT_DISCONNECT, profile.getPreDisconnectScript());
+    props.setProperty(PROP_PREFIX + key + PROP_DEFAULT_DIR, profile.getDefaultDirectory());
 
     SshConfig config = profile.getSshConfig();
     if (config != null)

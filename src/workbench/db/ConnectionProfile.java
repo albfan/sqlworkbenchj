@@ -25,6 +25,7 @@ package workbench.db;
 
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,14 +35,18 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import workbench.db.postgres.PgPassReader;
-import workbench.gui.profiles.ProfileKey;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
 import workbench.ssh.SshConfig;
 import workbench.ssh.SshManager;
+
+import workbench.db.postgres.PgPassReader;
+
+import workbench.gui.profiles.ProfileKey;
+
+import workbench.sql.DelimiterDefinition;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
@@ -113,6 +118,7 @@ public class ConnectionProfile
   private ObjectNameFilter catalogFilter;
   private String lastSettingsKey;
   private String macroFileName;
+  private String defaultDirectory;
   private final Set<String> tags = CollectionUtil.caseInsensitiveSet();
 
   private SshConfig sshConfig;
@@ -165,6 +171,31 @@ public class ConnectionProfile
     String cleanName = nm.replaceAll("").toLowerCase();
     String key = cleanGroup + "." + cleanName;
     return key;
+  }
+
+  public String getDefaultDirectory()
+  {
+    return defaultDirectory;
+  }
+
+  public void setDefaulDirectory(String scriptDirectory)
+  {
+    String dir = StringUtil.trimToNull(scriptDirectory);
+    if (this.defaultDirectory != null && dir != null)
+    {
+      File current = new File(defaultDirectory);
+      File newDir = new File(dir);
+      if (!current.equals(newDir))
+      {
+        this.defaultDirectory = dir;
+        this.changed = true;
+      }
+    }
+    else
+    {
+      this.defaultDirectory = dir;
+      this.changed = true;
+    }
   }
 
   public String getMacroFilename()
@@ -1045,6 +1076,7 @@ public class ConnectionProfile
     result.setStoreExplorerSchema(rememberExplorerSchema);
     result.setIdleScript(idleScript);
     result.setIdleTime(idleTime);
+    result.setDefaulDirectory(defaultDirectory);
     result.setPreDisconnectScript(preDisconnectScript);
     result.setPostConnectScript(postConnectScript);
     result.setInfoDisplayColor(infoColor);

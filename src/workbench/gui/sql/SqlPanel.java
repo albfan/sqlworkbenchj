@@ -709,7 +709,7 @@ public class SqlPanel
 			this.clearSqlHistory();
 			return true;
     }
-    
+
 		return false;
 	}
 
@@ -3195,12 +3195,12 @@ public class SqlPanel
 			}
 			catch (IOException e)
 			{
-				this.stmtRunner.setBaseDir(System.getProperty("user.dir"));
+				this.stmtRunner.setBaseDir(StringUtil.coalesce(dbConnection.getProfile().getDefaultDirectory(), System.getProperty("user.dir")));
 			}
 		}
 		else
 		{
-			this.stmtRunner.setBaseDir(System.getProperty("user.dir"));
+      this.stmtRunner.setBaseDir(StringUtil.coalesce(dbConnection.getProfile().getDefaultDirectory(), System.getProperty("user.dir")));
 		}
 
 		int maxRows = this.statusBar.getMaxRows();

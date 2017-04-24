@@ -165,14 +165,10 @@ public class StringPropertyEditor
 		{
 			this.applyChanges();
 		}
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				firePropertyChange(propName, null, getText());
-			}
-		});
+		EventQueue.invokeLater(() ->
+    {
+      firePropertyChange(propName, null, getText());
+    });
 	}
 
   public void ignoreNextFocus()

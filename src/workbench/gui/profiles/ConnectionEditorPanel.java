@@ -167,6 +167,8 @@ public class ConnectionEditorPanel
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(selectWkspButton);
+    policy.addComponent(tfScriptDir);
+    policy.addComponent(selectScriptDirButton);
 		policy.addComponent(icon);
 		policy.addComponent(selectIconButton);
 		policy.addComponent(macroFile);
@@ -183,6 +185,7 @@ public class ConnectionEditorPanel
 		this.selectWkspButton.addActionListener(this);
 		this.selectIconButton.addActionListener(this);
 		this.selectMacroFileButton.addActionListener(this);
+		this.selectScriptDirButton.addActionListener(this);
 		this.showPassword.addActionListener(this);
 
 		this.infoColor.setActionListener(this);
@@ -197,7 +200,7 @@ public class ConnectionEditorPanel
     alignHeight(tfWorkspaceFile, selectWkspButton);
     alignHeight(icon, selectIconButton);
     alignHeight(macroFile, selectMacroFileButton);
-    
+
 		this.initEditorList();
 	}
 
@@ -337,6 +340,10 @@ public class ConnectionEditorPanel
     jPanel1 = new javax.swing.JPanel();
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new javax.swing.JButton();
+    scriptDirLabel = new javax.swing.JLabel();
+    jPanel7 = new javax.swing.JPanel();
+    tfScriptDir = new StringPropertyEditor();
+    selectScriptDirButton = new javax.swing.JButton();
     jLabel3 = new javax.swing.JLabel();
     jPanel4 = new javax.swing.JPanel();
     icon = new StringPropertyEditor();
@@ -841,12 +848,55 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
     jPanel3.add(jPanel1, gridBagConstraints);
 
+    scriptDirLabel.setLabelFor(tfScriptDir);
+    scriptDirLabel.setText(ResourceMgr.getString("LblEditorDefaultDir")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    jPanel3.add(scriptDirLabel, gridBagConstraints);
+
+    jPanel7.setLayout(new java.awt.GridBagLayout());
+
+    tfScriptDir.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    tfScriptDir.setToolTipText(ResourceMgr.getDescription("LblOpenWksp"));
+    tfScriptDir.setName("defaultDirectory"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel7.add(tfScriptDir, gridBagConstraints);
+
+    selectScriptDirButton.setText("...");
+    selectScriptDirButton.setMaximumSize(null);
+    selectScriptDirButton.setMinimumSize(null);
+    selectScriptDirButton.setPreferredSize(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel7.add(selectScriptDirButton, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 6);
+    jPanel3.add(jPanel7, gridBagConstraints);
+
     jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
     jLabel3.setText(ResourceMgr.getString("LblIcon")); // NOI18N
     jLabel3.setToolTipText(ResourceMgr.getString("d_LblIcon")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel3.add(jLabel3, gridBagConstraints);
@@ -877,7 +927,7 @@ public class ConnectionEditorPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -889,7 +939,7 @@ public class ConnectionEditorPanel
     jLabel4.setToolTipText(ResourceMgr.getString("d_LblMacroFile")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel3.add(jLabel4, gridBagConstraints);
@@ -920,7 +970,7 @@ public class ConnectionEditorPanel
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
@@ -938,7 +988,7 @@ public class ConnectionEditorPanel
     jLabel2.setToolTipText(ResourceMgr.getString("d_LblConnTags")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 0);
@@ -949,7 +999,7 @@ public class ConnectionEditorPanel
     tagList.setVerifyInputWhenFocusTarget(false);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
@@ -1309,6 +1359,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JPanel jPanel4;
   protected javax.swing.JPanel jPanel5;
   protected javax.swing.JPanel jPanel6;
+  protected javax.swing.JPanel jPanel7;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JSeparator jSeparator3;
   protected javax.swing.JLabel lblDriver;
@@ -1321,8 +1372,10 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox rememberExplorerSchema;
   protected javax.swing.JCheckBox removeComments;
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
+  protected javax.swing.JLabel scriptDirLabel;
   protected javax.swing.JButton selectIconButton;
   protected javax.swing.JButton selectMacroFileButton;
+  protected javax.swing.JButton selectScriptDirButton;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
   protected javax.swing.JButton sshConfig;
@@ -1331,6 +1384,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JTextField tfFetchSize;
   protected javax.swing.JTextField tfProfileName;
   protected javax.swing.JPasswordField tfPwd;
+  protected javax.swing.JTextField tfScriptDir;
   protected javax.swing.JTextField tfTimeout;
   protected javax.swing.JTextField tfURL;
   protected javax.swing.JTextField tfUserName;
@@ -1449,6 +1503,28 @@ public class ConnectionEditorPanel
 			Settings.getInstance().setProperty("workbench.iconfile.lastdir", dir.getFullPath());
 		}
 	}
+
+	public void selectScriptDirectory()
+  {
+    String currentDir = StringUtil.trimToNull(tfScriptDir.getText());
+    JFileChooser jf = new WbFileChooser();
+    jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    jf.setMultiSelectionEnabled(false);
+    if (currentDir != null)
+    {
+      File f = new File(currentDir);
+      if (f.exists())
+      {
+        jf.setCurrentDirectory(f);
+      }
+    }
+    int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+    if (answer == JFileChooser.APPROVE_OPTION)
+    {
+      WbFile dir = new WbFile(jf.getSelectedFile());
+      tfScriptDir.setText(dir.getFullPath());
+    }
+  }
 
 	public void selectWorkspace()
 	{
@@ -1733,6 +1809,10 @@ public class ConnectionEditorPanel
 				this.readOnly.setSelected(false);
 			}
 		}
+    else if (e.getSource() == this.selectScriptDirButton)
+    {
+      this.selectScriptDirectory();
+    }
 		else if (e.getSource() == this.selectWkspButton)
 		{
 			this.selectWorkspace();
