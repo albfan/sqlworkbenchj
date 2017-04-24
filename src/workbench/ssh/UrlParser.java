@@ -82,9 +82,9 @@ public class UrlParser
       {
         return rewriteOracleConnectionDescriptor(originalUrl, localHost, localPort);
       }
-      if (lower.indexOf("//@") > -1)
+      if (lower.indexOf("@//") > -1)
       {
-        return rewriteUrl(originalUrl, localHost, localPort, "//@", "/");
+        return rewriteUrl(originalUrl, localHost, localPort, "@//", "/");
       }
       return rewriteOldOracle(originalUrl, localHost, localPort);
     }

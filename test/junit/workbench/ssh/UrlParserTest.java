@@ -36,7 +36,35 @@ public class UrlParserTest
   }
 
   @Test
-  public void testGetLocalUrl()
+  public void testPostgres()
+  {
+    UrlParser parser = new UrlParser("jdbc:postgresql://someserver:5433/dbname");
+    assertEquals("jdbc:postgresql://127.0.0.1:9090/dbname", parser.getLocalUrl(9090));
+    assertEquals(5433, parser.getDatabasePort());
+    assertEquals("someserver", parser.getDatabaseServer());
+
+    parser = new UrlParser("jdbc:postgresql://someserver/dbname");
+    assertEquals("jdbc:postgresql://127.0.0.1:9090/dbname", parser.getLocalUrl(9090));
+    assertEquals(5432, parser.getDatabasePort());
+    assertEquals("someserver", parser.getDatabaseServer());
+  }
+
+  @Test
+  public void testSQLServer()
+  {
+    UrlParser parser = new UrlParser("jdbc:sqlserver://dbserver:1433");
+    assertEquals("jdbc:sqlserver://127.0.0.1:9090", parser.getLocalUrl(9090));
+    assertEquals(1433, parser.getDatabasePort());
+    assertEquals("dbserver", parser.getDatabaseServer());
+
+    parser = new UrlParser("jdbc:sqlserver://dbserver;databaseName=wb_junit");
+    assertEquals("jdbc:sqlserver://127.0.0.1:9090;databaseName=wb_junit", parser.getLocalUrl(9090));
+    assertEquals(1433, parser.getDatabasePort());
+    assertEquals("dbserver", parser.getDatabaseServer());
+  }
+
+  @Test
+  public void testOracle()
   {
     UrlParser parser = new UrlParser("jdbc:postgresql://someserver:5433/dbname");
     assertEquals("jdbc:postgresql://127.0.0.1:9090/dbname", parser.getLocalUrl(9090));
@@ -58,13 +86,13 @@ public class UrlParserTest
     assertEquals(1433, parser.getDatabasePort());
     assertEquals("dbserver", parser.getDatabaseServer());
 
-    parser = new UrlParser("jdbc:oracle:thin://@oradev01/orcl");
-    assertEquals("jdbc:oracle:thin://@127.0.0.1:9090/orcl", parser.getLocalUrl(9090));
+    parser = new UrlParser("jdbc:oracle:thin:@//oradev01/orcl");
+    assertEquals("jdbc:oracle:thin:@//127.0.0.1:9090/orcl", parser.getLocalUrl(9090));
     assertEquals(1521, parser.getDatabasePort());
     assertEquals("oradev01", parser.getDatabaseServer());
 
-    parser = new UrlParser("jdbc:oracle:thin://@oradev01:1666/orcl");
-    assertEquals("jdbc:oracle:thin://@127.0.0.1:9090/orcl", parser.getLocalUrl(9090));
+    parser = new UrlParser("jdbc:oracle:thin:@//oradev01:1666/orcl");
+    assertEquals("jdbc:oracle:thin:@//127.0.0.1:9090/orcl", parser.getLocalUrl(9090));
     assertEquals(1666, parser.getDatabasePort());
     assertEquals("oradev01", parser.getDatabaseServer());
 
