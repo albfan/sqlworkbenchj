@@ -301,7 +301,7 @@ public class IniProfileStorage
     profile.setSchemaFilter(schemaFilter);
     profile.setCatalogFilter(catalogFilter);
     profile.setSshConfig(config);
-    profile.setDefaulDirectory(scriptDir);
+    profile.setDefaultDirectory(scriptDir);
 
     return profile;
   }

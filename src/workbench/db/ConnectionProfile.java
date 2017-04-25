@@ -178,7 +178,7 @@ public class ConnectionProfile
     return defaultDirectory;
   }
 
-  public void setDefaulDirectory(String scriptDirectory)
+  public void setDefaultDirectory(String scriptDirectory)
   {
     String dir = StringUtil.trimToNull(scriptDirectory);
     if (this.defaultDirectory != null && dir != null)
@@ -1076,7 +1076,7 @@ public class ConnectionProfile
     result.setStoreExplorerSchema(rememberExplorerSchema);
     result.setIdleScript(idleScript);
     result.setIdleTime(idleTime);
-    result.setDefaulDirectory(defaultDirectory);
+    result.setDefaultDirectory(defaultDirectory);
     result.setPreDisconnectScript(preDisconnectScript);
     result.setPostConnectScript(postConnectScript);
     result.setInfoDisplayColor(infoColor);
