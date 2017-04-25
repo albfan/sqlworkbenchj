@@ -182,7 +182,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_INSERT_START);
 		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
-		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
     ConditionCheck.addParameters(cmdLine);
 	}
@@ -359,9 +358,6 @@ public class WbImport
 		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
 		imp.setAdjustSequences(cmdLine.getBoolean(ARG_ADJUST_SEQ, false));
-
-		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
-		imp.skipTargetCheck(skipTargetCheck);
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);

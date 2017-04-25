@@ -487,7 +487,7 @@
           </row>
 
           <row>
-						<entry id="copy-user-source-table">-skipTargetCheck</entry>
+						<entry id="copy-skip-target-check">-skipTargetCheck</entry>
 						<entry>
 							<para>
                 Normally WbCopy will check if the specified target table does exist. However, some JDBC drivers
