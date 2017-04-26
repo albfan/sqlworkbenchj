@@ -745,16 +745,7 @@ public class EditorPanel
 
   public boolean readFile(File aFile)
   {
-    String encoding = null;
-    if (Settings.getInstance().getEditorDetectEncoding())
-    {
-      encoding = FileUtil.detectFileEncoding(aFile);
-      if (encoding == null)
-      {
-        encoding = Settings.getInstance().getSystemFileEncoding();
-      }
-    }
-    return this.readFile(aFile, encoding);
+    return this.readFile(aFile, null);
   }
 
   public boolean readFile(File toLoad, String encoding)
@@ -774,6 +765,17 @@ public class EditorPanel
     BufferedReader reader = null;
     SyntaxDocument doc = null;
 
+    if (StringUtil.isEmptyString(encoding) && Settings.getInstance().getEditorDetectEncoding())
+    {
+      encoding = FileUtil.detectFileEncoding(toLoad);
+    }
+
+    if (StringUtil.isEmptyString(encoding))
+    {
+      encoding = Settings.getInstance().getDefaultFileEncoding();
+      LogMgr.logWarning("EditorPanel.readFile()", "No encoding specified or detected for file \"" + toLoad.getAbsolutePath() + "\". Using default encoding: " + encoding);
+    }
+
     try
     {
       setCaretPosition(0);
@@ -785,15 +787,11 @@ public class EditorPanel
 
       try
       {
-        if (StringUtil.isEmptyString(encoding))
-        {
-          encoding = Settings.getInstance().getDefaultFileEncoding();
-        }
         reader = EncodingUtil.createBufferedReader(toLoad, encoding);
       }
       catch (UnsupportedEncodingException e)
       {
-        LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested. Using UTF-8", e);
+        LogMgr.logError("EditorPanel.readFile()", "Unsupported encoding: " + encoding + " requested.", e);
         WbSwingUtilities.showErrorMessage(this, ResourceMgr.getFormattedString("ErrWrongEncoding", encoding));
         return false;
       }
