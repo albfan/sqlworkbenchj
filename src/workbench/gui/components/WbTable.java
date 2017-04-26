@@ -44,6 +44,7 @@ import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.HashMap;
@@ -2012,6 +2013,7 @@ public class WbTable
 			{
 				TableColumn col = colMod.getColumn(i);
 				if (col == null) continue;
+        int type = dwModel.getColumnType(i);
 				if (isMultiLineColumn(i))
 				{
 					col.setCellRenderer(this.multiLineRenderer);
@@ -2023,6 +2025,14 @@ public class WbTable
         else if (isMapColumn(i))
         {
           col.setCellRenderer(new MapColumnRenderer());
+        }
+        else if (type == Types.TIMESTAMP_WITH_TIMEZONE)
+        {
+          // This is mainly for Oracle
+          // Timestamp columns are returned as a specific Oracle class and not as java.sql.Timestamp
+          // So the default renderer by class does not work
+          boolean variableFractions = Settings.getInstance().useVariableLengthTimeFractions();
+      		col.setCellRenderer(new DateColumnRenderer(Settings.getInstance().getDefaultTimestampFormat(), variableFractions));
         }
 			}
 		}
