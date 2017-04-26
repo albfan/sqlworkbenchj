@@ -218,6 +218,27 @@
 						</entry>
 					</row>
 
+-          <row>
+            <entry id="import-skip-target-check">-skipTargetCheck</entry>
+            <entry>
+              <para>
+                Normally <literal>WbImport</literal> will check if the specified target table exists and will retrieve the column
+                definition for the target table through the JDBC API. However, some JDBC drivers do not always return all table
+                information e.g. for temporary tables. If you know that the target table exists, the parameter
+                <literal>-skipTargetCheck=true</literal> can be used to tell <literal>WbImport</literal> to not verify
+                the existence of the table through the JDBC API.
+              </para>
+              <para>
+                However, <literal>WbImport</literal> needs to know the data types of the table columns.
+                When <literal>-skipTargetCheck</literal> is enabled, the data types are detected by
+                running a <literal>SELECT *</literal> statement to fetch the definition of the columns.
+                For JDBC drivers supporting meta data for prepared statements, the query is only
+                prepared, but not executed. For drivers not supporting that, the query is executed
+                and the result is limited to a single row.
+              </para>
+            </entry>
+          </row>
+
 					<row>
 						<entry>-checkDependencies</entry>
 						<entry>
