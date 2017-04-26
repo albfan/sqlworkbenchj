@@ -67,6 +67,7 @@ import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
 
+
 /**
  *
  * @author  Thomas Kellerer
@@ -182,6 +183,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_INSERT_START);
 		cmdLine.addArgument(ARG_PG_COPY, ArgumentType.BoolSwitch);
 		cmdLine.addArgument(ARG_ADJUST_SEQ, ArgumentType.BoolSwitch);
+		cmdLine.addArgument(WbCopy.PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolSwitch);
 		ModifierArguments.addArguments(cmdLine);
     ConditionCheck.addParameters(cmdLine);
 	}
@@ -359,6 +361,9 @@ public class WbImport
 		imp.setIgnoreIdentityColumns(cmdLine.getBoolean(CommonArgs.ARG_IGNORE_IDENTITY, false));
 		imp.setAdjustSequences(cmdLine.getBoolean(ARG_ADJUST_SEQ, false));
 
+		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
+		imp.skipTargetCheck(skipTargetCheck);
+
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(CommonArgs.ARG_SCHEMA);
 
@@ -529,7 +534,7 @@ public class WbImport
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
-			initParser(table, textParser, result, multiFileImport);
+			initParser(table, textParser, result, multiFileImport, skipTargetCheck);
 			if (!result.isSuccess())
 			{
 				textParser.done();
@@ -607,6 +612,7 @@ public class WbImport
 			xmlParser.setAbortOnError(!continueOnError);
 			xmlParser.setIgnoreMissingColumns(ignoreMissingCols);
 			parser = xmlParser;
+      parser.setCheckTargetWithQuery(skipTargetCheck);
 
 			// The encoding must be set as early as possible
 			// as the XmlDataFileParser might need it to read
@@ -707,7 +713,7 @@ public class WbImport
 				spreadSheetParser.setInputFile(inputFile);
 			}
 
-			initParser(table, spreadSheetParser, result, multiFileImport);
+			initParser(table, spreadSheetParser, result, multiFileImport, skipTargetCheck);
 			if (!result.isSuccess())
 			{
 				spreadSheetParser.done();
@@ -856,7 +862,7 @@ public class WbImport
 		return result;
 	}
 
-	private void initParser(String tableName, TabularDataParser parser, StatementRunnerResult result, boolean isMultifile)
+	private void initParser(String tableName, TabularDataParser parser, StatementRunnerResult result, boolean isMultifile, boolean skipTargetCheck)
 	{
 		boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 		boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
@@ -877,6 +883,8 @@ public class WbImport
 		{
 			toImport = stringToCols(importcolumns);
 		}
+
+    parser.setCheckTargetWithQuery(skipTargetCheck);
 
 		try
 		{

@@ -42,6 +42,7 @@ import workbench.resource.Settings;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.db.importer.modifier.ImportValueModifier;
 
@@ -103,6 +104,7 @@ public abstract class AbstractImportFileParser
   protected boolean ignoreMissingColumns;
   protected boolean clobsAreFilenames;
   protected boolean ignoreAllNullRows;
+  protected boolean checkTargetWithQuery;
 
   public AbstractImportFileParser()
   {
@@ -177,6 +179,12 @@ public abstract class AbstractImportFileParser
   {
     this.sourceFiles = null;
     this.inputFile = file;
+  }
+
+  @Override
+  public void setCheckTargetWithQuery(boolean flag)
+  {
+    this.checkTargetWithQuery = flag;
   }
 
   /**
@@ -291,7 +299,7 @@ public abstract class AbstractImportFileParser
     {
       table.setSchema(this.targetSchema);
     }
-    if (this.connection != null)
+    if (this.connection != null && !checkTargetWithQuery)
     {
       table.adjustCase(this.connection);
       if (table.getSchema() == null)
@@ -318,7 +326,17 @@ public abstract class AbstractImportFileParser
 
     TableIdentifier table = createTargetTableId();
 
-    targetTable = connection.getMetadata().getTableDefinition(table, true);
+    if (checkTargetWithQuery)
+    {
+      TableSelectBuilder builder = new TableSelectBuilder(connection);
+      String query = builder.getSelectForTable(table, 1);
+      List<ColumnIdentifier> columns = SqlUtil.getResultSetColumns(query, connection);
+      targetTable = new TableDefinition(table, columns);
+    }
+    else
+    {
+      targetTable = connection.getMetadata().getTableDefinition(table, true);
+    }
 
     return targetTable;
   }

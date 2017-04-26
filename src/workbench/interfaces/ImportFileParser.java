@@ -105,4 +105,6 @@ public interface ImportFileParser
 	void setRowMonitor(RowActionMonitor monitor);
 
 	void setIgnoreMissingColumns(boolean flag);
+
+  void setCheckTargetWithQuery(boolean flag);
 }
