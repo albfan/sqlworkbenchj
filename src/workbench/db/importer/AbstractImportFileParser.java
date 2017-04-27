@@ -328,10 +328,17 @@ public abstract class AbstractImportFileParser
 
     if (checkTargetWithQuery)
     {
-      TableSelectBuilder builder = new TableSelectBuilder(connection);
-      String query = builder.getSelectForTable(table, 1);
-      List<ColumnIdentifier> columns = SqlUtil.getResultSetColumns(query, connection);
-      targetTable = new TableDefinition(table, columns);
+      try
+      {
+        TableSelectBuilder builder = new TableSelectBuilder(connection);
+        String query = builder.getSelectForTable(table, 1);
+        List<ColumnIdentifier> columns = SqlUtil.getResultSetColumns(query, connection);
+        targetTable = new TableDefinition(table, columns);
+      }
+      catch (Exception ex)
+      {
+        LogMgr.logError("AbstractImportFileParser.getTargetTable()", "Error trying to detect the target table using a query", ex);
+      }
     }
     else
     {
