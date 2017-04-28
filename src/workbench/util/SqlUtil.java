@@ -768,6 +768,10 @@ public class SqlUtil
         {
           pstmt = conn.getSqlConnection().prepareStatement(sql);
           meta = pstmt.getMetaData();
+          if (meta == null)
+          {
+            LogMgr.logDebug("SqlUtil.getResultInfoFromQuery()", "No ResultSetMetaData returned from the PreparedStatement");
+          }
         }
         catch (Exception e)
         {
