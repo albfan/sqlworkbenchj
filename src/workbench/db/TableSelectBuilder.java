@@ -26,9 +26,12 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.db.sqltemplates.TemplateHandler;
 import workbench.log.LogMgr;
+
+import workbench.db.sqltemplates.TemplateHandler;
+
 import workbench.sql.ResultNameAnnotation;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -54,6 +57,7 @@ public class TableSelectBuilder
   private boolean sortPksFirst;
   private String sqlTemplate;
   private String limitClause;
+  private boolean neverUseFQN = false;
 
   public TableSelectBuilder(WbConnection source)
   {
@@ -85,6 +89,11 @@ public class TableSelectBuilder
     {
       sqlTemplate = "SELECT " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\nFROM " + MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER;
     }
+  }
+
+  public void setNeverUseFQN(boolean flag)
+  {
+    this.neverUseFQN = flag;
   }
 
   public void setSortPksFirst(boolean flag)
@@ -196,7 +205,7 @@ public class TableSelectBuilder
       return null;
     }
 
-    StringBuilder selectCols = new StringBuilder(columns.size() * 15);
+    StringBuilder selectCols = new StringBuilder(columns == null ? 5 : columns.size() * 15);
 
     if (CollectionUtil.isEmpty(columns))
     {
@@ -277,6 +286,13 @@ public class TableSelectBuilder
   private String replacePlaceholders(TableIdentifier table, CharSequence selectCols, int maxRows)
   {
     String select = sqlTemplate.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, selectCols);
+
+    if (neverUseFQN)
+    {
+      select = select.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER);
+      select = select.replace(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER);
+    }
+    
     select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection);
 
     select = applyLimit(select, maxRows);

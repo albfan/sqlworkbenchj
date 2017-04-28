@@ -771,7 +771,7 @@ public class SqlUtil
         }
         catch (Exception e)
         {
-          LogMgr.logError("SqlUtil.getResultInfoFromQuery()", "Could not obtain result info from prepared statement", e);
+          LogMgr.logError("SqlUtil.getResultInfoFromQuery()", "Could not obtain result info from prepared statement for:\n" + sql, e);
           closeStatement(pstmt);
           pstmt = null;
           meta = null;

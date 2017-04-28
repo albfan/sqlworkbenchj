@@ -330,8 +330,14 @@ public abstract class AbstractImportFileParser
     {
       try
       {
-        TableSelectBuilder builder = new TableSelectBuilder(connection);
-        String query = builder.getSelectForTable(table, 1);
+        TableSelectBuilder builder = new TableSelectBuilder(connection, TableSelectBuilder.TABLEDATA_TEMPLATE_NAME);
+
+        // make sure the table name is used as specified by the user
+        builder.setNeverUseFQN(true);
+
+        String query = builder.getSelectForColumns(table, null, 1);
+        LogMgr.logDebug("AbstractImportFileParser.getTargetTable()", "Using query to detect table columns:\n" + query);
+
         List<ColumnIdentifier> columns = SqlUtil.getResultSetColumns(query, connection);
         targetTable = new TableDefinition(table, columns);
       }
