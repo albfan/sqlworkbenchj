@@ -289,11 +289,39 @@ public class TableSelectBuilder
 
     if (neverUseFQN)
     {
-      select = select.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER);
-      select = select.replace(MetaDataSqlManager.TABLE_EXPRESSION_PLACEHOLDER, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER);
+      TableIdentifier tbl = new TableIdentifier(table.getCatalog(), table.getSchema(), table.getTableName())
+      {
+        @Override
+        public String getTableExpression(WbConnection conn)
+        {
+          return super.buildTableExpression(dbConnection.getMetadata(), null, SqlUtil.getCatalogSeparator(conn), SqlUtil.getSchemaSeparator(conn));
+        }
+
+        @Override
+        public String getTableExpression(char catalogSeparator, char schemaSeparator)
+        {
+          return getTableExpression(dbConnection);
+        }
+
+        @Override
+        public String getTableExpression()
+        {
+          return getTableExpression(dbConnection);
+        }
+
+        @Override
+        public String getFullyQualifiedName(WbConnection con)
+        {
+          return getTableExpression(dbConnection);
+        }
+      };
+
+      select = TemplateHandler.replaceTablePlaceholder(select, tbl, null);
     }
-    
-    select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection);
+    else
+    {
+      select = TemplateHandler.replaceTablePlaceholder(select, table, dbConnection);
+    }
 
     select = applyLimit(select, maxRows);
 

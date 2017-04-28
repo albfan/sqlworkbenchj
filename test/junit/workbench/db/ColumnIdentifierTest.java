@@ -28,13 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import workbench.util.SqlUtil;
 
 
 public class ColumnIdentifierTest
@@ -67,6 +66,12 @@ public class ColumnIdentifierTest
 				if (isQuoted(name)) return name;
 				return "`" + name + "`";
 			}
+
+      @Override
+      public String quoteObjectname(String name, boolean quoteAlways)
+      {
+        return quoteObjectname(name);
+      }
 
       @Override
       public boolean isLegalIdentifier(String name)
@@ -107,6 +112,12 @@ public class ColumnIdentifierTest
 				if (isQuoted(name)) return name;
 				return "[" + name + "]";
 			}
+
+      @Override
+      public String quoteObjectname(String name, boolean quoteAlways)
+      {
+        return quoteObjectname(name);
+      }
 
 			@Override
 			public boolean needsQuotes(String name)
@@ -208,7 +219,7 @@ public class ColumnIdentifierTest
 		ColumnIdentifier col6 = new ColumnIdentifier("six", Types.VARCHAR, true);
 		col6.setPosition(6);
 
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+		List<ColumnIdentifier> cols = new ArrayList<>();
 		cols.add(col3);
 		cols.add(col6);
 		cols.add(col2);

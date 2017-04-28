@@ -53,6 +53,8 @@ public interface QuoteHandler
    */
   String quoteObjectname(String name);
 
+  String quoteObjectname(String name, boolean quoteAlways);
+
   /**
    * Checks if the given SQL name needs quoting.
    *
@@ -97,6 +99,12 @@ public interface QuoteHandler
     public String quoteObjectname(String name)
     {
       return SqlUtil.quoteObjectname(name, false, true, '"');
+    }
+
+    @Override
+    public String quoteObjectname(String name, boolean quoteAlways)
+    {
+      return SqlUtil.quoteObjectname(name, quoteAlways, true, '"');
     }
 
     @Override

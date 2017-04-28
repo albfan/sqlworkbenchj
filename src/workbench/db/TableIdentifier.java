@@ -27,8 +27,10 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
-import workbench.db.objectcache.DbObjectCacheFactory;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
@@ -366,12 +368,12 @@ public class TableIdentifier
 
   public String getTableExpression()
   {
-    return buildTableExpression(null, '.', '.');
+    return buildTableExpression(QuoteHandler.STANDARD_HANDLER, null, '.', '.');
   }
 
   public String getTableExpression(char catalogSeparator, char schemaSeparator)
   {
-    return this.buildTableExpression(null, catalogSeparator, schemaSeparator);
+    return this.buildTableExpression(QuoteHandler.STANDARD_HANDLER, null, catalogSeparator, schemaSeparator);
   }
 
   @Override
@@ -384,10 +386,11 @@ public class TableIdentifier
   {
     char catalogSeparator = SqlUtil.getCatalogSeparator(conn);
     char schemaSeparator = SqlUtil.getSchemaSeparator(conn);
-    return this.buildTableExpression(conn, catalogSeparator, schemaSeparator);
+    QuoteHandler quoter = conn == null ? QuoteHandler.STANDARD_HANDLER : conn.getMetadata();
+    return this.buildTableExpression(quoter, conn, catalogSeparator, schemaSeparator);
   }
 
-  private String buildTableExpression(WbConnection conn, char catalogSeparator, char schemaSeparator)
+  protected String buildTableExpression(QuoteHandler quoter, WbConnection conn, char catalogSeparator, char schemaSeparator)
   {
     if (this.isNewTable && this.tablename == null)
     {
@@ -404,15 +407,15 @@ public class TableIdentifier
     {
       if (this.catalog != null && !useTableNameOnlyInExpression)
       {
-        result.append(SqlUtil.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted, true, '"'));
+        result.append(quoter.quoteObjectname(this.catalog, preserveQuotes && catalogWasQuoted));
         result.append(catalogSeparator);
       }
       if (this.schema != null && !useTableNameOnlyInExpression)
       {
-        result.append(SqlUtil.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted, true, '"'));
+        result.append(quoter.quoteObjectname(this.schema, preserveQuotes && schemaWasQuoted));
         result.append(schemaSeparator);
       }
-      result.append(SqlUtil.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted, true, '"'));
+      result.append(quoter.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
     }
     else
     {

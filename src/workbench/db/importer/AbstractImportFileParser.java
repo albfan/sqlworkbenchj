@@ -304,7 +304,11 @@ public abstract class AbstractImportFileParser
       table.adjustCase(this.connection);
       if (table.getSchema() == null)
       {
-        table.setSchema(this.connection.getCurrentSchema());
+        table.setSchema(table.getSchemaToUse(connection));
+      }
+      if (table.getCatalog() == null)
+      {
+        table.setCatalog(table.getCatalogToUse(connection));
       }
     }
     return table;

@@ -1733,9 +1733,14 @@ public class SqlUtil
    */
   public static String fullyQualifiedName(WbConnection conn, DbObject object)
   {
+    QuoteHandler quoter = (conn != null ? conn.getMetadata() : QuoteHandler.STANDARD_HANDLER);
+    return fullyQualifiedName(quoter, conn, object);
+  }
+
+  public static String fullyQualifiedName(QuoteHandler quoter, WbConnection conn, DbObject object)
+  {
     if (object == null) return null;
     StringBuilder result = new StringBuilder(30);
-    QuoteHandler quoter = (conn != null ? conn.getMetadata() : QuoteHandler.STANDARD_HANDLER);
 
     boolean supportsCatalogs = (conn != null ? conn.getDbSettings().supportsCatalogs() : true);
     boolean supportsSchemas = (conn != null ? conn.getDbSettings().supportsSchemas() : true);
