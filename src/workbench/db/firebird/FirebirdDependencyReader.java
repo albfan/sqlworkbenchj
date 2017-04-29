@@ -28,15 +28,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+
 import workbench.db.DbObject;
+import workbench.db.DomainIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
+
 import workbench.gui.dbobjects.objecttree.DbObjectSorter;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -60,6 +65,16 @@ public class FirebirdDependencyReader
     "from rdb$dependencies\n" +
     "where rdb$depended_on_name = ?";
 
+  private final String usedDomains =
+    "select distinct rdb$field_source, 'DOMAIN'\n" +
+    "from rdb$relation_fields\n" +
+    "where rdb$relation_name = ?";
+
+  private final String domainUsage =
+    "select distinct rdb$relation_name, 'TABLE'\n" +
+    "from rdb$relation_fields\n" +
+    "where rdb$field_source = ?";
+
   public FirebirdDependencyReader()
   {
   }
@@ -70,6 +85,9 @@ public class FirebirdDependencyReader
     if (base == null || connection == null) return Collections.emptyList();
 
     List<DbObject> objects = retrieveObjects(connection, base, searchUsed);
+    objects.addAll(retrieveObjects(connection, base, usedDomains));
+
+    DbObjectSorter.sort(objects, true);
 
     return objects;
   }
@@ -79,6 +97,8 @@ public class FirebirdDependencyReader
   {
     if (base == null || connection == null) return Collections.emptyList();
     List<DbObject> objects = retrieveObjects(connection, base, searchUsedBy);
+    objects.addAll(retrieveObjects(connection, base, domainUsage));
+    DbObjectSorter.sort(objects, true);
 
     return objects;
   }
@@ -106,12 +126,20 @@ public class FirebirdDependencyReader
       rs = pstmt.executeQuery();
       while (rs.next())
       {
-        String name = rs.getString(1);
+        String name = StringUtil.trim(rs.getString(1));
         String type = rs.getString(2);
-        TableIdentifier tbl = new TableIdentifier(name);
-        tbl.setNeverAdjustCase(true);
-        tbl.setType(type);
-        result.add(tbl);
+        if ("DOMAIN".equals(type))
+        {
+          DomainIdentifier domain = new DomainIdentifier(null, null, name);
+          result.add(domain);
+        }
+        else
+        {
+          TableIdentifier tbl = new TableIdentifier(name);
+          tbl.setNeverAdjustCase(true);
+          tbl.setType(type);
+          result.add(tbl);
+        }
       }
     }
     catch (Exception ex)
@@ -132,7 +160,7 @@ public class FirebirdDependencyReader
   @Override
   public boolean supportsUsedByDependency(String objectType)
   {
-    return supportedTypes.contains(objectType);
+    return supportedTypes.contains(objectType) || "domain".equalsIgnoreCase(objectType);
   }
 
   @Override
