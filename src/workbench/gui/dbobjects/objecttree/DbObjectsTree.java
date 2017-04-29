@@ -241,7 +241,7 @@ public class DbObjectsTree
       toSearch = getModel().getRoot();
     }
 
-    ObjectTreeNode node = findNodeForTable(toSearch, dbo);
+    ObjectTreeNode node = findNodeForObject(toSearch, dbo);
 
     if (node != null)
     {
@@ -269,7 +269,7 @@ public class DbObjectsTree
         {
           doLoad(toLoad, true);
 
-          final ObjectTreeNode node = findNodeForTable(toLoad, dbo);
+          final ObjectTreeNode node = findNodeForObject(toLoad, dbo);
 
           if (node != null)
           {
@@ -371,10 +371,10 @@ public class DbObjectsTree
     return null;
   }
 
-  private ObjectTreeNode findNodeForTable(ObjectTreeNode parent, DbObject table)
+  private ObjectTreeNode findNodeForObject(ObjectTreeNode parent, DbObject dbo)
   {
     if (parent == null) return null;
-    if (table == null) return null;
+    if (dbo == null) return null;
     String type = parent.getType();
     if (type == null) return null;
 
@@ -386,12 +386,12 @@ public class DbObjectsTree
       ObjectTreeNode child = parent.getChildAt(i);
       if (child != null && !child.isFKTable())
       {
-        if (DbObjectComparator.namesAreEqual(table, child.getDbObject()))
+        if (DbObjectComparator.namesAreEqual(dbo, child.getDbObject()))
         {
           return child;
         }
       }
-      ObjectTreeNode n2 = findNodeForTable(child, table);
+      ObjectTreeNode n2 = findNodeForObject(child, dbo);
       if (n2 != null) return n2;
     }
     return null;
