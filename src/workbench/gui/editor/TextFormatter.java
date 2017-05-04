@@ -46,10 +46,12 @@ import workbench.util.StringUtil;
 public class TextFormatter
 {
 	private String dbId;
+  private char quoteChar;
 
-	public TextFormatter(String id)
+	public TextFormatter(String id, char nonStandardQuoteChar)
 	{
 		this.dbId = id;
+    this.quoteChar = nonStandardQuoteChar;
 	}
 
 	public void formatSql(final SqlTextContainer editor, DelimiterDefinition alternateDelimiter)
@@ -132,7 +134,7 @@ public class TextFormatter
 
 			boolean isEmpty = isEmpty(command);
 
-			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false));
+			needDelimiter = (count > 1) || (isSelected && delimiter.terminatesScript(sql, false, quoteChar));
 
 			addNewLine = (i < count);
 

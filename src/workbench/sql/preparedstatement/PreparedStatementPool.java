@@ -27,7 +27,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
 import workbench.db.WbConnection;
+
 import workbench.util.SqlUtil;
 
 /**
@@ -71,7 +73,7 @@ public class PreparedStatementPool
 		if (sql.indexOf('?') == -1) return false;
 
 		// remove all comments, because the ? could also be part of a comment
-		String clean = SqlUtil.makeCleanSql(sql, false, false);
+		String clean = SqlUtil.makeCleanSql(sql, false, false, true, dbConnection);
 		if (clean.indexOf('?') == -1) return false;
 
 		sql = getSqlToUse(sql);

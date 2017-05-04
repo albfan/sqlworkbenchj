@@ -1155,14 +1155,21 @@ public class SqlUtil
     return false;
   }
 
-  public static String makeCleanSql(String aSql, boolean keepNewlines)
+  public static String makeCleanSql(String sql, boolean keepNewlines)
   {
-    return makeCleanSql(aSql, keepNewlines, false, false, true);
+    return makeCleanSql(sql, keepNewlines, false, false, true, '\"');
   }
 
-  public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
+  public static String makeCleanSql(String sql, boolean keepNewlines, boolean keepComments)
   {
-    return makeCleanSql(aSql, keepNewlines, keepComments, false, true);
+    return makeCleanSql(sql, keepNewlines, keepComments, false, true, '\"');
+  }
+
+  public static String makeCleanSql(String sql, boolean keepNewlines, boolean keepComments, boolean removeSemicolon, WbConnection connection)
+  {
+		boolean isMySQL = (connection != null ? connection.getMetadata().isMySql() : false);
+    char quoteChar = (connection != null ? connection.getMetadata().getIdentifierQuoteChar() : '\"');
+    return makeCleanSql(sql, keepNewlines, keepComments, isMySQL, removeSemicolon, quoteChar);
   }
 
   /**
@@ -1170,19 +1177,24 @@ public class SqlUtil
    *
    * Whitespace is not removed inside string literals.
    *
-   * @param aSql                     The sql script to "clean out"
+   * @param sql                     The sql script to "clean out"
    * @param keepNewlines             if true, newline characters (\n) are kept
    * @param keepComments             if true, comments (single line, block comments) are kept
    * @param checkNonStandardComments check for non-standard MySQL single line comments
    * @param removeSemicolon          if true, a trailing semicolon will be removed
+   * @param identifierQuote          if the DBMS doesn't care for the SQL standard, an additional non-standard identifier quote character can be specified
+   * 
    * @return String
  	 */
-  public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon)
+  public static String makeCleanSql(String sql, boolean keepNewlines, boolean keepComments, boolean checkNonStandardComments, boolean removeSemicolon, char identifierQuote)
   {
-    if (aSql == null) return null;
-    aSql = aSql.trim();
-    int count = aSql.length();
-    if (count == 0) return aSql;
+    if (sql == null) return null;
+
+    if (keepNewlines && keepComments && !removeSemicolon) return sql;
+
+    sql = sql.trim();
+    int count = sql.length();
+    if (count == 0) return sql;
     boolean inComment = false;
     boolean inQuotes = false;
     boolean lineComment = false;
@@ -1192,13 +1204,13 @@ public class SqlUtil
 
     char last = ' ';
 
-    int start = StringUtil.findFirstNonWhitespace(aSql);
+    int start = StringUtil.findFirstNonWhitespace(sql);
 
     for (int i=start; i < count; i++)
     {
-      char c = aSql.charAt(i);
+      char c = sql.charAt(i);
 
-      if (c == '\'' || c == '"')
+      if (c == '\'' || c == '"' || c == identifierQuote)
       {
         if (!inQuotes)
         {
@@ -1226,18 +1238,18 @@ public class SqlUtil
 
       if (!(inComment || lineComment) || keepComments)
       {
-        if (!keepComments && c == '/' && i < count - 1 && aSql.charAt(i+1) == '*')
+        if (!keepComments && c == '/' && i < count - 1 && sql.charAt(i+1) == '*')
         {
           inComment = true;
           i++;
         }
-        else if (!keepComments && c == '-' && i < count - 1 && aSql.charAt(i+1) == '-')
+        else if (!keepComments && c == '-' && i < count - 1 && sql.charAt(i+1) == '-')
         {
           // ignore rest of line for -- style comments
           while (c != '\n' && i < count - 1)
           {
             i++;
-            c = aSql.charAt(i);
+            c = sql.charAt(i);
           }
         }
         else
@@ -1263,7 +1275,7 @@ public class SqlUtil
       }
       else
       {
-        if ( c == '*' && i < count - 1 && aSql.charAt(i+1) == '/')
+        if ( c == '*' && i < count - 1 && sql.charAt(i+1) == '/')
         {
           inComment = false;
           i++;

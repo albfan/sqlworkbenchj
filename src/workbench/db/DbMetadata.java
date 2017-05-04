@@ -621,6 +621,15 @@ public class DbMetadata
     return this.quoteCharacter;
   }
 
+  public char getIdentifierQuoteChar()
+  {
+    if (StringUtil.isBlank(quoteCharacter))
+    {
+      return '\"';
+    }
+    return this.quoteCharacter.charAt(0);
+  }
+
   public String getBaseTableTypeName()
   {
     return baseTableTypeName;
@@ -1193,6 +1202,7 @@ public class DbMetadata
    * @see #needsQuotes(java.lang.String)
    * @see #getIdentifierQuoteCharacter()
    */
+  @Override
   public String quoteObjectname(String name, boolean quoteAlways)
   {
     if (StringUtil.isEmptyString(name)) return null;

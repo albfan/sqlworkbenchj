@@ -851,7 +851,7 @@ public class SqlCommand
 
       if (!removeComments && !removeNewLines ) return originalSql;
 
-      return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments, currentConnection.getMetadata().isMySql(), false);
+      return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments, false, currentConnection);
     }
     catch (Exception ex)
     {
@@ -1035,7 +1035,7 @@ public class SqlCommand
    */
   protected String getCommandLine(String sql)
   {
-    return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
+    return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false, true, currentConnection));
   }
 
   /**

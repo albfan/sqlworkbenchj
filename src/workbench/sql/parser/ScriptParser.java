@@ -256,7 +256,7 @@ public class ScriptParser
 		if (this.alternateDelimiter == null) return;
 		if (this.originalScript == null) return;
 
-		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript, this.parserType == ParserType.MySQL);
+		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript, this.parserType == ParserType.MySQL, '\"');
 		this.commands = null;
 	}
 

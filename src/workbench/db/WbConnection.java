@@ -543,7 +543,7 @@ public class WbConnection
       for (int i=0; i < count; i++)
       {
         command = p.getCommand(i);
-        String stmtSql = StringUtil.getMaxSubstring(SqlUtil.makeCleanSql(command, false),250);
+        String stmtSql = StringUtil.getMaxSubstring(SqlUtil.makeCleanSql(command, false, false, true, this),250);
 
         try
         {

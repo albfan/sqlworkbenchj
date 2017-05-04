@@ -189,7 +189,7 @@ public class TextFormatterTest
 		selectionStart = 0;
 		selectionEnd = 0;
 
-		TextFormatter instance = new TextFormatter("postgresql");
+		TextFormatter instance = new TextFormatter("postgresql", '\"');
 		instance.formatSql(editor, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
 		String expected =
@@ -233,7 +233,7 @@ public class TextFormatterTest
 //		System.out.println("formatted:\n" + editorText);
 		assertEquals(expected, editorText.trim());
 
-		instance = new TextFormatter("oracle");
+		instance = new TextFormatter("oracle", '\"');
 
 		editorText = "update foo set bar = 1 where id = 1\n/\nupdate foo set bar = 2 where id = 2\n/\n";
 		selectionStart = 0;

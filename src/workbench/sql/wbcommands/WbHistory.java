@@ -114,8 +114,7 @@ public class WbHistory
 	{
     if (WbManager.getInstance().isGUIMode()) return sql;
 
-		boolean isMySQL = (this.currentConnection != null ? currentConnection.getMetadata().isMySql() : false);
-		String display = SqlUtil.makeCleanSql(sql, false, false, isMySQL, true);
+		String display = SqlUtil.makeCleanSql(sql, false, false, true, currentConnection);
 		if (maxLength > -1)
 		{
 			display = StringUtil.getMaxSubstring(display, maxLength - 10);

@@ -22,9 +22,9 @@
  *
  */
 package workbench.sql.parser;
-import org.junit.Test;
-
 import workbench.sql.DelimiterDefinition;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -52,9 +52,9 @@ public class DelimiterDefinitionTest
 		throws Exception
 	{
 		String sql = "delete from thetable\nGO\n";
-		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
+		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false, '\"'));
 		sql = "delete from thetable\nGO";
-		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false));
+		assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql, false, '\"'));
 
 		sql = "create or replace procedure my_test \n" +
 				"as \n" +
@@ -62,9 +62,9 @@ public class DelimiterDefinitionTest
 				"  null;" +
 				"end; \n" +
 				" / ";
-		assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false));
+		assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql, false, '\"'));
 		DelimiterDefinition del = new DelimiterDefinition("/");
-		assertTrue(del.terminatesScript(sql, false));
+		assertTrue(del.terminatesScript(sql, false, '\"'));
 	}
 
 	@Test

@@ -2325,7 +2325,7 @@ public class SqlPanel
 	@Override
 	public void exportData()
 	{
-		final String sql = SqlUtil.makeCleanSql(this.editor.getSelectedStatement(),false);
+		final String sql = this.editor.getSelectedStatement();
 
 		this.cancelExecution = false;
 
@@ -3384,7 +3384,7 @@ public class SqlPanel
 
         if (LogMgr.isTraceEnabled())
         {
-          LogMgr.logTrace("SqlPanel.displayResults()", "Statement " + i + ": " + SqlUtil.makeCleanSql(StringUtil.getMaxSubstring(currentSql, 150), false));
+          LogMgr.logTrace("SqlPanel.displayResults()", "Statement " + i + ": " + SqlUtil.makeCleanSql(StringUtil.getMaxSubstring(currentSql, 150), false, false, true, dbConnection));
         }
 
 				historyStatements.add(currentSql);

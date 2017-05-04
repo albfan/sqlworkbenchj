@@ -672,7 +672,7 @@ public class StatementRunner
 
 		if (Settings.getInstance().getBoolProperty(Settings.PROP_LOG_CLEAN_SQL, false))
 		{
-			msg.append(SqlUtil.makeCleanSql(sql, false, true));
+			msg.append(SqlUtil.makeCleanSql(sql, false, true, true, conn));
 			msg.append(' ');
 		}
 		else

@@ -229,7 +229,7 @@ public class WbDefineVar
 			boolean cleanup = cmdLine.getBoolean(ARG_CLEANUP_VALUE, Settings.getInstance().getCleanupVariableValues());
 			if (cleanup)
 			{
-				valueParameter = SqlUtil.makeCleanSql(valueParameter, false, false);
+				valueParameter = SqlUtil.makeCleanSql(valueParameter, false, false, true, currentConnection);
 			}
 
 			if (removeUndefined)

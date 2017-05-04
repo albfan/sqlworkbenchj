@@ -317,6 +317,7 @@ public class EditorPanel
   {
     return quoteHandler;
   }
+  
   @Override
   public void fontChanged(String aKey, Font aFont)
   {
@@ -490,10 +491,13 @@ public class EditorPanel
   {
     if (!allowReformatOnReadonly && !this.isEditable()) return;
 
+    String quote = getQuoteHandler().getIdentifierQuoteCharacter();
+    char quoteChar = StringUtil.isBlank(quote) ? '\"' : quote.charAt(0);
+
     try
     {
       WbSwingUtilities.showWaitCursor(this);
-      TextFormatter f = new TextFormatter(this.dbId);
+      TextFormatter f = new TextFormatter(this.dbId, quoteChar);
       f.formatSql(this, alternateDelimiter);
     }
     finally

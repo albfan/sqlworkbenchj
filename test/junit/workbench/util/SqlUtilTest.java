@@ -400,6 +400,14 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testCleanSqlWithStupidQuotes()
+  {
+    String sql = "select * from `nation_json/*/2/***/nation.json`";
+    String clean = SqlUtil.makeCleanSql(sql, false, false, true, false, '`');
+    assertEquals(sql, clean);
+  }
+
+	@Test
 	public void testCleanSql()
 	{
 		String sql = "select \r\n from project";

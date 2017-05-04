@@ -1437,7 +1437,7 @@ public class DwPanel
 			this.sqlInfo.setBorder(b);
 			this.add(sqlInfo, BorderLayout.NORTH);
 		}
-		sqlInfo.setText(SqlUtil.makeCleanSql(sql == null ? "" : sql, false, false));
+		sqlInfo.setText(SqlUtil.makeCleanSql(sql == null ? "" : sql, false, false, true, dbConnection));
 	}
 
 	private void updateSqlInfoTooltip()

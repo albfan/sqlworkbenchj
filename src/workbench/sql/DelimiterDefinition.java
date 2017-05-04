@@ -212,13 +212,13 @@ public class DelimiterDefinition
 	 * with this delimiter
 	 * @param sql
 	 */
-	public boolean terminatesScript(String sql, boolean checkNonStandardComments)
+	public boolean terminatesScript(String sql, boolean checkNonStandardComments, char nonStandardQuoteChar)
 	{
 		if (StringUtil.isEmptyString(sql)) return false;
 
 		// cleaning the SQL from all "noise" ensures that the alternate delimiter is still
 		// recognized even if the script is terminated with only comments.
-		sql = SqlUtil.makeCleanSql(sql, true, false, checkNonStandardComments, false);
+		sql = SqlUtil.makeCleanSql(sql, true, false, checkNonStandardComments, false, nonStandardQuoteChar);
 
 		if (this.isSingleLine())
 		{
