@@ -18,14 +18,13 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.importer;
+package workbench.db;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import workbench.db.ColumnIdentifier;
-import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
+import workbench.db.hsqldb.HsqlArrayHandler;
 import workbench.db.postgres.PostgresArrayHandler;
 
 /**
@@ -44,9 +43,15 @@ public interface ArrayValueHandler
   {
     public static ArrayValueHandler getInstance(WbConnection conn)
     {
-      if (conn != null && conn.getMetadata().isPostgres())
+      if (conn == null) return null;
+
+      if (conn.getMetadata().isPostgres())
       {
         return new PostgresArrayHandler(conn);
+      }
+      if (conn.getMetadata().isHsql())
+      {
+        return new HsqlArrayHandler(conn);
       }
       return null;
     }

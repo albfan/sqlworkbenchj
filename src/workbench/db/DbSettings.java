@@ -213,12 +213,12 @@ public class DbSettings
 
   public boolean handleArrayDisplay()
   {
-    return getBoolProperty("array.adjust.display", false);
+    return getBoolProperty("array.adjust.display", true);
   }
 
   public boolean showArrayType()
   {
-    return getBoolProperty("array.show.type", true);
+    return getBoolProperty("array.show.type", false);
   }
 
   public boolean useGetStringForBit()

@@ -528,5 +528,21 @@ SELECT 42 FROM dual;</programlisting>
     </section>
   </section>
 
+	<section id="sqlanywhere-problems">
+		<title>Amazon Redshift</title>
+    <indexterm><primary>Problems</primary><secondary>Amazon Redshift</secondary></indexterm>
+    <indexterm><primary>Amazon Redshift</primary><secondary>ERROR: type "e" does not exist</secondary></indexterm>
+		<section id="sqa-nchar">
+			<title>"ERROR: type "e" does not exist" when using the DbExplorer</title>
+      <para>
+        This error occurs when using a Postgres JDBC driver with Amazon Redshift.
+      </para>
+      <para>
+        For Redshift, the Redshift driver should be used:
+        <ulink url="http://docs.aws.amazon.com/redshift/latest/mgmt/configure-jdbc-connection.html"/>
+      </para>
+    </section>
+  </section>
+
 </section>
 

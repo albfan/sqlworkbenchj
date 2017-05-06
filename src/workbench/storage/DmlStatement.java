@@ -50,10 +50,13 @@ import workbench.db.DmlExpressionBuilder;
 import workbench.db.DmlExpressionType;
 import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
-import workbench.db.importer.ArrayValueHandler;
+import workbench.db.ArrayValueHandler;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.formatter.WbSqlFormatter;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;

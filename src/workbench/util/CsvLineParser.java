@@ -23,6 +23,9 @@
  */
 package workbench.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import workbench.db.importer.TextFileParser;
 
 /**
@@ -264,4 +267,13 @@ public class CsvLineParser
     this.trimValues = trimValues;
   }
 
+	public List<String> getAllElements()
+	{
+		List<String> result = new ArrayList<>();
+		while (hasNext())
+		{
+			result.add(getNext());
+		}
+		return result;
+	}
 }

@@ -23,6 +23,8 @@
  */
 package workbench.db.importer;
 
+import workbench.db.ArrayValueHandler;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;

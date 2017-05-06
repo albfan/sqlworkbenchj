@@ -25,12 +25,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import workbench.WbManager;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.compare.BatchedStatement;
-import workbench.db.importer.ArrayValueHandler;
+import workbench.db.ArrayValueHandler;
+
 import workbench.log.LogMgr;
+
 import workbench.util.StringUtil;
 
 /**
