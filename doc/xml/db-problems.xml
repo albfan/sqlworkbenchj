@@ -528,11 +528,11 @@ SELECT 42 FROM dual;</programlisting>
     </section>
   </section>
 
-	<section id="sqlanywhere-problems">
+	<section id="redshift-problems">
 		<title>Amazon Redshift</title>
     <indexterm><primary>Problems</primary><secondary>Amazon Redshift</secondary></indexterm>
     <indexterm><primary>Amazon Redshift</primary><secondary>ERROR: type "e" does not exist</secondary></indexterm>
-		<section id="sqa-nchar">
+		<section id="redshift-jdbc-driver">
 			<title>"ERROR: type "e" does not exist" when using the DbExplorer</title>
       <para>
         This error occurs when using a Postgres JDBC driver with Amazon Redshift.
