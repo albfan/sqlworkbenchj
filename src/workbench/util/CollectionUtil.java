@@ -39,6 +39,14 @@ import java.util.TreeSet;
  */
 public class CollectionUtil
 {
+  public static void clear(Collection c)
+  {
+    if (c != null)
+    {
+      c.clear();
+    }
+  }
+  
   public static boolean isNonEmpty(Collection c)
   {
     return (c != null && c.size() > 0);

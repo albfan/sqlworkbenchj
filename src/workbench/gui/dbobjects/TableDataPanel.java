@@ -94,6 +94,7 @@ import workbench.storage.NamedSortDefinition;
 
 import workbench.sql.EndReadOnlyTrans;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
@@ -289,7 +290,6 @@ public class TableDataPanel
 
   private void createToolbar()
   {
-
     toolbar = new WbToolbar();
     toolbar.addDefaultBorder();
 		reloadAction = new ReloadAction(this);
@@ -369,27 +369,25 @@ public class TableDataPanel
 	public void dispose()
 	{
 		if (!initialized) return;
+
     reset();
-		dataDisplay.dispose();
+		if (dataDisplay != null) dataDisplay.dispose();
 		WbAction.dispose(reloadAction, cancelRetrieve);
 		WbSwingUtilities.removeAllListeners(this);
-		if (this.execListener != null)
-		{
-			this.execListener.clear();
-		}
+    CollectionUtil.clear(execListener);
 	}
 
 	public void detachConnection()
 	{
 		this.dbConnection = null;
-		this.dataDisplay.detachConnection();
-		this.dataDisplay.disableUpdateActions();
+    if (this.dataDisplay != null)
+    {
+      this.dataDisplay.detachConnection();
+      this.dataDisplay.disableUpdateActions();
+    }
 		this.reloadAction.setEnabled(false);
 		this.cancelRetrieve.setEnabled(false);
-		if (this.execListener != null)
-		{
-			this.execListener.clear();
-		}
+    CollectionUtil.clear(execListener);
 	}
 
 	public void disconnect()
@@ -428,7 +426,7 @@ public class TableDataPanel
 
 		WbSwingUtilities.invoke(() ->
     {
-      dataDisplay.clearContent();
+      if (dataDisplay != null) dataDisplay.clearContent();
       if (rowCountLabel != null) rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
       clearLoadingImage();
       reloadAction.setEnabled(true);
@@ -457,7 +455,7 @@ public class TableDataPanel
 	private void startRetrieveRowCount()
 	{
 		if (this.dbConnection == null) return;
-    
+
 		Thread t = null;
 		if (rowCountRetrieveStmt != null)
 		{
@@ -1159,8 +1157,6 @@ public class TableDataPanel
 
 	public void displayData(DataStore result, long lastExecutionTime)
 	{
-    if (this.dbConnection == null) return;
-
 		initGui();
 		removeTableDisplay();
 		useDataStoreSource = true;
@@ -1178,7 +1174,6 @@ public class TableDataPanel
 
 	public void showData(boolean includeData)
 	{
-    if (dbConnection == null) return;
 		if (this.isRetrieving()) return;
 
 		initGui();
