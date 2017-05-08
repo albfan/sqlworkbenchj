@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2017-05-07">
-    <entry dev-build="3" type="enh">For Firebird, DOMAINs are now included in the dependency display</entry>
-    <entry dev-build="3" type="enh">WbImport now also supports the -skipTargetCheck option</entry>
+  <release build="-1" date="2017-05-08">
+    <entry dev-build="2" type="enh">For Firebird, DOMAINs are now included in the dependency display</entry>
+    <entry dev-build="2" type="enh">WbImport now also supports the -skipTargetCheck option</entry>
     <entry dev-build="2" type="enh">It's now possible to define a default directory for a connection profile that is used e.g. for WbInclude or WbExport</entry>
     <entry dev-build="2" type="enh">The default encoding used for files in the editor can now be changed in the options dialog</entry>
     <entry dev-build="1" type="enh">WbImport and WbExport now support the -locale parameter to define the locale used for parsing and formatting dates and timestamps</entry>
