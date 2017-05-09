@@ -32,6 +32,7 @@
   <xsl:param name="prefixIndexNames">false</xsl:param>
   <xsl:param name="indexPrefix"></xsl:param>
   <xsl:param name="useIndexName">true</xsl:param>
+  <xsl:param name="includeIndexes">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -50,13 +51,14 @@ Supported parameters:
 
 * useJdbcTypes         - if true, create column definitions based on JDBC types, not DBMS data types (current value: <xsl:value-of select="$useJdbcTypes"/>)
 * makeLowerCase        - if true, make all identifiers lowercase (current value: <xsl:value-of select="$makeLowerCase"/>)
-* identifierCleanup    - how to deal with illegal SQL identifiers possible values: quote_if_needed, to_snake_case, preserve_case, cleanup (current value: <xsl:value-of select="$identifierCleanup"/>)
-* quoteAllNames        - if true, all identifiers are quoted using double quotes. Only used when identifierCleanup is not defined (current value: <xsl:value-of select="$quoteAllNames"/>)
+* identifierCleanup    - how to deal with illegal SQL identifiers possible values: quote_if_needed, to_snake_case, preserve_case, cleanup, none (current value: <xsl:value-of select="$identifierCleanup"/>)
+* quoteAllNames        - if true, all identifiers are quoted using double quotes. Only used when identifierCleanup is set to "none" (current value: <xsl:value-of select="$quoteAllNames"/>)
 * commitAfterEachTable - if false, write only one commit at the end (current value: <xsl:value-of select="$commitAfterEachTable"/>)
 * unrestrictedVarchar  - use VARCHAR type without length restriction (current value: <xsl:value-of select="$unrestrictedVarchar"/>)
 * sequencePrefix       - a prefix value for sequence names (current value: <xsl:value-of select="$sequencePrefix"/>)
 * prefixIndexNames     - prefix each index name with the table name (current value: <xsl:value-of select="$prefixIndexNames"/>)
 * indexPrefix          - a prefix value for index names, only used when prefixIndexNames is false (current value: <xsl:value-of select="$sequencePrefix"/>)
+* includeIndexes       - generate DDL for index definitions (current value: <xsl:value-of select="$includeIndexes"/>)
     </xsl:message>
 
     <xsl:apply-templates select="/schema-report/sequence-def">
@@ -281,13 +283,15 @@ Supported parameters:
       </xsl:if>
     </xsl:for-each>
 
-    <xsl:for-each select="index-def">
-      <xsl:value-of select="$newline"/>
-      <xsl:call-template name="create-index">
-        <xsl:with-param name="tablename" select="$tablename"/>
-        <xsl:with-param name="real-tablename" select="../table-name"/>
-      </xsl:call-template>
-    </xsl:for-each>
+    <xsl:if test="$includeIndexes = 'true'">
+      <xsl:for-each select="index-def">
+        <xsl:value-of select="$newline"/>
+        <xsl:call-template name="create-index">
+          <xsl:with-param name="tablename" select="$tablename"/>
+          <xsl:with-param name="real-tablename" select="../table-name"/>
+        </xsl:call-template>
+      </xsl:for-each>
+    </xsl:if>
 
     <xsl:if test="$commitAfterEachTable = 'true'">
     	<xsl:text>COMMIT;</xsl:text>
@@ -587,7 +591,7 @@ Supported parameters:
     <xsl:param name="scale"/>
     <xsl:param name="dbms-type"/>
     <xsl:param name="auto-inc"/>
-    
+
     <xsl:choose>
       <xsl:when test="$type-id = 2005"> <!-- CLOB -->
         <xsl:text>text</xsl:text>
@@ -747,7 +751,7 @@ Supported parameters:
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$quoteAllNames = 'true'">
-        <xsl:value-of select="concat($quote, objectname, $quote)"/>
+        <xsl:value-of select="concat($quote, $objectname, $quote)"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:call-template name="_simple_cleanup">

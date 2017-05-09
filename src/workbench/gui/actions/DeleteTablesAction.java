@@ -81,7 +81,7 @@ public class DeleteTablesAction
 
     List<TableIdentifier> tables = getSelectedTables();
 
-    boolean autoCommitChanged = false;
+    final boolean autoCommitChanged;
     boolean autoCommit = source.getConnection().getAutoCommit();
 
     // this is essentially here for the DbTree, because the DbTree sets its own connection
@@ -93,23 +93,31 @@ public class DeleteTablesAction
       source.getConnection().changeAutoCommit(false);
       autoCommitChanged = true;
     }
+    else
+    {
+      autoCommitChanged = false;
+    }
 
-    try
+    TableDeleterUI deleter = new TableDeleterUI()
     {
-      TableDeleterUI deleter = new TableDeleterUI();
-      deleter.addDeleteListener(this.deleteListener);
-      deleter.setObjects(tables);
-      deleter.setConnection(source.getConnection());
-      JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
-      deleter.showDialog(f);
-    }
-    finally
-    {
-      if (autoCommitChanged)
+      // The TableDeleterUI's dialog is not modal, so I can't use a finally
+      // block to reset the auto commit state after the dialog was closed
+      // because the code doesn't "wait" after calling delteter.showDialog()
+      @Override
+      protected void closeWindow()
       {
-        source.getConnection().changeAutoCommit(autoCommit);
+        if (autoCommitChanged)
+        {
+          source.getConnection().changeAutoCommit(autoCommit);
+        }
+        super.closeWindow();
       }
-    }
+    };
+    deleter.addDeleteListener(this.deleteListener);
+    deleter.setObjects(tables);
+    deleter.setConnection(source.getConnection());
+    JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
+    deleter.showDialog(f);
   }
 
   private List<TableIdentifier> getSelectedTables()

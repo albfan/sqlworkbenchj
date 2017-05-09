@@ -54,13 +54,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 
-import workbench.db.CommitType;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.TableDeleteListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.CommitType;
 import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -72,6 +72,7 @@ import workbench.gui.components.NoSelectionModel;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbStatusLabel;
 
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbThread;
 
@@ -89,7 +90,7 @@ public class TableDeleterUI
 	private WbConnection connection;
 	private Thread deleteThread;
 	private Thread checkThread;
-	private List<TableDeleteListener> deleteListener;
+	private final List<TableDeleteListener> deleteListener = new ArrayList<>(1);
 	private TableDeleter deleter;
 
 	public TableDeleterUI()
@@ -568,13 +569,13 @@ public class TableDeleterUI
 
 	public void setObjects(List<TableIdentifier> objects)
 	{
-		this.objectNames = objects;
+		this.objectNames = objects == null ? CollectionUtil.arrayList() : new ArrayList<>(objects);
 		int numNames = this.objectNames.size();
 
 		String[] display = new String[numNames];
 		for (int i = 0; i < numNames; i++)
 		{
-			display[i] = this.objectNames.get(i).toString();
+      display[i] = this.objectNames.get(i).getObjectExpression(connection);
 		}
 		this.objectList.setListData(display);
 	}
@@ -595,20 +596,18 @@ public class TableDeleterUI
 
 	public void addDeleteListener(TableDeleteListener listener)
 	{
-		if (this.deleteListener == null)
+		if (listener != null)
 		{
-			this.deleteListener = new ArrayList<>();
+      this.deleteListener.add(listener);
 		}
-		this.deleteListener.add(listener);
 	}
 
 	public void removeDeleteListener(TableDeleteListener listener)
 	{
-		if (this.deleteListener == null)
-		{
-			return;
-		}
-		this.deleteListener.remove(listener);
+		if (listener != null)
+    {
+      this.deleteListener.remove(listener);
+    }
 	}
 
 	protected void fireTableDeleted(List<TableIdentifier> tables)
@@ -617,9 +616,10 @@ public class TableDeleterUI
 		{
 			return;
 		}
+
 		for (TableDeleteListener l : this.deleteListener)
 		{
-			l.tableDataDeleted(tables);
+      if (l != null) l.tableDataDeleted(tables);
 		}
 	}
 
