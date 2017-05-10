@@ -86,6 +86,8 @@ public interface ErrorPositionReader
     public static ErrorPositionReader createPositionReader(WbConnection conn)
     {
       if (conn == null) return dummyReader;
+      if (conn.getMetadata() == null) return dummyReader;
+      
       if (conn.getMetadata().isOracle())
       {
         return new OracleErrorPositionReader();
