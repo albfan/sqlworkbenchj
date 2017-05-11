@@ -1492,10 +1492,18 @@ public class DataStore
       String name = parser.getResultName(sql);
       if (name == null && GuiSettings.getUseTablenameAsResultName())
       {
-        List<Alias> tables = SqlUtil.getTables(aSql, false, this.originalConnection);
-        if (tables.size() > 0)
+        String verb = SqlUtil.getSqlVerb(sql);
+        if (verb.toLowerCase().startsWith("explain"))
         {
-          name = tables.get(0).getObjectName();
+          name = "Execution plan";
+        }
+        else
+        {
+          List<Alias> tables = SqlUtil.getTables(aSql, false, this.originalConnection);
+          if (tables.size() > 0)
+          {
+            name = tables.get(0).getObjectName();
+          }
         }
       }
       setResultName(name);
