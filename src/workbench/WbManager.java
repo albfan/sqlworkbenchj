@@ -453,7 +453,8 @@ public final class WbManager
 
   private void disconnectWindows(boolean forceAbort)
   {
-    for (MainWindow w : mainWindows)
+    ArrayList<MainWindow> win = new ArrayList<>(mainWindows);
+    for (MainWindow w : win)
     {
       if (w == null) continue;
       if (forceAbort)
