@@ -20,8 +20,6 @@
  */
 package workbench.db.postgres;
 
-import java.util.ArrayList;
-
 import workbench.db.TableIdentifier;
 
 /**

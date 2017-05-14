@@ -75,6 +75,7 @@ import workbench.db.oracle.OracleUtils;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
+import workbench.db.postgres.PostgresObjectListCleaner;
 import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
@@ -133,6 +134,7 @@ public class DbMetadata
   private IndexReader indexReader;
   private List<ObjectListExtender> extenders = new ArrayList<>();
   private List<ObjectListAppender> appenders = new ArrayList<>();
+  private List<ObjectListCleaner> cleaners = new ArrayList<>();
 
   private DbmsOutput oraOutput;
 
@@ -235,6 +237,10 @@ public class DbMetadata
       if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.2") && PostgresRangeTypeReader.retrieveRangeTypes())
       {
         extenders.add(new PostgresRangeTypeReader());
+      }
+      if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0") && PostgresObjectListCleaner.removePartitions())
+      {
+        cleaners.add(new PostgresObjectListCleaner());
       }
     }
     else if (productLower.contains("oracle") && !productLower.contains("lite ordbms"))
@@ -1713,6 +1719,7 @@ public class DbMetadata
         result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, synonym.getCatalog());
         result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, synonym.getSchema());
         result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, synonym.getComment());
+        result.getRow(row).setUserObject(synonym);
       }
     }
 
@@ -1734,6 +1741,10 @@ public class DbMetadata
       objectListEnhancer.updateObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
     }
 
+    for (ObjectListCleaner cleaner : cleaners)
+    {
+      cleaner.cleanupObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
+    }
     result.resetStatus();
 
     return result;

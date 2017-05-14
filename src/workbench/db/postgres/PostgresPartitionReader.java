@@ -23,10 +23,12 @@ package workbench.db.postgres;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -215,6 +217,12 @@ public class PostgresPartitionReader
     ResultSet rs = null;
     Savepoint sp = null;
 
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresPartitionReader.readPartitioningDefinition()",
+        "Retrieving partitioning information using:\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
+    }
+
     try
     {
       sp = dbConnection.setSavepoint();
@@ -245,7 +253,7 @@ public class PostgresPartitionReader
     {
       dbConnection.rollback(sp);
       LogMgr.logError("PostgresPartitionReader.readPartitioningDefinition()",
-        "Error partitioning information using :\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), ex);
+        "Error retrieving partitioning information using :\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), ex);
     }
     finally
     {
