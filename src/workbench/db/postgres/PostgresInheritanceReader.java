@@ -50,7 +50,7 @@ public class PostgresInheritanceReader
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
-    final String sql83 =
+    String sql83 =
       "select bt.relname as table_name, bns.nspname as table_schema, 0 as level \n" +
       "from pg_class ct \n" +
       "    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
@@ -59,7 +59,7 @@ public class PostgresInheritanceReader
       "    join pg_namespace bns on bt.relnamespace = bns.oid";
 
     // Recursive version for 8.4+ based Craig Ringer's statement from here: http://stackoverflow.com/a/12139506/330315
-    final String sql84 =
+    String sql84 =
       "with recursive inh as ( \n" +
       "\n" +
       "  select i.inhrelid, 1 as level, array[inhrelid] as path \n" +
@@ -81,7 +81,7 @@ public class PostgresInheritanceReader
       "  join pg_catalog.pg_namespace on (pg_class.relnamespace = pg_namespace.oid) \n" +
       "order by path";
 
-    final boolean is84 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4");
+    boolean is84 = JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4");
 
     // wenn putting the "?" expression directly into the prepareStatement() call, this generates an error with Java 8
     final String sqlToUse = is84 ? sql84 : sql83;
@@ -137,7 +137,8 @@ public class PostgresInheritanceReader
       "  join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
       "  join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
       "  join pg_class bt on i.inhparent = bt.oid \n" +
-      "  join pg_namespace bns on bt.relnamespace = bns.oid";
+      "  join pg_namespace bns on bt.relnamespace = bns.oid \n" +
+      "where bt.relkind <> 'p'";
 
     Savepoint sp = null;
     List<TableIdentifier> result = new ArrayList<>();

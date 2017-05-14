@@ -96,12 +96,6 @@ public class PostgresTableSourceBuilder
 
     StringBuilder tableSql = new StringBuilder();
 
-    if (inherit != null)
-    {
-      if (tableSql.length() > 0) tableSql.append('\n');
-      tableSql.append(inherit);
-    }
-
     String persistenceCol = null;
     if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.1"))
     {
@@ -146,13 +140,20 @@ public class PostgresTableSourceBuilder
     ResultSet rs = null;
 
     String sql =
-      "select " + persistenceCol + ", ct.relkind, array_to_string(ct.reloptions, ', ') as options, " + spcnameCol + ", own.rolname as owner, " + defaultTsCol + " \n" +
+      "select " + persistenceCol + ", \n" +
+      "       ct.relkind, \n" +
+      "       array_to_string(ct.reloptions, ', ') as options, \n" +
+      "       " + spcnameCol + ", \n" +
+      "       own.rolname as owner, \n" +
+      "       " + defaultTsCol + " \n" +
       "from pg_catalog.pg_class ct \n" +
       "  join pg_catalog.pg_namespace cns on ct.relnamespace = cns.oid \n " +
       "  join pg_catalog.pg_roles own on ct.relowner = own.oid \n " +
       "  left join pg_catalog.pg_tablespace spc on spc.oid = ct.reltablespace \n" + defaultTsQuery +
       " where cns.nspname = ? \n" +
       "   and ct.relname = ?";
+
+    boolean isPartitioned = false;
 
     Savepoint sp = null;
     try
@@ -205,6 +206,14 @@ public class PostgresTableSourceBuilder
           option.setTypeModifier("FOREIGN");
         }
 
+        isPartitioned = "p".equals(type);
+
+        if (!isPartitioned && inherit != null)
+        {
+          if (tableSql.length() > 0) tableSql.append('\n');
+          tableSql.append(inherit);
+        }
+
         if (StringUtil.isNonEmpty(settings))
         {
           setConfigSettings(settings, option);
@@ -234,6 +243,11 @@ public class PostgresTableSourceBuilder
       SqlUtil.closeAll(rs, pstmt);
     }
     option.setTableOption(tableSql.toString());
+
+    if (isPartitioned)
+    {
+      handlePartitions(tbl);
+    }
   }
 
   private void setConfigSettings(String options, ObjectSourceOptions tblOption)
@@ -246,6 +260,32 @@ public class PostgresTableSourceBuilder
       {
         tblOption.addConfigSetting(opt[0], opt[1]);
       }
+    }
+  }
+
+  private void handlePartitions(TableIdentifier table)
+  {
+    PostgresPartitionReader reader = new PostgresPartitionReader(table, dbConnection);
+    reader.readPartitionInformation();
+    ObjectSourceOptions option = table.getSourceOptions();
+    String def = reader.getPartitionDefinition();
+    String sql = option.getTableOption();
+    if (sql == null)
+    {
+      sql = def;
+    }
+    else
+    {
+      sql = def + "\n" + sql;
+    }
+    option.setTableOption(sql);
+    option.addConfigSetting(PostgresPartitionReader.OPTION_KEY_STRATEGY, reader.getStrategy().toLowerCase());
+    option.addConfigSetting(PostgresPartitionReader.OPTION_KEY_EXPRESSION, reader.getPartitionExpression());
+
+    String createPartitions = reader.getCreatePartitions();
+    if (createPartitions != null)
+    {
+      option.setAdditionalSql(createPartitions);
     }
   }
 
@@ -356,7 +396,12 @@ public class PostgresTableSourceBuilder
     CharSequence enums = getEnumInformation(columns, schema);
     CharSequence domains = getDomainInformation(columns, schema);
     CharSequence sequences = getColumnSequenceInformation(table, columns);
-    CharSequence children = getChildTables(table);
+    CharSequence children = null;
+    ObjectSourceOptions sourceOptions = table.getSourceOptions();
+    if (sourceOptions.getConfigSettings().get(PostgresPartitionReader.OPTION_KEY_STRATEGY) == null)
+    {
+      children = getChildTables(table);
+    }
     StringBuilder storage = getColumnStorage(table, columns);
     String owner = getOwnerSql(table);
 

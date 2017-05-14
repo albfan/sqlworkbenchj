@@ -55,7 +55,15 @@ public class VersionNumber
       return;
     }
 
-    if ("@BUILD_NUMBER@".equals(number))
+    number = number.toLowerCase();
+    if (number.contains("dev") || number.contains("beta"))
+    {
+      number = number.replaceAll("[^0-9.]", "");
+      minor = 0;
+      patchLevel = 0;
+    }
+
+    if ("@build_number@".equals(number))
     {
       major = 999;
       minor = 999;
