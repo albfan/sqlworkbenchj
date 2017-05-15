@@ -65,6 +65,20 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import workbench.WbManager;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.ListSelectionControl;
+import workbench.interfaces.ObjectDropListener;
+import workbench.interfaces.PropertyStorage;
+import workbench.interfaces.Reloadable;
+import workbench.interfaces.Resettable;
+import workbench.interfaces.ShareableDisplay;
+import workbench.interfaces.WbSelectionModel;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+
 import workbench.db.ColumnIdentifier;
 import workbench.db.DBID;
 import workbench.db.DbMetadata;
@@ -86,6 +100,7 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
+
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AlterObjectAction;
@@ -112,23 +127,11 @@ import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.ListSelectionControl;
-import workbench.interfaces.ObjectDropListener;
-import workbench.interfaces.PropertyStorage;
-import workbench.interfaces.Reloadable;
-import workbench.interfaces.Resettable;
-import workbench.interfaces.ShareableDisplay;
-import workbench.interfaces.WbSelectionModel;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
+
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
-import static workbench.storage.NamedSortDefinition.*;
 import workbench.storage.SortDefinition;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
@@ -136,6 +139,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
+
+import static workbench.storage.NamedSortDefinition.*;
 
 
 /**
@@ -1976,7 +1981,7 @@ public class TableListPanel
 
 	private void endTransaction()
 	{
-		DbExplorerSettings.endTransaction(dbConnection);
+		ExplorerUtils.endTransaction(dbConnection);
 	}
 
 	private final Object busyLock = new Object();

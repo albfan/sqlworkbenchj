@@ -48,8 +48,8 @@ import workbench.resource.Settings;
 import workbench.db.importer.TableDependencySorter;
 
 import workbench.gui.components.WbTable;
+import workbench.gui.dbobjects.ExplorerUtils;
 import workbench.gui.dbobjects.ObjectScripterUI;
-import workbench.resource.DbExplorerSettings;
 
 import workbench.storage.ColumnData;
 import workbench.storage.DataStore;
@@ -636,7 +636,7 @@ public class DeleteScriptGenerator
       connection.setBusy(false);
       if (endTransaction)
       {
-        DbExplorerSettings.endTransaction(connection);
+        ExplorerUtils.endTransaction(connection);
       }
     }
   }

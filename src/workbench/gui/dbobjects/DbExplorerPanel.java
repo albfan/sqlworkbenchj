@@ -64,7 +64,6 @@ import workbench.resource.Settings;
 import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.db.JdbcUtils;
 import workbench.db.WbConnection;
 
 import workbench.gui.MainWindow;
@@ -663,7 +662,7 @@ public class DbExplorerPanel
 				setSwitchCatalog(separateConnection);
 				if (separateConnection)
 				{
-          JdbcUtils.initDbExplorerConnection(dbConnection);
+          ExplorerUtils.initDbExplorerConnection(dbConnection);
 				}
 			}
 

@@ -36,8 +36,6 @@ import java.sql.Statement;
 
 import workbench.log.LogMgr;
 
-import workbench.db.mssql.SqlServerUtil;
-
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
@@ -253,45 +251,6 @@ public class JdbcUtils
       LogMgr.logError("JdbcUtils.runStatement()", "Error running statement", ex);
     }
     return rs;
-  }
-
-  /**
-   * Initialize a connection to be used by the DbExplorer and DbTree.
-   *
-   * <br>
-   * This should only be used for Profiles where a different connection is used for the DbExplorer
-   * and the regular SQL panels.
-   * <br><br>
-   * Currently it will do the following:
-   *
-   * <ul>
-   * <li>Disable DBMS_OUTPUT</li>
-   * <li>Set a LOCK_TIMEOUT for SQL Server to prevent waiting indefinitely for the retrieval if some DDL statement wasn't comitted</li>
-   * </ul>
-   *
-   * @param connection
-   * @see DbMetadata#disableOutput()
-   * @see SqlServerUtil#setLockTimeout(workbench.db.WbConnection, int)
-   * @see DbSettings#getLockTimoutForSqlServer()
-   */
-  public static void initDbExplorerConnection(WbConnection connection)
-  {
-    // when dealing with tables that have LONG or LONG RAW columns
-    // and DBMS_OUTPUT was enabled, then retrieval of those columns
-    // does not work. If we have separate connections for each tab
-    // we can safely disable the DBMS_OUTPUT on this connection
-    // as there won't be a way to view the output anyway
-    connection.getMetadata().disableOutput();
-
-    if (connection.getMetadata().isSqlServer())
-    {
-      // we rather want an error message than the DbExplorer or DbTree waiting indefinitely
-      int timeout = connection.getDbSettings().getLockTimoutForSqlServer();
-      if (timeout > 0)
-      {
-        SqlServerUtil.setLockTimeout(connection, timeout);
-      }
-    }
   }
 
   public static String getDbIdFromUrl(String url)

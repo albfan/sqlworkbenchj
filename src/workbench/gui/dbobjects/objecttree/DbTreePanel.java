@@ -69,7 +69,6 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
-import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -88,6 +87,7 @@ import workbench.gui.components.WbStatusLabel;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.dbobjects.DbObjectList;
+import workbench.gui.dbobjects.ExplorerUtils;
 
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
@@ -313,7 +313,7 @@ public class DbTreePanel
         connection.changeAutoCommit(true);
       }
 
-      JdbcUtils.initDbExplorerConnection(connection);
+      ExplorerUtils.initDbExplorerConnection(connection);
       tree.setConnection(connection);
 
       statusBar.setStatusMessage(ResourceMgr.getString("MsgRetrieving"));

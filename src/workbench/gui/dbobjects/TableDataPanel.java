@@ -490,7 +490,7 @@ public class TableDataPanel
 
     if (dbs == null) return;
 
-		if (!DbExplorerSettings.isOwnTransaction(dbConnection)
+		if (!ExplorerUtils.isOwnTransaction(dbConnection)
         && dbs.useSavePointForDML()
         && dbs.getAutoCloseReadOnlyTransactions() == EndReadOnlyTrans.never)
 		{
@@ -782,7 +782,7 @@ public class TableDataPanel
 	{
     if (dbConnection.getDbSettings().getAutoCloseReadOnlyTransactions() != EndReadOnlyTrans.never) return;
 
-		if (DbExplorerSettings.isOwnTransaction(dbConnection))
+		if (ExplorerUtils.isOwnTransaction(dbConnection))
 		{
 			this.dbConnection.rollbackSilently();
 		}
@@ -797,7 +797,7 @@ public class TableDataPanel
 	{
     if (dbConnection.getDbSettings().getAutoCloseReadOnlyTransactions() != EndReadOnlyTrans.never) return;
 
-		if (DbExplorerSettings.isOwnTransaction(dbConnection))
+		if (ExplorerUtils.isOwnTransaction(dbConnection))
 		{
 			if (this.dbConnection.selectStartsTransaction())
 			{

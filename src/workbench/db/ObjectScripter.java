@@ -39,6 +39,8 @@ import workbench.resource.DbExplorerSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
+import workbench.gui.dbobjects.ExplorerUtils;
+
 import workbench.sql.DelimiterDefinition;
 
 import workbench.util.CollectionUtil;
@@ -289,7 +291,7 @@ public class ObjectScripter
       this.dbConnection.setBusy(false);
       if (endTransaction)
       {
-        DbExplorerSettings.endTransaction(dbConnection);
+        ExplorerUtils.endTransaction(dbConnection);
       }
     }
 

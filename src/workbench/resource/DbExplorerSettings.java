@@ -28,7 +28,6 @@ import java.util.Set;
 
 import workbench.db.DbSettings;
 import workbench.db.DropType;
-import workbench.db.WbConnection;
 
 import workbench.util.CollectionUtil;
 
@@ -232,22 +231,6 @@ public class DbExplorerSettings
 	public static void setFilterDuringTyping(boolean flag)
 	{
 		Settings.getInstance().setProperty(PROP_INSTANT_FILTER, flag);
-	}
-
-	public static void endTransaction(WbConnection dbConnection)
-	{
-    if (dbConnection == null) return;
-		if (isOwnTransaction(dbConnection) && dbConnection.selectStartsTransaction())
-		{
-			dbConnection.rollbackSilently();
-		}
-	}
-
-	public static boolean isOwnTransaction(WbConnection dbConnection)
-	{
-		if (dbConnection == null) return false;
-		if (dbConnection.getAutoCommit()) return false;
-		return (dbConnection.getProfile().getUseSeparateConnectionPerTab() || getAlwaysUseSeparateConnForDbExpWindow());
 	}
 
 	public static boolean getAlwaysUseSeparateConnForDbExpWindow()

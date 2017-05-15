@@ -34,7 +34,8 @@ import workbench.interfaces.Scripter;
 import workbench.interfaces.TextOutput;
 
 import workbench.db.sqltemplates.TemplateHandler;
-import workbench.resource.DbExplorerSettings;
+
+import workbench.gui.dbobjects.ExplorerUtils;
 
 import workbench.storage.RowActionMonitor;
 
@@ -406,7 +407,7 @@ public class DropScriptGenerator
     {
       if (endTransaction)
       {
-        DbExplorerSettings.endTransaction(connection);
+        ExplorerUtils.endTransaction(connection);
       }
     }
   }
