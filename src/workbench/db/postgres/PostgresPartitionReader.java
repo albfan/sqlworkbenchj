@@ -23,7 +23,6 @@ package workbench.db.postgres;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,23 +85,32 @@ public class PostgresPartitionReader
     StringBuilder result = new StringBuilder(partitions.size() * 100);
     for (PostgresPartition part : partitions)
     {
-      TableIdentifier subParent = part.getParentTable();
-
-      String tableOf = subParent == null ? baseTable : subParent.getTableExpression(dbConnection);
-
-      TableIdentifier name = new TableIdentifier(part.getSchema(), part.getName());
-      String partSQL =
-        "CREATE TABLE " + name.getTableExpression(dbConnection) + "\n" +
-        "  PARTITION OF " + tableOf + " " + part.getDefinition();
-
-      if (part.getSubPartitionDefinition() != null)
-      {
-        partSQL += "\n" +
-          "  PARTITION BY " + part.getSubPartitionStrategy() + " " + part.getSubPartitionDefinition();
-      }
-      result.append(partSQL + ";\n\n");
+      result.append(generatePartitionDDL(part, baseTable, dbConnection));
+      result.append(";\n\n");
     }
     return result.toString();
+  }
+
+  public static String generatePartitionDDL(PostgresPartition partition, String baseTable, WbConnection dbConnection)
+  {
+    if (partition == null) return null;
+
+    TableIdentifier parent = partition.getParentTable();
+
+    String tableOf = parent == null ? baseTable : parent.getTableExpression(dbConnection);
+
+    TableIdentifier name = new TableIdentifier(partition.getSchema(), partition.getName());
+    String partSQL =
+      "CREATE TABLE " + name.getTableExpression(dbConnection) + "\n" +
+      "  PARTITION OF " + tableOf + " " + partition.getDefinition();
+
+    if (partition.getSubPartitionDefinition() != null)
+    {
+      partSQL += "\n" +
+        "  PARTITION BY " + partition.getSubPartitionStrategy() + " " + partition.getSubPartitionDefinition();
+    }
+
+    return partSQL;
   }
 
   public void readPartitionInformation()
@@ -259,6 +267,82 @@ public class PostgresPartitionReader
     {
       SqlUtil.closeAll(rs, pstmt);
     }
+  }
+
+  /**
+   * Check if the given table is in fact a partition in Postgres 10.
+   *
+   * If it is a partition, the definition is returned, otherwise null
+   *
+   * @param table          the table to check
+   * @param dbConnection   the connection to use
+   * @return null if the table is not a parition, the definition otherwise
+   */
+  public static PostgresPartition getPartitionDefinition(TableIdentifier table, WbConnection dbConnection)
+  {
+    String sql =
+      "select bs.nspname as base_table_schema, \n" +
+      "       base.relname as base_table, \n" +
+      "       pg_get_expr(c.relpartbound, c.oid, true) as partition_expression, \n" +
+      "       pg_get_expr(p.partexprs, c.oid, true) as sub_partition, \n" +
+      "       case p.partstrat \n" +
+      "         when 'l' then 'LIST' \n" +
+      "         when 'r' then 'RANGE' \n" +
+      "       end as sub_partition_strategy \n" +
+      "from pg_catalog.pg_inherits i\n" +
+      "  join pg_catalog.pg_class c on i.inhrelid = c.oid \n" +
+      "  join pg_catalog.pg_namespace n on c.relnamespace = n.oid \n" +
+      "  join pg_partitioned_table p on p.partrelid = i.inhparent\n" +
+      "  join pg_class base on base.oid = p.partrelid\n" +
+      "  join pg_namespace bs on bs.oid = base.relnamespace\n" +
+      "where n.nspname = ? \n" +
+      "  and c.relname = ?";
+
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    Savepoint sp = null;
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logInfo("PostgresPartitionReader.getCreateForPartition()",
+        "Retrieving partition information using:\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
+    }
+
+    PostgresPartition result = null;
+    try
+    {
+      sp = dbConnection.setSavepoint();
+
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, table.getRawSchema());
+      pstmt.setString(2, table.getRawTableName());
+      rs = pstmt.executeQuery();
+
+      if (rs.next())
+      {
+        String name = rs.getString("base_table");
+        String schema = rs.getString("base_table_schema");
+        TableIdentifier tbl = new TableIdentifier(schema, name);
+        result = new PostgresPartition(table.getRawSchema(), table.getRawTableName());
+        result.setParentTable(tbl);
+        result.setDefinition(rs.getString("partition_expression"));
+        result.setSubPartitionStrategy(rs.getString("sub_partition_strategy"));
+        result.setSubPartitionDefinition(rs.getString("sub_partition"));
+      }
+
+      dbConnection.releaseSavepoint(sp);
+    }
+    catch (Exception ex)
+    {
+      dbConnection.rollback(sp);
+      LogMgr.logError("PostgresPartitionReader.getCreateForPartition()",
+        "Error retrieving partition information using :\n" + SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), ex);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+    return result;
   }
 
 }

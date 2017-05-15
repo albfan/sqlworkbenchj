@@ -43,9 +43,14 @@ import workbench.db.ObjectSourceOptions;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.DependencyNode;
+import workbench.db.DropType;
+
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -57,10 +62,35 @@ import workbench.util.StringUtil;
 public class PostgresTableSourceBuilder
   extends TableSourceBuilder
 {
-
+  private boolean isPostgres10 = false;
   public PostgresTableSourceBuilder(WbConnection con)
   {
     super(con);
+    isPostgres10 = JdbcUtils.hasMinimumServerVersion(con, "10.0");
+  }
+
+  @Override
+  public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList, List<DependencyNode> fkDefinitions, DropType dropType, boolean includeFk, boolean includePK, boolean useFQN)
+  {
+    PostgresPartition partition = null;
+
+    if (isPostgres10)
+    {
+      partition = PostgresPartitionReader.getPartitionDefinition(table, dbConnection);
+    }
+
+    if (partition == null)
+    {
+      return super.getCreateTable(table, columns, indexList, fkDefinitions, dropType, includeFk, includePK, useFQN);
+    }
+
+    StringBuilder ddl = new StringBuilder(500);
+    ddl.append(generateDrop(table, dropType));
+    ddl.append("\n\n");
+    ddl.append(PostgresPartitionReader.generatePartitionDDL(partition, null, dbConnection));
+    ddl.append(";\n\n");
+
+    return ddl;
   }
 
   @Override
