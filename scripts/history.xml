@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-05-08">
+    <entry dev-build="3" type="enh">Added support for new Postgres 10 features (partitioning, identity columns)</entry>
     <entry dev-build="2" type="enh">For Firebird, DOMAINs are now included in the dependency display</entry>
     <entry dev-build="2" type="enh">WbImport now also supports the -skipTargetCheck option</entry>
     <entry dev-build="2" type="enh">It's now possible to define a default directory for a connection profile that is used e.g. for WbInclude or WbExport</entry>
@@ -13,6 +14,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="3" type="fix">Detaching a result was longer possible in build 122.2</entry>
     <entry dev-build="2" type="fix">The option "Remove comments" was not working with databases are using non-standard characters to quote identifiers</entry>
     <entry dev-build="2" type="fix">For Oracle, the display format for timestamps was not used for "timestamp with time zone" values</entry>
     <entry dev-build="2" type="fix">SSH tunneling did not work with Oracle when using a service name in the JDBC URL</entry>
