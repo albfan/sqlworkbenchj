@@ -34,6 +34,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
+import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
@@ -66,6 +67,25 @@ public class PostgresSequenceReader
       "  LEFT JOIN pg_class tab ON d.objid = seq.oid AND d.refobjid = tab.oid   \n" +
       "  LEFT JOIN pg_attribute col ON (d.refobjid, d.refobjsubid) = (col.attrelid, col.attnum) \n" +
       "WHERE seq.relkind = 'S'";
+
+  private final String baseSqlV10 =
+    "SELECT s.seqmin as min_value,\n" +
+    "       s.seqmax as max_value, \n" +
+    "       seq_info.last_value,\n" +
+    "       s.seqincrement as increment_by, \n" +
+    "       s.seqcache as cache_value,\n" +
+    "       s.seqcycle as is_cycled,\n" +
+    "       obj_description(seq.oid, 'pg_class') as remarks, \n" +
+    "       quote_ident(tab.relname)||'.'||quote_ident(col.attname) as owned_by, \n" +
+    "       seq.relname as sequence_name, \n" +
+    "       sn.nspname as sequence_schema\n" +
+    "FROM pg_sequence s\n" +
+    "  JOIN pg_class seq on s.seqrelid = seq.oid\n" +
+    "  CROSS JOIN (SELECT last_value FROM " + NAME_PLACEHOLDER + ") seq_info \n" +
+    "  JOIN pg_namespace sn ON sn.oid = seq.relnamespace \n" +
+    "  LEFT JOIN pg_depend d ON d.objid = seq.oid AND deptype in ('a', 'i') \n" +
+    "  LEFT JOIN pg_class tab ON d.objid = seq.oid AND d.refobjid = tab.oid   \n" +
+    "  LEFT JOIN pg_attribute col ON (d.refobjid, d.refobjsubid) = (col.attrelid, col.attnum)";
 
   public PostgresSequenceReader(WbConnection conn)
   {
@@ -243,9 +263,13 @@ public class PostgresSequenceReader
     ResultSet rs = null;
     Savepoint sp = null;
 
+    boolean is10 = JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0");
+
+    String seqInfoSql = is10 ? baseSqlV10 : baseSql;
+
     String sql =
       "select min_value, max_value, last_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
-      "from ( \n" + baseSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n" +
+      "from ( \n" + seqInfoSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n" +
       "where sequence_name = ? ";
 
     if (schema != null)

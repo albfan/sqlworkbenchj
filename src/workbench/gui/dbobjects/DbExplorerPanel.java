@@ -603,7 +603,7 @@ public class DbExplorerPanel
 	private boolean isConnectionBusy()
 	{
 		if (this.dbConnection == null) return false;
-		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab()) return this.isBusy();
+		if (this.dbConnection.isShared() == false) return this.isBusy();
 		return dbConnection.isBusy();
 	}
 
@@ -658,7 +658,7 @@ public class DbExplorerPanel
 			}
 			else if (aConnection.getProfile() != null)
 			{
-				boolean separateConnection = aConnection.getProfile().getUseSeparateConnectionPerTab();
+				boolean separateConnection = aConnection.isShared() == false;
 				setSwitchCatalog(separateConnection);
 				if (separateConnection)
 				{
@@ -1025,7 +1025,7 @@ public class DbExplorerPanel
 	{
 		if (this.dbConnection != null)
 		{
-			if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab() || DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow())
+			if (this.dbConnection.isShared() == false) // getProfile().getUseSeparateConnectionPerTab() || DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow())
 			{
 				try { this.dbConnection.disconnect(); } catch (Throwable th) {}
 			}

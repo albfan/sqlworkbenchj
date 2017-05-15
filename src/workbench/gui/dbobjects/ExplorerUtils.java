@@ -38,7 +38,7 @@ public class ExplorerUtils
     if (dbConnection == null) return;
     if (dbConnection.getAutoCommit()) return;
 
-    if (isOwnTransaction(dbConnection) && dbConnection.selectStartsTransaction())
+    if (dbConnection.isShared() == false && dbConnection.selectStartsTransaction())
     {
       dbConnection.rollbackSilently();
     }
@@ -48,7 +48,7 @@ public class ExplorerUtils
   {
     if (dbConnection == null) return false;
     if (dbConnection.getAutoCommit()) return false;
-    return (dbConnection.getProfile().getUseSeparateConnectionPerTab() || DbExplorerSettings.getAlwaysUseSeparateConnForDbExpWindow());
+    return dbConnection.isShared() == false;
   }
 
     /**

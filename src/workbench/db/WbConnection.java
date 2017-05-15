@@ -121,6 +121,7 @@ public class WbConnection
   private SqlParsingUtil keywordUtil;
   private boolean pingAvailable = true;
   private boolean supportsSavepoints = true;
+  private boolean shared = false;
 
   /**
    * Create a new wrapper connection around the original SQL connection.
@@ -164,6 +165,16 @@ public class WbConnection
     {
       lastAutocommitState = profile.getAutocommit();
     }
+  }
+
+  public boolean isShared()
+  {
+    return shared;
+  }
+
+  public void setShared(boolean flag)
+  {
+    this.shared = flag;
   }
 
   public synchronized SqlParsingUtil getParsingUtil()

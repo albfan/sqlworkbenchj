@@ -1219,6 +1219,7 @@ public class MainWindow
 			}
 			else if (this.currentConnection != null)
 			{
+        currentConnection.setShared(true);
 				panel.setConnection(this.currentConnection);
 			}
 		}
@@ -1305,8 +1306,9 @@ public class MainWindow
 	{
 		if (!canUseSeparateConnection()) return false;
 		WbConnection conn = panel.getConnection() ;
-
-		return (currentConnection != null && conn != this.currentConnection);
+    if (conn == null) return false;
+    return conn.isShared() == false;
+		//return (currentConnection != null && conn != this.currentConnection);
 	}
 
 	public void createNewConnectionForCurrentPanel()
@@ -2458,13 +2460,19 @@ public class MainWindow
 	private void setConnection(WbConnection con)
 	{
 		int count = this.sqlTab.getTabCount();
+    if (con != null)
+    {
+      con.setShared(true);
+    }
+
 		for (int i=0; i < count; i++)
 		{
 			MainPanel sql = (MainPanel)this.sqlTab.getComponentAt(i);
 			sql.setConnection(con);
 		}
+
 		this.currentConnection = con;
-		if (this.currentProfile == null) this.currentProfile = con.getProfile();
+    if (this.currentProfile == null) this.currentProfile = con.getProfile();
 	}
 
 	public void selectConnection()
@@ -2699,6 +2707,7 @@ public class MainWindow
 		try
 		{
 			conn = mgr.getConnection(this.currentProfile, id);
+      conn.setShared(false);
 		}
 		finally
 		{
@@ -3779,7 +3788,7 @@ public class MainWindow
 			setIgnoreTabChange(true);
 
       WbConnection conn = panel.getConnection();
-      boolean doDisconnect = usesSeparateConnection(panel) || (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab());
+      boolean doDisconnect = conn != null && conn.isShared() == false; // usesSeparateConnection(panel) || (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab());
 
 			panel.dispose();
 

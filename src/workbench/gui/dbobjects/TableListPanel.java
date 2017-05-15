@@ -1188,7 +1188,7 @@ public class TableListPanel
 
 			String[] types = getSelectedTypes();
 
-      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      if (dbConnection.isShared() == false)
       {
         levelChanger.changeIsolationLevel(dbConnection);
       }
@@ -1912,7 +1912,7 @@ public class TableListPanel
 		this.setBusy(true);
 		try
 		{
-      if (dbConnection.getProfile().getUseSeparateConnectionPerTab())
+      if (dbConnection.isShared() == false)
       {
         levelChanger.changeIsolationLevel(dbConnection);
       }

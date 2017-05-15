@@ -1775,7 +1775,7 @@ public class SqlPanel
 		if (dbConnection.getProfile() == null) return false;
 
 		// if we are using a separate connection, we always need to do the rollback
-		if (dbConnection.getProfile().getUseSeparateConnectionPerTab()) return true;
+		if (dbConnection.isShared() == false) return true;
 
 		// a single connection is used for all tabs. Only terminate the transaction for the current tab.
 		return this.isCurrentTab();
