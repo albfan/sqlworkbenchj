@@ -296,7 +296,7 @@ public class DbTreePanel
 
     ConnectionMgr mgr = ConnectionMgr.getInstance();
 
-    statusBar.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + profile.getName() + " ...");
+    statusBar.setStatusMessage(ResourceMgr.getFormattedString("MsgConnectingTo", profile.getName()));
 
     try
     {

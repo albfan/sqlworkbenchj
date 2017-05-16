@@ -48,6 +48,7 @@ import javax.swing.border.LineBorder;
 
 import workbench.interfaces.EditorStatusbar;
 import workbench.interfaces.StatusBar;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -200,7 +201,15 @@ public class DwStatusBar
 		infoPanel.add(tfRowCount);
 		this.add(infoPanel, BorderLayout.EAST);
 
-		this.readyMsg = ResourceMgr.getString("MsgReady");
+    if (GuiSettings.showStatusbarReadyMessage())
+    {
+      this.readyMsg = ResourceMgr.getString("MsgReady");
+    }
+		else
+    {
+      this.readyMsg = "";
+    }
+
 		this.clearStatusMessage();
 	}
 

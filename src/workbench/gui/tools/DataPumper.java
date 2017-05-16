@@ -427,7 +427,7 @@ public class DataPumper
 		this.sourceProfile = profile;
 		this.isConnecting = true;
 
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.sourceProfile.getName() + " ...";
+		String label = ResourceMgr.getFormattedString("MsgConnectingTo", this.sourceProfile.getName());
 		this.sourceProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 		this.sourceProfileLabel.setText(label);
 
@@ -529,7 +529,7 @@ public class DataPumper
 		this.disconnectTarget();
 		this.targetProfile = profile;
 
-		String label = ResourceMgr.getString("MsgConnectingTo") + " " + this.targetProfile.getName() + " ...";
+		String label = ResourceMgr.getFormattedString("MsgConnectingTo", this.targetProfile.getName());
 		this.targetProfileLabel.setText(label);
 		this.targetProfileLabel.setIcon(IconMgr.getInstance().getLabelIcon("wait"));
 

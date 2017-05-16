@@ -60,10 +60,26 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import workbench.WbManager;
+import workbench.interfaces.Connectable;
+import workbench.interfaces.DbExecutionListener;
+import workbench.interfaces.FilenameChangeListener;
+import workbench.interfaces.MacroChangeListener;
+import workbench.interfaces.MainPanel;
+import workbench.interfaces.Moveable;
+import workbench.interfaces.StatusBar;
+import workbench.interfaces.ToolWindow;
+import workbench.log.LogMgr;
+import workbench.resource.DbExplorerSettings;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
+import workbench.resource.ShortcutManager;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.db.objectcache.DbObjectCacheFactory;
+
 import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -148,22 +164,10 @@ import workbench.gui.sql.RenameableTab;
 import workbench.gui.sql.SqlPanel;
 import workbench.gui.tabhistory.ClosedTabManager;
 import workbench.gui.toolbar.ToolbarBuilder;
-import workbench.interfaces.Connectable;
-import workbench.interfaces.DbExecutionListener;
-import workbench.interfaces.FilenameChangeListener;
-import workbench.interfaces.MacroChangeListener;
-import workbench.interfaces.MainPanel;
-import workbench.interfaces.Moveable;
-import workbench.interfaces.StatusBar;
-import workbench.interfaces.ToolWindow;
-import workbench.log.LogMgr;
-import workbench.resource.DbExplorerSettings;
-import workbench.resource.GuiSettings;
-import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
-import workbench.resource.ShortcutManager;
+
 import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
+
 import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
@@ -1658,7 +1662,7 @@ public class MainWindow
 			loadCurrentProfileWorkspace();
 		}
 		Settings.getInstance().setLastConnection(currentProfile);
-		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+		showStatusMessage(ResourceMgr.getFormattedString("MsgConnectingTo", currentProfile.getName()));
 		return true;
 	}
 
@@ -2699,7 +2703,7 @@ public class MainWindow
 		if (aPanel instanceof StatusBar)
 		{
 			status = (StatusBar)aPanel;
-			status.setStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
+			status.setStatusMessage(ResourceMgr.getFormattedString("MsgConnectingTo", this.currentProfile.getName()));
 		}
 
 		ConnectionMgr mgr = ConnectionMgr.getInstance();

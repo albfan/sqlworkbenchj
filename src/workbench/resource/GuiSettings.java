@@ -31,10 +31,13 @@ import java.util.Set;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
-import workbench.db.objectcache.ObjectCacheStorage;
-import workbench.gui.sql.FileReloadType;
 import workbench.interfaces.ResultReceiver;
 import workbench.log.LogMgr;
+
+import workbench.db.objectcache.ObjectCacheStorage;
+
+import workbench.gui.sql.FileReloadType;
+
 import workbench.util.CollectionUtil;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
@@ -1477,5 +1480,10 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.profile.filter.include.username", false);
 	}
+
+  public static boolean showStatusbarReadyMessage()
+  {
+    return Settings.getInstance().getBoolProperty("workbench.gui.statusbar.show.ready", false);
+  }
 
 }
