@@ -69,6 +69,7 @@ public class ColumnIdentifier
   private String columnTypeName;
   private String sourceTable;
   private boolean autoincrement;
+  private boolean identity;
   private String collation;
   private String collationExpression;
   private String generatorExpression;
@@ -525,29 +526,15 @@ public class ColumnIdentifier
     return isAutoincrement() || isIdentityColumn();
   }
 
+  public void setIsIdentity(boolean identity)
+  {
+    this.identity = identity;
+  }
+
   public boolean isIdentityColumn()
   {
     if (!SqlUtil.isNumberType(this.type)) return false;
-
-    // SQL Server
-    if (this.dbmsType != null && dbmsType.toLowerCase().contains("identity"))
-    {
-      return true;
-    }
-
-    // certain DB2 versions
-    if (defaultValue != null && defaultValue.toLowerCase().contains("identity"))
-    {
-      return true;
-    }
-
-    // HSQLDB and maybe DB2
-    if (expression != null && expression.toLowerCase().contains("identity"))
-    {
-      return true;
-    }
-
-    return false;
+    return identity;
   }
 
   /**
@@ -714,6 +701,12 @@ public class ColumnIdentifier
   public void setDefaultValue(String value)
   {
     this.defaultValue = value;
+
+    // certain DB2 versions
+    if (defaultValue != null && defaultValue.toLowerCase().contains("identity"))
+    {
+      identity = true;
+    }
   }
 
   /**

@@ -233,6 +233,7 @@ public class PostgresColumnEnhancer
           else if ("a".equals(identity))
           {
             col.setGeneratorExpression("GENERATED ALWAYS AS IDENTITY");
+            col.setIsIdentity(true);
           }
           identityColumns.add(col);
         }

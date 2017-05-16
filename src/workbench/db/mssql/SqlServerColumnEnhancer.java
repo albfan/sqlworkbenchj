@@ -161,6 +161,7 @@ public class SqlServerColumnEnhancer
             def = def + " PERSISTED";
           }
           col.setComputedColumnExpression(def);
+          col.setIsGenerated(true);
         }
 
         if (isNonDefault(collation, defaultCollation))
@@ -177,13 +178,14 @@ public class SqlServerColumnEnhancer
           col.setDbmsType(dataType);
         }
 
-        // the JDBC driver returns geometry and geography as "VARBINAR"
+        // the JDBC driver returns geometry and geography as "VARBINARY"
         // which is incorrect and breaks many things
         if (nonJdbcTypes.contains(dataType))
         {
           col.setDbmsType(dataType);
           col.setDataType(Types.OTHER);
         }
+        col.setIsIdentity(col.getDbmsType().toLowerCase().contains("identity"));
       }
     }
     catch (Exception e)

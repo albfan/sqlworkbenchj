@@ -103,9 +103,6 @@ public class Db2ColumnEnhancer
       LogMgr.logInfo("Db2ColumnEnhancer.updateComputedColumns()", "Query to retrieve column details:\n" + SqlUtil.replaceParameters(sql, tablename, schema));
     }
 
-    Map<String, String> expressions = new HashMap<>();
-    Set<String> hiddenCols = CollectionUtil.caseInsensitiveSet();
-
     try
     {
       stmt = conn.getSqlConnection().prepareStatement(sql);
@@ -135,6 +132,7 @@ public class Db2ColumnEnhancer
           rowend = rs.getString(13);
           transid = rs.getString(14);
         }
+        ColumnIdentifier col = ColumnIdentifier.findColumnInList(table.getColumns(), colname);
 
         if (!gentype.equals(" "))
         {
@@ -145,16 +143,20 @@ public class Db2ColumnEnhancer
           if ("A".equals(gentype))
           {
             expr += " ALWAYS";
+            col.setIsIdentity(true);
+            col.setIsAutoincrement(true);
           }
           else
           {
             expr += " BY DEFAULT";
+            col.setIsAutoincrement(true);
           }
 
           if (computedCol == null && !isHistoryTCol)
           {
             // IDENTITY column
             expr += " AS IDENTITY (" + Db2SequenceReader.buildSequenceDetails(false, start, min, max, inc, cycle, order, cache) + ")";
+            col.setGeneratorExpression(expr);
           }
           else if (isHistoryTCol)
           {
@@ -170,17 +172,24 @@ public class Db2ColumnEnhancer
             {
               expr += " AS TRANSACTION START ID";
             }
+            col.setGeneratorExpression(expr);
+            col.setIsIdentity(false);
+            col.setIsAutoincrement(false);
+            col.setIsGenerated(true);
           }
           else
           {
             expr += " " + computedCol;
+            col.setIsGenerated(true);
+            col.setComputedColumnExpression(expr);
+            col.setIsIdentity(false);
+            col.setIsAutoincrement(false);
           }
-          expressions.put(colname, expr);
         }
 
         if ("I".equals(hidden))
         {
-          hiddenCols.add(colname);
+          col.setSQLOption("IMPLICITLY HIDDEN");
         }
       }
     }
@@ -193,30 +202,6 @@ public class Db2ColumnEnhancer
       SqlUtil.closeAll(rs, stmt);
     }
 
-    for (ColumnIdentifier col : table.getColumns())
-    {
-      String expr = expressions.get(col.getColumnName());
-      if (StringUtil.isNonBlank(expr))
-      {
-        if (expr.contains("AS ROW") || expr.contains("AS TRANSACTION"))
-        {
-          col.setGeneratorExpression(expr);
-        }
-        else
-        {
-          col.setComputedColumnExpression(expr);
-        }
-
-        if (expr.indexOf("IDENTITY") > -1)
-        {
-          col.setIsAutoincrement(true);
-        }
-      }
-      if (hiddenCols.contains(col.getColumnName()))
-      {
-        col.setSQLOption("IMPLICITLY HIDDEN");
-      }
-    }
   }
 
 }

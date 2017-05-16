@@ -136,6 +136,7 @@ public class HsqlColumnEnhancer
         {
           col.setDefaultValue(null);
           col.setComputedColumnExpression(columnExpression);
+          col.setIsIdentity(columnExpression.contains("IDENTITY"));
         }
       }
     }
