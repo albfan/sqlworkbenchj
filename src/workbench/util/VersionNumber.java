@@ -56,9 +56,9 @@ public class VersionNumber
     }
 
     number = number.toLowerCase();
-    if (number.contains("dev") || number.contains("beta"))
+    if (number.contains("beta"))
     {
-      number = number.replaceAll("[^0-9.]", "");
+      number = number.replaceAll("beta[0-9.]*", "");
       minor = 0;
       patchLevel = 0;
     }
