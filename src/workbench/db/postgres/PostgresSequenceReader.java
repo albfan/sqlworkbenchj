@@ -56,6 +56,7 @@ public class PostgresSequenceReader
 
   private final String baseSql =
       "SELECT seq_info.*, \n" +
+      "       null::text as data_type, \n" +
       "       obj_description(seq.oid, 'pg_class') as remarks, \n" +
       "       quote_ident(tab.relname)||'.'||quote_ident(col.attname) as owned_by, \n" +
       "       seq.relname as sequence_name, \n" +
@@ -75,6 +76,7 @@ public class PostgresSequenceReader
     "       s.seqincrement as increment_by, \n" +
     "       s.seqcache as cache_value,\n" +
     "       s.seqcycle as is_cycled,\n" +
+    "       pg_catalog.format_type(s.seqtypid, NULL) as data_type, \n" +
     "       obj_description(seq.oid, 'pg_class') as remarks, \n" +
     "       quote_ident(tab.relname)||'.'||quote_ident(col.attname) as owned_by, \n" +
     "       seq.relname as sequence_name, \n" +
@@ -133,9 +135,15 @@ public class PostgresSequenceReader
       Long cache = (Long) def.getSequenceProperty(PROP_CACHE_SIZE);
       Boolean cycle = (Boolean) def.getSequenceProperty(PROP_CYCLE);
       if (cycle == null) cycle = Boolean.FALSE;
+      String dataType = (String)def.getSequenceProperty(PROP_DATA_TYPE);
 
       buf.append("CREATE SEQUENCE ");
       buf.append(name);
+      if (StringUtil.isNonBlank(dataType) && StringUtil.stringsAreNotEqual("bigint", dataType))
+      {
+        buf.append("\n       AS ");
+        buf.append(dataType);
+      }
       buf.append("\n       INCREMENT BY ");
       buf.append(inc);
       buf.append("\n       MINVALUE ");
@@ -151,9 +159,9 @@ public class PostgresSequenceReader
       buf.append("\n       ");
       if (!cycle.booleanValue())
       {
-        buf.append("NO");
+        buf.append("NO ");
       }
-      buf.append(" CYCLE");
+      buf.append("CYCLE");
       String col = def.getRelatedColumn();
       TableIdentifier tbl = def.getRelatedTable();
       if (tbl != null && StringUtil.isNonBlank(col))
@@ -229,6 +237,7 @@ public class PostgresSequenceReader
     def.setSequenceProperty(PROP_CACHE_SIZE, ds.getValue(0, "cache_value"));
     def.setSequenceProperty(PROP_CYCLE, ds.getValue(0, "is_cycled"));
     def.setSequenceProperty(PROP_LAST_VALUE, ds.getValue(0, "last_value"));
+    def.setSequenceProperty(PROP_DATA_TYPE, ds.getValue(0, "data_type"));
     String ownedBy = ds.getValueAsString(0, "owned_by");
     if (StringUtil.isNonEmpty(ownedBy))
     {
@@ -268,7 +277,7 @@ public class PostgresSequenceReader
     String seqInfoSql = is10 ? baseSqlV10 : baseSql;
 
     String sql =
-      "select min_value, max_value, last_value, increment_by, cache_value, is_cycled, remarks, owned_by \n" +
+      "select min_value, max_value, last_value, increment_by, cache_value, is_cycled, data_type, remarks, owned_by \n" +
       "from ( \n" + seqInfoSql.replace(NAME_PLACEHOLDER, fullname) + "\n) t \n" +
       "where sequence_name = ? ";
 
