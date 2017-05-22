@@ -173,7 +173,7 @@ public class StatementFactoryTest
 
 		ResultInfo info = new ResultInfo(cols, types, null);
 		info.setIsPkColumn(0, true);
-		info.getColumn(0).setDbmsType("identity");
+    info.getColumn(0).setIsIdentity(true);
 		TableIdentifier table = new TableIdentifier("person");
 
 		info.setUpdateTable(table);
