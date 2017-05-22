@@ -70,23 +70,20 @@ public class PostgresSequenceReader
       "WHERE seq.relkind = 'S'";
 
   private final String baseSqlV10 =
-    "SELECT s.seqmin as min_value,\n" +
-    "       s.seqmax as max_value, \n" +
-    "       seq_info.last_value,\n" +
-    "       s.seqincrement as increment_by, \n" +
-    "       s.seqcache as cache_value,\n" +
-    "       s.seqcycle as is_cycled,\n" +
-    "       pg_catalog.format_type(s.seqtypid, NULL) as data_type, \n" +
-    "       obj_description(seq.oid, 'pg_class') as remarks, \n" +
-    "       quote_ident(tab.relname)||'.'||quote_ident(col.attname) as owned_by, \n" +
-    "       seq.relname as sequence_name, \n" +
-    "       sn.nspname as sequence_schema\n" +
-    "FROM pg_sequence s\n" +
-    "  JOIN pg_class seq on s.seqrelid = seq.oid\n" +
-    "  CROSS JOIN (SELECT last_value FROM " + NAME_PLACEHOLDER + ") seq_info \n" +
-    "  JOIN pg_namespace sn ON sn.oid = seq.relnamespace \n" +
-    "  LEFT JOIN pg_depend d ON d.objid = seq.oid AND deptype in ('a', 'i') \n" +
-    "  LEFT JOIN pg_class tab ON d.objid = seq.oid AND d.refobjid = tab.oid   \n" +
+    "select s.min_value,\n" +
+    "       s.max_value,\n" +
+    "       s.last_value,\n" +
+    "       s.increment_by,\n" +
+    "       s.cache_size as cache_value,\n" +
+    "       s.cycle as is_cycled,\n" +
+    "       pg_catalog.format_type(s.data_type, NULL) as data_type,\n" +
+    "       obj_description(to_regclass(format('%I.%I', s.schemaname, s.sequencename)), 'pg_class') as remarks,\n" +
+    "       quote_ident(tab.relname)||'.'||quote_ident(col.attname) as owned_by,\n" +
+    "       s.sequencename as sequence_name, \n" +
+    "       s.schemaname as sequence_schema\n" +
+    "from pg_catalog.pg_sequences s\n" +
+    "  LEFT JOIN pg_depend d ON d.objid = to_regclass(format('%I.%I', s.schemaname, s.sequencename)) AND deptype in ('a', 'i') \n" +
+    "  LEFT JOIN pg_class tab ON d.objid = to_regclass(format('%I.%I', s.schemaname, s.sequencename)) AND d.refobjid = tab.oid   \n" +
     "  LEFT JOIN pg_attribute col ON (d.refobjid, d.refobjsubid) = (col.attrelid, col.attnum)";
 
   public PostgresSequenceReader(WbConnection conn)
