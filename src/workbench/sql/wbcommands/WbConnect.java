@@ -27,14 +27,18 @@ import java.sql.SQLException;
 
 import workbench.AppArguments;
 import workbench.WbManager;
+import workbench.log.LogMgr;
+
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+
 import workbench.gui.profiles.ProfileKey;
-import workbench.log.LogMgr;
+
 import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
@@ -76,6 +80,7 @@ public class WbConnect
     cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_DESCRIPTOR);
 		cmdLine.addArgument(AppArguments.ARG_ALT_DELIMITER);
+    cmdLine.addArgument("restore", ArgumentType.BoolSwitch);
 	}
 
 	@Override
@@ -107,6 +112,14 @@ public class WbConnect
 
 		ConnectionProfile profile = null;
 		String profName = null;
+
+    if (cmdLine.isArgPresent("restore"))
+    {
+      runner.restoreMainConnection();
+      result.addMessageByKey("MsgConnectedTo", runner.getConnection().getDisplayString());
+      result.setSuccess();
+      return result;
+    }
 
 		// Allow to directly specify a profile name without parameters
 		if (cmdLine.getArgumentCount() == 0)
