@@ -198,6 +198,21 @@ public class ClasspathEditor
 		libList.setSelectedIndex(secondIndex);
 	}
 
+  private void removeSingleInvalidEntry()
+  {
+    if (libList.getModel().getSize() == 1)
+    {
+      LibraryElement lib = (LibraryElement)libList.getModel().getElementAt(0);
+      String realPath = lib.getRealPath();
+      File f = new File(realPath);
+      if (!f.exists())
+      {
+        DefaultListModel model = (DefaultListModel)libList.getModel();
+        model.remove(0);
+      }
+    }
+  }
+
 	private void selectFile()
 	{
 		DefaultListModel model = (DefaultListModel)libList.getModel();
@@ -215,6 +230,7 @@ public class ClasspathEditor
 			LibListUtil util = new LibListUtil();
 			File[] selectedFiles = jf.getSelectedFiles();
 			removeSelected();
+      removeSingleInvalidEntry();
 			for (File f : selectedFiles)
 			{
 				WbFile wbf = util.replaceLibDir(new WbFile(f));
