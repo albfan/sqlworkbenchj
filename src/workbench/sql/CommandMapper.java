@@ -33,8 +33,10 @@ import java.util.TreeSet;
 
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+
 import workbench.sql.commands.AlterSessionCommand;
 import workbench.sql.commands.DdlCommand;
 import workbench.sql.commands.IgnoredCommand;
@@ -91,6 +93,7 @@ import workbench.sql.wbcommands.WbMode;
 import workbench.sql.wbcommands.WbOraShow;
 import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbRemoveVar;
+import workbench.sql.wbcommands.WbRestoreConnection;
 import workbench.sql.wbcommands.WbRowCount;
 import workbench.sql.wbcommands.WbRunLB;
 import workbench.sql.wbcommands.WbSavePkMapping;
@@ -122,6 +125,7 @@ import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbSetDisplaySize;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 import workbench.sql.wbcommands.console.WbToggleDisplay;
+
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlParsingUtil;
@@ -170,6 +174,7 @@ public class CommandMapper
 		addCommand(new WbMessage());
 		addCommand(new WbCall());
 		addCommand(new WbConnect());
+    addCommand(new WbRestoreConnection());
 		addCommand(new WbInclude());
 		addCommand(new WbListCatalogs());
 		addCommand(new WbListSchemas());
