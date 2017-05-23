@@ -25,29 +25,13 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.AppArguments;
-import workbench.WbManager;
-import workbench.log.LogMgr;
-
-import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-
-import workbench.gui.profiles.ProfileKey;
-
-import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
-import workbench.util.ArgumentParser;
-import workbench.util.ArgumentType;
-import workbench.util.ExceptionUtil;
-import workbench.util.StringUtil;
 
 /**
  * Restore the original connection in a script.
  * <br>
- * Using WbRestoreConnection is equivalent to "WbConnect -restore"
  * @author Thomas Kellerer
  */
 public class WbRestoreConnection
@@ -77,9 +61,17 @@ public class WbRestoreConnection
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-    runner.restoreMainConnection();
-    result.addMessageByKey("MsgConnectedTo", runner.getConnection().getDisplayString());
+    boolean restored = runner.restoreMainConnection();
+    if (restored)
+    {
+      result.addMessageByKey("MsgConnectedTo", runner.getConnection().getDisplayString());
+    }
+    else
+    {
+      result.addMessageByKey("MsgConnNotRestored", runner.getConnection().getDisplayString());
+    }
     result.setSuccess();
+
 		return result;
 	}
 

@@ -319,14 +319,16 @@ public class StatementRunner
 		return this.currentConnection;
 	}
 
-	public void restoreMainConnection()
+	public boolean restoreMainConnection()
 	{
 		if (mainConnection != null)
 		{
 			this.currentConnection.disconnect();
 			this.setConnection(this.mainConnection);
 			this.mainConnection = null;
+      return true;
 		}
+    return false;
 	}
 
 	/**
