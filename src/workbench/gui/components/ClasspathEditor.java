@@ -200,14 +200,15 @@ public class ClasspathEditor
 
   private void removeSingleInvalidEntry()
   {
-    if (libList.getModel().getSize() == 1)
+    DefaultListModel model = (DefaultListModel)libList.getModel();
+    
+    if (model.getSize() == 1)
     {
-      LibraryElement lib = (LibraryElement)libList.getModel().getElementAt(0);
+      LibraryElement lib = (LibraryElement)model.getElementAt(0);
       String realPath = lib.getRealPath();
       File f = new File(realPath);
       if (!f.exists())
       {
-        DefaultListModel model = (DefaultListModel)libList.getModel();
         model.remove(0);
       }
     }
