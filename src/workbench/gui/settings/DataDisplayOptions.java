@@ -64,6 +64,14 @@ public class DataDisplayOptions
 		ComboBoxModel model = new DefaultComboBoxModel(new String[] {ResourceMgr.getString("TxtTabRight"), ResourceMgr.getString("TxtTabLeft") });
 		alignmentDropDown.setModel(model);
 
+		ComboBoxModel fontModel = new DefaultComboBoxModel(
+      new String[] {
+        ResourceMgr.getString("TxtFntNormal"),
+        ResourceMgr.getString("TxtFntBold"),
+        ResourceMgr.getString("TxtFntItalic"),
+        ResourceMgr.getString("TxtFntBoldItalic") });
+		nullFontStyle.setModel(fontModel);
+
 		WbSwingUtilities.setMinimumSizeFromCols(defMaxRows);
 		WbSwingUtilities.setMinimumSizeFromCols(nullString);
 		WbSwingUtilities.setMinimumSizeFromCols(maxRowHeight);
@@ -121,6 +129,7 @@ public class DataDisplayOptions
 		boldHeader.setSelected(GuiSettings.showTableHeaderInBold());
     showDataType.setSelected(GuiSettings.showDatatypeInTableHeader());
     showRemarks.setSelected(GuiSettings.showRemarksInTableHeader());
+    nullFontStyle.setSelectedIndex(GuiSettings.getDisplayNullFontStyle());
 		fillLanguageDropDown();
 	}
 
@@ -153,6 +162,7 @@ public class DataDisplayOptions
     GuiSettings.setDataTooltipType(indexToType(tooltipConfig.getSelectedIndex()));
     GuiSettings.setShowDatatypeInTableHeader(showDataType.isSelected());
     GuiSettings.setShowRemarksInTableHeader(showRemarks.isSelected());
+    GuiSettings.setDisplayNullFontStyle(nullFontStyle.getSelectedIndex());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 		Settings.getInstance().setSortLocale(dl.getLocale());
 		if (alignmentDropDown.getSelectedIndex() == 1)
@@ -291,6 +301,7 @@ public class DataDisplayOptions
     localeDropDown = new javax.swing.JComboBox();
     toolTipConfigLabel = new javax.swing.JLabel();
     tooltipConfig = new javax.swing.JComboBox();
+    nullFontStyle = new javax.swing.JComboBox<>();
     colWidthPanel = new javax.swing.JPanel();
     jPanel3 = new javax.swing.JPanel();
     autoColWidth = new javax.swing.JCheckBox();
@@ -356,9 +367,10 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     generalPanel.add(defMaxRows, gridBagConstraints);
 
     showRowNumbers.setText(ResourceMgr.getString("LblShowRowNumbers")); // NOI18N
@@ -378,7 +390,7 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
@@ -390,7 +402,7 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 16, 0, 0);
     generalPanel.add(showMaxRowsTooltip, gridBagConstraints);
@@ -410,8 +422,8 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 10);
     generalPanel.add(alignmentDropDown, gridBagConstraints);
 
@@ -429,8 +441,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 9);
     generalPanel.add(nullString, gridBagConstraints);
 
     appendResults.setText(ResourceMgr.getString("LblAppendDefault")); // NOI18N
@@ -486,7 +497,7 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
     generalPanel.add(jPanel1, gridBagConstraints);
@@ -504,9 +515,18 @@ public class DataDisplayOptions
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
     generalPanel.add(tooltipConfig, gridBagConstraints);
+
+    nullFontStyle.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    generalPanel.add(nullFontStyle, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -817,6 +837,7 @@ public class DataDisplayOptions
   private javax.swing.JPanel multiLinePanel;
   private javax.swing.JTextField multiLineThreshold;
   private javax.swing.JLabel multilineThresholLabel;
+  private javax.swing.JComboBox<String> nullFontStyle;
   private javax.swing.JTextField nullString;
   private javax.swing.JLabel nullStringLabel;
   private javax.swing.JCheckBox retrieveComments;
