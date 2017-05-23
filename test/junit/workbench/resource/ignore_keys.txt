@@ -1,3 +1,4 @@
+TxtFntNormal
 LblSshConfig
 LblSshHost
 LblTestConn
