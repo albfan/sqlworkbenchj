@@ -444,7 +444,17 @@ public class TableDeleterUI
 			LogMgr.logWarning("TableDeleterUI.cancel()", "Error when trying to kill check thread", e);
 		}
 
-		this.dialog.setVisible(false);
+    try
+    {
+      if (this.dialog != null)
+      {
+        this.dialog.setVisible(false);
+      }
+    }
+    catch (Throwable th)
+    {
+      // ignore
+    }
 		this.dialog = null;
 	}
 

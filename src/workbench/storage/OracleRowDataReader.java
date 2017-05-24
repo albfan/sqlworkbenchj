@@ -87,8 +87,9 @@ public class OracleRowDataReader
     }
     catch (Throwable t)
     {
-      LogMgr.logError("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum class", t);
-      throw new ClassNotFoundException("TIMESTAMPTZ");
+      LogMgr.logWarning("OracleRowDataReader.initialize()", "Class oracle.sql.Datum not available!");
+      LogMgr.logDebug("OracleRowDataReader.initialize()", "Could not access oracle.sql.Datum", t);
+      throw new ClassNotFoundException("oracle.sql.Datum");
     }
 
     if (useInternalConversion)
@@ -101,7 +102,8 @@ public class OracleRowDataReader
       catch (Throwable t)
       {
         useInternalConversion = false;
-        LogMgr.logError("OracleRowDataReader.initialize()", "Could not accessoracle.sql.TIMESTAMPTZ class", t);
+        LogMgr.logWarning("OracleRowDataReader.initialize()", "Class oracle.sql.TIMESTAMPTZ not available!");
+        LogMgr.logDebug("OracleRowDataReader.initialize()", "Could not oracle.sql.TIMESTAMPTZ", t);
       }
     }
   }

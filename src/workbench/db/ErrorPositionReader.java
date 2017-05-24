@@ -86,17 +86,21 @@ public interface ErrorPositionReader
     public static ErrorPositionReader createPositionReader(WbConnection conn)
     {
       if (conn == null) return dummyReader;
-      if (conn.getMetadata() == null) return dummyReader;
+      DbMetadata meta = conn.getMetadata();
+      DbSettings dbs = conn.getDbSettings();
       
-      if (conn.getMetadata().isOracle())
+      if (dbs == null) return dummyReader;
+      if (meta == null) return dummyReader;
+
+      if (meta.isOracle())
       {
         return new OracleErrorPositionReader();
       }
 
-      String colRegex = conn.getDbSettings().getErrorColumnInfoRegex();
-      String lineRegex = conn.getDbSettings().getErrorLineInfoRegex();
-      String posRegex = conn.getDbSettings().getErrorPosInfoRegex();
-      boolean zeroBased = conn.getDbSettings().getErrorPosIsZeroBased();
+      String colRegex = dbs.getErrorColumnInfoRegex();
+      String lineRegex = dbs.getErrorLineInfoRegex();
+      String posRegex = dbs.getErrorPosInfoRegex();
+      boolean zeroBased = dbs.getErrorPosIsZeroBased();
 
       if (posRegex != null)
       {

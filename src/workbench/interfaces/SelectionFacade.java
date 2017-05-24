@@ -74,7 +74,11 @@ public class SelectionFacade
     {
       return treeModel.getSelectionCount() > 0;
     }
-    return listModel.getMinSelectionIndex() >= 0;
+    if (listModel != null)
+    {
+      return listModel.getMinSelectionIndex() >= 0;
+    }
+    return false;
   }
 
 
@@ -85,6 +89,8 @@ public class SelectionFacade
     {
       return treeModel.getSelectionCount();
     }
+    if (listModel == null) return 0;
+    
     int count = 0;
     int min = listModel.getMinSelectionIndex();
     int max = listModel.getMaxSelectionIndex();
@@ -103,7 +109,7 @@ public class SelectionFacade
   {
     for (WbSelectionListener l : listenerList)
     {
-      l.selectionChanged(this);
+      if (l != null) l.selectionChanged(this);
     }
   }
 
@@ -112,7 +118,7 @@ public class SelectionFacade
   {
     for (WbSelectionListener l : listenerList)
     {
-      l.selectionChanged(this);
+      if (l != null) l.selectionChanged(this);
     }
   }
 

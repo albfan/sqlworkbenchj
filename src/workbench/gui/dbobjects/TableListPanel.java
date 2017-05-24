@@ -1717,6 +1717,14 @@ public class TableListPanel
 	protected void retrieveTableSource()
 	{
 		if (selectedTable == null) return;
+    if (this.dbConnection == null) return;
+
+    DbMetadata meta = this.dbConnection.getMetadata();
+    DbSettings dbs = this.dbConnection.getDbSettings();
+
+    // Can happen when closing the application
+    if (meta == null) return;
+    if (dbs == null) return;
 
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
     tableSource.setEnabled(false);
@@ -1727,9 +1735,6 @@ public class TableListPanel
 			setActivePanelIndex(tableSource);
 			WbSwingUtilities.showWaitCursor(this);
 			WbSwingUtilities.showWaitCursor(tableSource);
-
-			DbMetadata meta = this.dbConnection.getMetadata();
-			DbSettings dbs = this.dbConnection.getDbSettings();
 
 			String type = selectedTable.getType();
 
@@ -1780,7 +1785,7 @@ public class TableListPanel
 			// isExtendedTableType() checks for regular tables and "extended tables"
 			else if (meta.isExtendedTableType(type))
 			{
-				sql = builder.getTableSource(selectedTable, dropType, true, dbConnection.getDbSettings().getGenerateTableGrants());
+				sql = builder.getTableSource(selectedTable, dropType, true, dbs.getGenerateTableGrants());
 			}
 
 			if (sql != null && dbConnection.generateCommitForDDL())

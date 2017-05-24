@@ -24,6 +24,7 @@ package workbench.storage;
 
 import workbench.log.LogMgr;
 
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleUtils;
 
@@ -35,19 +36,28 @@ public class RowDataReaderFactory
 {
   public static RowDataReader createReader(ResultInfo info, WbConnection conn)
   {
-    if (conn != null  && conn.getMetadata().isOracle() && OracleUtils.fixTimestampTZ())
+    DbMetadata meta = conn == null ? null : conn.getMetadata();
+    if (conn != null && meta != null && meta.isOracle() && OracleUtils.fixTimestampTZ())
     {
       try
       {
         return new OracleRowDataReader(info, conn);
       }
-      catch (ClassNotFoundException cnf)
+      catch (Exception cnf)
       {
-        LogMgr.logError("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader", cnf);
+        if (LogMgr.isDebugEnabled())
+        {
+          LogMgr.logDebug("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader", cnf);
+        }
+        else
+        {
+          LogMgr.logWarning("RowDataReaderFactory.createReader()", "Could not instantiate OracleRowDataReader. Probably the Oracle specific classes are not available");
+        }
         // disable the usage of the OracleRowDataReader for now, to avoid unnecessary further attempts
         System.setProperty(OracleUtils.PROP_FIX_TIMESTAMPTZ, "false");
       }
     }
+    
     return new RowDataReader(info, conn);
   }
 }

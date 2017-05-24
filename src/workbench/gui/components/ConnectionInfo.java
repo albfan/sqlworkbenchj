@@ -39,14 +39,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import workbench.db.ConnectionProfile;
-import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.WbAction;
-import workbench.gui.tools.ConnectionInfoPanel;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
 import workbench.ssh.SshConfig;
+
+import workbench.db.ConnectionProfile;
+import workbench.db.WbConnection;
+
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.WbAction;
+import workbench.gui.tools.ConnectionInfoPanel;
 
 /**
  * @author  Thomas Kellerer
@@ -151,17 +153,18 @@ public class ConnectionInfo
 
 	private void _updateDisplay()
 	{
-		if (this.sourceConnection != null)
+    WbConnection conn = this.sourceConnection;
+		if (conn != null)
 		{
-			infoText.setText(this.sourceConnection.getDisplayString(useCachedSchema));
+			infoText.setText(conn.getDisplayString(useCachedSchema));
 			StringBuilder tip = new StringBuilder(30);
 			tip.append("<html>");
-			tip.append(this.sourceConnection.getDatabaseProductName());
+			tip.append(conn.getDatabaseProductName());
 			tip.append(" ");
-			tip.append(this.sourceConnection.getDatabaseVersion().toString());
+			tip.append(conn.getDatabaseVersion().toString());
 			tip.append("<br>");
-			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
-      SshConfig sshConfig = sourceConnection.getProfile().getSshConfig();
+			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", conn.getDriverVersion()));
+      SshConfig sshConfig = conn.getProfile().getSshConfig();
       if (sshConfig != null)
       {
         tip.append("<br>SSH: ");
