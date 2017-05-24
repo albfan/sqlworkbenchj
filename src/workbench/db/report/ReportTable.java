@@ -53,6 +53,8 @@ import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.oracle.OracleTablePartition;
+import workbench.db.postgres.PostgresPartitionReader;
+import workbench.db.postgres.PostgresTableSourceBuilder;
 import workbench.db.sqltemplates.ConstraintNameTester;
 
 import workbench.util.CollectionUtil;
@@ -257,6 +259,15 @@ public class ReportTable
         dbmsOptions.add(option);
       }
       builder.setIncludePartitions(false); // no need to retrieve it twice
+    }
+    else if (conn.getMetadata().isPostgres() && includePartitions)
+    {
+      PostgresPartitionReader reader = new PostgresPartitionReader(table, conn);
+      reader.readPartitionInformation();
+      dbmsOptions.add(new ObjectOption("partition_strategy", reader.getStrategy()));
+      dbmsOptions.add(new ObjectOption("partition_expression", reader.getPartitionExpression()));
+      dbmsOptions.add(new ObjectOption("partition_definition", reader.getPartitionDefinition()));
+      dbmsOptions.add(new ObjectOption("partitions", reader.getCreatePartitions()));
     }
     else
     {

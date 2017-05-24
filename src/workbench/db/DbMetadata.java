@@ -134,7 +134,7 @@ public class DbMetadata
   private IndexReader indexReader;
   private List<ObjectListExtender> extenders = new ArrayList<>();
   private List<ObjectListAppender> appenders = new ArrayList<>();
-  private List<ObjectListCleaner> cleaners = new ArrayList<>();
+  private List<ObjectListCleaner> cleaners = new ArrayList<>(1);
 
   private DbmsOutput oraOutput;
 
@@ -173,6 +173,7 @@ public class DbMetadata
   private boolean supportsGetSchema = true;
   private boolean supportsGetCatalog = true;
   private Pattern identifierPattern;
+  private boolean cleanupObjectList = false;
 
   public DbMetadata(WbConnection aConnection)
     throws SQLException
@@ -238,9 +239,10 @@ public class DbMetadata
       {
         extenders.add(new PostgresRangeTypeReader());
       }
-      if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0") && PostgresObjectListCleaner.removePartitions())
+      if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0"))
       {
         cleaners.add(new PostgresObjectListCleaner());
+        cleanupObjectList = PostgresObjectListCleaner.removePartitions();
       }
     }
     else if (productLower.contains("oracle") && !productLower.contains("lite ordbms"))
@@ -539,6 +541,16 @@ public class DbMetadata
         LogMgr.logWarning("DbMetadata.initIdentifierPattern()", "Could not compile pattern: " + pattern, ex);
       }
     }
+  }
+
+  public boolean getCleanupObjectList()
+  {
+    return cleanupObjectList;
+  }
+  
+  public void setCleanupObjectList(boolean flag)
+  {
+    this.cleanupObjectList = flag;
   }
 
   public int getMaxTableNameLength()
@@ -1741,9 +1753,12 @@ public class DbMetadata
       objectListEnhancer.updateObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
     }
 
-    for (ObjectListCleaner cleaner : cleaners)
+    if (cleanupObjectList)
     {
-      cleaner.cleanupObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
+      for (ObjectListCleaner cleaner : cleaners)
+      {
+        cleaner.cleanupObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
+      }
     }
     result.resetStatus();
 

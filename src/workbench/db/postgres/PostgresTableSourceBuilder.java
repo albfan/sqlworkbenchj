@@ -416,9 +416,6 @@ public class PostgresTableSourceBuilder
     }
   }
 
-  /**
-   * Return domain information for columns in the specified table.
-   */
   @Override
   public String getAdditionalTableInfo(TableIdentifier table, List<ColumnIdentifier> columns, List<IndexDefinition> indexList)
   {
@@ -426,6 +423,11 @@ public class PostgresTableSourceBuilder
     CharSequence enums = getEnumInformation(columns, schema);
     CharSequence domains = getDomainInformation(columns, schema);
     CharSequence sequences = getColumnSequenceInformation(table, columns);
+    CharSequence stats = null;
+    if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.0"))
+    {
+      stats = readExtendeStats(table);
+    }
     CharSequence children = null;
     ObjectSourceOptions sourceOptions = table.getSourceOptions();
     if (sourceOptions.getConfigSettings().get(PostgresPartitionReader.OPTION_KEY_STRATEGY) == null)
@@ -435,7 +437,7 @@ public class PostgresTableSourceBuilder
     StringBuilder storage = getColumnStorage(table, columns);
     String owner = getOwnerSql(table);
 
-    if (StringUtil.allEmpty(enums, domains, sequences, children, owner, storage)) return null;
+    if (StringUtil.allEmpty(enums, domains, sequences, children, owner, storage, stats)) return null;
 
     StringBuilder result = new StringBuilder(200);
 
@@ -443,6 +445,7 @@ public class PostgresTableSourceBuilder
     if (enums != null) result.append(enums);
     if (domains != null) result.append(domains);
     if (sequences != null) result.append(sequences);
+    if (stats != null) result.append(stats);
     if (children != null) result.append(children);
     if (owner != null) result.append(owner);
 
@@ -658,4 +661,65 @@ public class PostgresTableSourceBuilder
     return result;
   }
 
+  private CharSequence readExtendeStats(TableIdentifier table)
+  {
+    if (table == null) return null;
+
+    String sql =
+      "select st.stxname as statistic_name, \n" +
+      "       string_agg(col.attname, ',') as columns\n" +
+      "from pg_statistic_ext st\n" +
+      "  join pg_class t on t.oid = st.stxrelid\n" +
+      "  join pg_namespace nsp on nsp.oid = t.relnamespace\n" +
+      "  join pg_attribute col on t.oid = col.attrelid and col.attnum = any(stxkeys)\n" +
+      "where nsp.nspname = ? \n"+
+      "  and t.relname = ? \n" +
+      "group by nsp.nspname, t.relname, st.stxname";
+    ResultSet rs = null;
+    PreparedStatement pstmt = null;
+    StringBuilder b = new StringBuilder(100);
+
+    Savepoint sp = null;
+    StringBuilder result = null;
+
+    ObjectSourceOptions option = table.getSourceOptions();
+    try
+    {
+      sp = dbConnection.setSavepoint();
+      pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+      pstmt.setString(1, table.getRawSchema());
+      pstmt.setString(2, table.getRawTableName());
+      rs = pstmt.executeQuery();
+      String tname = table.getTableExpression(dbConnection);
+      while (rs.next())
+      {
+        String name = rs.getString(1);
+        String cols = rs.getString(2);
+        if (result == null)
+        {
+          result = new StringBuilder(100);
+        }
+        result.append("\nCREATE STATISTICS ");
+        result.append(name);
+        result.append(" ON ");
+        result.append(cols);
+        result.append(" FROM ");
+        result.append(tname);
+        result.append(';');
+        option.addConfigSetting("column_statistics: " + name, cols);
+      }
+      dbConnection.releaseSavepoint(sp);
+    }
+    catch (Exception e)
+    {
+      dbConnection.rollback(sp);
+      LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information using: " + sql, e);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, pstmt);
+    }
+
+    return result;
+  }
 }
