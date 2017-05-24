@@ -674,13 +674,19 @@ public class PostgresTableSourceBuilder
       "  join pg_attribute col on t.oid = col.attrelid and col.attnum = any(stxkeys)\n" +
       "where nsp.nspname = ? \n"+
       "  and t.relname = ? \n" +
-      "group by nsp.nspname, t.relname, st.stxname";
+      "group by st.stxname";
     ResultSet rs = null;
     PreparedStatement pstmt = null;
     StringBuilder b = new StringBuilder(100);
 
     Savepoint sp = null;
     StringBuilder result = null;
+
+    if (Settings.getInstance().getDebugMetadataSql())
+    {
+      LogMgr.logDebug("PostgresTableSourceBuilder.readExtendeStats()", "Retrieving extended column statistics using:\n" +
+        SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()));
+    }
 
     ObjectSourceOptions option = table.getSourceOptions();
     try
@@ -713,7 +719,9 @@ public class PostgresTableSourceBuilder
     catch (Exception e)
     {
       dbConnection.rollback(sp);
-      LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence information using: " + sql, e);
+      LogMgr.logWarning("PostgresTableSourceBuilder.readExtendeStats()", "Error reading extended statistics using:\n" +
+        SqlUtil.replaceParameters(sql, table.getSchema(), table.getTableName()), e);
+      result = null;
     }
     finally
     {
