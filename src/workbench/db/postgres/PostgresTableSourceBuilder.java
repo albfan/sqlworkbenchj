@@ -667,14 +667,15 @@ public class PostgresTableSourceBuilder
 
     String sql =
       "select st.stxname as statistic_name, \n" +
-      "       string_agg(col.attname, ',') as columns\n" +
+      "       string_agg(col.attname, ',') as columns, \n" +
+      "       array_to_string(stxkind, '') as stxkind \n"+
       "from pg_statistic_ext st\n" +
       "  join pg_class t on t.oid = st.stxrelid\n" +
       "  join pg_namespace nsp on nsp.oid = t.relnamespace\n" +
       "  join pg_attribute col on t.oid = col.attrelid and col.attnum = any(stxkeys)\n" +
       "where nsp.nspname = ? \n"+
       "  and t.relname = ? \n" +
-      "group by st.stxname";
+      "group by st.stxname, st.stxkind";
     ResultSet rs = null;
     PreparedStatement pstmt = null;
     StringBuilder b = new StringBuilder(100);
@@ -701,12 +702,30 @@ public class PostgresTableSourceBuilder
       {
         String name = rs.getString(1);
         String cols = rs.getString(2);
+        String types = rs.getString(3);
+
         if (result == null)
         {
           result = new StringBuilder(100);
         }
         result.append("\nCREATE STATISTICS ");
         result.append(name);
+        if (StringUtil.isNonBlank(types))
+        {
+          result.append(" (");
+          boolean needComma = false;
+          if (types.indexOf('d') > -1)
+          {
+            result.append("ndistinct");
+            needComma = true;
+          }
+          if (types.indexOf('d') > -1)
+          {
+            if (needComma) result.append(',');
+            result.append("dependencies");
+          }
+          result.append(")");
+        }
         result.append(" ON ");
         result.append(cols);
         result.append(" FROM ");
