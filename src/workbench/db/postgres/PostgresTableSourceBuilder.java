@@ -667,15 +667,17 @@ public class PostgresTableSourceBuilder
 
     String sql =
       "select st.stxname as statistic_name, \n" +
+      "       sn.nspname as statistic_schema, \n" +
       "       string_agg(col.attname, ',') as columns, \n" +
       "       array_to_string(stxkind, '') as stxkind \n"+
-      "from pg_statistic_ext st\n" +
+      "from pg_statistic_ext st \n" +
+      "  join pg_namespace sn on sn.oid = st.stxnamespace \n" +
       "  join pg_class t on t.oid = st.stxrelid\n" +
       "  join pg_namespace nsp on nsp.oid = t.relnamespace\n" +
       "  join pg_attribute col on t.oid = col.attrelid and col.attnum = any(stxkeys)\n" +
       "where nsp.nspname = ? \n"+
       "  and t.relname = ? \n" +
-      "group by st.stxname, st.stxkind";
+      "group by st.stxname, sn.nspname, st.stxkind";
     ResultSet rs = null;
     PreparedStatement pstmt = null;
     StringBuilder b = new StringBuilder(100);
@@ -701,15 +703,18 @@ public class PostgresTableSourceBuilder
       while (rs.next())
       {
         String name = rs.getString(1);
-        String cols = rs.getString(2);
-        String types = rs.getString(3);
+        String schema = rs.getString(2);
+        String cols = rs.getString(3);
+        String types = rs.getString(4);
+
+        TableIdentifier tbl = new TableIdentifier(schema, name);
 
         if (result == null)
         {
           result = new StringBuilder(100);
         }
         result.append("\nCREATE STATISTICS ");
-        result.append(name);
+        result.append(tbl.getTableExpression(dbConnection));
         if (StringUtil.isNonBlank(types))
         {
           result.append(" (");
@@ -731,6 +736,7 @@ public class PostgresTableSourceBuilder
         result.append(" FROM ");
         result.append(tname);
         result.append(';');
+        option.addConfigSetting("column_statistics: " + name, cols);
         option.addConfigSetting("column_statistics: " + name, cols);
       }
       dbConnection.releaseSavepoint(sp);
