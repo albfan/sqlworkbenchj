@@ -736,8 +736,7 @@ public class PostgresTableSourceBuilder
         result.append(" FROM ");
         result.append(tname);
         result.append(';');
-        option.addConfigSetting("column_statistics: " + name, cols);
-        option.addConfigSetting("column_statistics: " + name, cols);
+        option.addConfigSetting("column_statistics", result.toString());
       }
       dbConnection.releaseSavepoint(sp);
     }
