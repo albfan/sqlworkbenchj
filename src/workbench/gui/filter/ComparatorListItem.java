@@ -41,7 +41,7 @@ public class ComparatorListItem
 	@Override
 	public String toString()
 	{
-		return comparator.getOperator();
+		return comparator.getUserDisplay();
 	}
 
 	public ColumnComparator getComparator()

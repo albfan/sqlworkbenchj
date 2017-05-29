@@ -51,7 +51,7 @@ public class BooleanEqualsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
 		return "equals";
 	}

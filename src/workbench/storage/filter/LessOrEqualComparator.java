@@ -49,9 +49,9 @@ public class LessOrEqualComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "less than or equal";
+		return getOperator();
 	}
 
 	@Override

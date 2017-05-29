@@ -45,9 +45,9 @@ public class StringEqualsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return ResourceMgr.getString("TxtOpEquals");
+		return getOperator();
 	}
 
 	@Override

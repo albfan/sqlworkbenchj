@@ -23,6 +23,8 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.util.ValueConverter;
 
 /**
@@ -62,9 +64,9 @@ public class DateEqualsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "equals";
+		return ResourceMgr.getString("TxtOpEquals");
 	}
 
 	@Override

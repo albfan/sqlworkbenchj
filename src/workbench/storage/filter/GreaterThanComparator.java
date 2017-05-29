@@ -60,9 +60,9 @@ public class GreaterThanComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "greater than";
+		return getOperator();
 	}
 
 	@Override

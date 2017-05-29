@@ -44,7 +44,7 @@ public class StartsWithComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
 		return ResourceMgr.getString("TxtOpStartsWith");
 	}

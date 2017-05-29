@@ -36,7 +36,7 @@ public interface ColumnComparator
 	/**
 	 * Return a human redeable (localized) name of this operator
 	 */
-	String getDescription();
+	String getUserDisplay();
 
 	/**
 	 * Evaluate this ColumnComparator.

@@ -51,9 +51,9 @@ public class NumberNotEqualsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "not equal";
+		return getOperator();
 	}
 
 	@Override

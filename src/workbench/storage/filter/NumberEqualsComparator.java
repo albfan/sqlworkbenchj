@@ -52,9 +52,9 @@ public class NumberEqualsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "equals";
+		return getOperator();
 	}
 
 	@Override

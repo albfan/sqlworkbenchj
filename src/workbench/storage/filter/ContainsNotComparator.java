@@ -32,7 +32,7 @@ public class ContainsNotComparator
 	extends ContainsComparator
 {
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
 		return getOperator();
 	}

@@ -228,7 +228,7 @@ public class ClientSideTableSearcher
 
       ResultInfo info = new ResultInfo(rs.getMetaData(), connection);
       DataStore result = new DataStore(rs.getMetaData(), connection);
-      String explain = "-- " + ResourceMgr.getFormattedString("TxtSearchFilter", this.comparator.getDescription() + " '"  + this.searchString + "'\n\n");
+      String explain = "-- " + ResourceMgr.getFormattedString("TxtSearchFilter", this.comparator.getUserDisplay() + " '"  + this.searchString + "'\n\n");
       result.setGeneratingSql(explain + sql);
       result.setResultName(table.getTableName());
       result.setUpdateTableToBeUsed(table);

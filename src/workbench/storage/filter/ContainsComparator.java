@@ -38,7 +38,7 @@ public class ContainsComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
 		return ResourceMgr.getString("TxtOpContains");
 	}
@@ -46,7 +46,7 @@ public class ContainsComparator
 	@Override
 	public String getOperator()
 	{
-		return getDescription();
+		return "contains";
 	}
 
 	@Override

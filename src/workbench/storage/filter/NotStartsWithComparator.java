@@ -23,6 +23,8 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 /**
  * @author Thomas Kellerer
  */
@@ -43,9 +45,9 @@ public class NotStartsWithComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return getOperator();
+		return ResourceMgr.getString("TxtOpNotStartsWith");
 	}
 
 	@Override

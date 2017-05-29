@@ -48,9 +48,9 @@ public class GreaterOrEqualComparator
 	}
 
 	@Override
-	public String getDescription()
+	public String getUserDisplay()
 	{
-		return "greater or equal";
+		return getOperator();
 	}
 
 	@Override
