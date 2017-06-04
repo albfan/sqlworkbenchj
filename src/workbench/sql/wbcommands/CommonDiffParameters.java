@@ -71,6 +71,7 @@ public class CommonDiffParameters
 	private List<String> missingRefTables = new ArrayList<>();
 	private List<String> missingTargetTables = new ArrayList<>();
 	private String baseDir;
+  private boolean ignoreMissing;
 
 	public CommonDiffParameters(ArgumentParser args)
 	{
@@ -97,6 +98,11 @@ public class CommonDiffParameters
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES);
 	}
+
+  public void setIgnoreMissing(boolean flag)
+  {
+    this.ignoreMissing = flag;
+  }
 
 	public void setMonitor(RowActionMonitor rowMonitor)
 	{
@@ -226,7 +232,8 @@ public class CommonDiffParameters
 				{
 					other = TableIdentifier.findTableByName(targetTables, refTable);
 				}
-				if (other != null)
+        
+				if (other != null || ignoreMissing)
 				{
 					mapping.referenceTables.add(refTable);
 					mapping.targetTables.add(other);

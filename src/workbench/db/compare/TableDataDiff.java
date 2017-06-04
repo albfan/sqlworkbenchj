@@ -117,6 +117,7 @@ public class TableDataDiff
   private Set<String> realPKCols = CollectionUtil.caseInsensitiveSet();
   private boolean excludeRealPK;
   private boolean excludeIgnoredColumns;
+  private boolean ignoreMissingTarget;
 
   public TableDataDiff(WbConnection original, WbConnection compareTo)
     throws SQLException
@@ -185,6 +186,12 @@ public class TableDataDiff
   {
     this.excludeIgnoredColumns = flag;
   }
+
+  public void setIgnoreMissingTarget(boolean flag)
+  {
+    this.ignoreMissingTarget = flag;
+  }
+
 
   /**
    * Define a alternate PK columns.
@@ -343,26 +350,29 @@ public class TableDataDiff
     }
 
     tableToSync = this.toSync.getMetadata().findSelectableObject(tableToVerify);
-    if (tableToSync == null)
+    if (tableToSync == null && !ignoreMissingTarget)
     {
       LogMgr.logError("TableDataDiff.setTableName()", "Target table " + tableToVerify.getTableName() + " not found!", null);
       return TableDiffStatus.TargetNotFound;
     }
-    else
+
+    TableDiffStatus status = TableDiffStatus.OK;
+
+    if (tableToSync != null)
     {
       toSyncDef = this.toSync.getMetadata().getTableDefinition(tableToSync);
       tableToSync = toSyncDef.getTable();
-    }
 
-    TableDiffStatus status = TableDiffStatus.OK;
-    for (ColumnIdentifier col : cols)
-    {
-      if (findTargetColumn(col) == null)
+      for (ColumnIdentifier col : cols)
       {
-        status = TableDiffStatus.ColumnMismatch;
-        LogMgr.logError("TableDataDiff.setTableName()", "Reference column " + col.getColumnName() + " not found in target table!", null);
+        if (findTargetColumn(col) == null)
+        {
+          status = TableDiffStatus.ColumnMismatch;
+          LogMgr.logError("TableDataDiff.setTableName()", "Reference column " + col.getColumnName() + " not found in target table!", null);
+        }
       }
     }
+
     return status;
   }
 
@@ -403,7 +413,7 @@ public class TableDataDiff
       if (this.monitor != null)
       {
         this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-        String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", this.tableToSync.getTableName());
+        String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", referenceTable.getTableName());
         this.monitor.setCurrentObject(msg, -1, -1);
       }
 
@@ -451,23 +461,37 @@ public class TableDataDiff
     String sql = buildCheckSql(referenceRows, info);
     ResultSet rs = null;
     RowDataReader reader = null;
+    ResultInfo ri = null;
     try
     {
-      rs = checkStatement.executeQuery(sql);
       List<RowData> checkRows = new ArrayList<>(referenceRows.size());
-      ResultInfo ri = new ResultInfo(rs.getMetaData(), toSync);
-      ri.setPKColumns(this.pkColumns);
-      ri.setUpdateTable(this.tableToSync);
-
-      if (currentRowNumber == 0) comparer.setResultInfo(ri);
-
-      reader = RowDataReaderFactory.createReader(ri, toSync);
-      while (rs.next())
+      if (sql != null)
       {
-        RowData r = reader.read(rs, false);
-        checkRows.add(r);
-        if (cancelExecution) break;
+        rs = checkStatement.executeQuery(sql);
+        ri = new ResultInfo(rs.getMetaData(), toSync);
+        ri.setPKColumns(this.pkColumns);
+        ri.setUpdateTable(this.tableToSync);
+
+        reader = RowDataReaderFactory.createReader(ri, toSync);
+        while (rs.next())
+        {
+          RowData r = reader.read(rs, false);
+          checkRows.add(r);
+          if (cancelExecution) break;
+        }
       }
+      else
+      {
+        ri = info.createCopy();
+        ri.setPKColumns(this.pkColumns);
+        ri.setUpdateTable(this.referenceTable);
+      }
+
+      if (currentRowNumber == 0)
+      {
+        comparer.setResultInfo(ri);
+      }
+
 
       for (RowData toInsert : referenceRows)
       {
@@ -558,6 +582,9 @@ public class TableDataDiff
 
   protected int findRowByPk(List<RowData> reference, ResultInfo refInfo, RowData toFind, ResultInfo findInfo)
   {
+    if (findInfo == null) return -1;
+    if (toFind == null) return -1;
+
     int index = 0;
     for (RowData refRow : reference)
     {
@@ -586,6 +613,8 @@ public class TableDataDiff
    */
   private String buildCheckSql(List<RowData> rows, ResultInfo info)
   {
+    if (tableToSync == null) return null;
+
     StringBuilder sql = new StringBuilder(150);
     sql.append("SELECT ");
     for (int i=0; i < info.getColumnCount(); i++)
