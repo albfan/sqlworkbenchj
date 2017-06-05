@@ -118,6 +118,7 @@ public class TableDataDiff
   private boolean excludeRealPK;
   private boolean excludeIgnoredColumns;
   private boolean ignoreMissingTarget;
+  private String targetSchema;
 
   public TableDataDiff(WbConnection original, WbConnection compareTo)
     throws SQLException
@@ -130,6 +131,11 @@ public class TableDataDiff
     comparer = new RowDataComparer();
     comparer.setConnection(toSync);
     comparer.setTypeSql();
+  }
+
+  public void setTargetSchema(String schema)
+  {
+    this.targetSchema = schema;
   }
 
   public void setTypeXml(boolean useCDATA)
@@ -484,6 +490,12 @@ public class TableDataDiff
       {
         ri = info.createCopy();
         ri.setPKColumns(this.pkColumns);
+        TableIdentifier target = this.referenceTable.createCopy();
+        target.setSchema(targetSchema);
+        if (target.getSchema() == null)
+        {
+          target.setSchema(toSync.getCurrentSchema());
+        }
         ri.setUpdateTable(this.referenceTable);
       }
 
@@ -491,7 +503,6 @@ public class TableDataDiff
       {
         comparer.setResultInfo(ri);
       }
-
 
       for (RowData toInsert : referenceRows)
       {

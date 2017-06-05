@@ -590,6 +590,14 @@
         </row>
 
         <row>
+          <entry id="data-diff-ignore-missing">-ignoreMissing</entry>
+          <entry>
+            If this parameter is true, <literal>WbDataDiff</literal> will still generate INSERT statements for tables that are not found
+            in the target database.
+          </entry>
+        </row>
+
+        <row>
           <entry id="data-diff-checkdeps">-checkDependencies</entry>
 
           <entry>

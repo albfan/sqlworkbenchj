@@ -178,7 +178,7 @@ public class WbSchemaDiff
 		diff.setAdditionalTypes(types);
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
-		String tarTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
+		String targetTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
 
 		// Setting the tables to be excluded must be done before setting any other table selection
 		String excludeTables = cmdLine.getValue(CommonDiffParameters.PARAM_EXCLUDE_TABLES);
@@ -215,7 +215,7 @@ public class WbSchemaDiff
 				diff.setSchemas(refSchema, targetSchema);
 			}
 		}
-		else if (tarTables == null)
+		else if (targetTables == null)
 		{
 			SourceTableArgument parms = new SourceTableArgument(refTables, referenceConnection);
 			List<TableIdentifier> tables = new ArrayList<>();
@@ -233,7 +233,7 @@ public class WbSchemaDiff
 		else
 		{
 			List<String> rl = StringUtil.stringToList(refTables, ",", true, true);
-			List<String> tl = StringUtil.stringToList(tarTables, ",", true, true);
+			List<String> tl = StringUtil.stringToList(targetTables, ",", true, true);
 			if (rl.size() != tl.size())
 			{
 				result.addMessageByKey("ErrDiffTableListNoMatch");
@@ -322,7 +322,7 @@ public class WbSchemaDiff
 						if (xsltMsg.length() != 0)
 						{
 							result.addMessage(xsltMsg);
-							result.addMessageNewLine(); 
+							result.addMessageNewLine();
 						}
 						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 						result.setSuccess();

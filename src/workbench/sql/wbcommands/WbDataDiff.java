@@ -297,7 +297,6 @@ public class WbDataDiff
 
 		dataDiff = new TableDataDiff(sourceCon, targetCon);
 		dataDiff.setSqlDateLiteralType(literalType);
-
     dataDiff.setIgnoreMissingTarget(ignoreMissing);
 
 		String outputType = cmdLine.getValue(PARAM_OUTPUT_TYPE);
@@ -342,6 +341,21 @@ public class WbDataDiff
 		dataDiff.setAlternateKeys(alternatekeys);
 		dataDiff.setExcludeRealPK(cmdLine.getBoolean(PARAM_EXCLUDE_REAL_PK, false));
 		dataDiff.setExcludeIgnoredColumns(cmdLine.getBoolean(PARAM_EXCLUDE_IGNORED, false));
+
+
+    if (ignoreMissing)
+    {
+      String schema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
+      if (StringUtil.isBlank(schema))
+      {
+        Set<String> schemas = params.getSchemas(mapping.targetTables);
+        if (!schemas.isEmpty())
+        {
+          schema = schemas.iterator().next();
+        }
+      }
+      dataDiff.setTargetSchema(schema);
+    }
 
 		boolean singleFile = cmdLine.getBoolean(PARAM_SINGLE_FILE, false);
 		try

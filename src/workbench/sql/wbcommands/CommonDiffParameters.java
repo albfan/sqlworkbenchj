@@ -232,7 +232,7 @@ public class CommonDiffParameters
 				{
 					other = TableIdentifier.findTableByName(targetTables, refTable);
 				}
-        
+
 				if (other != null || ignoreMissing)
 				{
 					mapping.referenceTables.add(refTable);
@@ -267,13 +267,13 @@ public class CommonDiffParameters
 		return schemas;
 	}
 
-	private Set<String> getSchemas(List<TableIdentifier> tables)
+	public Set<String> getSchemas(List<TableIdentifier> tables)
 	{
 		Set<String> schemas = CollectionUtil.caseInsensitiveSet();
 		if (CollectionUtil.isEmpty(tables)) return schemas;
 		for (TableIdentifier tbl : tables)
 		{
-			if (tbl.getSchema() != null)
+			if (tbl != null && tbl.getSchema() != null)
 			{
 				schemas.add(tbl.getSchema());
 			}
