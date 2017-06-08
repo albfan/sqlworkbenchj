@@ -3203,8 +3203,6 @@ public class SqlPanel
       this.stmtRunner.setBaseDir(StringUtil.coalesce(dbConnection.getProfile().getDefaultDirectory(), System.getProperty("user.dir")));
 		}
 
-		int maxRows = this.statusBar.getMaxRows();
-		int timeout = this.statusBar.getQueryTimeout();
 		int firstResultIndex = 0;
 		final long scriptStart = System.currentTimeMillis();
 
@@ -3356,17 +3354,19 @@ public class SqlPanel
 			}
 
 			statusBar.executionStart();
+
 			long stmtTotal = 0;
 			int executedCount = 0;
 			int resultSets = 0;
+			long totalRows = 0;
 
 			macroExecution = false;
-
-			long totalRows = 0;
 			lastScriptExecTime = 0;
-			stmtRunner.setMaxRows(maxRows);
-
 			ignoreStateChange = true;
+
+			stmtRunner.setMaxRows(this.statusBar.getMaxRows());
+      stmtRunner.setQueryTimeout(this.statusBar.getQueryTimeout());
+
 			ErrorDescriptor errorDetails = null;
       boolean ignoreUpdateCounts = true;
 
@@ -3412,7 +3412,6 @@ public class SqlPanel
 					highlighter.highlightStatement(scriptParser, i, selectionOffset);
 				}
 
-				stmtRunner.setQueryTimeout(timeout);
 				stmtRunner.runStatement(currentSql);
 				statementResult = this.stmtRunner.getResult();
 
