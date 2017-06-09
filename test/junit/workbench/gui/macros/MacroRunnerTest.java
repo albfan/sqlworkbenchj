@@ -24,10 +24,14 @@
 package workbench.gui.macros;
 
 import javax.swing.JComponent;
+
 import workbench.WbTestCase;
+
 import workbench.sql.macros.MacroDefinition;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -77,6 +81,12 @@ public class MacroRunnerTest
 			{
 				return null;
 			}
+
+      @Override
+      public int getMacroClientId()
+      {
+        return 42;
+      }
 		};
 		MacroRunner runner = new MacroRunner();
 		runner.runMacro(macro, p, false);
@@ -117,6 +127,12 @@ public class MacroRunnerTest
 			{
 				return null;
 			}
+
+      @Override
+      public int getMacroClientId()
+      {
+        return 42;
+      }
 		};
 		MacroRunner runner = new MacroRunner();
 		runner.runMacro(macro, p, false);
@@ -157,6 +173,12 @@ public class MacroRunnerTest
 			{
 				return null;
 			}
+
+      @Override
+      public int getMacroClientId()
+      {
+        return 42;
+      }
 		};
 		MacroRunner runner = new MacroRunner();
 		runner.runMacro(macro, p, false);
@@ -197,6 +219,12 @@ public class MacroRunnerTest
 			{
 				return null;
 			}
+
+      @Override
+      public int getMacroClientId()
+      {
+        return 42;
+      }
 		};
 		MacroRunner runner = new MacroRunner();
 		runner.runMacro(macro, p, false);
@@ -237,6 +265,12 @@ public class MacroRunnerTest
 			{
 				return null;
 			}
+
+      @Override
+      public int getMacroClientId()
+      {
+        return 42;
+      }
 		};
 		MacroRunner runner = new MacroRunner();
 		runner.runMacro(macro, p, false);

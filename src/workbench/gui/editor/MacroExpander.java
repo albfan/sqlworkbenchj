@@ -28,10 +28,14 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 
-import workbench.gui.editor.actions.NextWord;
 import workbench.interfaces.MacroChangeListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+
+import workbench.gui.editor.actions.NextWord;
+import workbench.gui.macros.MacroClient;
+import workbench.gui.macros.MacroRunner;
+
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroManager;
 
@@ -51,21 +55,21 @@ public class MacroExpander
 	private int maxTypingPause = 350;
 
 	private JEditTextArea editor;
-	private final int macroClientId;
+  private MacroClient macroClient;
 
-	public MacroExpander(int clientId, JEditTextArea textArea)
+	public MacroExpander(JEditTextArea textArea, MacroClient client)
 	{
-		macroClientId = clientId;
-		MacroManager.getInstance().addChangeListener(this, macroClientId);
-		macros = MacroManager.getInstance().getExpandableMacros(macroClientId);
+    this.editor = textArea;
+    this.macroClient = client;
+		MacroManager.getInstance().addChangeListener(this, macroClient.getMacroClientId());
+		macros = MacroManager.getInstance().getExpandableMacros(macroClient.getMacroClientId());
 		maxTypingPause = GuiSettings.getMaxExpansionPause();
 		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXPAND_MAXDURATION);
-		this.editor = textArea;
 	}
 
 	public void dispose()
 	{
-		MacroManager.getInstance().removeChangeListener(this, macroClientId);
+		MacroManager.getInstance().removeChangeListener(this, macroClient.getMacroClientId());
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
@@ -77,14 +81,14 @@ public class MacroExpander
 
 	public int getMacroClientId()
 	{
-		return macroClientId;
+		return macroClient.getMacroClientId();
 	}
 
 	private void readMap()
 	{
 		synchronized (lockMonitor)
 		{
-			macros = MacroManager.getInstance().getExpandableMacros(macroClientId);
+			macros = MacroManager.getInstance().getExpandableMacros(getMacroClientId());
 		}
 	}
 
@@ -136,7 +140,18 @@ public class MacroExpander
 
 	public void insertMacroText(String replacement)
 	{
-		insertMacroText(replacement, -1, -1);
+    int start = -1;
+    int end = -1;
+
+    if (editor.isTextSelected())
+    {
+      int line = editor.getCaretLine();
+      int lineStart = editor.getLineStartOffset(line);
+      start = editor.getSelectionStart(line) - lineStart;
+      end = editor.getSelectionEnd(line) - lineStart;
+    }
+
+		insertMacroText(replacement, start, end);
 	}
 
 	private void insertMacroText(String replacement, int start, int end)
@@ -145,11 +160,14 @@ public class MacroExpander
 		int currentLine = editor.getCaretLine();
 		int lineStart = editor.getLineStartOffset(currentLine);
 
+    MacroRunner runner = new MacroRunner();
+    replacement = runner.handleReplacement(replacement, macroClient, false);
+
 		boolean doSelect = shouldSelect(replacement);
 		int cursorPos = getCaretPositionInString(replacement);
 		if (cursorPos > -1)
 		{
-			newCaret = lineStart + start + cursorPos;
+			newCaret = lineStart + Math.max(start, 0) + cursorPos;
 		}
 
 		replacement = replacement.replace(CURSOR_PLACEHOLDER, "").replace(SELECT_PLACEHOLDER, "");

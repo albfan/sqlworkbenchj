@@ -77,6 +77,7 @@ import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
+import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 
 import workbench.util.MemoryWatcher;
@@ -539,11 +540,11 @@ public class JEditTextArea
 		return expander;
 	}
 
-	public void setMacroExpansionEnabled(boolean flag, int clientId)
+	public void setMacroExpansionEnabled(boolean flag, MacroClient client)
 	{
 		if (flag && expander == null)
 		{
-			expander = new MacroExpander(clientId, this);
+			expander = new MacroExpander(this, client);
 		}
 		else if (!flag)
 		{

@@ -36,4 +36,5 @@ public interface MacroClient
 	String getSelectedText();
 	String getText();
 	JComponent getPanel();
+  int getMacroClientId();
 }

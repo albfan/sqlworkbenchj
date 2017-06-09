@@ -26,12 +26,12 @@ package workbench.gui.macros;
 
 import java.util.Map;
 
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.db.exporter.TextRowDataConverter;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -53,42 +53,48 @@ public class MacroRunner
 	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
 	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
 
-	public void runMacro(MacroDefinition macro, MacroClient client, boolean replaceText)
+	public void runMacro(MacroDefinition macro, MacroClient client, boolean replaceEditorText)
+  {
+    if (macro == null) return;
+
+    String sql = handleReplacement(macro.getText(), client, true);
+    if (sql != null)
+    {
+      client.executeMacroSql(sql, replaceEditorText, macro.isAppendResult());
+    }
+  }
+
+	public String handleReplacement(String macroText, MacroClient client, boolean showError)
 	{
-		if (macro == null) return;
-		if (client == null) return;
+		if (client == null || StringUtil.isBlank(macroText)) return macroText;
 
-		String sql = macro.getText();
-
-		if (StringUtil.isBlank(sql)) return;
-
-		if (hasSelectedKey(sql))
+		if (hasSelectedKey(macroText))
 		{
 			String selected = client.getSelectedText();
-			if (selected == null)
+			if (selected == null && showError)
 			{
-				WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoSelection4Macro");
-				return;
+        WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoSelection4Macro");
+        return null;
 			}
-			sql = replaceSelected(sql, selected);
+			macroText = replaceSelected(macroText, StringUtil.coalesce(selected, ""));
 		}
 
-		if (hasCurrentKey(sql))
+		if (hasCurrentKey(macroText))
 		{
 			String current = client.getStatementAtCursor();
-			if (current == null)
+			if (current == null && showError)
 			{
-				WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoCurrent4Macro");
-				return;
+        WbSwingUtilities.showErrorMessageKey(client.getPanel(), "ErrNoCurrent4Macro");
+        return null;
 			}
-			sql = replaceCurrent(sql, current);
+			macroText = replaceCurrent(macroText, StringUtil.coalesce(current, ""));
 		}
 
-		if (hasTextKey(sql))
+		if (hasTextKey(macroText))
 		{
-			sql = replaceEditorText(sql, client.getText());
+			macroText = replaceEditorText(macroText, client.getText());
 		}
-		client.executeMacroSql(sql, replaceText, macro.isAppendResult());
+    return macroText;
 	}
 
 	protected boolean hasTextKey(String sql)

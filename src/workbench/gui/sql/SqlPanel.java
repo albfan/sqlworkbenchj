@@ -452,7 +452,8 @@ public class SqlPanel
       ToolbarBuilder.CONFIG_PROPERTY,
       GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON,
       GuiSettings.PROP_SHOW_TEXT_SELECTION_INFO);
-		editor.setMacroExpansionEnabled(true, macroClientId);
+
+		editor.setMacroExpansionEnabled(true, this);
 		editor.setBracketCompletionEnabled(true);
 		historyStatements = new StatementHistory(Settings.getInstance().getMaxHistorySize());
 
@@ -2301,6 +2302,12 @@ public class SqlPanel
       }
     }
     this.startExecution(sql, 0, false, true, RunType.RunAll);
+  }
+
+  @Override
+  public int getMacroClientId()
+  {
+    return macroClientId;
   }
 
 	@Override
