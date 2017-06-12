@@ -16,6 +16,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="3" type="fix">Made the SQL formatter more robust against useless parentheses around sub-selects</entry>
     <entry dev-build="3" type="fix">When an expandable macros was invoked through the menu, the cursor position was not correct when using ${c}</entry>
     <entry dev-build="3" type="fix">It was not possible to change the statement/query timeout in GUI mode using SET TIMEOUT</entry>
     <entry dev-build="3" type="fix">Detaching a result was longer possible in build 122.2</entry>
