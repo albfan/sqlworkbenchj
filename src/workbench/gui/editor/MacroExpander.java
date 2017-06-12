@@ -154,31 +154,31 @@ public class MacroExpander
 		insertMacroText(replacement, start, end);
 	}
 
-	private void insertMacroText(String replacement, int start, int end)
+	private void insertMacroText(String macroText, int start, int end)
 	{
 		int newCaret = -1;
 		int currentLine = editor.getCaretLine();
 		int lineStart = editor.getLineStartOffset(currentLine);
 
     MacroRunner runner = new MacroRunner();
-    replacement = runner.handleReplacement(replacement, macroClient, false);
+    macroText = runner.handleReplacement(macroText, macroClient, false);
 
-		boolean doSelect = shouldSelect(replacement);
-		int cursorPos = getCaretPositionInString(replacement);
+		boolean doSelect = shouldSelect(macroText);
+		int cursorPos = getCaretPositionInString(macroText);
 		if (cursorPos > -1)
 		{
 			newCaret = lineStart + Math.max(start, 0) + cursorPos;
 		}
 
-		replacement = replacement.replace(CURSOR_PLACEHOLDER, "").replace(SELECT_PLACEHOLDER, "");
+		macroText = macroText.replace(CURSOR_PLACEHOLDER, "").replace(SELECT_PLACEHOLDER, "");
 
 		if (start > -1 && end > -1)
 		{
-			editor.replaceText(currentLine, start, end, replacement);
+			editor.replaceText(currentLine, start, end, macroText);
 		}
 		else
 		{
-			editor.insertText(replacement);
+			editor.insertText(macroText);
 		}
 
 		if (newCaret > -1)

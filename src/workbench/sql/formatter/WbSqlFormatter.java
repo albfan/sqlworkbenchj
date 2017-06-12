@@ -1021,7 +1021,7 @@ public class WbSqlFormatter
 				{
 					appendNewline();
 				}
-				else if (!lineComment && !isStartOfLine())
+				else if (!startOfLine)
 				{
 					appendText(' ');
 				}
@@ -1341,6 +1341,10 @@ public class WbSqlFormatter
 	}
 
 	private SQLToken processCase(int indentCount)
+  {
+    return processCase(indentCount, true);
+  }
+	private SQLToken processCase(int indentCount, boolean addFinalNewline)
 	{
 		String current = StringUtil.padRight(" ", indentCount);
 		StringBuilder myIndent = new StringBuilder(indentCount + 2);
@@ -1375,9 +1379,11 @@ public class WbSqlFormatter
 				this.appendNewline();
 				this.indent(current.length() + 4);
 				this.appendTokenText(t);
-				t = this.processCase(current.length() + 4);
-				this.indent(current.length() + 2);
-				this.appendTokenText(t);
+        last = t;
+				t = this.processCase(current.length() + 4, false);
+				//this.indent(current.length() + 2);
+				//this.appendTokenText(t);
+        continue;
 			}
 			else if ("END".equals(text) || "END CASE".equals(text))
 			{
@@ -1388,12 +1394,12 @@ public class WbSqlFormatter
 				// Get the next token after the END. If that is the keyword AS,
 				// the CASE statement ist not yet ended and we have to add the AS keyword
 				// and the alias that was given before returning to the caller
-				t = this.lexer.getNextToken(true, false);
+				t = skipComments();
 				if (t != null && (t.isIdentifier() || t.getContents().equals("AS")))
 				{
 					boolean aliasWithAs = t.getContents().equals("AS");
 					this.appendTokenText(t);
-					t = this.lexer.getNextToken(true, false);
+					t = skipComments();
 					if (aliasWithAs)
 					{
 						// the next token is the actual alias
@@ -1405,7 +1411,7 @@ public class WbSqlFormatter
 						}
 					}
 				}
-				else
+        else if (addFinalNewline)
 				{
 					this.appendNewline();
 				}
@@ -1810,6 +1816,15 @@ public class WbSqlFormatter
 					continue;
 				}
 
+				if (word.equals("INSERT"))
+				{
+					lastToken = t;
+					t = this.processInsert(t);
+					if (t == null) return;
+					firstToken = false;
+					continue;
+				}
+
 				if (word.equals("SET"))
 				{
 					lastToken = t;
@@ -1949,9 +1964,47 @@ public class WbSqlFormatter
 		}
 	}
 
+  private SQLToken processInsert(SQLToken last)
+  {
+
+		SQLToken t = skipComments();
+
+		if (t == null) return t;
+
+		// this should be the INTO keyword, if not something is wrong
+		if (!t.getContents().equals("INTO")) return t;
+		this.appendText(' ');
+		this.appendTokenText(t);
+
+		List<String> insertColumns = new ArrayList<>();
+    t = this.processIntoKeyword(insertColumns);
+
+    if (t.getContents().equals("SELECT"))
+    {
+      return t;
+    }
+
+    if (t.getContents().equals("VALUES"))
+    {
+      this.appendNewline();
+      this.appendTokenText(t);
+
+      t = skipComments();
+      if (t != null && t.getContents().equals("("))
+      {
+        t = this.processBracketList(indentInsert ? 2 : 0, getColumnsPerInsert(), insertColumns, false);
+      }
+      return t;
+    }
+
+    // maybe an insert select with useless parentheses around the select
+    appendNewline();
+
+    return t;
+  }
+
 	private SQLToken processMerge(SQLToken last)
 	{
-		// this should be the MERGE keyword
 		SQLToken t = skipComments();
 
 		if (t == null) return t;
@@ -2249,7 +2302,7 @@ public class WbSqlFormatter
 
 	private SQLToken processIntoKeyword(List<String> columnNames)
 	{
-		SQLToken t = this.lexer.getNextToken(false, false);
+		SQLToken t = skipComments();
 		// we expect an identifier now (the table name)
 		// but to be able to handle "wrong statements" we'll
 		// make sure everything's fine

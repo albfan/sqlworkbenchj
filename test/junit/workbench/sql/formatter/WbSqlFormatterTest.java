@@ -67,7 +67,7 @@ public class WbSqlFormatterTest
       "  AND name ~* 'foo'\n" +
       "  AND doc ->> 'abc'\n" +
       "  AND xxx ?-| yyy";
-		System.out.println("***** output ***** \n" + formatted + "\n----------- expected --------- \n" + expected + "\n*****************");
+//		System.out.println("***** output ***** \n" + formatted + "\n----------- expected --------- \n" + expected + "\n*****************");
     assertEquals(expected, formatted);
   }
 
@@ -325,30 +325,6 @@ public class WbSqlFormatterTest
 	}
 
 	@Test
-	public void testNestedCase()
-	{
-		String sql = "select one, case when x = 1 then case when y = 1 then 1 when y = 2 then 4 end else 6 end as some_col from foo";
-		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
-		f.setKeywordCase(GeneratedIdentifierCase.upper);
-		f.setIdentifierCase(GeneratedIdentifierCase.lower);
-		String formatted = f.getFormattedSql();
-
-		String expected =
-			"SELECT one,\n" +
-			"       CASE\n" +
-			"         WHEN x = 1 THEN\n" +
-			"           CASE\n" +
-			"             WHEN y = 1 THEN 1\n" +
-			"             WHEN y = 2 THEN 4\n" +
-			"           END \n" +
-			"         ELSE 6\n" +
-			"       END AS some_col\n" +
-			"FROM foo";
-//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
-		assertEquals(expected, formatted);
-	}
-
-	@Test
 	public void testCommentLinesInSelect()
 	{
 		String sql =
@@ -572,34 +548,6 @@ public class WbSqlFormatterTest
 	}
 
 	@Test
-	public void testInsertSelectWithComment()
-	{
-		String sql =
-			"insert into foo (col1, col2)\n" +
-			"select \n" +
-			" -- useless comment \n" +
-			"      case \n" +
-			"         when x = 1 then 2 \n"+
-			"         else case when (y = 3) then 4 else 5 end\n" +
-			"       end col1, " +
-			"       col2\n" +
-			"from foobar";
-		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
-		f.setColumnsPerInsert(1);
-		f.setFunctionCase(GeneratedIdentifierCase.lower);
-		String formatted = f.getFormattedSql();
-		String expected =
-			"SELECT\n" +
-			"-- blabla\n" +
-			"       col1,\n" +
-			"       col2,\n" +
-			"       col3\n" +
-			"FROM foo";
-//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
-//		assertEquals(expected, formatted);
-	}
-
-	@Test
 	public void testSelectWithLineComment()
 	{
 		String sql =
@@ -613,19 +561,154 @@ public class WbSqlFormatterTest
 			"\n" +
 			"       col3 from foo";
 		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
-		f.setColumnsPerInsert(1);
-		f.setFunctionCase(GeneratedIdentifierCase.lower);
 		String formatted = f.getFormattedSql();
 		String expected =
 			"SELECT\n" +
-			"-- blabla\n" +
+			"-- blabla \n" +
 			"       col1,\n" +
 			"       col2,\n" +
 			"       col3\n" +
 			"FROM foo";
 //		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
-//		assertEquals(expected, formatted);
+		assertEquals(expected, formatted);
+
+    sql =
+			"SELECT -- useless \n" +
+			"       CASE \n" +
+			"         WHEN x = 1 THEN 2 \n"+
+			"         ELSE 5\n" +
+			"       END col1, \n" +
+			"       col2\n" +
+			"FROM foobar";
+		f = new WbSqlFormatter(sql, 10);
+		formatted = f.getFormattedSql();
+    expected =
+			"SELECT -- useless \n" +
+      "       CASE\n" +
+			"         WHEN x = 1 THEN 2\n"+
+			"         ELSE 5\n" +
+			"       END col1,\n" +
+			"       col2\n" +
+			"FROM foobar";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
+  public void testInsertSimple()
+  {
+    String sql = "insert into some_table (id, data) values (1,'foo');";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerInsert(100);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "INSERT INTO some_table\n" +
+      "  (id, data)\n" +
+      "VALUES\n" +
+      "  (1, 'foo');";
+//		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
+		assertEquals(expected, formatted);
+  }
+
+	@Test
+	public void testInsertWithSubselect()
+		throws Exception
+	{
+		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
+		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "  (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+//		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
+		assertEquals(expected, formatted);
+  }
+
+	@Test
+	public void testInsertSelectWithComment()
+	{
+		String sql =
+			"insert into foo (col1, col2,col3)\n" +
+			"select \n" +
+			" -- useless comment \n" +
+			"      case \n" +
+			"         when x = 1 then 2 \n"+
+			"         else 5\n" +
+			"       end col1, " +
+			"       col2\n" +
+			"from foobar";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
+		f.setColumnsPerInsert(5);
+		f.setFunctionCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"INSERT INTO foo\n" +
+      "  (col1, col2, col3)\n" +
+			"SELECT\n" +
+			"-- useless comment \n" +
+			"       CASE\n" +
+			"         WHEN x = 1 THEN 2\n"+
+			"         ELSE 5\n" +
+			"       END col1,\n" +
+			"       col2\n" +
+			"FROM foobar";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
 	}
+
+	@Test
+	public void testInsertSelectSimple()
+	{
+		String sql =
+			"insert into foo (col1, col2,col3)\n" +
+			"select c1,c2,c3 from other_table;";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 10);
+		f.setColumnsPerInsert(5);
+    f.setColumnsPerSelect(5);
+		String formatted = f.getFormattedSql();
+		String expected =
+			"INSERT INTO foo\n" +
+      "  (col1, col2, col3)\n" +
+			"SELECT c1, c2, c3\n" +
+			"FROM other_table;";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+	}
+
+  @Test
+  public void testInsertSelectUselessParens()
+  {
+    String sql = "insert into some_table (id, data) (select x,y from other_table)";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerSelect(10);
+    f.setColumnsPerInsert(10);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "INSERT INTO some_table\n" +
+      "  (id, data)\n" +
+      "(SELECT x, y\n" +
+      "FROM other_table)";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+    sql = "insert into some_table (id, data) (select x,y from other_table where a not in (select z from t3))";
+    f = new WbSqlFormatter(sql, 150, DBID.Postgres.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerSelect(10);
+    f.setColumnsPerInsert(10);
+    formatted = f.getFormattedSql();
+    expected =
+      "INSERT INTO some_table\n" +
+      "  (id, data)\n" +
+      "(SELECT x, y\n" +
+      "FROM other_table\n" +
+      "WHERE a NOT IN (SELECT z FROM t3))";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
 
 	@Test
 	public void testInsertWithComment()
@@ -2260,18 +2343,6 @@ public class WbSqlFormatterTest
 	}
 
 	@Test
-	public void testInsertWithSubselect()
-		throws Exception
-	{
-		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
-		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "  (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
-		WbSqlFormatter f = new WbSqlFormatter(sql, 100);
-		CharSequence formatted = f.getFormattedSql();
-//		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
-		assertEquals("SELECT in VALUES not formatted", expected, formatted);
-	}
-
-	@Test
 	public void testLowerCaseFunctions()
 		throws Exception
 	{
@@ -2282,6 +2353,59 @@ public class WbSqlFormatterTest
 		CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
+	}
+
+	@Test
+	public void testCaseNested()
+	{
+		String sql = "select one, case when x = 1 then case when y = 1 then 1 when (y = 2) or (x = 5) then 4 end else 6 end as some_col, two from foo";
+		WbSqlFormatter f = new WbSqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		String formatted = f.getFormattedSql();
+
+		String expected =
+			"SELECT one,\n" +
+			"       CASE\n" +
+			"         WHEN x = 1 THEN\n" +
+			"           CASE\n" +
+			"             WHEN y = 1 THEN 1\n" +
+			"             WHEN (y = 2) OR (x = 5) THEN 4\n" +
+			"           END \n" +
+			"         ELSE 6\n" +
+			"       END AS some_col,\n" +
+      "       two\n" +
+			"FROM foo";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+
+    sql =
+			"select one,\n" +
+			"      case \n" +
+			"         when x = 1 then 2 \n"+
+			"         else case when (y = 3) then 4 else 5 end\n" +
+			"       end col1, " +
+			"       col2\n" +
+			"from foobar";
+
+		f = new WbSqlFormatter(sql, 150);
+		f.setKeywordCase(GeneratedIdentifierCase.upper);
+		f.setIdentifierCase(GeneratedIdentifierCase.lower);
+		formatted = f.getFormattedSql();
+    expected =
+			"SELECT one,\n" +
+			"       CASE\n" +
+			"         WHEN x = 1 THEN 2\n"+
+			"         ELSE\n" +
+      "           CASE\n" +
+      "             WHEN (y = 3) THEN 4\n" +
+      "             ELSE 5\n" +
+      "           END \n" +
+			"       END col1,\n" +
+			"       col2\n" +
+			"FROM foobar";
+//		System.out.println("***************\n" + formatted + "\n-----------------------\n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
 	}
 
 	@Test
