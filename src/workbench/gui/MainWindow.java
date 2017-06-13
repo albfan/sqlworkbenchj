@@ -499,12 +499,9 @@ public class MainWindow
   {
     for (int i=0; i < this.sqlTab.getTabCount(); i++)
     {
-      MainPanel panel = this.getSqlPanel(i).get();
-      if (panel instanceof SqlPanel)
-      {
-        SqlPanel sql = (SqlPanel)panel;
-        sql.addFilenameChangeListener(aListener);
-      }
+      this.getSqlPanel(i).filter(panel -> panel instanceof SqlPanel).
+        map(SqlPanel.class::cast).
+        ifPresent(panel -> panel.addFilenameChangeListener(aListener));
     }
   }
 
@@ -516,12 +513,8 @@ public class MainWindow
   {
     for (int i = 0; i < this.sqlTab.getTabCount(); i++)
     {
-      MainPanel panel = this.getSqlPanel(i).get();
-      if (panel instanceof SqlPanel)
-      {
-        SqlPanel sql = (SqlPanel)panel;
-        sql.removeFilenameChangeListener(aListener);
-      }
+      this.getSqlPanel(i).filter(panel -> panel instanceof SqlPanel).map(SqlPanel.class::cast).
+        ifPresent(panel -> panel.removeFilenameChangeListener(aListener));
     }
   }
 
@@ -547,11 +540,8 @@ public class MainWindow
 		int count = this.sqlTab.getTabCount();
     for (int i = 0; i < count; i++)
     {
-      MainPanel p = this.getSqlPanel(i).get();
-      if (p instanceof SqlPanel)
-      {
-        ((SqlPanel)p).addDbExecutionListener(l);
-      }
+      this.getSqlPanel(i).filter(panel -> panel instanceof SqlPanel).map(SqlPanel.class::cast).
+        ifPresent(panel -> panel.addDbExecutionListener(l));
     }
   }
 
@@ -560,11 +550,8 @@ public class MainWindow
     int count = this.sqlTab.getTabCount();
     for (int i = 0; i < count; i++)
     {
-      MainPanel p = this.getSqlPanel(i).get();
-      if (p instanceof SqlPanel)
-      {
-        ((SqlPanel)p).removeDbExecutionListener(l);
-      }
+      this.getSqlPanel(i).filter(panel -> panel instanceof SqlPanel).map(SqlPanel.class::cast).
+        ifPresent(panel -> panel.removeDbExecutionListener(l));
     }
   }
 
@@ -1160,12 +1147,7 @@ public class MainWindow
 
   public SqlPanel getCurrentSqlPanel()
   {
-    MainPanel p = this.getCurrentPanel().get();
-    if (p instanceof SqlPanel)
-    {
-      return (SqlPanel)p;
-    }
-    return null;
+    return this.getCurrentPanel().filter(p -> p instanceof SqlPanel).map(SqlPanel.class::cast).orElse(null);
   }
 
   public int getTabCount()
@@ -1207,30 +1189,30 @@ public class MainWindow
 		this.connectInProgress = true;
 	}
 
-  public void checkConnectionForPanel(final Optional<MainPanel> opt)
+  public void checkConnectionForPanel(final Optional<MainPanel> panel)
   {
     if (this.isConnectInProgress()) return;
-    if (!opt.isPresent()) return;
 
-    MainPanel panel = opt.get();
-    if (panel.isConnected()) return;
+    panel.filter(((Predicate<MainPanel>)MainPanel::isConnected).negate()).ifPresent(p ->
+    {
+      try
+      {
+        if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
+        {
+          createNewConnectionForPanel(panel);
+        }
+        else if (this.currentConnection != null)
+        {
+          currentConnection.setShared(true);
+          p.setConnection(this.currentConnection);
+        }
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
+      }
 
-    try
-    {
-      if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
-      {
-        createNewConnectionForPanel(opt);
-      }
-      else if (this.currentConnection != null)
-      {
-        currentConnection.setShared(true);
-        panel.setConnection(this.currentConnection);
-      }
-    }
-    catch (Exception e)
-    {
-      LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
-    }
+    });
   }
 
   public void disconnectCurrentPanel()
@@ -1333,7 +1315,12 @@ public class MainWindow
   {
     if (this.isConnectInProgress()) return;
     if (this.connectThread != null) return;
-    if (!panel.isPresent()) return;
+
+    if (!panel.isPresent())
+    {
+      LogMgr.logDebug("MainWindow.createNewConnectionForPanel()", "createNewConnectionForPanel() called without a panel!", new Exception("Backtrace"));
+      return;
+    }
 
     this.showConnectingInfo();
 
@@ -1361,7 +1348,6 @@ public class MainWindow
     {
       // prevent a manual tab change while connecting
       sqlTab.setEnabled(false);
-
       WbConnection conn = this.getConnectionForTab(aPanel, true);
       int index = this.getIndexForPanel(aPanel);
       this.tabConnected(aPanel, conn, index);
@@ -1468,8 +1454,7 @@ public class MainWindow
     }
     else
     {
-      MainPanel lastPanel = getSqlPanel(lastIndex).get();
-      if (lastPanel instanceof DbExplorerPanel)
+      getSqlPanel(lastIndex).filter(isDBExplorerPanel).map(DbExplorerPanel.class::cast).ifPresent(lastPanel ->
       {
         if (shouldShowTree)
         {
@@ -1480,7 +1465,7 @@ public class MainWindow
         {
           restoreDbTree();
         }
-      }
+      });
     }
   }
 
@@ -1594,21 +1579,19 @@ public class MainWindow
 	 */
   public void showStatusMessage(final String aMsg)
   {
-		MainPanel current = getCurrentPanel().get();
-		if (!(current instanceof StatusBar)) return;
-
-		final StatusBar status = (StatusBar)current;
-
-    WbSwingUtilities.invoke(() ->
+    this.getCurrentPanel().filter(p -> p instanceof StatusBar).map(StatusBar.class::cast).ifPresent(status ->
     {
-      if (StringUtil.isEmptyString(aMsg))
+      WbSwingUtilities.invoke(() ->
       {
-        status.clearStatusMessage();
-      }
-      else
-      {
-        status.setStatusMessage(aMsg);
-      }
+        if (StringUtil.isEmptyString(aMsg))
+        {
+          status.clearStatusMessage();
+        }
+        else
+        {
+          status.setStatusMessage(aMsg);
+        }
+      });
     });
   }
 
@@ -1833,11 +1816,7 @@ public class MainWindow
   {
     for (int i = 0; i < sqlTab.getTabCount(); i++)
     {
-      MainPanel sql = getSqlPanel(i).get();
-      if (sql instanceof StatusBar)
-      {
-        ((StatusBar)sql).clearStatusMessage();
-      }
+      getSqlPanel(i).filter(p -> p instanceof StatusBar).map(StatusBar.class::cast).ifPresent(StatusBar::clearStatusMessage);
     }
 
 		logVariables();
@@ -2706,10 +2685,9 @@ public class MainWindow
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 
-    StatusBar status = null;
-		if (aPanel.get() instanceof StatusBar)
+    StatusBar status = aPanel.filter(p -> p instanceof StatusBar).map(StatusBar.class::cast).orElse(null);
+		if (status != null)
 		{
-			status = (StatusBar)aPanel.get();
 			status.setStatusMessage(ResourceMgr.getFormattedString("MsgConnectingTo", this.currentProfile.getName()));
 		}
 
@@ -3046,14 +3024,13 @@ public class MainWindow
     int count = this.sqlTab.getTabCount();
     for (int i = 0; i < count; i++)
     {
-      MainPanel p = this.getSqlPanel(i).get();
-      if (p == null) continue;
-      if (p instanceof SqlPanel)
-      {
-        SqlPanel sql = (SqlPanel)p;
-        sql.closeFile(true, false);
-        this.setTabTitle(i, defaultTitle);
-      }
+      final int fi = i;
+      this.getSqlPanel(i).filter(p -> p instanceof SqlPanel).map(SqlPanel.class::cast).
+        ifPresent(panel ->
+        {
+          panel.closeFile(true, false);
+          this.setTabTitle(fi, defaultTitle);
+        });
     }
   }
 
@@ -3770,8 +3747,8 @@ public class MainWindow
   public void tabCloseButtonClicked(int index)
   {
     Optional<MainPanel> panel = this.getSqlPanel(index);
-		if (!panel.isPresent()) return;
-		if (!panel.get().canClosePanel(true)) return;
+
+    if (!panel.map(p -> p.canClosePanel(true)).orElse(false)) return;
 
     if (GuiSettings.getConfirmTabClose())
     {
