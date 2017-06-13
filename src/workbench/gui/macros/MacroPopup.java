@@ -37,6 +37,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -518,26 +519,26 @@ public class MacroPopup
 	{
 	}
 
-	@Override
-	public void valueChanged(TreeSelectionEvent e)
-	{
-		MacroDefinition macro = tree.getSelectedMacro();
-		if (mainWindow != null && macro != null)
-		{
-			MainPanel panel = mainWindow.getCurrentPanel();
-			if (panel instanceof MacroClient)
-			{
-				runAction.setEnabled(true);
-				runAction.setMacro(macro);
-			}
-			editAction.setMacro(macro);
-		}
-		else
-		{
-			runAction.setEnabled(false);
-			editAction.setMacro(null);
-		}
-	}
+  @Override
+  public void valueChanged(TreeSelectionEvent e)
+  {
+    MacroDefinition macro = tree.getSelectedMacro();
+    if (mainWindow != null && macro != null)
+    {
+      MainPanel panel = mainWindow.getCurrentPanel().get();
+      if (panel instanceof MacroClient)
+      {
+        runAction.setEnabled(true);
+        runAction.setMacro(macro);
+      }
+      editAction.setMacro(macro);
+    }
+    else
+    {
+      runAction.setEnabled(false);
+      editAction.setMacro(null);
+    }
+  }
 
 	@Override
 	public void macroListChanged()

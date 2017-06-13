@@ -245,7 +245,7 @@ public class GlobalSearch
 
     for (int i = 0; i < count; i++)
     {
-      MainPanel panel = window.getSqlPanel(i);
+      MainPanel panel = window.getSqlPanel(i).get();
       if (panel instanceof SqlPanel)
       {
         SearchAndReplace replacer = ((SqlPanel)panel).getEditor().getReplacer();

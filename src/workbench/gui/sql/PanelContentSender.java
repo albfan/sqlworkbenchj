@@ -24,7 +24,9 @@
 package workbench.gui.sql;
 
 import java.awt.EventQueue;
+import java.util.Optional;
 
+import workbench.interfaces.MainPanel;
 import workbench.interfaces.ResultReceiver;
 
 import workbench.gui.MainWindow;
@@ -136,8 +138,8 @@ public class PanelContentSender
 		}
 		else
 		{
-			panel = (SqlPanel)this.target.getSqlPanel(index);
-			target.selectTab(index);
+      panel = (SqlPanel)this.target.getSqlPanel(index).get();
+      target.selectTab(index);
 		}
 		return panel;
 	}

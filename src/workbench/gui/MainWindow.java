@@ -41,8 +41,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -423,8 +425,7 @@ public class MainWindow
     int count = getTabCount();
     for (int i=0; i < count; i++)
     {
-      MainPanel sqlPanel = getSqlPanel(i);
-      sqlPanel.registerObjectFinder(treePanel);
+       getSqlPanel(i).ifPresent(p -> p.registerObjectFinder(treePanel));
     }
   }
 
@@ -469,8 +470,7 @@ public class MainWindow
       int count = getTabCount();
       for (int i=0; i < count; i++)
       {
-        MainPanel sqlPanel = getSqlPanel(i);
-        sqlPanel.registerObjectFinder(null);
+        getSqlPanel(i).ifPresent(p -> p.registerObjectFinder(null));
       }
       EventQueue.invokeLater(this::validate);
     }
@@ -495,35 +495,35 @@ public class MainWindow
 	 * to display the available panels in the context menu
 	 * @see workbench.gui.dbobjects.EditorTabSelectMenu#fileNameChanged(Object, String)
 	 */
-	public void addFilenameChangeListener(FilenameChangeListener aListener)
-	{
-		for (int i=0; i < this.sqlTab.getTabCount(); i++)
-		{
-			MainPanel panel = this.getSqlPanel(i);
-			if (panel instanceof SqlPanel)
-			{
-				SqlPanel sql = (SqlPanel)panel;
-				sql.addFilenameChangeListener(aListener);
-			}
-		}
-	}
+  public void addFilenameChangeListener(FilenameChangeListener aListener)
+  {
+    for (int i=0; i < this.sqlTab.getTabCount(); i++)
+    {
+      MainPanel panel = this.getSqlPanel(i).get();
+      if (panel instanceof SqlPanel)
+      {
+        SqlPanel sql = (SqlPanel)panel;
+        sql.addFilenameChangeListener(aListener);
+      }
+    }
+  }
 
 	/**
 	 * Remove the file name change listener.
 	 * @see #addFilenameChangeListener(FilenameChangeListener )
 	 */
-	public void removeFilenameChangeListener(FilenameChangeListener aListener)
-	{
-		for (int i=0; i < this.sqlTab.getTabCount(); i++)
-		{
-			MainPanel panel = this.getSqlPanel(i);
-			if (panel instanceof SqlPanel)
-			{
-				SqlPanel sql = (SqlPanel)panel;
-				sql.removeFilenameChangeListener(aListener);
-			}
-		}
-	}
+  public void removeFilenameChangeListener(FilenameChangeListener aListener)
+  {
+    for (int i = 0; i < this.sqlTab.getTabCount(); i++)
+    {
+      MainPanel panel = this.getSqlPanel(i).get();
+      if (panel instanceof SqlPanel)
+      {
+        SqlPanel sql = (SqlPanel)panel;
+        sql.removeFilenameChangeListener(aListener);
+      }
+    }
+  }
 
 	/**
 	 * The listener will be notified when the current tab changes.
@@ -545,28 +545,28 @@ public class MainWindow
 	public void addExecutionListener(DbExecutionListener l)
 	{
 		int count = this.sqlTab.getTabCount();
-		for (int i = 0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p instanceof SqlPanel)
-			{
-				((SqlPanel)p).addDbExecutionListener(l);
-			}
-		}
-	}
+    for (int i = 0; i < count; i++)
+    {
+      MainPanel p = this.getSqlPanel(i).get();
+      if (p instanceof SqlPanel)
+      {
+        ((SqlPanel)p).addDbExecutionListener(l);
+      }
+    }
+  }
 
-	public void removeExecutionListener(DbExecutionListener l)
-	{
-		int count = this.sqlTab.getTabCount();
-		for (int i = 0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p instanceof SqlPanel)
-			{
-				((SqlPanel)p).removeDbExecutionListener(l);
-			}
-		}
-	}
+  public void removeExecutionListener(DbExecutionListener l)
+  {
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      MainPanel p = this.getSqlPanel(i).get();
+      if (p instanceof SqlPanel)
+      {
+        ((SqlPanel)p).removeDbExecutionListener(l);
+      }
+    }
+  }
 
   public boolean hasProfileWorkspace()
   {
@@ -923,15 +923,14 @@ public class MainWindow
 			this.currentToolbar = null;
 		}
 
-		if (GuiSettings.getShowToolbar())
-		{
-			final MainPanel curPanel = this.getCurrentPanel();
-			if (curPanel != null)
-			{
-				currentToolbar = curPanel.getToolbar(getGlobalActions(), createNew);
-				content.add(currentToolbar, BorderLayout.NORTH);
-			}
-		}
+    if (GuiSettings.getShowToolbar())
+    {
+      this.getCurrentPanel().ifPresent(curPanel ->
+      {
+        currentToolbar = curPanel.getToolbar(getGlobalActions(), createNew);
+        content.add(currentToolbar, BorderLayout.NORTH);
+      });
+    }
 		content.revalidate();
 	}
 
@@ -979,19 +978,21 @@ public class MainWindow
 		}
 	}
 
-	private void checkMacroMenuForPanel(int index)
-	{
-		MainPanel p = this.getSqlPanel(index);
-		try
-		{
-			JMenu macro = this.getMacroMenu(index);
-			setMacroMenuItemStates(macro, p.isConnected());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("MainWindow.checkMacroMenuForPanel()", "Error during macro update", e);
-		}
-	}
+  private void checkMacroMenuForPanel(int index)
+  {
+    this.getSqlPanel(index).ifPresent(p ->
+    {
+      try
+      {
+        JMenu macro = this.getMacroMenu(index);
+        setMacroMenuItemStates(macro, p.isConnected());
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("MainWindow.checkMacroMenuForPanel()", "Error during macro update", e);
+      }
+    });
+  }
 
 	private void setMacroMenuEnabled(boolean enabled)
 	{
@@ -1050,8 +1051,7 @@ public class MainWindow
       if (macros != null)
       {
         buildMacroMenu(macros);
-        MainPanel p = this.getSqlPanel(i);
-        this.setMacroMenuItemStates(macros, p.isConnected());
+        this.getSqlPanel(i).ifPresent(p -> this.setMacroMenuItemStates(macros, p.isConnected()));
       }
     }
   }
@@ -1081,22 +1081,21 @@ public class MainWindow
 		return this.sqlTab.getSelectedIndex();
 	}
 
-	public int getIndexForPanel(MainPanel panel)
-	{
-		if (panel == null) return -1;
-		return getIndexForPanel(panel.getId());
-	}
+  public int getIndexForPanel(Optional<MainPanel> panel)
+  {
+    return panel.map(MainPanel::getId).map(this::getIndexForPanel).orElse(-1);
+  }
 
 	public int getIndexForPanel(String tabId)
 	{
 		if (tabId == null) return -1;
 		int tabCount = this.sqlTab.getTabCount();
-		for (int i=0; i < tabCount; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p.getId().equals(tabId)) return i;
-		}
-		return -1;
+    for (int i = 0; i < tabCount; i++)
+    {
+      String id = this.getSqlPanel(i).map(MainPanel::getId).orElse(null);
+      if (tabId.equals(id)) return i;
+    }
+    return -1;
 	}
 
 	/**
@@ -1111,7 +1110,7 @@ public class MainWindow
 
 		synchronized (workspaceLock)
 		{
-      Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
+		   Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
 
 			WbProperties props = toolProperties.get(toolKey);
 			if (props == null)
@@ -1130,64 +1129,63 @@ public class MainWindow
 	 */
 	public List<String> getPanelLabels()
 	{
-		int tabCount = this.sqlTab.getTabCount();
+    int tabCount = this.sqlTab.getTabCount();
 
-		List<String> result = new ArrayList<>(tabCount);
-		for (int i=0; i < tabCount; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p instanceof SqlPanel)
-			{
-				result.add(p.getTabTitle());
-			}
-			else
-			{
-				result.add(null);
-			}
-		}
-		return result;
+    List<String> result = new ArrayList<>(tabCount);
+    for (int i = 0; i < tabCount; i++)
+    {
+      String title = this.getSqlPanel(i).filter(p -> p instanceof SqlPanel).map(MainPanel::getTabTitle).orElse(null);
+      result.add(title);
+    }
+    return result;
 	}
 
-	public MainPanel getCurrentPanel()
-	{
-		int index = this.sqlTab.getSelectedIndex();
-		if (index >-1) return this.getSqlPanel(index);
-		else return null;
-	}
+  public Optional<MainPanel> getCurrentPanel()
+  {
+    int index = this.sqlTab.getSelectedIndex();
+    if (index > -1)
+    {
+      return this.getSqlPanel(index);
+    }
+    else
+    {
+      return Optional.empty();
+    }
+  }
 
   public ClosedTabManager getClosedTabHistory()
   {
     return closedTabHistory;
   }
 
-	public SqlPanel getCurrentSqlPanel()
-	{
-		MainPanel p = this.getCurrentPanel();
-		if (p instanceof SqlPanel)
-		{
-			return (SqlPanel)p;
-		}
-		return null;
-	}
+  public SqlPanel getCurrentSqlPanel()
+  {
+    MainPanel p = this.getCurrentPanel().get();
+    if (p instanceof SqlPanel)
+    {
+      return (SqlPanel)p;
+    }
+    return null;
+  }
 
-	public int getTabCount()
-	{
-		return this.sqlTab.getTabCount();
-	}
+  public int getTabCount()
+  {
+    return this.sqlTab.getTabCount();
+  }
 
-	public MainPanel getSqlPanel(int index)
-	{
-		if (index < 0 || index >= sqlTab.getTabCount()) return null;
-		try
-		{
-			return (MainPanel)this.sqlTab.getComponentAt(index);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logDebug("MainWindow.getSqlPanel()", "Invalid index [" + index + "] specified!", e);
-			return null;
-		}
-	}
+  public Optional<MainPanel> getSqlPanel(int index)
+  {
+    if (index < 0 || index >= sqlTab.getTabCount()) return Optional.empty();
+    try
+    {
+      return Optional.of((MainPanel)this.sqlTab.getComponentAt(index));
+    }
+    catch (Exception e)
+    {
+      LogMgr.logDebug("MainWindow.getSqlPanel()", "Invalid index [" + index + "] specified!", e);
+      return Optional.empty();
+    }
+  }
 
 	public void selectTab(int anIndex)
 	{
@@ -1209,90 +1207,98 @@ public class MainWindow
 		this.connectInProgress = true;
 	}
 
-	public void checkConnectionForPanel(final MainPanel panel)
-	{
-		if (this.isConnectInProgress()) return;
-		if (panel == null) return;
-		if (panel.isConnected()) return;
+  public void checkConnectionForPanel(final Optional<MainPanel> opt)
+  {
+    if (this.isConnectInProgress()) return;
+    if (!opt.isPresent()) return;
 
-		try
-		{
-			if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
-			{
-				createNewConnectionForPanel(panel);
-			}
-			else if (this.currentConnection != null)
-			{
+    MainPanel panel = opt.get();
+    if (panel.isConnected()) return;
+
+    try
+    {
+      if (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab())
+      {
+        createNewConnectionForPanel(opt);
+      }
+      else if (this.currentConnection != null)
+      {
         currentConnection.setShared(true);
-				panel.setConnection(this.currentConnection);
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
-		}
-	}
+        panel.setConnection(this.currentConnection);
+      }
+    }
+    catch (Exception e)
+    {
+      LogMgr.logError("MainWindow.checkConnectionForPanel()", "Error when checking connection", e);
+    }
+  }
 
-	public void disconnectCurrentPanel()
-	{
-		if (this.currentProfile == null) return;
-		if (this.currentProfile.getUseSeparateConnectionPerTab()) return;
+  public void disconnectCurrentPanel()
+  {
+    if (this.currentProfile == null) return;
+    if (this.currentProfile.getUseSeparateConnectionPerTab()) return;
 
-		final MainPanel p = this.getCurrentPanel();
-		WbConnection con = p.getConnection();
-		if (con == this.currentConnection) return;
+    this.getCurrentPanel().ifPresent(p ->
+    {
+      WbConnection con = p.getConnection();
+      if (con == this.currentConnection) return;
 
-		Thread t = new WbThread("Disconnect panel " + p.getId())
-		{
-			@Override
-			public void run()
-			{
-				disconnectPanel(p);
-			}
-		};
-		t.start();
-	}
+      Thread t = new WbThread("Disconnect panel " + p.getId())
+      {
+        @Override
+        public void run()
+        {
+          disconnectPanel(Optional.of(p));
+        }
+      };
+      t.start();
+    });
+  }
 
-	protected void disconnectPanel(final MainPanel panel)
-	{
-		if (this.isConnectInProgress()) return;
-		boolean inProgress = isConnectInProgress();
-		if (!inProgress) setConnectIsInProgress();
+  protected void disconnectPanel(final Optional<MainPanel> panel)
+  {
+    if (this.isConnectInProgress()) return;
+    boolean inProgress = isConnectInProgress();
+    if (!inProgress) setConnectIsInProgress();
 
-		showDisconnectInfo();
-		showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
-		try
-		{
-			WbConnection old = panel.getConnection();
-			panel.disconnect();
+    showDisconnectInfo();
+    showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 
-			// use WbConnection.disconnect() rather than ConnectionMgr.getInstance().disconnect()
-			// to make sure the connection state listeners are notified
-			old.disconnect();
+    try
+    {
+      panel.ifPresent(p ->
+      {
+        WbConnection old = p.getConnection();
+        p.disconnect();
 
-			panel.setConnection(currentConnection);
-			int index = this.getIndexForPanel(panel);
-			sqlTab.setForegroundAt(index, null);
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("MainWindow.connectPanel()", "Error when disconnecting panel " + panel.getId(), e);
-			String error = ExceptionUtil.getDisplay(e);
-			WbSwingUtilities.showErrorMessage(this, error);
-		}
-		finally
-		{
-			showStatusMessage("");
-			closeConnectingInfo();
-			if (!inProgress) clearConnectIsInProgress();
-		}
+        // use WbConnection.disconnect() rather than ConnectionMgr.getInstance().disconnect()
+        // to make sure the connection state listeners are notified
+        old.disconnect();
 
-		EventQueue.invokeLater(() ->
+        p.setConnection(currentConnection);
+      });
+      int index = this.getIndexForPanel(panel);
+      sqlTab.setForegroundAt(index, null);
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("MainWindow.connectPanel()", "Error when disconnecting panel " + panel.map(MainPanel::getId).orElse("-"), e);
+      String error = ExceptionUtil.getDisplay(e);
+      WbSwingUtilities.showErrorMessage(this, error);
+    }
+    finally
+    {
+      showStatusMessage("");
+      closeConnectingInfo();
+      if (!inProgress) clearConnectIsInProgress();
+    }
+
+    EventQueue.invokeLater(() ->
     {
       createNewConnection.checkState();
       disconnectTab.checkState();
     });
-	}
+  }
 
 	public boolean canUseSeparateConnection()
 	{
@@ -1306,77 +1312,75 @@ public class MainWindow
     return usesSeparateConnection(this.getCurrentPanel());
 	}
 
-	public boolean usesSeparateConnection(MainPanel panel)
-	{
-		if (!canUseSeparateConnection()) return false;
-		WbConnection conn = panel.getConnection() ;
-    if (conn == null) return false;
-    return conn.isShared() == false;
-		//return (currentConnection != null && conn != this.currentConnection);
-	}
+  public boolean usesSeparateConnection(Optional<MainPanel> panel)
+  {
+    if (!canUseSeparateConnection()) return false;
+    return panel.map(MainPanel::getConnection).map(t -> t.isShared() == false).orElse(false);
+  }
 
-	public void createNewConnectionForCurrentPanel()
-	{
-		final MainPanel panel = getCurrentPanel();
-		createNewConnectionForPanel(panel);
-		EventQueue.invokeLater(() ->
+  public void createNewConnectionForCurrentPanel()
+  {
+    Optional<MainPanel> panel = getCurrentPanel();
+    createNewConnectionForPanel(panel);
+    EventQueue.invokeLater(() ->
     {
       int index = getIndexForPanel(panel);
       sqlTab.setForegroundAt(index, Color.BLUE);
     });
-	}
+  }
 
-	protected void createNewConnectionForPanel(final MainPanel aPanel)
-	{
-		if (this.isConnectInProgress()) return;
-		if (this.connectThread != null) return;
+  protected void createNewConnectionForPanel(final Optional<MainPanel> panel)
+  {
+    if (this.isConnectInProgress()) return;
+    if (this.connectThread != null) return;
+    if (!panel.isPresent()) return;
 
-		this.showConnectingInfo();
+    this.showConnectingInfo();
 
-		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
-		{
-			@Override
-			public void run()
-			{
-				connectPanel(aPanel);
-			}
-		};
-		this.connectThread.start();
-	}
+    this.connectThread = new WbThread("Panel Connect " + panel.get().getId())
+    {
+      @Override
+      public void run()
+      {
+        connectPanel(panel);
+      }
+    };
+    this.connectThread.start();
+  }
 
 	/**
 	 * Connect the given panel to the database. This will always
 	 * create a new physical connection to the database.
 	 */
-	protected void connectPanel(final MainPanel aPanel)
-	{
-		if (this.isConnectInProgress()) return;
-		this.setConnectIsInProgress();
+  protected void connectPanel(final Optional<MainPanel> aPanel)
+  {
+    if (this.isConnectInProgress()) return;
+    this.setConnectIsInProgress();
 
-		try
-		{
-			// prevent a manual tab change while connecting
-			sqlTab.setEnabled(false);
+    try
+    {
+      // prevent a manual tab change while connecting
+      sqlTab.setEnabled(false);
 
-			WbConnection conn = this.getConnectionForTab(aPanel, true);
-			int index = this.getIndexForPanel(aPanel);
-			this.tabConnected(aPanel, conn, index);
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("MainWindow.connectPanel()", "Error when connecting panel " + aPanel.getId(), e);
-			showStatusMessage("");
-			String error = ExceptionUtil.getDisplay(e);
-			WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error);
-		}
-		finally
-		{
-			sqlTab.setEnabled(true);
-			closeConnectingInfo();
-			clearConnectIsInProgress();
-			this.connectThread = null;
-		}
-	}
+      WbConnection conn = this.getConnectionForTab(aPanel, true);
+      int index = this.getIndexForPanel(aPanel);
+      this.tabConnected(aPanel, conn, index);
+    }
+    catch (Throwable e)
+    {
+      LogMgr.logError("MainWindow.connectPanel()", "Error when connecting panel " + aPanel.map(MainPanel::getId).orElse("-"), e);
+      showStatusMessage("");
+      String error = ExceptionUtil.getDisplay(e);
+      WbSwingUtilities.showFriendlyErrorMessage(this, ResourceMgr.getString("ErrConnectFailed"), error);
+    }
+    finally
+    {
+      sqlTab.setEnabled(true);
+      closeConnectingInfo();
+      clearConnectIsInProgress();
+      this.connectThread = null;
+    }
+  }
 
 	public void waitForConnection()
 	{
@@ -1393,46 +1397,46 @@ public class MainWindow
 		}
 	}
 
-	private void tabConnected(final MainPanel panel, WbConnection conn, final int anIndex)
-	{
-		this.closeConnectingInfo();
-		panel.setConnection(conn);
+  private void tabConnected(final Optional<MainPanel> panel, WbConnection conn, final int anIndex)
+  {
+    this.closeConnectingInfo();
+    panel.ifPresent(p -> p.setConnection(conn));
 
-		WbSwingUtilities.invoke(() ->
+    WbSwingUtilities.invoke(() ->
     {
       updateGuiForTab(anIndex);
     });
-	}
+  }
 
-	private void updateGuiForTab(final int index)
-	{
-		if (index < 0) return;
-		if (index > this.sqlTab.getTabCount() - 1) return;
+  private void updateGuiForTab(final int index)
+  {
+    if (index < 0) return;
+    if (index > this.sqlTab.getTabCount() - 1) return;
 
-		final MainPanel current = this.getSqlPanel(index);
-		if (current == null) return;
+    this.getSqlPanel(index).ifPresent(current ->
+    {
+      JMenuBar menu = null;
+      if (index > -1 && index < panelMenus.size())
+      {
+        menu = this.panelMenus.get(index);
+      }
 
-		JMenuBar menu = null;
-		if (index > -1 && index < panelMenus.size())
-		{
-			menu = this.panelMenus.get(index);
-		}
+      // this can happen if a tab selected event occurs during initialization of a new tab
+      if (menu == null)
+      {
+        return;
+      }
 
-		// this can happen if a tab selected event occurs during initialization of a new tab
-		if (menu == null)
-		{
-			return;
-		}
+      setJMenuBar(menu);
+      updateToolbarVisibility(false);
+      createNewConnection.checkState();
+      disconnectTab.checkState();
+      checkMacroMenuForPanel(index);
+      forceRedraw();
 
-		setJMenuBar(menu);
-		updateToolbarVisibility(false);
-		createNewConnection.checkState();
-		disconnectTab.checkState();
-		checkMacroMenuForPanel(index);
-		forceRedraw();
-
-		SwingUtilities.invokeLater(current::panelSelected);
-	}
+      SwingUtilities.invokeLater(current::panelSelected);
+    });
+  }
 
 	public void currentTabChanged()
 	{
@@ -1440,30 +1444,31 @@ public class MainWindow
 		tabSelected(index);
 	}
 
-	protected void tabSelected(final int index)
-	{
-		if (index < 0) return;
-		if (index >= sqlTab.getTabCount()) return;
+  protected void tabSelected(final int index)
+  {
+    if (index < 0) return;
+    if (index >= sqlTab.getTabCount()) return;
 
-		// Make sure this is executed on the EDT
-		WbSwingUtilities.invoke(() ->
+    // Make sure this is executed on the EDT
+    WbSwingUtilities.invoke(() ->
     {
       updateCurrentTab(index);
     });
 
-		int lastIndex = sqlTab.getPreviousTabIndex();
-		if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
-		{
-			BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex), false);
-		}
+    int lastIndex = sqlTab.getPreviousTabIndex();
+    if (lastIndex > -1 && lastIndex < sqlTab.getTabCount())
+    {
+      BookmarkManager.getInstance().updateInBackground(MainWindow.this, getSqlPanel(lastIndex).orElse(null), false);
+    }
 
-    if (getCurrentPanel() instanceof DbExplorerPanel)
+    Predicate<? super MainPanel> isDBExplorerPanel = p -> p instanceof DbExplorerPanel;
+    if (getCurrentPanel().filter(isDBExplorerPanel).isPresent())
     {
       hideDbTree();
     }
     else
     {
-      MainPanel lastPanel = getSqlPanel(lastIndex);
+      MainPanel lastPanel = getSqlPanel(lastIndex).get();
       if (lastPanel instanceof DbExplorerPanel)
       {
         if (shouldShowTree)
@@ -1477,18 +1482,16 @@ public class MainWindow
         }
       }
     }
+  }
 
-	}
-
-	private void updateCurrentTab(int index)
-	{
-		MainPanel current = getSqlPanel(index);
-		if (current == null) return;
-		checkConnectionForPanel(current);
-		updateAddMacroAction();
-		updateGuiForTab(index);
-		updateWindowTitle();
-	}
+  private void updateCurrentTab(int index)
+  {
+    Optional<MainPanel> current = getSqlPanel(index);
+    checkConnectionForPanel(current);
+    updateAddMacroAction();
+    updateGuiForTab(index);
+    updateWindowTitle();
+  }
 
 	protected void updateAddMacroAction()
 	{
@@ -1589,14 +1592,14 @@ public class MainWindow
 	/**
 	 *	Display a message in the status bar
 	 */
-	public void showStatusMessage(final String aMsg)
-	{
-		MainPanel current = this.getCurrentPanel();
+  public void showStatusMessage(final String aMsg)
+  {
+		MainPanel current = getCurrentPanel().get();
 		if (!(current instanceof StatusBar)) return;
 
 		final StatusBar status = (StatusBar)current;
 
-		WbSwingUtilities.invoke(() ->
+    WbSwingUtilities.invoke(() ->
     {
       if (StringUtil.isEmptyString(aMsg))
       {
@@ -1607,12 +1610,11 @@ public class MainWindow
         status.setStatusMessage(aMsg);
       }
     });
-	}
+  }
 
 	public void showLogMessage(String aMsg)
 	{
-		MainPanel current = this.getCurrentPanel();
-		if (current != null) current.showLogMessage(aMsg);
+		this.getCurrentPanel().ifPresent(current -> current.showLogMessage(aMsg));
 	}
 
 	@Override
@@ -1676,15 +1678,15 @@ public class MainWindow
 		return NumberStringCache.getNumberString(windowId);
 	}
 
-	private String getConnectionIdForPanel(MainPanel p)
-	{
-		if (p == null)
-		{
-			LogMgr.logError("MainWindow.getConnectionIdForPanel()", "Requested connection ID for NULL panel!", new Exception());
-			return "Wb" + getWindowId();
-		}
-		return "Wb" + getWindowId() + "-" + p.getId();
-	}
+  private String getConnectionIdForPanel(Optional<MainPanel> p)
+  {
+    if (!p.isPresent())
+    {
+      LogMgr.logError("MainWindow.getConnectionIdForPanel()", "Requested connection ID for NULL panel!", new Exception());
+      return "Wb" + getWindowId();
+    }
+    return "Wb" + getWindowId() + "-" + p.map(MainPanel::getId).orElse(null);
+  }
 
 	@Override
 	public String getDefaultIconName()
@@ -1757,22 +1759,22 @@ public class MainWindow
 	@Override
 	public void connected(WbConnection conn)
 	{
-		MainPanel panel = this.getCurrentPanel();
-		if (panel == null)
+		Optional<MainPanel> panel = this.getCurrentPanel();
+		if (!panel.isPresent())
 		{
 			Thread.yield();
 			panel = this.getCurrentPanel();
 			LogMgr.logError("MainWindow.connected()", "Connection established but no current panel!", new NullPointerException("Backtrace"));
 		}
 
-		if (this.currentProfile.getUseSeparateConnectionPerTab())
-		{
-			if (panel != null) panel.setConnection(conn);
-		}
-		else
-		{
-			this.setConnection(conn);
-		}
+    if (this.currentProfile.getUseSeparateConnectionPerTab())
+    {
+      panel.ifPresent(p -> p.setConnection(conn));
+    }
+    else
+    {
+      this.setConnection(conn);
+    }
 
 		this.setMacroMenuEnabled(true);
 		this.updateWindowTitle();
@@ -1788,14 +1790,15 @@ public class MainWindow
 		this.disconnectTab.checkState();
 		this.showMacroPopup.workspaceChanged();
 
-		if (panel != null)
-		{
-			panel.clearLog();
-			panel.showResultPanel();
-		}
+    panel.ifPresent(p ->
+    {
+      p.clearLog();
+      p.showResultPanel();
+    });
+
 		VersionNumber version = conn.getDatabaseVersion();
 		showDbmsManual.setDbms(conn.getDbId(), version);
-    connectionInfoAction.setEnabled(true);
+		connectionInfoAction.setEnabled(true);
 		showConnectionWarnings(conn, panel);
 
     if (isDbTreeVisible())
@@ -1825,19 +1828,19 @@ public class MainWindow
 		}
 	}
 
-	@Override
-	public void connectEnded()
-	{
-		for (int i=0; i < sqlTab.getTabCount(); i++)
-		{
-			MainPanel sql = getSqlPanel(i);
-			if (sql instanceof StatusBar)
-			{
-				((StatusBar)sql).clearStatusMessage();
-			}
-		}
+  @Override
+  public void connectEnded()
+  {
+    for (int i = 0; i < sqlTab.getTabCount(); i++)
+    {
+      MainPanel sql = getSqlPanel(i).get();
+      if (sql instanceof StatusBar)
+      {
+        ((StatusBar)sql).clearStatusMessage();
+      }
+    }
 
-    logVariables();
+		logVariables();
 		this.clearConnectIsInProgress();
 	}
 
@@ -1946,9 +1949,14 @@ public class MainWindow
           {
             addTabAtIndex(false, false, false, -1);
           }
-          MainPanel p = getSqlPanel(i);
-          ((JComponent)p).validate();
-          p.readFromWorkspace(currentWorkspace, i);
+
+          Optional<MainPanel> sqlPanel = getSqlPanel(i);
+          if (sqlPanel.isPresent())
+          {
+            MainPanel p = sqlPanel.get();
+            ((JComponent)p).validate();
+            p.readFromWorkspace(currentWorkspace, i);
+          }
         }
 
         if (entryCount == 0)
@@ -1973,7 +1981,7 @@ public class MainWindow
           sqlTab.setSelectedIndex(newIndex);
         }
 
-        MainPanel p = getCurrentPanel();
+        Optional<MainPanel> p = getCurrentPanel();
         checkConnectionForPanel(p);
         setMacroMenuEnabled(true);
       }
@@ -2042,27 +2050,27 @@ public class MainWindow
 
   private void logVariables()
   {
-    MainPanel current = this.getCurrentPanel();
-    if (current == null) return;
-
-    StringBuilder msg = new StringBuilder();
-
-    if (currentProfile != null)
+    this.getCurrentPanel().ifPresent(p ->
     {
-      appendVariables(msg, currentProfile.getConnectionVariables(), ResourceMgr.getString("TxtProfile"));
-    }
-    if (currentWorkspace != null)
-    {
+      StringBuilder msg = new StringBuilder();
+
+      if (currentProfile != null)
+      {
+        appendVariables(msg, currentProfile.getConnectionVariables(), ResourceMgr.getString("TxtProfile"));
+      }
+      if (currentWorkspace != null)
+      {
+        if (msg.length() > 0)
+        {
+          msg.append("\n");
+        }
+        appendVariables(msg, currentWorkspace.getVariables(), ResourceMgr.getString("TxtWorkspace"));
+      }
       if (msg.length() > 0)
       {
-        msg.append("\n");
+        p.appendToLog(msg.toString());
       }
-      appendVariables(msg, currentWorkspace.getVariables(), ResourceMgr.getString("TxtWorkspace"));
-    }
-    if (msg.length() > 0)
-    {
-      current.appendToLog(msg.toString());
-    }
+    });
   }
 
   private void appendVariables(StringBuilder msg, Properties variables, String source)
@@ -2287,11 +2295,10 @@ public class MainWindow
 
   private void saveCache()
   {
-    MainPanel panel = getCurrentPanel();
-    if (panel == null) return;
-    WbConnection conn = panel.getConnection();
-    if (conn == null) return;
-    DbObjectCacheFactory.getInstance().saveCache(conn);
+    getCurrentPanel().map(MainPanel::getConnection).ifPresent(conn ->
+    {
+      DbObjectCacheFactory.getInstance().saveCache(conn);
+    });
   }
 
 	/**
@@ -2693,16 +2700,16 @@ public class MainWindow
 		}
 	}
 
-	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
+	private WbConnection getConnectionForTab(Optional<MainPanel> aPanel, boolean returnNew)
 		throws Exception
 	{
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 
-		StatusBar status = null;
-		if (aPanel instanceof StatusBar)
+    StatusBar status = null;
+		if (aPanel.get() instanceof StatusBar)
 		{
-			status = (StatusBar)aPanel;
+			status = (StatusBar)aPanel.get();
 			status.setStatusMessage(ResourceMgr.getFormattedString("MsgConnectingTo", this.currentProfile.getName()));
 		}
 
@@ -2711,7 +2718,7 @@ public class MainWindow
 		try
 		{
 			conn = mgr.getConnection(this.currentProfile, id);
-      conn.setShared(false);
+			conn.setShared(false);
 		}
 		finally
 		{
@@ -2721,17 +2728,19 @@ public class MainWindow
 		return conn;
 	}
 
-	private void showConnectionWarnings(WbConnection conn, MainPanel panel)
-	{
-		if (panel == null) return;
-		String warn = (conn != null ? conn.getWarnings() : null);
-		if (warn != null && panel != null)
-		{
-			panel.showResultPanel();
-			panel.showLogMessage(ResourceMgr.getString("MsgConnectMsg") + "\n");
-			panel.appendToLog(warn);
-		}
-	}
+  private void showConnectionWarnings(WbConnection conn, Optional<MainPanel> panel)
+  {
+    panel.ifPresent(p ->
+    {
+      String warn = (conn != null ? conn.getWarnings() : null);
+      if (warn != null)
+      {
+        p.showResultPanel();
+        p.showLogMessage(ResourceMgr.getString("MsgConnectMsg") + "\n");
+        p.appendToLog(warn);
+      }
+    });
+  }
 
 	public void addDbExplorerTab(DbExplorerPanel explorer)
 	{
@@ -2773,7 +2782,7 @@ public class MainWindow
 		}
 	}
 
-	public void closeOtherPanels(MainPanel toKeep)
+	public void closeOtherPanels(Optional<MainPanel> toKeepOpt)
 	{
 		if (GuiSettings.getConfirmTabClose())
 		{
@@ -2781,6 +2790,7 @@ public class MainWindow
 			if (!doClose) return;
 		}
 
+		MainPanel toKeep = toKeepOpt.orElse(null);
 		boolean inProgress = connectInProgress;
 		if (!inProgress) this.setConnectIsInProgress();
 
@@ -2790,9 +2800,9 @@ public class MainWindow
 			int index = 0;
 			while (index < sqlTab.getTabCount())
 			{
-				MainPanel p = getSqlPanel(index);
+				MainPanel p = getSqlPanel(index).orElse(null);
 
-				if (p != toKeep && !p.isLocked())
+				if (p != null  && p != toKeep && !p.isLocked())
 				{
 					if (p.isModified())
 					{
@@ -2860,16 +2870,16 @@ public class MainWindow
 			// Reset the first panel, now we have a "clean" workspace
 			if (keepOne)
 			{
-				MainPanel p = getSqlPanel(0);
-				if (p == null)
+				Optional<MainPanel> p = getSqlPanel(0);
+				if (!p.isPresent())
 				{
 					addTabAtIndex(false, false, false, -1);
 					p = getSqlPanel(0);
 				}
-        else
-        {
-          p.reset();
-        }
+				else
+				{
+				   p.get().reset();
+				}
 				resetTabTitles();
 
 				// make sure the toolbar and menus are updated correctly
@@ -3030,65 +3040,61 @@ public class MainWindow
 	/**
 	 *	Sets the default title for all tab titles
 	 */
-	private void resetTabTitles()
-	{
-		String defaultTitle = ResourceMgr.getDefaultTabLabel();
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p == null) continue;
-			if (p instanceof SqlPanel)
-			{
-				SqlPanel sql = (SqlPanel)p;
-				sql.closeFile(true, false);
-				this.setTabTitle(i, defaultTitle);
-			}
-		}
-	}
+  private void resetTabTitles()
+  {
+    String defaultTitle = ResourceMgr.getDefaultTabLabel();
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      MainPanel p = this.getSqlPanel(i).get();
+      if (p == null) continue;
+      if (p instanceof SqlPanel)
+      {
+        SqlPanel sql = (SqlPanel)p;
+        sql.closeFile(true, false);
+        this.setTabTitle(i, defaultTitle);
+      }
+    }
+  }
 
-	public boolean isCancelling()
-	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p.isCancelling()) return true;
-		}
-		return false;
+  public boolean isCancelling()
+  {
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      if (this.getSqlPanel(i).map(MainPanel::isCancelling).orElse(false)) return true;
+    }
+    return false;
+  }
 
-	}
-
-	public boolean isConnected()
-	{
-		if (this.currentConnection != null)
-		{
-			return true;
-		}
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p.isConnected()) return true;
-		}
-		return false;
-	}
+  public boolean isConnected()
+  {
+    if (this.currentConnection != null)
+    {
+      return true;
+    }
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      if (this.getSqlPanel(i).map(MainPanel::isConnected).orElse(false)) return true;
+    }
+    return false;
+  }
 
 	/**
 	 *	Returns true if at least one of the SQL panels is currently
 	 *  executing a SQL statement.
 	 *  This method calls isBusy() for each tab.
 	 */
-	public boolean isBusy()
-	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (p.isBusy()) return true;
-		}
-		return false;
-	}
+  public boolean isBusy()
+  {
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      if (this.getSqlPanel(i).map(MainPanel::isBusy).orElse(false)) return true;
+    }
+    return false;
+  }
 
   public void replaceWorkspaceVariables(Properties newVars)
   {
@@ -3153,20 +3159,25 @@ public class MainWindow
 	 */
 	public boolean closeWorkspace(boolean checkUnsaved)
 	{
-		if (checkUnsaved)
-		{
-			int count = this.sqlTab.getTabCount();
-			boolean first = true;
-			for (int i=0; i < count; i++)
-			{
-				MainPanel p = getSqlPanel(i);
-				if (currentConnection != null)
-				{
-					first = i == 0;
-				}
-				if (!p.canClosePanel(first)) return false;
-			}
-		}
+    if (checkUnsaved)
+    {
+      int count = this.sqlTab.getTabCount();
+      boolean first = true;
+      final boolean connectionAvailable = currentConnection != null;
+
+      for (int i = 0; i < count; i++)
+      {
+        Optional<MainPanel> p = getSqlPanel(i);
+        if (connectionAvailable)
+        {
+          first = i == 0;
+        }
+        if (p.isPresent() && !p.get().canClosePanel(first))
+        {
+          return false;
+        }
+      }
+    }
 
 		WbSwingUtilities.invoke(() ->
     {
@@ -3314,11 +3325,14 @@ public class MainWindow
       currentWorkspace.openForWriting();
 			currentWorkspace.setSelectedTab(sqlTab.getSelectedIndex());
 			currentWorkspace.setEntryCount(count);
-			for (int i=0; i < count; i++)
-			{
-				MainPanel p = getSqlPanel(i);
-				p.saveToWorkspace(currentWorkspace, i);
-			}
+      for (int i = 0; i < count; i++)
+      {
+        Optional<MainPanel> p = getSqlPanel(i);
+        if (p.isPresent())
+        {
+          p.get().saveToWorkspace(currentWorkspace, i);
+        }
+      }
       currentWorkspace.save();
 			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + filename + " saved");
 		}
@@ -3456,7 +3470,7 @@ public class MainWindow
 		JMenuBar menuBar = this.createMenuForPanel(sql);
 		this.panelMenus.add(index, menuBar);
 
-		if (checkConnection) this.checkConnectionForPanel(sql);
+		if (checkConnection) this.checkConnectionForPanel(Optional.of(sql));
 
 		this.setMacroMenuEnabled(sql.isConnected());
 
@@ -3485,40 +3499,39 @@ public class MainWindow
 			LogMgr.logWarning("MainWindow.jumpToBookmark()", "Tab with ID=" + bookmark.getTabId() + " not found!");
 			return;
 		}
-		final MainPanel p = getSqlPanel(index);
-		final boolean selectTab = index != sqlTab.getSelectedIndex();
-		EventQueue.invokeLater(() ->
+    final Optional<MainPanel> p = getSqlPanel(index);
+    final boolean selectTab = index != sqlTab.getSelectedIndex();
+    EventQueue.invokeLater(() ->
     {
       if (selectTab)
       {
         selectTab(index);
         invalidate();
       }
-      p.jumpToBookmark(bookmark);
+      p.ifPresent(pan -> pan.jumpToBookmark(bookmark));
     });
-	}
+  }
 
-	/**
-	 * Returns the real title of a tab (without the index number or any formatting)
-	 *
-	 * @see MainPanel#getTabTitle()
-	 */
-	public String getTabTitle(int index)
-	{
-		MainPanel panel = getSqlPanel(index);
-		return panel.getTabTitle();
-	}
+  /**
+   * Returns the real title of a tab (without the index number or any formatting)
+   *
+   * @see MainPanel#getTabTitle()
+   */
+  public String getTabTitle(int index)
+  {
+    return getSqlPanel(index).map(MainPanel::getTabTitle).orElse(null);
+  }
 
-	private int getTabIndexById(String tabId)
-	{
-		int count = sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = getSqlPanel(i);
-			if (p.getId().equals(tabId)) return i;
-		}
-		return -1;
-	}
+  private int getTabIndexById(String tabId)
+  {
+    int count = sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      String id = getSqlPanel(i).map(MainPanel::getId).orElse(null);
+      if (id != null && id.equals(tabId)) return i;
+    }
+    return -1;
+  }
 
   /**
    * Returns the tab title as displayed to the user (including the index number).
@@ -3563,26 +3576,28 @@ public class MainWindow
 	 *	Sets the title of a tab and appends the index number to
 	 *  the title, so that a shortcut Ctrl-n can be defined
 	 */
-	public void setTabTitle(int anIndex, String aName)
-	{
-		MainPanel p = this.getSqlPanel(anIndex);
-		p.setTabName(aName);
-		p.setTabTitle(this.sqlTab, anIndex);
-		updateViewMenu(anIndex, p.getTabTitle());
-	}
+  public void setTabTitle(int anIndex, String aName)
+  {
+    this.getSqlPanel(anIndex).ifPresent(p ->
+    {
+      p.setTabName(aName);
+      p.setTabTitle(this.sqlTab, anIndex);
+      updateViewMenu(anIndex, p.getTabTitle());
+    });
+  }
 
-	public void removeLastTab(boolean includeExplorer)
-	{
-		int index = this.sqlTab.getTabCount() - 1;
-		if (!includeExplorer)
-		{
-			while (this.getSqlPanel(index) instanceof DbExplorerPanel)
-			{
-				index --;
-			}
-		}
-		this.tabCloseButtonClicked(index);
-	}
+  public void removeLastTab(boolean includeExplorer)
+  {
+    int index = this.sqlTab.getTabCount() - 1;
+    if (!includeExplorer)
+    {
+			while (this.getSqlPanel(index).get() instanceof DbExplorerPanel)
+      {
+				index--;
+      }
+    }
+    this.tabCloseButtonClicked(index);
+  }
 
 	/**
 	 * Checks if the current tab is locked, or if it is the
@@ -3599,17 +3614,17 @@ public class MainWindow
 		return canCloseTab(index);
 	}
 
-	@Override
-	public boolean canCloseTab(int index)
-	{
-		if (index < 0) return false;
-		MainPanel panel = this.getSqlPanel(index);
-		if (panel == null) return false;
-		if (panel.isLocked()) return false;
+  @Override
+  public boolean canCloseTab(int index)
+  {
+    if (index < 0) return false;
+    Optional<MainPanel> panel = this.getSqlPanel(index);
 
-		int numTabs = sqlTab.getTabCount();
-		return numTabs > 1;
-	}
+    if (!panel.isPresent() || panel.get().isLocked()) return false;
+
+    int numTabs = sqlTab.getTabCount();
+    return numTabs > 1;
+  }
 
 	@Override
 	public Component getComponent()
@@ -3634,19 +3649,19 @@ public class MainWindow
 		this.tabCloseButtonClicked(index);
 	}
 
-	private void renumberTabs()
-	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			p.setTabTitle(sqlTab, i);
-		}
-		for (int panel=0; panel < count; panel++)
-		{
-			rebuildViewMenu(panel);
-		}
-	}
+  private void renumberTabs()
+  {
+    int count = this.sqlTab.getTabCount();
+    for (int i = 0; i < count; i++)
+    {
+      final int fi = i;
+      this.getSqlPanel(i).ifPresent(p -> p.setTabTitle(sqlTab, fi));
+    }
+    for (int panel = 0; panel < count; panel++)
+    {
+      rebuildViewMenu(panel);
+    }
+  }
 
 	/**
 	 * Rebuild the part of the view menu that handles the
@@ -3720,23 +3735,28 @@ public class MainWindow
 		this.ignoreTabChange = flag;
 	}
 
-	@Override
-	public boolean moveTab(int oldIndex, int newIndex)
-	{
-		MainPanel panel = this.getSqlPanel(oldIndex);
+  @Override
+  public boolean moveTab(int oldIndex, int newIndex)
+  {
+    Optional<MainPanel> panel = this.getSqlPanel(oldIndex);
 
-		JMenuBar oldMenu = this.panelMenus.get(oldIndex);
-		this.sqlTab.remove(oldIndex);
-		this.panelMenus.remove(oldIndex);
-		this.panelMenus.add(newIndex, oldMenu);
+    if (!panel.isPresent())
+    {
+      return false;
+    }
 
-		this.sqlTab.add((JComponent)panel, newIndex);
-		this.sqlTab.setSelectedIndex(newIndex);
+    JMenuBar oldMenu = this.panelMenus.get(oldIndex);
+    this.sqlTab.remove(oldIndex);
+    this.panelMenus.remove(oldIndex);
+    this.panelMenus.add(newIndex, oldMenu);
 
-		renumberTabs();
-		this.validate();
-		return true;
-	}
+    this.sqlTab.add((JComponent)panel.get(), newIndex);
+    this.sqlTab.setSelectedIndex(newIndex);
+
+    renumberTabs();
+    this.validate();
+    return true;
+  }
 
 	/**
 	 * Removes the tab at the given location. If the current profile
@@ -3746,25 +3766,25 @@ public class MainWindow
 	 * <br/>
 	 * The user will not be
 	 */
-	@Override
-	public void tabCloseButtonClicked(int index)
-	{
-		MainPanel panel = this.getSqlPanel(index);
-		if (panel == null) return;
-		if (!panel.canClosePanel(true)) return;
+  @Override
+  public void tabCloseButtonClicked(int index)
+  {
+    Optional<MainPanel> panel = this.getSqlPanel(index);
+		if (!panel.isPresent()) return;
+		if (!panel.get().canClosePanel(true)) return;
 
-		if (GuiSettings.getConfirmTabClose())
-		{
-			boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseTab"));
-			if (!doClose) return;
-		}
+    if (GuiSettings.getConfirmTabClose())
+    {
+      boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseTab"));
+      if (!doClose) return;
+    }
 
-		if (GuiSettings.getUseLRUForTabs())
-		{
-			tabHistory.restoreLastTab();
-		}
-		removeTab(index, true, true);
-	}
+    if (GuiSettings.getUseLRUForTabs())
+    {
+      tabHistory.restoreLastTab();
+    }
+    removeTab(index, true, true);
+  }
 
 	/**
 	 * Removes the indicated tab without checking for modified file etc.
@@ -3774,68 +3794,68 @@ public class MainWindow
 	 */
 	protected void removeTab(int index, boolean updateGUI, boolean addToHistory)
 	{
-		MainPanel panel = this.getSqlPanel(index);
-		if (panel == null) return;
-
-		int newTab = -1;
-
-		boolean inProgress = this.isConnectInProgress();
-		if (!inProgress) this.setConnectIsInProgress();
-
-    if (addToHistory)
+    this.getSqlPanel(index).ifPresent(panel ->
     {
-      closedTabHistory.addToTabHistory(panel, index);
-    }
+      int newTab = -1;
 
-		try
-		{
-			setIgnoreTabChange(true);
+      boolean inProgress = this.isConnectInProgress();
+      if (!inProgress) this.setConnectIsInProgress();
 
-      WbConnection conn = panel.getConnection();
-      boolean doDisconnect = conn != null && conn.isShared() == false; // usesSeparateConnection(panel) || (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab());
+      if (addToHistory)
+      {
+        closedTabHistory.addToTabHistory(panel, index);
+      }
 
-			panel.dispose();
+      try
+      {
+        setIgnoreTabChange(true);
 
-			BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
+        WbConnection conn = panel.getConnection();
+        boolean doDisconnect = conn != null && conn.isShared() == false; // usesSeparateConnection(panel) || (this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab());
 
-      if (doDisconnect)
-			{
-        disconnectInBackground(conn);
-			}
-			disposeMenu(panelMenus.get(index));
-			this.panelMenus.remove(index);
-			this.sqlTab.removeTabAt(index);
+        panel.dispose();
 
-			if (updateGUI)
-			{
-				this.renumberTabs();
-				newTab = this.sqlTab.getSelectedIndex();
-        if (panel instanceof DbExplorerPanel)
+        BookmarkManager.getInstance().clearBookmarksForPanel(getWindowId(), panel.getId());
+
+        if (doDisconnect)
         {
-          restoreDbTree();
+          disconnectInBackground(conn);
         }
-			}
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("MainWindows.removeTab()", "Error removing tab index=" + index,e);
-		}
-		finally
-		{
-			setIgnoreTabChange(false);
-			if (!inProgress) this.clearConnectIsInProgress();
-		}
-		if (newTab >= 0 && updateGUI)
-		{
-			this.tabSelected(newTab);
-		}
+        disposeMenu(panelMenus.get(index));
+        this.panelMenus.remove(index);
+        this.sqlTab.removeTabAt(index);
 
-		if (sqlTab.getTabCount() > 0)
-		{
-			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
-		}
-    updateTabHistoryMenu();
-	}
+        if (updateGUI)
+        {
+          this.renumberTabs();
+          newTab = this.sqlTab.getSelectedIndex();
+          if (panel instanceof DbExplorerPanel)
+          {
+            restoreDbTree();
+          }
+        }
+      }
+      catch (Throwable e)
+      {
+        LogMgr.logError("MainWindows.removeTab()", "Error removing tab index=" + index, e);
+      }
+      finally
+      {
+        setIgnoreTabChange(false);
+        if (!inProgress) this.clearConnectIsInProgress();
+      }
+      if (newTab >= 0 && updateGUI)
+      {
+        this.tabSelected(newTab);
+      }
+
+      if (sqlTab.getTabCount() > 0)
+      {
+        sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
+      }
+      updateTabHistoryMenu();
+    });
+  }
 
 	private void disconnectInBackground(final WbConnection conn)
   {

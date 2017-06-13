@@ -68,11 +68,7 @@ public class HelpContactAction
 
     if (mainWin != null)
     {
-      MainPanel panel = mainWin.getCurrentPanel();
-      if (panel != null)
-      {
-        currentConnection = panel.getConnection();
-      }
+      currentConnection = mainWin.getCurrentPanel().map(MainPanel::getConnection).orElse(null);
     }
 
     try

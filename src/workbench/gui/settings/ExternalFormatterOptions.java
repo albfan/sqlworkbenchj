@@ -92,13 +92,7 @@ public class ExternalFormatterOptions
     MainWindow mainWin = (MainWindow)WbManager.getInstance().getCurrentWindow();
     if (mainWin == null) return;
 
-		WbConnection currentConnection = null;
-
-    MainPanel panel = mainWin.getCurrentPanel();
-    if (panel != null)
-    {
-      currentConnection = panel.getConnection();
-    }
+    WbConnection currentConnection = mainWin.getCurrentPanel().map(MainPanel::getConnection).orElse(null);
 
     if (currentConnection != null)
     {

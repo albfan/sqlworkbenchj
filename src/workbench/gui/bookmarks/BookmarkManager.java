@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
@@ -82,18 +83,14 @@ public class BookmarkManager
 	{
 		long start = System.currentTimeMillis();
 		int count = -1;
-		synchronized (this)
-		{
-			count = win.getTabCount();
-			for (int i=0; i < count; i++)
-			{
-				MainPanel panel = win.getSqlPanel(i);
-				if (panel.supportsBookmarks())
-				{
-					updateBookmarks(win, panel);
-				}
-			}
-		}
+    synchronized (this)
+    {
+      count = win.getTabCount();
+      for (int i = 0; i < count; i++)
+      {
+        win.getSqlPanel(i).filter(MainPanel::supportsBookmarks).ifPresent(panel -> updateBookmarks(win, panel));
+      }
+    }
 		long end = System.currentTimeMillis();
 		LogMgr.logDebug("BookmarkManager.updateBookmarks()", "Parsing bookmarks for " + count + " tabs took: " + (end - start) + "ms");
 	}
@@ -129,11 +126,11 @@ public class BookmarkManager
 				{
 					updated = new BookmarkGroup(panelBookmarks, panel.getId());
 					String title = panel.getTabTitle();
-					if (GuiSettings.getShowTabIndex() && title.equals(ResourceMgr.getDefaultTabLabel()))
-					{
-						int index = win.getIndexForPanel(panel);
-						title += " " + NumberStringCache.getNumberString(index + 1);
-					}
+          if (GuiSettings.getShowTabIndex() && title.equals(ResourceMgr.getDefaultTabLabel()))
+          {
+            int index = win.getIndexForPanel(Optional.ofNullable(panel));
+            title += " " + NumberStringCache.getNumberString(index + 1);
+          }
 					updated.setName(title);
 					windowBookmarks.put(updated.getGroupId(), updated);
 				}

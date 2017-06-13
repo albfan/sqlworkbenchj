@@ -27,8 +27,6 @@ import java.awt.event.ActionEvent;
 
 import workbench.interfaces.MainPanel;
 
-import workbench.db.WbConnection;
-
 import workbench.gui.MainWindow;
 import workbench.gui.tools.ConnectionInfoPanel;
 
@@ -52,11 +50,7 @@ public class HelpConnectionInfoAction
   public void executeAction(ActionEvent e)
   {
     if (mainWindow == null) return;
-    MainPanel panel = mainWindow.getCurrentPanel();
-    if (panel == null) return;
-    WbConnection connection = panel.getConnection();
-    if (connection == null) return;
-    ConnectionInfoPanel.showConnectionInfo(connection);
+    mainWindow.getCurrentPanel().map(MainPanel::getConnection).ifPresent(ConnectionInfoPanel::showConnectionInfo);
   }
 
 }

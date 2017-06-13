@@ -58,11 +58,8 @@ public class ManageDriversAction
     MainWindow mainWin = (MainWindow)WbManager.getInstance().getCurrentWindow();
     if (mainWin != null)
     {
-      MainPanel panel = mainWin.getCurrentPanel();
-      if (panel != null)
-      {
-        currentConnection = panel.getConnection();
-      }
+      currentConnection = mainWin.getCurrentPanel().map(MainPanel::getConnection).orElse(null);
+      
       if (currentConnection != null)
       {
         String drvName = currentConnection.getProfile().getDriverName();

@@ -735,14 +735,14 @@ public class BookmarkSelector
 		{
 			BookmarkManager.getInstance().updateInBackground(window);
 		}
-		else
-		{
-			// default behaviour is to update only the current panel, because that should only
-			// be the one that is stale. The bookmarks for a tab are refreshed when the tab is left
-			// so the bookmarks for all others should be correct
-			MainPanel panel = window.getCurrentPanel();
-			BookmarkManager.getInstance().updateInBackground(window, panel, false);
-		}
+    else
+    {
+      // default behaviour is to update only the current panel, because that should only
+      // be the one that is stale. The bookmarks for a tab are refreshed when the tab is left
+      // so the bookmarks for all others should be correct
+      MainPanel panel = window.getCurrentPanel().orElse(null);
+      BookmarkManager.getInstance().updateInBackground(window, panel, false);
+    }
 
 		final BookmarkSelector picker = new BookmarkSelector(window);
 

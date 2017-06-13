@@ -23,6 +23,8 @@
  */
 package workbench.gui.menu;
 
+import java.util.Optional;
+
 import javax.swing.JPopupMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AddTabAction;
@@ -68,7 +70,7 @@ public class SqlTabPopup
 		remove.setEnabled(aClient.canCloseTab());
 		this.add(remove);
 
-		MainPanel panel = aClient.getCurrentPanel();
+    Optional<MainPanel> panel = aClient.getCurrentPanel();
 
 		CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
 		this.add(closeOthers);
@@ -85,7 +87,7 @@ public class SqlTabPopup
 		LockPanelAction lock = new LockPanelAction(panel);
 
 		this.add(lock.getMenuItem());
-		lock.setSwitchedOn(panel.isLocked());
+    lock.setSwitchedOn(panel.map(MainPanel::isLocked).orElse(false));
 
 		this.addSeparator();
 
@@ -107,32 +109,33 @@ public class SqlTabPopup
 
 		this.addSeparator();
 
-		if (panel instanceof SqlPanel)
-		{
-			SqlPanel spanel = (SqlPanel)panel;
+    MainPanel mpanel = panel.get();
+    if (mpanel instanceof SqlPanel)
+    {
+      SqlPanel spanel = (SqlPanel)mpanel;
 
-			EditorPanel editor = spanel.getEditor();
+      EditorPanel editor = spanel.getEditor();
 
-			this.add(editor.getFileSaveAction());
-			this.add(editor.getFileSaveAsAction());
+      this.add(editor.getFileSaveAction());
+      this.add(editor.getFileSaveAsAction());
       this.add(new OpenFileAction(aClient));
 
-			if (editor.hasFileLoaded())
-			{
-				this.add(editor.getReloadAction());
-				FileDiscardAction discard = new FileDiscardAction(spanel);
-				discard.removeIcon();
-				this.add(discard);
-				this.addSeparator();
-				this.add(new CopyFileNameAction(editor, true));
-				this.add(new CopyFileNameAction(editor, false));
-				this.add(new OpenFileDirAction(editor));
-			}
-		}
+      if (editor.hasFileLoaded())
+      {
+        this.add(editor.getReloadAction());
+        FileDiscardAction discard = new FileDiscardAction(spanel);
+        discard.removeIcon();
+        this.add(discard);
+        this.addSeparator();
+        this.add(new CopyFileNameAction(editor, true));
+        this.add(new CopyFileNameAction(editor, false));
+        this.add(new OpenFileDirAction(editor));
+      }
+    }
     else
     {
       this.add(new OpenFileAction(aClient));
     }
-	}
+  }
 
 }
