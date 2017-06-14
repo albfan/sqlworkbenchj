@@ -964,8 +964,22 @@ public class ConnectionProfile
     return StringUtil.isBlank(config.getPassword());
   }
 
+  private boolean integratedSecurityEnabled()
+  {
+    if (url == null) return false;
+    
+    if (url.startsWith("jdbc:sqlserver:"))
+    {
+      Pattern p = Pattern.compile(";\\s*integratedSecurity\\s*=\\s*true", Pattern.CASE_INSENSITIVE);
+      Matcher m = p.matcher(url);
+      return m.find();
+    }
+    return false;
+  }
+
   public boolean needsPasswordPrompt()
   {
+    if (integratedSecurityEnabled()) return false;
     return getLoginPassword() == null && getStorePassword() == false;
   }
 
