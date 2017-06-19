@@ -3749,7 +3749,7 @@ public class Settings
 		boolean makeVersionedBackups = getCreateSettingsBackup();
 		if (renameExistingFile || (createBackup && !makeVersionedBackups))
 		{
-			String bck = this.configfile.makeBackup();
+      WbFile bck = this.configfile.makeBackup();
 			LogMgr.logInfo("Settings.saveSettings()", "Created backup of global settings file: " + bck);
 		}
 

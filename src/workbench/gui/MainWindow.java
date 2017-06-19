@@ -35,6 +35,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -3239,7 +3240,7 @@ public class MainWindow
 		}
 
 		String realFilename = getRealWorkspaceFilename(filename);
-		WbFile f = new WbFile(realFilename);
+		WbFile workspaceFile = new WbFile(realFilename);
 
     if (currentWorkspace == null)
     {
@@ -3250,6 +3251,10 @@ public class MainWindow
       currentWorkspace.setFilename(realFilename);
     }
 
+    File backupFile = null;
+    boolean deleteBackup = false;
+    boolean restoreBackup = false;
+
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
 			int maxVersions = Settings.getInstance().getMaxBackupFiles();
@@ -3258,18 +3263,20 @@ public class MainWindow
 			FileVersioner version = new FileVersioner(maxVersions, dir, sep);
 			try
 			{
-				version.createBackup(f);
+				backupFile = version.createBackup(workspaceFile);
 			}
 			catch (IOException e)
 			{
 				LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
 			}
 		}
-		else if (WbManager.getInstance().outOfMemoryOcurred())
+		else
 		{
-			// Sometimes, when an OoM occurrs when saving of the workspace succeeds but the ZIP file is not written correctly.
-			// This tries to prevent the old file from beeing overwritten, just in case...
-			f.makeBackup();
+      // create a backup of the current workspace in order to preserve it
+      // in case something goes wrong when writing the new workspace, at least the last good version can be restored
+			backupFile = workspaceFile.makeBackup();
+      LogMgr.logDebug("MainWindow.saveWorkspace()", "Created temporary backup file: " + backupFile);
+      deleteBackup = true;
 		}
 
 		this.showMacroPopup.saveWorkspaceSettings();
@@ -3311,18 +3318,31 @@ public class MainWindow
         }
       }
       currentWorkspace.save();
-			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + filename + " saved");
+
+			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + workspaceFile + " saved");
+      if (deleteBackup && backupFile != null)
+      {
+        LogMgr.logDebug("MainWindow.saveWorkspace()", "Deleting temporary backup file: " + backupFile.getAbsolutePath());
+        backupFile.delete();
+      }
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace: " + filename, e);
+			LogMgr.logError("MainWindow.saveWorkspace()", "Error saving workspace: " + realFilename, e);
 			WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrSavingWorkspace") + "\n" + ExceptionUtil.getDisplay(e));
+      restoreBackup = true;
 		}
 		finally
 		{
 			FileUtil.closeQuietely(currentWorkspace);
 		}
 
+    if (restoreBackup && backupFile != null)
+    {
+      LogMgr.logWarning("MainWindow.saveWorkspace()", "Restoring the old workspace file from backup: " + backupFile.getAbsolutePath());
+      FileUtil.copySilently(backupFile, workspaceFile);
+    }
+    
 		if (interactive)
 		{
 			this.checkMakeProfileWorkspace();

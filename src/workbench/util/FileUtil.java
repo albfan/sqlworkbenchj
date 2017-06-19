@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +37,7 @@ import java.io.Writer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -293,22 +293,45 @@ public class FileUtil
   }
 
   /**
-   * Copies the source file to the destination file
+   * Copies the source file to the destination file.
    *
    * @param source
    * @param destination
-   * @return the number of bytes copied
+   * 
    * @throws java.io.IOException
    *
-   * @see #copy(java.io.InputStream, java.io.OutputStream)
+   * @see Files#copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...)
    */
-  public static long copy(File source, File destination)
+  public static void copy(File source, File destination)
     throws IOException
   {
-    InputStream in = new FileInputStream(source);
-    OutputStream out = new FileOutputStream(destination);
-    return copy(in, out);
+    if (source == null || destination == null) return;
+    Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
   }
+
+  /**
+   * Copies a file without throwing an exception.
+   *
+   * @param fromFile
+   * @param toFile
+   *
+   * @see #copy(java.io.File, java.io.File)
+   */
+  public static void copySilently(File fromFile, File toFile)
+  {
+    if (fromFile == null || toFile == null) return;
+    if (!fromFile.exists()) return;
+
+    try
+    {
+      copy(fromFile, toFile);
+    }
+    catch (Exception ex)
+    {
+      LogMgr.logError("FileUtil.copySilently()", "Error when copying file: " + fromFile + " to " + toFile, ex);
+    }
+  }
+
 
   /**
    * Copies the content of the InputStream to the OutputStream.
@@ -472,6 +495,7 @@ public class FileUtil
   {
     return fname != null && (fname.indexOf('?') > -1 || fname.indexOf('*') > -1);
   }
+
   /**
    * List all files denoted by the file pattern.
    *

@@ -26,9 +26,6 @@ package workbench.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 
 import workbench.log.LogMgr;
@@ -97,24 +94,25 @@ public class WbFile
   }
 
   /**
-   * Renames this file by adding the current timestamp to the filename.
+   * Creates a backup copy of this file.
+   *
+   * This file is copied to a new file while adding the current timestamp to the filename.
    */
-  public String makeBackup()
+  public WbFile makeBackup()
   {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
     String newname = this.getName() + "." + sdf.format(new java.util.Date());
     WbFile newfile = new WbFile(this.getParent(), newname);
-    Path newPath = newfile.toPath();
-    Path myPath = this.toPath();
     try
     {
-      Files.move(myPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+      FileUtil.copy(this, newfile);
     }
-    catch (IOException io)
+    catch (Exception io)
     {
-      LogMgr.logWarning("WbFile.makeBackup()", "Could not create backup: " + newfile.getFullPath() + " for " + this.getFullPath());
+      LogMgr.logWarning("WbFile.makeBackup()", "Could not copy " + this.getFullPath() + " to " + newfile.getFullPath());
+      return null;
     }
-    return newfile.getFullPath();
+    return newfile;
   }
 
   /**

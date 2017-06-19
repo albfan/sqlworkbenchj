@@ -248,18 +248,28 @@ public class WbSwingUtilities
 
   public static Rectangle getVirtualBounds()
   {
-    Rectangle virtualBounds = new Rectangle();
-    GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] devices = env.getScreenDevices();
-    for (GraphicsDevice gd : devices)
+    Rectangle result = null;
+    if (Settings.getInstance().getBoolProperty("workbench.gui.screensize.check.monitors", true))
     {
-      GraphicsConfiguration[] configs = gd.getConfigurations();
-      for (GraphicsConfiguration gc : configs)
+      Rectangle virtualBounds = new Rectangle();
+      GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      GraphicsDevice[] devices = env.getScreenDevices();
+      for (GraphicsDevice gd : devices)
       {
-        virtualBounds = virtualBounds.union(gc.getBounds());
+        GraphicsConfiguration[] configs = gd.getConfigurations();
+        for (GraphicsConfiguration gc : configs)
+        {
+          virtualBounds = virtualBounds.union(gc.getBounds());
+        }
       }
+      result = virtualBounds;
     }
-    return virtualBounds;
+    else
+    {
+      Dimension screenSize = getScreenSize();
+      result = new Rectangle(screenSize);
+    }
+    return result;
   }
 
 	public static boolean isFullyVisible(int x, int y, Dimension size)
@@ -327,8 +337,6 @@ public class WbSwingUtilities
   public static Dimension getScreenSize(Insets insets)
   {
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsConfiguration conf = ge.getDefaultScreenDevice().getDefaultConfiguration();
 
     screen.width -= (insets.left + insets.right);
     screen.height -= (insets.bottom + insets.top);
