@@ -64,7 +64,7 @@ public interface MainPanel
 	void dispose();
 	void panelSelected();
 	void readFromWorkspace(WbWorkspace w, int index) throws IOException;
-	void saveToWorkspace(WbWorkspace w, int index) throws IOException;
+	void storeInWorkspace(WbWorkspace w, int index);
 	boolean canClosePanel(boolean checkTransactions);
 	boolean isModified();
 	void reset();

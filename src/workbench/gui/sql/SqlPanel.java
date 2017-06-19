@@ -1476,8 +1476,7 @@ public class SqlPanel
 	}
 
 	@Override
-	public void saveToWorkspace(WbWorkspace w, int index)
-		throws IOException
+	public void storeInWorkspace(WbWorkspace w, int index)
 	{
 		PanelWorkspaceHandler handler = new PanelWorkspaceHandler(this);
 		handler.saveToWorkspace(w, index);

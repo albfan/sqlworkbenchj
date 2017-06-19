@@ -121,7 +121,6 @@ public class PanelWorkspaceHandler
 	}
 
 	public void saveToWorkspace(WbWorkspace w, int index)
-		throws IOException
 	{
 		if (!client.hasFileLoaded() ||
 			  client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() != ExternalFileHandling.none)

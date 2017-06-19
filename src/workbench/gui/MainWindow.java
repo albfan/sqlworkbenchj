@@ -3315,7 +3315,7 @@ public class MainWindow
         Optional<MainPanel> p = getSqlPanel(i);
         if (p.isPresent())
         {
-          p.get().saveToWorkspace(currentWorkspace, i);
+          p.get().storeInWorkspace(currentWorkspace, i);
         }
       }
 

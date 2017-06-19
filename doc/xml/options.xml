@@ -687,33 +687,13 @@
 			<para>
 				If this option is enabled, the current workspace is saved each time you run
 				a SQL statement.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="options-backup-wksp">
-			<title>Create workspace backup</title><blockquote>
-			<para>
-				If this option is enabled the current workspace file will be backed up, before
-				saving the new workspace. You can keep multiple versions of the workspace by
-				supplying a number in the "Max. Backups" input field. If a value > 1 is
-				entered, saving the workspace will create a new "version" of the backup file.
-				The versions will have the version number appended (e.g. <literal>testdata.wksp.1</literal>,
-				<literal>testdata.wksp.2</literal> and so on). The most recent version is the one with the
-				highest number.
-			</para>
-		</blockquote></simplesect>
-
-		<simplesect id="options-wksp-bck-dir">
-			<title>Workspace backup directory</title><blockquote>
-			<para>
-				By default the backups for the workspaces are stored in the same directory
-				as the workspace file itself. If you want to keep the (versioned) backups in a
-				separate directory, you can specify it here.
-			</para>
-			<para>
-				If you specify a relative directory, it will be relative to the
-				<link linkend="config-dir">config directory</link>.
-			</para>
+      </para>
+      <important>
+        <para>
+          If automatic backups of the workspace is enabled, this means
+          that a new version of the workspace file is created each time a statement is executed!
+        </para>
+      </important>
 		</blockquote></simplesect>
 
 		<simplesect id="options-wksp-external-files">
@@ -769,6 +749,74 @@
 				</tgroup>
 			</informaltable>
 
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-backup">
+		<title>Backup options</title>
+    <para>
+      If an automatic backup is enabled for a file, then each time a file is saved, a new version of the file will be created in the backup directory if
+      <link linkend="options-backup-max-versions">Number of backups</link> is greater than 1.
+    </para>
+    <para>
+      A file version will be created by appending a version number to the file name (e.g. <literal>testdata.wksp.1</literal>,
+      <literal>testdata.wksp.2</literal> and so on). The most recent version is the one with the highest number.
+    </para>
+
+		<simplesect id="options-backup-wksp">
+			<title>Create backups of workspace files</title><blockquote>
+			<para>
+        If this option is enabled the current <link linkend="workspace-usage">workspace file</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-settings">
+			<title>Create backups of the settings file</title><blockquote>
+			<para>
+				If this option is enabled, the settings file will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-macros">
+			<title>Create backups of the macro file</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="macros">macro definitions</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-profiles">
+			<title>Create backups of the connection profiles</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="profiles">connection profiles</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-drivers">
+			<title>Create backups of the driver definitions</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="jdbc-setup">JDBC drivers</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-max-versions">
+			<title>Number of backups</title><blockquote>
+			<para>
+        This option defines the maximum number of version to keep if backups are enabled.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-dir">
+			<title>Backup directory</title><blockquote>
+			<para>
+				By default the backups for the workspaces are stored in the same directory
+				as the workspace file itself. If you want to keep the (versioned) backups in a
+				separate directory, you can specify it here.
+			</para>
+			<para>
+				If you specify a relative directory, it will be relative to the
+				<link linkend="config-dir">config directory</link>.
+			</para>
 		</blockquote></simplesect>
 
 	</section>

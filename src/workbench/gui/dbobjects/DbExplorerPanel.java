@@ -1068,8 +1068,7 @@ public class DbExplorerPanel
 	}
 
 	@Override
-	public void saveToWorkspace(WbWorkspace w, int index)
-		throws IOException
+	public void storeInWorkspace(WbWorkspace w, int index)
 	{
 		Object s = this.schemaSelector.getSelectedItem();
 		WbProperties p = w.getSettings();
