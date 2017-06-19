@@ -688,12 +688,16 @@
 				If this option is enabled, the current workspace is saved each time you run
 				a SQL statement.
       </para>
-      <important>
-        <para>
-          If automatic backups of the workspace is enabled, this means
-          that a new version of the workspace file is created each time a statement is executed!
-        </para>
-      </important>
+			<para>
+				If this option is disabled, the workspace is only saved when the application is closed, when a
+        a different workspace is loaded (either manually or by connecting to a different connection profile)
+        or when the workspace is manually saved through the menu using <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace</guimenuitem></menuchoice>
+      </para>
+      <para>
+        If automatic backups of the workspace is enabled, this means that a new version of the workspace file is created <emphasis role="bold">each time</emphasis>
+        a statement is executed. In that case the <link linkend="">number of backups</link> should be high enough so that also substantial changes
+        to the workspace are still kept in the history.
+      </para>
 		</blockquote></simplesect>
 
 		<simplesect id="options-wksp-external-files">
