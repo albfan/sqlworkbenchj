@@ -1092,23 +1092,23 @@ public class MainWindow
 	 * @param toolKey a (unique) key for the tool. It must not contain spaces or special characters
 	 * @return the properties, never null
 	 */
-	public WbProperties getToolProperties(String toolKey)
-	{
+  public WbProperties getToolProperties(String toolKey)
+  {
     if (currentWorkspace == null) return null;
 
-		synchronized (workspaceLock)
-		{
-		   Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
+    synchronized (workspaceLock)
+    {
+      Map<String, WbProperties> toolProperties = currentWorkspace.getToolProperties();
 
-			WbProperties props = toolProperties.get(toolKey);
-			if (props == null)
-			{
-				props = new WbProperties(1);
-				toolProperties.put(toolKey, props);
-			}
-			return props;
-		}
-	}
+      WbProperties props = toolProperties.get(toolKey);
+      if (props == null)
+      {
+        props = new WbProperties(1);
+        toolProperties.put(toolKey, props);
+      }
+      return props;
+    }
+  }
 
 	/**
 	 * Return a list of titles for all sql panels.
@@ -3249,6 +3249,7 @@ public class MainWindow
     else
     {
       currentWorkspace.setFilename(realFilename);
+      currentWorkspace.prepareForSaving();
     }
 
     File backupFile = null;
@@ -3306,7 +3307,7 @@ public class MainWindow
 					if (!p.canClosePanel(first)) return false;
 				}
 			}
-      currentWorkspace.openForWriting();
+
 			currentWorkspace.setSelectedTab(sqlTab.getSelectedIndex());
 			currentWorkspace.setEntryCount(count);
       for (int i = 0; i < count; i++)
@@ -3317,6 +3318,8 @@ public class MainWindow
           p.get().saveToWorkspace(currentWorkspace, i);
         }
       }
+
+      currentWorkspace.openForWriting();
       currentWorkspace.save();
 
 			LogMgr.logDebug("MainWindow.saveWorkspace()", "Workspace " + workspaceFile + " saved");
@@ -3342,7 +3345,7 @@ public class MainWindow
       LogMgr.logWarning("MainWindow.saveWorkspace()", "Restoring the old workspace file from backup: " + backupFile.getAbsolutePath());
       FileUtil.copySilently(backupFile, workspaceFile);
     }
-    
+
 		if (interactive)
 		{
 			this.checkMakeProfileWorkspace();
