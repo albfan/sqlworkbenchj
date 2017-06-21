@@ -71,6 +71,7 @@ public class DataStoreTableModel
 	private SortDefinition sortDefinition = new SortDefinition();
 
 	private boolean allowEditing = true;
+  private boolean allowEditMode = true;
 
 	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
@@ -498,7 +499,7 @@ public class DataStoreTableModel
     // The cell editors will refuse typing if the table is set to read only
     // and setValueAt() will ignore any change to the data if this model
     // is set to read only
-    return true;
+    return allowEditMode || SqlUtil.isBlobType(getColumnType(column));
 	}
 
 	/**
@@ -537,12 +538,18 @@ public class DataStoreTableModel
 	public void setAllowEditing(boolean aFlag)
 	{
 		this.allowEditing = aFlag;
+    this.allowEditMode = aFlag;
 	}
 
 	public boolean getAllowEditing()
 	{
 		return allowEditing;
 	}
+
+  public void setAllowEditMode(boolean flag)
+  {
+    this.allowEditMode = flag;
+  }
 
 	/**
 	 * Clears the filter that is currently defined on the underlying

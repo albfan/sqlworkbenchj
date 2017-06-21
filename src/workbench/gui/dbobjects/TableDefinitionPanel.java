@@ -151,8 +151,8 @@ public class TableDefinitionPanel
 		this.tableDefinition.getExportAction().setEnabled(true);
 		this.tableDefinition.setRendererSetup(RendererSetup.getBaseSetup());
 
-		tableDefinition.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
-		Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_ALTER_TABLE);
+    updateReadOnlyState();
+    Settings.getInstance().addPropertyChangeListener(this, DbExplorerSettings.PROP_ALLOW_ALTER_TABLE);
 
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
@@ -744,12 +744,18 @@ public class TableDefinitionPanel
 		}
 	}
 
+  private void updateReadOnlyState()
+  {
+    tableDefinition.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
+    tableDefinition.setAllowEditMode(true);
+  }
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(DbExplorerSettings.PROP_ALLOW_ALTER_TABLE))
 		{
-			tableDefinition.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
+      updateReadOnlyState();
 		}
 	}
 }

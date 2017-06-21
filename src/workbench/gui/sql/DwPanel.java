@@ -1196,6 +1196,7 @@ public class DwPanel
 		}
 
 		dataTable.setReadOnly(this.readOnly);
+		dataTable.setAllowEditMode(true);
 
 		if (this.selectKeys != null) this.selectKeys.setEnabled(hasResult);
 		this.dataTable.checkCopyActions();

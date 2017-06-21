@@ -418,6 +418,7 @@ public class TableListPanel
 		tableList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("tablelist"));
 		tableList.setListSelectionControl(this);
 		tableList.setReadOnly(!DbExplorerSettings.allowAlterInDbExplorer());
+		tableList.setAllowEditMode(true);
     dependencyPanel = new ObjectDependencyPanel();
 		showObjectDefinitionPanels(false);
 	}

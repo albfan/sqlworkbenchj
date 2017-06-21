@@ -504,6 +504,12 @@ public class WbTable
 		return zoomer;
 	}
 
+  public void setAllowEditMode(boolean flag)
+  {
+		DataStoreTableModel model = getDataStoreTableModel();
+		if (model != null) model.setAllowEditMode(flag);
+  }
+  
 	public void setReadOnly(boolean flag)
 	{
 		readOnly = flag;
