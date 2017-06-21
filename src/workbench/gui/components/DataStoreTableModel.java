@@ -232,6 +232,7 @@ public class DataStoreTableModel
 	{
 		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
+    if (!allowEditing) return;
 
 		int realColumn = column - this.columnStartIndex;
 
@@ -488,23 +489,16 @@ public class DataStoreTableModel
 	@Override
 	public boolean isCellEditable(int row, int column)
 	{
-		if (!this.noneditableColumns.isEmpty())
-		{
-			return (this.allowEditing && !noneditableColumns.contains(column));
-		}
-		else if (this.columnStartIndex > 0 && column < this.columnStartIndex)
+    if (noneditableColumns.contains(column) || (this.columnStartIndex > 0 && column < this.columnStartIndex))
 		{
 			return false;
 		}
-		else
-		{
-			// For BLOB columns the BlobHandler and BlobInfoDialog will
-			// check if this model allows editing.
-			// otherwise the blob dialog cannot be opened. Apparently
-			// JTable does not even route the clicked event to the button
-			// in the BlobColumnRenderer if the column is not editable.
-			return this.allowEditing || SqlUtil.isBlobType(getColumnType(column));
-		}
+
+    // Always allow initiating the edit mode.
+    // The cell editors will refuse typing if the table is set to read only
+    // and setValueAt() will ignore any change to the data if this model
+    // is set to read only
+    return true;
 	}
 
 	/**
