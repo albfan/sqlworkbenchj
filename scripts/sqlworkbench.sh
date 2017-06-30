@@ -34,4 +34,4 @@ cp=$cp:$SCRIPT_PATH/ext/*
 #   -Djava.awt.headless=true
 # might be needed for some combinations of OS and JDK
 
-exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Dawt.useSystemAAFontSettings=on -Xmx1024m -cp $cp workbench.WbStarter "$@"
+exec $JAVACMD -Dvisualvm.display.name=SQLWorkbench -Dawt.useSystemAAFontSettings=on -cp $cp workbench.WbStarter "$@"

@@ -51,7 +51,7 @@ goto :eof
 title SQL Workbench/J
 
 "%JAVA_BINPATH%java.exe" -Dvisualvm.display.name=SQLWorkbench ^
-                         -Xmx512m -cp %cp% workbench.console.SQLConsole %*
+                         -cp %cp% workbench.console.SQLConsole %*
 
 goto :eof
 

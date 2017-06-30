@@ -498,16 +498,14 @@ public abstract class BaseAnalyzer
 	protected void retrieveSchemas()
 	{
 		List<String> schemas = dbConnection.getMetadata().getSchemas();
-		this.elements = new ArrayList(schemas.size());
-		this.elements.addAll(schemas);
+		this.elements = new ArrayList(schemas);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void retrieveCatalogs()
 	{
-		List<String> catalogs = dbConnection.getMetadata().getCatalogs();
-		this.elements = new ArrayList(catalogs.size());
-		this.elements.addAll(catalogs);
+		List<String> catalogs = dbConnection.getMetadata().getAllCatalogs();
+		this.elements = new ArrayList(catalogs);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -566,8 +564,7 @@ public abstract class BaseAnalyzer
 		{
 			this.title = schemaForTableList + ".*";
 		}
-		this.elements = new ArrayList(tables.size());
-		this.elements.addAll(tables);
+		this.elements = new ArrayList(tables);
 	}
 
 
@@ -584,8 +581,7 @@ public abstract class BaseAnalyzer
 		{
 			this.title = schemaForTableList + ".*";
 		}
-		this.elements = new ArrayList(tables.size());
-		this.elements.addAll(tables);
+		this.elements = new ArrayList(tables);
 	}
 
 	@SuppressWarnings("unchecked")

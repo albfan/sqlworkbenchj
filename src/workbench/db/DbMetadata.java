@@ -79,6 +79,7 @@ import workbench.db.postgres.PostgresObjectListCleaner;
 import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.db.postgres.PostgresTypeReader;
+import workbench.db.postgres.PostgresUtil;
 import workbench.db.progress.OpenEdgeObjectListEnhancer;
 import workbench.db.progress.OpenEdgeSchemaInformationReader;
 import workbench.db.progress.OpenEdgeSequenceReader;
@@ -547,7 +548,7 @@ public class DbMetadata
   {
     return cleanupObjectList;
   }
-  
+
   public void setCleanupObjectList(boolean flag)
   {
     this.cleanupObjectList = flag;
@@ -2621,6 +2622,15 @@ public class DbMetadata
    */
   public List<String> getCatalogs()
   {
+    return getCatalogInformation(null);
+  }
+
+  public List<String> getAllCatalogs()
+  {
+    if (this.isPostgres)
+    {
+      return PostgresUtil.getAllDatabases(dbConnection);
+    }
     return getCatalogInformation(null);
   }
 

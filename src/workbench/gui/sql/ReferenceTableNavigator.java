@@ -422,6 +422,7 @@ public class ReferenceTableNavigator
 
 		Map<String, String> columns = node.getColumns();
 		DataStore ds = this.source.getDataStore();
+    ColumnIdentifier[] dataColumns = ds.getColumns();
 		for (int i = 0; i < rowCount; i++)
 		{
 			List<ColumnData> rowData = new ArrayList<>();
@@ -431,7 +432,9 @@ public class ReferenceTableNavigator
 				if (colIndex > -1)
 				{
 					Object data = ds.getValue(selectedRows[i], colIndex);
-					ColumnData cdata = new ColumnData(data, new ColumnIdentifier(col));
+          // we need a fully populated ColumnIdentifier in order to be able
+          // to properly generate SQL statements later
+					ColumnData cdata = new ColumnData(data, dataColumns[colIndex]);
 					rowData.add(cdata);
 				}
 			}

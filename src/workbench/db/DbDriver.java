@@ -40,10 +40,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import workbench.db.postgres.PostgresUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+
+import workbench.db.postgres.PostgresUtil;
+
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
@@ -182,7 +184,7 @@ public class DbDriver
 
     // we don not need to check the jar file's directory.
     // That will be added anyway
-    
+
     if (authDLL.exists())
     {
       return authDir.getFullPath();
@@ -677,6 +679,12 @@ public class DbDriver
       appNameProperty = "APPLICATIONNAME";
     }
 
+    if (appNameProperty == null)
+    {
+      String dbid = JdbcUtils.getDbIdFromUrl(url);
+      appNameProperty = Settings.getInstance().getProperty("workbench.db." + dbid + ".connection.property.appname", null);
+    }
+    
     if (appNameProperty != null && !props.containsKey(appNameProperty))
     {
       props.put(appNameProperty, prgName);

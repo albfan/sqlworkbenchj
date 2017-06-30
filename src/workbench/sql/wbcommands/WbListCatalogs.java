@@ -29,16 +29,16 @@ import java.util.List;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
-import workbench.resource.ResourceMgr;
+
+import workbench.db.postgres.PostgresUtil;
 
 import workbench.storage.DataStore;
 
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -85,7 +85,7 @@ public class WbListCatalogs
 		{
       cmdLine.parse(getCommandLine(sql));
       boolean verbose = cmdLine.getBoolean(CommonArgs.ARG_VERBOSE, false);
-			ds = listPgDatabases(verbose);
+			ds = PostgresUtil.listPgDatabases(currentConnection, verbose);
 		}
 		else
 		{
@@ -110,31 +110,6 @@ public class WbListCatalogs
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
-	}
-
-	private DataStore listPgDatabases(boolean verbose)
-	{
-		String name = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
-    String size = verbose ?
-      "       CASE WHEN pg_catalog.has_database_privilege(d.datname, 'CONNECT')\n" +
-      "            THEN pg_catalog.pg_size_pretty(pg_catalog.pg_database_size(d.datname))\n" +
-      "            ELSE 'No Access'\n" +
-      "       END as \"Size\", \n" : "";
-		String sql =
-			"SELECT d.datname as \"" + name + "\",\n" +
-			"       pg_catalog.pg_get_userbyid(d.datdba) as \"Owner\",\n" +
-			"       pg_catalog.pg_encoding_to_char(d.encoding) as \"Encoding\",\n" +
-			"       d.datcollate as \"Collate\",\n" +
-			"       d.datctype as \"Ctype\",\n" +
-			"       pg_catalog.array_to_string(d.datacl, E'\\n') AS \"Access privileges\", \n" +
-      size +
-			"       pg_catalog.shobj_description(d.oid, 'pg_database') as \"Description\" \n" +
-			"FROM pg_catalog.pg_database d\n" +
-			"ORDER BY 1";
-		DataStore ds = SqlUtil.getResult(currentConnection, sql, true);
-		ds.setGeneratingSql(sql);
-		ds.setResultName(ResourceMgr.getString("TxtDbList"));
-		return ds;
 	}
 
 	@Override

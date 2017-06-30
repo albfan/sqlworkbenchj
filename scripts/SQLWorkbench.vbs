@@ -26,7 +26,7 @@ end if
 
 jarpath = wbpath & "sqlworkbench.jar"
 
-javaCmd = chr(34) & javaPath & chr(34) & " -Xmx512m -jar " & chr(34) & jarpath & chr(34)
+javaCmd = chr(34) & javaPath & chr(34) & " " & chr(34) & jarpath & chr(34)
 
 if (args.length > 0) then
   for each arg in args
