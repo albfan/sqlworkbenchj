@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
@@ -98,6 +99,7 @@ public abstract class RowDataConverter
   protected SimpleDateFormat defaultTimeFormatter;
   protected WbDateFormatter defaultDateFormatter;
   protected WbNumberFormatter defaultNumberFormatter;
+  protected WbNumberFormatter defaultIntegerFormatter;
   protected WbDateFormatter defaultTimestampFormatter;
   protected boolean needsUpdateTable;
   protected OutputFactory factory;
@@ -746,6 +748,11 @@ public abstract class RowDataConverter
     this.defaultNumberFormatter = formatter;
   }
 
+  public void setDefaultIntegerFormatter(WbNumberFormatter formatter)
+  {
+    this.defaultIntegerFormatter = formatter;
+  }
+
   public void setDefaultDateFormat(String format)
   {
     if (StringUtil.isEmptyString(format)) return;
@@ -897,9 +904,10 @@ public abstract class RowDataConverter
       {
         result = this.defaultDateFormatter.formatUtilDate((java.util.Date)value);
       }
-      else if (value instanceof Number && this.defaultNumberFormatter != null)
+      else if (value instanceof Number && getFormatter(value) != null)
       {
-        result = this.defaultNumberFormatter.format((Number)value);
+        WbNumberFormatter formatter = getFormatter(value);
+        result = formatter.format((Number)value);
       }
       else if (value instanceof Clob)
       {
@@ -934,6 +942,14 @@ public abstract class RowDataConverter
     }
   }
 
+  private WbNumberFormatter getFormatter(Object value)
+  {
+    if (defaultIntegerFormatter != null && (value instanceof Integer || value instanceof BigInteger || value instanceof Long))
+    {
+      return defaultIntegerFormatter;
+    }
+    return defaultNumberFormatter;
+  }
 
   protected void writeEscapedXML(StringBuilder out, String s, boolean keepCR)
   {

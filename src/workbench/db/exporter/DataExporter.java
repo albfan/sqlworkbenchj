@@ -33,6 +33,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,6 +154,7 @@ public class DataExporter
   private WbDateFormatter dateTimeFormatter;
 
   private WbNumberFormatter numberFormatter;
+  private WbNumberFormatter integerFormatter;
   private boolean append;
   private int targetSheetIndex; // for XLS and XLSX only
   private String targetSheetName; // for XLS and XLSX only
@@ -1081,6 +1085,30 @@ public class DataExporter
     }
   }
 
+  public void setIntegerFormatString(String format, String decimalSymbol, String decimalGroup)
+  {
+    if (StringUtil.isNonBlank(format))
+    {
+      integerFormatter = createFormatter(format, decimalSymbol, decimalGroup);
+    }
+  }
+
+  public void setDecimalFormatString(String format, String decimalSymbol, String decimalGroup)
+  {
+    if (StringUtil.isNonBlank(format))
+    {
+      numberFormatter = createFormatter(format, decimalSymbol, decimalGroup);
+    }
+  }
+
+  public WbNumberFormatter createFormatter(String format, String decimalSymbol, String decimalGroup)
+  {
+    if (decimalSymbol == null) decimalSymbol = Settings.getInstance().getDecimalSymbol();
+    if (decimalGroup == null) decimalGroup = Settings.getInstance().getDecimalGroupCharacter();
+
+    return new WbNumberFormatter(format, decimalSymbol.charAt(0), decimalGroup.charAt(0));
+  }
+
   public void setDecimalDigits(int digits, String symbol, boolean fixedLength)
   {
     if (StringUtil.isNonBlank(symbol))
@@ -1089,6 +1117,11 @@ public class DataExporter
     }
   }
 
+  public WbNumberFormatter getIntegerFormatter()
+  {
+    return integerFormatter;
+  }
+  
   public WbNumberFormatter getDecimalFormatter()
   {
     return this.numberFormatter;

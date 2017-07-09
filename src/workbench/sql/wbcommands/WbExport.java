@@ -125,6 +125,9 @@ public class WbExport
 	public static final String ARG_CREATEFULL_HTML_PAGE = "createFullHTML";
 	public static final String ARG_DATEFORMAT = "dateFormat";
 	public static final String ARG_DECIMAL_SYMBOL = "decimal";
+	public static final String ARG_DECIMAL_FORMAT = "decimalFormat";
+	public static final String ARG_DECIMAL_GROUP = "decimalGroup";
+	public static final String ARG_INTEGER_FORMAT = "integerFormat";
 	public static final String ARG_MAX_DIGITS = "maxDigits";
 	public static final String ARG_FIXED_DIGITS = "fixedDigits";
 	public static final String ARG_ESCAPETEXT = "escapeText";
@@ -185,6 +188,8 @@ public class WbExport
     cmdLine.addArgument(CommonArgs.ARG_LOCALE);
 		cmdLine.addArgument(ARG_TIMEFORMAT);
 		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
+		cmdLine.addArgument(ARG_DECIMAL_FORMAT);
+		cmdLine.addArgument(ARG_INTEGER_FORMAT);
 		cmdLine.addArgument(ARG_FIXED_DIGITS);
 		cmdLine.addArgument(ARG_MAX_DIGITS);
 		cmdLine.addArgument(ARG_CHARFUNC);
@@ -491,20 +496,32 @@ public class WbExport
 		format = cmdLine.getValue(ARG_TIMEFORMAT);
 		if (format != null) exporter.setTimeFormat(format);
 
-		String decimal = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
-    int digits = cmdLine.getIntValue(ARG_MAX_DIGITS, 0);
-    boolean fixedDigits = false;
-    if (cmdLine.isArgPresent(ARG_MAX_DIGITS))
+    String decimalFormat = cmdLine.getValue(ARG_DECIMAL_FORMAT);
+    String decimal = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
+    String group = cmdLine.getValue(ARG_DECIMAL_GROUP);
+
+    if (StringUtil.isNonBlank(decimalFormat))
     {
-      fixedDigits = false;
+      exporter.setDecimalFormatString(decimalFormat, decimal, group);
     }
-    else if (cmdLine.isArgPresent(ARG_FIXED_DIGITS))
+    else
     {
-      digits = cmdLine.getIntValue(ARG_FIXED_DIGITS, -1);
-      fixedDigits = true;
+      int digits = cmdLine.getIntValue(ARG_MAX_DIGITS, 0);
+      boolean fixedDigits = false;
+      if (cmdLine.isArgPresent(ARG_MAX_DIGITS))
+      {
+        fixedDigits = false;
+      }
+      else if (cmdLine.isArgPresent(ARG_FIXED_DIGITS))
+      {
+        digits = cmdLine.getIntValue(ARG_FIXED_DIGITS, -1);
+        fixedDigits = true;
+      }
+      exporter.setDecimalDigits(digits, decimal == null ? "." : decimal, fixedDigits);
     }
 
-		exporter.setDecimalDigits(digits, decimal == null ? "." : decimal, fixedDigits);
+    String integerFormat = cmdLine.getValue(ARG_INTEGER_FORMAT);
+    exporter.setIntegerFormatString(integerFormat, decimal, group);
 
 		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
 
