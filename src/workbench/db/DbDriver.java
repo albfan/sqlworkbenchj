@@ -527,7 +527,8 @@ public class DbDriver
           PostgresUtil.setApplicationName(conn, getProgramName() + " (" + id + ")");
         }
 
-        if (url.startsWith("jdbc:sap"))
+        // Set client info for HANA
+        if (url.startsWith("jdbc:sap:") && doSetAppName(url))
         {
           conn.setClientInfo("APPLICATION", StringUtil.coalesce(getAppName(), ResourceMgr.TXT_PRODUCT_NAME));
           conn.setClientInfo("APPLICATIONSOURCE", id);
@@ -684,7 +685,7 @@ public class DbDriver
       String dbid = JdbcUtils.getDbIdFromUrl(url);
       appNameProperty = Settings.getInstance().getProperty("workbench.db." + dbid + ".connection.property.appname", null);
     }
-    
+
     if (appNameProperty != null && !props.containsKey(appNameProperty))
     {
       props.put(appNameProperty, prgName);

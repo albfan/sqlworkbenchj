@@ -42,4 +42,11 @@ public class JdbcUtilsTest
     assertEquals("jdbc:jtds:", JdbcUtils.extractDBType("jdbc:jtds:sqlserver://localhost/foobar"));
   }
 
+  @Test
+  public void testExtractDBID()
+  {
+    assertEquals("postgresql", JdbcUtils.getDbIdFromUrl("jdbc:postgresql://localhost/postgres"));
+    assertEquals("hdb", JdbcUtils.getDbIdFromUrl("jdbc:sap://centos01:30015/"));
+    assertEquals("sapdb", JdbcUtils.getDbIdFromUrl("jdbc:sapdb://127.0.0.1/dummy"));
+  }
 }

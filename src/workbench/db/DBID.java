@@ -46,6 +46,7 @@ public enum DBID
   Cubrid("cubrid"),
   Informix("informix_dynamic_server"),
   Exasol("exasolution"),
+  SAP_DB("sap_db"),
   Unknown("_$unknown$_");
 
   private String dbid;

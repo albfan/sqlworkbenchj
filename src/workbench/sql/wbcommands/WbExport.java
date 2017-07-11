@@ -189,6 +189,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_TIMEFORMAT);
 		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
 		cmdLine.addArgument(ARG_DECIMAL_FORMAT);
+		cmdLine.addArgument(ARG_DECIMAL_GROUP);
 		cmdLine.addArgument(ARG_INTEGER_FORMAT);
 		cmdLine.addArgument(ARG_FIXED_DIGITS);
 		cmdLine.addArgument(ARG_MAX_DIGITS);

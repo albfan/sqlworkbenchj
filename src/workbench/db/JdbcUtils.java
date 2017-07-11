@@ -267,7 +267,8 @@ public class JdbcUtils
     if (url.startsWith("jdbc:h2")) return DBID.H2.getId();
     if (url.startsWith("jdbc:derby")) return DBID.Derby.getId();
     if (url.startsWith("jdbc:hsqldb")) return DBID.HSQLDB.getId();
-    if (url.startsWith("jdbc:sap")) return DBID.HANA.getId();
+    if (url.startsWith("jdbc:sapdb:")) return DBID.SAP_DB.getId();
+    if (url.startsWith("jdbc:sap:")) return DBID.HANA.getId();
     if (url.startsWith("jdbc:datadirect:openedge")) return DBID.OPENEDGE.getId();
     if (url.startsWith("jdbc:db2")) return DBID.DB2_LUW.getId();
     if (url.startsWith("jdbc:informix")) return DBID.Informix.getId();
