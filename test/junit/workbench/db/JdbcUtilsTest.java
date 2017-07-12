@@ -47,6 +47,6 @@ public class JdbcUtilsTest
   {
     assertEquals("postgresql", JdbcUtils.getDbIdFromUrl("jdbc:postgresql://localhost/postgres"));
     assertEquals("hdb", JdbcUtils.getDbIdFromUrl("jdbc:sap://centos01:30015/"));
-    assertEquals("sapdb", JdbcUtils.getDbIdFromUrl("jdbc:sapdb://127.0.0.1/dummy"));
+    assertEquals("sap_db", JdbcUtils.getDbIdFromUrl("jdbc:sapdb://127.0.0.1/dummy"));
   }
 }
