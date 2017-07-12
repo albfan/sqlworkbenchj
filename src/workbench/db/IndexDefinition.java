@@ -54,6 +54,7 @@ public class IndexDefinition
   private String indexExpression;
   private String displayName;
   private String status;
+  private String filterExpression;
   private ObjectSourceOptions sourceOptions = new ObjectSourceOptions();
 
   // For Oracle, Postgres
@@ -170,6 +171,16 @@ public class IndexDefinition
   public void setValid(Boolean status)
   {
     this.validated = status;
+  }
+
+  public String getFilterExpression()
+  {
+    return filterExpression;
+  }
+
+  public void setFilterExpression(String expression)
+  {
+    this.filterExpression = expression;
   }
 
   @Override

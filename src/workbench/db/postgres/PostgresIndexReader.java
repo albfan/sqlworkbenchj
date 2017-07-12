@@ -272,7 +272,8 @@ public class PostgresIndexReader
       "SELECT i.relname AS indexname, \n" +
       "       coalesce(t.spcname, ts.default_tablespace) as tablespace, \n" +
       "       obj_description(i.oid) as remarks, \n" +
-      "       am.amname as index_type \n" +
+      "       am.amname as index_type, \n" +
+      "       pg_get_expr(x.indpred, 'pg_index'::regclass, true) as filter_expression \n" +
       "FROM pg_index x \n" +
       "  JOIN pg_class i ON i.oid = x.indexrelid \n" +
       "  JOIN pg_class c ON c.oid = x.indrelid \n" +
@@ -323,6 +324,7 @@ public class PostgresIndexReader
         String tblSpace = rs.getString(2);
         String remarks = rs.getString(3);
         String type = rs.getString(4);
+        String filter = rs.getString(5);
         IndexDefinition idx = findIndexByName(indexDefs, idxName);
         if (StringUtil.isNonEmpty(tblSpace))
         {
@@ -330,6 +332,7 @@ public class PostgresIndexReader
         }
         idx.setComment(remarks);
         idx.setIndexType(type);
+        idx.setFilterExpression(filter);
       }
       con.releaseSavepoint(sp);
     }

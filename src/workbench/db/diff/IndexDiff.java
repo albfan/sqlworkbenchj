@@ -47,6 +47,7 @@ public class IndexDiff
   public static final String TAG_RENAME_INDEX = "rename-index";
   public static final String TAG_ADD_INDEX = "add-index";
   public static final String TAG_DROP_INDEX = "drop-index";
+  public static final String TAG_FILTER_EXPRESSION = "filter-expression";
 
   private Collection<IndexDefinition> reference = Collections.emptyList();
   private Collection<IndexDefinition> target = Collections.emptyList();
@@ -96,8 +97,9 @@ public class IndexDiff
         boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
         boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
         boolean nameDiff = !(ind.getName().equalsIgnoreCase(refIndex.getName()));
+        boolean filterDiff = !(StringUtil.equalStringOrEmpty(ind.getFilterExpression(), refIndex.getFilterExpression(), false));
 
-        if (uniqueDiff || pkDiff || typeDiff || nameDiff)
+        if (uniqueDiff || pkDiff || typeDiff || nameDiff || filterDiff)
         {
           writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
           result.append('\n');
@@ -141,6 +143,17 @@ public class IndexDiff
             TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getIndexType());
             writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_TYPE, false, oldAtt, newAtt);
             result.append("/>\n");
+          }
+
+          if (filterDiff)
+          {
+            writer.appendOpenTag(result, changedIndent, TAG_FILTER_EXPRESSION);
+            result.append('\n');
+            StringBuilder filterIndent = new StringBuilder(changedIndent);
+            filterIndent.append("  ");
+            writer.appendTag(result, filterIndent, "target-expression", ind.getFilterExpression());
+            writer.appendTag(result, filterIndent, "reference-expression", refIndex.getFilterExpression());
+            writer.appendCloseTag(result, changedIndent, TAG_FILTER_EXPRESSION);
           }
 
           writer.appendCloseTag(result, idxIndent, "modified");
