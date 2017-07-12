@@ -40,13 +40,14 @@ public class JdbcUtilsTest
   {
     assertEquals("jdbc:postgresql:", JdbcUtils.extractDBType("jdbc:postgresql://localhost/postgres"));
     assertEquals("jdbc:jtds:", JdbcUtils.extractDBType("jdbc:jtds:sqlserver://localhost/foobar"));
+    assertEquals("jdbc:oracle:", JdbcUtils.extractDBType("jdbc:oracle:thin:@//localhost:1521/oradb"));
   }
 
   @Test
   public void testExtractDBID()
   {
-    assertEquals("postgresql", JdbcUtils.getDbIdFromUrl("jdbc:postgresql://localhost/postgres"));
-    assertEquals("hdb", JdbcUtils.getDbIdFromUrl("jdbc:sap://centos01:30015/"));
-    assertEquals("sap_db", JdbcUtils.getDbIdFromUrl("jdbc:sapdb://127.0.0.1/dummy"));
+    assertEquals(DBID.Postgres.getId(), JdbcUtils.getDbIdFromUrl("jdbc:postgresql://localhost/postgres"));
+    assertEquals(DBID.HANA.getId(), JdbcUtils.getDbIdFromUrl("jdbc:sap://centos01:30015/"));
+    assertEquals(DBID.SAP_DB.getId(), JdbcUtils.getDbIdFromUrl("jdbc:sapdb://127.0.0.1/dummy"));
   }
 }
