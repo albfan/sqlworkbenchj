@@ -273,7 +273,7 @@ public class PostgresIndexReader
       "       coalesce(t.spcname, ts.default_tablespace) as tablespace, \n" +
       "       obj_description(i.oid) as remarks, \n" +
       "       am.amname as index_type, \n" +
-      "       pg_get_expr(x.indpred, 'pg_index'::regclass, true) as filter_expression \n" +
+      "       pg_get_expr(x.indpred, x.indrelid, true) as filter_expression \n" +
       "FROM pg_index x \n" +
       "  JOIN pg_class i ON i.oid = x.indexrelid \n" +
       "  JOIN pg_class c ON c.oid = x.indrelid \n" +

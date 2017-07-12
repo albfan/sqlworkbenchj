@@ -147,6 +147,34 @@ public class PostgresIndexReaderTest
 	}
 
 	@Test
+	public void testPartialIndex()
+		throws SQLException
+	{
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
+		assertNotNull(conn);
+
+		DbMetadata meta = conn.getMetadata();
+		IndexReader reader = meta.getIndexReader();
+
+		assertNotNull(reader);
+		assertTrue(reader instanceof PostgresIndexReader);
+
+		TestUtil.executeScript(conn,
+			"create table person (id integer, firstname varchar(50), lastname varchar(50), active boolean);\n" +
+			"create index idx_person_id on person (id) where active;\n" +
+			"commit;\n");
+
+		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
+		List<IndexDefinition> indexes = reader.getTableIndexList(table, true);
+
+		assertFalse(indexes.isEmpty());
+
+		IndexDefinition index = indexes.get(0);
+		assertEquals("idx_person_id", index.getObjectName());
+    assertEquals("active", index.getFilterExpression());
+	}
+
+	@Test
 	public void testTableSourceWithIndexes()
 		throws Exception
 	{

@@ -99,7 +99,7 @@ public class PostgresSchemaDiffTest
       "  id integer not null, \n" +
       "  is_active boolean not null \n" +
       ");\n" +
-      "create index ix1 on " + TARGET_SCHEMA + ".foo1 (id) where (is_active = false);\n" +
+      "create index ix1 on " + TARGET_SCHEMA + ".foo1 (id) where (is_active = true);\n" +
       "\n" +
       "commit;\n";
 
@@ -111,7 +111,19 @@ public class PostgresSchemaDiffTest
     diff.setIncludeIndex(true);
     StringWriter result = new StringWriter();
     diff.writeXml(result);
-    System.out.println(result);
+    String xml = result.toString();
+//    System.out.println(xml);
+    String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='foo1'])");
+    assertEquals("1", value);
+
+    value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table/modify-index[@name='ix1'])");
+    assertEquals("1", value);
+
+    value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table/modify-index/modified/filter-expression/target-expression");
+    assertEquals("is_active = true", value);
+
+    value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table/modify-index/modified/filter-expression/reference-expression");
+    assertEquals("is_active = false", value);
   }
 
   @Test
