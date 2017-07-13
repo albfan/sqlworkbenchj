@@ -33,6 +33,7 @@ import workbench.db.report.IndexReporter;
 import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
 
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -205,6 +206,14 @@ public class IndexDiff
 
   private IndexDefinition findIndex(Collection<IndexDefinition> defs, IndexDefinition toCheck)
   {
+    // First: try a match on the index name:
+    for (IndexDefinition idx : defs)
+    {
+      if (SqlUtil.objectNamesAreEqual(toCheck.getName(), idx.getName())) return idx;
+    }
+
+    // No index with the same name found
+    // Find an index that matches the definition
     for (IndexDefinition idx : defs)
     {
       if (idx.equals(toCheck)) return idx;

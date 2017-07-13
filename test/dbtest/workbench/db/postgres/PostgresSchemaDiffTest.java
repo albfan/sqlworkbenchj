@@ -23,22 +23,15 @@
  */
 package workbench.db.postgres;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Reader;
 import java.io.StringWriter;
-import java.io.Writer;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
 
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.diff.SchemaDiff;
 
 import workbench.util.CollectionUtil;
-import workbench.util.FileUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,6 +69,112 @@ public class PostgresSchemaDiffTest
   {
     PostgresTestUtil.cleanUpTestCase();
   }
+
+  @Test
+  public void testMultipleColumnLists()
+    throws Exception
+  {
+    WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
+    String sql =
+      "create schema if not exists " + REFERENCE_SCHEMA + ";\n" +
+      "create schema if not exists " + TARGET_SCHEMA + ";\n" +
+      "CREATE TABLE " + REFERENCE_SCHEMA + ".foo1 \n" +
+      "( \n" +
+      "  id integer not null, \n" +
+      "  is_active boolean not null \n" +
+      ");\n" +
+      "create index ix1 on " + REFERENCE_SCHEMA + ".foo1 (id);\n" +
+      "create index ix2 on " + REFERENCE_SCHEMA + ".foo1 (id) where not is_active;\n" +
+      "\n" +
+      "CREATE TABLE " + TARGET_SCHEMA + ".foo1 \n" +
+      "( \n" +
+      "  id integer not null, \n" +
+      "  is_active boolean not null \n" +
+      ");\n" +
+      "create index ix1 on " + TARGET_SCHEMA + ".foo1 (id);\n" +
+      "create index ix2 on " + TARGET_SCHEMA + ".foo1 (id) where is_active;\n" +
+      "\n" +
+      "commit;\n";
+
+    TestUtil.executeScript(conn, sql);
+
+    SchemaDiff diff = new SchemaDiff(conn, conn);
+    diff.setSchemaNames(REFERENCE_SCHEMA, TARGET_SCHEMA);
+    diff.setTableNames(CollectionUtil.arrayList(REFERENCE_SCHEMA + ".foo1"), CollectionUtil.arrayList(TARGET_SCHEMA + ".foo1"));
+    diff.setIncludeIndex(true);
+    StringWriter result = new StringWriter();
+    diff.writeXml(result);
+    String xml = result.toString();
+//    System.out.println(xml);
+
+    String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+    assertEquals("1", value);
+
+    value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table/modify-index/modified/filter-expression/reference-expression");
+    assertEquals("NOT is_active", value);
+
+    TestUtil.executeScript(conn,
+      "drop index " + TARGET_SCHEMA + ".ix2;\n" +
+      "create index ix2 on " + TARGET_SCHEMA + ".foo1 (id) where not is_active;\n" +
+      "commit;");
+
+    diff.setSchemaNames(REFERENCE_SCHEMA, TARGET_SCHEMA);
+    diff.setTableNames(CollectionUtil.arrayList(REFERENCE_SCHEMA + ".foo1"), CollectionUtil.arrayList(TARGET_SCHEMA + ".foo1"));
+    diff.setIncludeIndex(true);
+    result = new StringWriter();
+    diff.writeXml(result);
+    xml = result.toString();
+//    System.out.println(xml);
+
+    value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+    assertEquals("0", value);
+  }
+
+  @Test
+  public void testDuplicateDefinitions()
+    throws Exception
+  {
+    WbConnection conn = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(conn);
+
+    String sql =
+      "create schema if not exists " + REFERENCE_SCHEMA + ";\n" +
+      "create schema if not exists " + TARGET_SCHEMA + ";\n" +
+      "CREATE TABLE " + REFERENCE_SCHEMA + ".foo1 \n" +
+      "( \n" +
+      "  id integer not null, \n" +
+      "  is_active boolean not null \n" +
+      ");\n" +
+      "create index ix1 on " + REFERENCE_SCHEMA + ".foo1 (id);\n" +
+      "create index ix2 on " + REFERENCE_SCHEMA + ".foo1 (id);\n" +
+      "\n" +
+      "CREATE TABLE " + TARGET_SCHEMA + ".foo1 \n" +
+      "( \n" +
+      "  id integer not null, \n" +
+      "  is_active boolean not null \n" +
+      ");\n" +
+      "create index ix1 on " + TARGET_SCHEMA + ".foo1 (id);\n" +
+      "create index ix2 on " + TARGET_SCHEMA + ".foo1 (id);\n" +
+      "\n" +
+      "commit;\n";
+
+    TestUtil.executeScript(conn, sql);
+
+    SchemaDiff diff = new SchemaDiff(conn, conn);
+    diff.setSchemaNames(REFERENCE_SCHEMA, TARGET_SCHEMA);
+    diff.setTableNames(CollectionUtil.arrayList(REFERENCE_SCHEMA + ".foo1"), CollectionUtil.arrayList(TARGET_SCHEMA + ".foo1"));
+    diff.setIncludeIndex(true);
+    StringWriter result = new StringWriter();
+    diff.writeXml(result);
+    String xml = result.toString();
+//    System.out.println(xml);
+
+    String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
+    assertEquals("0", value);
+  }
+
 
   @Test
   public void testFilteredIndexDiff()
@@ -200,9 +299,6 @@ public class PostgresSchemaDiffTest
     diff.setAdditionalTypes(CollectionUtil.arrayList("enum", "type"));
     diff.setSchemas(REFERENCE_SCHEMA, TARGET_SCHEMA);
 
-    TestUtil util = getTestUtil();
-
-    File outfile = new File(util.getBaseDir(), "pg_addtypes_diff.xml");
     StringWriter out = new StringWriter();
     diff.writeXml(out);
     String xml = out.toString();
@@ -215,8 +311,6 @@ public class PostgresSchemaDiffTest
 
     value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-type/modify-column[@name='city'])");
     assertEquals("1", value);
-
-    assertTrue("Could not delete output", outfile.delete());
   }
 
   @Test
@@ -254,9 +348,6 @@ public class PostgresSchemaDiffTest
     diff.setIncludeTriggers(false);
     diff.setSchemas(REFERENCE_SCHEMA, TARGET_SCHEMA);
 
-    TestUtil util = getTestUtil();
-
-    File outfile = new File(util.getBaseDir(), "pg_proc_diff.xml");
     StringWriter out = new StringWriter();
     diff.writeXml(out);
     String xml = out.toString();
@@ -270,8 +361,6 @@ public class PostgresSchemaDiffTest
 
     value = TestUtil.getXPathValue(xml, "/schema-diff/drop-procedure/proc-def/proc-full-name");
     assertEquals("to_delete(integer)", value);
-
-    assertTrue("Could not delete output", outfile.delete());
   }
 
   @Test

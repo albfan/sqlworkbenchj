@@ -450,6 +450,10 @@ public class IndexDefinition
       else
       {
         equals = this.columns.equals(other.columns);
+        if (equals)
+        {
+          equals = StringUtil.equalStringOrEmpty(this.getFilterExpression(), other.getFilterExpression(), false);
+        }
       }
 
       if (equals)
