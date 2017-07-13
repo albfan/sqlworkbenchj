@@ -17,6 +17,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="4" type="fix">WbSchemaDiff did not handle multiple indexes on the same column list correctly</entry>
     <entry dev-build="4" type="fix">It was no longer possible to connect to a SAP DB</entry>
     <entry dev-build="3" type="fix">Navigating foreign keys from the result set did not work for non-numeric data types</entry>
     <entry dev-build="3" type="fix">Made saving of Workspaces more robust against errors.</entry>
