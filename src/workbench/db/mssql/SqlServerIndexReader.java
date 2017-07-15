@@ -158,7 +158,7 @@ public class SqlServerIndexReader
     {
       options.append("\n   WHERE ");
       options.append(filter.trim());
-      index.getSourceOptions().addConfigSetting("filter", filter.trim());
+      index.setFilterExpression(filter.trim());
     }
 
     if (isPadded || ignoreDups || fillFactor > 0)

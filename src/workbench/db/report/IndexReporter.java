@@ -64,6 +64,7 @@ public class IndexReporter
   public static final String TAG_INDEX_COLUMN_NAME = "column";
   public static final String TAG_INDEX_OPTION = "index-option";
   public static final String TAG_INDEX_COMMENT = "comment";
+  public static final String TAG_INDEX_FILTER = "filter-expression";
 
   private List<IndexDefinition> indexList;
   private TagWriter tagWriter = new TagWriter();
@@ -146,6 +147,10 @@ public class IndexReporter
           result.append("/>\n");
         }
         tagWriter.appendCloseTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
+      }
+      if (StringUtil.isNonBlank(index.getFilterExpression()))
+      {
+        tagWriter.appendTag(result, defIndent, TAG_INDEX_FILTER, index.getFilterExpression(), true);
       }
       if (StringUtil.isNonBlank(index.getTablespace()))
       {
