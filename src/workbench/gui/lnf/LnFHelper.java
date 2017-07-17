@@ -168,7 +168,7 @@ public class LnFHelper
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
 		return lnf.contains("GTKLookAndFeel");
   }
-  
+
 	public static boolean isWindowsLookAndFeel()
 	{
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
@@ -231,6 +231,12 @@ public class LnFHelper
 			}
 			else
 			{
+        // Fix for bug: http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8179014
+        // under Windows 10 with the "Creators Update"
+        if (className.contains(".plaf.windows.") && Settings.getInstance().getBoolProperty("workbench.gui.fix.filechooser.bug", true))
+        {
+          UIManager.put("FileChooser.useSystemExtensionHiding", false);
+        }
 				UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
 				// I hate the bold menu font in the Metal LnF
