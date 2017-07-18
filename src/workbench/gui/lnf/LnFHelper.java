@@ -233,7 +233,7 @@ public class LnFHelper
 			{
         // Fix for bug: http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8179014
         // under Windows 10 with the "Creators Update"
-        if (className.contains(".plaf.windows.") && Settings.getInstance().getBoolProperty("workbench.gui.fix.filechooser.bug", true))
+        if (className.contains(".plaf.windows.") && Settings.getInstance().getBoolProperty("workbench.gui.fix.filechooser.bug", false))
         {
           UIManager.put("FileChooser.useSystemExtensionHiding", false);
         }
