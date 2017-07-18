@@ -662,6 +662,28 @@ public class TableListPanel
     });
 	}
 
+	/**
+	 * Displays the tabs necessary for a TABLE like object
+	 */
+	protected void showOnlySourcePanel()
+	{
+		WbSwingUtilities.invoke(() ->
+    {
+      try
+      {
+        ignoreStateChanged = true;
+        int index = displayTab.getSelectedIndex();
+        displayTab.removeAll();
+        addSourcePanel();
+        displayTab.setSelectedIndex(0);
+      }
+      finally
+      {
+        ignoreStateChanged = false;
+      }
+    });
+	}
+
 	private void restoreIndex(int index)
 	{
 		if (index > 0 && index < displayTab.getTabCount())
@@ -791,6 +813,11 @@ public class TableListPanel
 	protected void addBaseObjectPanels()
 	{
 		displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
+		addSourcePanel();
+	}
+
+	protected void addSourcePanel()
+	{
 		displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), tableSource);
 	}
 
@@ -1580,6 +1607,17 @@ public class TableListPanel
 		}
 	}
 
+  private boolean isScriptOnlyObject()
+  {
+    if (this.dbConnection == null) return false;
+    DbSettings settings = dbConnection.getDbSettings();
+    if (settings == null) return false;
+		if (this.selectedTable == null) return false;
+
+		String type = selectedTable.getType();
+    return settings.getScriptOnlyObjects().contains(type);
+  }
+
 	public void updateDisplay()
 	{
 		int count = this.tableList.getSelectedRowCount();
@@ -1597,20 +1635,28 @@ public class TableListPanel
 
 		boolean isTable = isTable();
 		boolean hasData = isTable || canContainData();
+    boolean onlySource = isScriptOnlyObject();
 
 		if (isTable)
 		{
 			showTablePanels();
 		}
-		else
+    else if (onlySource)
+    {
+      showOnlySourcePanel();
+    }
+    else
 		{
 			showObjectDefinitionPanels(hasData);
 		}
 
-		this.tableData.reset();
-		this.tableData.setTable(this.selectedTable);
-    dependencyPanel.reset();
-    dependencyPanel.setCurrentObject(selectedTable);
+    if (!onlySource)
+    {
+      tableData.reset();
+      tableData.setTable(this.selectedTable);
+      dependencyPanel.reset();
+      dependencyPanel.setCurrentObject(selectedTable);
+    }
 
 		if (tableHistory != null)
 		{

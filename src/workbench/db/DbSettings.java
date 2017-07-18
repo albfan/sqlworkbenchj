@@ -2305,4 +2305,10 @@ public class DbSettings
   {
     return getBoolProperty("getmoreresults.ignore.sqlerrors", false);
   }
+
+  public Set<String> getScriptOnlyObjects()
+  {
+    List<String> types = getListProperty("scriptonly.objects", "");
+    return CollectionUtil.caseInsensitiveSet(types);
+  }
 }

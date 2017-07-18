@@ -75,6 +75,7 @@ import workbench.db.oracle.OracleUtils;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
+import workbench.db.postgres.PostgresForeignServerReader;
 import workbench.db.postgres.PostgresObjectListCleaner;
 import workbench.db.postgres.PostgresRangeTypeReader;
 import workbench.db.postgres.PostgresRuleReader;
@@ -231,6 +232,10 @@ public class DbMetadata
       if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.3"))
       {
         extenders.add(new PostgresEnumReader());
+      }
+      if (JdbcUtils.hasMinimumServerVersion(dbConnection, "8.4"))
+      {
+        extenders.add(new PostgresForeignServerReader());
       }
       extenders.add(new PostgresRuleReader());
       PostgresTypeReader typeReader = new PostgresTypeReader();
