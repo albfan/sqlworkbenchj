@@ -326,7 +326,22 @@ public class CommonArgs
     {
       try
       {
-        locale = new Locale(localeName);
+        if (localeName.contains("_"))
+        {
+          String[] def = localeName.split("_");
+          if (def.length > 1)
+          {
+            locale = new Locale(def[0], def[1]);
+          }
+          else
+          {
+            locale = new Locale(def[0]);
+          }
+        }
+        else
+        {
+          locale = new Locale(localeName);
+        }
         // check if this is valid, it will throw an exception when
         // an invalid language was specified
         locale.getISO3Language();

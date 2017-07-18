@@ -47,6 +47,18 @@ public class WbDateFormatterTest
 	{
 	}
 
+  @Test
+  public void testDayName()
+  {
+		WbDateFormatter formatter = new WbDateFormatter();
+    formatter.applyPattern("EE'.', dd.MM.yy");
+    LocalDate dt = formatter.parseDate("Mo., 12.06.17").toLocalDate();
+    assertNotNull(dt);
+    assertEquals(2017, dt.getYear());
+    assertEquals(6, dt.getMonthValue());
+    assertEquals(12, dt.getDayOfMonth());
+  }
+
 	@Test
 	public void testFormat()
 	{

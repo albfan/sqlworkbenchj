@@ -276,7 +276,7 @@ public class WbDateFormatter
   {
     source = StringUtil.trimToNull(source);
     if (source == null) return null;
-    
+
     try
     {
       return parseDate(source);

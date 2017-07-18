@@ -28,6 +28,7 @@ import java.sql.Date;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Locale;
 
 import workbench.WbTestCase;
 
@@ -292,6 +293,18 @@ public class ValueConverterTest
 		d = new java.sql.Date(WbDateFormatter.DATE_NEGATIVE_INFINITY);
 		assertEquals(d, o);
 	}
+
+  @Test
+  public void testDayNames()
+    throws Exception
+  {
+    String value = "Mo., 12.06.17";
+		ValueConverter converter = new ValueConverter();
+    converter.setLocale(Locale.GERMANY);
+    converter.setDefaultDateFormat("EE'.', dd.MM.yy");
+    Object date = converter.convertValue(value, Types.DATE);
+    assertNotNull(date);
+  }
 
 	@Test
 	public void testConvertDateLiterals()
