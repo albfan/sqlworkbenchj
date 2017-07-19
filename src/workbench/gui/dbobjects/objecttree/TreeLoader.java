@@ -80,6 +80,11 @@ public class TreeLoader
   public static final String TYPE_CATALOG = "catalog";
 
   /**
+   * The node type for global elements.
+   */
+  public static final String TYPE_GLOBAL = "global";
+
+  /**
    * The node type for table like elements.
    */
   public static final String TYPE_TABLE = "table";
@@ -188,6 +193,8 @@ public class TreeLoader
     if (connection != null)
     {
       availableTypes = connection.getMetadata().getObjectTypes();
+      Set<String> globalTypes = connection.getDbSettings().getGlobalObjectTypes();
+      availableTypes.removeAll(globalTypes);
     }
     if (DbExplorerSettings.getShowTriggerPanel())
     {
@@ -278,6 +285,13 @@ public class TreeLoader
 
     try
     {
+      if (CollectionUtil.isNonEmpty(connection.getDbSettings().getGlobalObjectTypes()))
+      {
+        GlobalTreeNode global = new GlobalTreeNode();
+        global.loadChildren(connection);
+        root.add(global);
+      }
+
       if (connection.getDbSettings().supportsCatalogs())
       {
         loaded = loadCatalogs(root);

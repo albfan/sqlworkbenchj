@@ -22,6 +22,7 @@ package workbench.gui.dbobjects.objecttree;
 
 import java.awt.Window;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -31,6 +32,7 @@ import javax.swing.event.PopupMenuListener;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
+
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CountTableRowsAction;
@@ -44,8 +46,12 @@ import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.components.WbPopupMenu;
 import workbench.gui.dbobjects.EditorTabSelectMenu;
 import workbench.gui.sql.PasteType;
+
 import workbench.interfaces.WbSelectionModel;
 import workbench.resource.ResourceMgr;
+
+import workbench.db.DbMetadata;
+
 import workbench.util.CollectionUtil;
 
 /**
@@ -79,9 +85,11 @@ class ContextMenuFactory
     menu.add(reload);
 
     List<ObjectTreeNode> selectedNodes = dbTree.getSelectedNodes();
+    String currentType = null;
     if (selectedNodes.size() == 1)
     {
       ObjectTreeNode selectedNode = selectedNodes.get(0);
+      currentType = selectedNode.getType();
       if (selectedNode.getType().equals(TreeLoader.TYPE_COLUMN_LIST))
       {
         SortColumnsAction nameSort = new SortColumnsAction(dbTree.getTree(), selectedNode, true);
@@ -129,20 +137,26 @@ class ContextMenuFactory
 
     menu.addSeparator();
 
-    Window window = SwingUtilities.getWindowAncestor(dbTree);
-    if (window instanceof MainWindow)
-    {
-      EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", (MainWindow)window, true);
-      showSelect.setPasteType(PasteType.insert);
-      showSelect.setObjectList(dbTree);
-      showSelect.setUseColumnListForTableData(DbTreeSettings.useColumnListForTableDataDisplay(dbTree.getConnection().getDbId()));
-      menu.add(showSelect);
-		}
+    DbMetadata meta = dbTree.getConnection().getMetadata();
+    Set<String> selectable = CollectionUtil.caseInsensitiveSet(meta.getSelectableTypes());
 
-    menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
-		menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
-		menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
-    menu.addSeparator();
+    Window window = SwingUtilities.getWindowAncestor(dbTree);
+    if (currentType != null && selectable.contains(currentType))
+    {
+      if (window instanceof MainWindow)
+      {
+        EditorTabSelectMenu showSelect = new EditorTabSelectMenu(ResourceMgr.getString("MnuTxtShowTableData"), "LblShowDataInNewTab", "LblDbTreePutSelectInto", (MainWindow)window, true);
+        showSelect.setPasteType(PasteType.insert);
+        showSelect.setObjectList(dbTree);
+        showSelect.setUseColumnListForTableData(DbTreeSettings.useColumnListForTableDataDisplay(dbTree.getConnection().getDbId()));
+        menu.add(showSelect);
+      }
+
+      menu.add(CreateDummySqlAction.createDummyInsertAction(dbTree, selection));
+      menu.add(CreateDummySqlAction.createDummyUpdateAction(dbTree, selection));
+      menu.add(CreateDummySqlAction.createDummySelectAction(dbTree, selection));
+      menu.addSeparator();
+    }
 
     if (window instanceof MainWindow)
     {

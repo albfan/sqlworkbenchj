@@ -67,6 +67,7 @@ public class DbObjectNodeRenderer
     iconMap.put(DbMetadata.MVIEW_NAME, "mview");
     iconMap.put("database", "profile");
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
+    iconMap.put(TreeLoader.TYPE_GLOBAL, "folder");
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder-db");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put(TreeLoader.TYPE_PROCEDURES_NODE, "db_type");
@@ -77,6 +78,7 @@ public class DbObjectNodeRenderer
     iconMap.put("trigger", "bullet_black");
     iconMap.put("index", "index");
     iconMap.put("type", "type");
+    iconMap.put("foreign server", "server");
     iconMap.put(TreeLoader.TYPE_PACKAGE_NODE, "package");
 
     iconMapOpen.put(TreeLoader.TYPE_SCHEMA, "folder-open");

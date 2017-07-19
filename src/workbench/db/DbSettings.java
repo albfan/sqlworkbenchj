@@ -2311,4 +2311,10 @@ public class DbSettings
     List<String> types = getListProperty("scriptonly.objects", "");
     return CollectionUtil.caseInsensitiveSet(types);
   }
+
+  public Set<String> getGlobalObjectTypes()
+  {
+    List<String> types = getListProperty("objects.global", "");
+    return CollectionUtil.caseInsensitiveSet(types);
+  }
 }

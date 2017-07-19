@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import workbench.db.exporter.InfinityLiterals;
 
@@ -51,6 +52,7 @@ public class WbDateFormatterTest
   public void testDayName()
   {
 		WbDateFormatter formatter = new WbDateFormatter();
+    formatter.setLocale(Locale.GERMAN);
     formatter.applyPattern("EE'.', dd.MM.yy");
     LocalDate dt = formatter.parseDate("Mo., 12.06.17").toLocalDate();
     assertNotNull(dt);
