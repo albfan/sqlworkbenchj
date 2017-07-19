@@ -174,6 +174,7 @@ public class TreeLoader
   private WbConnection connection;
   private DbObjectTreeModel model;
   private ObjectTreeNode root;
+  private GlobalTreeNode globalNode;
   private Collection<String> availableTypes;
   private ProcedureTreeLoader procLoader;
   private DependencyReader dependencyLoader;
@@ -222,6 +223,10 @@ public class TreeLoader
     if (types != null)
     {
       typesToShow.addAll(types);
+    }
+    if (globalNode != null)
+    {
+      globalNode.setTypesToShow(typesToShow);
     }
   }
 
@@ -287,9 +292,9 @@ public class TreeLoader
     {
       if (CollectionUtil.isNonEmpty(connection.getDbSettings().getGlobalObjectTypes()))
       {
-        GlobalTreeNode global = new GlobalTreeNode();
-        global.loadChildren(connection);
-        root.add(global);
+        globalNode = new GlobalTreeNode(typesToShow);
+        globalNode.loadChildren(connection);
+        root.add(globalNode);
       }
 
       if (connection.getDbSettings().supportsCatalogs())

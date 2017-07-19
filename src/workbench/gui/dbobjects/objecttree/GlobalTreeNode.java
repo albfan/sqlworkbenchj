@@ -38,10 +38,19 @@ import workbench.util.CollectionUtil;
 public class GlobalTreeNode
     extends ObjectTreeNode
 {
-  public GlobalTreeNode()
+  private final Set<String> typesToShow = CollectionUtil.caseInsensitiveSet();
+
+  public GlobalTreeNode(Set<String> showTypes)
   {
     super(ResourceMgr.getString("LblGlobalObjects"), TreeLoader.TYPE_GLOBAL);
     setAllowsChildren(true);
+    setTypesToShow(showTypes);
+  }
+
+  public void setTypesToShow(Set<String> showTypes)
+  {
+    typesToShow.clear();
+    typesToShow.addAll(showTypes);
   }
 
   @Override
@@ -58,12 +67,13 @@ public class GlobalTreeNode
 
     for (String type : types)
     {
-      GlobalTypeNode typeNode = new GlobalTypeNode(type);
-      add(typeNode);
+      if (typesToShow.isEmpty() || typesToShow.contains(type))
+      {
+        GlobalTypeNode typeNode = new GlobalTypeNode(type);
+        add(typeNode);
+      }
     }
     setChildrenLoaded(true);
     return true;
   }
-
-
 }
