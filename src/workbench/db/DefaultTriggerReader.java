@@ -122,13 +122,19 @@ public class DefaultTriggerReader
     return getTriggers(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
   }
 
-  protected DataStore getTriggers(String catalog, String schema, String tableName)
-    throws SQLException
+  protected DataStore createResultDataStore()
   {
     final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
     final int[] sizes =   {30, 30, 20, 20, 20, 10, 10};
 
     DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
+    return result;
+  }
+  
+  protected DataStore getTriggers(String catalog, String schema, String tableName)
+    throws SQLException
+  {
+    DataStore result = createResultDataStore();
 
     GetMetaDataSql sql = dbMeta.getMetaDataSQLMgr().getListTriggerSql();
     if (sql == null)

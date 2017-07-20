@@ -49,35 +49,33 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to read information about foreign servers from Postgres.
+ * A class to read information about extensions from Postgres.
  *
  * @author Thomas Kellerer
  */
-public class PostgresForeignServerReader
+public class PostgresExtensionReader
   implements ObjectListExtender
 {
 
-  public List<ForeignServer> getServerList(WbConnection connection)
+  public List<PgExtension> getExtensions(WbConnection connection)
   {
     Statement stmt = null;
     ResultSet rs = null;
     Savepoint sp = null;
-    List<ForeignServer> result = new ArrayList<>();
+    List<PgExtension> result = new ArrayList<>();
     String sql =
-      "select s.srvname as name, \n" +
-      "       s.srvtype as type,\n" +
-      "       s.srvversion as version,\n" +
-      "       s.srvoptions as options,\n" +
-      "       w.fdwname as fdw\n" +
-      "from pg_catalog.pg_foreign_server s\n" +
-      "  join pg_catalog.pg_foreign_data_wrapper w on s.srvfdw = w.oid\n" +
-      "order by s.srvname";
+      "select nsp.nspname as schema_name, \n" +
+      "       ext.extname, \n" +
+      "       ext.extversion, \n" +
+      "       obj_description(ext.oid) as remarks\n" +
+      "from pg_extension ext\n" +
+      "  join pg_namespace nsp on nsp.oid = extnamespace\n" +
+      "  join pg_user u on u.usesysid = ext.extowner";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
-      LogMgr.logDebug("PostgresForeignServerReader.getServerList()", "Retrieving foreign servers using:\n" + sql);
+      LogMgr.logDebug("PostgresExtensionReader.getExtensions()", "Retrieving extensions using:\n" + sql);
     }
-
     try
     {
       sp = connection.setSavepoint();
@@ -85,42 +83,21 @@ public class PostgresForeignServerReader
       rs = stmt.executeQuery(sql);
       while (rs.next())
       {
-        String name = rs.getString("name");
-        String type = rs.getString("type");
-        String version = rs.getString("version");
-        Array optionsArray = rs.getArray("options");
-        String[] options = null;
-        if (optionsArray != null)
-        {
-          options = (String[])optionsArray.getArray();
-        }
-        String fdw = rs.getString("fdw");
-        ForeignServer server = new ForeignServer(name);
-        server.setVersion(version);
-        server.setType(type);
-        server.setFdwName(fdw);
-
-        if (options != null)
-        {
-          Map<String, String> optionMap = new HashMap<>();
-          for (String option : options)
-          {
-            String[] optValues = option.split("=");
-            if (optValues.length == 2)
-            {
-              optionMap.put(optValues[0], optValues[1]);
-            }
-            server.setOptions(optionMap);
-          }
-        }
-        result.add(server);
+        String name = rs.getString("extname");
+        String schema = rs.getString("schema_name");
+        String version = rs.getString("extversion");
+        String remarks = rs.getString("remarks");
+        PgExtension ext = new PgExtension(schema, name);
+        ext.setVersion(version);
+        ext.setComment(remarks);
+        result.add(ext);
       }
       connection.releaseSavepoint(sp);
     }
     catch (SQLException e)
     {
       connection.rollback(sp);
-      LogMgr.logError("PostgresForeignServerReader.getServerList()", "Could not read foreign servers using:\n" + sql, e);
+      LogMgr.logError("PostgresExtensionReader.getExtensions()", "Could not read extensions using:\n" + sql, e);
     }
     finally
     {
@@ -130,29 +107,29 @@ public class PostgresForeignServerReader
   }
 
   @Override
-  public ForeignServer getObjectDefinition(WbConnection connection, DbObject object)
+  public PgExtension getObjectDefinition(WbConnection connection, DbObject object)
   {
-    List<ForeignServer> rules = getServerList(connection);
-    if (rules == null || rules.isEmpty()) return null;
-    return rules.get(0);
+    List<PgExtension> extensions = getExtensions(connection);
+    if (extensions == null || extensions.isEmpty()) return null;
+    return extensions.get(0);
   }
 
   @Override
   public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objectNamePattern, String[] requestedTypes)
   {
-    if (!DbMetadata.typeIncluded(ForeignServer.TYPE_NAME, requestedTypes)) return false;
+    if (!DbMetadata.typeIncluded(PgExtension.TYPE_NAME, requestedTypes)) return false;
 
-    List<ForeignServer> servers = getServerList(con);
-    if (servers.isEmpty()) return false;
-    for (ForeignServer rule : servers)
+    List<PgExtension> extensions = getExtensions(con);
+    if (extensions.isEmpty()) return false;
+    for (PgExtension ext : extensions)
     {
       int row = result.addRow();
       result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
-      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, null);
-      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, rule.getObjectName());
-      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, rule.getComment());
-      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, rule.getObjectType());
-      result.getRow(row).setUserObject(rule);
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, ext.getSchema() );
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, ext.getObjectName());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, ext.getComment());
+      result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, ext.getObjectType());
+      result.getRow(row).setUserObject(ext);
     }
     return true;
   }
@@ -166,7 +143,7 @@ public class PostgresForeignServerReader
   @Override
   public boolean handlesType(String type)
   {
-    return StringUtil.equalStringIgnoreCase(ForeignServer.TYPE_NAME, type);
+    return StringUtil.equalStringIgnoreCase(PgExtension.TYPE_NAME, type);
   }
 
   @Override
@@ -189,15 +166,15 @@ public class PostgresForeignServerReader
   @Override
   public List<String> supportedTypes()
   {
-    return CollectionUtil.arrayList(ForeignServer.TYPE_NAME);
+    return CollectionUtil.arrayList(PgExtension.TYPE_NAME);
   }
 
   @Override
   public String getObjectSource(WbConnection con, DbObject object)
   {
-    ForeignServer server = getObjectDefinition(con, object);
-    if (server == null) return null;
-    return server.getSource();
+    PgExtension ext = getObjectDefinition(con, object);
+    if (ext == null) return null;
+    return ext.getSource();
   }
 
   @Override

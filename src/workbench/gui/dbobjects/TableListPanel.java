@@ -100,6 +100,7 @@ import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.db.dependency.DependencyReader;
 import workbench.db.dependency.DependencyReaderFactory;
+import workbench.db.postgres.PostgresEventTriggerReader;
 
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
@@ -948,6 +949,10 @@ public class TableListPanel
 	private void setupSingleSelectTypes()
 	{
 		Collection<String> types = this.dbConnection.getMetadata().getObjectTypes();
+
+    // Event Triggers are displayed in the trigger panel
+    types.remove(PostgresEventTriggerReader.TYPE);
+    
 		this.tableTypes.removeAllItems();
 		this.tableTypes.addItem("*");
 

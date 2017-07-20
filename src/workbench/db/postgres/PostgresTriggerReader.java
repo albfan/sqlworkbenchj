@@ -23,6 +23,7 @@
  */
 package workbench.db.postgres;
 
+import java.sql.Array;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,6 +39,7 @@ import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
 
@@ -45,6 +47,7 @@ import workbench.storage.DataStore;
 import workbench.storage.SortDefinition;
 
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A TriggerReader for Postgres that retrieves not only the trigger source but also
@@ -74,13 +77,20 @@ public class PostgresTriggerReader
     return result;
   }
 
-  private void retrieveEventTriggers(DataStore triggers)
+  public DataStore getEventTriggerse()
+  {
+    DataStore result = createResultDataStore();
+    retrieveEventTriggers(result);
+    return result;
+  }
+
+  public int retrieveEventTriggers(DataStore triggers)
   {
     String sql =
       "select evtname as trigger,  \n" +
       "       evtevent as event,  \n" +
-      "       obj_description(trg.oid, 'pg_event_trigger') as remarks \n" +
-      "FROM pg_event_trigger trg";
+      "       obj_description(oid, 'pg_event_trigger') as remarks \n" +
+      "FROM pg_event_trigger";
 
     PreparedStatement stmt = null;
     ResultSet rs = null;
@@ -109,6 +119,10 @@ public class PostgresTriggerReader
         triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, "EVENT");
         triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, event);
         triggers.setValue(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, remarks);
+        TriggerDefinition trg = new TriggerDefinition(null, null, name);
+        trg.setComment(remarks);
+        trg.setTriggerType("EVENT TRIGGER");
+        triggers.getRow(row).setUserObject(trg);
       }
       dbConnection.releaseSavepoint(sp);
     }
@@ -130,6 +144,8 @@ public class PostgresTriggerReader
       triggers.sort(def);
     }
     triggers.resetStatus();
+
+    return triggerCount;
   }
 
   @Override
@@ -151,9 +167,11 @@ public class PostgresTriggerReader
     ResultSet rs = null;
     Savepoint sp = null;
 
-    final String sql
-      = "select pr.proname, \n" +
+
+    final String sql =
+      "select pr.proname, \n" +
       "       trg.evtevent, \n " +
+      "       trg.evttags, \n "+
       "       pg_get_functiondef(pr.oid) as func_source \n" +
       "FROM pg_event_trigger trg \n" +
       " JOIN pg_proc pr on pr.oid = trg.evtfoid \n" +
@@ -170,17 +188,24 @@ public class PostgresTriggerReader
       String funcName = null;
       String event = null;
       String funcSource = null;
+      String[] tags = null;
 
       sp = dbConnection.setSavepoint();
 
       stmt = dbConnection.getSqlConnection().prepareStatement(sql);
       stmt.setString(1, triggerName);
       rs = stmt.executeQuery();
+
       if (rs.next())
       {
-        funcName = rs.getString(1);
-        event = rs.getString(2);
-        funcSource = rs.getString(3);
+        event = rs.getString("evtevent");
+        Array tagArray = rs.getArray("evttags");
+        if (tagArray != null)
+        {
+          tags = (String[])tagArray.getArray();
+        }
+        funcSource = rs.getString("func_source");
+        funcName = rs.getString("proname");
       }
 
       result.append("DROP EVENT TRIGGER IF EXISTS ");
@@ -190,6 +215,18 @@ public class PostgresTriggerReader
       result.append(dbConnection.getMetadata().quoteObjectname(funcName));
       result.append("\n  ON ");
       result.append(event);
+      if (tags != null)
+      {
+        result.append("\n  WHEN TAG IN (");
+        for (int i=0; i < tags.length; i++)
+        {
+          if (i > 0) result.append(", ");
+          result.append('\'');
+          result.append(tags[i]);
+          result.append('\'');
+        }
+        result.append(')');
+      }
       result.append("\n  EXECUTE PROCEDURE ");
       result.append(funcName);
       result.append("();\n\nCOMMIT;\n");
