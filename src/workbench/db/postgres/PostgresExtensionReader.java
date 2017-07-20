@@ -23,15 +23,12 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -48,6 +45,8 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import static workbench.util.SqlUtil.*;
+
 /**
  * A class to read information about extensions from Postgres.
  *
@@ -57,7 +56,7 @@ public class PostgresExtensionReader
   implements ObjectListExtender
 {
 
-  public List<PgExtension> getExtensions(WbConnection connection)
+  public List<PgExtension> getExtensions(WbConnection connection, String namePattern)
   {
     Statement stmt = null;
     ResultSet rs = null;
@@ -71,6 +70,16 @@ public class PostgresExtensionReader
       "from pg_extension ext\n" +
       "  join pg_namespace nsp on nsp.oid = extnamespace\n" +
       "  join pg_user u on u.usesysid = ext.extowner";
+
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      sql += "\nWHERE ext.extname like '";
+      sql += SqlUtil.escapeUnderscore(namePattern, connection);
+      sql += "%' ";
+      sql += getEscapeClause(connection, namePattern);
+    }
+    sql += "\norder by ext.extname";
+
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
@@ -109,7 +118,7 @@ public class PostgresExtensionReader
   @Override
   public PgExtension getObjectDefinition(WbConnection connection, DbObject object)
   {
-    List<PgExtension> extensions = getExtensions(connection);
+    List<PgExtension> extensions = getExtensions(connection, null);
     if (extensions == null || extensions.isEmpty()) return null;
     return extensions.get(0);
   }
@@ -119,7 +128,7 @@ public class PostgresExtensionReader
   {
     if (!DbMetadata.typeIncluded(PgExtension.TYPE_NAME, requestedTypes)) return false;
 
-    List<PgExtension> extensions = getExtensions(con);
+    List<PgExtension> extensions = getExtensions(con, objectNamePattern);
     if (extensions.isEmpty()) return false;
     for (PgExtension ext : extensions)
     {

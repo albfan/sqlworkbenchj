@@ -48,6 +48,8 @@ import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import static workbench.util.SqlUtil.*;
+
 /**
  * A class to read information about foreign servers from Postgres.
  *
@@ -57,7 +59,7 @@ public class PostgresForeignServerReader
   implements ObjectListExtender
 {
 
-  public List<ForeignServer> getServerList(WbConnection connection)
+  public List<ForeignServer> getServerList(WbConnection connection, String namePattern)
   {
     Statement stmt = null;
     ResultSet rs = null;
@@ -70,8 +72,16 @@ public class PostgresForeignServerReader
       "       s.srvoptions as options,\n" +
       "       w.fdwname as fdw\n" +
       "from pg_catalog.pg_foreign_server s\n" +
-      "  join pg_catalog.pg_foreign_data_wrapper w on s.srvfdw = w.oid\n" +
-      "order by s.srvname";
+      "  join pg_catalog.pg_foreign_data_wrapper w on s.srvfdw = w.oid";
+
+    if (StringUtil.isNonBlank(namePattern))
+    {
+      sql += "\nWHERE s.srvname like '";
+      sql += SqlUtil.escapeUnderscore(namePattern, connection);
+      sql += "%' ";
+      sql += getEscapeClause(connection, namePattern);
+    }
+    sql += "\norder by s.srvname";
 
     if (Settings.getInstance().getDebugMetadataSql())
     {
@@ -132,7 +142,7 @@ public class PostgresForeignServerReader
   @Override
   public ForeignServer getObjectDefinition(WbConnection connection, DbObject object)
   {
-    List<ForeignServer> rules = getServerList(connection);
+    List<ForeignServer> rules = getServerList(connection, null);
     if (rules == null || rules.isEmpty()) return null;
     return rules.get(0);
   }
@@ -142,7 +152,7 @@ public class PostgresForeignServerReader
   {
     if (!DbMetadata.typeIncluded(ForeignServer.TYPE_NAME, requestedTypes)) return false;
 
-    List<ForeignServer> servers = getServerList(con);
+    List<ForeignServer> servers = getServerList(con, objectNamePattern);
     if (servers.isEmpty()) return false;
     for (ForeignServer rule : servers)
     {
