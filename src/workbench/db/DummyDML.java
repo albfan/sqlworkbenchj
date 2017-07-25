@@ -48,18 +48,21 @@ public class DummyDML
   public static final String PLACEHOLDER_TABLE_NAME = "${table_name}";
 
   protected boolean doFormat;
+  protected boolean generatePreparedStatements;
   protected final TableIdentifier table;
   private List<ColumnIdentifier> columns;
 
   protected DummyDML(TableIdentifier tbl)
   {
     this.table = tbl;
+    this.generatePreparedStatements = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
   }
 
   public DummyDML(TableIdentifier tbl, List<ColumnIdentifier> cols)
   {
     this.table = tbl;
     this.columns = new ArrayList<>(cols);
+    this.generatePreparedStatements = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
   }
 
   public void setDoFormatSql(boolean flag)
@@ -164,10 +167,14 @@ public class DummyDML
     return PROP_CONFIG_PREFIX + getObjectType().toLowerCase() + ".value.template." + type;
   }
 
+  public void setGeneratePreparedStatement(boolean flag)
+  {
+    generatePreparedStatements = flag;
+  }
+
   protected String getValueString(ColumnIdentifier col)
   {
-    boolean makePrepared = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
-    if (makePrepared)
+    if (generatePreparedStatements)
     {
       return "?";
     }

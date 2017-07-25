@@ -32,6 +32,7 @@ import javax.swing.SwingUtilities;
 
 import workbench.interfaces.WbSelectionListener;
 import workbench.interfaces.WbSelectionModel;
+import workbench.resource.Settings;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
@@ -43,6 +44,8 @@ import workbench.db.TableIdentifier;
 
 import workbench.gui.dbobjects.DbObjectList;
 import workbench.gui.dbobjects.ObjectScripterUI;
+
+import static workbench.db.DummyDML.*;
 
 /**
  * @author Thomas Kellerer
@@ -118,6 +121,14 @@ public class CreateDummySqlAction
     List<? extends DbObject> objects = source.getSelectedObjects();
     List<DbObject> scriptObjects = new ArrayList<>(objects.size());
     List<ColumnIdentifier> cols = new ArrayList<>();
+
+    boolean generatePrepared = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
+    
+    if (isCtrlPressed(e) )
+    {
+      generatePrepared = true;
+    }
+
     for (DbObject dbo : objects)
     {
       if (dbo instanceof TableIdentifier)
@@ -129,11 +140,15 @@ public class CreateDummySqlAction
         }
         else if (scriptType.equalsIgnoreCase(ObjectScripter.TYPE_UPDATE))
         {
-          scriptObjects.add(new DummyUpdate(tbl));
+          DummyUpdate dml = new DummyUpdate(tbl);
+          dml.setGeneratePreparedStatement(generatePrepared);
+          scriptObjects.add(dml);
         }
         else if (scriptType.equalsIgnoreCase(ObjectScripter.TYPE_INSERT))
         {
-          scriptObjects.add(new DummyInsert(tbl));
+          DummyInsert dml = new DummyInsert(tbl);
+          dml.setGeneratePreparedStatement(generatePrepared);
+          scriptObjects.add(dml);
         }
       }
       else if (dbo instanceof ColumnIdentifier)
@@ -141,6 +156,7 @@ public class CreateDummySqlAction
         cols.add((ColumnIdentifier)dbo);
       }
     }
+
     if (cols.size() > 0)
     {
       TableIdentifier tbl = source.getObjectTable();
@@ -152,7 +168,9 @@ public class CreateDummySqlAction
         }
         else
         {
-          scriptObjects.add(new DummyInsert(tbl, cols));
+          DummyInsert dml = new DummyInsert(tbl);
+          dml.setGeneratePreparedStatement(generatePrepared);
+          scriptObjects.add(dml);
         }
       }
     }
