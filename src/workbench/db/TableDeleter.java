@@ -119,6 +119,7 @@ public class TableDeleter
    * @param objectNames the list of tables to be deleted
    * @param commitEach true = commit each table, false = one single commit at the end
    * @param useTruncate true = use TRUNCATE instead of DELETE (implies commitEach = false)
+   * @param cascadedTruncate use the CASCADE option with TRUNCATE (if the DBMS supports that)
    *
    * @return the tables were the data was actually deleted. This can be different to the input list,
    * if one of the DELETEs caused an error but the user chose to continue anyway.

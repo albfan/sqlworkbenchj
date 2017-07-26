@@ -67,7 +67,7 @@ public class DbObjectNodeRenderer
     iconMap.put(DbMetadata.MVIEW_NAME, "mview");
     iconMap.put("database", "profile");
     iconMap.put(TreeLoader.TYPE_SCHEMA, "folder");
-    iconMap.put(TreeLoader.TYPE_GLOBAL, "folder");
+    iconMap.put(TreeLoader.TYPE_GLOBAL, "global");
     iconMap.put(TreeLoader.TYPE_CATALOG, "folder-db");
     iconMap.put(TreeLoader.TYPE_DBO_TYPE_NODE, "db_type");
     iconMap.put(TreeLoader.TYPE_PROCEDURES_NODE, "db_type");
