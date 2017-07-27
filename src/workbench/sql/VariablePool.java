@@ -218,8 +218,9 @@ public class VariablePool
 	}
 
 	/**
-	 * Returns a set of prompt variables defined in the
-	 * SQL string. If a variable is not yet defined it will
+	 * Returns a set of prompt variables defined in the SQL string.
+   *
+   * If a variable is not yet defined it will
 	 * be created in the internal pool with an empty value.
 	 * and returned in the result set.
 	 *
@@ -245,7 +246,7 @@ public class VariablePool
 		return m.find();
 	}
 
-  public boolean containsVariable(String sql, Set<String> names)
+  public boolean containsVariable(CharSequence sql, Set<String> names)
   {
     if (StringUtil.isBlank(sql)) return false;
 
@@ -362,13 +363,7 @@ public class VariablePool
   public String replaceAllParameters(String sql, Map<String, String> variables)
 	{
 		if (variables.isEmpty()) return sql;
-    Set<String> names = variables.keySet();
-    String result = replaceParameters(variables, sql, false);
-    while (containsVariable(result, names))
-    {
-      result = replaceParameters(variables, result, false);
-    }
-    return result;
+    return replaceParameters(variables, sql, false);
 	}
 
 	private String replaceParameters(Map<String, String> variables, String sql, boolean forPrompt)
@@ -376,13 +371,19 @@ public class VariablePool
 		if (sql == null) return null;
 		if (StringUtil.isBlank(sql)) return StringUtil.EMPTY_STRING;
 		if (sql.indexOf(this.getPrefix()) == -1) return sql;
+
 		StringBuilder newSql = new StringBuilder(sql);
-    for (String name : variables.keySet())
+    Set<String> names = variables.keySet();
+
+    while (containsVariable(newSql, names))
     {
-      String var = this.buildVarNamePattern(name, forPrompt);
-      String value = variables.get(name);
-      if (value == null) continue;
-      replaceVarValue(newSql, var, value);
+      for (String name : names)
+      {
+        String var = this.buildVarNamePattern(name, forPrompt);
+        String value = variables.get(name);
+        if (value == null) continue;
+        replaceVarValue(newSql, var, value);
+      }
     }
 		return newSql.toString();
 	}
