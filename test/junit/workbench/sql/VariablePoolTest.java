@@ -248,4 +248,15 @@ public class VariablePoolTest
 		String replaced = pool.replaceAllParameters(sql);
 		assertEquals("select * from foo where bar = 1", replaced);
 	}
+
+  @Test
+  public void testNestedReplacements()
+  {
+		VariablePool pool = VariablePool.getInstance();
+    pool.setParameterValue("template", "Variable one=$[parameter_one] and two=$[parameter_two] defined");
+    pool.setParameterValue("parameter_one", "the first value");
+    pool.setParameterValue("parameter_two", "this is the second parameter");
+    String result = pool.replaceAllParameters("$[template]");
+    assertEquals("Variable one=the first value and two=this is the second parameter defined", result);
+  }
 }

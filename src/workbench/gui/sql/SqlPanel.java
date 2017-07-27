@@ -3141,6 +3141,12 @@ public class SqlPanel
 		return goOn;
 	}
 
+  private String getBaseDir()
+  {
+    String profileDir = dbConnection != null ? dbConnection.getProfile().getDefaultDirectory() : null;
+
+    return StringUtil.coalesce(profileDir, System.getProperty("user.dir"));
+  }
   /**
    * Display the result of running a statement.
    *
@@ -3201,12 +3207,12 @@ public class SqlPanel
 			}
 			catch (IOException e)
 			{
-				this.stmtRunner.setBaseDir(StringUtil.coalesce(dbConnection.getProfile().getDefaultDirectory(), System.getProperty("user.dir")));
+				this.stmtRunner.setBaseDir(getBaseDir());
 			}
 		}
 		else
 		{
-      this.stmtRunner.setBaseDir(StringUtil.coalesce(dbConnection.getProfile().getDefaultDirectory(), System.getProperty("user.dir")));
+      this.stmtRunner.setBaseDir(getBaseDir());
 		}
 
 		int firstResultIndex = 0;

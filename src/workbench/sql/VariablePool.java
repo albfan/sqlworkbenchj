@@ -362,7 +362,13 @@ public class VariablePool
   public String replaceAllParameters(String sql, Map<String, String> variables)
 	{
 		if (variables.isEmpty()) return sql;
-    return replaceParameters(variables, sql, false);
+    Set<String> names = variables.keySet();
+    String result = replaceParameters(variables, sql, false);
+    while (containsVariable(result, names))
+    {
+      result = replaceParameters(variables, result, false);
+    }
+    return result;
 	}
 
 	private String replaceParameters(Map<String, String> variables, String sql, boolean forPrompt)
@@ -371,13 +377,13 @@ public class VariablePool
 		if (StringUtil.isBlank(sql)) return StringUtil.EMPTY_STRING;
 		if (sql.indexOf(this.getPrefix()) == -1) return sql;
 		StringBuilder newSql = new StringBuilder(sql);
-		for (String name : variables.keySet())
-		{
-			String var = this.buildVarNamePattern(name, forPrompt);
-			String value = variables.get(name);
-			if (value == null) continue;
-			replaceVarValue(newSql, var, value);
-		}
+    for (String name : variables.keySet())
+    {
+      String var = this.buildVarNamePattern(name, forPrompt);
+      String value = variables.get(name);
+      if (value == null) continue;
+      replaceVarValue(newSql, var, value);
+    }
 		return newSql.toString();
 	}
 
@@ -394,11 +400,12 @@ public class VariablePool
 	 * inside the string original.
 	 * String.replaceAll() cannot be used, because it parses escape sequences
 	 */
-	private void replaceVarValue(StringBuilder original, String pattern, String replacement)
+	private boolean replaceVarValue(StringBuilder original, String pattern, String replacement)
 	{
 		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(original);
     int searchStart = 0;
+    boolean replaced = false;
 		while (m != null && m.find(searchStart))
 		{
 			int start = m.start();
@@ -406,8 +413,10 @@ public class VariablePool
 			original.replace(start, end, replacement);
 			m = p.matcher(original.toString());
       searchStart = start + replacement.length();
+      replaced = true;
       if (searchStart >= original.length()) break;
 		}
+    return replaced;
 	}
 
 	public String buildVarName(String varName, boolean forPrompt)
