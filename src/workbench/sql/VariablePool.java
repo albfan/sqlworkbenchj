@@ -246,16 +246,37 @@ public class VariablePool
 		return m.find();
 	}
 
+  private Map<String, Pattern> getNamePatterns(Set<String> names)
+  {
+    HashMap<String, Pattern> result = new HashMap<>();
+
+    for (String name : names)
+    {
+      String varPattern = buildVarNamePattern(name, false);
+      Pattern p = Pattern.compile(varPattern);
+      result.put(name, p);
+    }
+    return result;
+  }
+
   public boolean containsVariable(CharSequence sql, Set<String> names)
+  {
+    if (StringUtil.isBlank(sql)) return false;
+    return containsVariable(sql, names, getNamePatterns(names));
+  }
+
+  private boolean containsVariable(CharSequence sql, Set<String> names, Map<String, Pattern> patterns)
   {
     if (StringUtil.isBlank(sql)) return false;
 
     for (String var : names)
     {
-      String varPattern = buildVarNamePattern(var, false);
-      Pattern p = Pattern.compile(varPattern);
-      Matcher m = p.matcher(sql);
-      if (m.find()) return true;
+      Pattern p = patterns.get(var);
+      if (p != null)
+      {
+        Matcher m = p.matcher(sql);
+        if (m.find()) return true;
+      }
     }
     return false;
   }
@@ -374,8 +395,9 @@ public class VariablePool
 
 		StringBuilder newSql = new StringBuilder(sql);
     Set<String> names = variables.keySet();
+    Map<String, Pattern> patterns = getNamePatterns(names);
 
-    while (containsVariable(newSql, names))
+    while (containsVariable(newSql, names, patterns))
     {
       for (String name : names)
       {
