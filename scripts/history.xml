@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2017-07-16">
+  <release build="-1" date="2017-08-01">
     <entry dev-build="5" type="enh">For Postgres global objects are now shown in the DbTree and DbExplorer</entry>
     <entry dev-build="4" type="enh">WbExport now supports specifying a format pattern when exporting numbers to text files.</entry>
     <entry dev-build="3" type="enh">Expandable macros now also support placeholders for the selected text and statement.</entry>
