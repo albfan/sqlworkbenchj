@@ -401,10 +401,9 @@ public class VariablePool
     {
       for (String name : names)
       {
-        String var = this.buildVarNamePattern(name, forPrompt);
         String value = variables.get(name);
-        if (value == null) continue;
-        replaceVarValue(newSql, var, value);
+        Pattern p = patterns.get(name);
+        replaceVarValue(newSql, p, value);
       }
     }
 		return newSql.toString();
@@ -423,10 +422,11 @@ public class VariablePool
 	 * inside the string original.
 	 * String.replaceAll() cannot be used, because it parses escape sequences
 	 */
-	private boolean replaceVarValue(StringBuilder original, String pattern, String replacement)
+	private boolean replaceVarValue(StringBuilder original, Pattern pattern, String replacement)
 	{
-		Pattern p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(original);
+    if (replacement == null || pattern == null) return false;
+
+		Matcher m = pattern.matcher(original);
     int searchStart = 0;
     boolean replaced = false;
 		while (m != null && m.find(searchStart))
@@ -434,7 +434,7 @@ public class VariablePool
 			int start = m.start();
 			int end = m.end();
 			original.replace(start, end, replacement);
-			m = p.matcher(original.toString());
+			m = pattern.matcher(original.toString());
       searchStart = start + replacement.length();
       replaced = true;
       if (searchStart >= original.length()) break;
