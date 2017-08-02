@@ -972,7 +972,7 @@
       </replacefilter>
       <replacefilter token="XXXX_DBMS_XXXX|"/>
       <replacefilter>
-        <replacetoken>string=([\'](([^\']|\'\')*)[\'])</replacetoken>
+        <replacetoken>string=([\'](([^\']|\'\')*)[\']|[Nn][\'](([^\']|\'\')*)[\'])</replacetoken>
         <replacevalue>string=([\'](([^\']|\'\'|\\\')*)[\'])</replacevalue>
       </replacefilter>
       <replacefilter>
