@@ -26,9 +26,6 @@ package workbench.db.ibm;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -39,7 +36,6 @@ import workbench.db.JdbcUtils;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 
-import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 

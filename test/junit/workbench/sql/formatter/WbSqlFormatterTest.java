@@ -51,6 +51,56 @@ public class WbSqlFormatterTest
 	}
 
   @Test
+  public void testNVarchar()
+  {
+    String sql = "INSERT INTO test (id, col1, col2) VALUES (1, N'A', 'B')";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.SQL_Server.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerInsert(1);
+    f.setAddColumnNameComment(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "INSERT INTO test\n" +
+      "(\n" +
+      "  id,\n" +
+      "  col1,\n" +
+      "  col2\n" +
+      ")\n" +
+      "VALUES\n" +
+      "(\n" +
+      "  /* id */ 1,\n" +
+      "  /* col1 */ N'A',\n" +
+      "  /* col2 */ 'B'\n" +
+      ")";
+//		System.out.println("***** formatted ***** \n" + formatted + "\n----------- expected --------- \n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+  
+  @Test
+  public void testSqlServerBlobLiteral()
+  {
+    String sql = "INSERT INTO test_blob(file_content) VALUES (0x54455354203132330d0a)";
+    WbSqlFormatter f = new WbSqlFormatter(sql, 150, DBID.SQL_Server.getId());
+    f.setKeywordCase(GeneratedIdentifierCase.upper);
+    f.setIdentifierCase(GeneratedIdentifierCase.lower);
+    f.setColumnsPerInsert(1);
+    f.setIndentWhereCondition(true);
+    String formatted = f.getFormattedSql();
+    String expected =
+      "INSERT INTO test_blob\n" +
+      "(\n" +
+      "  file_content\n" +
+      ")\n" +
+      "VALUES\n" +
+      "(\n" +
+      "  0x54455354203132330d0a\n" +
+      ")";
+//		System.out.println("***** formatted ***** \n" + formatted + "\n----------- expected --------- \n" + expected + "\n*****************");
+		assertEquals(expected, formatted);
+  }
+
+  @Test
   public void testPostgresOperators()
   {
     String sql = "select * from foo where x @> array[1,2,3] and name ~* 'foo' and doc ->> 'abc' and xxx ?-| yyy";
