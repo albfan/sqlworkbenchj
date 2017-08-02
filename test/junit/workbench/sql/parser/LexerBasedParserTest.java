@@ -977,11 +977,11 @@ public class LexerBasedParserTest
 	{
 		for (ParserType type : ParserType.values())
 		{
-			doTestEscapedQuotes(new LexerBasedParser(type));
+			doTestEscapedQuotes(new LexerBasedParser(type), type.toString());
 		}
 	}
 
-	public void doTestEscapedQuotes(ScriptIterator parser)
+	public void doTestEscapedQuotes(ScriptIterator parser, String parserType)
 	{
 		parser.setCheckEscapedQuotes(true);
 		parser.setScript(
@@ -991,16 +991,17 @@ public class LexerBasedParserTest
 		parser.setStoreStatementText(true);
 
 		ScriptCommandDefinition c = parser.getNextCommand();
-		assertNotNull(c);
-		assertTrue(c.getSQL().startsWith("insert"));
+		assertNotNull("First statement is null for type: " + parserType, c);
+		assertTrue("First statement not an insert for type: " + parserType, c.getSQL().startsWith("insert"));
 
 		c = parser.getNextCommand();
+		assertNotNull("Second statement is null for type: " + parserType, c);
 		assertNotNull(c);
-		assertTrue(c.getSQL().startsWith("insert"));
+		assertTrue("Second statement not an insert for type: " + parserType, c.getSQL().startsWith("insert"));
 
 		c = parser.getNextCommand();
-		assertNotNull(c);
-		assertEquals("commit", c.getSQL());
+		assertNotNull("Third statement is null for type: " + parserType, c);
+		assertEquals("Third statement not a commit for type: " + parserType, "commit", c.getSQL());
 	}
 
 	@Test
