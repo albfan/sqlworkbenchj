@@ -905,6 +905,14 @@
         <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
         <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="]]></replacevalue>
       </replacefilter>
+<!--      <replacefilter>
+        <replacetoken><![CDATA[bitstring=("B"[\']([01]+)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[bitstring=("B"[\']([01]+)[\'])|[Ee]"'\\\\x"[0-9A-Fa-f]+"'"]]></replacevalue>
+      </replacefilter>-->
+      <replacefilter>
+        <replacetoken><![CDATA[string=([\'](([^\']|\'\')*)[\']|[Nn][\'](([^\']|\'\')*)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[string=([\'](([^\']|\'\')*)[\']|[Ee][\'](([^\']|\'\')*)[\'])]]></replacevalue>
+      </replacefilter>
     </replace>
 
     <replace file="../src/workbench/sql/lexer/SqlServerLexer.flex">
@@ -949,6 +957,10 @@
       <replacefilter>
         <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
         <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>")]]></replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[bitstring=("B"[\']([01]+)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[bitstring=("B"[\']([01]+)[\'])|"0x"[0-9A-Fa-f]+]]></replacevalue>
       </replacefilter>
     </replace>
 
