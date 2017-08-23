@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
+import workbench.WbManager;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -57,6 +58,7 @@ public class FileDialogUtil
 
   private int lastFileType = FILE_TYPE_UNKNOWN;
   public static final String CONFIG_DIR_KEY = "%ConfigDir%";
+  public static final String PROGRAM_DIR_KEY = "%ProgramDir%";
   private String encoding = null;
 
   public int getLastSelectedFileType()
@@ -238,7 +240,7 @@ public class FileDialogUtil
       }
       if (replaceConfigDir && filename != null)
       {
-        filename = this.removeConfigDir(filename);
+        filename = removeConfigDir(filename);
       }
       return filename;
     }
@@ -292,6 +294,13 @@ public class FileDialogUtil
     if (aPathname == null) return null;
     WbFile dir = new WbFile(Settings.getInstance().getConfigDir());
     return StringUtil.replace(aPathname, CONFIG_DIR_KEY, dir.getFullPath());
+  }
+
+  public static String replaceProgramDir(String aPathname)
+  {
+    if (aPathname == null) return null;
+    WbFile dir = new WbFile(WbManager.getInstance().getJarPath());
+    return StringUtil.replace(aPathname, PROGRAM_DIR_KEY, dir.getFullPath());
   }
 
   public static void selectPkMapFileIfNecessary(Component parent)

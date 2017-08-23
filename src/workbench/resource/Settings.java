@@ -621,6 +621,7 @@ public class Settings
 	{
 		String dir = getProperty(PROP_LIBDIR, null);
 		dir = FileDialogUtil.replaceConfigDir(dir);
+    dir = FileDialogUtil.replaceProgramDir(dir);
 		if (dir == null) return new WbFile(getConfigDir());
 		return new WbFile(dir);
 	}
