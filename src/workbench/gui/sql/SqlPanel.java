@@ -147,6 +147,8 @@ import workbench.gui.actions.ImportClipboardAction;
 import workbench.gui.actions.ImportFileAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.JoinCompletionAction;
+import workbench.gui.actions.JumpToNextStatement;
+import workbench.gui.actions.JumpToPrevStatement;
 import workbench.gui.actions.JumpToStatement;
 import workbench.gui.actions.MakeInListAction;
 import workbench.gui.actions.MakeLowerCaseAction;
@@ -961,6 +963,10 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getShowLastStatementAction());
 		this.actions.add(this.sqlHistory.getClearHistoryAction());
 
+    JumpToNextStatement nextStmt = new JumpToNextStatement(this);
+    nextStmt.setCreateMenuSeparator(true);
+    actions.add(nextStmt);
+    actions.add(new JumpToPrevStatement(this));
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
 
