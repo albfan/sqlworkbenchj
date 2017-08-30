@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/albfan/sqlworkbenchj.svg?branch=master)](https://travis-ci.org/albfan/sqlworkbenchj)
+
 # SQL Workbench/J
 
 A fork from this fantastic SQL workbench
