@@ -57,8 +57,14 @@ public class SQLServerTestUtil
 			WbConnection con = ConnectionMgr.getInstance().findConnection(PROFILE_NAME);
 			if (con != null) return con;
 
+			String dbname = getProperty("wbjunit.mssql.testdb", DB_NAME);
+			String username = getProperty("wbjunit.mssql.user", TEST_USER);
+			String pwd = getProperty("wbjunit.mssql.password", TEST_PWD);
+			String port = getProperty("wbjunit.mssql.port", "1433");
+			String host = getProperty("wbjunit.mssql.host", "localhost");
+
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:sqlserver://localhost:1433;databaseName=" + DB_NAME + "' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			parser.parse("-url='jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + dbname + "' -username=" + username + " -password=" + pwd + " -driver=com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName(PROFILE_NAME);
 			ConnectionMgr.getInstance().addProfile(prof);
@@ -72,6 +78,15 @@ public class SQLServerTestUtil
 		}
 	}
 
+	private static String getProperty(String key, String defaultValue)
+	{
+		String value= System.getProperty(key, null);
+		if (value == null || value.equals("${" + key + "}"))
+		{
+			return defaultValue;
+		}
+		return value;
+	}
 
 	public static void initTestcase(String name)
 		throws Exception
