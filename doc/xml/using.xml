@@ -209,10 +209,10 @@ COMMIT;
 				<para>
 					The previous statement can be
 					recalled by pressing <keycap>Alt-Left</keycap> or choosing
-					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Editor history back</guimenuitem></menuchoice>
 					statement from the menu. Once the previous statement(s) have been
 					recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
-					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Editor history next</guimenuitem></menuchoice>
 					from the menu. This is similar to browsing through the history of a web browser.
 				</para>
 				<para>
