@@ -1479,7 +1479,6 @@ public class WbImportTest
       String msg = result.getMessages().toString();
       assertEquals(msg, true, result.isSuccess());
 //      System.out.println("messages: " + msg);
-      Statement stmt = this.connection.createStatement();
 
       int rows = TestUtil.getNumberValue(connection, "select count(*) from bool_int_test");
       assertEquals("Wrong number of rows imported", 2, rows);
@@ -2679,7 +2678,7 @@ public class WbImportTest
         "create table b (id_b integer); \n" +
         "commit;\n");
 
-      String cmd = "wbimport -encoding='UTF-8' -sourceDir='" + ta.getParent() + "' -type=xml -batchSize=10";
+      String cmd = "wbimport -encoding='UTF-8' -sourceDir='" + ta.getParent() + "' -type=xml -batchSize=10 " + CommonArgs.ARG_CHECK_FK_DEPS + "=true";
 
       StatementRunnerResult result = importCmd.execute(cmd);
       String msg = result.getMessages().toString();
@@ -2757,10 +2756,10 @@ public class WbImportTest
     TestUtil.writeFile(xmlFile, xml, "UTF-8");
 
     String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
-    //System.out.println("cmd=" + cmd);
+//    System.out.println("cmd=" + cmd);
     StatementRunnerResult result = importCmd.execute(cmd);
-    String msg = result.getMessages().toString();
-    System.out.println(msg);
+//    String msg = result.getMessages().toString();
+//    System.out.println(msg);
     assertEquals(true, result.isSuccess());
 
     try (Statement stmt = this.connection.createStatementForQuery();

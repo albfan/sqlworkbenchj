@@ -24,6 +24,7 @@
 package workbench.gui.editor;
 import java.util.List;
 
+import org.junit.Assume;
 import workbench.WbTestCase;
 import workbench.interfaces.TextContainer;
 
@@ -70,6 +71,7 @@ public class SearchAndReplaceTest
 	@Test
 	public void testReplace()
 	{
+		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
 		DummyContainer container = new DummyContainer();
 		container.setText("go\ngo\ngo\n");
 		SearchAndReplace replace = new SearchAndReplace(null, container);
@@ -84,6 +86,7 @@ public class SearchAndReplaceTest
 	@Test
 	public void testFind()
 	{
+		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
 		DummyContainer editor = new DummyContainer();
 		editor.setText("foobar\nfoobar\nbar\n");
 		SearchAndReplace replace = new SearchAndReplace(null, editor);
@@ -98,6 +101,7 @@ public class SearchAndReplaceTest
 	@Test
 	public void testFindAll()
 	{
+		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
 		DummyContainer editor = new DummyContainer();
 		editor.setText("foobar1\nfoobar2\nbarman\nbar word\n");
 		SearchAndReplace replace = new SearchAndReplace(null, editor);

@@ -121,7 +121,7 @@ public class TableCreatorTest
 			assertEquals(0, tables.size());
 
 			TableIdentifier tbl = new TableIdentifier("mytemp");
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 
 			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
 			id.setIsPkColumn(true);
@@ -187,7 +187,7 @@ public class TableCreatorTest
 			assertEquals(0, tables.size());
 
 			TableIdentifier tbl = new TableIdentifier("INLINE_PK");
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 
 			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
 			id.setIsPkColumn(true);
@@ -249,7 +249,7 @@ public class TableCreatorTest
 
 			con.getDbSettings().setCreateTableTemplate("creator_inline_test", template);
 
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 			// Now a table without PK, but with the PK template
 			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
 			id.setIsPkColumn(false);
@@ -303,7 +303,7 @@ public class TableCreatorTest
 			assertEquals(0, tables.size());
 
 			TableIdentifier tbl = new TableIdentifier("other.foo");
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			List<ColumnIdentifier> cols = new ArrayList<>();
 
 			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
 			id.setIsPkColumn(true);

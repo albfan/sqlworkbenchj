@@ -23,6 +23,7 @@
  */
 package workbench.gui.sql;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -32,6 +33,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.junit.Before;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
@@ -54,6 +56,12 @@ public class EditorPanelTest
 	extends WbTestCase
 {
 	private TestUtil util;
+
+  @Before
+  public void check()
+  {
+    org.junit.Assume.assumeTrue(!GraphicsEnvironment.isHeadless());
+  }
 
 	public EditorPanelTest()
 	{

@@ -23,11 +23,14 @@
  */
 package workbench;
 
+import org.junit.Ignore;
+
 import java.io.IOException;
 
 /**
  * @author Thomas Kellerer
  */
+@Ignore
 public class WbTestCase
 {
 	private String name;

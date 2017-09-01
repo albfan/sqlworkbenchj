@@ -23,6 +23,7 @@
  */
 package workbench.gui.actions;
 
+import org.junit.Assume;
 import org.junit.Test;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
@@ -43,6 +44,7 @@ public class CreateSnippetActionTest
 	@Test
 	public void testMakeJavaString()
 	{
+		Assume.assumeTrue(!java.awt.GraphicsEnvironment.isHeadless());
 		String input =
 			"SELECT * \n" +
 			"FROM some_table;";
