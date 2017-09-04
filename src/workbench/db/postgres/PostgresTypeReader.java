@@ -295,7 +295,7 @@ public class PostgresTypeReader
     // information for types any longer
     // this is a copy of the statement and code used by the driver, adjusted for type columns only
     String sql =
-      "selECT a.attname as column_name, \n" +
+      "SELECT a.attname as column_name, \n" +
       "       a.attnum as column_position,  \n" +
       "       dsc.description as remarks, \n" +
       "       a.atttypid, \n" +
