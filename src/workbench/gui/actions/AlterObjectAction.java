@@ -54,140 +54,140 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class AlterObjectAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable tableList;
-	private WbConnection dbConnection;
-	private Reloadable client;
+  private WbTable tableList;
+  private WbConnection dbConnection;
+  private Reloadable client;
 
-	public AlterObjectAction(WbTable tables)
-	{
-		tableList = tables;
-		initMenuDefinition("MnuTxtAlterObjects");
-		tableList.addTableModelListener(this);
-		checkEnabled();
-	}
+  public AlterObjectAction(WbTable tables)
+  {
+    tableList = tables;
+    initMenuDefinition("MnuTxtAlterObjects");
+    tableList.addTableModelListener(this);
+    checkEnabled();
+  }
 
-	public void setReloader(Reloadable reload)
-	{
-		client = reload;
-	}
+  public void setReloader(Reloadable reload)
+  {
+    client = reload;
+  }
 
-	public void setConnection(WbConnection con)
-	{
-		dbConnection = con;
-		checkEnabled();
-	}
+  public void setConnection(WbConnection con)
+  {
+    dbConnection = con;
+    checkEnabled();
+  }
 
-	private void checkEnabled()
-	{
-		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
-		boolean modified = (ds != null ? ds.isModified() : false);
-		setEnabled(modified && canAlterChangedTypes());
-	}
+  private void checkEnabled()
+  {
+    DataStore ds = (tableList != null ? tableList.getDataStore() : null);
+    boolean modified = (ds != null ? ds.isModified() : false);
+    setEnabled(modified && canAlterChangedTypes());
+  }
 
-	private boolean canAlterChangedTypes()
-	{
-		if (dbConnection == null) return false;
-		DbSettings db = dbConnection.getDbSettings();
-		if (db == null) return false;
+  private boolean canAlterChangedTypes()
+  {
+    if (dbConnection == null) return false;
+    DbSettings db = dbConnection.getDbSettings();
+    if (db == null) return false;
 
-		DataStore ds = (tableList != null ? tableList.getDataStore() : null);
-		if (ds == null) return false;
+    DataStore ds = (tableList != null ? tableList.getDataStore() : null);
+    if (ds == null) return false;
 
-		Map<DbObject, DbObject> changed = new HashMap<>();
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
-			if (ds.isRowModified(row))
-			{
-				TableIdentifier newTable = getCurrentDefinition(row);
-				TableIdentifier oldTable = getOldDefintion(row);
-				changed.put(oldTable, newTable);
-			}
-		}
-		DbObjectChanger changer = new DbObjectChanger(dbConnection);
-		String sql = changer.getAlterScript(changed);
-		return StringUtil.isNonEmpty(sql);
-	}
+    Map<DbObject, DbObject> changed = new HashMap<>();
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      if (ds.isRowModified(row))
+      {
+        TableIdentifier newTable = getCurrentDefinition(row);
+        TableIdentifier oldTable = getOldDefintion(row);
+        changed.put(oldTable, newTable);
+      }
+    }
+    DbObjectChanger changer = new DbObjectChanger(dbConnection);
+    String sql = changer.getAlterScript(changed);
+    return StringUtil.isNonEmpty(sql);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		String alterScript = getScript();
-		if (alterScript == null)
-		{
-			WbSwingUtilities.showErrorMessageKey(tableList, "MsgNoAlterAvailable");
-		}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    String alterScript = getScript();
+    if (alterScript == null)
+    {
+      WbSwingUtilities.showErrorMessageKey(tableList, "MsgNoAlterAvailable");
+    }
 
-		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
-		panel.openWindow(tableList, ResourceMgr.getString("TxtAlterTable"));
+    RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
+    panel.openWindow(tableList, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.wasRun() && client != null)
-		{
-			EventQueue.invokeLater(client::reload);
-		}
-	}
+    if (panel.wasRun() && client != null)
+    {
+      EventQueue.invokeLater(client::reload);
+    }
+  }
 
-	private String getScript()
-	{
-		DataStore ds = tableList.getDataStore();
-		DbObjectChanger renamer = new DbObjectChanger(dbConnection);
+  private String getScript()
+  {
+    DataStore ds = tableList.getDataStore();
+    DbObjectChanger renamer = new DbObjectChanger(dbConnection);
 
-		Map<DbObject, DbObject> changed = new HashMap<>();
+    Map<DbObject, DbObject> changed = new HashMap<>();
 
-		for (int row = 0; row < ds.getRowCount(); row++)
-		{
-			DbObject oldObject = getOldDefintion(row);
-			DbObject newObject = getCurrentDefinition(row);
-			changed.put(oldObject, newObject);
-		}
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      DbObject oldObject = getOldDefintion(row);
+      DbObject newObject = getCurrentDefinition(row);
+      changed.put(oldObject, newObject);
+    }
 
-		return renamer.getAlterScript(changed);
-	}
+    return renamer.getAlterScript(changed);
+  }
 
-	private TableIdentifier getCurrentDefinition(int row)
-	{
-		if (tableList == null) return null;
-		DataStore ds = tableList.getDataStore();
+  private TableIdentifier getCurrentDefinition(int row)
+  {
+    if (tableList == null) return null;
+    DataStore ds = tableList.getDataStore();
 
-		String name = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String schema = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-		String catalog = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-		String type = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-		String comment = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
-		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
-		tbl.setType(type);
-		tbl.setNeverAdjustCase(true);
-		tbl.setComment(comment);
-		return tbl;
-	}
+    String name = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+    String schema = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+    String catalog = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+    String type = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+    String comment = ds.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
+    TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+    tbl.setType(type);
+    tbl.setNeverAdjustCase(true);
+    tbl.setComment(comment);
+    return tbl;
+  }
 
-	private TableIdentifier getOldDefintion(int row)
-	{
-		if (tableList == null) return null;
-		DataStore ds = tableList.getDataStore();
+  private TableIdentifier getOldDefintion(int row)
+  {
+    if (tableList == null) return null;
+    DataStore ds = tableList.getDataStore();
 
-		String name = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
-		String schema = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
-		String catalog = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
-		String type = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-		String comment = (String) ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
-		TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
-		tbl.setType(type);
-		tbl.setNeverAdjustCase(true);
-		tbl.setComment(comment);
-		return tbl;
-	}
+    String name = (String)ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
+    String schema = (String)ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA);
+    String catalog = (String)ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG);
+    String type = (String)ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
+    String comment = (String)ds.getOriginalValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS);
+    TableIdentifier tbl = new TableIdentifier(catalog, schema, name);
+    tbl.setType(type);
+    tbl.setNeverAdjustCase(true);
+    tbl.setComment(comment);
+    return tbl;
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent e)
-	{
-		if (e.getType() == TableModelEvent.UPDATE)
-		{
-			checkEnabled();
-		}
-	}
+  @Override
+  public void tableChanged(TableModelEvent e)
+  {
+    if (e.getType() == TableModelEvent.UPDATE)
+    {
+      checkEnabled();
+    }
+  }
 
   @Override
   public boolean useInToolbar()

@@ -2084,9 +2084,9 @@ public class SqlPanel
 		this.startExecution(sql, 0, GuiSettings.getHighlightErrorStatement(), this.appendResults, RunType.RunAll);
 	}
 
-	private void startExecution(final String sql, final int offset, final boolean highlightError, final boolean appendResult, final RunType runType)
-	{
-		if (this.isConnectionBusy()) return;
+  private void startExecution(final String sql, final int offset, final boolean highlightError, final boolean appendResult, final RunType runType)
+  {
+    if (this.isConnectionBusy()) return;
 
     if (!appendResult && !confirmDiscardChanges(-1, true))
     {
@@ -2099,7 +2099,7 @@ public class SqlPanel
       return;
     }
 
-			this.executionThread = new WbThread(getThreadId())
+    this.executionThread = new WbThread(getThreadId())
     {
       @Override
       public void run()
@@ -2109,17 +2109,17 @@ public class SqlPanel
     };
 
     this.executionThread.start();
-	}
+  }
 
-	private String getThreadId()
-	{
-		String id = "SQL Thread " + getRealTabTitle();
-		if (this.dbConnection != null)
-		{
-			id += " (" + dbConnection.getId() + ")";
-		}
-		return id;
-	}
+  private String getThreadId()
+  {
+    String id = "SQL Thread " + getRealTabTitle();
+    if (this.dbConnection != null)
+    {
+      id += " (" + dbConnection.getId() + ")";
+    }
+    return id;
+  }
 
   private void doAutoSaveFile()
   {
@@ -2146,57 +2146,57 @@ public class SqlPanel
 	 * This is only public to allow a direct call during
 	 * GUI testing (to avoid multi-threading)
 	 */
-	protected void runStatement(String sql, int selectionOffset, boolean highlightOnError, boolean appendResult, RunType runType)
-	{
-		this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
+  protected void runStatement(String sql, int selectionOffset, boolean highlightOnError, boolean appendResult, RunType runType)
+  {
+    this.setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
-		this.storeStatementInHistory();
-		cancelExecution = false;
+    this.storeStatementInHistory();
+    cancelExecution = false;
 
-		setBusy(true);
+    setBusy(true);
 
-		// the dbStart should be fired *after* updating the
-		// history, as the history might be saved ("AutoSaveHistory") if the MainWindow
-		// receives the execStart event
-		fireDbExecStart();
+    // the dbStart should be fired *after* updating the
+    // history, as the history might be saved ("AutoSaveHistory") if the MainWindow
+    // receives the execStart event
+    fireDbExecStart();
 
     doAutoSaveFile();
 
-		setCancelState(true);
+    setCancelState(true);
 
-		try
-		{
-			this.displayResult(sql, selectionOffset, highlightOnError, appendResult, runType);
-		}
-		finally
-		{
-			fireDbExecEnd();
-			clearStatusMessage();
-			setCancelState(false);
-			updateResultInfos();
-			iconHandler.showBusyIcon(false);
-			// setBusy(false) should be called after dbExecEnd()
-			// otherwise the panel would indicate it's not busy, but
-			// the connection would still be marked as busy
-			this.setBusy(false);
-			this.selectEditorLater();
-			this.executionThread = null;
-			this.cancelExecution = false;
-		}
-	}
+    try
+    {
+      this.displayResult(sql, selectionOffset, highlightOnError, appendResult, runType);
+    }
+    finally
+    {
+      fireDbExecEnd();
+      clearStatusMessage();
+      setCancelState(false);
+      updateResultInfos();
+      iconHandler.showBusyIcon(false);
+      // setBusy(false) should be called after dbExecEnd()
+      // otherwise the panel would indicate it's not busy, but
+      // the connection would still be marked as busy
+      this.setBusy(false);
+      this.selectEditorLater();
+      this.executionThread = null;
+      this.cancelExecution = false;
+    }
+  }
 
   public AutomaticRefreshMgr getRefreshMgr()
   {
     return refreshMgr;
   }
 
-	/**
-	 * Re-run the SQL of the current result in the background.
-	 */
-	public void reloadCurrent()
-	{
-		if (isConnectionBusy()) return;
-		if (currentData == null) return;
+  /**
+   * Re-run the SQL of the current result in the background.
+   */
+  public void reloadCurrent()
+  {
+    if (isConnectionBusy()) return;
+    if (currentData == null) return;
 
     startReloadPanel(currentData);
   }
@@ -2209,16 +2209,16 @@ public class SqlPanel
     int index = resultTab.indexOfComponent(panel);
     if (!confirmDiscardChanges(index, true)) return;
 
-		this.executionThread = new WbThread(getThreadId())
-		{
-			@Override
-			public void run()
-			{
-				runCurrentSql(panel);
-			}
-		};
-		this.executionThread.start();
-	}
+    this.executionThread = new WbThread(getThreadId())
+    {
+      @Override
+      public void run()
+      {
+        runCurrentSql(panel);
+      }
+    };
+    this.executionThread.start();
+  }
 
 	protected void runCurrentSql()
   {
@@ -2242,44 +2242,44 @@ public class SqlPanel
     }
   }
 
-	private void runCurrentSql(DwPanel dataPanel)
-	{
-		if (isConnectionBusy()) return;
-		if (dataPanel == null) return;
+  private void runCurrentSql(DwPanel dataPanel)
+  {
+    if (isConnectionBusy()) return;
+    if (dataPanel == null) return;
 
-		cancelExecution = false;
-		setBusy(true);
+    cancelExecution = false;
+    setBusy(true);
 
-		fireDbExecStart();
-		setCancelState(true);
- 		setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
+    fireDbExecStart();
+    setCancelState(true);
+    setStatusMessage(ResourceMgr.getString("MsgExecutingSql"));
 
-		try
-		{
-			dataPanel.runCurrentSql(true);
-    	TableAnnotationProcessor processor = new TableAnnotationProcessor();
-  		processor.handleAnnotations(this, dataPanel, null);
+    try
+    {
+      dataPanel.runCurrentSql(true);
+      TableAnnotationProcessor processor = new TableAnnotationProcessor();
+      processor.handleAnnotations(this, dataPanel, null);
       checkAutoRefreshIndicator(dataPanel);
-		}
-		catch (Exception e)
-		{
-			this.showLogMessage(e.getMessage());
-			LogMgr.logError("SqlPanel.runCurrentSql()", "Error reloading current result", e);
-		}
-		finally
-		{
-			clearStatusMessage();
-			setCancelState(false);
-			updateResultInfos();
-			fireDbExecEnd();
+    }
+    catch (Exception e)
+    {
+      this.showLogMessage(e.getMessage());
+      LogMgr.logError("SqlPanel.runCurrentSql()", "Error reloading current result", e);
+    }
+    finally
+    {
+      clearStatusMessage();
+      setCancelState(false);
+      updateResultInfos();
+      fireDbExecEnd();
 
-			// setBusy(false) should be called after dbExecEnd()
-			// otherwise the panel would indicate it's not busy, but
-			// the connection would still be marked as busy
-			setBusy(false);
-			executionThread = null;
-		}
-	}
+      // setBusy(false) should be called after dbExecEnd()
+      // otherwise the panel would indicate it's not busy, but
+      // the connection would still be marked as busy
+      setBusy(false);
+      executionThread = null;
+    }
+  }
 
   public void showData(TableIdentifier table, List<ColumnIdentifier> toSelect)
   {
@@ -2315,312 +2315,312 @@ public class SqlPanel
     return macroClientId;
   }
 
-	@Override
-	public void executeMacroSql(final String sql, final boolean replaceText, boolean appendData)
-	{
-		if (isConnectionBusy()) return;
-		if (StringUtil.isBlank(sql)) return;
+  @Override
+  public void executeMacroSql(final String sql, final boolean replaceText, boolean appendData)
+  {
+    if (isConnectionBusy()) return;
+    if (StringUtil.isBlank(sql)) return;
 
-		if (replaceText)
-		{
-			this.storeStatementInHistory();
-			this.editor.setText(sql);
-			this.macroExecution = false;
-		}
-		else
-		{
-			this.macroExecution = true;
-		}
-		this.startExecution(sql, 0, false, this.appendResults || appendData, RunType.RunAll);
-	}
+    if (replaceText)
+    {
+      this.storeStatementInHistory();
+      this.editor.setText(sql);
+      this.macroExecution = false;
+    }
+    else
+    {
+      this.macroExecution = true;
+    }
+    this.startExecution(sql, 0, false, this.appendResults || appendData, RunType.RunAll);
+  }
 
-	@Override
-	public void exportData()
-	{
-		final String sql = this.editor.getSelectedStatement();
+  @Override
+  public void exportData()
+  {
+    final String sql = this.editor.getSelectedStatement();
 
-		this.cancelExecution = false;
+    this.cancelExecution = false;
 
-		ExportFileDialog dialog = new ExportFileDialog(SwingUtilities.getWindowAncestor(this));
-		dialog.setQuerySql(sql, this.getConnection());
-		dialog.setIncludeSqlInsert(true);
+    ExportFileDialog dialog = new ExportFileDialog(SwingUtilities.getWindowAncestor(this));
+    dialog.setQuerySql(sql, this.getConnection());
+    dialog.setIncludeSqlInsert(true);
 
-		boolean result = dialog.selectOutput();
-		if (!result) return;
+    boolean result = dialog.selectOutput();
+    if (!result) return;
 
-		final DataExporter exporter = new DataExporter(this.dbConnection);
-		exporter.setRowMonitor(this.rowMonitor);
-		WbFile f = new WbFile(dialog.getSelectedFilename());
-		exporter.addQueryJob(sql, f, null);
-		dialog.setExporterOptions(exporter);
+    final DataExporter exporter = new DataExporter(this.dbConnection);
+    exporter.setRowMonitor(this.rowMonitor);
+    WbFile f = new WbFile(dialog.getSelectedFilename());
+    exporter.addQueryJob(sql, f, null);
+    dialog.setExporterOptions(exporter);
 
-		this.worker = exporter;
+    this.worker = exporter;
 
-		String msg = ResourceMgr.getString("MsgQueryExportInit");
-		msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
-		msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
-		showLogMessage(msg);
+    String msg = ResourceMgr.getString("MsgQueryExportInit");
+    msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
+    msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
+    showLogMessage(msg);
 
-		this.executionThread = new WbThread("ExportSQL")
-		{
-			@Override
-			public void run()
-			{
-				setBusy(true);
-				setCancelState(true);
-				fireDbExecStart();
-				statusBar.executionStart();
-				long start = System.currentTimeMillis();
-				try
-				{
-					boolean newLineAppended = false;
-					StringBuilder messages = new StringBuilder();
+    this.executionThread = new WbThread("ExportSQL")
+    {
+      @Override
+      public void run()
+      {
+        setBusy(true);
+        setCancelState(true);
+        fireDbExecStart();
+        statusBar.executionStart();
+        long start = System.currentTimeMillis();
+        try
+        {
+          boolean newLineAppended = false;
+          StringBuilder messages = new StringBuilder();
 
-					long rowCount = exporter.startExport();
+          long rowCount = exporter.startExport();
 
-					long execTime = (System.currentTimeMillis() - start);
+          long execTime = (System.currentTimeMillis() - start);
 
-					CharSequence errors = exporter.getErrors();
-					if (errors.length() > 0)
-					{
-						messages.append('\n');
-						newLineAppended = true;
-						messages.append(errors);
-						messages.append('\n');
-					}
+          CharSequence errors = exporter.getErrors();
+          if (errors.length() > 0)
+          {
+            messages.append('\n');
+            newLineAppended = true;
+            messages.append(errors);
+            messages.append('\n');
+          }
 
-					CharSequence warnings = exporter.getWarnings();
-					if (warnings.length() > 0)
-					{
-						if (!newLineAppended) messages.append('\n');
-						messages.append(warnings);
-						messages.append('\n');
-					}
+          CharSequence warnings = exporter.getWarnings();
+          if (warnings.length() > 0)
+          {
+            if (!newLineAppended) messages.append('\n');
+            messages.append(warnings);
+            messages.append('\n');
+          }
 
-					if (exporter.isSuccess())
-					{
-						messages.append("\n");
-						messages.append(ResourceMgr.getFormattedString("MsgSpoolOk", NumberStringCache.getNumberString(rowCount)));
-						messages.append("\n");
-						messages.append(ResourceMgr.getString("MsgSpoolTarget"));
-						messages.append(' ');
-						messages.append(exporter.getFullOutputFilename());
-						messages.append("\n\n");
-					}
+          if (exporter.isSuccess())
+          {
+            messages.append("\n");
+            messages.append(ResourceMgr.getFormattedString("MsgSpoolOk", NumberStringCache.getNumberString(rowCount)));
+            messages.append("\n");
+            messages.append(ResourceMgr.getString("MsgSpoolTarget"));
+            messages.append(' ');
+            messages.append(exporter.getFullOutputFilename());
+            messages.append("\n\n");
+          }
 
-					messages.append(ResourceMgr.getString("MsgExecTime"));
-					messages.append(' ');
-					messages.append(Double.toString( ((double)execTime) / 1000.0));
-					messages.append("s\n");
-					appendToLog(messages.toString());
-					showLogPanel();
-				}
-				catch (Exception e)
-				{
+          messages.append(ResourceMgr.getString("MsgExecTime"));
+          messages.append(' ');
+          messages.append(Double.toString(((double)execTime) / 1000.0));
+          messages.append("s\n");
+          appendToLog(messages.toString());
+          showLogPanel();
+        }
+        catch (Exception e)
+        {
           appendToLog(ExceptionUtil.getDisplay(e));
-					LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
-				}
-				finally
-				{
-					setBusy(false);
-					fireDbExecEnd();
-					statusBar.executionEnd();
-					long execTime = (System.currentTimeMillis() - start);
-					statusBar.setExecutionTime(execTime);
-					clearStatusMessage();
-					setCancelState(false);
-					executionThread = null;
-					worker = null;
-				}
-			}
-		};
-		this.executionThread.start();
-	}
+          LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
+        }
+        finally
+        {
+          setBusy(false);
+          fireDbExecEnd();
+          statusBar.executionEnd();
+          long execTime = (System.currentTimeMillis() - start);
+          statusBar.setExecutionTime(execTime);
+          clearStatusMessage();
+          setCancelState(false);
+          executionThread = null;
+          worker = null;
+        }
+      }
+    };
+    this.executionThread.start();
+  }
 
-	@Override
-	public void fatalError(String msg)
-	{
-		WbSwingUtilities.showErrorMessage(this, msg);
-	}
+  @Override
+  public void fatalError(String msg)
+  {
+    WbSwingUtilities.showErrorMessage(this, msg);
+  }
 
-	@Override
-	public int getActionOnError(int errorRow, String errorColumn, String dataLine, String errorMessage)
-	{
-		if (this.importRunning)
-		{
-			return this.getImportErrorAction(errorRow, errorColumn, dataLine, errorMessage);
-		}
-		else if (this.updateRunning)
-		{
-			return this.getUpdateErrorAction(errorRow, errorColumn, dataLine, errorMessage);
-		}
-		return JobErrorHandler.JOB_ABORT;
-	}
+  @Override
+  public int getActionOnError(int errorRow, String errorColumn, String dataLine, String errorMessage)
+  {
+    if (this.importRunning)
+    {
+      return this.getImportErrorAction(errorRow, errorColumn, dataLine, errorMessage);
+    }
+    else if (this.updateRunning)
+    {
+      return this.getUpdateErrorAction(errorRow, errorColumn, dataLine, errorMessage);
+    }
+    return JobErrorHandler.JOB_ABORT;
+  }
 
-	/**
-	 * 	We are implementing our own getUpdateErrorAction() (and not using the one from
-	 *  DwPanel) because it's necessary to turn off the loading indicator before displaying a message box.
-	 *
-	 * 	DwPanel's getUpdateErrorAction is called from here after turning off the loading indicator.
-	 */
-	public int getUpdateErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
-	{
-		iconHandler.showBusyIcon(false);
-		int choice = this.currentData.getActionOnError(errorRow, errorColumn, dataLine, errorMessage);
-		iconHandler.showBusyIcon(true);
-		return choice;
-	}
+  /**
+   * We are implementing our own getUpdateErrorAction() (and not using the one from
+   * DwPanel) because it's necessary to turn off the loading indicator before displaying a message box.
+   * <p>
+   * DwPanel's getUpdateErrorAction is called from here after turning off the loading indicator.
+   */
+  public int getUpdateErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
+  {
+    iconHandler.showBusyIcon(false);
+    int choice = this.currentData.getActionOnError(errorRow, errorColumn, dataLine, errorMessage);
+    iconHandler.showBusyIcon(true);
+    return choice;
+  }
 
-	public int getImportErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
-	{
-		String msg = null;
-		if (errorColumn != null)
-		{
-			msg = ResourceMgr.getString("ErrColumnImportError");
-			msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
-			msg = msg.replace("%column%", errorColumn);
-			msg = msg.replace("%data%", dataLine);
-		}
-		else
-		{
-			msg = ResourceMgr.getString("ErrRowImportError");
-			msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
-			msg = msg.replace("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
-		}
+  public int getImportErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
+  {
+    String msg = null;
+    if (errorColumn != null)
+    {
+      msg = ResourceMgr.getString("ErrColumnImportError");
+      msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
+      msg = msg.replace("%column%", errorColumn);
+      msg = msg.replace("%data%", dataLine);
+    }
+    else
+    {
+      msg = ResourceMgr.getString("ErrRowImportError");
+      msg = msg.replace("%row%", NumberStringCache.getNumberString(errorRow));
+      msg = msg.replace("%data%", dataLine == null ? "(null)" : dataLine.substring(0, 40) + " ...");
+    }
 
-		iconHandler.showBusyIcon(false);
-		int choice = WbSwingUtilities.getYesNoIgnoreAll(this, msg);
-		int result = JobErrorHandler.JOB_ABORT;
-		iconHandler.showBusyIcon(true);
-		if (choice == JOptionPane.YES_OPTION)
-		{
-			result = JobErrorHandler.JOB_CONTINUE;
-		}
-		else if (choice == WbSwingUtilities.IGNORE_ALL)
-		{
-			result = JobErrorHandler.JOB_IGNORE_ALL;
-		}
-		return result;
-	}
+    iconHandler.showBusyIcon(false);
+    int choice = WbSwingUtilities.getYesNoIgnoreAll(this, msg);
+    int result = JobErrorHandler.JOB_ABORT;
+    iconHandler.showBusyIcon(true);
+    if (choice == JOptionPane.YES_OPTION)
+    {
+      result = JobErrorHandler.JOB_CONTINUE;
+    }
+    else if (choice == WbSwingUtilities.IGNORE_ALL)
+    {
+      result = JobErrorHandler.JOB_IGNORE_ALL;
+    }
+    return result;
+  }
 
-	public void importFile()
-	{
-		if (this.currentData == null) return;
-		if (!this.currentData.startEdit()) return;
-		ImportFileDialog dialog = new ImportFileDialog(this);
-		dialog.allowImportModeSelection(false);
-		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"), "general");
-		if (!ok) return;
-		DataStoreImporter importer = new DataStoreImporter(currentData.getTable().getDataStore(), currentData.getRowMonitor(), this);
-		File importFile = dialog.getSelectedFile();
-		importer.setImportOptions(importFile,
-			                        dialog.getImportType(),
-			                        dialog.getGeneralOptions(),
-			                        dialog.getTextOptions());
+  public void importFile()
+  {
+    if (this.currentData == null) return;
+    if (!this.currentData.startEdit()) return;
+    ImportFileDialog dialog = new ImportFileDialog(this);
+    dialog.allowImportModeSelection(false);
+    boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"), "general");
+    if (!ok) return;
+    DataStoreImporter importer = new DataStoreImporter(currentData.getTable().getDataStore(), currentData.getRowMonitor(), this);
+    File importFile = dialog.getSelectedFile();
+    importer.setImportOptions(importFile,
+      dialog.getImportType(),
+      dialog.getGeneralOptions(),
+      dialog.getTextOptions());
 
-		Settings.getInstance().setLastImportDir(importFile.getParent());
-		dialog.saveSettings();
-		runImporter(importer);
-	}
+    Settings.getInstance().setLastImportDir(importFile.getParent());
+    dialog.saveSettings();
+    runImporter(importer);
+  }
 
-	public void importString(String content, boolean showOptions)
-	{
-		if (this.currentData == null) return;
-		if (!this.currentData.startEdit()) return;
+  public void importString(String content, boolean showOptions)
+  {
+    if (this.currentData == null) return;
+    if (!this.currentData.startEdit()) return;
 
-		DataStore ds = currentData.getTable().getDataStore();
+    DataStore ds = currentData.getTable().getDataStore();
 
-		ImportStringVerifier v = new ImportStringVerifier(content, ds.getResultInfo());
-		DataStoreImporter importer = new DataStoreImporter(ds, currentData.getRowMonitor(), this);
-		boolean dataOK = v.checkData();
-		if (showOptions || !dataOK)
-		{
-			boolean checked = false;
-			while (!checked)
-			{
-				boolean ok = v.showOptionsDialog();
-				if (!ok) return; // user cancelled dialog
-				checked = v.checkData();
-			}
-			TextImportOptions textOptions = v.getTextImportOptions();
-			ImportOptions options = v.getImportOptions();
-			importer.importString(content, options, textOptions);
-		}
-		else
-		{
-			if (!v.columnNamesMatched())
-			{
-				// assume the clipboard does not contain a header
-				TextImportOptions textOptions = new DefaultTextImportOptions("\t", "\"");
-				textOptions.setContainsHeader(false);
-				ImportOptions options = new DefaultImportOptions();
-				importer.importString(content, options, textOptions);
-			}
-			else
-			{
-				importer.importString(content);
-			}
-		}
-		if (!this.currentData.startEdit()) return;
+    ImportStringVerifier v = new ImportStringVerifier(content, ds.getResultInfo());
+    DataStoreImporter importer = new DataStoreImporter(ds, currentData.getRowMonitor(), this);
+    boolean dataOK = v.checkData();
+    if (showOptions || !dataOK)
+    {
+      boolean checked = false;
+      while (!checked)
+      {
+        boolean ok = v.showOptionsDialog();
+        if (!ok) return; // user cancelled dialog
+        checked = v.checkData();
+      }
+      TextImportOptions textOptions = v.getTextImportOptions();
+      ImportOptions options = v.getImportOptions();
+      importer.importString(content, options, textOptions);
+    }
+    else
+    {
+      if (!v.columnNamesMatched())
+      {
+        // assume the clipboard does not contain a header
+        TextImportOptions textOptions = new DefaultTextImportOptions("\t", "\"");
+        textOptions.setContainsHeader(false);
+        ImportOptions options = new DefaultImportOptions();
+        importer.importString(content, options, textOptions);
+      }
+      else
+      {
+        importer.importString(content);
+      }
+    }
+    if (!this.currentData.startEdit()) return;
 
-		runImporter(importer);
-	}
+    runImporter(importer);
+  }
 
-	public synchronized void runImporter(final DataStoreImporter importer)
-	{
-		this.setActionState(this.importFileAction, false);
-		this.setBusy(true);
-		this.setCancelState(true);
-		this.worker = importer;
-		WbThread importThread = new WbThread("DataImport")
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					importRunning = true;
-					fireDbExecStart();
-					importer.startImport();
-				}
-				catch (Throwable e)
-				{
-					LogMgr.logError("SqlPanel.importData() - worker thread", "Error when importing data", e);
-				}
-				finally
-				{
-					importRunning = false;
-					setBusy(false);
-					fireDbExecEnd();
-					currentData.getTable().getDataStoreTableModel().fileImported();
-					currentData.rowCountChanged();
-					currentData.clearStatusMessage();
-					MessageBuffer buff = importer.getMessage();
-					if (buff != null && buff.getLength() > 0)
-					{
-						appendToLog(buff.getBuffer().toString());
-					}
-					setCancelState(false);
-					checkResultSetActions();
-				}
-			}
-		};
-		importThread.start();
-		this.selectEditor();
-	}
+  public synchronized void runImporter(final DataStoreImporter importer)
+  {
+    this.setActionState(this.importFileAction, false);
+    this.setBusy(true);
+    this.setCancelState(true);
+    this.worker = importer;
+    WbThread importThread = new WbThread("DataImport")
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          importRunning = true;
+          fireDbExecStart();
+          importer.startImport();
+        }
+        catch (Throwable e)
+        {
+          LogMgr.logError("SqlPanel.importData() - worker thread", "Error when importing data", e);
+        }
+        finally
+        {
+          importRunning = false;
+          setBusy(false);
+          fireDbExecEnd();
+          currentData.getTable().getDataStoreTableModel().fileImported();
+          currentData.rowCountChanged();
+          currentData.clearStatusMessage();
+          MessageBuffer buff = importer.getMessage();
+          if (buff != null && buff.getLength() > 0)
+          {
+            appendToLog(buff.getBuffer().toString());
+          }
+          setCancelState(false);
+          checkResultSetActions();
+        }
+      }
+    };
+    importThread.start();
+    this.selectEditor();
+  }
 
-	@Override
-	public void printMessage(String trace)
-	{
-		appendMessage(trace,"\n");
-	}
+  @Override
+  public void printMessage(String trace)
+  {
+    appendMessage(trace, "\n");
+  }
 
-	@Override
-	public void appendToLog(final String logMessage)
-	{
-		if (logMessage == null) return;
-		appendMessage(logMessage);
-	}
+  @Override
+  public void appendToLog(final String logMessage)
+  {
+    if (logMessage == null) return;
+    appendMessage(logMessage);
+  }
 
 	private void appendMessage(final String logMessage, final String ... moreMessages)
 	{
@@ -2638,38 +2638,38 @@ public class SqlPanel
     });
 	}
 
-	@Override
-	public String getInput(String prompt)
-	{
-		String pwd = WbSwingUtilities.getUserInput(this, prompt, "");
-		if (StringUtil.isEmptyString(pwd)) return null;
-		return pwd;
-	}
+  @Override
+  public String getInput(String prompt)
+  {
+    String pwd = WbSwingUtilities.getUserInput(this, prompt, "");
+    if (StringUtil.isEmptyString(pwd)) return null;
+    return pwd;
+  }
 
-	@Override
-	public String getPassword(String prompt)
-	{
-		String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
-		if (StringUtil.isEmptyString(pwd)) return null;
-		return pwd;
-	}
+  @Override
+  public String getPassword(String prompt)
+  {
+    String pwd = WbSwingUtilities.getUserInputHidden(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "");
+    if (StringUtil.isEmptyString(pwd)) return null;
+    return pwd;
+  }
 
-	@Override
-	public boolean confirmExecution(String prompt, String yes, String no)
-	{
-		String title = "";
-		Window w = SwingUtilities.getWindowAncestor(this);
+  @Override
+  public boolean confirmExecution(String prompt, String yes, String no)
+  {
+    String title = "";
+    Window w = SwingUtilities.getWindowAncestor(this);
 
-		if (dbConnection != null)
-		{
-			WindowTitleBuilder builder = new WindowTitleBuilder();
-			title = builder.getWindowTitle(dbConnection.getProfile(), null, null, null) + " - ";
-		}
-		title += getRealTabTitle();
+    if (dbConnection != null)
+    {
+      WindowTitleBuilder builder = new WindowTitleBuilder();
+      title = builder.getWindowTitle(dbConnection.getProfile(), null, null, null) + " - ";
+    }
+    title += getRealTabTitle();
 
-		int result = WbSwingUtilities.getYesNo(w, title, prompt, yes, no);
-		return result == JOptionPane.YES_OPTION;
-	}
+    int result = WbSwingUtilities.getYesNo(w, title, prompt, yes, no);
+    return result == JOptionPane.YES_OPTION;
+  }
 
 	/** Used for storing the result of the confirmExecution() callback */
 	private boolean executeAllStatements = true;

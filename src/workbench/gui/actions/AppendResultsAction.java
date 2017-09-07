@@ -32,54 +32,54 @@ import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.SqlPanel;
 
 /**
- *	Action to toggle the if running statements should replace the current
- *  results or simply add a new result tab to SqlPanel
+ * Action to toggle the if running statements should replace the current
+ * results or simply add a new result tab to SqlPanel
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class AppendResultsAction
-	extends CheckBoxAction
+  extends CheckBoxAction
 {
-	private SqlPanel client;
-	private JToggleButton toggleButton;
+  private SqlPanel client;
+  private JToggleButton toggleButton;
 
-	public AppendResultsAction(SqlPanel panel)
-	{
-		super("MnuTxtToggleAppendResults", null);
-		this.client = panel;
-		this.setSwitchedOn(client.getAppendResults());
-		this.setEnabled(false);
+  public AppendResultsAction(SqlPanel panel)
+  {
+    super("MnuTxtToggleAppendResults", null);
+    this.client = panel;
+    this.setSwitchedOn(client.getAppendResults());
+    this.setEnabled(false);
     this.setIcon("append_result");
-	}
+  }
 
-	@Override
-	public void setSwitchedOn(boolean aFlag)
-	{
-		super.setSwitchedOn(aFlag);
-		if (this.toggleButton != null)
-		{
-			this.toggleButton.setSelected(this.isSwitchedOn());
-		}
-		client.setAppendResults(this.isSwitchedOn());
-	}
+  @Override
+  public void setSwitchedOn(boolean aFlag)
+  {
+    super.setSwitchedOn(aFlag);
+    if (this.toggleButton != null)
+    {
+      this.toggleButton.setSelected(this.isSwitchedOn());
+    }
+    client.setAppendResults(this.isSwitchedOn());
+  }
 
-	public JToggleButton getButton()
-	{
-		if (this.toggleButton == null)
-		{
-			this.toggleButton = new JToggleButton(this);
-			this.toggleButton.setText(null);
-			this.toggleButton.setMargin(WbToolbarButton.MARGIN);
-			this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(getIconKey()));
-			this.toggleButton.setSelected(this.isSwitchedOn());
-		}
-		return this.toggleButton;
-	}
+  public JToggleButton getButton()
+  {
+    if (this.toggleButton == null)
+    {
+      this.toggleButton = new JToggleButton(this);
+      this.toggleButton.setText(null);
+      this.toggleButton.setMargin(WbToolbarButton.MARGIN);
+      this.toggleButton.setIcon(IconMgr.getInstance().getToolbarIcon(getIconKey()));
+      this.toggleButton.setSelected(this.isSwitchedOn());
+    }
+    return this.toggleButton;
+  }
 
-	@Override
-	public void addToToolbar(JToolBar aToolbar)
-	{
-		aToolbar.add(this.getButton());
-	}
+  @Override
+  public void addToToolbar(JToolBar aToolbar)
+  {
+    aToolbar.add(this.getButton());
+  }
 
 }

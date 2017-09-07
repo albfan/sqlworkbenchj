@@ -1,4 +1,4 @@
-	/*
+/*
  * AddMacroAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
@@ -45,78 +45,78 @@ import workbench.util.StringUtil;
  * Action to add a new macro.
  *
  * @see workbench.sql.macros.MacroManager
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class AddMacroAction
-	extends WbAction
-	implements TextSelectionListener
+  extends WbAction
+  implements TextSelectionListener
 {
-	private EditorPanel client;
-	private final int macroClientId;
+  private EditorPanel client;
+  private final int macroClientId;
 
-	public AddMacroAction(int macroId)
-	{
-		super();
-		this.macroClientId = macroId;
-		this.setIcon(null);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		this.initMenuDefinition("MnuTxtAddMacro");
-		setEnabled(false);
-	}
+  public AddMacroAction(int macroId)
+  {
+    super();
+    this.macroClientId = macroId;
+    this.setIcon(null);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
+    this.initMenuDefinition("MnuTxtAddMacro");
+    setEnabled(false);
+  }
 
-	public void setClient(EditorPanel panel)
-	{
-		if (this.client != null)
-		{
-			this.client.removeSelectionListener(this);
-		}
-		this.client = panel;
-		if (this.client == null)
-		{
-			this.setEnabled(false);
-		}
-		else
-		{
-			this.client.addSelectionListener(this);
-			this.setEnabled(client.isTextSelected());
-		}
-	}
+  public void setClient(EditorPanel panel)
+  {
+    if (this.client != null)
+    {
+      this.client.removeSelectionListener(this);
+    }
+    this.client = panel;
+    if (this.client == null)
+    {
+      this.setEnabled(false);
+    }
+    else
+    {
+      this.client.addSelectionListener(this);
+      this.setEnabled(client.isTextSelected());
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		String text = client.getSelectedText();
-		if (StringUtil.isBlank(text))
-		{
-			Toolkit.getDefaultToolkit().beep();
-			return;
-		}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    String text = client.getSelectedText();
+    if (StringUtil.isBlank(text))
+    {
+      Toolkit.getDefaultToolkit().beep();
+      return;
+    }
 
-		AddMacroPanel panel = new AddMacroPanel(this.macroClientId);
+    AddMacroPanel panel = new AddMacroPanel(this.macroClientId);
 
-		ValidatingDialog dialog = ValidatingDialog.createDialog(
-			SwingUtilities.getWindowAncestor(client),
-			panel,
-			ResourceMgr.getString("TxtGetMacroNameWindowTitle"), null, 0, true);
+    ValidatingDialog dialog = ValidatingDialog.createDialog(
+      SwingUtilities.getWindowAncestor(client),
+      panel,
+      ResourceMgr.getString("TxtGetMacroNameWindowTitle"), null, 0, true);
 
-		dialog.addWindowListener(panel);
-		dialog.setVisible(true);
+    dialog.addWindowListener(panel);
+    dialog.setVisible(true);
 
-		if (!dialog.isCancelled())
-		{
-			MacroGroup group = panel.getSelectedGroup();
-			String name = panel.getMacroName();
-			if (StringUtil.isNonBlank(name) && group != null)
-			{
-				MacroManager.getInstance().getMacros(macroClientId).addMacro(group, new MacroDefinition(name, text));
-			}
-		}
-	}
+    if (!dialog.isCancelled())
+    {
+      MacroGroup group = panel.getSelectedGroup();
+      String name = panel.getMacroName();
+      if (StringUtil.isNonBlank(name) && group != null)
+      {
+        MacroManager.getInstance().getMacros(macroClientId).addMacro(group, new MacroDefinition(name, text));
+      }
+    }
+  }
 
-	@Override
-	public void selectionChanged(int newStart, int newEnd)
-	{
-		boolean selected = (newStart > -1 && newEnd > newStart);
-		this.setEnabled(selected);
-	}
+  @Override
+  public void selectionChanged(int newStart, int newEnd)
+  {
+    boolean selected = (newStart > -1 && newEnd > newStart);
+    this.setEnabled(selected);
+  }
 }

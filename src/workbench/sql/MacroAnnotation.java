@@ -36,49 +36,49 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class MacroAnnotation
-	extends WbAnnotation
+  extends WbAnnotation
 {
-	public static final String MAP_KEYWORD = "map";
-	public static final String NAME_KEYWORD = "name";
-	public static final String ANNOTATION = "WbMacro";
-	private Map<String, String> columnMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
+  public static final String MAP_KEYWORD = "map";
+  public static final String NAME_KEYWORD = "name";
+  public static final String ANNOTATION = "WbMacro";
+  private Map<String, String> columnMap = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
 
-	public MacroAnnotation()
-	{
-		super(ANNOTATION);
-	}
+  public MacroAnnotation()
+  {
+    super(ANNOTATION);
+  }
 
-	@Override
-	public void setValue(String value)
-	{
-		if (StringUtil.isBlank(value))
-		{
-			super.setValue(null);
-		}
-		else
-		{
-			ArgumentParser parser = new ArgumentParser(false);
-			parser.addArgument(MAP_KEYWORD, ArgumentType.RepeatableValue);
-			parser.addArgument(NAME_KEYWORD);
-			parser.parse(value);
-			Map<String, String> map = parser.getMapValue(MAP_KEYWORD);
-			if (map != null)
-			{
-				columnMap.clear();
-				columnMap.putAll(map);
-			}
-			super.setValue(parser.getValue(NAME_KEYWORD));
-		}
+  @Override
+  public void setValue(String value)
+  {
+    if (StringUtil.isBlank(value))
+    {
+      super.setValue(null);
+    }
+    else
+    {
+      ArgumentParser parser = new ArgumentParser(false);
+      parser.addArgument(MAP_KEYWORD, ArgumentType.RepeatableValue);
+      parser.addArgument(NAME_KEYWORD);
+      parser.parse(value);
+      Map<String, String> map = parser.getMapValue(MAP_KEYWORD);
+      if (map != null)
+      {
+        columnMap.clear();
+        columnMap.putAll(map);
+      }
+      super.setValue(parser.getValue(NAME_KEYWORD));
+    }
 
-	}
+  }
 
-	public String getMacroName()
-	{
-		return getValue();
-	}
+  public String getMacroName()
+  {
+    return getValue();
+  }
 
-	public Map<String, String> getColumnMap()
-	{
-		return columnMap;
-	}
+  public Map<String, String> getColumnMap()
+  {
+    return columnMap;
+  }
 }

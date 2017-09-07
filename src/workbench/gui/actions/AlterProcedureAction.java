@@ -53,109 +53,109 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class AlterProcedureAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable procList;
-	private WbConnection dbConnection;
-	private Reloadable client;
+  private WbTable procList;
+  private WbConnection dbConnection;
+  private Reloadable client;
 
-	public AlterProcedureAction(WbTable tables)
-	{
-		procList = tables;
-		initMenuDefinition("MnuTxtAlterObjects");
-		procList.addTableModelListener(this);
-		checkEnabled();
-	}
+  public AlterProcedureAction(WbTable tables)
+  {
+    procList = tables;
+    initMenuDefinition("MnuTxtAlterObjects");
+    procList.addTableModelListener(this);
+    checkEnabled();
+  }
 
-	public void setReloader(Reloadable reload)
-	{
-		client = reload;
-	}
+  public void setReloader(Reloadable reload)
+  {
+    client = reload;
+  }
 
-	public void setConnection(WbConnection con)
-	{
-		dbConnection = con;
-		checkEnabled();
-	}
+  public void setConnection(WbConnection con)
+  {
+    dbConnection = con;
+    checkEnabled();
+  }
 
-	private void checkEnabled()
-	{
-		DataStore ds = (procList != null ? procList.getDataStore() : null);
-		boolean modified = (ds != null ? ds.isModified() : false);
-		setEnabled(modified && canAlterChangedTypes());
-	}
+  private void checkEnabled()
+  {
+    DataStore ds = (procList != null ? procList.getDataStore() : null);
+    boolean modified = (ds != null ? ds.isModified() : false);
+    setEnabled(modified && canAlterChangedTypes());
+  }
 
-	private boolean canAlterChangedTypes()
-	{
-		if (dbConnection == null) return false;
-		DbSettings db = dbConnection.getDbSettings();
-		if (db == null) return false;
+  private boolean canAlterChangedTypes()
+  {
+    if (dbConnection == null) return false;
+    DbSettings db = dbConnection.getDbSettings();
+    if (db == null) return false;
 
-		DataStore ds = (procList != null ? procList.getDataStore() : null);
-		if (ds == null) return false;
+    DataStore ds = (procList != null ? procList.getDataStore() : null);
+    if (ds == null) return false;
 
-		Map<DbObject, DbObject> changed = new HashMap<>();
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
-			if (ds.isRowModified(row))
-			{
+    Map<DbObject, DbObject> changed = new HashMap<>();
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      if (ds.isRowModified(row))
+      {
         DbObject oldProc = (DbObject)ds.getRow(row).getUserObject();
-				DbObject newProc = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, true);
-				changed.put(oldProc, newProc);
-			}
-		}
-		DbObjectChanger changer = new DbObjectChanger(dbConnection);
-		String sql = changer.getAlterScript(changed);
-		return StringUtil.isNonEmpty(sql);
-	}
+        DbObject newProc = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, true);
+        changed.put(oldProc, newProc);
+      }
+    }
+    DbObjectChanger changer = new DbObjectChanger(dbConnection);
+    String sql = changer.getAlterScript(changed);
+    return StringUtil.isNonEmpty(sql);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		String alterScript = getScript();
-		if (alterScript == null)
-		{
-			WbSwingUtilities.showErrorMessageKey(procList, "MsgNoAlterAvailable");
-		}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    String alterScript = getScript();
+    if (alterScript == null)
+    {
+      WbSwingUtilities.showErrorMessageKey(procList, "MsgNoAlterAvailable");
+    }
 
-		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
-		panel.openWindow(procList, ResourceMgr.getString("TxtAlterTable"));
+    RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
+    panel.openWindow(procList, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.wasRun() && client != null)
-		{
-			EventQueue.invokeLater(client::reload);
-		}
-	}
+    if (panel.wasRun() && client != null)
+    {
+      EventQueue.invokeLater(client::reload);
+    }
+  }
 
-	private String getScript()
-	{
-		DataStore ds = procList.getDataStore();
-		DbObjectChanger renamer = new DbObjectChanger(dbConnection);
+  private String getScript()
+  {
+    DataStore ds = procList.getDataStore();
+    DbObjectChanger renamer = new DbObjectChanger(dbConnection);
 
-		Map<DbObject, DbObject> changed = new HashMap<>();
+    Map<DbObject, DbObject> changed = new HashMap<>();
 
-		for (int row = 0; row < ds.getRowCount(); row++)
-		{
-			if (ds.isRowModified(row))
-			{
-				DbObject oldObject = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, false);
-				DbObject newObject = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, true);
-				changed.put(oldObject, newObject);
-			}
-		}
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      if (ds.isRowModified(row))
+      {
+        DbObject oldObject = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, false);
+        DbObject newObject = ProcedureListPanel.buildDefinitionFromDataStore(dbConnection, ds, row, true);
+        changed.put(oldObject, newObject);
+      }
+    }
 
-		return renamer.getAlterScript(changed);
-	}
+    return renamer.getAlterScript(changed);
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent e)
-	{
-		if (e.getType() == TableModelEvent.UPDATE)
-		{
-			checkEnabled();
-		}
-	}
+  @Override
+  public void tableChanged(TableModelEvent e)
+  {
+    if (e.getType() == TableModelEvent.UPDATE)
+    {
+      checkEnabled();
+    }
+  }
 
   @Override
   public boolean useInToolbar()

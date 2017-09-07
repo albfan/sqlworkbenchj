@@ -27,16 +27,19 @@ import java.util.List;
 
 import javax.swing.JMenu;
 
+import workbench.resource.ResourceMgr;
+
 import workbench.gui.MainWindow;
 import workbench.gui.actions.RunMacroAction;
 import workbench.gui.components.WbMenu;
 import workbench.gui.components.WbTable;
-import workbench.resource.ResourceMgr;
+
 import workbench.sql.MacroAnnotation;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.sql.macros.MacroStorage;
+
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -48,69 +51,68 @@ public class MacroMenuBuilder
 {
   public static final String MENU_ITEM_NAME = "macroDataMenu";
 
-	public void buildMacroMenu(MainWindow main, JMenu macroMenu)
-	{
+  public void buildMacroMenu(MainWindow main, JMenu macroMenu)
+  {
     MacroStorage allMacros = MacroManager.getInstance().getMacros(main.getMacroClientId());
     if (allMacros == null) return;
 
-		List<MacroGroup> groups = allMacros.getVisibleGroups();
+    List<MacroGroup> groups = allMacros.getVisibleGroups();
 
-		if (groups == null || groups.isEmpty()) return;
+    if (groups == null || groups.isEmpty()) return;
 
-		macroMenu.addSeparator();
+    macroMenu.addSeparator();
 
-		int groupCount = groups.size();
-		int groupIndex = 0;
-		for (MacroGroup group : groups)
-		{
-			groupIndex ++;
-			WbMenu groupMenu = (groupCount > 1 ? new WbMenu(group.getName(), groupIndex) : null);
+    int groupCount = groups.size();
+    int groupIndex = 0;
+    for (MacroGroup group : groups)
+    {
+      groupIndex++;
+      WbMenu groupMenu = (groupCount > 1 ? new WbMenu(group.getName(), groupIndex) : null);
 
-			List<MacroDefinition> macros = group.getVisibleMacros();
+      List<MacroDefinition> macros = group.getVisibleMacros();
 
-			int index = 1;
-			for (MacroDefinition macro : macros)
-			{
-				if (StringUtil.isBlank(macro.getText())) continue;
-				RunMacroAction run = new RunMacroAction(main, macro, index);
-				if (groupMenu == null)
-				{
-					run.addToMenu(macroMenu);
-				}
-				else
-				{
-					run.addToMenu(groupMenu);
-				}
-				index++;
-			}
-			if (groupMenu != null) macroMenu.add(groupMenu);
-		}
-	}
+      int index = 1;
+      for (MacroDefinition macro : macros)
+      {
+        if (StringUtil.isBlank(macro.getText())) continue;
+        RunMacroAction run = new RunMacroAction(main, macro, index);
+        if (groupMenu == null)
+        {
+          run.addToMenu(macroMenu);
+        }
+        else
+        {
+          run.addToMenu(groupMenu);
+        }
+        index++;
+      }
+      if (groupMenu != null) macroMenu.add(groupMenu);
+    }
+  }
 
-	public WbMenu buildDataMacroMenu(MainWindow main, WbTable table, List<MacroAnnotation> macroAnnotations)
-	{
-		if (table == null) return null;
-		if (CollectionUtil.isEmpty(macroAnnotations)) return null;
+  public WbMenu buildDataMacroMenu(MainWindow main, WbTable table, List<MacroAnnotation> macroAnnotations)
+  {
+    if (table == null) return null;
+    if (CollectionUtil.isEmpty(macroAnnotations)) return null;
 
-		MacroStorage macros = MacroManager.getInstance().getMacros(main.getMacroClientId());
+    MacroStorage macros = MacroManager.getInstance().getMacros(main.getMacroClientId());
     if (macros == null) return null;
-    
-		WbMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
+
+    WbMenu result = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_MACRO));
     result.setName(MENU_ITEM_NAME);
 
-		for (MacroAnnotation annotation: macroAnnotations)
-		{
-			MacroDefinition macro = macros.getMacro(annotation.getMacroName());
-			if (macro != null)
-			{
-				RunMacroAction run = new RunMacroAction(main, macro, -1);
-				run.setTooltip(null);
-				run.setDataTable(table, annotation.getColumnMap());
-				run.addToMenu(result);
-			}
-		}
-		return result;
-	}
-
+    for (MacroAnnotation annotation : macroAnnotations)
+    {
+      MacroDefinition macro = macros.getMacro(annotation.getMacroName());
+      if (macro != null)
+      {
+        RunMacroAction run = new RunMacroAction(main, macro, -1);
+        run.setTooltip(null);
+        run.setDataTable(table, annotation.getColumnMap());
+        run.addToMenu(result);
+      }
+    }
+    return result;
+  }
 
 }

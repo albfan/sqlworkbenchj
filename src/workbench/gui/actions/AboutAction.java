@@ -30,25 +30,26 @@ import workbench.gui.dialogs.WbAboutDialog;
 
 /**
  * Action to display program version information
+ *
  * @see workbench.gui.dialogs.WbAboutDialog
  * @author Thomas Kellerer
  */
 public class AboutAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWindow;
+  private MainWindow mainWindow;
 
-	public AboutAction(MainWindow parent)
-	{
-		super();
-		this.mainWindow = parent;
-		initMenuDefinition("MnuTxtAbout");
-		removeIcon();
-	}
+  public AboutAction(MainWindow parent)
+  {
+    super();
+    this.mainWindow = parent;
+    initMenuDefinition("MnuTxtAbout");
+    removeIcon();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     WbAboutDialog.showDialog(mainWindow);
-	}
+  }
 }

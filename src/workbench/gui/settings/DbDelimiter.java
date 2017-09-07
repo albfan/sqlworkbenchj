@@ -31,91 +31,90 @@ import workbench.resource.Settings;
 
 import workbench.sql.DelimiterDefinition;
 
-
 /**
  *
  * @author Thomas Kellerer
  */
 public class DbDelimiter
 {
-	private final String dbid;
-	private final String displayName;
-	private String delimiter;
+  private final String dbid;
+  private final String displayName;
+  private String delimiter;
 
-	public DbDelimiter(String id, String name)
-	{
-		this.dbid = id;
-		this.displayName = name;
-	}
+  public DbDelimiter(String id, String name)
+  {
+    this.dbid = id;
+    this.displayName = name;
+  }
 
-	public String getDbid()
-	{
-		return dbid;
-	}
+  public String getDbid()
+  {
+    return dbid;
+  }
 
-	public String getDisplayName()
-	{
-		return displayName;
-	}
+  public String getDisplayName()
+  {
+    return displayName;
+  }
 
-	public String getDelimiter()
-	{
-		return delimiter == null ? "" : delimiter;
-	}
+  public String getDelimiter()
+  {
+    return delimiter == null ? "" : delimiter;
+  }
 
-	public void setDelimiter(String delimiterString)
-	{
-		this.delimiter = delimiterString;
-	}
+  public void setDelimiter(String delimiterString)
+  {
+    this.delimiter = delimiterString;
+  }
 
-	@Override
-	public String toString()
-	{
-		return displayName;
-	}
+  @Override
+  public String toString()
+  {
+    return displayName;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 7;
-		hash = 53 * hash + Objects.hashCode(this.dbid);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 53 * hash + Objects.hashCode(this.dbid);
+    return hash;
+  }
 
-	@Override
-	public boolean equals(Object other)
-	{
-		if (other == null)
-		{
-			return false;
-		}
-		if (other instanceof DbDelimiter)
-		{
-			return Objects.equals(this.dbid, ((DbDelimiter)other).dbid);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other == null)
+    {
+      return false;
+    }
+    if (other instanceof DbDelimiter)
+    {
+      return Objects.equals(this.dbid, ((DbDelimiter)other).dbid);
+    }
+    return false;
+  }
 
-	public static DbDelimiter[] getMapping()
-	{
-		List<DbDelimiter> result = new ArrayList<>();
-		Map<String, String> map = Settings.getInstance().getDbIdMapping();
-		for (Map.Entry<String, String> entry : map.entrySet())
-		{
-			DbDelimiter def = new DbDelimiter(entry.getKey(), entry.getValue());
-			String delim = Settings.getInstance().getDbDelimiter(entry.getKey());
-			def.setDelimiter(delim);
-			result.add(def);
-		}
-		Comparator<DbDelimiter> comp = (DbDelimiter o1, DbDelimiter o2) -> o1.displayName.compareToIgnoreCase(o2.displayName);
-		result.sort(comp);
-		DbDelimiter all = new DbDelimiter("*", ResourceMgr.getString("TxtDefault"));
-		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(null);
-		if (delim != null)
-		{
-			all.setDelimiter(delim.getDelimiter());
-		}
-		result.add(0, all);
-		return result.toArray(new DbDelimiter[0]);
-	}
+  public static DbDelimiter[] getMapping()
+  {
+    List<DbDelimiter> result = new ArrayList<>();
+    Map<String, String> map = Settings.getInstance().getDbIdMapping();
+    for (Map.Entry<String, String> entry : map.entrySet())
+    {
+      DbDelimiter def = new DbDelimiter(entry.getKey(), entry.getValue());
+      String delim = Settings.getInstance().getDbDelimiter(entry.getKey());
+      def.setDelimiter(delim);
+      result.add(def);
+    }
+    Comparator<DbDelimiter> comp = (DbDelimiter o1, DbDelimiter o2) -> o1.displayName.compareToIgnoreCase(o2.displayName);
+    result.sort(comp);
+    DbDelimiter all = new DbDelimiter("*", ResourceMgr.getString("TxtDefault"));
+    DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(null);
+    if (delim != null)
+    {
+      all.setDelimiter(delim.getDelimiter());
+    }
+    result.add(0, all);
+    return result.toArray(new DbDelimiter[0]);
+  }
 }

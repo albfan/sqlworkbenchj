@@ -26,24 +26,24 @@ package workbench.gui.actions;
 import workbench.gui.dbobjects.objecttree.FindObjectAction;
 
 /**
- * 	Register actions with the ShortcutManager that are not created upon startup.
- * 	For this, a dummy action is created (with no client) which will
- * 	kick off the registration with the ShortcutManager
+ * Register actions with the ShortcutManager that are not created upon startup.
+ * For this, a dummy action is created (with no client) which will
+ * kick off the registration with the ShortcutManager
  *
  * @author Thomas Kellerer
  */
 public class ActionRegistration
 {
-	public static void registerActions()
-	{
-		new ToggleTableSourceAction(null);
-		new ReloadAction(null);
-		new CopySelectedAsTextAction(null);
-		new CopySelectedAsSqlDeleteInsertAction(null);
-		new CopySelectedAsSqlInsertAction(null);
-		new CopySelectedAsSqlUpdateAction(null);
-		new SetNullAction(null);
-		new SelectFkValueAction(null);
+  public static void registerActions()
+  {
+    new ToggleTableSourceAction(null);
+    new ReloadAction(null);
+    new CopySelectedAsTextAction(null);
+    new CopySelectedAsSqlDeleteInsertAction(null);
+    new CopySelectedAsSqlInsertAction(null);
+    new CopySelectedAsSqlUpdateAction(null);
+    new SetNullAction(null);
+    new SelectFkValueAction(null);
     new FindObjectAction(null);
-	}
+  }
 }

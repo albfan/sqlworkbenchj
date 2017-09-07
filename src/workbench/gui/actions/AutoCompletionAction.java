@@ -25,86 +25,91 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+
 import javax.swing.KeyStroke;
-import workbench.db.WbConnection;
-import workbench.gui.completion.CompletionHandler;
-import workbench.gui.editor.JEditTextArea;
+
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
+import workbench.db.WbConnection;
+
+import workbench.gui.completion.CompletionHandler;
+import workbench.gui.editor.JEditTextArea;
+
 /**
  * Action to display the code-completion for SQL statements.
+ *
  * @see workbench.gui.completion.CompletionHandler
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class AutoCompletionAction
-	extends WbAction
+  extends WbAction
 {
-	private CompletionHandler handler;
-	private JEditTextArea editor;
-	private StatusBar status;
+  private CompletionHandler handler;
+  private JEditTextArea editor;
+  private StatusBar status;
 
-	public AutoCompletionAction(JEditTextArea edit, StatusBar bar)
-	{
-		super();
-		this.editor = edit;
-		this.status = bar;
-		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.CTRL_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setEnabled(false);
+  public AutoCompletionAction(JEditTextArea edit, StatusBar bar)
+  {
+    super();
+    this.editor = edit;
+    this.status = bar;
+    this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.CTRL_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setEnabled(false);
 
-		// we have to register this keybinding with the editor
-		// otherwise Ctrl-Space will not work properly
-		edit.addKeyBinding(this);
-	}
+    // we have to register this keybinding with the editor
+    // otherwise Ctrl-Space will not work properly
+    edit.addKeyBinding(this);
+  }
 
-	public void closePopup()
-	{
-		if (handler != null) handler.cancelPopup();
-	}
+  public void closePopup()
+  {
+    if (handler != null) handler.cancelPopup();
+  }
 
-	public void setConnection(WbConnection conn)
-	{
-		if (conn == null)
-		{
-			this.handler = null;
-		}
-		else if (this.handler == null)
-		{
-			try
-			{
-				this.handler = new CompletionHandler();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("AutoCompletionAction.setConnection()", "Error setting connection", e);
-			}
-		}
+  public void setConnection(WbConnection conn)
+  {
+    if (conn == null)
+    {
+      this.handler = null;
+    }
+    else if (this.handler == null)
+    {
+      try
+      {
+        this.handler = new CompletionHandler();
+      }
+      catch (Exception e)
+      {
+        LogMgr.logError("AutoCompletionAction.setConnection()", "Error setting connection", e);
+      }
+    }
 
-		if (conn != null)
-		{
-			this.handler.setStatusBar(status);
-			this.handler.setEditor(editor);
-			this.handler.setConnection(conn);
-		}
+    if (conn != null)
+    {
+      this.handler.setStatusBar(status);
+      this.handler.setEditor(editor);
+      this.handler.setConnection(conn);
+    }
 
-		this.setEnabled(conn != null);
-	}
+    this.setEnabled(conn != null);
+  }
 
-	@Override
-	public void setAccelerator(KeyStroke key)
-	{
-		KeyStroke old = this.getAccelerator();
-		editor.removeKeyBinding(old);
-		super.setAccelerator(key);
-		editor.addKeyBinding(this);
-	}
+  @Override
+  public void setAccelerator(KeyStroke key)
+  {
+    KeyStroke old = this.getAccelerator();
+    editor.removeKeyBinding(old);
+    super.setAccelerator(key);
+    editor.addKeyBinding(this);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		handler.showCompletionPopup();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    handler.showCompletionPopup();
+  }
 }

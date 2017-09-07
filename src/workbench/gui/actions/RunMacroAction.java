@@ -51,84 +51,84 @@ import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
 /**
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class RunMacroAction
-	extends WbAction
-	implements ListSelectionListener
+  extends WbAction
+  implements ListSelectionListener
 {
-	private MainWindow client;
-	private MacroDefinition macro;
-	private WbTable dataTable;
-	private Map<String, String> columnMap;
+  private MainWindow client;
+  private MacroDefinition macro;
+  private WbTable dataTable;
+  private Map<String, String> columnMap;
   private static int internalId;
 
-	public RunMacroAction(MainWindow macroClient, MacroDefinition def, int index)
-	{
-		super();
+  public RunMacroAction(MainWindow macroClient, MacroDefinition def, int index)
+  {
+    super();
     internalId++;
 
-		macro = def;
-		client = macroClient;
+    macro = def;
+    client = macroClient;
 
     putValue(ACTION_COMMAND_KEY, "run-macro-" + Integer.toString(internalId));
 
-		if (def == null)
-		{
-			String title = ResourceMgr.getPlainString("LblRunMacro");
-			setMenuText(title);
-			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-			desc = desc.replaceAll("[ ]*(%macro%)[ ]*", " ");
-			putValue(Action.SHORT_DESCRIPTION, desc);
-		}
-		else
-		{
-			String title = def.getName();
-			if (index < 10 && index > 0)
-			{
-				title = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
-			}
+    if (def == null)
+    {
+      String title = ResourceMgr.getPlainString("LblRunMacro");
+      setMenuText(title);
+      String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
+      desc = desc.replaceAll("[ ]*(%macro%)[ ]*", " ");
+      putValue(Action.SHORT_DESCRIPTION, desc);
+    }
+    else
+    {
+      String title = def.getName();
+      if (index < 10 && index > 0)
+      {
+        title = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
+      }
 
-			StoreableKeyStroke key = macro.getShortcut();
-			if (key != null)
-			{
-				KeyStroke stroke = key.getKeyStroke();
-				setAccelerator(stroke);
-			}
+      StoreableKeyStroke key = macro.getShortcut();
+      if (key != null)
+      {
+        KeyStroke stroke = key.getKeyStroke();
+        setAccelerator(stroke);
+      }
 
       setMenuText(title);
       initTooltip();
-		}
+    }
 
-		setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		setIcon(null);
-		setEnabled(macro != null && client != null);
-	}
+    setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
+    setIcon(null);
+    setEnabled(macro != null && client != null);
+  }
 
-	public void setDataTable(WbTable table, Map<String, String> colMap)
-	{
-		this.dataTable = table;
-		this.columnMap = new HashMap<>(colMap);
-		if (columnMap == null)
-		{
-			columnMap = Collections.emptyMap();
-		}
-		if (dataTable != null)
-		{
-			dataTable.getSelectionModel().addListSelectionListener(this);
-			setEnabled(dataTable.getSelectedRowCount() == 1);
-		}
-	}
+  public void setDataTable(WbTable table, Map<String, String> colMap)
+  {
+    this.dataTable = table;
+    this.columnMap = new HashMap<>(colMap);
+    if (columnMap == null)
+    {
+      columnMap = Collections.emptyMap();
+    }
+    if (dataTable != null)
+    {
+      dataTable.getSelectionModel().addListSelectionListener(this);
+      setEnabled(dataTable.getSelectedRowCount() == 1);
+    }
+  }
 
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		if (dataTable != null)
-		{
-			dataTable.getSelectionModel().removeListSelectionListener(this);
-		}
-	}
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    if (dataTable != null)
+    {
+      dataTable.getSelectionModel().removeListSelectionListener(this);
+    }
+  }
 
   private void initTooltip()
   {
@@ -142,81 +142,81 @@ public class RunMacroAction
     setTooltip(desc);
   }
 
-	public void setMacro(MacroDefinition def)
-	{
-		this.macro = def;
+  public void setMacro(MacroDefinition def)
+  {
+    this.macro = def;
     initTooltip();
-	}
+  }
 
-	private void executeStandardMacro(ActionEvent e)
-	{
-		SqlPanel sql = this.client.getCurrentSqlPanel();
-		if (sql == null) return;
+  private void executeStandardMacro(ActionEvent e)
+  {
+    SqlPanel sql = this.client.getCurrentSqlPanel();
+    if (sql == null) return;
 
-		if (macro.getExpandWhileTyping())
-		{
-			MacroExpander expander = sql.getEditor().getMacroExpander();
-			if (expander != null)
-			{
-				expander.insertMacroText(macro.getText());
-				sql.selectEditorLater();
-			}
-		}
-		else
-		{
-			boolean shiftPressed = isShiftPressed(e) && invokedByMouse(e);
-			MacroRunner runner = new MacroRunner();
-			runner.runMacro(macro, sql, shiftPressed);
-		}
-	}
+    if (macro.getExpandWhileTyping())
+    {
+      MacroExpander expander = sql.getEditor().getMacroExpander();
+      if (expander != null)
+      {
+        expander.insertMacroText(macro.getText());
+        sql.selectEditorLater();
+      }
+    }
+    else
+    {
+      boolean shiftPressed = isShiftPressed(e) && invokedByMouse(e);
+      MacroRunner runner = new MacroRunner();
+      runner.runMacro(macro, sql, shiftPressed);
+    }
+  }
 
-	private void executeDataMacro()
-	{
-		if (dataTable == null) return;
+  private void executeDataMacro()
+  {
+    if (dataTable == null) return;
 
-		SqlPanel sql = this.client.getCurrentSqlPanel();
-		if (sql == null) return;
+    SqlPanel sql = this.client.getCurrentSqlPanel();
+    if (sql == null) return;
 
-		int row = dataTable.getSelectedRow();
-		if (row < 0) return;
+    int row = dataTable.getSelectedRow();
+    if (row < 0) return;
 
-		DataStore ds = dataTable.getDataStore();
-		if (ds == null) return;
+    DataStore ds = dataTable.getDataStore();
+    if (ds == null) return;
 
-		RowData rowData = ds.getRow(row);
-		if (rowData == null) return;
+    RowData rowData = ds.getRow(row);
+    if (rowData == null) return;
 
-		MacroRunner runner = new MacroRunner();
-		runner.runDataMacro(macro, ds.getResultInfo(), rowData, sql, columnMap);
-	}
+    MacroRunner runner = new MacroRunner();
+    runner.runDataMacro(macro, ds.getResultInfo(), rowData, sql, columnMap);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.client == null || this.macro == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.client == null || this.macro == null) return;
 
-		if (this.dataTable != null)
-		{
-			executeDataMacro();
-		}
-		else
-		{
-			executeStandardMacro(e);
-		}
-	}
+    if (this.dataTable != null)
+    {
+      executeDataMacro();
+    }
+    else
+    {
+      executeStandardMacro(e);
+    }
+  }
 
-	@Override
-	public void valueChanged(ListSelectionEvent e)
-	{
-		if (e.getValueIsAdjusting()) return;
+  @Override
+  public void valueChanged(ListSelectionEvent e)
+  {
+    if (e.getValueIsAdjusting()) return;
 
-		if (dataTable == null)
-		{
-			setEnabled(false);
-			return;
-		}
-		setEnabled(dataTable.getSelectedRowCount() == 1);
-	}
+    if (dataTable == null)
+    {
+      setEnabled(false);
+      return;
+    }
+    setEnabled(dataTable.getSelectedRowCount() == 1);
+  }
 
   @Override
   public boolean useInToolbar()

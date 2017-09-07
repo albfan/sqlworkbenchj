@@ -33,20 +33,21 @@ import workbench.gui.bookmarks.BookmarkSelector;
  * @author Thomas Kellerer
  */
 public class BookmarksAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow parent;
-	public BookmarksAction(MainWindow window)
-	{
-		super();
-		initMenuDefinition("MnuTxtBookmarks");
-		setIcon("bookmark");
-		parent = window;
-	}
+  private MainWindow parent;
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		BookmarkSelector.selectBookmark(parent);
-	}
+  public BookmarksAction(MainWindow window)
+  {
+    super();
+    initMenuDefinition("MnuTxtBookmarks");
+    setIcon("bookmark");
+    parent = window;
+  }
+
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    BookmarkSelector.selectBookmark(parent);
+  }
 }

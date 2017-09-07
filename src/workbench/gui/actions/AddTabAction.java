@@ -28,9 +28,10 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import workbench.gui.MainWindow;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+
+import workbench.gui.MainWindow;
 
 /**
  * Action to add a new tab to the MainWindow's interface
@@ -38,25 +39,25 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.MainWindow
  * @see workbench.gui.MainWindow#addTab()
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class AddTabAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow client;
+  private MainWindow client;
 
-	public AddTabAction(MainWindow aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.initMenuDefinition("MnuTxtAddTab", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon(null);
-	}
+  public AddTabAction(MainWindow aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+    this.initMenuDefinition("MnuTxtAddTab", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon(null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.addTab();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.addTab();
+  }
 }

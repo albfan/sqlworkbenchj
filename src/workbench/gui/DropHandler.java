@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.gui;
 
 import java.awt.Component;
@@ -39,83 +38,82 @@ import workbench.gui.sql.SqlPanel;
 
 import workbench.util.WbFile;
 
-
 /**
  *
  * @author Thomas Kellerer
  */
 class DropHandler
-	implements DropTargetListener
+  implements DropTargetListener
 {
-	private final MainWindow client;
-	private final DropTarget target;
+  private final MainWindow client;
+  private final DropTarget target;
 
-	DropHandler(MainWindow client, Component dropTarget)
-	{
-		this.client = client;
-		target = new DropTarget(dropTarget, DnDConstants.ACTION_COPY, this);
-	}
+  DropHandler(MainWindow client, Component dropTarget)
+  {
+    this.client = client;
+    target = new DropTarget(dropTarget, DnDConstants.ACTION_COPY, this);
+  }
 
-	public void dispose()
-	{
-		if (target != null)
-		{
-			target.removeDropTargetListener(this);
-		}
-	}
+  public void dispose()
+  {
+    if (target != null)
+    {
+      target.removeDropTargetListener(this);
+    }
+  }
 
-	@Override
-	public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-		dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
-	}
+  @Override
+  public void dragEnter(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+  {
+    dropTargetDragEvent.acceptDrag(DnDConstants.ACTION_COPY);
+  }
 
-	@Override
-	public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
-	{
-	}
+  @Override
+  public void dragExit(java.awt.dnd.DropTargetEvent dropTargetEvent)
+  {
+  }
 
-	@Override
-	public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-	}
+  @Override
+  public void dragOver(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+  {
+  }
 
-	@Override
-	public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
-	{
-		try
-		{
-			Transferable tr = dropTargetDropEvent.getTransferable();
-			if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-			{
-				dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
-				List fileList = (List)tr.getTransferData(DataFlavor.javaFileListFlavor);
+  @Override
+  public void drop(java.awt.dnd.DropTargetDropEvent dropTargetDropEvent)
+  {
+    try
+    {
+      Transferable tr = dropTargetDropEvent.getTransferable();
+      if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+      {
+        dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY);
+        List fileList = (List)tr.getTransferData(DataFlavor.javaFileListFlavor);
         if (isWorkspaceFile(fileList))
         {
           WbFile f = new WbFile((File)fileList.get(0));
           client.loadWorkspace(f.getFullPath(), true);
         }
         else if (fileList != null)
-				{
-					openFiles(fileList);
-				}
-			}
-			else
-			{
-				dropTargetDropEvent.rejectDrop();
-			}
-		}
-		catch (IOException | UnsupportedFlavorException io)
-		{
-			LogMgr.logError("MainWindow.drop()", "Error processing drop event", io);
-			dropTargetDropEvent.rejectDrop();
-		}
-	}
+        {
+          openFiles(fileList);
+        }
+      }
+      else
+      {
+        dropTargetDropEvent.rejectDrop();
+      }
+    }
+    catch (IOException | UnsupportedFlavorException io)
+    {
+      LogMgr.logError("MainWindow.drop()", "Error processing drop event", io);
+      dropTargetDropEvent.rejectDrop();
+    }
+  }
 
-	@Override
-	public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
-	{
-	}
+  @Override
+  public void dropActionChanged(java.awt.dnd.DropTargetDragEvent dropTargetDragEvent)
+  {
+  }
 
   private boolean isWorkspaceFile(final List fileList)
   {
@@ -123,15 +121,15 @@ class DropHandler
     if (fileList.size() != 1) return false;
     WbFile f = new WbFile((File)fileList.get(0));
     return (f.getExtension().equalsIgnoreCase(ExtensionFileFilter.WORKSPACE_EXT));
- }
+  }
 
-	private void openFiles(final List fileList)
-	{
-		WbSwingUtilities.invokeLater(() ->
+  private void openFiles(final List fileList)
+  {
+    WbSwingUtilities.invokeLater(() ->
     {
       int count = fileList.size();
 
-      for (int i=0; i < count; i++)
+      for (int i = 0; i < count; i++)
       {
         File file = (File)fileList.get(i);
         boolean doSelect = (i == count - 1);
@@ -139,6 +137,6 @@ class DropHandler
         newTab.readFile(file.getAbsolutePath(), null);
       }
     });
-	}
+  }
 
 }

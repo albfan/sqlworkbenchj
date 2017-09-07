@@ -40,38 +40,38 @@ import workbench.storage.DataStore;
  * @author Thomas Kellerer
  */
 public class AutomaticReloadAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public AutomaticReloadAction(SqlPanel panel)
-	{
-		initMenuDefinition("MnuTxtReloadAutomatic");
-		setClient(panel);
-	}
+  public AutomaticReloadAction(SqlPanel panel)
+  {
+    initMenuDefinition("MnuTxtReloadAutomatic");
+    setClient(panel);
+  }
 
-	public final void setClient(SqlPanel panel)
-	{
-		client = panel;
-		checkEnabled();
-	}
+  public final void setClient(SqlPanel panel)
+  {
+    client = panel;
+    checkEnabled();
+  }
 
-	public void checkEnabled()
-	{
-		boolean canRefresh = false;
-    DwPanel dw =  client.getCurrentResult();
+  public void checkEnabled()
+  {
+    boolean canRefresh = false;
+    DwPanel dw = client.getCurrentResult();
     if (dw != null)
     {
       DataStore ds = dw.getDataStore();
       canRefresh = (ds != null ? ds.getOriginalConnection() != null : false);
     }
-		setEnabled(canRefresh);
-	}
+    setEnabled(canRefresh);
+  }
 
-	@Override
-	public void executeAction(ActionEvent evt)
-	{
-    DwPanel dw =  client.getCurrentResult();
+  @Override
+  public void executeAction(ActionEvent evt)
+  {
+    DwPanel dw = client.getCurrentResult();
     String lastValue = Settings.getInstance().getProperty("workbench.gui.result.refresh.last_interval", null);
     String interval = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("LblRefreshIntv"), lastValue);
     if (interval == null) return;
@@ -82,7 +82,7 @@ public class AutomaticReloadAction
       client.getRefreshMgr().addRefresh(client, dw, milliSeconds);
       client.checkAutoRefreshIndicator(dw);
     }
-	}
+  }
 
   @Override
   public boolean useInToolbar()

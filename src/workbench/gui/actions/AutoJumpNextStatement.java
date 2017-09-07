@@ -26,17 +26,17 @@ package workbench.gui.actions;
 import workbench.resource.Settings;
 
 /**
- *	Action to toggle the automatic jump to the next statement
- *  if "Execute current" statement is used
+ * Action to toggle the automatic jump to the next statement
+ * if "Execute current" statement is used
  *
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class AutoJumpNextStatement
-	extends CheckBoxAction
+  extends CheckBoxAction
 {
-	public AutoJumpNextStatement()
-	{
-		super("MnuTxtJumpToNext", Settings.PROPERTY_AUTO_JUMP_STATEMENT);
-	}
+  public AutoJumpNextStatement()
+  {
+    super("MnuTxtJumpToNext", Settings.PROPERTY_AUTO_JUMP_STATEMENT);
+  }
 
 }

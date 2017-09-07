@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.gui.bookmarks;
 
 import java.util.List;
@@ -29,65 +28,65 @@ import java.util.List;
  */
 class BookmarkGroup
 {
-	private final List<NamedScriptLocation> bookmarks;
-	private final String groupId;
-	private final long createdAt;
-	private String groupName;
+  private final List<NamedScriptLocation> bookmarks;
+  private final String groupId;
+  private final long createdAt;
+  private String groupName;
 
-	BookmarkGroup(List<NamedScriptLocation> bookmarkList, String panelId)
-	{
-		this.bookmarks = bookmarkList;
-		this.groupId = panelId;
-		this.createdAt = System.currentTimeMillis();
-	}
+  BookmarkGroup(List<NamedScriptLocation> bookmarkList, String panelId)
+  {
+    this.bookmarks = bookmarkList;
+    this.groupId = panelId;
+    this.createdAt = System.currentTimeMillis();
+  }
 
-	public String getName()
-	{
-		return groupName;
-	}
+  public String getName()
+  {
+    return groupName;
+  }
 
-	public void setName(String name)
-	{
-		this.groupName = name;
-	}
+  public void setName(String name)
+  {
+    this.groupName = name;
+  }
 
-	public List<NamedScriptLocation> getBookmarks()
-	{
-		return bookmarks;
-	}
+  public List<NamedScriptLocation> getBookmarks()
+  {
+    return bookmarks;
+  }
 
-	public String getGroupId()
-	{
-		return groupId;
-	}
+  public String getGroupId()
+  {
+    return groupId;
+  }
 
-	public long creationTime()
-	{
-		return this.createdAt;
-	}
+  public long creationTime()
+  {
+    return this.createdAt;
+  }
 
-	@Override
-	public int hashCode()
-	{
-		int hash = 5;
-		hash = 79 * hash + (this.groupId != null ? this.groupId.hashCode() : 0);
-		return hash;
-	}
+  @Override
+  public int hashCode()
+  {
+    int hash = 5;
+    hash = 79 * hash + (this.groupId != null ? this.groupId.hashCode() : 0);
+    return hash;
+  }
 
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (obj instanceof BookmarkGroup)
-		{
-			BookmarkGroup other = (BookmarkGroup) obj;
-			return this.groupId.equals(other.groupId);
-		}
-		return false;
-	}
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj instanceof BookmarkGroup)
+    {
+      BookmarkGroup other = (BookmarkGroup)obj;
+      return this.groupId.equals(other.groupId);
+    }
+    return false;
+  }
 
-	@Override
-	public String toString()
-	{
-		return "Group: " + this.groupName + ", " + this.bookmarks.size() + " bookmarks";
-	}
+  @Override
+  public String toString()
+  {
+    return "Group: " + this.groupName + ", " + this.bookmarks.size() + " bookmarks";
+  }
 }

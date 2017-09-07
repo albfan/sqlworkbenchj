@@ -38,7 +38,7 @@ import workbench.gui.sql.EditorPanel;
 
 /**
  * A KeyEventDispatcher which handle Ctrl-Tab and Ctrl-Shift-Tab to navigate in tabbed pane.
- *
+ * <p>
  * This is necessary to allow Ctrl-Tab to switch tabs in the MainWindow. If no KeyEventDispatcher
  * is installed, Ctrl-Tab will jump inside the current tabt to the next focusable component,
  * even if an action is registered with the Ctrl-Tab keystroke.
@@ -53,50 +53,50 @@ import workbench.gui.sql.EditorPanel;
  * @see WbManager#initUI()
  */
 public class WbKeyDispatcher
-	implements KeyEventDispatcher
+  implements KeyEventDispatcher
 {
-	private WbAction nextTab;
-	private WbAction prevTab;
+  private WbAction nextTab;
+  private WbAction prevTab;
   private boolean enabled;
 
-	private static class LazyInstanceHolder
-	{
-		protected static final WbKeyDispatcher instance = new WbKeyDispatcher();
-	}
+  private static class LazyInstanceHolder
+  {
+    protected static final WbKeyDispatcher instance = new WbKeyDispatcher();
+  }
 
-	public static WbKeyDispatcher getInstance()
-	{
-		return LazyInstanceHolder.instance;
-	}
+  public static WbKeyDispatcher getInstance()
+  {
+    return LazyInstanceHolder.instance;
+  }
 
-	private WbKeyDispatcher()
-	{
+  private WbKeyDispatcher()
+  {
     super();
-	}
+  }
 
-	/**
-	 * Define the two actions to be grabbed by this focus manager.
-	 * <br>
-	 * As these actions are window specific, the window that wants to
-	 * override the focus traversal keys, needs to regiters these actions
-	 * in the windowActivated event.
-	 * <br>
-	 * To make sure, the actions are executed for the correct window, the window
-	 * must de-register the actions in the windowDeactivated event by passing <tt>null</tt>
-	 * for the two parameters
-	 *
-	 * @param next the action for "Next tab", may be null
-	 * @param prev the action for "previous tab", may be null
-	 */
-	public void grabActions(WbAction next, WbAction prev)
-	{
-		synchronized (LazyInstanceHolder.instance)
-		{
-			nextTab = next;
-			prevTab = prev;
+  /**
+   * Define the two actions to be grabbed by this focus manager.
+   * <br>
+   * As these actions are window specific, the window that wants to
+   * override the focus traversal keys, needs to regiters these actions
+   * in the windowActivated event.
+   * <br>
+   * To make sure, the actions are executed for the correct window, the window
+   * must de-register the actions in the windowDeactivated event by passing <tt>null</tt>
+   * for the two parameters
+   *
+   * @param next the action for "Next tab", may be null
+   * @param prev the action for "previous tab", may be null
+   */
+  public void grabActions(WbAction next, WbAction prev)
+  {
+    synchronized (LazyInstanceHolder.instance)
+    {
+      nextTab = next;
+      prevTab = prev;
       enabled = nextTab != null && prevTab != null;
-		}
-	}
+    }
+  }
 
   @Override
   public boolean dispatchKeyEvent(KeyEvent evt)
@@ -108,7 +108,7 @@ public class WbKeyDispatcher
       FocusManager mgr = FocusManager.getCurrentManager();
       Component owner = mgr.getFocusOwner();
       // Allow Alt-Click in the editor and result sets
-      if ( (owner instanceof EditorPanel) || (owner instanceof WbTable))
+      if ((owner instanceof EditorPanel) || (owner instanceof WbTable))
       {
         evt.consume();
         return true;
@@ -137,6 +137,5 @@ public class WbKeyDispatcher
     }
     return processed;
   }
-
 
 }

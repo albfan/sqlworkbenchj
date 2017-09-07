@@ -31,10 +31,10 @@ import javax.swing.JComponent;
  */
 public interface MacroClient
 {
-	void executeMacroSql(String sql, boolean replaceText, boolean appendResults);
-	String getStatementAtCursor();
-	String getSelectedText();
-	String getText();
-	JComponent getPanel();
+  void executeMacroSql(String sql, boolean replaceText, boolean appendResults);
+  String getStatementAtCursor();
+  String getSelectedText();
+  String getText();
+  JComponent getPanel();
   int getMacroClientId();
 }

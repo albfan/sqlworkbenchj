@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.gui.bookmarks;
 
 /**
@@ -27,46 +26,46 @@ package workbench.gui.bookmarks;
  */
 public class NamedScriptLocation
 {
-	private final String name;
-	private final int offset;
-	private final String tabId;
-	private int lineNumber;
+  private final String name;
+  private final int offset;
+  private final String tabId;
+  private int lineNumber;
 
-	public NamedScriptLocation(String bookMark, int position, String panelId)
-	{
-		this.name = bookMark;
-		this.offset = position;
-		this.tabId = panelId;
-	}
+  public NamedScriptLocation(String bookMark, int position, String panelId)
+  {
+    this.name = bookMark;
+    this.offset = position;
+    this.tabId = panelId;
+  }
 
-	public int getLineNumber()
-	{
-		return lineNumber;
-	}
+  public int getLineNumber()
+  {
+    return lineNumber;
+  }
 
-	public void setLineNumber(int line)
-	{
-		this.lineNumber = line;
-	}
+  public void setLineNumber(int line)
+  {
+    this.lineNumber = line;
+  }
 
-	public String getTabId()
-	{
-		return tabId;
-	}
+  public String getTabId()
+  {
+    return tabId;
+  }
 
-	public String getName()
-	{
-		return name;
-	}
+  public String getName()
+  {
+    return name;
+  }
 
-	public int getOffset()
-	{
-		return offset;
-	}
+  public int getOffset()
+  {
+    return offset;
+  }
 
-	@Override
-	public String toString()
-	{
-		return "{Bookmark: " + name + ", offset=" + offset + '}';
-	}
+  @Override
+  public String toString()
+  {
+    return "{Bookmark: " + name + ", offset=" + offset + '}';
+  }
 }
