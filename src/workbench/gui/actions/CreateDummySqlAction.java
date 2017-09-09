@@ -51,59 +51,59 @@ import static workbench.db.DummyDML.*;
  * @author Thomas Kellerer
  */
 public class CreateDummySqlAction
-	extends WbAction
-	implements WbSelectionListener
+  extends WbAction
+  implements WbSelectionListener
 {
-	private DbObjectList source;
-	private String scriptType;
+  private DbObjectList source;
+  private String scriptType;
   private WbSelectionModel selection;
 
-	public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, ListSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDummyUpdate", client, list, ObjectScripter.TYPE_UPDATE);
-	}
+  public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, ListSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDummyUpdate", client, list, ObjectScripter.TYPE_UPDATE);
+  }
 
-	public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, ListSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
-	}
+  public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, ListSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
+  }
 
-	public static CreateDummySqlAction createDummySelectAction(DbObjectList client, ListSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
-	}
+  public static CreateDummySqlAction createDummySelectAction(DbObjectList client, ListSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
+  }
 
-	public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, WbSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDummyUpdate", client, list, ObjectScripter.TYPE_UPDATE);
-	}
+  public static CreateDummySqlAction createDummyUpdateAction(DbObjectList client, WbSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDummyUpdate", client, list, ObjectScripter.TYPE_UPDATE);
+  }
 
-	public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, WbSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
-	}
+  public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, WbSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
+  }
 
-	public static CreateDummySqlAction createDummySelectAction(DbObjectList client, WbSelectionModel list)
-	{
-		return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
-	}
+  public static CreateDummySqlAction createDummySelectAction(DbObjectList client, WbSelectionModel list)
+  {
+    return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
+  }
 
-	private CreateDummySqlAction(String key, DbObjectList client, ListSelectionModel list, String type)
+  private CreateDummySqlAction(String key, DbObjectList client, ListSelectionModel list, String type)
   {
     this(key, client, WbSelectionModel.Factory.createFacade(list), type);
   }
 
-	private CreateDummySqlAction(String key, DbObjectList client, WbSelectionModel list, String type)
-	{
-		super();
-		isConfigurable = false;
-		initMenuDefinition(key);
-		source = client;
-		scriptType = type;
+  private CreateDummySqlAction(String key, DbObjectList client, WbSelectionModel list, String type)
+  {
+    super();
+    isConfigurable = false;
+    initMenuDefinition(key);
+    source = client;
+    scriptType = type;
     selection = list;
-		checkEnabled();
-		selection.addSelectionListener(this);
-	}
+    checkEnabled();
+    selection.addSelectionListener(this);
+  }
 
   @Override
   public void dispose()
@@ -123,8 +123,8 @@ public class CreateDummySqlAction
     List<ColumnIdentifier> cols = new ArrayList<>();
 
     boolean generatePrepared = Settings.getInstance().getBoolProperty(PROP_CONFIG_MAKE_PREPARED, false);
-    
-    if (isCtrlPressed(e) )
+
+    if (isCtrlPressed(e))
     {
       generatePrepared = true;
     }
@@ -182,7 +182,7 @@ public class CreateDummySqlAction
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-		checkEnabled();
+    checkEnabled();
   }
 
   private void checkEnabled()

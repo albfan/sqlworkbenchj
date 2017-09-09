@@ -34,37 +34,37 @@ import workbench.gui.MainWindow;
  * @author Thomas Kellerer
  */
 public class CreateNewConnection
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow window;
+  private MainWindow window;
 
-	public CreateNewConnection(MainWindow client)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtCreateNewConn");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		this.setEnabled(false);
-		this.window = client;
-		checkState();
-	}
+  public CreateNewConnection(MainWindow client)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtCreateNewConn");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    this.setEnabled(false);
+    this.window = client;
+    checkState();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.window == null) return;
-		if (!window.canUseSeparateConnection()) return;
-		this.window.createNewConnectionForCurrentPanel();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.window == null) return;
+    if (!window.canUseSeparateConnection()) return;
+    this.window.createNewConnectionForCurrentPanel();
+  }
 
-	public void checkState()
-	{
-		if (this.window == null)
-		{
-			this.setEnabled(false);
-		}
-		else
-		{
-			this.setEnabled(window.canUseSeparateConnection() && !window.usesSeparateConnection());
-		}
-	}
+  public void checkState()
+  {
+    if (this.window == null)
+    {
+      this.setEnabled(false);
+    }
+    else
+    {
+      this.setEnabled(window.canUseSeparateConnection() && !window.usesSeparateConnection());
+    }
+  }
 }

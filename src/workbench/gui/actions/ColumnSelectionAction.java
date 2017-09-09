@@ -33,27 +33,29 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.sql.EditorPanel;
 
 /**
- *	Action to enable column selection for the next selection in the editor
- *	@author  Thomas Kellerer
+ * Action to enable column selection for the next selection in the editor
+ *
+ * @author Thomas Kellerer
  */
-public class ColumnSelectionAction extends WbAction
+public class ColumnSelectionAction
+  extends WbAction
 {
-	private EditorPanel client;
+  private EditorPanel client;
 
-	public ColumnSelectionAction(EditorPanel aClient)
-	{
-		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtColumnSelection", KeyStroke.getKeyStroke(KeyEvent.VK_Q,KeyEvent.ALT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setEnabled(true);
-	}
+  public ColumnSelectionAction(EditorPanel aClient)
+  {
+    super();
+    this.client = aClient;
+    this.initMenuDefinition("MnuTxtColumnSelection", KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.ALT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+    this.setEnabled(true);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.setSelectionRectangular(true);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.setSelectionRectangular(true);
+  }
 
   @Override
   public boolean useInToolbar()

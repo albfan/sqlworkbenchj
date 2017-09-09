@@ -37,104 +37,105 @@ import workbench.gui.WbSwingUtilities;
 
 /**
  * Toggle the display of the toolbar in the main window
+ *
  * @author Petr Novotnik
  */
 public class CheckBoxAction
-	extends WbAction
+  extends WbAction
 {
-	private boolean switchedOn = false;
-	private String settingsProperty;
-	private JCheckBoxMenuItem toggleMenu;
+  private boolean switchedOn = false;
+  private String settingsProperty;
+  private JCheckBoxMenuItem toggleMenu;
 
-	public CheckBoxAction(String resourceKey)
-	{
-		this(resourceKey, null);
-	}
+  public CheckBoxAction(String resourceKey)
+  {
+    this(resourceKey, null);
+  }
 
-	public CheckBoxAction(String resourceKey, String prop)
-	{
-		super();
-		this.initMenuDefinition(resourceKey);
-		this.setIcon(null);
-		this.settingsProperty = prop;
-		if (prop != null)
-		{
-			this.switchedOn = Settings.getInstance().getBoolProperty(settingsProperty);
-		}
-	}
+  public CheckBoxAction(String resourceKey, String prop)
+  {
+    super();
+    this.initMenuDefinition(resourceKey);
+    this.setIcon(null);
+    this.settingsProperty = prop;
+    if (prop != null)
+    {
+      this.switchedOn = Settings.getInstance().getBoolProperty(settingsProperty);
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.setSwitchedOn(!this.switchedOn);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.setSwitchedOn(!this.switchedOn);
+  }
 
-	public boolean isSwitchedOn()
-	{
-		return this.switchedOn;
-	}
+  public boolean isSwitchedOn()
+  {
+    return this.switchedOn;
+  }
 
-	public void setSwitchedOn(boolean flag)
-	{
-		if (flag == this.switchedOn) return;
+  public void setSwitchedOn(boolean flag)
+  {
+    if (flag == this.switchedOn) return;
 
-		this.switchedOn = flag;
-		if (this.toggleMenu != null)
-		{
-			WbSwingUtilities.invoke(() ->
+    this.switchedOn = flag;
+    if (this.toggleMenu != null)
+    {
+      WbSwingUtilities.invoke(() ->
       {
         toggleMenu.setSelected(switchedOn);
       });
-		}
-		if (this.settingsProperty != null)
-		{
-			Settings.getInstance().setProperty(settingsProperty, this.switchedOn);
-		}
-	}
+    }
+    if (this.settingsProperty != null)
+    {
+      Settings.getInstance().setProperty(settingsProperty, this.switchedOn);
+    }
+  }
 
-	@Override
-	public JMenuItem getMenuItem()
-	{
-		if (this.toggleMenu == null)
-		{
-			createMenuItem();
-		}
-		return toggleMenu;
-	}
+  @Override
+  public JMenuItem getMenuItem()
+  {
+    if (this.toggleMenu == null)
+    {
+      createMenuItem();
+    }
+    return toggleMenu;
+  }
 
-	private void createMenuItem()
-	{
-		this.toggleMenu = new JCheckBoxMenuItem();
-		this.toggleMenu.setAction(this);
-		String text = this.getValue(Action.NAME).toString();
-		int pos = text.indexOf('&');
-		if (pos > -1)
-		{
-			char mnemonic = text.charAt(pos + 1);
-			text = text.substring(0, pos) + text.substring(pos + 1);
-			this.toggleMenu.setMnemonic((int) mnemonic);
-		}
-		this.toggleMenu.setText(text);
-		this.toggleMenu.setSelected(this.switchedOn);
-	}
+  private void createMenuItem()
+  {
+    this.toggleMenu = new JCheckBoxMenuItem();
+    this.toggleMenu.setAction(this);
+    String text = this.getValue(Action.NAME).toString();
+    int pos = text.indexOf('&');
+    if (pos > -1)
+    {
+      char mnemonic = text.charAt(pos + 1);
+      text = text.substring(0, pos) + text.substring(pos + 1);
+      this.toggleMenu.setMnemonic((int)mnemonic);
+    }
+    this.toggleMenu.setText(text);
+    this.toggleMenu.setSelected(this.switchedOn);
+  }
 
-	@Override
-	public void addToMenu(JMenu aMenu)
-	{
-		if (this.toggleMenu == null)
-		{
-			createMenuItem();
-		}
-		aMenu.add(this.toggleMenu);
-	}
+  @Override
+  public void addToMenu(JMenu aMenu)
+  {
+    if (this.toggleMenu == null)
+    {
+      createMenuItem();
+    }
+    aMenu.add(this.toggleMenu);
+  }
 
-	@Override
-	public void setAccelerator(KeyStroke key)
-	{
-		super.setAccelerator(key);
-		if (this.toggleMenu != null)
-		{
-			toggleMenu.setAccelerator(key);
-		}
-	}
+  @Override
+  public void setAccelerator(KeyStroke key)
+  {
+    super.setAccelerator(key);
+    if (this.toggleMenu != null)
+    {
+      toggleMenu.setAccelerator(key);
+    }
+  }
 }

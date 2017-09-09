@@ -18,7 +18,6 @@
  *
  * To contact the author please send an email to: support@sql-workbench.net
  */
-
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
@@ -34,30 +33,30 @@ import workbench.log.LogMgr;
  * @author Charles (peacech@gmail.com)
  */
 public class FileReconnectAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow window;
+  private MainWindow window;
 
-	public FileReconnectAction(MainWindow aWindow)
-	{
-		super();
-		this.window = aWindow;
-		this.initMenuDefinition("MnuTxtReconnect");
-		setEnabled(false);
-	}
+  public FileReconnectAction(MainWindow aWindow)
+  {
+    super();
+    this.window = aWindow;
+    this.initMenuDefinition("MnuTxtReconnect");
+    setEnabled(false);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
+  @Override
+  public void executeAction(ActionEvent e)
+  {
     LogMgr.logDebug("FileReconnectAction.executeAction()", "Initiating reconnect.");
-		ConnectionProfile profile = window.getCurrentProfile();
-		boolean reloadWorkspace = false;
-		window.disconnect(false, false, true);
-		if (invokedByMouse(e) && isCtrlPressed(e))
-		{
-			reloadWorkspace = true;
-		}
-		window.connectTo(profile, false, reloadWorkspace);
-	}
+    ConnectionProfile profile = window.getCurrentProfile();
+    boolean reloadWorkspace = false;
+    window.disconnect(false, false, true);
+    if (invokedByMouse(e) && isCtrlPressed(e))
+    {
+      reloadWorkspace = true;
+    }
+    window.connectTo(profile, false, reloadWorkspace);
+  }
 
 }

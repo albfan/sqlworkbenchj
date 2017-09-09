@@ -111,13 +111,9 @@ public class SchemaReportAction
         {
           LogMgr.logError("TableListPanel.saveReport()", "Error writing schema report", e);
           final String msg = ExceptionUtil.getDisplay(e);
-          EventQueue.invokeLater(new Runnable()
+          EventQueue.invokeLater(() ->
           {
-            @Override
-            public void run()
-            {
-              WbSwingUtilities.showErrorMessage(caller, msg);
-            }
+            WbSwingUtilities.showErrorMessage(caller, msg);
           });
         }
         finally

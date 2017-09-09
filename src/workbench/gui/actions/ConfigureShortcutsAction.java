@@ -30,24 +30,25 @@ import workbench.gui.settings.ShortcutEditor;
 
 /**
  * Action to open the shortcut manager window.
+ *
  * @see workbench.gui.settings.ShortcutEditor
  * @author Thomas Kellerer
  */
 public class ConfigureShortcutsAction
-	extends WbAction
+  extends WbAction
 {
-	public ConfigureShortcutsAction()
-	{
-		super();
-		initMenuDefinition("MnuTxtConfigureShortcuts");
-		removeIcon();
-	}
+  public ConfigureShortcutsAction()
+  {
+    super();
+    initMenuDefinition("MnuTxtConfigureShortcuts");
+    removeIcon();
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		final JFrame main = WbManager.getInstance().getCurrentWindow();
-		ShortcutEditor editor = new ShortcutEditor(main);
-		editor.showWindow();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    final JFrame main = WbManager.getInstance().getCurrentWindow();
+    ShortcutEditor editor = new ShortcutEditor(main);
+    editor.showWindow();
+  }
 }

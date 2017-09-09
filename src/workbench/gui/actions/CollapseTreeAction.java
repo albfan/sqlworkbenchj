@@ -29,27 +29,27 @@ import workbench.interfaces.ExpandableTree;
 
 /**
  * Action to collapse all nodes in a tree
-
+ *
  * @author Thomas Kellerer
  */
 public class CollapseTreeAction
-	extends WbAction
+  extends WbAction
 {
-	private ExpandableTree client;
+  private ExpandableTree client;
 
-	public CollapseTreeAction(ExpandableTree tree)
-	{
-		super();
-		this.client = tree;
-		this.initMenuDefinition("LblCollapseAll");
-		this.setIcon("collapse");
-	}
+  public CollapseTreeAction(ExpandableTree tree)
+  {
+    super();
+    this.client = tree;
+    this.initMenuDefinition("LblCollapseAll");
+    this.setIcon("collapse");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.collapseAll();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.collapseAll();
+  }
 
   @Override
   public boolean useInToolbar()

@@ -29,27 +29,28 @@ import workbench.interfaces.ClipboardSupport;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to clear the contents of a entry field
- *	@author  Thomas Kellerer
+ * Action to clear the contents of a entry field
+ *
+ * @author Thomas Kellerer
  */
 public class ClearAction
-	extends WbAction
+  extends WbAction
 {
-	private ClipboardSupport client;
+  private ClipboardSupport client;
 
-	public ClearAction(ClipboardSupport aClient)
-	{
-		super();
-		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtClear");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-	}
+  public ClearAction(ClipboardSupport aClient)
+  {
+    super();
+    this.client = aClient;
+    this.setMenuTextByKey("MnuTxtClear");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.client.clear();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.client.clear();
+  }
 
   @Override
   public boolean useInToolbar()

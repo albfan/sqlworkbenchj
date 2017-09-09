@@ -45,45 +45,45 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class CreatePKAction
-	extends WbAction
+  extends WbAction
 {
-	private DbObjectList columns;
+  private DbObjectList columns;
 
-	public CreatePKAction(DbObjectList cols)
-	{
-		super();
-		this.columns = cols;
-		this.initMenuDefinition("MnuTxtCreatePK");
-	}
+  public CreatePKAction(DbObjectList cols)
+  {
+    super();
+    this.columns = cols;
+    this.initMenuDefinition("MnuTxtCreatePK");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		List<? extends DbObject> selected = columns.getSelectedObjects();
-		if (CollectionUtil.isEmpty(selected)) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    List<? extends DbObject> selected = columns.getSelectedObjects();
+    if (CollectionUtil.isEmpty(selected)) return;
 
-		List<ColumnIdentifier> cols = CollectionUtil.arrayList();
-		for (DbObject dbo : selected)
-		{
-			cols.add((ColumnIdentifier)dbo);
-		}
+    List<ColumnIdentifier> cols = CollectionUtil.arrayList();
+    for (DbObject dbo : selected)
+    {
+      cols.add((ColumnIdentifier)dbo);
+    }
 
-		TableIdentifier table = columns.getObjectTable();
+    TableIdentifier table = columns.getObjectTable();
 
-		DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
-		String sql = changer.getAddPKScript(table, cols);
-		if (StringUtil.isBlank(sql)) return;
+    DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
+    String sql = changer.getAddPKScript(table, cols);
+    if (StringUtil.isBlank(sql)) return;
 
-		RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
+    RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
 
-		panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtCreatePK"));
+    panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtCreatePK"));
 
-		if (panel.wasRun() && columns != null)
-		{
-			EventQueue.invokeLater(columns::reload);
-		}
+    if (panel.wasRun() && columns != null)
+    {
+      EventQueue.invokeLater(columns::reload);
+    }
 
-	}
+  }
 
   @Override
   public boolean useInToolbar()

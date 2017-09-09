@@ -52,114 +52,114 @@ import workbench.util.CollectionUtil;
  * @author Thomas Kellerer
  */
 public class CompileDbObjectAction
-	extends WbAction
-	implements WbSelectionListener
+  extends WbAction
+  implements WbSelectionListener
 {
-	private JMenuItem menuItem;
-	private DbObjectList source;
-	private WbSelectionModel selection;
+  private JMenuItem menuItem;
+  private DbObjectList source;
+  private WbSelectionModel selection;
 
-	public CompileDbObjectAction(DbObjectList client, WbSelectionModel list)
-	{
-		super();
-		this.initMenuDefinition("MnuTxtRecompile");
-		this.source = client;
-		this.selection = list;
-		setVisible(false);
+  public CompileDbObjectAction(DbObjectList client, WbSelectionModel list)
+  {
+    super();
+    this.initMenuDefinition("MnuTxtRecompile");
+    this.source = client;
+    this.selection = list;
+    setVisible(false);
     checkState();
-	}
+  }
 
-	public void setVisible(boolean flag)
-	{
-		if (this.menuItem == null)
-		{
-			menuItem = getMenuItem();
-		}
-		menuItem.setVisible(flag);
-	}
+  public void setVisible(boolean flag)
+  {
+    if (this.menuItem == null)
+    {
+      menuItem = getMenuItem();
+    }
+    menuItem.setVisible(flag);
+  }
 
-	public void setConnection(WbConnection conn)
-	{
-		if (conn != null && conn.getMetadata().isOracle())
-		{
-			setVisible(true);
+  public void setConnection(WbConnection conn)
+  {
+    if (conn != null && conn.getMetadata().isOracle())
+    {
+      setVisible(true);
       selection.addSelectionListener(this);
-			checkState();
-		}
-		else
-		{
+      checkState();
+    }
+    else
+    {
       selection.removeSelectionListener(this);
-			setVisible(false);
-			setEnabled(false);
-		}
-	}
+      setVisible(false);
+      setEnabled(false);
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		compileObjects();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    compileObjects();
+  }
 
-	private void compileObjects()
-	{
-		if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
+  private void compileObjects()
+  {
+    if (!WbSwingUtilities.isConnectionIdle(source.getComponent(), source.getConnection())) return;
 
-		List<DbObject> objects = getSelectedObjects();
-		if (CollectionUtil.isEmpty(objects)) return;
+    List<DbObject> objects = getSelectedObjects();
+    if (CollectionUtil.isEmpty(objects)) return;
 
-		try
-		{
-			ObjectCompilerUI compilerUI = new ObjectCompilerUI(objects, this.source.getConnection());
-			compilerUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
-		}
-	}
+    try
+    {
+      ObjectCompilerUI compilerUI = new ObjectCompilerUI(objects, this.source.getConnection());
+      compilerUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
+    }
+    catch (SQLException e)
+    {
+      LogMgr.logError("ProcedureListPanel.compileObjects()", "Error initializing ObjectCompilerUI", e);
+    }
+  }
 
-	private List<DbObject> getSelectedObjects()
-	{
-		List<? extends DbObject> selected = this.source.getSelectedObjects();
-		if (CollectionUtil.isEmpty(selected)) return null;
+  private List<DbObject> getSelectedObjects()
+  {
+    List<? extends DbObject> selected = this.source.getSelectedObjects();
+    if (CollectionUtil.isEmpty(selected)) return null;
 
-		Set<String> packageNames = CollectionUtil.caseInsensitiveSet();
-		List<DbObject> objects = new ArrayList<>();
+    Set<String> packageNames = CollectionUtil.caseInsensitiveSet();
+    List<DbObject> objects = new ArrayList<>();
 
-		for (DbObject dbo : selected)
-		{
-			if (!OracleObjectCompiler.canCompile(dbo)) continue;
+    for (DbObject dbo : selected)
+    {
+      if (!OracleObjectCompiler.canCompile(dbo)) continue;
 
-			if (dbo instanceof ProcedureDefinition)
-			{
-				ProcedureDefinition pd = (ProcedureDefinition) dbo;
-				if (pd.isPackageProcedure())
-				{
+      if (dbo instanceof ProcedureDefinition)
+      {
+        ProcedureDefinition pd = (ProcedureDefinition)dbo;
+        if (pd.isPackageProcedure())
+        {
           boolean added = packageNames.add(pd.getPackageName());
           if (!added)
-					{
+          {
             // the package was already processed and at least one
             // procedure is therefor part of the list of objects
-						continue;
-					}
-				}
-			}
-			objects.add(dbo);
-		}
+            continue;
+          }
+        }
+      }
+      objects.add(dbo);
+    }
 
-		return objects;
-	}
+    return objects;
+  }
 
-	private void checkState()
-	{
-		List<DbObject> selected = getSelectedObjects();
-		this.setEnabled(CollectionUtil.isNonEmpty(selected));
-	}
+  private void checkState()
+  {
+    List<DbObject> selected = getSelectedObjects();
+    this.setEnabled(CollectionUtil.isNonEmpty(selected));
+  }
 
   @Override
   public void selectionChanged(WbSelectionModel source)
   {
-		EventQueue.invokeLater(this::checkState);
+    EventQueue.invokeLater(this::checkState);
   }
 
   @Override

@@ -78,15 +78,11 @@ public class ScrollToColumnAction
           row = client.getFirstVisibleRow();
         }
         final Rectangle rect = client.getCellRect(row, idx, true);
-        EventQueue.invokeLater(new Runnable()
+        EventQueue.invokeLater(() ->
         {
-          @Override
-          public void run()
-          {
-            client.scrollRectToVisible(rect);
-            client.getTableHeader().repaint();
-            client.repaint();
-          }
+          client.scrollRectToVisible(rect);
+          client.getTableHeader().repaint();
+          client.repaint();
         });
       }
     }

@@ -55,137 +55,137 @@ import workbench.util.WbProperties;
 /**
  * Open a new file in the main window, with the option to open the file in a new tab
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class OpenFileAction
-	extends WbAction
+  extends WbAction
 {
-	private MainWindow mainWindow;
-	private TextFileContainer container;
+  private MainWindow mainWindow;
+  private TextFileContainer container;
 
-	public OpenFileAction(MainWindow mainWindow)
-	{
-		this(mainWindow, null);
-	}
+  public OpenFileAction(MainWindow mainWindow)
+  {
+    this(mainWindow, null);
+  }
 
-	public OpenFileAction(TextFileContainer client)
-	{
-		this(null, client);
-	}
+  public OpenFileAction(TextFileContainer client)
+  {
+    this(null, client);
+  }
 
-	public OpenFileAction(MainWindow window, TextFileContainer client)
-	{
-		super();
-		mainWindow = window;
-		container = client;
-		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Open");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
-		setCreateMenuSeparator(true);
-	}
+  public OpenFileAction(MainWindow window, TextFileContainer client)
+  {
+    super();
+    mainWindow = window;
+    container = client;
+    this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
+    this.setIcon("Open");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
+    setCreateMenuSeparator(true);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		EncodingUtil.fetchEncodings();
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    EncodingUtil.fetchEncodings();
 
-		final MainWindow window = getWindow();
-		final SqlPanel currentPanel = getCurrentPanel();
+    final MainWindow window = getWindow();
+    final SqlPanel currentPanel = getCurrentPanel();
 
-		if (currentPanel != null)
-		{
-			if (!currentPanel.checkAndSaveFile()) return;
-		}
+    if (currentPanel != null)
+    {
+      if (!currentPanel.checkAndSaveFile()) return;
+    }
 
-		final String toolname = "directories";
-		final String lastDirKey = "last.script.dir";
+    final String toolname = "directories";
+    final String lastDirKey = "last.script.dir";
 
-		try
-		{
-			File lastDir = new File(Settings.getInstance().getLastSqlDir());
-			if (Settings.getInstance().getStoreScriptDirInWksp())
-			{
+    try
+    {
+      File lastDir = new File(Settings.getInstance().getLastSqlDir());
+      if (Settings.getInstance().getStoreScriptDirInWksp())
+      {
         WbProperties props = window.getToolProperties(toolname);
-				String dirname = props == null ? null : props.getProperty(lastDirKey, null);
-				if (StringUtil.isNonBlank(dirname))
-				{
-					lastDir = new File(dirname);
-				}
-			}
+        String dirname = props == null ? null : props.getProperty(lastDirKey, null);
+        if (StringUtil.isNonBlank(dirname))
+        {
+          lastDir = new File(dirname);
+        }
+      }
 
-			if (GuiSettings.getFollowFileDirectory())
-			{
-				if (currentPanel != null && currentPanel.hasFileLoaded())
-				{
-					WbFile f = new WbFile(currentPanel.getCurrentFileName());
-					if (f.getParent() != null)
-					{
-						lastDir = f.getParentFile();
-					}
-				}
-				if (lastDir == null)
-				{
-					lastDir = GuiSettings.getDefaultFileDir();
-				}
-			}
+      if (GuiSettings.getFollowFileDirectory())
+      {
+        if (currentPanel != null && currentPanel.hasFileLoaded())
+        {
+          WbFile f = new WbFile(currentPanel.getCurrentFileName());
+          if (f.getParent() != null)
+          {
+            lastDir = f.getParentFile();
+          }
+        }
+        if (lastDir == null)
+        {
+          lastDir = GuiSettings.getDefaultFileDir();
+        }
+      }
 
-			WbFileChooser fc = new WbFileChooser(lastDir);
-			fc.setSettingsID("workbench.editor.file.opendialog");
-			fc.setMultiSelectionEnabled(true);
+      WbFileChooser fc = new WbFileChooser(lastDir);
+      fc.setSettingsID("workbench.editor.file.opendialog");
+      fc.setMultiSelectionEnabled(true);
 
       FileEncodingAccessoryPanel acc = new FileEncodingAccessoryPanel(window);
 
       fc.addEncodingPanel(acc);
-			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
+      fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 
       boolean rememberNewTabSetting = window != null && window.getCurrentSqlPanel() != null;
 
-			int answer = fc.showOpenDialog(window);
+      int answer = fc.showOpenDialog(window);
 
       GuiSettings.setAutoDetectFileEncoding(acc.getAutoDetect());
-      
-			if (answer == JFileChooser.APPROVE_OPTION)
-			{
-				final String encoding = acc.getEncoding();
 
-				if (!GuiSettings.getFollowFileDirectory())
-				{
-					lastDir = fc.getCurrentDirectory();
-					if (Settings.getInstance().getStoreScriptDirInWksp())
-					{
-						window.getToolProperties(toolname).setProperty(lastDirKey, lastDir.getAbsolutePath());
-					}
-					else
-					{
-						Settings.getInstance().setLastSqlDir(lastDir.getAbsolutePath());
-					}
-				}
+      if (answer == JFileChooser.APPROVE_OPTION)
+      {
+        final String encoding = acc.getEncoding();
 
-				Settings.getInstance().setDefaultFileEncoding(encoding);
+        if (!GuiSettings.getFollowFileDirectory())
+        {
+          lastDir = fc.getCurrentDirectory();
+          if (Settings.getInstance().getStoreScriptDirInWksp())
+          {
+            window.getToolProperties(toolname).setProperty(lastDirKey, lastDir.getAbsolutePath());
+          }
+          else
+          {
+            Settings.getInstance().setLastSqlDir(lastDir.getAbsolutePath());
+          }
+        }
 
-				File[] files = fc.getSelectedFiles();
+        Settings.getInstance().setDefaultFileEncoding(encoding);
 
-				final boolean openInNewTab;
-				if (files.length == 1)
-				{
-					openInNewTab = acc.openInNewTab();
-				}
-				else
-				{
-					openInNewTab = true;
-				}
+        File[] files = fc.getSelectedFiles();
 
-				if (rememberNewTabSetting)
-				{
-					Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);
-				}
+        final boolean openInNewTab;
+        if (files.length == 1)
+        {
+          openInNewTab = acc.openInNewTab();
+        }
+        else
+        {
+          openInNewTab = true;
+        }
 
-				for (File sf : files)
-				{
-					final WbFile f = new WbFile(sf);
+        if (rememberNewTabSetting)
+        {
+          Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);
+        }
 
-					final String fname = f.getFullPath();
-					EventQueue.invokeLater(() ->
+        for (File sf : files)
+        {
+          final WbFile f = new WbFile(sf);
+
+          final String fname = f.getFullPath();
+          EventQueue.invokeLater(() ->
           {
             SqlPanel sql;
             String encodingToUse = encoding;
@@ -196,7 +196,7 @@ public class OpenFileAction
 
             if (openInNewTab)
             {
-              sql = (SqlPanel) window.addTab();
+              sql = (SqlPanel)window.addTab();
             }
             else
             {
@@ -212,33 +212,33 @@ public class OpenFileAction
             // even if the current tab didn't really change
             window.currentTabChanged();
           });
-				}
-			}
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("EditorPanel.openFile()", "Error selecting file", th);
-			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(th));
-		}
-	}
+        }
+      }
+    }
+    catch (Throwable th)
+    {
+      LogMgr.logError("EditorPanel.openFile()", "Error selecting file", th);
+      WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(th));
+    }
+  }
 
-	private MainWindow getWindow()
-	{
-		if (mainWindow != null) return mainWindow;
-		if (container != null)
-		{
-			return container.getMainWindow();
-		}
-		return null;
-	}
+  private MainWindow getWindow()
+  {
+    if (mainWindow != null) return mainWindow;
+    if (container != null)
+    {
+      return container.getMainWindow();
+    }
+    return null;
+  }
 
-	private SqlPanel getCurrentPanel()
-	{
-		if (getWindow() != null)
-		{
-			return getWindow().getCurrentSqlPanel();
-		}
-		return null;
-	}
+  private SqlPanel getCurrentPanel()
+  {
+    if (getWindow() != null)
+    {
+      return getWindow().getCurrentSqlPanel();
+    }
+    return null;
+  }
 
 }

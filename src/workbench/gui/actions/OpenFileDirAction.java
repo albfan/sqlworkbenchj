@@ -35,54 +35,54 @@ import workbench.gui.WbSwingUtilities;
 /**
  * An action to open the directory of the currently loaded file in the system.
  *
- * @see Desktop#open(java.io.File) 
+ * @see Desktop#open(java.io.File)
  *
  * @author Thomas Kellerer
  */
 public class OpenFileDirAction
-	extends WbAction
+  extends WbAction
 {
-	private TextFileContainer editor;
+  private TextFileContainer editor;
 
-	public OpenFileDirAction(TextFileContainer textContainer)
-	{
-		this.editor = textContainer;
-		this.initMenuDefinition("MnuTxtOpenFileDir");
-		boolean hasFile = this.editor.getCurrentFile() != null;
-		boolean desktopAvailable = false;
-		if (hasFile)
-		{
-			desktopAvailable = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
-			if (!desktopAvailable)
-			{
-				LogMgr.logWarning("OpenFileDirAction", "Desktop or Desktop.open() not supported!");
-			}
-		}
-		this.setEnabled(hasFile && desktopAvailable);
-	}
+  public OpenFileDirAction(TextFileContainer textContainer)
+  {
+    this.editor = textContainer;
+    this.initMenuDefinition("MnuTxtOpenFileDir");
+    boolean hasFile = this.editor.getCurrentFile() != null;
+    boolean desktopAvailable = false;
+    if (hasFile)
+    {
+      desktopAvailable = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
+      if (!desktopAvailable)
+      {
+        LogMgr.logWarning("OpenFileDirAction", "Desktop or Desktop.open() not supported!");
+      }
+    }
+    this.setEnabled(hasFile && desktopAvailable);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (editor == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (editor == null) return;
 
-		File file = editor.getCurrentFile();
-		if (file == null) return;
+    File file = editor.getCurrentFile();
+    if (file == null) return;
 
-		File dir = file.getParentFile();
+    File dir = file.getParentFile();
 
-		if (dir != null)
-		{
-			try
-			{
-				Desktop.getDesktop().open(dir);
-			}
-			catch (Exception io)
-			{
-				WbSwingUtilities.showErrorMessage(io.getLocalizedMessage());
-			}
-		}
-	}
+    if (dir != null)
+    {
+      try
+      {
+        Desktop.getDesktop().open(dir);
+      }
+      catch (Exception io)
+      {
+        WbSwingUtilities.showErrorMessage(io.getLocalizedMessage());
+      }
+    }
+  }
 
   @Override
   public boolean useInToolbar()

@@ -34,30 +34,23 @@ import workbench.gui.sql.SqlPanel;
  * @author Thomas Kellerer
  */
 public class CloseOtherResultsAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel client;
+  private SqlPanel client;
 
-	public CloseOtherResultsAction(SqlPanel panel)
-	{
-		client = panel;
-		initMenuDefinition("MnuTxtCloseOtherResults");
-		this.setEnabled(client.getResultTabCount() > 2);
-	}
+  public CloseOtherResultsAction(SqlPanel panel)
+  {
+    client = panel;
+    initMenuDefinition("MnuTxtCloseOtherResults");
+    this.setEnabled(client.getResultTabCount() > 2);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		final DwPanel toKeep = client.getCurrentResult();
-		ResultCloseFilter filter = new ResultCloseFilter()
-		{
-			@Override
-			public boolean shouldClose(DwPanel panel, int panelIndex)
-			{
-				return toKeep != panel;
-			}
-		};
-		client.closeSelectedResults(filter);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    final DwPanel toKeep = client.getCurrentResult();
+    ResultCloseFilter filter = (DwPanel panel, int panelIndex) -> toKeep != panel;
+    client.closeSelectedResults(filter);
+  }
 
 }

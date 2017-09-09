@@ -29,27 +29,28 @@ import workbench.gui.sql.SqlPanel;
 
 /**
  * Run all statements in the current SQL Panel
+ *
  * @see workbench.gui.sql.SqlPanel#runCurrentStatement()
- *	@author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ExecuteUpToCursorAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel target;
+  private SqlPanel target;
 
-	public ExecuteUpToCursorAction(SqlPanel aPanel)
-	{
-		super();
-		this.target = aPanel;
-		this.initMenuDefinition("MnuTxtExecuteToCursor");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+  public ExecuteUpToCursorAction(SqlPanel aPanel)
+  {
+    super();
+    this.target = aPanel;
+    this.initMenuDefinition("MnuTxtExecuteToCursor");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
     this.setIcon("execute_to");
-	}
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		this.target.runToCursor();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    this.target.runToCursor();
+  }
 
 }

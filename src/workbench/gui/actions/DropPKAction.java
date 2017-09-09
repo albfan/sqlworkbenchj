@@ -41,35 +41,35 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class DropPKAction
-	extends WbAction
+  extends WbAction
 {
-	private final DbObjectList columns;
+  private final DbObjectList columns;
 
-	public DropPKAction(DbObjectList cols)
-	{
-		super();
-		this.columns = cols;
-		this.initMenuDefinition("MnuTxtDropPK");
-	}
+  public DropPKAction(DbObjectList cols)
+  {
+    super();
+    this.columns = cols;
+    this.initMenuDefinition("MnuTxtDropPK");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		TableIdentifier table = columns.getObjectTable();
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    TableIdentifier table = columns.getObjectTable();
 
-		DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
-		String sql = changer.getDropPKScript(table);
-		if (StringUtil.isBlank(sql)) return;
+    DbObjectChanger changer = new DbObjectChanger(columns.getConnection());
+    String sql = changer.getDropPKScript(table);
+    if (StringUtil.isBlank(sql)) return;
 
-		RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
+    RunScriptPanel panel = new RunScriptPanel(columns.getConnection(), sql);
 
-		panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtDropPK"));
+    panel.openWindow(columns.getComponent(), ResourceMgr.getString("TxtDropPK"));
 
-		if (panel.wasRun() && columns != null)
-		{
-			EventQueue.invokeLater(columns::reload);
-		}
-	}
+    if (panel.wasRun() && columns != null)
+    {
+      EventQueue.invokeLater(columns::reload);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

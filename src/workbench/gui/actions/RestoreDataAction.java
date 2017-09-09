@@ -32,34 +32,34 @@ import workbench.interfaces.NullableEditor;
  * @author Thomas Kellerer
  */
 public class RestoreDataAction
-	extends WbAction
+  extends WbAction
 {
-	private NullableEditor client;
+  private NullableEditor client;
 
-	public RestoreDataAction(NullableEditor editor)
-	{
-		initMenuDefinition("MnuTxtRestoreOrgValue");
-		client = editor;
-		if (client != null && client.getEditor() != null)
-		{
-			addToInputMap(client.getEditor());
-		}
-	}
+  public RestoreDataAction(NullableEditor editor)
+  {
+    initMenuDefinition("MnuTxtRestoreOrgValue");
+    client = editor;
+    if (client != null && client.getEditor() != null)
+    {
+      addToInputMap(client.getEditor());
+    }
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (client != null)
-		{
-			client.restoreOriginal();
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (client != null)
+    {
+      client.restoreOriginal();
+    }
+  }
 
-	@Override
-	public boolean allowDuplicate()
-	{
-		return true;
-	}
+  @Override
+  public boolean allowDuplicate()
+  {
+    return true;
+  }
 
   @Override
   public boolean useInToolbar()

@@ -29,20 +29,21 @@ import workbench.WbManager;
 
 /**
  * Open a new SQL MainWindow
- *	@author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
 public class FileNewWindowAction
-	extends WbAction
+  extends WbAction
 {
-	public FileNewWindowAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtFileNewWindow");
-	}
+  public FileNewWindowAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtFileNewWindow");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		WbManager.getInstance().openNewWindow();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    WbManager.getInstance().openNewWindow();
+  }
 }

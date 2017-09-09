@@ -30,28 +30,28 @@ import workbench.resource.ResourceMgr;
 /**
  * Action to clear the contents of the message display
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ClearMessagesAction
-	extends WbAction
+  extends WbAction
 {
-	private ResultLogger logdisplay;
+  private ResultLogger logdisplay;
 
-	public ClearMessagesAction(ResultLogger log)
-	{
-		super();
-		logdisplay = log;
-		this.initMenuDefinition("MnuTxtClearLog");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setEnabled(true);
-	}
+  public ClearMessagesAction(ResultLogger log)
+  {
+    super();
+    logdisplay = log;
+    this.initMenuDefinition("MnuTxtClearLog");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+    this.setEnabled(true);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (logdisplay != null)
-		{
-			logdisplay.clearLog();
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (logdisplay != null)
+    {
+      logdisplay.clearLog();
+    }
+  }
 }

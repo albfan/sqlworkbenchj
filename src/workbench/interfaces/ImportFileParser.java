@@ -40,71 +40,75 @@ import workbench.storage.RowActionMonitor;
  * @author Thomas Kellerer
  */
 public interface ImportFileParser
-	extends RowDataProducer
+  extends RowDataProducer
 {
-	/**
-	 *  Return the encoding used to read input files
-	 */
-	String getEncoding();
+  /**
+   * Return the encoding used to read input files
+   */
+  String getEncoding();
 
-	/**
-	 * Set the file to be processed.
-	 * @param file
-	 */
-	void setInputFile(File file);
+  /**
+   * Set the file to be processed.
+   *
+   * @param file
+   */
+  void setInputFile(File file);
 
-	/**
-	 *	Return the name of the input file
-	 */
-	String getSourceFilename();
+  /**
+   * Return the name of the input file
+   */
+  String getSourceFilename();
 
-	/**
-	 *	Parse the file and return a list of column
-	 *  names defined in that file
-	 */
-	List<ColumnIdentifier> getColumnsFromFile();
+  /**
+   * Parse the file and return a list of column
+   * names defined in that file
+   */
+  List<ColumnIdentifier> getColumnsFromFile();
 
-	void setTableName(String table);
-	void setTargetSchema(String schema);
+  void setTableName(String table);
 
-	/**
-	 * Define the column structure to be used for the import
-	 */
-	void setColumns(List<ColumnIdentifier> columns)
-		throws SQLException;
+  void setTargetSchema(String schema);
 
-	/**
-	 *	Returns the column list as a comma separated string
-	 *  that can be used for the WbImport command.
-	 */
-	String getColumns();
+  /**
+   * Define the column structure to be used for the import
+   */
+  void setColumns(List<ColumnIdentifier> columns)
+    throws SQLException;
 
-	ImportFileHandler getFileHandler();
+  /**
+   * Returns the column list as a comma separated string
+   * that can be used for the WbImport command.
+   */
+  String getColumns();
 
-	/**
-	 * Define a modifier to change the values received
-	 * from the text file before they are converted to
-	 * the correct datatype.
-	 *
-	 * @param modifier the ImportValueModifier to apply to the values in the import file
-	 */
-	void setValueModifier(ImportValueModifier modifier);
+  ImportFileHandler getFileHandler();
 
-	void setMultiFileImport(boolean flag);
-	boolean isMultiFileImport();
+  /**
+   * Define a modifier to change the values received
+   * from the text file before they are converted to
+   * the correct datatype.
+   *
+   * @param modifier the ImportValueModifier to apply to the values in the import file
+   */
+  void setValueModifier(ImportValueModifier modifier);
 
-	void setSourceFiles(ImportFileLister source);
+  void setMultiFileImport(boolean flag);
+
+  boolean isMultiFileImport();
+
+  void setSourceFiles(ImportFileLister source);
+
   void setTrimValues(boolean trimValues);
 
-	List<File> getProcessedFiles();
+  List<File> getProcessedFiles();
 
-	void addColumnFilter(String colname, String regex);
+  void addColumnFilter(String colname, String regex);
 
-	void setConnection(WbConnection connection);
+  void setConnection(WbConnection connection);
 
-	void setRowMonitor(RowActionMonitor monitor);
+  void setRowMonitor(RowActionMonitor monitor);
 
-	void setIgnoreMissingColumns(boolean flag);
+  void setIgnoreMissingColumns(boolean flag);
 
   void setCheckTargetWithQuery(boolean flag);
 }

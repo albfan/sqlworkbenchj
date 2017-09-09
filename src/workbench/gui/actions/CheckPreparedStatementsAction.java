@@ -34,32 +34,32 @@ import workbench.resource.Settings;
  *
  * @see workbench.resource.Settings#setCheckPreparedStatements(boolean)
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CheckPreparedStatementsAction
-	extends CheckBoxAction
-	implements PropertyChangeListener
+  extends CheckBoxAction
+  implements PropertyChangeListener
 {
-	private static final String PROPERTY = "workbench.sql.checkprepared";
+  private static final String PROPERTY = "workbench.sql.checkprepared";
 
-	public CheckPreparedStatementsAction()
-	{
-		super("MnuTxtCheckPrepared", PROPERTY);
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		Settings.getInstance().addPropertyChangeListener(this, PROPERTY);
-	}
+  public CheckPreparedStatementsAction()
+  {
+    super("MnuTxtCheckPrepared", PROPERTY);
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    Settings.getInstance().addPropertyChangeListener(this, PROPERTY);
+  }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt)
-	{
-		setSwitchedOn(Settings.getInstance().getCheckPreparedStatements());
-	}
+  @Override
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+    setSwitchedOn(Settings.getInstance().getCheckPreparedStatements());
+  }
 
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		Settings.getInstance().removePropertyChangeListener(this);
-	}
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    Settings.getInstance().removePropertyChangeListener(this);
+  }
 
 }

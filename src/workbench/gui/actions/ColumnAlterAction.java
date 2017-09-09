@@ -56,196 +56,196 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class ColumnAlterAction
-	extends WbAction
-	implements TableModelListener
+  extends WbAction
+  implements TableModelListener
 {
-	private WbTable definition;
-	private TableIdentifier sourceTable;
-	private WbConnection dbConnection;
-	private Reloadable client;
+  private WbTable definition;
+  private TableIdentifier sourceTable;
+  private WbConnection dbConnection;
+  private Reloadable client;
 
-	public ColumnAlterAction(WbTable defTable)
-	{
-		super();
-		this.definition = defTable;
-		this.initMenuDefinition("MnuTxtRunAlter");
-		this.setEnabled(false);
-		definition.addTableModelListener(this);
-	}
+  public ColumnAlterAction(WbTable defTable)
+  {
+    super();
+    this.definition = defTable;
+    this.initMenuDefinition("MnuTxtRunAlter");
+    this.setEnabled(false);
+    definition.addTableModelListener(this);
+  }
 
-	@Override
-	public void dispose()
-	{
-		if (definition != null)
-		{
-			definition.removeTableModelListener(this);
-		}
-		super.dispose();
-	}
+  @Override
+  public void dispose()
+  {
+    if (definition != null)
+    {
+      definition.removeTableModelListener(this);
+    }
+    super.dispose();
+  }
 
-	public void setReloader(Reloadable reload)
-	{
-		client = reload;
-	}
+  public void setReloader(Reloadable reload)
+  {
+    client = reload;
+  }
 
-	@Override
-	public void tableChanged(TableModelEvent e)
-	{
-		if (definition.isReadOnly()) return;
+  @Override
+  public void tableChanged(TableModelEvent e)
+  {
+    if (definition.isReadOnly()) return;
 
-		if (!isTable())
-		{
-			setEnabled(false);
-			return;
-		}
+    if (!isTable())
+    {
+      setEnabled(false);
+      return;
+    }
 
-		DataStoreTableModel model = (DataStoreTableModel)e.getSource();
-		if (model.getDataStore().isModified())
-		{
-			setEnabled(sourceTable != null);
-		}
-	}
+    DataStoreTableModel model = (DataStoreTableModel)e.getSource();
+    if (model.getDataStore().isModified())
+    {
+      setEnabled(sourceTable != null);
+    }
+  }
 
-	public void setSourceTable(WbConnection con, TableIdentifier tbl)
-	{
-		dbConnection = con;
-		sourceTable = tbl;
-	}
+  public void setSourceTable(WbConnection con, TableIdentifier tbl)
+  {
+    dbConnection = con;
+    sourceTable = tbl;
+  }
 
-	private boolean isTable()
-	{
-		if (dbConnection == null) return false;
-		if (sourceTable == null) return false;
-		return dbConnection.getDbSettings().columnCommentAllowed(this.sourceTable.getType());
-	}
+  private boolean isTable()
+  {
+    if (dbConnection == null) return false;
+    if (sourceTable == null) return false;
+    return dbConnection.getDbSettings().columnCommentAllowed(this.sourceTable.getType());
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.definition == null) return;
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.definition == null) return;
 
-		this.definition.stopEditing();
+    this.definition.stopEditing();
 
-		String alterScript = getScript();
-		if (alterScript == null)
-		{
-			String msg = ResourceMgr.getString("MsgNoAlterAvailable");
-			WbSwingUtilities.showMessage(definition, msg);
-		}
+    String alterScript = getScript();
+    if (alterScript == null)
+    {
+      String msg = ResourceMgr.getString("MsgNoAlterAvailable");
+      WbSwingUtilities.showMessage(definition, msg);
+    }
 
-		final RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
-		panel.openWindow(definition, ResourceMgr.getString("TxtAlterTable"));
+    final RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
+    panel.openWindow(definition, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.wasRun() && panel.isSuccess() && client != null)
-		{
-			EventQueue.invokeLater(client::reload);
-		}
-	}
+    if (panel.wasRun() && panel.isSuccess() && client != null)
+    {
+      EventQueue.invokeLater(client::reload);
+    }
+  }
 
-	private String getScript()
-	{
-		DataStore ds = definition.getDataStore();
-		ColumnChanger changer = new ColumnChanger(dbConnection);
-		StringBuilder result = new StringBuilder(200);
+  private String getScript()
+  {
+    DataStore ds = definition.getDataStore();
+    ColumnChanger changer = new ColumnChanger(dbConnection);
+    StringBuilder result = new StringBuilder(200);
 
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
-			ColumnIdentifier oldCol = getOldDefintion(row);
-			ColumnIdentifier newCol = getCurrentDefinition(row);
+    for (int row = 0; row < ds.getRowCount(); row++)
+    {
+      ColumnIdentifier oldCol = getOldDefintion(row);
+      ColumnIdentifier newCol = getCurrentDefinition(row);
 
-			String script = changer.getAlterScript(sourceTable, oldCol, newCol);
-			if (script != null)
-			{
-				result.append(script);
-			}
-		}
-		int count = ds.getDeletedRowCount();
-		if (count > 0)
-		{
-			List<ColumnIdentifier> deleted = CollectionUtil.arrayList();
-			for (int row = 0;  row < count; row ++)
-			{
-				deleted.add(getDeletedColumn(row));
-			}
-			List<String> statements = ColumnDropper.getSql(sourceTable, deleted, dbConnection);
-			for (String sql : statements)
-			{
-				result.append(sql);
-				if (!sql.endsWith(";"))
-				{
-					result.append(';');
-				}
-				result.append('\n');
-			}
-		}
-		if (dbConnection.generateCommitForDDL())
-		{
-			result.append("\nCOMMIT;\n");
-		}
-		return result.toString();
-	}
+      String script = changer.getAlterScript(sourceTable, oldCol, newCol);
+      if (script != null)
+      {
+        result.append(script);
+      }
+    }
+    int count = ds.getDeletedRowCount();
+    if (count > 0)
+    {
+      List<ColumnIdentifier> deleted = CollectionUtil.arrayList();
+      for (int row = 0; row < count; row++)
+      {
+        deleted.add(getDeletedColumn(row));
+      }
+      List<String> statements = ColumnDropper.getSql(sourceTable, deleted, dbConnection);
+      for (String sql : statements)
+      {
+        result.append(sql);
+        if (!sql.endsWith(";"))
+        {
+          result.append(';');
+        }
+        result.append('\n');
+      }
+    }
+    if (dbConnection.generateCommitForDDL())
+    {
+      result.append("\nCOMMIT;\n");
+    }
+    return result.toString();
+  }
 
-	private ColumnIdentifier getDeletedColumn(int row)
-	{
-		if (definition == null) return null;
-		DataStore ds = definition.getDataStore();
+  private ColumnIdentifier getDeletedColumn(int row)
+  {
+    if (definition == null) return null;
+    DataStore ds = definition.getDataStore();
 
-		String name = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-		String type = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-		String defaultValue = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
-		String nullable = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-		String comment = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
-		ColumnIdentifier col = new ColumnIdentifier(name);
-		col.setDbmsType(type);
-		col.setDefaultValue(defaultValue);
-		if (StringUtil.isNonBlank(nullable))
-		{
-			col.setIsNullable(StringUtil.stringToBool(nullable));
-		}
-		col.setComment(comment);
-		return col;
-	}
+    String name = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+    String type = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+    String defaultValue = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+    String nullable = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
+    String comment = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
+    ColumnIdentifier col = new ColumnIdentifier(name);
+    col.setDbmsType(type);
+    col.setDefaultValue(defaultValue);
+    if (StringUtil.isNonBlank(nullable))
+    {
+      col.setIsNullable(StringUtil.stringToBool(nullable));
+    }
+    col.setComment(comment);
+    return col;
+  }
 
-	private ColumnIdentifier getCurrentDefinition(int row)
-	{
-		if (definition == null) return null;
-		DataStore ds = definition.getDataStore();
+  private ColumnIdentifier getCurrentDefinition(int row)
+  {
+    if (definition == null) return null;
+    DataStore ds = definition.getDataStore();
 
-		String name = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-		String type = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-		String defaultValue = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
-		String nullable = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-		String comment = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
-		ColumnIdentifier col = new ColumnIdentifier(name);
-		col.setDbmsType(type);
-		col.setDefaultValue(defaultValue);
-		if (StringUtil.isNonBlank(nullable))
-		{
-			col.setIsNullable(StringUtil.stringToBool(nullable));
-		}
-		col.setComment(comment);
-		return col;
-	}
+    String name = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+    String type = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+    String defaultValue = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+    String nullable = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
+    String comment = ds.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
+    ColumnIdentifier col = new ColumnIdentifier(name);
+    col.setDbmsType(type);
+    col.setDefaultValue(defaultValue);
+    if (StringUtil.isNonBlank(nullable))
+    {
+      col.setIsNullable(StringUtil.stringToBool(nullable));
+    }
+    col.setComment(comment);
+    return col;
+  }
 
-	private ColumnIdentifier getOldDefintion(int row)
-	{
-		DataStore ds = definition.getDataStore();
-		if (ds.getRowStatus(row) == RowData.NEW) return null;
-		String name = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-		String type = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-		String defaultValue = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
-		String nullable  = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-		String comment = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
-		ColumnIdentifier col = new ColumnIdentifier(name);
-		col.setDbmsType(type);
-		col.setDefaultValue(defaultValue);
-		if (StringUtil.isNonBlank(nullable))
-		{
-			col.setIsNullable(StringUtil.stringToBool(nullable));
-		}
-		col.setComment(comment);
-		return col;
-	}
+  private ColumnIdentifier getOldDefintion(int row)
+  {
+    DataStore ds = definition.getDataStore();
+    if (ds.getRowStatus(row) == RowData.NEW) return null;
+    String name = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+    String type = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+    String defaultValue = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+    String nullable = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
+    String comment = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
+    ColumnIdentifier col = new ColumnIdentifier(name);
+    col.setDbmsType(type);
+    col.setDefaultValue(defaultValue);
+    if (StringUtil.isNonBlank(nullable))
+    {
+      col.setIsNullable(StringUtil.stringToBool(nullable));
+    }
+    col.setComment(comment);
+    return col;
+  }
 
   @Override
   public boolean useInToolbar()

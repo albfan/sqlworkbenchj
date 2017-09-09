@@ -62,7 +62,7 @@ public class CreateIndexAction
   public void setConnection(WbConnection connection)
   {
     dbConnection = connection;
-		setEnabled(this.dbConnection != null);
+    setEnabled(this.dbConnection != null);
   }
 
   @Override
@@ -71,15 +71,15 @@ public class CreateIndexAction
     createIndex();
   }
 
-	protected void createIndex()
-	{
+  protected void createIndex()
+  {
     if (source == null) return;
 
     List<DbObject> objects = source.getSelectedObjects();
     if (CollectionUtil.isEmpty(objects)) return;
 
-		List<IndexColumn> columns = new ArrayList<>();
-		String indexName = ResourceMgr.getString("TxtNewIndexName");
+    List<IndexColumn> columns = new ArrayList<>();
+    String indexName = ResourceMgr.getString("TxtNewIndexName");
 
     TableIdentifier currentTable = source.getObjectTable();
 
@@ -87,34 +87,33 @@ public class CreateIndexAction
     {
       if ((object instanceof ColumnIdentifier))
       {
-        columns.add(new IndexColumn( ((ColumnIdentifier)object).getColumnName(), null));
+        columns.add(new IndexColumn(((ColumnIdentifier)object).getColumnName(), null));
       }
     }
     if (columns.isEmpty()) return;
 
+    IndexReader reader = this.dbConnection.getMetadata().getIndexReader();
 
-		IndexReader reader = this.dbConnection.getMetadata().getIndexReader();
+    String sql = reader.buildCreateIndexSql(currentTable, indexName, false, columns);
+    if (!sql.trim().endsWith(";"))
+    {
+      sql += ";\n";
+    }
 
-		String sql = reader.buildCreateIndexSql(currentTable, indexName, false, columns);
-		if (!sql.trim().endsWith(";"))
-		{
-			sql += ";\n";
-		}
+    String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
 
-		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
+    if (dbConnection.generateCommitForDDL())
+    {
+      sql += "\nCOMMIT;\n";
+    }
+    RunScriptPanel panel = new RunScriptPanel(dbConnection, sql);
+    panel.openWindow(source.getComponent(), title, indexName);
 
-		if (dbConnection.generateCommitForDDL())
-		{
-			sql += "\nCOMMIT;\n";
-		}
-		RunScriptPanel panel = new RunScriptPanel(dbConnection, sql);
-		panel.openWindow(source.getComponent(), title, indexName);
-
-		if (panel.wasRun() && changeListener != null)
-		{
-			changeListener.indexChanged(currentTable, indexName);
-		}
-	}
+    if (panel.wasRun() && changeListener != null)
+    {
+      changeListener.indexChanged(currentTable, indexName);
+    }
+  }
 
   @Override
   public boolean useInToolbar()

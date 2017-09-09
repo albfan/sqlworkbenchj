@@ -34,27 +34,27 @@ import workbench.resource.ResourceMgr;
 /**
  * An action to close the currently selected result tab of a SqlPanel.
  *
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class CloseResultTabAction
-	extends WbAction
+  extends WbAction
 {
-	private SqlPanel panel;
+  private SqlPanel panel;
 
-	public CloseResultTabAction(SqlPanel sqlPanel)
-	{
-		super();
-		panel = sqlPanel;
-		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK ));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.setIcon(null);
-		this.setEnabled(panel.getCurrentResult() != null);
-	}
+  public CloseResultTabAction(SqlPanel sqlPanel)
+  {
+    super();
+    panel = sqlPanel;
+    this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+    this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+    this.setIcon(null);
+    this.setEnabled(panel.getCurrentResult() != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		panel.closeCurrentResult();
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    panel.closeCurrentResult();
+  }
 
 }

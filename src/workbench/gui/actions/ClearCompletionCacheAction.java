@@ -34,33 +34,33 @@ import workbench.db.objectcache.DbObjectCache;
  * Action to clear the cache for code completion
  *
  * @see DbObjectCache
- * @author  Thomas Kellerer
+ * @author Thomas Kellerer
  */
 public class ClearCompletionCacheAction
-	extends WbAction
+  extends WbAction
 {
-	private WbConnection dbConnection;
+  private WbConnection dbConnection;
 
-	public ClearCompletionCacheAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtClearCompletionCache");
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setEnabled(false);
-	}
+  public ClearCompletionCacheAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtClearCompletionCache");
+    this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
+    this.setEnabled(false);
+  }
 
-	public void setConnection(WbConnection conn)
-	{
-		this.dbConnection = conn;
-		this.setEnabled(this.dbConnection != null);
-	}
+  public void setConnection(WbConnection conn)
+  {
+    this.dbConnection = conn;
+    this.setEnabled(this.dbConnection != null);
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		if (this.dbConnection != null)
-		{
-			this.dbConnection.getObjectCache().removeAll();
-		}
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    if (this.dbConnection != null)
+    {
+      this.dbConnection.getObjectCache().removeAll();
+    }
+  }
 }

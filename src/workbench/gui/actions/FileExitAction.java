@@ -35,26 +35,26 @@ import workbench.gui.WbSwingUtilities;
  *
  * @see workbench.WbManager#exitWorkbench(boolean)
  * @see FileCloseAction
- * 
- * @author  Thomas Kellerer
+ *
+ * @author Thomas Kellerer
  */
 public class FileExitAction
-	extends WbAction
+  extends WbAction
 {
-	public FileExitAction()
-	{
-		super();
-		this.initMenuDefinition("MnuTxtExit");
-	}
+  public FileExitAction()
+  {
+    super();
+    this.initMenuDefinition("MnuTxtExit");
+  }
 
-	@Override
-	public void executeAction(ActionEvent e)
-	{
-		boolean forceShutdown = false;
-		if (isCtrlPressed(e))
-		{
-			forceShutdown = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgAbortWarning"));
-		}
-		WbManager.getInstance().exitWorkbench(forceShutdown);
-	}
+  @Override
+  public void executeAction(ActionEvent e)
+  {
+    boolean forceShutdown = false;
+    if (isCtrlPressed(e))
+    {
+      forceShutdown = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgAbortWarning"));
+    }
+    WbManager.getInstance().exitWorkbench(forceShutdown);
+  }
 }

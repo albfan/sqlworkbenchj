@@ -30,12 +30,12 @@ import workbench.resource.Settings;
  * @author Thomas Kellerer
  */
 public class ViewToolbarAction
-	extends CheckBoxAction
+  extends CheckBoxAction
 {
-	public ViewToolbarAction()
-	{
-		super("MnuTxtShowToolbar", Settings.PROPERTY_SHOW_TOOLBAR);
-	}
+  public ViewToolbarAction()
+  {
+    super("MnuTxtShowToolbar", Settings.PROPERTY_SHOW_TOOLBAR);
+  }
 
   @Override
   public boolean useInToolbar()

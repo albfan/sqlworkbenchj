@@ -34,7 +34,7 @@ import workbench.interfaces.MainPanel;
  * @author Thomas Kellerer
  */
 public class CloseOtherTabsAction
-	extends WbAction
+  extends WbAction
 {
   private Optional<MainPanel> keepOpen;
   private MainWindow client;
