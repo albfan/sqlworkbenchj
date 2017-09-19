@@ -123,9 +123,12 @@ public class ToolTipRenderer
 	public ToolTipRenderer()
 	{
 		super();
-		int thick = WbSwingUtilities.FOCUSED_CELL_BORDER.getThickness();
-		focusedInsets = new Insets(thick, thick, thick, thick);
 		regularInsets = getDefaultInsets();
+		int thick = WbSwingUtilities.FOCUSED_CELL_BORDER.getThickness();
+
+    // if the regular inserts were changed, reflect this with the focused insets
+		focusedInsets = new Insets(thick + regularInsets.top - 1, thick + regularInsets.left - 1, thick + regularInsets.bottom - 1, thick + regularInsets.right - 1);
+    
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 		showTooltip = Settings.getInstance().getBoolProperty("workbench.gui.renderer.showtooltip", true);
