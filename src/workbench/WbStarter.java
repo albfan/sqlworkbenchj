@@ -28,8 +28,8 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Method;
-
 import java.net.URL;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -39,8 +39,9 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 /**
- * This is a wrapper to kick-off the actual WbManager class. It should run
- * with any JDK >= 1.3 as it does not reference any other classes.
+ * This is a wrapper to kick-off the actual WbManager class.
+ * 
+ * It should run with any JDK >= 1.3 as it does not reference any other classes.
  * <br/>
  * This class is compiled separately in build.xml to allow for a different
  * class file version between this class and the rest of the application.
@@ -63,15 +64,35 @@ public class WbStarter
     }
 
     boolean versionIsOk = false;
-    final int minMinorVersion = 8;
-
-    int minorversion = -1;
 
     try
     {
-      int majorversion = Integer.parseInt(version.substring(0,1));
-      minorversion = Integer.parseInt(version.substring(2,3));
-      versionIsOk = (majorversion >= 1) && (minorversion >= minMinorVersion);
+      int pos = version.indexOf('.');
+      int part1 = -1;
+      int part2 = -1;
+      int versionNr = -1;
+
+      if (pos <= 0)
+      {
+        part1 = Integer.parseInt(version);
+      }
+      else
+      {
+        part1 = Integer.parseInt(version.substring(0,pos));
+        part2 = Integer.parseInt(version.substring(pos + 1, pos + 2)); // we only consider one digit at the second position
+      }
+
+      if (version.startsWith("9"))
+      {
+        versionNr = part1;
+      }
+      else
+      {
+        // Before Java 9 the Java version was reported as 1.8 or 1.7
+        versionNr = part2;
+      }
+//      System.out.println("version: " + version + ", versionNr: " + versionNr + ", part1: " + part1 + ", part2: "+ part2);
+      versionIsOk = (versionNr >= 8);
     }
     catch (Exception e)
     {

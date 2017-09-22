@@ -167,23 +167,4 @@ public class VersionNumber
     return Integer.toString(major) + "." + Integer.toString(minor) + "." + Integer.toString(patchLevel);
   }
 
-  public static VersionNumber getJavaVersion()
-  {
-    String version = System.getProperty("java.version", null);
-    if (version == null)
-    {
-      version = System.getProperty("java.runtime.version");
-    }
-
-    try
-    {
-      String[] elements = version.split("\\.");
-      return new VersionNumber(Integer.valueOf(elements[0]), Integer.valueOf(elements[1]));
-    }
-    catch (Throwable th)
-    {
-      // that's the minimum version this application needs
-      return new VersionNumber(1,6);
-    }
-  }
 }

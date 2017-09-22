@@ -61,27 +61,23 @@ public class UpdateCheck
     {
       startRead();
     }
-    else
-    {
-      checkJavaVersion();
-    }
   }
 
-  private void checkJavaVersion()
-  {
-    if (!Settings.getInstance().checkJavaVersion()) return;
-    if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
-
-    VersionNumber minVersion = new VersionNumber(1,8);
-    VersionNumber currentVersion = VersionNumber.getJavaVersion();
-    if (!currentVersion.isNewerOrEqual(minVersion))
-    {
-      NotifierEvent event = new NotifierEvent("alert", ResourceMgr.getString("MsgOldJava"), this);
-      event.setTooltip(ResourceMgr.getString("MsgOldJavaDetail"));
-      event.setType(TYPE_JAVA_VERSION);
-      EventNotifier.getInstance().displayNotification(event);
-    }
-  }
+//  private void checkJavaVersion()
+//  {
+//    if (!Settings.getInstance().checkJavaVersion()) return;
+//    if (ResourceMgr.getBuildNumber().getMajorVersion() == 999) return; // don't check if started from IDE
+//
+//    VersionNumber minVersion = new VersionNumber(1,8);
+//    VersionNumber currentVersion = VersionNumber.getJavaVersion();
+//    if (!currentVersion.isNewerOrEqual(minVersion))
+//    {
+//      NotifierEvent event = new NotifierEvent("alert", ResourceMgr.getString("MsgOldJava"), this);
+//      event.setTooltip(ResourceMgr.getString("MsgOldJavaDetail"));
+//      event.setType(TYPE_JAVA_VERSION);
+//      EventNotifier.getInstance().displayNotification(event);
+//    }
+//  }
 
   /**
    * This is public so that the method is accessible for Unit-Testing
@@ -159,16 +155,8 @@ public class UpdateCheck
         }
       }
 
-      if (event == null)
-      {
-        // no new version so no event to display, we can start the check for the Java version
-        checkJavaVersion();
-      }
-      else
-      {
-        event.setType(TYPE_WB_VERSION);
-        EventNotifier.getInstance().displayNotification(event);
-      }
+      event.setType(TYPE_WB_VERSION);
+      EventNotifier.getInstance().displayNotification(event);
     }
     catch (Exception e)
     {
