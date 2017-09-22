@@ -40,7 +40,7 @@ import javax.swing.WindowConstants;
 
 /**
  * This is a wrapper to kick-off the actual WbManager class.
- * 
+ *
  * It should run with any JDK >= 1.3 as it does not reference any other classes.
  * <br/>
  * This class is compiled separately in build.xml to allow for a different
@@ -63,14 +63,13 @@ public class WbStarter
       version = System.getProperty("java.runtime.version");
     }
 
-    boolean versionIsOk = false;
+    int versionNr = -1;
 
     try
     {
       int pos = version.indexOf('.');
       int part1 = -1;
       int part2 = -1;
-      int versionNr = -1;
 
       if (pos <= 0)
       {
@@ -82,24 +81,24 @@ public class WbStarter
         part2 = Integer.parseInt(version.substring(pos + 1, pos + 2)); // we only consider one digit at the second position
       }
 
-      if (version.startsWith("9"))
+      // Before Java 9 the Java version was reported as 1.8 or 1.7
+      if (version.startsWith("1"))
       {
-        versionNr = part1;
+        versionNr = part2;
       }
       else
       {
-        // Before Java 9 the Java version was reported as 1.8 or 1.7
-        versionNr = part2;
+        versionNr = part1;
       }
+
 //      System.out.println("version: " + version + ", versionNr: " + versionNr + ", part1: " + part1 + ", part2: "+ part2);
-      versionIsOk = (versionNr >= 8);
     }
     catch (Exception e)
     {
-      versionIsOk = false;
+      versionNr = -1;
     }
 
-    if (!versionIsOk)
+    if (versionNr < 8)
     {
       String error =
         "SQL Workbench/J requires Java 8, but only " + version + " was found\n\n" +
