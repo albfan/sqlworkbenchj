@@ -97,7 +97,8 @@ public class ResourceMgr
 
 	public static String getJavaInfo()
 	{
-		String jdk = getString("TxtJavaVersion") + ": " + System.getProperty("java.runtime.version");
+    String version = System.getProperty("java.version");
+		String jdk = getString("TxtJavaVersion") + ": " + version;
 		String bits = System.getProperty("sun.arch.data.model", null);
 		if (bits != null)
 		{
