@@ -19,6 +19,7 @@
     <entry dev-build="1" type="enh">For SQL Server and MySQL the USE command now supports code-completion</entry>
     <entry dev-build="1" type="enh">Generated DDL scripts now only contain commit statements if the current connection is not set to auto-commit (and the DBMS supports transactional DDL)</entry>
     <entry dev-build="1" type="enh">For Postgres, a tablespace other then pg_default will now be displayed in the generated source for tables and indexes</entry>
+    <entry dev-build="6" type="fix">SQL Workbench could not be started with Java 9</entry>
     <entry dev-build="6" type="fix">BLOB and NVARCHAR literals were not handled correctly when formatting a statement</entry>
     <entry dev-build="5" type="fix">Replacing variables inside other variables did not always work</entry>
     <entry dev-build="4" type="fix">WbSchemaDiff did not handle multiple indexes on the same column list correctly</entry>
