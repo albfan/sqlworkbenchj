@@ -71,7 +71,7 @@ public class WbStarter
       int part1 = -1;
       int part2 = -1;
 
-      if (pos <= 0)
+      if (pos < 0)
       {
         part1 = Integer.parseInt(version);
       }
