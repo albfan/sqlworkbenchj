@@ -1,0 +1,13 @@
+audit
+delta
+export
+history
+import
+load
+merge
+rename
+replace
+roundrobin
+row
+unset
+upsert

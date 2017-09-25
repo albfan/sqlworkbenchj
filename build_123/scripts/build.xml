@@ -1,0 +1,1335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="make-dev-jar" name="Workbench">
+
+  <property name="root" value=".."/>
+  <property name="doc" value="../doc"/>
+  <property name="pdfwork" value="../build/pdfwork"/>
+  <property name="src" value="../src"/>
+  <property name="testsrc" value="../test"/>
+  <property name="unittest" value="../test/junit"/>
+  <property name="dbtest" value="../test/dbtest"/>
+  <property name="csrc" value="../launcher"/>
+  <property name="junitdir" value="../build/junit"/>
+  <property name="junitlibs" value="../libs/junit"/>
+  <property name="scriptsrc" value="."/>
+  <property name="libdir" value="../libs"/>
+  <property name="build" value="../build/classes"/>
+  <property name="build.test" value="../build/test"/>
+  <property name="distdir" value="../dist"/>
+  <property name="jarfile" value="sqlworkbench.jar"/>
+  <property name="javadocdir" value="../javadoc"/>
+  <property name="srczipname" value="WorkbenchSrc.zip"/>
+  <property name="srczip" value="${root}/${srczipname}"/>
+  <property name="doczip" value="${root}/release/html-manual.zip"/>
+  <property name="html-stylesheet" value="html-publish.css"/>
+  <property name="html-outdir" value="${distdir}/manual"/>
+  <property name="html-resource-dir" value="./images"/>
+  <property name="target.version" value="1.8"/>
+
+  <!-- location of the docbook installation and the FOP installation -->
+  <property name="docbook.root" value="../etc/docbook"/>
+  <property name="docbook.dtd" value="../etc/dtd"/>
+  <property name="fop.root" value="../etc/fop"/>
+
+  <property name="coverage.report.dir" value="${junitdir}/coverage" />
+  <property name="instrumented.dir" value="${root}/build/instrumented" />
+
+  <property name="cobertura.dir" value="${junitlibs}/cobertura" />
+
+  <path id="cobertura.path">
+    <fileset dir="${cobertura.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+  <taskdef classpathref="cobertura.path" resource="tasks.properties" />
+
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.16.jar"/>
+
+  <target name="init">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="today"/>
+    </tstamp>
+    <tstamp>
+      <format pattern="yyyy-MM-dd HH:mm" property="build_timestamp"/>
+    </tstamp>
+  </target>
+
+  <path id="xalan.path">
+    <fileset dir="${fop.root}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="fop.path">
+    <fileset dir="${fop.root}/lib">
+      <include name="**/*.jar"/>
+    </fileset>
+    <pathelement location="${fop.root}/build/fop.jar"/>
+  </path>
+
+  <target name="set-build-number" depends="prepare">
+    <buildnumber file="build.number"/>
+    <echo message="Build number is ${build.number}"/>
+
+    <!-- Reset the sub-build number for dev-builds -->
+    <propertyfile file="devbuild.number">
+      <entry key="dev-build.number" type="int" operation="=" value="0"/>
+    </propertyfile>
+    <antcall target="replace-build-number"/>
+  </target>
+
+  <target name="replace-build-number" depends="copy-resources">
+    <replace dir="${build}/language" token="@BUILD_NUMBER@" value="${build.number}"/>
+    <replace dir="${build}/language" token="@BUILD_DATE@" value="${build_timestamp}"/>
+  </target>
+
+  <target name="set-dev-build" depends="prepare">
+    <propertyfile file="devbuild.number">
+      <entry key="dev-build.number" type="int" operation="+" value="1"/>
+    </propertyfile>
+    <loadproperties srcFile="release.property"/>
+    <loadproperties srcFile="devbuild.number"/>
+
+    <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
+    <echo message="Build number is ${build.number}"/>
+    <antcall target="replace-build-number"/>
+  </target>
+
+  <target name="get-dev-build" depends="prepare">
+    <loadproperties srcFile="release.property"/>
+    <loadproperties srcFile="devbuild.number"/>
+
+    <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
+    <echo message="Build number is ${build.number}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${html-outdir}" failonerror="false"/>
+    <delete dir="${build}" failonerror="false"/>
+    <delete dir="${instrumented.dir}" failonerror="false"/>
+    <delete dir="${build.test}"/>
+    <delete dir="${junitdir}"/>
+    <delete dir="${pdfwork}" failonerror="false"/>
+    <delete failonerror="false">
+      <fileset dir="${distdir}">
+        <include name="WorkbenchSrc*.zip"/>
+        <include name="Workbench-Build*.zip"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="clean-junit">
+    <delete dir="${coverage.report.dir}" failonerror="false"/>
+    <delete failonerror="false">
+      <fileset dir="${junitdir}">
+        <include name="**/*.txt"/>
+      </fileset>
+    </delete>
+    <delete dir="${instrumented.dir}" />
+  </target>
+
+  <target name="prepare" depends="init">
+    <mkdir dir="${pdfwork}"/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${distdir}"/>
+    <mkdir dir="${html-outdir}"/>
+    <mkdir dir="${html-outdir}/images"/>
+  </target>
+
+  <target name="copy-resources" depends="init">
+    <copy overwrite="true" todir="${build}">
+      <fileset defaultexcludes="true" dir="${src}">
+        <include name="**/*.*"/>
+        <exclude name="**/*.html"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.form"/>
+        <exclude name="**/*.class"/>
+        <exclude name="**/*.flex"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="prepare-test" depends="prepare,copy-resources">
+    <mkdir dir="${build.test}"/>
+    <mkdir dir="${junitdir}"/>
+    <copy overwrite="true"  todir="${build.test}">
+      <fileset defaultexcludes="true" dir="${testsrc}/junit">
+        <include name="**/*.sql"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.xslt"/>
+        <include name="**/*.xlsx"/>
+        <include name="**/*.xls"/>
+        <include name="**/*.ods"/>
+        <include name="**/*.txt"/>
+        <include name="**/*.properties"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile" depends="prepare">
+
+    <!-- compile the starter class with target=1.2 so that it can be loaded by
+         older JVMs as well and is able to display the error message -->
+    <javac debug="on"
+           debuglevel="source,lines"
+           destdir="${build}"
+           srcdir="${src}"
+           target="1.2"
+           source="1.2"
+           encoding="ISO-8859-1"
+           includeantruntime="false"
+           includes="workbench/WbStarter.java"/>
+
+    <!-- the rest of the application is compiled to the needed class file version -->
+    <javac debug="on"
+           debuglevel="source,lines"
+           destdir="${build}"
+           srcdir="${src}"
+           target="${target.version}"
+           source="${target.version}"
+           includeantruntime="false"
+           encoding="ISO-8859-1">
+      <compilerarg value="-Xlint:none"/>
+      <exclude name="workbench/WbStarter.java"/>
+      <classpath>
+          <fileset dir="../libs/odf" includes="*.jar"/>
+          <fileset dir="../libs/poi" includes="*.jar"/>
+          <fileset dir="../libs/jna" includes="*.jar"/>
+          <fileset dir="../libs/log4j" includes="*.jar"/>
+          <fileset dir="../libs/dbunit" includes="*.jar"/>
+      </classpath>
+    </javac>
+
+  </target>
+
+  <!-- Manual related tasks -->
+
+  <!-- Create the FO file which will in turn be transformed
+       into the PDF manual by the target "pdf" -->
+  <target name="fop" depends="init, docbook-history">
+
+    <!-- fop seems to require absolute pathnames... -->
+    <dirname property="admondir" file="${docbook.root}/images/note.svg"/>
+    <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.png"/>
+
+    <copy overwrite="true" todir="${pdfwork}">
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+
+      <filterset begintoken="@" endtoken="@">
+        <filter token="BUILD_NUMBER" value="${build.number}"/>
+        <filter token="IMAGE_DIR" value="${imgdir}"/>
+      </filterset>
+    </copy>
+
+    <copy file="docbook-history.xml" todir="${pdfwork}"/>
+
+    <xslt classpathref="xalan.path"
+          in="${pdfwork}/Manual.xml"
+          out="${pdfwork}/manual.fo"
+          style="${doc}/xsl/workbench-pdf.xsl">
+      <xmlcatalog>
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN"
+             location="${docbook.dtd}/docbookx.dtd"/>
+      </xmlcatalog>
+      <param name="text-indent" expression="0.2cm"/>
+      <param name="paper.type" expression="A4"/>
+      <param name="page.margin.bottom" expression="2cm"/>
+      <param name="page.margin.top" expression="1.5cm"/>
+      <param name="page.margin.outer" expression="2cm"/>
+      <param name="page.margin.inner" expression="2cm"/>
+      <param name="generate.section.toc.level" expression="3"/>
+      <param name="default.image.width" expression="16"/>
+      <param name="ignore.image.scaling" expression="0"/>
+      <param name="admon.graphics" expression="1"/>
+      <param name="admon.graphics.path" expression="${admondir}/"/>
+      <param name="admon.graphics.extension" expression=".svg"/>
+      <param name="admon.graphic.width" expression="0"/>
+      <param name="admon.textlabel" expression="0"/>
+      <param name="body.font.master" expression="10"/>
+      <param name="toc.indent.width" expression="24"/>
+      <param name="toc.max.depth" expression="3"/>
+      <param name="toc.section.depth" expression="2"/>
+      <param name="title.margin.left" expression="0pt"/>
+      <param name="body.start.indent" expression="0pt"/>
+      <param name="section.autolabel" expression="1"/>
+      <param name="section.autolabel.max.depth" expression="3"/>
+      <param name="alignment" expression="left"/>
+      <param name="fop1.extensions" expression="1"/>
+      <param name="use.extensions" expression="1"/>
+      <param name="tablecolumns.extension" expression="0"/>
+      <param name="menuchoice.separator" expression=" &#187; "/>
+      <param name="menuchoice.menu.separator" expression=" &#187; "/>
+      <param name="ulink.show" expression="0"/>
+      <param name="ulink.footnotes" expression="0"/>
+      <param name="insert.link.page.number" expression="no"/>
+      <param name="insert.olink.page.number" expression="no"/>
+
+      <param name="generate.index" expression="1"/>
+      <param name="index.prefer.titleabbrev" expression="1"/>
+      <param name="column.count.index" expression="2"/>
+      <param name="use.svg" expression="1"/>
+
+      <!-- <param name="axf.extensions" expression="1"/> -->
+    </xslt>
+
+  </target>
+
+  <!-- Create the pdf version of the manual -->
+  <target name="pdf" depends="fop">
+    <property name="inputFile" location="${pdfwork}/manual.fo"/>
+    <property name="outputFile" location="${distdir}/SQLWorkbench-Manual.pdf"/>
+
+    <java failonerror="true"
+          maxmemory="512m"
+          fork="true"
+          dir="${fop.root}" classname="org.apache.fop.cli.Main" classpathref="fop.path">
+      <arg line="-q -fo ${inputFile} -pdf ${outputFile}"/>
+      <sysproperty key="org.apache.fop.level" value="SEVERE"/>
+    </java>
+  </target>
+
+  <target name="publish" depends="build-html"/>
+
+  <target name="publish-dev" depends="get-dev-build, set-dev-prop, publish"/>
+
+  <target name="publish-single" depends="get-dev-build, single-html, post-html"/>
+
+  <target name="prepare-html" depends="prepare, docbook-history">
+
+    <copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
+      <fileset dir="${src}/workbench/resource/images">
+        <include name="colfilter16.png"/>
+        <include name="execute_sel16.png"/>
+        <include name="delete16.png"/>
+        <include name="filter16.png"/>
+        <include name="new-profile16.png"/>
+        <include name="append_result16.png"/>
+        <include name="folder_new16.png"/>
+        <include name="copy-profile16.png"/>
+        <include name="open16.png"/>
+      </fileset>
+      <fileset dir="${docbook.root}/images">
+        <include name="note.png"/>
+        <include name="caution.png"/>
+        <include name="important.png"/>
+        <include name="note.svg"/>
+        <include name="caution.svg"/>
+        <include name="important.svg"/>
+      </fileset>
+    </copy>
+
+    <echo message="Generating HTML in ${html-outdir}"/>
+
+    <copy overwrite="true" todir="${html-outdir}">
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+
+      <filterset begintoken="@" endtoken="@">
+        <filter token="build_timestamp" value="${build_timestamp}"/>
+        <filter token="BUILD_NUMBER" value="${build.number}"/>
+        <filter token="IMAGE_DIR" value="${html-resource-dir}"/>
+      </filterset>
+    </copy>
+
+    <copy file="docbook-history.xml" todir="${html-outdir}"/>
+
+  </target>
+
+  <target name="docbook-history" depends="set-history-build-date">
+    <xslt in="history.xml"
+          out="docbook-history.xml"
+          includes="history.xml"
+          style="history2docbook.xslt">
+    </xslt>
+  </target>
+
+  <target name="html-history" depends="set-history-build-date">
+    <xslt in="history.xml"
+          out="history.html"
+          style="history2html.xslt">
+    </xslt>
+  </target>
+
+  <target name="build-html" depends="prepare-html">
+    <antcall target="chunk-html"/>
+    <antcall target="post-html"/>
+  </target>
+
+  <target name="chunk-html">
+
+    <xslt classpathref="xalan.path"
+          basedir="${html-outdir}"
+          includes="Manual.xml"
+          style="${docbook.root}/html/chunkfast.xsl"
+          destdir="${html-outdir}">
+
+      <xmlcatalog>
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${docbook.dtd}/docbookx.dtd"/>
+      </xmlcatalog>
+
+      <param name="use.extensions" expression="0"/>
+      <param name="textinsert.extension" expression="1"/>
+      <param name="root.filename" expression="workbench-manual"/>
+      <param name="html.stylesheet" expression="${html-stylesheet}"/>
+      <param name="html.extra.head.links" expression="1"/>
+      <param name="admon.graphics.path" expression="${html-resource-dir}/"/>
+      <param name="admon.graphics.extension" expression=".png"/>
+      <param name="admon.graphics" expression="1"/>
+      <param name="admon.textlabel" expression="0"/>
+      <param name="ulink.target" expression="_blank"/>
+
+      <param name="generate.index" expression="1"/>
+      <param name="index.prefer.titleabbrev" expression="1"/>
+
+      <param name="index.method" expression="'default'"/>
+      <param name="chunk.tocs.and.lots" expression="0"/>
+      <param name="chunk.tocs.and.lots.has.title" expression="1"/>
+      <param name="chunk.fast" expression="1"/>
+      <param name="generate.id.attributes" expression="1"/>
+      <param name="chunk.quietly" expression="1"/>
+      <param name="chunk.first.sections" expression="1"/>
+      <param name="chunker.output.indent" expression="no"/>
+      <param name="use.id.as.filename" expression="1"/>
+      <param name="section.autolabel" expression="1"/>
+      <param name="chunker.output.indent" expression="yes"/>
+      <param name="generate.section.toc.level" expression="1"/>
+      <param name="toc.max.depth" expression="3"/>
+      <param name="toc.section.depth" expression="2"/>
+
+      <param name="table.borders.with.css" expression="1"/>
+      <param name="table.cell.border.style" expression="solid"/>
+      <param name="table.cell.border.thickness" expression="1px"/>
+      <param name="table.frame.border.style" expression="solid"/>
+      <param name="table.frame.border.thickness" expression="1px"/>
+      <param name="make.valid.html" expression="1"/>
+      <param name="html.cleanup" expression="1"/>
+      <param name="navig.showtitles" expression="1"/>
+      <param name="css.decoration" expression="1"/>
+      <param name="use.svg" expression="1"/>
+    </xslt>
+
+    <delete>
+      <fileset dir="${html-outdir}">
+        <include name="Manual.html"/>
+      </fileset>
+    </delete>
+
+  </target>
+
+  <target name="single-html" depends="prepare-html">
+    <antcall target="prepare-html"/>
+
+    <dirname property="docdir" file="${docbook.root}/images/note.png"/>
+
+    <xslt classpathref="xalan.path"
+          in="${html-outdir}/Manual.xml"
+          out="${html-outdir}/workbench-manual-single.html"
+          style="${docbook.root}/html/docbook.xsl">
+
+      <xmlcatalog>
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${docbook.dtd}/docbookx.dtd"/>
+      </xmlcatalog>
+
+      <param name="use.extensions" expression="0"/>
+      <param name="textinsert.extension" expression="1"/>
+      <param name="html.stylesheet" expression="${html-stylesheet}"/>
+      <param name="admon.graphics.path" expression="${docdir}/"/>
+      <param name="admon.graphics.extension" expression=".gif"/>
+      <param name="admon.graphics" expression="1"/>
+      <param name="admon.textlabel" expression="0"/>
+      <param name="generate.index" expression="0"/>
+      <param name="index.method" expression="'default'"/>
+      <param name="generate.id.attributes" expression="1"/>
+      <param name="use.id.as.filename" expression="1"/>
+      <param name="section.autolabel" expression="1"/>
+      <param name="ulink.target" expression="_blank"/>
+
+      <param name="generate.section.toc.level" expression="1"/>
+      <param name="toc.max.depth" expression="3"/>
+      <param name="toc.section.depth" expression="2"/>
+
+      <param name="table.borders.with.css" expression="1"/>
+      <param name="table.cell.border.style" expression="solid"/>
+      <param name="table.cell.border.thickness" expression="1px"/>
+      <param name="table.frame.border.style" expression="solid"/>
+      <param name="table.frame.border.thickness" expression="1px"/>
+      <param name="make.valid.html" expression="1"/>
+      <param name="html.cleanup" expression="1"/>
+      <param name="navig.showtitles" expression="1"/>
+      <param name="css.decoration" expression="1"/>
+      <param name="use.svg" expression="1"/>
+    </xslt>
+  </target>
+
+  <target name="post-html">
+    <delete>
+      <fileset dir="${html-outdir}">
+        <include name="*.xml"/>
+      </fileset>
+    </delete>
+
+    <copy overwrite="true" todir="${html-outdir}" file="${doc}/css/${html-stylesheet}"/>
+
+    <replace dir="${html-outdir}" summary="true">
+      <replacetoken><![CDATA[href="mailto:support@sql-workbench.net">support@sql-workbench.net</a>]]></replacetoken>
+      <replacevalue><![CDATA[href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]></replacevalue>
+    </replace>
+
+  </target>
+
+  <target name="-make-jar" depends="prepare,compile">
+
+    <jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
+      <manifest>
+        <attribute name="Main-Class" value="workbench.WbStarter"/>
+        <attribute name="Class-Path" value=". log4j.jar dbunit-2.3.0.jar slf4j-api-1.5.10.jar slf4j-log4j12-1.5.6.jar mail.jar poi.jar poi-ooxml.jar dom4j-1.6.1.jar stax-api-1.0.1.jar poi-ooxml-schemas.jar xmlbeans-2.3.0.jar odfdom-java.jar resolver.jar serializer.jar simple-odf.jar xercesImpl.jar xml-apis.jar jna.jar jna-platform.jar ext/"/>
+        <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
+        <attribute name="Implementation-Title" value="SQL Workbench/J"/>
+        <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
+        <attribute name="WbBuild-Number" value="${build.number}"/>
+        <attribute name="WbBuild-Date" value="${build_timestamp}"/>
+      </manifest>
+      <fileset dir="${build}">
+        <exclude name="**/package.html"/>
+      </fileset>
+    </jar>
+
+  </target>
+
+  <target name="embeddable-jar" depends="clean, set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, -jar-noclasspath"/>
+  <target name="-jar-noclasspath" depends="prepare,compile">
+    <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
+      <manifest>
+        <attribute name="Main-Class" value="workbench.WbStarter"/>
+        <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
+        <attribute name="Implementation-Title" value="SQL Workbench/J"/>
+        <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
+        <attribute name="WbBuild-Number" value="${build.number}"/>
+        <attribute name="WbBuild-Date" value="${build_timestamp}"/>
+      </manifest>
+      <fileset dir="${build}">
+        <exclude name="**/package.html"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!-- alias for make-src-zip -->
+  <target name="src" depends="make-src-zip"/>
+
+  <target name="make-src-zip">
+    <delete file="${srczip}"/>
+
+    <zip zipfile="${srczip}">
+      <zipfileset dir="${src}" prefix="src">
+        <include name="**/*.*"/>
+        <exclude name="**/*.class"/>
+        <exclude name="**/*.java~"/>
+        <exclude name="**/workbench.settings"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/.nb*"/>
+        <exclude name="**/tags"/>
+        <exclude name="**/Test/*"/>
+        <exclude name="**/*.tws"/>
+      </zipfileset>
+
+      <zipfileset dir="${scriptsrc}" prefix="scripts">
+        <exclude name="**/.nb*"/>
+        <exclude name="**/.new"/>
+        <exclude name="**/*test*"/>
+        <exclude name="**/*.txt"/>
+        <exclude name="history.html"/>
+        <exclude name="make_manual.cmd"/>
+        <exclude name="make_release.cmd"/>
+        <exclude name="docbook-history.xml"/>
+      </zipfileset>
+
+      <zipfileset dir="${testsrc}" prefix="test">
+        <exclude name="**/.nb*"/>
+      </zipfileset>
+
+      <zipfileset dir="${doc}" prefix="doc">
+        <include name="**/*.*"/>
+        <exclude name="**/.nb*"/>
+        <exclude name="html/**/*.*"/>
+        <exclude name="openoffice/**/*.*"/>
+        <exclude name="documentation.project"/>
+        <exclude name="*docbook*/**"/>
+        <exclude name="manual/**/*.*"/>
+        <exclude name="**/*pdf*/*.*"/>
+        <exclude name="dtd/**/*.*"/>
+      </zipfileset>
+
+      <zipfileset dir="../website" prefix="website">
+        <include name="**/*.*"/>
+        <exclude name="*.html"/>
+        <exclude name="test*.*"/>
+        <exclude name="*.jar"/>
+        <exclude name="*.png"/>
+      </zipfileset>
+    </zip>
+  </target>
+
+  <!-- build a full release -->
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, -make-jar, pdf, publish, publish-single, release-src-zip, release-package, mac-package">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="today"/>
+    </tstamp>
+
+    <!-- reset the release property file -->
+    <delete file="release.property"/>
+
+    <propertyfile file="release.property">
+      <entry key="release.build.number" value="${build.number}"/>
+      <entry key="release.build.date" value="${today}"/>
+    </propertyfile>
+
+    <ant dir="..\website" inheritall="false" target="release"/>
+
+    <mkdir dir="${root}/release/build${build.number}"/>
+
+    <move todir="${root}/release/build${build.number}">
+      <fileset dir="${distdir}">
+        <include name="WorkbenchSrc-Build${build.number}.zip"/>
+        <include name="Workbench-Build${build.number}*.zip"/>
+        <include name="Workbench-Build${build.number}*.tgz"/>
+      </fileset>
+    </move>
+
+  </target>
+
+  <target name="set-dev-prop">
+    <property name="dev-jar" value="1"/>
+  </target>
+
+  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, -make-jar"/>
+
+  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, -make-jar"/>
+
+  <!-- build a development release -->
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, -make-jar, pdf, publish, publish-single, release-package, release-src-zip">
+    <tstamp>
+      <format pattern="yyyy-MM-dd" property="today"/>
+    </tstamp>
+
+    <propertyfile file="release.property">
+      <entry key="dev.build.date" value="${today}"/>
+      <entry key="dev.build.number" value="${build.number}"/>
+    </propertyfile>
+    <ant dir="../website" inheritall="false" target="dev-release"/>
+  </target>
+
+  <target name="set-history-release-number" depends="set-build-number">
+    <xmltask source="history.xml" dest="history.xml">
+      <attr path="/history/release[1]" attr="build" value="${build.number}"/>
+    </xmltask>
+  </target>
+
+  <target name="set-history-build-date" depends="init" unless="dev-jar">
+    <xmltask source="history.xml" dest="history.xml">
+      <attr path="/history/release[1]" attr="date" value="${today}"/>
+    </xmltask>
+  </target>
+
+  <target name="website">
+    <ant antfile="../website/build.xml" inheritall="false" target="release"/>
+  </target>
+
+  <target name="bundleapp" depends="init">
+
+    <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="../libs/appbundler/appbundler-1.0.jar"/>
+
+    <property name="bundledir" value="${distdir}/mac"/>
+    <delete dir="${bundledir}" failonerror="false"/>
+    <mkdir dir="${bundledir}"/>
+
+    <bundleapp outputdirectory="${bundledir}"
+               name="SQLWorkbenchJ"
+               displayname="SQL Workbench/J"
+               identifier="sqlworkbench.app"
+               icon="Workbench.icns"
+               shortversion="${build.number}"
+               signature="sqwb"
+               applicationCategory="public.app-category.developer-tools"
+               copyright="Thomas Kellerer 2002-2016"
+               mainclassname="workbench.WbStarter">
+
+      <classpath dir="${distdir}">
+        <include name="${jarfile}"/>
+      </classpath>
+
+      <option value="-Dapple.laf.useScreenMenuBar=true"/>
+      <option value="-Dapple.awt.showGrowBoxtrue=true"/>
+      <option value="-Xmx1024m"/>
+      <option value="-Xdock:name=SQLWorkbench/J"/>
+    </bundleapp>
+
+    <replace file="${bundledir}/SQLWorkbenchJ.app/Contents/Info.plist">
+      <replacefilter>
+        <replacetoken>&lt;/dict&gt;</replacetoken>
+        <replacevalue>&lt;key&gt;NSHighResolutionCapable&lt;/key&gt;
+&lt;true/&gt;
+&lt;/dict&gt;</replacevalue>
+      </replacefilter>
+    </replace>
+  </target>
+
+  <target name="mac-package" depends="init,publish,bundleapp">
+
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
+      <tarfileset dir="${bundledir}">
+        <include name="**/*"/>
+        <exclude name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset mode="555" dir="${bundledir}">
+        <include name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Java/manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="history.html"/>
+        <include name="LICENSE"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </tarfileset>
+    </tar>
+
+    <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac-with-optional-libs.tgz">
+      <tarfileset dir="${bundledir}">
+        <include name="**/*"/>
+        <exclude name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset mode="555" dir="${bundledir}">
+        <include name="**/JavaAppLauncher"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Java/manual">
+        <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="history.html"/>
+        <include name="LICENSE"/>
+      </tarfileset>
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </tarfileset>
+      <tarfileset dir="../libs/poi" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset dir="../libs/odf" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+      <tarfileset dir="../libs/jna" prefix="SQLWorkbenchJ.app/Contents/Java">
+        <include name="*.jar"/>
+      </tarfileset>
+    </tar>
+
+  </target>
+
+  <target name="release-package" depends="fixshellscripts,html-history">
+
+    <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
+      <zipfileset dir="${distdir}">
+        <include name="${jarfile}"/>
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </zipfileset>
+      <zipfileset dir="../launcher">
+        <include name="SQLWorkbench.exe"/>
+        <include name="sqlwbconsole.exe"/>
+        <include name="SQLWorkbench64.exe"/>
+        <include name="sqlwbconsole64.exe"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}">
+        <include name="log4j-sample.xml"/>
+        <include name="SQLWorkbench.vbs"/>
+        <include name="sqlwbconsole.cmd"/>
+        <include name="sqlworkbench.cmd"/>
+        <include name="sqlworkbench.sh"/>
+        <include name="sqlwbconsole.sh"/>
+        <include name="history.html"/>
+        <include name="SQLWorkbench.desktop"/>
+        <include name="LICENSE"/>
+      </zipfileset>
+      <zipfileset dir="${src}/workbench/resource/images">
+        <include name="workbench32.png"/>
+      </zipfileset>
+      <zipfileset dir="${distdir}/manual" prefix="manual">
+        <include name="**/*.*"/>
+      </zipfileset>
+      <zipfileset dir="../xslt" prefix="xslt">
+        <include name="**/*.xslt"/>
+      </zipfileset>
+    </zip>
+
+    <zip zipfile="${distdir}/Workbench-Build${build.number}-with-optional-libs.zip">
+      <zipfileset dir="${distdir}">
+        <include name="${jarfile}"/>
+        <include name="SQLWorkbench-Manual.pdf"/>
+      </zipfileset>
+      <zipfileset dir="../libs/poi">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="../libs/odf">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="../libs/jna">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="../launcher">
+        <include name="SQLWorkbench.exe"/>
+        <include name="sqlwbconsole.exe"/>
+        <include name="SQLWorkbench64.exe"/>
+        <include name="sqlwbconsole64.exe"/>
+      </zipfileset>
+      <zipfileset dir="${scriptsrc}">
+        <include name="log4j-sample.xml"/>
+        <include name="SQLWorkbench.vbs"/>
+        <include name="sqlworkbench.cmd"/>
+        <include name="sqlwbconsole.cmd"/>
+        <include name="sqlworkbench.sh"/>
+        <include name="sqlwbconsole.sh"/>
+        <include name="history.html"/>
+        <include name="SQLWorkbench.desktop"/>
+        <include name="LICENSE"/>
+      </zipfileset>
+      <zipfileset dir="${src}/workbench/resource/images">
+        <include name="workbench32.png"/>
+      </zipfileset>
+      <zipfileset dir="${distdir}/manual" prefix="manual">
+        <include name="**/*.*"/>
+      </zipfileset>
+      <zipfileset dir="../xslt" prefix="xslt">
+        <include name="**/*.xslt"/>
+      </zipfileset>
+    </zip>
+
+    <delete file="docbook-history.xml" failonerror="false"/>
+
+  </target>
+
+  <target name="release-src-zip" depends="init,fixshellscripts">
+
+    <zip zipfile="${distdir}/WorkbenchSrc-Build${build.number}.zip">
+      <zipfileset dir="${src}" prefix="src">
+        <include name="**/*.*"/>
+        <exclude name="**/workbench.settings"/>
+        <exclude name="**/.nb*"/>
+        <exclude name="**/*.dfPackage"/>
+        <exclude name="**/tags"/>
+        <exclude name="**/*.tws"/>
+      </zipfileset>
+
+      <zipfileset dir="${testsrc}" prefix="test">
+        <include name="**/*.*"/>
+      </zipfileset>
+
+      <zipfileset dir="${scriptsrc}" prefix="scripts">
+        <include name="build.xml"/>
+        <include name="log4j-sample.xml"/>
+        <include name="devbuild.number"/>
+        <include name="build.number"/>
+        <include name="release.property"/>
+        <include name="history.xml"/>
+        <include name="SQLWorkbench.vbs"/>
+        <include name="sqlwbconsole.cmd"/>
+        <include name="sqlworkbench.sh"/>
+        <include name="sqlwb.sh"/>
+        <include name="*.xslt"/>
+        <include name="LICENSE"/>
+        <exclude name="**/*test*"/>
+      </zipfileset>
+
+      <zipfileset dir="${doc}" prefix="doc">
+        <include name="css/*.*"/>
+        <include name="xml/*.*"/>
+        <include name="xsl/*.*"/>
+        <exclude name="**/.nb*"/>
+        <exclude name="**/tags"/>
+        <exclude name="**/*.tws"/>
+      </zipfileset>
+
+      <zipfileset dir="../xslt" prefix="xslt">
+        <include name="*.*"/>
+      </zipfileset>
+    </zip>
+  </target>
+
+  <target name="generate-lexer">
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/StandardLexer.flex"/>
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/NonStandardLexer.flex"/>
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/MySQLLexer.flex"/>
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
+
+    <copy quiet="true" overwrite="true"
+					file="../src/workbench/sql/lexer/BaseLexer.flex"
+          tofile="../src/workbench/sql/lexer/PostgresLexer.flex"/>
+
+    <replace file="../src/workbench/sql/lexer/StandardLexer.flex">
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
+    </replace>
+
+    <replace file="../src/workbench/sql/lexer/PostgresLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>PostgresLexer</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|" value='"CLUSTER"|"DISCARD"|"DEALLOCATE"|"DO"|"(IMPORT{wsp}FOREIGN{wsp}SCHEMA)"|"VACUUM"|'/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token='"VARCHAR2"|'/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(DATABASE{wsp}LINK)|"/>
+      <replacefilter token='"SYSDATE"|'/>
+      <replacefilter token='"SYSTIMESTAMP"|'/>
+      <replacefilter token='"SESSION_USER"|'/>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="]]></replacevalue>
+      </replacefilter>
+<!--      <replacefilter>
+        <replacetoken><![CDATA[bitstring=("B"[\']([01]+)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[bitstring=("B"[\']([01]+)[\'])|[Ee]"'\\\\x"[0-9A-Fa-f]+"'"]]></replacevalue>
+      </replacefilter>-->
+      <replacefilter>
+        <replacetoken><![CDATA[string=([\'](([^\']|\'\')*)[\']|[Nn][\'](([^\']|\'\')*)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[string=([\'](([^\']|\'\')*)[\']|[Ee][\'](([^\']|\'\')*)[\'])]]></replacevalue>
+      </replacefilter>
+    </replace>
+
+    <replace file="../src/workbench/sql/lexer/SqlServerLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>SqlServerLexer</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken>"UPDATE"|</replacetoken>
+        <replacevalue>"UPDATE"|"(UPDATE{wsp}STATISTICS)"|</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|" value="(BEGIN{wsp}TRANSACTION)|(BEGIN{wsp}TRAN)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(SIMILAR{wsp}TO)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(DISTINCT{wsp}ON)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token='"SIMILAR"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"OVERLAPS"|'/>
+      <replacefilter token='"VARCHAR2"|'/>
+      <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"DEFERRABLE"|'/>
+      <replacefilter token='"DEFERRED"|'/>
+      <replacefilter token='"WHENEVER"|'/>
+      <replacefilter token='"SYSTIMESTAMP"|'/>
+      <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(DATABASE{wsp}LINK)|"/>
+      <replacefilter>
+        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")]]></replacetoken>
+        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")|(\[[^\r\n\t\f\[]*\]) ]]></replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"*="|"=*"|"<="|">="|"=>")]]></replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[bitstring=("B"[\']([01]+)[\'])]]></replacetoken>
+        <replacevalue><![CDATA[bitstring=("B"[\']([01]+)[\'])|"0x"[0-9A-Fa-f]+]]></replacevalue>
+      </replacefilter>
+    </replace>
+
+    <replace file="../src/workbench/sql/lexer/NonStandardLexer.flex">
+      <!-- this generates a Lexer that can handle the backslash for escaping single quotes inside a string literal -->
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>NonStandardLexer</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
+      <replacefilter>
+        <replacetoken>string=([\'](([^\']|\'\')*)[\']|[Nn][\'](([^\']|\'\')*)[\'])</replacetoken>
+        <replacevalue>string=([\'](([^\']|\'\'|\\\')*)[\'])</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"|/"|"||/"|"!!"|"<<"|">>"|"##"|"~"|"~*"|"!~"|"!~*"|"@-@"|"@@"|"@@@"|"?&"|"#-"|"#>"|"#>>"|"->"|"->>"|"<->"|"&<"|"&>"|"<<|"|"|>>"|"&<|"|"|&>"|"<^"|">^"|"?#"|"?-"|"?|"|"?-|"|"?|"|"~="|"!="|"<>"|"<="|">="|"=>"|"@>"|"<@")|"<<="|">>="]]></replacevalue>
+      </replacefilter>
+    </replace>
+
+    <replace file="../src/workbench/sql/lexer/MySQLLexer.flex">
+      <replacefilter>
+        <replacetoken>StandardLexer</replacetoken>
+        <replacevalue>MySQLLexer</replacevalue>
+      </replacefilter>
+      <replacefilter token="XXXX_DBMS_XXXX|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW)|"/>
+      <replacefilter token="(MATERIALIZED{wsp}VIEW{wsp}LOG)|"/>
+      <replacefilter token="(SNAPSHOT{wsp}LOG)|"/>
+      <replacefilter token="(FLASHBACK{wsp}ARCHIVE)|"/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(PACKAGE{wsp}BODY)|"/>
+      <replacefilter token="(TYPE{wsp}BODY)|"/>
+      <replacefilter token="(DISTINCT{wsp}ON)|"/>
+      <replacefilter token="(CONNECT{wsp}BY)|"/>
+      <replacefilter token="(START{wsp}TRANSACTION)|"/>
+      <replacefilter token="(SIMILAR{wsp}TO)|"/>
+      <replacefilter token="(PARTITION{wsp}BY)|"/>
+      <replacefilter token='"OVERLAPS"|'/>
+      <replacefilter token='"OVER"|'/>
+      <replacefilter token='"LATERAL"|'/>
+      <replacefilter token='"VARCHAR2"|'/>
+      <replacefilter token='"SIMILAR"|'/>
+      <replacefilter token='"CYCLE"|'/>
+      <replacefilter token='"DEPTH"|'/>
+      <replacefilter token='"DEFERRABLE"|'/>
+      <replacefilter token='"DEFERRED"|'/>
+      <replacefilter token='(DATABASE{wsp}LINK)|'/>
+      <replacefilter token="(START{wsp}WITH)|"/>
+      <replacefilter token="(FOREIGN{wsp}DATA{wsp}WRAPPER)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}REPLACE)|"/>
+      <replacefilter token="(CREATE{wsp}OR{wsp}ALTER)|"/>
+      <replacefilter token="(FULL{wsp}JOIN)|"/>
+      <replacefilter token="(FULL{wsp}OUTER{wsp}JOIN)|"/>
+      <replacefilter token="(OUTER{wsp}APPLY)|"/>
+      <replacefilter token="(CROSS{wsp}APPLY)|"/>
+      <replacefilter>
+        <replacetoken>linecomment=("--"[^\r\n]*)</replacetoken>
+        <replacevalue>linecomment=("--"[ \t]+[^\r\n]*)|("#"[^\r\n]*)</replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")]]></replacetoken>
+        <replacevalue><![CDATA[identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\~\?\(\)\[\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\]\[\,\;\:\*]*)|(\"[^\r\n\t\f\"]*\")|(`[^\r\n\t\f`]+`)]]></replacevalue>
+      </replacefilter>
+      <replacefilter>
+        <replacetoken><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&\?]|"||"|"!="|"<>"|"<="|">="|"=>"|"(+)")]]></replacetoken>
+        <replacevalue><![CDATA[operator=([\+\-\*\/\<\>\=\~\!\%\^\&]|"||"|"!="|"<>"|"<="|">="|"=>"|":="|"&&"|"<<"|">>")]]></replacevalue>
+      </replacefilter>
+    </replace>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/StandardLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/PostgresLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/NonStandardLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/MySQLLexer.flex"/>
+    </java>
+
+    <java classname="JFlex.Main" classpath="../libs/jflex/JFlex.jar" fork="true">
+      <jvmarg value="-Xmx256m"/>
+      <arg value="-q"/>
+      <arg value="../src/workbench/sql/lexer/SqlServerLexer.flex"/>
+    </java>
+
+  </target>
+
+  <path id="junit.path">
+    <fileset dir="${junitlibs}">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/poi">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/log4j">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/odf">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="../libs/dbunit">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="compile-tests" depends="prepare-test, compile">
+    <javac debug="on"
+           includeantruntime="false"
+           destdir="${build.test}"
+           optimize="off"
+           srcdir="${unittest}"
+           target="${target.version}"
+           source="${target.version}"
+           encoding="ISO-8859-1">
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="junit.path"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="compile-db-tests" depends="prepare-test, compile-tests">
+    <javac debug="on"
+           includeantruntime="false"
+           destdir="${build.test}"
+           optimize="off"
+           srcdir="${dbtest}"
+           target="${target.version}"
+           source="${target.version}"
+           encoding="ISO-8859-1">
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="junit.path"/>
+      </classpath>
+    </javac>
+  </target>
+
+
+  <target name="init-cobertura">
+    <delete dir="${instrumented.dir}" />
+    <mkdir dir="${instrumented.dir}" />
+    <delete file="${junitdir}/cobertura.ser" />
+
+    <cobertura-instrument datafile="${junitdir}/cobertura.ser" todir="${instrumented.dir}">
+      <fileset dir="${build}">
+        <include name="workbench/**/*.class" />
+        <exclude name="workbench/WbStarter"/>
+        <exclude name="workbench/sql/wbcommands/MissingWidthDefinition.class"/> <!-- exception -->
+        <exclude name="workbench/db/SourceStatementsHelp.class"/>
+        <exclude name="workbench/db/KeepAliveDaemon.class"/>
+        <exclude name="workbench/db/ASAConstraintReader.class"/>
+        <exclude name="workbench/db/search/TableDataSearcher"/> <!-- interface -->
+        <exclude name="workbench/**/*Exception*.class" />
+        <exclude name="workbench/storage/filter/ComparatorFactory"/> <!-- doesn't work with coberture -->
+        <exclude name="workbench/**/*$*.class" />
+        <exclude name="workbench/sql/wbcommands/console/**" />
+        <exclude name="workbench/gui/lnf/**" />
+        <exclude name="workbench/db/mysql/**" />
+        <exclude name="workbench/db/firstsql/**" />
+        <exclude name="workbench/db/derby/**" />
+        <exclude name="workbench/db/mckoi/**" />
+        <exclude name="workbench/db/mssql/**" />
+        <exclude name="workbench/interfaces/**" />
+        <exclude name="workbench/print/**" />
+        <exclude name="workbench/gui/log/**" />
+        <exclude name="workbench/gui/lnf/**" />
+        <exclude name="workbench/gui/dialogs/**" />
+        <exclude name="workbench/gui/renderer/**" />
+        <exclude name="workbench/gui/help/**" />
+      </fileset>
+    </cobertura-instrument>
+  </target>
+
+  <target name="coverage" depends="clean, clean-junit, compile-tests, compile-db-tests, init-cobertura">
+    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
+      <classpath>
+        <pathelement location="${instrumented.dir}"/>
+        <pathelement location="${build}"/>
+        <pathelement location="${build.test}"/>
+        <path refid="junit.path"/>
+        <path refid="cobertura.path"/>
+      </classpath>
+
+      <sysproperty key="net.sourceforge.cobertura.datafile" file="${junitdir}/cobertura.ser" />
+
+      <batchtest todir="${junitdir}">
+        <formatter type="plain"/>
+        <fileset dir="${unittest}">
+          <include name="**/*Test.java"/>
+          <exclude name="**/XsltTransformerTest.java"/>
+          <exclude name="**/ClassFinderTest.java"/>
+          <exclude name="**/ComparatorFactoryTest.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="${junitdir}">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}">
+          <include name="workbench/db/postgres/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <cobertura-report datafile="${junitdir}/cobertura.ser" format="html" destdir="${coverage.report.dir}" srcdir="${src}" />
+  </target>
+
+  <target name="test" depends="compile-tests, clean-junit">
+
+    <junit fork="true"
+           forkmode="perBatch"
+           maxmemory="512m"
+           showoutput="false"
+           haltonerror="true"
+           haltonfailure="true"
+           printsummary="true"
+           includeantruntime="true">
+
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${build.test}"/>
+        <path refid="junit.path"/>
+      </classpath>
+
+      <batchtest todir="${junitdir}">
+        <formatter type="plain"/>
+        <fileset dir="${unittest}">
+          <exclude name="**/XsltTransformerTest.java"/>
+          <exclude name="**/ClassFinderTest.java"/>
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+
+      <!--
+        for some reasons running the XsltTransformerTest on a 64bit JVM
+        bombs out with an OutOfMemory error in the PermGen space
+        Moving this - and the ClassFinderTest - to a separate VM solves the problem
+      -->
+      <batchtest todir="${junitdir}">
+        <formatter type="plain"/>
+        <fileset dir="${unittest}">
+          <include name="**/XsltTransformerTest.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="../junit">
+        <formatter type="plain"/>
+        <fileset dir="${unittest}">
+          <include name="**/ClassFinderTest.java.java"/>
+        </fileset>
+      </batchtest>
+
+    </junit>
+  </target>
+
+  <target name="echo-dbtest-type" if="test.db">
+    <echo message="Testing ${test.db}"/>
+  </target>
+
+  <target name="echo-dbtest" unless="test.db">
+    <echo message="Testing all DBMS"/>
+  </target>
+
+  <target name="db-test" depends="compile-db-tests, clean-junit, echo-dbtest-type, echo-dbtest">
+
+    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${build.test}"/>
+        <path refid="junit.path"/>
+      </classpath>
+
+      <sysproperty key="wbjunit.db2.testdb" value="${wbjunit.db2.testdb}"/>
+      <sysproperty key="wbjunit.db2.username" value="${wbjunit.db2.username}"/>
+      <sysproperty key="wbjunit.db2.password" value="${wbjunit.db2.password}"/>
+      <sysproperty key="wbjunit.db2.schema" value="${wbjunit.db2.schema}"/>
+
+      <batchtest todir="${junitdir}" if="test.db">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}/">
+          <include name="workbench/db/${test.db}/*Test.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="${junitdir}" unless="test.db">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+
+    </junit>
+  </target>
+
+  <target name="test-mysql">
+    <property name="test.db" value="mysql"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-db2">
+    <property name="test.db" value="ibm"/>
+    <property file="db2.test.properties"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-fb">
+    <property name="test.db" value="firebird"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-mssql">
+    <property name="test.db" value="mssql"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-pg">
+    <property name="test.db" value="postgres"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-ora">
+    <property name="test.db" value="oracle"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="javadoc">
+    <javadoc destdir="${javadocdir}"
+             noqualifier="java.*:javax.*"
+             notree="true"
+             sourcepath="${src}"
+             link="http://docs.oracle.com/javase/6/docs/api/"
+             packagenames="workbench.*"/>
+  </target>
+
+  <target name="pdf-javadoc">
+    <javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
+             docletpath="../libs/doclet/pdfdoclet-1.0.3-all.jar"
+             sourcepath="${src}"
+             additionalparam="-pdf ${javadocdir}/workbench-api.pdf -config pdf_javadoc.properties"
+             packagenames="workbench.*"
+    />
+  </target>
+
+  <target name="fixshellscripts">
+
+    <fixcrlf srcdir="${scriptsrc}"
+       eol="lf"
+       eof="remove"
+       includes="**/*.sh"/>
+
+    <fixcrlf srcdir="${scriptsrc}"
+       eol="crlf"
+       eof="remove"
+       includes="**/*.cmd"/>
+
+  </target>
+
+</project>

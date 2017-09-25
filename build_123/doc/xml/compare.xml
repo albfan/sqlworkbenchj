@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<section id="compare-commands">
+  <title>Comparing databases</title>
+
+	<important><para>
+    All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
+  </para></important>
+
+  <para>
+    There are two &wb-productname; specific commands that can compare either the structure of two databases or
+    the data contained in them.
+  </para>
+
+	<para>
+		These commands (<literal>WbSchemaDiff</literal> and <literal>WbDataDiff</literal>) can be used like
+    any other SQL command as long as they are run using &wb-productname; This includes the usage in scripts
+    that are run in <link linkend="using-scripting">batch mode</link>.
+	</para>
+
+  <section id="command-schema-diff">
+    <title>Compare two database schemas - WbSchemaDiff</title>
+
+    <para>
+      <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
+      and outputs the differences between those schemas as an XML file. The XML file
+      describes the changes that need to be applied to the target schema to have
+      the same structure as the reference schema, e.g. modify column definitions,
+      remove or add tables, remove or add indexes.
+    </para>
+
+    <para>
+      The output is intended to be transformed using XSLT (e.g. with the
+      <link linkend="command-xslt">WbXSLT Command</link>).
+
+      Sample XSLT transformations are stored in the <literal>xslt</literal> subdirectory of the &wb-productname; installation
+      directory. All scripts that are part of the download can also be found on the
+      <ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
+    </para>
+
+    <note>
+    <para>
+      This feature should only be considered as a one-off solution to quickly compare two database schemas. Is not intended
+      to replace a proper schema (script) management. You should consider tools like <ulink url="http://liquibase.org/">Liquibase</ulink>
+      or <ulink url="http://flywaydb.org/">Flyway</ulink> to manage a database schema.
+      Those scripts should also be stored in a version control system (Subversion, Git, ...)
+    </para>
+    </note>
+
+    <para>The command supports the following parameters:</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+      <colspec colname="c1" colwidth="4cm" />
+      <colspec colname="c2" />
+      <thead>
+        <row>
+          <entry>Parameter</entry>
+          <entry>Description</entry>
+        </row>
+      </thead>
+
+      <tbody valign="top">
+        <row>
+          <entry id="schema-diff-refprof">-referenceProfile</entry>
+          <entry>The name of the connection profile for the reference
+            connection. If this is not specified, then the current connection is
+          used.</entry>
+        </row>
+        <row>
+          <entry id="schema-diff-refgroup">-referenceGroup</entry>
+          <entry>If the name of your reference profile is not unique across
+            all profiles, you will need to specify the group in which the profile
+            is located with this parameter.
+          </entry>
+        </row>
+        <row>
+          <entry id="schema-diff-refconn">-referenceConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="copy-source-con-descriptor">documentation for WbCopy</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-referenceProfile</literal> will be ignored.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry id="schema-diff-targetprof">-targetProfile</entry>
+          <entry>
+            <para>
+              The name of the connection profile for the target
+              connection (the one that needs to be migrated). If this is not
+              specified, then the current connection is used.
+            </para>
+            <para>
+              If you use the current connection for reference and target,
+              then you should prefix the table names with schema/user or
+              use the <literal>-referenceschema</literal> and
+              <literal>-targetschema</literal> parameters.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-targetgroup">-targetGroup</entry>
+          <entry>
+            If the name of your target profile is not unique across
+            all profiles, you will need to specify the group in which the profile
+            is located with this parameter.
+          </entry>
+        </row>
+        <row>
+          <entry id="schema-diff-targetconn">-targetConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="command-connect-descriptor-arg">documentation for WbConnect</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-targetProfile</literal> will be ignored.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-file">-file</entry>
+          <entry>The filename of the output file. If this
+          is not supplied the output will be written to the message area</entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-reftables">-referenceTables</entry>
+          <entry>A (comma separated) list of tables that are the reference
+            tables, to be checked.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-targettables">-targetTables</entry>
+          <entry>
+            <para>
+              A (comma separated) list of tables in the target
+              connection to be compared to the source tables. The tables
+              are "matched" by their position in the list. The first table in the
+              <literal>-referenceTables</literal> parameter is compared to the
+              first table in the <literal>-targetTables</literal> parameter, and so
+              on. Using this parameter you can compare tables that do not have the
+              same name.
+            </para>
+            <para>
+              If you omit this parameter, then all tables from the
+              target connection with the same names as those listed in
+              <literal>-referenceTables</literal> are compared.
+            </para>
+            <para>
+              If you omit both parameters, then all tables that the
+              user can access are retrieved from the source connection
+              and compared to the tables with the same name in the target
+              connection.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-refschemas">-referenceSchema</entry>
+          <entry>
+            Compare all tables from the specified schema (user)
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-targetschema">-targetSchema</entry>
+          <entry>
+            A schema in the target connection to be compared to the tables from the reference schema.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-excludetables">-excludeTables</entry>
+          <entry>
+            A comma separated list of tables that should not be compared. If tables from
+            several schemas are compared (using <literal>-referenceTables=schema_one.*, schema_two.*</literal>) then
+            the listed tables must be qualified with a schema, e.g. <literal>-excludeTables=schema_one.foobar, schema_two.fubar</literal>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-encodig">-encoding</entry>
+          <entry>The encoding to be used for the XML file. The default is UTF-8</entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includepk">-includePrimaryKeys</entry>
+          <entry>Select whether primary key constraint definitions should be compared as well.
+            The default is <literal>true</literal>.
+            Valid values are <literal>true</literal> or <literal>false</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includefk">-includeForeignKeys</entry>
+          <entry>Select whether foreign key constraint definitions should be compared as well.
+            The default is <literal>true</literal>.
+            Valid values are <literal>true</literal> or <literal>false</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includegrants">-includeTableGrants</entry>
+          <entry>
+            Select whether table grants should be compared as well.
+            The default is <literal>false</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includetrg">-includeTriggers</entry>
+          <entry>
+            Select whether table triggers are compared as well.
+            The default value is <literal>true</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includecons">-includeConstraints</entry>
+          <entry>
+            <para>
+              Select whether table and column (check) constraints
+              should be compared as well. &wb-productname; compares the constraint
+              definition (SQL) as stored in the database.
+            </para>
+            <para>
+              The default is to compare table constraints (<literal>true</literal>)
+              Valid values are <literal>true</literal> or <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry  id="schema-diff-useconsnames">-useConstraintNames</entry>
+          <entry>
+            <para>
+              When including check constraints this parameter controls whether constraints
+              should be matched by name, or only by their expression. If comparing by names
+              the diff output will contain elements for constraint modification
+              otherwise only drop and add entries will be available.
+            </para>
+            <para>
+              The default is to compare by names(<literal>true</literal>)
+              Valid values are <literal>true</literal> or <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includeviews">-includeViews</entry>
+          <entry>
+            <para>
+              Select whether views should also be compared.
+            </para>
+            <para>
+              Note that this comparison is very unreliable, because this compares
+              the source code, not the logical representation of the view definition.
+            </para>
+            <para>
+              The source code is compared the way it is returned by the DBMS is compared.
+              This comparison is case-sensitiv, which means <literal>SELECT * FROM foo;</literal>
+              will be reported as a difference to <literal>select * from foo;</literal> even
+              if they are logically the same. Aslo different indention or empty lines
+              will result in the views being reported as "different".
+            </para>
+            <para>
+              A comparison across different DBMS will not work.
+            </para>
+            <para>
+              The default is <literal>true</literal>
+              Valid values are <literal>true</literal> or <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includeprocs">-includeProcedures</entry>
+          <entry>
+            <para>
+              Select whether stored procedures should also be compared. When comparing
+              procedures the source as it is stored in the DBMS is compared. This comparison
+              is case-sensitive. A comparison across different DBMS will also not work!
+            </para>
+            <para>
+              The default is <literal>false</literal>
+              Valid values are <literal>true</literal> or <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includeidx">-includeIndex</entry>
+          <entry>
+            Select whether indexes should be compared as well.  The default
+            is to not compare index definitions.
+            Valid values are <literal>true</literal> or <literal>false</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-includeseq">-includeSequences</entry>
+          <entry>
+            Select whether sequences should be compared as well. The default is
+            to not compare sequences. Valid values are <literal>true</literal>, <literal>false</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="schema-diff-jdbctypes">-useJdbcTypes</entry>
+          <entry>
+            <para>
+              Define whether to compare the DBMS specific data types, or
+              the JDBC data type returned by the driver. When comparing
+              tables from two different DBMS it is recommended to use
+              <literal>-useJdbcType=true</literal> as this will make the
+              comparison a bit more DBMS-independent. When comparing e.g.
+              Oracle vs. PostgreSQL a column defined as
+              <literal>VARCHAR2(100)</literal> in Oracle would be reported as being different
+              to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
+              As both drivers report the column as java.sql.Types.VARCHAR,
+              they would be considered as identical when using <literal>-useJdbcType=true</literal>.
+            </para>
+            <para>
+              Valid values are <literal>true</literal> or <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry id="schema-diff-addtypes">-additionalTypes</entry>
+          <entry>
+              <para>
+                Select additional object types that are not compared by default (using the <literal>-includeXXX</literal> parameters)
+                such as Oracle <literal>TYPE</literal> definitions. Those objects are compared on source code level (like procedures)
+                rather than on attribute level.
+              </para>
+              <para>
+                Valid values are object type names as shown in the "Type" drop down in the DbExplorer.
+              </para>
+          </entry>
+        </row>
+        &common-xslt-args;
+      </tbody>
+      </tgroup>
+    </informaltable>
+
+    <simplesect  id="schema-diff-examples">
+      <title>WbSchemaDiff Examples</title>
+      <para>
+        Compare all tables between two connections, and write the output to the
+        file <literal>migrate_prod.xml</literal> and convert the XML to a series
+        of SQL statements for PostgreSQL
+      </para>
+<programlisting>WbSchemaDiff -referenceProfile="Staging"
+             -targetProfile="Production"
+             -file=migrate_prod.xml
+             -styleSheet=wbdiff2pg.xslt
+             -xsltOutput=migrate_prod.sql</programlisting>
+
+      <para>
+        Compare a list of matching tables between two databases and write the output to the
+        file <literal>migrate_staging.xml</literal> ignoring all tables that start with <literal>TMP_</literal>
+        and exclude any index definition from the comparison. Convert the output to a SQL script for Oracle
+      </para>
+
+<programlisting>WbSchemaDiff -referenceProfile="Development"
+             -targetProfile="Staging"
+             -file=migrate_stage.xml
+             -excludeTables=TMP_*
+             -includeIndex=false
+             -styleSheet=wbdiff2oracle.xslt
+             -xsltOutput=migrate_stage.sql</programlisting>
+    </simplesect>
+
+  </section>
+
+  <section id="command-data-diff">
+
+    <title>Compare data across databases - WbDataDiff</title>
+
+    <para>
+      The <literal>WbDataDiff</literal> command can be used to generate SQL scripts
+      that update a target database such that the data is identical to a reference
+      database. This is similar to the <literal>WbSchemaDiff</literal> but compares
+      the actual data in the tables rather than the table structure.
+    </para>
+    <para>
+      For each table the command will create up to three script files, depending on
+      the needed statements to migrate the data. One file for <literal>UPDATE</literal> statements,
+      one file for <literal>INSERT</literal> statements and one file for <literal>DELETE</literal>
+      statements (if <literal>-includeDelete=true</literal> is specified)
+    </para>
+
+    <note><para>
+      As this command needs to read every row from the reference and the target
+      table, processing large tables can take quite some time, especially if <literal>DELETE</literal>
+      statements should also be generated.
+    </para></note>
+
+    <para>
+      <literal>WbDataDiff</literal> requires that all involved tables have a primary key
+      defined. If a table does not have a primary key, <literal>WbDataDiff</literal> will
+      stop the processing.
+    </para>
+
+    <para>
+      To improve performance (a bit), the rows are retrieved in chunks from the
+      target table by dynamically constructing a WHERE clause for the rows
+      that were retrieved from the reference table. The chunk size
+      can be controlled using the property <literal>workbench.sql.sync.chunksize</literal>
+      The chunk size defaults to 25. This is a conservative setting to avoid
+      problems with long SQL statements when processing tables that have
+      a PK with multiple columns. If you know that your primary keys
+      consist only of a single column and the values won't be too long, you
+      can increase the chunk size, possibly increasing the performance when
+      generating the SQL statements. As most DBMS have a limit on the length
+      of a single SQL statement, be careful when setting the chunksize too high.
+      The same chunk size is applied when generating <literal>DELETE</literal>
+      statements by the <link linkend="command-copy"><literal>WbCopy</literal></link> command,
+      when <link linkend="copy-sync-delete">syncDelete</link> mode is enabled.
+    </para>
+
+    <para>
+      The command supports the following parameters:
+    </para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+      <colspec colname="c1" colwidth="4cm" />
+      <colspec colname="c2" />
+      <thead>
+        <row>
+          <entry>Parameter</entry>
+          <entry>Description</entry>
+        </row>
+      </thead>
+
+      <tbody valign="top">
+        <row>
+          <entry id="data-diff-refprof">-referenceProfile</entry>
+          <entry>
+            The name of the connection profile for the reference connection.
+            If this is not specified, then the current connection is used.
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-refgroup">-referenceGroup</entry>
+          <entry>
+            If the name of your reference profile is not unique across
+            all profiles, you will need to specify the group in which the profile
+            is located with this parameter. If the profile's name is unique
+            you can omit this parameter
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-refconn">-referenceConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="copy-source-con-descriptor">documentation for WbCopy</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-referenceProfile</literal> will be ignored.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-targetprof">-targetProfile</entry>
+          <entry>
+            <para>
+              The name of the connection profile for the target
+              connection (the one that needs to be migrated). If this is not
+              specified, then the current connection is used.
+            </para>
+            <para>
+              If you use the current connection for reference and target,
+              then you should prefix the table names with schema/user or
+              use the <literal>-referenceschema</literal> and
+              <literal>-targetschema</literal> parameters.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-targetgrp">-targetGroup</entry>
+          <entry>
+            If the name of your target profile is not unique across
+            all profiles, you will need to specify the group in which the profile
+            is located with this parameter.
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-targetconn">-targetConnection</entry>
+          <entry>
+            &connect-descriptor;
+            <para>
+              For a sample connection string please see the <link linkend="command-connect-descriptor-arg">documentation for WbConnect</link>.
+            </para>
+            <para>
+              If this parameter is specified <literal>-targetProfile</literal> will be ignored.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-fname">-file</entry>
+          <entry>
+            The filename of the main script file. The command creates two
+            scripts per table. One script named <literal>update_&lt;tablename&gt;.sql</literal>
+            that contains all needed <literal>UPDATE</literal> or <literal>INSERT</literal>
+            statements. The second script is named <literal>delete_&lt;tablename&gt;.sql</literal>
+            and will contain all <literal>DELETE</literal> statements for the target table.
+            The main script merely calls (using <link linkend="command-wbinclude">WbInclude</link>)
+            the generated scripts for each table.
+            You can enable writing a single file that includes all statements for all tables by using the parameter
+            <literal>-singleFile=true</literal>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-singlefile">-singleFile</entry>
+          <entry>
+            If this parameter's value is <literal>true</literal>, then only one single file
+            containing all statements will be written.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-reftables">-referenceTables</entry>
+          <entry>
+            A (comma separated) list of tables that are the reference
+            tables, to be checked. You can specify the table with wildcards,
+            e.g. <literal>-referenceTables=P%</literal> to compare all tables
+            that start with the letter <literal>P</literal>.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-targettables">-targetTables</entry>
+          <entry>
+            <para>
+              A (comma separated) list of tables in the target
+              connection to be compared to the source tables. The tables
+              are "matched" by their position in the list. The first table in the
+              <literal>-referenceTables</literal> parameter is compared to the
+              first table in the <literal>-targetTables</literal> parameter, and so
+              on. Using this parameter you can compare tables that do not have the
+              same name.
+            </para>
+            <para>
+              If you omit this parameter, then all tables from the
+              target connection with the same names as those listed in
+              <literal>-referenceTables</literal> are compared.
+            </para>
+            <para>
+              If you omit both parameters, then all tables that the
+              user can access are retrieved from the source connection
+              and compared to the tables with the same name in the target
+              connection.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-refschemas">-referenceSchema</entry>
+          <entry>
+            Compare all tables from the specified schema (user)
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-targetschema">-targetSchema</entry>
+          <entry>
+            A schema in the target connection to be compared to the tables from the reference schema.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-excltables">-excludeTables</entry>
+          <entry>
+            A comma separated list of tables that should not be compared. If tables from
+            several schemas are compared (using <literal>-referenceTables=schema_one.*, schema_two.*</literal>) then
+            the listed tables must be qualified with a schema, e.g. <literal>-excludeTables=schema_one.foobar, schema_two.fubar</literal>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-ignore-missing">-ignoreMissing</entry>
+          <entry>
+            If this parameter is true, <literal>WbDataDiff</literal> will still generate INSERT statements for tables that are not found
+            in the target database.
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-checkdeps">-checkDependencies</entry>
+
+          <entry>
+            <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+            <para>
+              Sorts the generated scripts in order to respect foreign key dependencies
+              for deleting and inserting rows.
+            </para>
+            <para>
+              The default is <literal>true</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-incldelete">-includeDelete</entry>
+          <entry>
+            <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+            <para>
+              Generates <literal>DELETE</literal> statements for rows that are present
+              in the target table, but not in the reference table. Note that enabling this
+              option will result in additional overhead reading the target table's data and
+              will slow down the overal comparison speed.
+            </para>
+            <para>
+              The default is <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-outtype">-type</entry>
+          <entry>
+            <para>Valid values are <literal>sql</literal>, <literal>xml</literal></para>
+            <para>Defines the type of the generated files.</para>
+          </entry>
+        </row>
+        <row>
+          <entry id="data-diff-encoding">-encoding</entry>
+          <entry>
+            <para>
+            The encoding to be used for the SQL scripts. The default depends
+            on your operating system. It will be displayed when you run
+            <literal>WbDataDiff</literal> without any parameters. You can overwrite
+            the platform default with the property <literal>workbench.encoding</literal>
+            in the file <literal>workbench.settings</literal>
+            </para>
+            <para>
+              XML files are always stored in UTF-8
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-dateliterals">-sqlDateLiterals</entry>
+          <entry>
+            <para>Valid values: <literal>jdbc</literal>, <literal>ansi</literal>, <literal>dbms</literal>, <literal>default</literal></para>
+            <para>
+              Controls the format in which the values of DATE, TIME and TIMESTAMP columns
+              are written into the generated SQL statements.
+              For a detailed description of the possible values, please refer to the
+              <link linkend="export-sql-literal-formats">WbExport</link>
+              command.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-ignorecols">-ignoreColumns</entry>
+          <entry>
+            <para>
+              With this parameter you can define a list of column names that should not be considered when comparing
+              data. You can e.g. exclude columns that store the last access time of a row, or the last update time if
+              that should not be taken into account when checking for changes.
+            </para>
+            <para>
+              They will however be part of generated <literal>INSERT</literal> or <literal>UPDATE</literal> statements
+              unless <literal>-exclueIgnored=true</literal> is also specified.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-exclignored">-excludeIgnored</entry>
+          <entry>
+            <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+            <para>
+              If this is set to <literal>true</literal>, the ignored columns will also be removed from any
+              <literal>INSERT</literal> or <literal>UPDATE</literal> statement
+            </para>
+            <para>
+              The default is <literal>false</literal>.
+            </para>
+          </entry>
+        </row>
+
+
+        <row>
+          <entry id="data-diff-altkey">-alternateKey</entry>
+          <entry>
+            <para>
+              With this parameter alternate keys can be defined for the tables that are compared. The parameter
+              can be repeated multiple times to set the keys for multiple tables in the following format:
+              <literal>-alternateKey='table_1=column_1,column_2'</literal>
+            </para>
+            <para>
+              Note that each value has to be enclosed in either single or double quotes to mask the equals sign
+              embedded in the parameter value.
+            </para>
+            <para>
+              Once an alternate (primary) key has been defined, the primary key columns defined on the tables
+              are ignored. By default the real PK columns will however be included in <literal>INSERT</literal> statement that are generated.
+              To avoid this, set the parameter <literal>-excludeRealPK</literal> to true.
+            </para>
+          </entry>
+        </row>
+
+        <row>
+          <entry id="data-diff-excludepk">-excludeRealPK</entry>
+          <entry>
+            <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+            <para>
+              This parameter controls the usage of the real PK columns in case alternate PK columns are defined.
+              If set to <literal>true</literal> the real PK columns are excluded from generated <literal>INSERT</literal>
+              statements (assuming that a new PK value will be generated during inserting the rows).
+            </para>
+            <para>
+              Note that this parameter will enable/disable the use of the real PK columns for <emphasis role="bold">all</emphasis>
+              tables for which alternate key columns were defined.
+            </para>
+            <para>
+              This parameter has no effect if no alternate keys were specified using the <literal>-alternateKey</literal> option.
+            </para>
+          </entry>
+        </row>
+
+        &progress-parameter;
+
+      </tbody>
+      </tgroup>
+    </informaltable>
+
+    <simplesect id="data-diff-examples">
+      <title>WbDataDiff Examples</title>
+      <para>
+        Compare all tables between two connections, and write the output to the
+        file <literal>migrate_staging.sql</literal>, but do not generate
+        <literal>DELETE</literal> statements.
+      </para>
+<programlisting>WbDataDiff -referenceProfile="Production"
+           -targetProfile="Staging"
+           -file=migrate_staging.sql
+           -includeDelete=false</programlisting>
+
+      <para>
+        Compare a list of matching tables between two databases and write the output to the
+        file <literal>migrate_staging.sql</literal> including <literal>DELETE</literal> statements.
+      </para>
+
+<programlisting>WbDataDiff -referenceProfile="Production"
+           -targetProfile="Staging"
+           -referenceTables=person,address,person_address
+           -file=migrate_staging.sql
+           -includeDelete=true</programlisting>
+
+    <para>
+      Compare three tables that are differently named in the target database and
+      ignore all columns (regardless in which table they appear) that are named
+      <literal>LAST_ACCESS</literal> or <literal>LAST_UPDATE</literal>
+    </para>
+<programlisting>WbDataDiff -referenceProfile="Production"
+           -targetProfile="Staging"
+           -referenceTables=person,address,person_address
+           -targetTables=t_person,t_address,t_person_address
+           -ignoreColumns=last_access,last_update
+           -file=migrate_staging.sql
+           -includeDelete=true</programlisting>
+    </simplesect>
+
+  </section>
+
+</section>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<section id="plain-profile-file">
+  <title>Simple properties based profile storage</title>
+
+  <para>
+    The default file format for saving connection profiles is XML, however when using &wb-productname;
+    in <link linkend="using-scripting">batch mode</link> or as a <link linkend="console-mode">console application</link>
+    editing the XML format is tedious. Therefor it is possible to store the profiles in a "plain" properties file.
+  </para>
+
+  <important>
+  <para>
+    The properties file <emphasis role="bold">must</emphasis> have the extension <literal>.properties</literal>,
+    otherwise it will not treated as a properties file by &wb-productname;
+  </para>
+  </important>
+
+  <para>
+    The properties file can contain multiple profiles, each property key has to start with the prefix
+    <literal>profile</literal>. The second element of the key is a unique identifier for the profile
+    that is used to combine the keys for one profile together. This identifier can be any combination
+    of digits and characters. The identifier is <emphasis role="bold">case sensitive</emphasis>.
+  </para>
+  <para>
+    The last element of the key is the actual profile property.
+  </para>
+  <para>
+    A minimal definition of a profile in a properties file, could look like this:
+    <programlisting>profile.042.name=Local Postgres
+profile.042.driverclass=org.postgresql.Driver
+profile.042.url=jdbc:postgresql://localhost/postgres
+profile.042.username=arthur
+profile.042.password=dent
+profile.042.driverjar=postgresql-9.4-1203.jdbc41.jar
+</programlisting>
+    In the above example the identifier <literal>042</literal> is used. The actual value is irrelevant.
+    It is only important that all properties for one profile have the same identifier. You can also
+    use any other combination of digits and characters.
+  </para>
+
+  <para>
+    For each profile the following properties can be defined. The property name listed in the following table
+    is the last element for each key in the properties file.
+  </para>
+
+  <informaltable frame="all">
+    <tgroup cols="2" align="left">
+      <colspec colname="c1" />
+      <colspec colname="c2" />
+      <thead>
+        <row>
+          <entry>Key</entry>
+          <entry>Value</entry>
+        </row>
+      </thead>
+
+      <tbody valign="top">
+        <row>
+          <entry>
+            <literal>name</literal>
+          </entry>
+          <entry>
+            <para>
+              This defines the name of the connection profile which can e.g. be used with the <literal>-profile</literal>
+              command line parameter.
+            </para>
+            <para>
+              This parameter is mandatory.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <literal>url</literal>
+          </entry>
+          <entry>
+            <para>
+              This defines the JDBC URL for the connection
+            </para>
+            <para>
+              This parameter is mandatory.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <literal>username</literal>
+          </entry>
+          <entry>
+            <para>
+              This defines the username that should be used to connect to the database
+            </para>
+            <para>
+              This parameter is mandatory.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <literal>password</literal>
+          </entry>
+          <entry>
+            <para>
+              This defines the password that should be used to connect to the database
+            </para>
+            <para>
+              This parameter is mandatory.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <literal>drivername</literal>
+          </entry>
+          <entry>
+            <para>
+              This defines the named JDBC driver as registered within &wb-productname;.
+              If this is specified the corresponding driver needs to be defined and
+              available in the <literal>WbDrivers.xml</literal> file.
+            </para>
+            <para>
+              Either this parameter or <literal>driverjar</literal> is mandatory.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <literal>driverjar</literal>
+          </entry>
+          <entry>
+            <para>
+              This specifies the jar file that contains the JDBC driver. If <literal>driverjar</literal>
+              is specified <literal>drivername</literal> is ignored.
+            </para>
+            <para>
+              If the filename is not specified as an absolute file, it is assumed to be relative
+              to the location of the properties file.
+            </para>
+            <para>
+              Either this parameter or <literal>drivername</literal> is mandatory.
+            </para>
+            <para>
+              Defining the driver jar in this way is not supported when running in GUI mode. Drivers managed
+              through the GUI will always be saved in <literal>WbDrivers.xml</literal>
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry><literal>autocommit</literal></entry>
+          <entry>
+            <para>Defines the autocommit behaviour of the connection. This defaults to <literal>false</literal></para>
+          </entry>
+        </row>
+        <row>
+          <entry><literal>fetchsize</literal></entry>
+          <entry><para>Defines the fetchsize attribute of the connection.</para></entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+
+</section>

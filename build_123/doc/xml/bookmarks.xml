@@ -1,0 +1,71 @@
+<section id="editor-bookmarks">
+  <title>Working with bookmarks</title>
+  <section id="define-bookmark">
+    <title>Defining bookmarks</title>
+    <para>
+      A bookmark inside the editor is defined by adding the keyword <literal>@WbTag</literal> followed by the name
+      of the bookmark into a SQL comment:
+    </para>
+    <programlisting>-- @WbTag delete everything
+truncate table orders,order_line,customers;
+commit;
+    </programlisting>
+    <para>
+      The keyword is not case sensitive, <literal>@wbtag</literal> will work just as wel as <literal>@WBTAG</literal>,
+      or <literal>@WbTag</literal>. A multiline comment can be used as well as a single line comment.
+    </para>
+    <para>
+      The annotations for <link linkend="result-names">naming a result</link> can additionally be
+      included in the bookmark list. This is enabled in the <link linkend="option-result-name">options panel for the editor</link>.
+    </para>
+    <para>
+      The names of procedures and functions can also be used as bookmarks if enabled in the <link linkend="bookmark-options">bookmark options</link>
+    </para>
+  </section>
+
+  <section id="jump-bookmark">
+    <title>Jumping to a bookmark</title>
+    <para>
+      To jump to a bookmark select <menuchoice><guimenu>Tools</guimenu><guimenuitem>Bookmarks</guimenuitem></menuchoice>.
+      A dialog box with all defined bookmarks will be displayed. You can filter the list of displayed bookmarks
+      by entering a value in the input field. Depending on the option <guimenu>Filter on name only</guimenu>
+      the value will either be compared only against the bookmark name. If that option is disabled then
+      the bookmark name and the name of the SQL tab will be checked for the entered value.
+    </para>
+    <note><para>
+      The selection in the bookmark list can be moved with the <keycap>UP/DOWN</keycap> keys even when
+      the cursor is located in the filter input field.
+    </para></note>
+    <para>
+      If the option <guimenu>Only for current tab</guimenu> is enabled, then the dialog will open showing
+      only bookmarks for the current tab.
+    </para>
+  </section>
+
+  <section id="bookmark-config">
+    <title>Configuring the display of the bookmark list</title>
+    <para>
+      There are two options to influence how the list of bookmarks is displayed. Both options
+      are available when displaying the context menu for the list header (usually through a
+      click with the right mouse button):
+      <itemizedlist>
+        <listitem>
+          <simpara>
+            Remember column widths - if this is enabled, the columns are not automatically adjusted to the
+            width of the content. Instead the list remembers whatever width was adjusted.
+          </simpara>
+        </listitem>
+        <listitem>
+          <simpara>
+            Remember sort order - by default the list is sorted by the name of the bookmark.
+            When this option is selected, whatever sort order is selected (by clicking on the
+            column headers) will be saved and restored the next time the dialog is opened.
+          </simpara>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+  </section>
+
+</section>
+

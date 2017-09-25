@@ -1,0 +1,745 @@
+<section id="command-copy">
+	<title>Copy data across databases</title>
+
+	<para>
+		The <literal>WbCopy</literal> is essentially the command line version of the
+		the <link linkend="data-pumper">DataPumper</link>. For a more detailed explanation
+    of the copy process, please refer to that section. It basically chains a
+    <link linkend="command-export"><literal>WbExport</literal></link> and a <link linkend="command-import"><literal>WbImport</literal></link>
+    statement without the need of an intermediate data file. The <literal>WbCopy</literal> command requires
+    that a connection to the source and target database can be made at the same time from the computer
+    running &wb-productname;
+	</para>
+
+   <note>
+    <para>
+       Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft Driver) read the full result obtained
+       from the database into memory. In that case, copying large results might require a lot
+       of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
+       for details on how to configure the individual drivers if this happens to you.
+     </para>
+    </note>
+
+	<section id="wbcopy-general-parameters">
+
+		<title>General parameters for the <literal>WbCopy</literal> command.</title>
+
+    <para>
+      <literal>WbCopy</literal> supports <link linkend="conditional-exec">conditional execution</link>
+    </para>
+
+		<informaltable frame="all">
+			<tgroup cols="2"  align="left">
+				<colspec colname="c1" colwidth="4cm" />
+				<colspec colname="c2" />
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+
+				<tbody valign="top">
+					<row>
+						<entry id="copy-source-con-profile">-sourceProfile</entry>
+						<entry>
+							<para>
+								The name of the connection profile to use as the source connection.
+								If -sourceprofile is not specified, the current connection is used as the source.
+							</para>
+							<para>
+								If the profile name contains spaces or dashes, it has to be quoted.
+							</para>
+              <para>
+                This parameter supports auto-completion
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-sourceGroup</entry>
+						<entry>
+							<para>
+								If the name of your source profile is not unique across
+								all profiles, you will need to specify the group in which the profile
+								is located with this parameter.
+							</para>
+							<para>
+								If the group name contains spaces or dashes, it has to be quoted.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-source-con-descriptor">-sourceConnection</entry>
+						<entry>
+              &connect-descriptor;
+              <para>
+                For a sample connection string please see the <link linkend="command-connect-descriptor-arg">documentation for WbConnect</link>.
+              </para>
+              <para>
+                If this parmeter is specified, <literal>-sourceProfile</literal> is ignored
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-target-con-profile">-targetProfile</entry>
+						<entry>
+							<para>
+								The name of the connection profile to use as the target connection. If
+								<literal>-targetProfile</literal> is not specified, the current connection is used as the target.
+							</para>
+							<para>
+								If the profile name contains spaces or dashes, it has to be quoted.
+							</para>
+              <para>
+                This parameter supports auto-completion
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-targetGroup</entry>
+						<entry>
+							<para>
+								If the name of your target profile is not unique across
+								all profiles, you will need to specify the group in which the profile
+								is located with this parameter.
+							</para>
+							<para>
+								If the group name contains spaces or dashes, it has to be quoted.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-targetConnection</entry>
+						<entry>
+              &connect-descriptor;
+              <para>
+                If this parmeter is specified, <literal>-sourceProfile</literal> is ignored
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-commit">-commitEvery</entry>
+						<entry>
+							The number of rows after which a commit is sent to the target database. This parameter
+							is ignored if JDBC batching (<literal>-batchSize</literal>) is used.
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-delete-target">-deleteTarget</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If this parameter is set to true, all rows are deleted from the
+                target table using a <literal>DELETE</literal> statement before copying the data.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-truncate-target">-truncateTable</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If this parameter is set to true, all rows are remove from the
+                target table using a <literal>TRUNCATE</literal> statement before copying the data.
+							</para>
+              <para>
+                Not all DBMS support the <literal>TRUNCATE</literal> command. If this option is used for a DBMS
+                that does not support <literal>TRUNCATE</literal> or where the target table(s) cannot be
+                truncated due to other restrictions, an error will occur.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-mode">-mode</entry>
+						<entry>
+							<para>
+								Defines how the data should be sent to the database. Possible
+								values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
+								'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'. Please
+								refer to the description of the <link linkend="command-import">WbImport</link>
+								command for details on.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-sync-delete">-syncDelete</entry>
+						<entry>
+							<para>
+								If this option is enabled <literal>-syncDelete=true</literal>, &wb-productname; will
+								check each row from the target table if it's present in the source table. Rows in
+								the target table that are not present in the source will be deleted. As this is implemented
+								by checking each row individually in the source table, this can take some time for
+								large tables. This option requires that each table in question has a primary key
+								defined.
+							</para>
+							<para>
+								Combined with an <literal>UPDATE,INSERT</literal> or <literal>UPDATE,INSERT</literal> mode
+								this creates an exact copy of the source table.
+							</para>
+							<para>
+								If more than one table is copied, the delete process is started after
+								all inserts and updates have been processed. It is recommended to use the
+								<literal>-checkDependencies</literal> parameter to make sure the deletes are processed
+								in the correct order (which is most probably already needed to process inserts correctly).
+							</para>
+							<para>
+								To only generate the SQL statements that would synchronize two databases,
+								you can use the command <link linkend="command-data-diff">WbDataDiff</link>
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-key-columns">-keyColumns</entry>
+						<entry>
+							<para>
+								Defines the key columns for the target table. This parameter
+								is only necessary if import is running in <literal>UPDATE</literal> mode.
+								It is ignored when specifying more than one table with the <literal>-sourceTable</literal>
+								argument. In that case each table must have a primary key.
+							</para>
+              <para>
+                It is assumed that the values for the key columns will never be <literal>NULL</literal>.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-ignore-identity">-ignoreIdentityColumns</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls if identity or auto-increment columns will be included in the import.
+							</para>
+              <para>
+                If this is used, the JDBC driver (of the target database) must correctly report the column to be excluded as
+                an <emphasis>AUTOINCREMENT</emphasis> column. This can be verified in the table definition display of the DbExplorer.
+                If the column is reported with <literal>YES</literal> for the <emphasis>AUTOINCREMENT</emphasis> property,
+                then this column will be excluded during the import.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-batch-size">-batchSize</entry>
+						<entry>
+							<para>
+								Enable the use of the JDBC batch update feature, by setting the size
+								of the batch queue. Any value greater than 1 will enable batch modee. If the
+								JDBC driver supports this, the INSERT (or UPDATE) performance can be increased.
+							</para>
+							<para>
+								This parameter will be ignored if the driver does not support batch updates or if
+								the mode is not UPDATE or INSERT (i.e. if <literal>-mode=update,insert</literal>
+								or <literal>-mode=insert,update</literal> is used).
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-commit-batch">-commitBatch</entry>
+						<entry>
+							<para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+							<para>When using the <literal>-batchSize</literal> parameter, the
+								<literal>-commitEvery</literal> is ignored (as not all JDBC drivers
+								support a <literal>COMMIT</literal> inside a JDBC batch operation. When
+								using <literal>-commitBatch=true</literal> &wb-productname; will send a
+								<literal>COMMIT</literal> to the database server after each JDBC
+								batch is sent to the server.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-continue">-continueOnError</entry>
+						<entry>
+							<para>
+								Defines the behaviour if an error occurs in one of the statements.
+								If this is set to <literal>true</literal> the copy process will continue
+								even if one statement fails. If set to <literal>false</literal> the copy process
+								will be halted on the first error. The default value is <literal>false</literal>.
+							</para>
+              <para>
+                With PostgreSQL <literal>continueOnError</literal> will only work, if the use of
+                savepoints is enabled using <literal>-useSavepoint=true</literal>.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-savepoint">-useSavepoint</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								Controls if &wb-productname; guards every insert or update statement
+                with a savepoint to recover from individual error during import,
+                when <literal>continueOnError</literal> is set to true.
+							</para>
+              <para>
+                Using a savepoint for each DML statement can drastically reduce the performance
+                of the import.
+              </para>
+						</entry>
+					</row>
+
+          <row>
+            <entry id="copy-trim-char-data">-trimCharData</entry>
+
+            <entry>
+              <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                If this parameter is set to true, values from <literal>CHAR</literal> columns will be trimmed from trailing
+                whitespace. This is equivalent to the <link linkend="profile-trim-char-data">Trim CHAR data</link> in the connection profile.
+              </para>
+            </entry>
+          </row>
+
+					&progress-parameter;
+
+				</tbody>
+			</tgroup>
+		</informaltable>
+
+	</section>
+
+	<section id="wbcopy-single-table">
+		<title>Copying data from one or more tables</title>
+		<informaltable frame="all">
+			<tgroup cols="2"  align="left">
+				<colspec colname="c1" colwidth="4cm" />
+				<colspec colname="c2" />
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				<tbody valign="top">
+					<row>
+					 <entry>-sourceSchema</entry>
+						<entry>
+              <para>
+                The name of the schema to be copied. When using this parameter, all tables
+                from the specified schema are copied to the target. You must specify either
+                <literal>-sourceSchema</literal>, <literal>-sourceTable</literal> or <literal>-sourceQuery</literal>
+              </para>
+            </entry>
+					</row>
+
+					<row>
+						<entry>-sourceTable</entry>
+						<entry>
+              <para>
+                The name of the table(s) to be copied. You can either specifiy a
+                list of tables: <literal>-sourceTable=table1,table2</literal>. Or select
+                the tables using a wildcard: <literal>-sourceTable=*</literal> will copy
+                all tables accessible to the user. If more than one table is specified
+                using this parameter, the <literal>-targetTable</literal> parameter is
+                ignored.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-exclude-tables">-excludeTables</entry>
+						<entry>
+              <para>
+                The tables listed in this parameter will not be copied. This can be used when all but a few tables
+                should be copied from one database to another. First all tables specified through <literal>-sourceTable</literal> will
+                be evaluated. The tables specified by <literal>-excludeTables</literal> can include wildcards in the same way,
+                <literal>-sourceTable</literal> allows wildcards.
+              </para>
+              <para>
+                <literal>-sourceTable=* -excludeTables=TEMP*</literal> will copy all tables, but not those starting with <literal>TEMP</literal>.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+
+					<row>
+						<entry>-checkDependencies</entry>
+						<entry>
+							<para>
+								When copying more than one file into tables with foreign key constraints,
+								this switch can be used to import the files in the correct order (child tables first).
+								When <literal>-checkDependencies=true</literal> is passed, &wb-productname; will
+								check the foreign key dependencies for the tables specified with <literal>-sourceTable</literal>
+							</para>
+						</entry>
+					</row>
+
+					<row>
+					 <entry>-targetSchema</entry>
+						<entry>
+              The name of the target schema into which the tables should be copied. When this
+              parameter is not specified, the default schema of the target connection is used.
+						</entry>
+					</row>
+
+					<row>
+						<entry>-sourceWhere</entry>
+						<entry>
+							A <literal>WHERE</literal> condition that is applied to the source table.
+						</entry>
+					</row>
+
+					<row>
+						<entry>-targetTable</entry>
+						<entry>
+							The name of the table into which the data should be written.
+							This parameter is ignored if more than one table is copied.
+						</entry>
+					</row>
+
+					<row>
+						<entry id="copy-create-target">-createTarget</entry>
+						<entry>
+							<para>
+								If this parameter is set to <literal>true</literal> the target table
+								will be created, if it doesn't exist. Valid values are <literal>true</literal> or <literal>false</literal>.
+							</para>
+              <important>
+                <para>
+                  Using <literal>-createTarget=true</literal> is intended as a quick and dirty way of
+                  creating a target table "on the fly" during the copy process. Tables created this way should not
+                  be considered "production-ready". The created tables will only have the primary key and not-null constraints created.
+                  All other constraints from the source table are ignored.
+                </para>
+                <para>
+                  Because the automatic mapping of table definitions will only work in the most simple cases
+                  this feature is not suited to synchronize the table definitions between two different DBMS products.
+                </para>
+                <para>
+                  Because of these limitations this feature can not considered a replacement for
+                  a proper schema management. If you have the requirement to keep the schema definition
+                  of different DBMS in sync please consider a tool like <ulink url="http://liquibase.org/">Liquibase</ulink>
+                  or <ulink url="http://flywaydb.org/">Flyway</ulink>. Do not try to use <literal>WbCopy</literal> for this.
+                </para>
+                <para>
+                  If you want to migrate a table (or several tables) from one DBMS to another, consider user
+                  <link linkend="command-schema-report">WbSchemaReport</link> together with an
+                  <ulink url="http://www.sql-workbench.net/xslt.html">XSLT</ulink> transformation
+                </para>
+              </important>
+							<para>
+								When using this option with different source and target DBMS, the information
+								about the data types to be used in the target database are retrieved from
+								the JDBC driver. In some cases this information might not be accurate
+								or complete. You can enhance the information from the driver by configuring
+								your own mappings in workbench.settings. Please see the section
+								<link linkend="db-custom-type-map">Customizing data type mapping</link>
+								for details.
+							</para>
+              <para>
+                If the automatic mapping generates an invalid <literal>CREATE TABLE</literal> statement, you will
+                need to create the table manually in the target database.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-removeDefaults</entry>
+						<entry>
+							<para>
+                Valid values are <literal>true</literal> or <literal>false</literal>.
+							</para>
+              <para>
+                This parameter is only valid in combination with <literal>-createTarget=true</literal>. If set to <literal>true</literal>,
+                any default value (or expression) defined on the source table will be ignored when creating the target table. This is
+                useful if the source and target DBMS use different syntax for default values.
+              </para>
+            </entry>
+          </row>
+
+          <row>
+						<entry id="copy-create-type">-tableType</entry>
+						<entry>
+							<para>
+                When <literal>-createTarget</literal> is set to <literal>true</literal>, this parameter
+                can be used to control the SQL statement that is generated to create the
+                target table. This is useful if the target table should e.g. be a temporary table
+							</para>
+							<para>
+                When using the auto-completion for this parameter, all defined "create types" that
+                are configured in workbench.settings (or are part of the default settings) are displayed
+                together with the name of the DBMS they are used for. The list is <emphasis role="bold">not</emphasis>
+                limited to definitions for the target database! The specified type must nonetheless match a type
+                defined for the target connection. If you specify a type that does not exist, the default
+                <literal>CREATE TABLE</literal> will be used.
+                </para>
+              <para>
+                For details on how to configure a CREATE TABLE template for this parameter, please refer to the
+                chapter <link linkend="setting-sql-generation">Settings related to SQL statement generation</link>
+              </para>
+						</entry>
+          </row>
+
+          <row>
+						<entry id="copy-skip-target-check">-skipTargetCheck</entry>
+						<entry>
+							<para>
+                Normally WbCopy will check if the specified target table does exist. However, some JDBC drivers
+                do not always return all table information correctly (e.g. temporary tables). If you know that the
+                target table exists, the parameter <literal>-skipTargetCheck=true</literal> can be used to tell
+                WbCopy, that the (column) definition of the source table should be assumed for the target table and
+                not further test for the target table will be done.
+							</para>
+						</entry>
+          </row>
+
+					<row>
+						<entry>-dropTarget</entry>
+						<entry>
+              <para>Possible values: <literal>false</literal>, <literal>true</literal>, <literal>cascade</literal></para>
+              <para>
+                If this parameter is set to <literal>true</literal> the target table
+                will be dropped before it is created.
+              </para>
+              <para>
+                For database systems that support it (Oracle, PostgreSQL), a <literal>DROP ... CASCADE</literal>
+                is used when the value <literal>cascade</literal> is specified. If the DBMS does not support
+                cascading drops, this is the same as specifying <literal>true</literal>.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-columns</entry>
+						<entry>
+							<para>
+								Defines the columns to be copied. If this parameter is not specified, then
+								all matching columns are copied from source to target. Matching
+								is done on name <emphasis role="bold">and</emphasis> data type. You
+								can either specify a list of columns or a column mapping.
+							</para>
+							<para>
+								When supplying a list of columns, the data from
+								each column in the source table will be copied into the corresponding column (i.e.
+								one with the same name) in the target table.
+								If <literal>-createTarget=true</literal> is specified then this list also defines
+								the columns of the target table to be created. The names have to be separated
+								by comma: <literal>-columns=firstname, lastname, zipcode</literal>
+							</para>
+							<para>
+								A column mapping defines which column from the source table maps to which column
+								of the target table (if the column names do not match)
+								If <literal>-createTarget=true</literal> then the
+								target table will be created from the specified target names:
+								<literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
+								<literal>firstname</literal> from the source table to a column named <literal>surname</literal>
+								in the target table, and so on.
+							</para>
+							<para>This parameter is ignored if more than one table is copied.</para>
+							<para><literallayout>When using a SQL <emphasis>query</emphasis> as the data source a <emphasis>mapping</emphasis> cannot be specified.
+Please check <link linkend="command-copy-query">Copying data based on a SQL query</link> for details.</literallayout></para>
+						</entry>
+					</row>
+
+          &table-statements;
+
+
+				</tbody>
+			</tgroup>
+		</informaltable>
+	</section>
+
+	<section id="command-copy-query">
+		<title>Copying data based on a SQL query</title>
+		<informaltable frame="all">
+			<tgroup cols="2"  align="left">
+				<colspec colname="c1" colwidth="4cm" />
+				<colspec colname="c2" />
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>-sourceQuery</entry>
+						<entry>
+              <para>The SQL query to be used as the source data (instead of a table).</para>
+              <para>
+                This parameter is ignored if <literal>-sourceSchema</literal> or <literal>-sourceTable</literal>
+                is specified.
+              </para>
+            </entry>
+					</row>
+					<row>
+						<entry>-columns</entry>
+						<entry>
+							<para>
+								The <emphasis>list</emphasis> of columns from the target table, in the order in which they appear in the source query.
+							</para>
+							<para>
+								If the column names in the query match the column names in the target table, this
+								parameter is not necessary.
+							</para>
+							<para>
+								If you do specify this parameter, note that this
+								is <emphasis role="bold">not</emphasis> a column mapping.
+								It only lists the columns in the correct order .
+							</para>
+						</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</informaltable>
+	</section>
+
+	<section id="copy-update-mode">
+		<title>Update mode</title>
+		<para>The <literal>WbCopy</literal> command understands the same update mode
+		parameter as the <literal>WbImport</literal> command. For a discussion on
+		the different update modes, please refer to the <link linkend="import-update-mode">WbImport</link>
+		command.</para>
+	</section>
+
+	<section id="copy-sync">
+		<title>Synchronizing tables</title>
+
+		<para>
+			Using <literal>-mode=update,insert</literal> ensures that all rows that are present in
+			the source table do exist in the target table and that all values for non-key columns
+			are identical.
+		</para>
+
+		<para>
+			When you need to keep two tables completely in sync, rows that are present in the
+			target table that do not exist in the source table need to be deleted. This is what the
+			parameter <literal>-syncDelete</literal> is for. If this is enabled (<literal>-syncDelete=true</literal>)
+			then &wb-productname; will check every row from the target table if it is present in the
+			source table. This check is based on the primary keys of the target table and
+			assumes that the source table as the same primary key.
+		</para>
+
+		<para>
+			Testing if each row in the target table exists in the source table is a substantial overhead,
+			so you should enable this option only when really needed. <literal>DELETE</literal>s in the
+			target table are batched according to the <literal>-batchSize</literal> setting of the
+			<literal>WbCopy</literal> command. To increase performance, you should enable batching
+			for the whole process.
+		</para>
+
+		<para>
+			Internally the rows from the source table are checked in chunks, which means that
+			&wb-productname; will generate a <literal>SELECT</literal> statement that contains
+			a <literal>WHERE</literal> condition for each row retrieved from the target table.
+			The default chunk size is relatively small to avoid problems with large SQL statements.
+			This approach was taken to minimize the number of statements sent to the server.
+		</para>
+
+		<para>
+			The <link linkend="import-mode-downgrade">automatic fallback</link> from <literal>update,insert</literal> or <literal>insert,update</literal>
+			mode to <literal>insert</literal> mode applies for synchronizing tables using <literal>WbCopy</literal>
+			as well.
+		</para>
+	</section>
+
+	<section id="copy-examples">
+		<title>Examples</title>
+
+		<section id="example-copy-single-table">
+			<title>Copy one table to another where all column names match</title>
+
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=the_table
+       -targetTable=the_other_table;</programlisting>
+	 </section>
+
+		<section id="example-copy-sync">
+			<title>Synchronize the tables between two databases</title>
+			<para>
+				This example will copy the data from the tables in the source
+				database to the corresponding tables in the target database. Rows that
+				are not available in the source tables are deleted from the target tables.
+			</para>
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=*
+       -mode=update,insert
+       -syncDelete=true;</programlisting>
+		</section>
+
+		<section id="example-copy-where">
+			<title>Copy only selected rows</title>
+
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=the_table
+       -sourceWhere="lastname LIKE 'D%'"
+       -targetTable=the_other_table;</programlisting>
+			 <para>
+				 This example will run the statement <literal>SELECT * FROM the_table WHERE lastname like 'D%'</literal>
+				 and copy all corresponding columns to the target table <literal>the_other_table</literal>.
+			 </para>
+		</section>
+
+		<section id="example-copy-column-map">
+			<title>Copy data between tables with different columns</title>
+
+			<para>
+				This example copies only selected columns from the source table. The column names
+				in the two tables do not match and a column mapping is defined. Before the
+				copy is started all rows are deleted from the target table.
+			</para>
+
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceTable=person
+       -targetTable=contacts
+       -deleteTarget=true
+       -columns=firstname/surname, lastname/name, birthday/dob;</programlisting>
+		</section>
+
+		<section id="example-copy-query">
+			<title>Copy data based on a SQL query</title>
+
+			<para>
+				When using a query as the source for the <literal>WbCopy</literal> command, the column
+				mapping is specified by simply supplying the order of the target columns as they appear
+				in the <literal>SELECT</literal> statement.
+			</para>
+
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceQuery="SELECT firstname, lastname, birthday FROM person"
+       -targetTable=contacts
+       -deleteTarget=true
+       -columns=surname, name, dob;</programlisting>
+
+			 <para>
+				This copies the data based on the SELECT statement into the table <literal>CONTACTS</literal>
+				of the target database. The <literal>-columns</literal> parameter defines that the first column
+				of the SELECT (firstname) is copied into the target column with the name <literal>surname</literal>,
+				the second result column (lastname) is copied into the target column <literal>name</literal> and the
+				last source column (birthday) is copied into the target column <literal>dob</literal>.
+			</para>
+			<para>
+				This example could also be written as:
+		  </para>
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceQuery="SELECT firstname <emphasis role="bold">as surname</emphasis>, lastname <emphasis role="bold">as name</emphasis>, birthday <emphasis role="bold">as dob</emphasis> FROM person"
+       -targetTable=contacts
+       -deleteTarget=true</programlisting>
+
+		</section>
+
+	</section>
+
+</section>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="false" xmlns:log4j='http://jakarta.apache.org/log4j/' >
+
+    <!-- 
+      Enable this appender if you want to see log messages in the console window 
+      You need to un-comment the line <appender-ref ref="console"/>
+      in the <root> tag as well
+    -->
+    <appender name="console" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- if you want to include the class that issued the log message
+                 include %C{1} in the pattern -->
+            <param name="ConversionPattern" value="%d{ISO8601} %-5p %m%n" />
+        </layout>
+    </appender>
+    
+    <!-- 
+        Define an appender that writes to a file.
+    -->
+    <appender name="file" class="org.apache.log4j.RollingFileAppender">
+
+        <!--
+            workbench.config.dir will be set by SQL Workbench/J before the
+            Log4J system is initialized.
+            It also sets workbench.install.dir which points to the directory where
+            sqlworkbench.jar is located
+        -->
+        <param name="File" value="${workbench.config.dir}/log4j.log" />
+        <param name="maxFileSize" value="100KB" />
+        <param name="maxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ISO8601} %-5p %m%n" />
+        </layout>
+
+    </appender>
+
+    <!--
+       An example to turn on different logging levels for different packages.
+    <logger name="workbench.db">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="workbench.gui">
+        <level value="error"/>
+    </logger>
+    -->
+
+    <root>
+        <priority value="info"/>
+        <appender-ref ref="file"/>
+        <appender-ref ref="console"/>
+    </root>
+    
+    <!-- <loggerFactory class="workbench.log.Log4JLoggerFactory" />-->
+
+</log4j:configuration>
+
+
+
+

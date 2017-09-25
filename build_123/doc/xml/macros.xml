@@ -1,0 +1,279 @@
+<section id="macros">
+  <title>Using macros and text clips</title>
+
+  <para>
+    SQL macros and text clips can help writing and executing SQL statements that you use frequently.
+  </para>
+  <para>
+    There are two types of macros:
+
+    <itemizedlist>
+      <listitem><simpara>executable macros</simpara></listitem>
+      <listitem><simpara>expandable macros</simpara></listitem>
+    </itemizedlist>
+
+    Executable macros are intended for complete SQL statements that are executed once you select the macro.
+    They can also be used as an abbreviated SQL statement, by typing the macro's name and executing this
+    as a SQL statement.
+  </para>
+  <para>
+    Expandable macros are intended for SQL fragments (or "clips"). The text of the macro is inserted into
+    the editor if the name is typed or the macro is selected from the menu.
+  </para>
+
+  <section id="macro-load-save">
+    <title>Loading and saving macro sets</title>
+    <para>
+      By default &wb-productname; will use a file with the name <literal>WbMacros.xml</literal>
+      stored in the <link linkend="config-dir">configuration directory</link> to save and load the macros.
+    </para>
+    <para>
+      To create a copy of the currently loaded macros, use
+      <menuchoice><guimenu>Macros</guimenu><guimenuitem>Save Macros as...</guimenuitem></menuchoice>.
+      To load previously saved macros, use <menuchoice><guimenu>Macros</guimenu><guimenuitem>Load Macros...</guimenuitem></menuchoice>.
+    </para>
+    <para>
+      The currently loaded file is displayed as a tool tip of the <guimenuitem>Save Macros as...</guimenuitem> menu item and
+      and the bottom of the <guimenuitem>Manage Macros</guimenuitem> dialog.
+    </para>
+
+    <para>
+      <note>
+        A set of macros is always loaded globally, not just for the current window. If you
+        have more than one window open, the newly loaded macros will also be active in all the other windows.
+      </note>
+    </para>
+  </section>
+
+  <section id="define-macro">
+    <title>Defining Macros</title>
+
+    <para>There are three ways to define a SQL macro.</para>
+    <para>
+      If the current statement in the editor should be defined as a macro, select (highlight) the statement's text
+      and select  <menuchoice><guimenu>Macros</guimenu><guimenuitem>Add SQL macro</guimenuitem></menuchoice> from the main
+      menu. You will be prompted to supply a name for the new macro. If you supply the name of an existing
+      macro, the existing macro will be overwritten.
+    </para>
+    <para>
+      Alternatively you can add a new macro through
+      <menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>.
+      This dialog can also be used to delete and and edit existing macros.
+      You can put macros into separate groups (e.g. one for PostgreSQL macros, one for Oracle etc).
+      If you have only one group defined (or only one visible group), all macros of that group
+      will be listed in the menu directly. If you define more than one group, each group will appear
+      as a separate sub-menu.
+    </para>
+    <para>
+      Macros can also be defined using the command <link linkend="command-definemacro"><literal>WbDefineMacro</literal></link>.
+    </para>
+    <para>
+      When the dialog is closed using the <guibutton>OK</guibutton> button the macros are automatically
+      saved to the current file.
+    </para>
+
+    <para>
+      The order in which the macros (or groups) appear in the menu can be changed by
+      dragging them to the desired position in the manage macro dialog.
+    </para>
+  </section>
+
+  <section id="executable-macros">
+    <title>Executable macros</title>
+
+    <para>
+      There are two ways to run an executable macro: use it's name as a SQL command by typing it into the editor
+      and executing it like any other SQL statement. Or by selecting the corresponding menu entry from the
+      <guimenu>Macros</guimenu> menu.
+    </para>
+    <para>
+      Note that the macro name needs to be unique to be used as a "SQL Statement". If you have
+      two different macros in two different macro groups with the same name, it is undefined (i.e. "random") which of them will be executed.
+    </para>
+
+    <para>
+      To view the complete list of
+      macros select <menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>
+      After selecting a macro, it can be executed by clicking on the Run <guibutton>Run</guibutton> button. If you check the
+      option "Replace current SQL", then the text in the editor will be replaced with the
+      text from the macro when you click on the run button.
+    </para>
+    <para>
+      In console mode you can use the command <literal>WbListMacros</literal> to show the complete list of macros (of course
+      this can also be used in GUI mode as well.
+    </para>
+    <note><para>
+      Macros will not be evaluated when running in batch mode.
+    </para></note>
+
+    <para>
+      Apart from the &wb-productname; <link linkend="using-variables">script variables</link> for SQL Statements,
+      additional "parameters" can be used inside a macro definition. These parameters will be replaced <emphasis>before</emphasis> replacing
+      the script variables.
+    </para>
+
+    <informaltable frame="all" id="macro-parameters">
+
+      <tgroup cols="2" align="left">
+        <colspec colname="c1" colwidth="3.8cm" />
+        <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody valign="top">
+            <row>
+              <entry>${selection}$</entry>
+              <entry>
+                This parameter will be replaced with the currently selected text. The
+                selected text will not be altered in any way.
+              </entry>
+            </row>
+            <row>
+              <entry>${selected_statement}$</entry>
+              <entry>
+                This behaves similar to <literal>${selection}$</literal> except that
+                any trailing semicolon will be removed from the selection. Thus the
+                macro definition can always contain the semicolon (e.g. when the
+                macro actually defines a script with multiple statements) but
+                when selecting the text, you do not need to worry whether a semicolon
+                is selected or not (and would potentially break the script).
+              </entry>
+            </row>
+
+            <row>
+              <entry>${current_statement}$</entry>
+              <entry>
+                This key will be replaced with the current statement (without the trailing
+                delimiter). The current statement is defined by the cursor location
+                and is the statement that would be executed when using
+                <link linkend="execute-current"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice></link>
+              </entry>
+            </row>
+
+            <row>
+              <entry>${text}$</entry>
+              <entry>
+                  This key will be replaced with the complete text from the editor (regardless
+                  of any selection).
+              </entry>
+            </row>
+
+          </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>
+      The SQL statement that is eventually executed will be logged into the message panel
+      when invoking the macro from the menu. Macros that use the above parameters
+      cannot correctly be executed by entering the macro alias in the SQL editor (and
+      then executing the "statement").
+    </para>
+
+    <note><para>
+      The parameter keywords are case sensitive, i.e.
+      the text <literal>${SELECTION}$</literal> will not be replaced!
+    </para></note>
+
+    <para>
+      This feature can be used to create SQL scripts that work only with
+      with an additional statement. e.g. for Oracle you could define
+      a macro to run an explain plan for the current statement:
+    </para>
+
+        <programlisting>explain plan
+for
+${current_statement}$
+;
+
+-- @wbResult Execution plan
+select plan_table_output
+from table(dbms_xplan.display(format => 'ALL'));</programlisting>
+
+    <para>
+      When you run this macro, it will run an <literal>EXPLAIN PLAN</literal>
+      for the statement in which the cursor is currently located, and will
+      immediately display the results for the explain. Note that the
+      <literal>${current_statement}$</literal> keyword is terminated with
+      a semicolon, as the replacement for <literal>${current_statement}$</literal>
+      will never add the semicolon. If you use <literal>${selection}$</literal>
+      instead, you have to pay attention to not select the semicolon in the
+      editor before running this macro.
+    </para>
+
+    <para>
+      For PostgreSQL you can define a similar macro that will automatically run
+      the <literal>EXPLAIN</literal> command for a statemet:
+      <programlisting>explain (analyze true, verbose true, buffers true) ${current_statement}$;</programlisting>
+    </para>
+
+
+    <para>
+      Another usage of the parameter replacement could be a SQL Statement that
+      retrieves the rowcount that would be returned by the current statement:
+    </para>
+      <programlisting>SELECT count(*) FROM
+(
+${current_statement}$
+)</programlisting>
+
+  </section>
+
+  <section id="expandable-macro">
+    <indexterm><primary>Editor</primary><secondary>expanding text clips</secondary></indexterm>
+    <title>Expandable macros</title>
+    <para>
+      Expandable macros are not intended to be run directly. They serve as code templates for writing
+      statements.
+    </para>
+    <para>
+      When typing the name of the macro in the editor and completing this name with the "Macro expansion key",
+      the typed word will be replaced with the macro's text. The name of a such a macro is not case sensitive. So
+      <literal>slt</literal> and <literal>SLT</literal> are detected as the same macro name.
+    </para>
+    <para>
+      The macro expansion is only triggered if the <link linkend="macro-expansion-keystroke">macro expansion key</link> is typed
+      quickly after the word. If there is a longer pause between typing the last character of the macro's name
+      and typing the expansion key, the macro will not be expanded.
+    </para>
+
+    <para>
+      For expandable macros, two special place holders in the macro text are supported. Both place holders
+      are deleting when the macro text is inserted.
+      <informaltable frame="all">
+
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="3.8cm" />
+          <colspec colname="c2" />
+            <thead>
+              <row>
+                <entry>Parameter</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+
+            <tbody valign="top">
+              <row>
+                <entry>${c}</entry>
+                <entry>
+                  This parameter marks the location of the cursor after the macro is expanded.
+                </entry>
+              </row>
+              <row>
+                <entry>${s}</entry>
+                <entry>
+                  This parameter also marks the position of the cursor after expansion. Additionally
+                  the word on the right hand side of the parameter will automatically be selected.
+                </entry>
+              </row>
+            </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </section>
+
+</section>
+

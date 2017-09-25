@@ -1,0 +1,21 @@
+<para>
+  Allows to specify a full connection definition as a single parameter (and thus does not require
+  a pre-defined connection profile).
+</para>
+<para>
+  The connection is specified with a comma separated list of key value pairs:
+  <itemizedlist>
+    <listitem><literal>username</literal> - the username for the connection</listitem>
+    <listitem><literal>password</literal> - the password for the connection</listitem>
+    <listitem><literal>url</literal> - the JDBC URL</listitem>
+    <listitem>
+      <literal>driver</literal> - the class name for the JDBC driver. If this is not specified, &wb-productname;
+      will try to determine the driver from the JDBC URL
+    </listitem>
+    <listitem>
+      <literal>driverJar</literal> - the full path to the JDBC driver. This not required if a driver
+      for the specified class is already configured
+    </listitem>
+  </itemizedlist>
+  e.g.: <literal>"username=foo,password=bar,url=jdbc:postgresql://localhost/mydb"</literal>
+</para>

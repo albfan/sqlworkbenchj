@@ -1,0 +1,383 @@
+<section id="commandline" xreflabel="command line parameters">
+  <title>Command line parameters</title>
+  <indexterm><primary>Command line</primary><secondary>parameters</secondary></indexterm>
+
+  <para>
+    Command line parameters are <emphasis role="bold">not</emphasis> case sensitive.
+    The parameters <literal>-PROFILE</literal> or <literal>-profile</literal> are
+    identical. The usage of the command line parameters is identical between
+    the launcher or starting &wb-productname; using the <literal>java</literal> command itself.
+  </para>
+
+  <note>
+    <para>
+      When quoting parameters on the command line (especially in a Windows&reg; environment) you have
+      to use single quotes, as the double quotes won't be passed to the application.
+    </para>
+  </note>
+
+  <section id="cmdline-parameter-configdir">
+    <title>Specify the directory for configuration settings</title>
+
+    <para>
+      The parameter <literal>-configDir</literal> specifies the directory where
+      &wb-productname; will store all its settings. If this parameter is not supplied,
+      the directory where the <link linkend="config-dir">default location</link> is used.
+      The placeholder <literal>${user.home}</literal> will be
+      replaced with the current user's home directory (as returned by the Operating System).
+      If the specified directory does not exist, it will be created.
+    </para>
+
+    <?dbfo-need height="2cm" ?>
+    <para>
+      If you want to control the location where &wb-productname; stores the configuration
+      files, you have to start the application with the parameter -configDir to specify an
+      alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
+    </para>
+
+    <?dbfo-need height="2cm" ?>
+    <para>
+      or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
+      The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
+      (as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
+      If the specified directory does not exist, it will be created.
+    </para>
+
+    <para>
+      On the Windows&reg; platform you can use a forward slash to separate directory names in the parameter.
+    </para>
+  </section>
+
+  <section id="cmdline-parameter-libdir">
+    <title>Specify a base directory for JDBC driver libraries</title>
+    <para>
+      The <literal>-libdir</literal> parameter defines the base directory for your JDBC drivers. The value of
+      this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link>
+      using the placeholder <literal>%LibDir%</literal>
+      The value for this parameter can also be set in the file <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
+    </para>
+  </section>
+
+  <section id="cmdline-parameter-profilestorage">
+    <title>Specify the file containing connection profiles</title>
+    <para>
+      &wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
+      If you want to use a different filename, or use different set of profiles for different purposes
+      you can define the file where the profiles are stored with the <literal>-profileStorage</literal>
+      parameter.
+    </para>
+
+    <para>
+      If the value of the parameter does not contain a path, the file will be expected (and stored) in the
+      configuration directory.
+    </para>
+
+    <para>
+      The default XML format of the <literal>WbProfiles.xml</literal> file is not intended to be edited manually.
+      To manage pre-defined profiles for <link linkend="console-mode">console mode</link> or
+      <link linkend="using-scripting">batch mode</link>, it's easier to use a <link linkend="plain-profile-file">properties file</link>
+      containing the profiles.
+    </para>
+
+    <para>
+      When specifying a properties file with <literal>-profileStorage</literal> the file extension <emphasis role="bold">must</emphasis>
+      be <literal>.properties</literal>
+    </para>
+
+  </section>
+
+  <section id="cmdline-vardef">
+    <indexterm><primary>Variables</primary><secondary>define on command line</secondary></indexterm>
+
+    <title>Defining variables</title>
+
+    <para>
+      You can define variables when starting &wb-productname; by either passing the variable
+      definition directly or by passing a file that contains the variable definitions.
+    </para>
+
+    <para>
+      Defining variable values in this way can also be used when running in
+      <link linkend="using-scripting">batch mode</link>.
+    </para>
+
+    <simplesect id="cmdline-varfile">
+      <title>Providing a file with variable definitions</title>
+
+      <para>
+        With the <literal>-varFile</literal> parameter a definition file for
+        <link linkend="using-variables">internal variables</link> can be specified.
+        Each variable has to be listed on a single line in the format <literal>variable=value</literal>.
+        Lines starting with a <literal>#</literal> character are ignored (comments).
+        the file can contain unicode sequences (e.g. <literal>\u00fc</literal>. Values
+        spanning multiple lines are not supported. When reading a file during startup
+        the default encoding is used. If you need to read the file in a specific encoding
+        please use the <link linkend="wb-define-var"><literal>WbVarDef</literal></link>
+        command with the <literal>-file</literal> and <literal>-encoding</literal> parameter.
+      </para>
+      <programlisting>#Define some values
+var_id=42
+person_name=Dent
+another_variable=24</programlisting>
+
+      <para>
+        If the above file was saved under the name <literal>vars.txt</literal>, you can use those
+        variables by starting &wb-productname; using the following command line:
+      </para>
+      <programlisting>java -jar sqlworkbench.jar -varFile=vars.txt</programlisting>
+    </simplesect>
+
+    <simplesect id="cmdline-single-var">
+      <title>Specifying variables directly</title>
+      <para>
+        A single variable can be defined by passing the parameter <literal>-variable</literal>. This
+        parameter can be supplied multiple times to define multiple variables:
+      </para>
+
+      <programlisting>java -jar sqlworkbench.jar -variable=foo=42 -variable=bar='xyz'</programlisting>
+
+      <para>
+        Note that the variable definition does not need to be quoted even though it contains the <literal>=</literal> character.
+        Using <literal>-variable=bar='xyz'</literal> will include the single quotes in the variable value. The variable
+        definition only needs to be quoted if it contains a space:
+      <programlisting>java -jar sqlworkbench.jar -variable="foo=hello world"</programlisting>
+      </para>
+
+    </simplesect>
+  </section>
+
+  <section id="nosettings-commandline">
+    <title>Prevent updating the .settings file</title>
+    <para>
+      If the <literal>-nosettings</literal> parameter is specified, &wb-productname; will not write
+      its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note
+      that in <link linkend="using-scripting">batch mode</link>, this file is never written.
+    </para>
+    <note><para>
+      If this parameter is supplied, the workspace will not be saved automatically as well!
+    </para></note>
+  </section>
+
+  <section id="commandline-connect-profile">
+    <title>Connect using a pre-defined connection profile</title>
+    <indexterm><primary>Command line</primary><secondary>connection profile</secondary></indexterm>
+
+    <para>
+      You can specify the name of an already created <link linkend="profiles">connection
+      profile</link> on the command line with the <literal>-profile=&#60;profile name&#62;</literal>
+      parameter. The name has to be passed exactly like it appears in the profile dialog
+      (case sensitive!). If the name contains spaces or dashes, it has to be enclosed in
+      quotations marks. If you have more than one profile with the same name but in different
+      profile groups, you have to specify the desired profile group using the <literal>-profilegroup</literal>
+      parameter, otherwise the first profile matching the passed name will be selected.
+    </para>
+
+    <para>Example (on one line):</para>
+
+    <programlisting>java -jar sqlworkbench.jar
+     -profile='PostgreSQL - Test'
+     -script='test.sql'</programlisting>
+    <para>
+      In this case the file <literal>WbProfiles.xml</literal> must be in the current
+      (working) directory of the application. If this is not the case, please specify the
+      location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profileStorage</literal></link> or
+      <link linkend="cmdline-parameter-configdir"><literal>-configDir</literal></link> parameter.
+    </para>
+    <para>
+      If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will
+      need to specify the profile group as well (in one line):
+    </para>
+    <programlisting>java -jar sqlworkbench.jar
+     -profile='PostgreSQL - Test'
+     -profilegroup='Local'
+     -script='test.sql'</programlisting>
+
+    <para>
+      You can also store the connection profiles in a <link linkend="plain-profile-file">properties file</link>
+      and specify this file using the <link linkend="cmdline-parameter-profilestorage"><literal>-profileStorage</literal></link> parameter.
+    </para>
+
+  </section>
+
+  <section id="commandline-connect-noprofile">
+    <title>Connect without a profile</title>
+    <indexterm><primary>Command line</primary><secondary>JDBC connection</secondary></indexterm>
+
+    <para>
+      You can also specify the full connection parameters on the command line, if
+      you don&apos;t want to create a profile only for executing a batch file.
+      The advantage of this method is, that &wb-productname; does not need the files
+      <filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be
+      able to connect to the database.
+    </para>
+
+    <simplesect id="commandline-connect-args">
+      <title>Specifying all connection attributes</title>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.6cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody valign="top">
+            &common-connect-args;
+            <row>
+              <entry>-emptyStringIsNull</entry>
+              <entry>This parameter corresponds to the
+              <link linkend="profile-empty-string-is-null">Empty String is NULL</link>
+              setting of the connection profile. This will only be needed when editing a result set in GUI mode.
+              </entry>
+            </row>
+
+            <row>
+              <entry>-connectionProperties</entry>
+              <entry>
+                <para>
+                  This parameter can be used to pass <link linkend="profile-extended-properties">extended connection properties</link> if
+                  the driver does not support them e.g. in the JDBC URL. The values are passed as key=value pairs,
+                  e.g. <literal>-connectionProperties=someProp=42</literal>
+                </para>
+                <para>
+                  If either a comma or an equal sign occurs in a parameter's value, it must be quoted.
+                  This means, when passing multiple properties the whole expression needs to be quoted:
+                  <literal>-connectionProperties='someProp=42,otherProp=24'</literal>.
+                </para>
+                <para>
+                  As an alternative, a colon can be used instead of the equals sign,
+                  e.g <literal>-connectionProperties=someProp:42,otherProp:24</literal>. In this
+                  case no quoting is needed (because no delimiter is part of the parameters value).
+                </para>
+                <para>
+                  If any of the property values contain a comma or an equal sign, then the whole parameter value needs to be quoted again, even
+                  when using a colon.
+                  <literal>-connectionProperties='someProp:"answer=42",otherProp:"2,4"'</literal> will define the value <literal>answer=42</literal> for the
+                  property <literal>someProp</literal> and the value 2,4 for the property <literal>otherProp</literal>.
+                 </para>
+              </entry>
+            </row>
+
+            <row>
+              <entry>-altDelim</entry>
+              <entry>
+                The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection.
+                e.g. <literal>-altDelimiter=GOl</literal> to define a SQL Server like GO as the
+                alternate delimiter. Note that when running in batchmode you can also override
+                the default delimiter by specifying the
+                <link linkend="scripting-delimiter"><literal>-delimiter</literal></link> parameter.
+              </entry>
+            </row>
+
+            <row>
+              <entry>-separateConnection</entry>
+              <entry>If this parameter is set to true, and &wb-productname; is run in GUI mode,
+              each SQL tab will use it's own connection to the database server. This setting is
+              also available in the <link linkend="profile-separate-connection">connection profile</link>.
+              The default is <literal>true</literal>.
+              </entry>
+            </row>
+
+            <row>
+              <entry>-connectionName</entry>
+              <entry>
+                When specifying a connection without a profile (only using <literal>-username</literal>, <literal>-password</literal>
+                and so on) then the name of the connection can be defined using this parameter. The connection name
+                will be shown in the title of the main window if &wb-productname; is started in GUI mode.
+                The parameter does not have any visible effect when running in batch or console mode.
+              </entry>
+            </row>
+            <row>
+              <entry>-workspace</entry>
+              <entry>The workspace file to be loaded. If the file specification does not
+              include a directory, the workspace will be loaded from the
+              <link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
+              is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
+              </entry>
+            </row>
+
+            <row>
+              <entry>-readOnly</entry>
+              <entry>
+                Puts the connection into <link linkend="profile-readonly">read-only mode</link>.
+              </entry>
+            </row>
+
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </simplesect>
+
+    <simplesect id="commandline-connect-descriptor">
+      <title>By specifying a simple connection string</title>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.6cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody valign="top">
+            <row id="id">
+              <entry>-connection</entry>
+              <entry>
+                &connect-descriptor;
+                <para>
+                  If an approriate driver is already configured the driver's classname or the JAR file don't have to be specified.
+                </para>
+                <para>
+                  If an approriate driver is not configured, the driver's jar file must be specified:
+                  <simpara>
+                  <literal>"username=foo,password=bar,url=jdbc:postgresql://localhost/mydb,driverjar=/etc/drivers/postgresql.jar"</literal>
+                  </simpara>
+                  &wb-productname; will try to detect the driver's classname automatically (based on the JDBC URL).
+                </para>
+                <para>
+                  If this parameter is specified, <literal>-profile</literal> is ignored.
+                </para>
+                <para>
+                  The individual parameters controlling the connection <emphasis>behaviour</emphasis>
+                  can be used together with <literal>-connection</literal>, e.g. <literal>-autocommit</literal> or <literal>-fetchSize</literal>
+                </para>
+                <para>
+                  In addition to <literal>-connection></literal> the following parameters are also supported to specify
+                  connections for <link linkend="command-copy"><literal>WbCopy</literal></link>,
+                  <link linkend="command-copy"><literal>WbDataDiff</literal></link> or <link linkend="command-copy"><literal>WbSchemaDiff</literal></link>:
+                  <itemizedlist>
+                    <listitem><simpara>-sourceConnection</simpara></listitem>
+                    <listitem><simpara>-targetConnection</simpara></listitem>
+                    <listitem><simpara>-referenceConnection</simpara></listitem>
+                  </itemizedlist>
+                </para>
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+    </simplesect>
+
+    <para>
+      If a value for one of the parameters contains a dash or a space, you will
+      need to quote the parameter value.
+    </para>
+
+    <para>
+      A disadvantage of this method is, that the password is displayed in plain text
+      on the command line. If this is used in a batch file, the password will be stored
+      in plain text in the batch file. If you don't want to expose the password,
+      you can use a connection profile and <link linkend="options-encrypt-password">enable password encryption</link>
+      for connection profiles.
+    </para>
+
+  </section>
+
+</section>
+

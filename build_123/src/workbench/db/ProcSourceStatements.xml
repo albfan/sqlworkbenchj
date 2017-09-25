@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.5" class="java.beans.XMLDecoder">
+ <object class="java.util.HashMap">
+
+
+  <void method="put">
+   <string>SQLBase</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select text from sysadm.syscommands</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>creator</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <!-- SAP HANA -->
+   <string>HDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select definition
+from (
+   select schema_name, function_name as name, definition
+   from sys.functions
+   union all
+   select schema_name, procedure_name as name, definition
+   from sys.procedures
+) t
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schema_name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>SAP DB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select definition
+        from (
+           select schemaname, functionname as name, definition
+           from functions
+           union all
+           select schemaname, dbprocname as name, definition
+           from dbprocedures
+        ) t</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>MonetDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select fct.func
+from sys.functions fct
+  left join sys.schemas sch on sch.id = fct.schema_id
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>fct.name</string>
+    </void>
+    <void property="schemaField">
+     <string>sch.name</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Apache Derby</string>
+   <object id="derby_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT a.aliasinfo FROM sys.sysaliases a, sys.sysschemas s WHERE a.schemaid = s.schemaid</string>
+    </void>
+    <void property="objectNameField">
+     <string>a.alias</string>
+    </void>
+    <void property="schemaField">
+     <string>s.schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Cloudscape</string>
+   <object idref="derby_proc_source"/>
+	</void>
+
+  <!-- DB2 for z/OS identifies itself as DB2 -->
+	<void method="put">
+   <string>$dbid:db2h</string>
+   <object id="db2_host_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM sysibm.sysroutines</string>
+    </void>
+    <void property="objectNameField">
+     <string>NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>SCHEMA</string>
+    </void>
+   </object>
+  </void>
+
+	<void method="put">
+   <string>$dbid:db2i</string>
+   <object id="db2_as400_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select routine_definition FROM qsys2.sysroutines</string>
+    </void>
+    <void property="objectNameField">
+     <string>routine_name</string>
+    </void>
+    <void property="schemaField">
+     <string>routine_schema </string>
+    </void>
+    <void property="specificNameColumn">
+     <string>specific_name</string>
+    </void>
+   </object>
+	</void>
+
+  <!-- DB2 for LUW -->
+	<void method="put">
+   <string>$dbid:db2</string>
+   <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM syscat.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>ROUTINENAME</string>
+    </void>
+    <void property="schemaField">
+     <string>ROUTINESCHEMA</string>
+    </void>
+    <void property="specificNameColumn">
+     <string>SPECIFICNAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>NuoDB</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT PROCEDURETEXT FROM system.procedures</string>
+    </void>
+    <void property="objectNameField">
+     <string>procedurename</string>
+    </void>
+    <void property="schemaField">
+     <string>schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Oracle</string>
+   <object id="ora_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM all_source</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY TYPE,LINE</string>
+    </void>
+    <void property="schemaField">
+     <string>owner</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Oracle8</string>
+   <object idref="ora_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>MySQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select routine_definition from information_schema.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>routine_name</string>
+    </void>
+    <void property="schemaField">
+     <string>routine_schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>HSQL Database Engine</string>
+   <object id="hsql_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select routine_definition from information_schema.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>routine_name</string>
+    </void>
+    <void property="specificNameColumn">
+     <string>specific_name</string>
+    </void>
+
+    <void property="schemaField">
+     <string>routine_schema</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>HSQL Database Engine 2.0</string>
+   <object idref="hsql_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>ThinkSQL Relational Database Management System</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT routine_definition FROM information_schema.routines</string>
+    </void>
+    <void property="objectNameField">
+     <string>ROUTINE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>ROUTINE_SCHEMA</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>false</boolean>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>$dbid:firebird-3</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select source
+from (
+select trim(rdb$procedure_name) as procedure_name,
+       trim(rdb$owner_name) as owner,
+       rdb$procedure_source as source
+from rdb$procedures
+union all
+select trim(rdb$function_name),
+       trim(rdb$owner_name),
+       rdb$function_source
+from rdb$functions
+) t
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>PROCEDURE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>OWNER</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>$dbid:firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+select rdb$procedure_source
+from rdb$procedures
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>RDB$PROCEDURE_NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>RDB$OWNER_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Enterprise</string>
+   <object id="ase_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select syscomments.text
+ from sysobjects, syscomments
+ where sysobjects.id = syscomments.id
+and  sysobjects.type = &apos;P&apos;</string>
+    </void>
+    <void property="objectNameField">
+     <string>sysobjects.name</string>
+    </void>
+    <void property="orderBy">
+     <string> order by syscomments.colid</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Adaptive Server Anywhere</string>
+		<object idref="ase_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>SQL Anywhere</string>
+		<object idref="ase_proc_source"/>
+  </void>
+
+  <void method="put">
+   <string>INGRES</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text_segment FROM iiprocedures</string>
+    </void>
+    <void property="objectNameField">
+     <string>procedure_name</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>false</boolean>
+    </void>
+    <void property="schemaField">
+     <string>procedure_owner</string>
+    </void>
+    <void property="orderBy">
+     <string>order by text_sequence</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+SELECT B.data, B.seqno
+FROM informix.sysprocedures P,
+     informix.sysprocbody  B
+WHERE P.procid = B.procid
+  and B.datakey = 'T'</string>
+    </void>
+    <void property="internalIdColumn">
+      <string>p.procid</string>
+    </void>
+    <void property="objectNameField">
+      <string>P.procname</string>
+    </void>
+    <void property="schemaField">
+      <string>P.owner</string>
+    </void>
+    <void property="orderBy">
+      <string>order by B.seqno</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+    <string>LucidDB</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>SELECT external_name FROM SYS_ROOT.DBA_ROUTINES</string>
+      </void>
+      <void property="objectNameField">
+        <string>invocation_name</string>
+      </void>
+      <void property="schemaField">
+        <string>schema_name</string>
+      </void>
+    </object>
+  </void>
+
+  <void method="put">
+    <string>H2</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>
+          SELECT 'CREATE ALIAS '||alias_name||' AS \n$$\n'|| source ||'\n$$;'
+          FROM information_schema.function_aliases
+        </string>
+      </void>
+      <void property="objectNameField">
+        <string>alias_name</string>
+      </void>
+      <void property="schemaField">
+        <string>alias_schema</string>
+      </void>
+    </object>
+  </void>
+
+
+  <void method="put">
+   <string>Vertica Database</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>
+            select 'CREATE FUNCTION '||function_name||'('||function_argument_type||')\nRETURN '||function_return_type||'\nAS BEGIN\n  '||function_definition||';\nEND;'
+            from v_catalog.user_functions
+        </string>
+      </void>
+      <void property="objectNameField">
+        <string>function_name</string>
+      </void>
+      <void property="schemaField">
+        <string>schema_name</string>
+      </void>
+    </object>
+  </void>
+
+  <void method="put">
+   <string>EXASolution</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>select function_text from EXA_ALL_FUNCTIONS</string>
+      </void>
+      <void property="objectNameField">
+        <string>function_name</string>
+      </void>
+      <void property="schemaField">
+        <string>function_schema</string>
+      </void>
+    </object>
+  </void>
+
+ </object>
+</java>

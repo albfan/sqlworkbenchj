@@ -1,0 +1,423 @@
+<section id="console-mode">
+	<title>Using &wb-productname; in console mode</title>
+
+	<para>
+		&wb-productname; can also be used from the command line without starting the GUI, e.g. when
+		you only have a console window (Putty, SSH) to access the database. In that case you can either
+		run scripts using the <link linkend="using-scripting">batch mode</link>, or start &wb-productname;
+		in console mode, where you can run statements interactively, similar to the GUI mode (but of course with
+		less comfortable editing possibilities).
+	</para>
+
+	<para>
+		When using &wb-productname; in console mode, you
+		<emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>.
+		Please use the supplied scripts <literal>sqlwbconsole.cmd</literal> (Windows batch file) or
+		<literal>sqlwbconsole.sh</literal> (Unix shell script) to start the console.
+		On Windows you can also use the <literal>sqlwbconsole.exe</literal> program to start the console mode.
+	</para>
+
+	<para>
+		When starting &wb-productname; in console mode, you can define the connection
+		using a <link linkend="commandline-connect-profile">profile name</link> or specifying the connection
+		properties <link linkend="commandline-connect-noprofile">directly </link>.
+		Additionally you can specify all parameters that can be used in <link linkend="using-scripting">batch mode</link>.
+	</para>
+
+	<para>
+		The following batch mode parameters will be ignored in console mode:
+		<simplelist columns="1">
+			<member>
+				<literal>script</literal> - you cannot specify a script to be run during startup.
+				If you want to run a script in console mode, use the command <link linkend="command-wbinclude">WbInclude</link>.
+			</member>
+			<member><literal>encoding</literal> - as you cannot specify a script, the encoding parameter is ignored as well</member>
+			<member><literal>displayResult</literal> - always true in console mode</member>
+			<member><literal>cleanupSuccess</literal> and <literal>cleanupError</literal>- as no script is run, there is no "end of script" after which a "cleanup" is necessary</member>
+			<member><literal>abortOnError</literal></member>
+		</simplelist>
+	</para>
+
+	<section id="console-running-sql">
+		<title>Entering statements</title>
+		<para>
+			After starting the console mode, &wb-productname; displays the prompt <literal>SQL&gt;</literal> where
+			you can enter SQL statements. The statement will not be sent to the database until it is either
+			terminated with the standard semicolon, or with the alternate delimiter (that can be specified either
+			in the used connection profile or on the commandline when starting the console mode).
+		</para>
+		<para>
+			As long as a statement is not complete, the prompt will change to <literal>..&gt;</literal>. Once
+			a delimiter is identified the statement(s) are sent to the database.
+		</para>
+
+		<screen>SQL&gt; SELECT * [enter]
+..&gt;FROM person;
+</screen>
+
+		<para>
+			A delimiter is only recognized at the end of the input line, thus you can enter more than one
+			statement on a line (or multiple lines) if the intermediate delimiter is not at the end of one
+			of the input lines:
+		</para>
+
+		<screen>SQL&gt; DELETE FROM person; rollback;
+DELETE executed successfully
+4 row(s) affected.
+
+ROLLBACK executed successfully
+SQL&gt;</screen>
+
+
+	</section>
+
+	<section id="console-exit">
+		<title>Exiting console mode</title>
+		<para>
+			To exit the application in console mode, enter <literal>exit</literal> when the default prompt is displayed.
+			If the "continuation prompt" (<literal>..&gt;</literal>) is displayed, this will not terminate the application.
+			The keyword <literal>exit</literal> must not be terminated with a semicolon.
+		</para>
+	</section>
+
+
+	<section id="console-mode-connection">
+		<title>Setting or changing the connection</title>
+
+		<para>
+			If you did not specify a connection on the command line when starting the console, you can set or
+			change the current connection in console mode using the
+			<link linkend="command-connect"><literal>WbConnect</literal></link> command.
+			Using <literal>WbConnect</literal> in console mode will automatically close the current
+			connection, before establishing the new connection.
+		</para>
+
+		<para>
+			To disconnect the current connection in console mode, run the statement <literal>WbDisconnect</literal>.
+			Note that this statement is only available in console mode.
+		</para>
+
+	</section>
+
+	<section id="console-resultset-display">
+		<title>Displaying result sets</title>
+		<para>
+			If you are running <literal>SELECT</literal> statements in console mode, the result is
+			displayed on the screen in "tabular" format. Note that &wb-productname; reads the whole result
+			into memory in order to be to adjust the column widths to the displayed data.
+		</para>
+
+		<para>
+			You can disable the buffering of the results using the command line parameter <literal>bufferResults=false</literal>.
+			In that case, the width of the displayed columns will not be adjusted properly. The column widths are
+			taken from the information returned by the driver which typically results is a much larger display
+			than needed.
+		</para>
+
+		<para>
+			The output in tabular format (if results are buffered) looks like this:
+		</para>
+
+		<screen>SQL> select id, firstname, lastname, comment from person;
+id | firstname | lastname   | comment
+---+-----------+------------+--------------------
+1  | Arthur    | Dent       | this is a comment
+2  | Zaphod    | Beeblebrox |
+4  | Mary      | Moviestar  | comment
+3  | Tricia    | McMillian  | test1
+
+(4 Rows)
+SQL></screen>
+
+		<para>
+			If the size of the column values exceed the console's width the display will be wrapped, which
+			makes it hard to read. In that case, you can switch the output so that each column is printed on
+			a single line.
+		</para>
+		<para>
+			This is done by running the statement: <literal>WbDisplay record</literal>
+		</para>
+		<screen>SQL> <emphasis role="bold">WbDisplay record;</emphasis>
+Display changed to single record format
+Execution time: 0.0s
+SQL> select id, firstname, lastname, comment from person;
+---- [Row 1] -------------------------------
+id        : 1
+firstname : Arthur
+lastname  : Dent
+comment   : this is a very long comment that would not fit onto the screen when printed as the last column
+---- [Row 2] -------------------------------
+id        : 2
+firstname : Zaphod
+lastname  : Beeblebrox
+comment   :
+---- [Row 3] -------------------------------
+id        : 4
+firstname : Mary
+lastname  : Moviestar
+comment   :
+---- [Row 4] -------------------------------
+id        : 3
+firstname : Tricia
+lastname  : McMillian
+comment   :
+
+(4 Rows)
+SQL> </screen>
+
+		<para>
+			To switch back to the "tabular" display, use: <literal>WbDisplay tab</literal>.
+		</para>
+	</section>
+
+  <section id="console-wbrun">
+    <title>Running SQL scripts that produce a result</title>
+    <para>
+      Normally when executing a SQL script using <link linkend="command-wbinclude">WbInclude</link>, the result of such a script (e.g. when it
+      contains a SELECT statement) is not displayed on the console.
+    </para>
+    <para>
+      To run such a script, use the command <literal>WbRun</literal> instead of <literal>WbInclude</literal>. If you
+      have the following SQL script (named select_person.sql):
+    </para>
+    <programlisting>SELECT *
+FROM person;</programlisting>
+    <para>
+      and execute that using the WbInclude command:
+    </para>
+		<screen>SQL> WbInclude -file=select_person.sql;
+SQL> Execution time: 0.063s</screen>
+    <para>
+      If you execute this script using <literal>WbRun</literal> the result of the script is displayed:
+    </para>
+    <screen>SQL> WbRun select_people.sql;
+select *
+from person;
+
+id | firstname | lastname
+---+-----------+------------
+1  | Arthur    | Dent
+4  | Mary      | Moviestar
+2  | Zaphod    | Beeblebrox
+3  | Tricia    | McMillian
+
+(4 Rows)
+Execution time: 0.078s
+SQL></screen>
+  </section>
+
+	<section id="console-maxrows">
+		<title>Controlling the number of rows displayed</title>
+		<para>
+			In the &wb-productname; GUI window, you can limit the reusult of a query by entering
+			a value in the "Max. Rows" field. If you want to limit the number of rows in console mode
+			you can do this by running the statement
+		</para>
+		<screen>SQL> set maxrows 42;
+MAXROWS set to 42
+Execution time: 0.0s
+SQL>
+</screen>
+		<para>
+			This will limit the number of rows retrieved to 42.
+		</para>
+		<para>
+			SET MAXROWS has no effect when run as a <link linkend="profile-connect-scripts">post-connect script</link>.
+		</para>
+	</section>
+
+	<section id="console-timeouts">
+		<title>Controlling the query timeout</title>
+		<para>
+			To set the query timeout in console mode, you can run the following statement
+		</para>
+		<screen>SQL> set timeout 42;
+TIMEOUT set to 42
+Execution time: 0.0s
+SQL></screen>
+		<para>
+			This will set a query timeout of 42 seconds. Note that not all JDBC
+			drivers support a query timout.
+		</para>
+		<para>
+			SET TIMEOUT has no effect when run as a <link linkend="profile-connect-scripts">post-connect script</link>.
+		</para>
+	</section>
+
+	<section id="console-manage-profiles">
+		<title>Managing connection profiles</title>
+		<para>
+			Connection profiles can be managed through several &wb-productname; specific commands. They are primarily intended
+      to be used in console mode, but can also be used when running in GUI mode.
+		</para>
+
+		<section id="console-listprofiles">
+				<title>List available profiles - WbListProfiles</title>
+				<para>
+					The command <literal>WbListProfiles</literal> will display a list of all displayed
+					profiles
+				</para>
+		</section>
+
+		<section id="console-deleteprofiles">
+				<title>Delete a profile - WbDeleteProfile</title>
+				<para>
+					You can delete an existing profile using the command <literal>WbDeleteProfile</literal>.
+					The command takes one argument, which is the name of the profile. If the name is unique across
+					all profile groups you don't have to specify a group name. If the name is not unique, you
+					need to include the group name, e.g.
+				</para>
+				<screen>SQL> WbDeleteProfile {MyGroup}/SQL Server
+Do you really want to delete the profile '{MyGroup}/SQL Server'? (Yes/No) yes
+Profile '{MyGroup}/SQL Server' deleted
+SQL></screen>
+				<para>
+					As the profile name is the only parameter to this command, no quoting is necessary.
+					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
+					profile's name
+				</para>
+				<para>
+					All profiles are automatically saved after executing <literal>WbDeleteProfile</literal>.
+				</para>
+		</section>
+
+		<section id="console-saveprofile">
+				<title>Save the current profile - WbStoreProfile</title>
+				<para>
+					Saves the currently active connection as a new connection profile. This can be used
+					when &wb-productname; if the connection information was passsed using individual parameters
+					(<literal>-url</literal>, <literal>-username</literal> and so on) either on the commandline
+					or through  <literal>WbConnect</literal>.
+				</para>
+				<screen>SQL> WbStoreProfile {MyGroup}/PostgreSQL Production
+Profile '{MyGroup}/PostgreSQL Production' added
+SQL> </screen>
+				<para>
+					If no parameter switch is given, everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
+					profile's name. By default the password is not saved.
+				</para>
+        <para>
+          Alternatively the command supports the parameters <literal>name</literal> and <literal>savePassword</literal>. If
+          you want to store the password in the profile, the version using parameters must be used:
+        </para>
+				<screen>SQL> WbStoreProfile -name="{MyGroup}/DevelopmentServer" -savePassword=true
+Profile '{MyGroup}/DevelopmentServer' added
+SQL> </screen>
+
+				<para>
+					If the current connection references a JDBC driver that is not already defined,
+					a new entry for the driver defintions is created referencing the library
+					that was passed on the commandline.
+				</para>
+				<para>
+					All profiles are automatically saved after executing <literal>WbStoreProfile</literal>.
+				</para>
+		</section>
+
+    <section id="console-createprofile">
+      <title>Create a new connection profile - WbCreateProfile</title>
+      <para>
+        <literal>WbCreateProfile</literal> can be used to create a new profile without an existing connection. It accepts
+        the same parameters as <link linkend="command-connect-descriptor-arg">WbConnect</link> plus an additional parameter to define
+        the name of the new profile.
+      </para>
+      <screen>SQL> WbCreateProfile -name="Postgres" -profileGroup=DBA -savePassword=true -username=postgres -password=secret
+..> -url=jdbc:postgresql://localhost/postgres
+..> -driver=org.postgresql.Driver
+..> -driverJar=c:/etc/libs/postgres/postgresql-9.4-1206-jdbc42.jar;
+Profile '{DBA}/Postgres' added
+SQL> </screen>
+    </section>
+
+	</section>
+
+  <section id="console-psql">
+    <title>PostgreSQL psql commands</title>
+    <para>
+      Some of the &wb-productname; specific commands can be abbreviated using the command syntax from PostgreSQL's
+      command line client <literal>psql</literal>. This is only implemented for very few commands and
+      most of them don't work exactly the same way as the PostgreSQL command.
+    </para>
+    <para>
+      The following commands are available:
+    </para>
+    <informaltable frame="all">
+      <tgroup cols="2"  align="left">
+        <colspec colname="c1" colwidth="4cm" />
+        <colspec colname="c2" />
+        <thead>
+          <row>
+            <entry>Command</entry>
+            <entry>Description / &wb-productname; command</entry>
+          </row>
+        </thead>
+
+        <tbody valign="top">
+
+          <row>
+            <entry><literal>\q</literal></entry>
+            <entry>Quit console mode (equivalent to <literal>exit</literal> </entry>
+          </row>
+
+          <row>
+            <entry><literal>\s</literal></entry>
+            <entry>
+              <literal><link linkend="command-history">WbHistory</link></literal> - display the statement history</entry>
+          </row>
+
+          <row>
+            <entry><literal>\i</literal></entry>
+            <entry><link linkend="command-wbrunlb"><literal>WbRun</literal></link> - Run a SQL script</entry>
+          </row>
+
+          <row>
+            <entry><literal>\d</literal></entry>
+            <entry><link linkend="command-list"><literal>WbList</literal></link> - Show the list of available tables</entry>
+          </row>
+
+          <row>
+            <entry><literal>\l</literal></entry>
+            <entry><link linkend="command-listcat"><literal>WbListCat</literal></link> - Show the list of databases</entry>
+          </row>
+
+          <row>
+            <entry><literal>\dn</literal></entry>
+            <entry><link linkend="command-listschema"><literal>WbListSchemas</literal></link> - Show the list of schemas</entry>
+          </row>
+
+          <row>
+            <entry><literal>\dt</literal></entry>
+            <entry><link linkend="command-desc"><literal>DESCRIBE</literal></link> - Show the structure of a table</entry>
+          </row>
+
+          <row>
+            <entry><literal>\df</literal></entry>
+            <entry><link linkend="command-listprocs"><literal>WbListProcs</literal></link> - Show the list of stored procedures</entry>
+          </row>
+
+          <row>
+            <entry><literal>\sf</literal></entry>
+            <entry><link linkend="command-procsource"><literal>WbProcSource</literal></link> - Show the source code of a stored procedure or function</entry>
+          </row>
+
+          <row>
+            <entry><literal>\g</literal></entry>
+            <entry>Run the last entered statement again</entry>
+          </row>
+
+          <row>
+            <entry><literal>\!</literal></entry>
+            <entry><link linkend="command-wbexec"><literal>WbSysExec</literal></link> - Run a commandline program</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Even though those commands look like the <literal>psql</literal> commands, they don't work exactly like them.
+      Most importantly they don't accept the parameters that <literal>psql</literal> supports. Parameters need to
+      be passed as if the regular &wb-productname; command had been used.
+    </para>
+
+  </section>
+
+</section>

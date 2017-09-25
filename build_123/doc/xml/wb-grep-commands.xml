@@ -1,0 +1,414 @@
+<section id="wb-grep-commands">
+  <title>Search data and code in the database</title>
+
+	<important><para>
+    All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
+  </para></important>
+
+  <section id="command-search-source">
+    <title>Search source of database objects - WbGrepSource</title>
+    <para>
+      The command <literal>WbGrepSource</literal> can be used to search
+      in the source code of the specified database objects.
+    </para>
+    <para>
+      The command basically retrieves the source code for all selected
+      objects and does a simple search on that source code.
+      The source code that is searched is identical to the source code
+      that is displayed in the "Source" tab in the various DbExplorer
+      panels.
+    </para>
+    <para>
+      The search values can be regular expressions. When searching the source
+      code the specified expression must be found somewhere in the source.
+      The regex is <emphasis>not</emphasis> used to match the <emphasis>entire</emphasis>  source.
+    </para>
+
+		<para>
+			The command supports the following parameters:
+		</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+        <colspec colname="c1" colwidth="4cm" />
+        <colspec colname="c2" />
+        <thead>
+          <row>
+            <entry>Parameter</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody valign="top">
+          <row>
+            <entry>-searchValues</entry>
+            <entry>
+              <para>
+                A comma separated list of values to be searched for.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepsrc-regex">
+            <entry>-useRegex</entry>
+            <entry>
+						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+              <para>
+                If this parameter is set to true, the values specified with <literal>-searchValues</literal> are
+                treated as regular expression
+              </para>
+              <para>
+                The default for this parameter is <literal>false</literal>.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepsrc-matchall">
+            <entry>-matchAll</entry>
+            <entry>
+						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+              <para>
+                This specifies if all values specified with <literal>-searchValues</literal>
+                have to match or only one.
+              </para>
+              <para>
+                The default for this parameter is <literal>false</literal>.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepsrc-ignorecase">
+            <entry>-ignoreCase</entry>
+            <entry>
+						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+              <para>
+                When set to true, the comparison is be done case-insesitive ("ARTHUR" will
+                match "Arthur" or "arthur").
+              </para>
+              <para>
+                The default for this parameter is <literal>true</literal>.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepsrc-types">
+            <entry>-types</entry>
+            <entry>
+              <para>
+                Specifies if the object types to be searched. The values for this
+                parameter are the same as in the "Type" drop down of DbExplorer's
+                table list. Additionally the types <literal>function</literal>,
+                <literal>procedure</literal> and <literal>trigger</literal> are
+                supported.
+              </para>
+              <para>
+                When specifying a type that contains a space, the type name neeeds to be
+                enclosed in quotes, e.g. <literal>-types="materialized view"</literal>. When specifying multiple types,
+                the whole argument needs to be enclosed in quotes: <literal>-types='table, materialized view'</literal>
+              </para>
+              <para>
+                The default for this parameter is <literal>view, procedure, function, trigger, materialized view</literal>.
+                To search in all available object types, use <literal>-types=*</literal>.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+
+          <row id="command-grepsrc-objects">
+            <entry>-objects</entry>
+            <entry>
+              <para>
+                A list of object names to be searched. These names may contain SQL wildcards, e.g. <literal>-objects=PER%,NO%</literal>
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+
+          <row id="command-grepsrc-schemas">
+            <entry>-schemas</entry>
+            <entry>
+              <para>
+                Specifies a list of schemas to be searched (for DBMS that
+                support schemas). If this parameter is not specified the
+                current schema is searched.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      The functionality of the <literal>WbGrepSource</literal> command is also
+      available through a GUI at
+      <menuchoice><guimenu>Tools</guimenu><guimenuitem>Search in object source</guimenuitem></menuchoice>
+    </para>
+  </section>
+
+  <section id="command-search-data">
+    <title>Search data in multiple tables - WbGrepData</title>
+    <para>
+      The command <literal>WbGrepData</literal> can be used to search
+      for occurrences of a certain value in all columns of multiple tables.
+      It is the command line version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
+      in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
+    </para>
+
+    <para>
+      <important>
+        To search the data of a table a <literal>SELECT * FROM the_table</literal> is executed and
+        processed on a row-by-row basis. Although &wb-productname; only keeps one row at a time in memory
+        it is possible that the JDBC drivers caches the full result set in memory. Please see the chapter
+        <link linkend="troubleshooting">Common problems</link> for your DBMS to check if the JDBC driver you are using
+        caches result sets.
+      </important>
+    </para>
+		<para>
+			The command supports the following parameters:
+		</para>
+
+    <informaltable frame="all">
+      <tgroup cols="2" align="left">
+        <colspec colname="c1" colwidth="4cm" />
+        <colspec colname="c2" />
+        <thead>
+          <row>
+            <entry>Parameter</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody valign="top">
+          <row>
+            <entry>-searchValue</entry>
+            <entry>
+              <para>
+                The value to be searched for
+              </para>
+              <para>
+                This parameter is ignored when using <literal>isNull</literal> for the compare type.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-ignorecase">
+            <entry>-ignoreCase</entry>
+            <entry>
+						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+              <para>
+                When set to true, the comparison is be done case-insensitive ("ARTHUR" will
+                match "Arthur" or "arthur").
+              </para>
+              <para>
+                The default for this parameter is <literal>true</literal>.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-comparetype">
+            <entry>-compareType</entry>
+            <entry>
+						  <para>
+                Valid values are <literal>contains</literal>, <literal>equals</literal>,
+                <literal>matches</literal>, <literal>startsWith</literal>, <literal>isNull</literal>
+              </para>
+              <para>
+                When specifying <literal>matches</literal>, the search value
+                is used as a regular expression. A column is included in the
+                search result if the regular expression is <emphasis>contained</emphasis> in the
+                column value (not when the column value completely matches the regular
+                expression entirely).
+              </para>
+              <para>
+                The default for this parameter is <literal>contains</literal>.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-tables">
+            <entry>-tables</entry>
+            <entry>
+              <para>
+                A list of table names to be searched. These names may contain
+                SQL wildcards, e.g. <literal>-tables=PER%,NO%</literal>.
+                If you want to search in different schemas, you need to prefix the
+                table names, e.g. <literal>-tables=schema1.p%,schema2.n%</literal>.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-types">
+            <entry>-types</entry>
+            <entry>
+              <para>
+                By default <literal>WbGrepData</literal> will search all
+                tables and views (including materialized views). If you want
+                to search only one of those types, this can be specified with
+                the <literal>-types</literal> parameter. Using <literal>-types=table</literal>
+                will only search table data and skip views in the database.
+              </para>
+              <para>
+                This parameter supports auto-completion.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-exclude-tables">
+            <entry>-excludeTables</entry>
+            <entry>
+              <para>
+                A list of table names to be excluded from the search. If e.g.
+                the wildcard for -tables would select too many tables, you can
+                exclude individual tables with this parameter. The parameter values
+                may include SQL wildcards.
+              </para>
+              <para>
+                <literal>-tables=p% -excludeTables=product_details,product_images</literal>
+                would process all tables starting with P but not the <literal>product_detail</literal>
+                and the <literal>product_images</literal> tables.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-columns">
+            <entry>-columns</entry>
+            <entry>
+              <para>
+                By default <literal>WbGrepData</literal> will search all
+                columns of a table (or view). If you want to limit the search
+                to some columns only, you can define a list of column names to
+                be included. Wildcards are not supported.
+              </para>
+            </entry>
+          </row>
+          <row id="command-grepdata-clob">
+            <entry>-retrieveCLOB</entry>
+            <entry>
+              <para>
+                By default <literal>CLOB</literal> columns will be retrieved and searched.
+                If this parameter is set to <literal>false</literal>, CLOB columns will not be retrieved.
+              </para>
+              <para>
+                If the search value is not expected in columns of that type, excluding them from the search
+                will speed up data retrieval (and thus the searching).
+              </para>
+              <para>
+                Only columns reported as <literal>CLOB</literal> by the JDBC driver will be excluded.
+                If the driver reports a column as <literal>VARCHAR</literal> this parameter will
+                not exclude that column.
+              </para>
+            </entry>
+          </row>
+
+          <row id="command-grepdata-blob">
+            <entry>-retrieveBLOB</entry>
+            <entry>
+              <para>
+                By default <literal>BLOB</literal> columns will not be retrieved for those rows
+                that match the criteria to avoid excessive memory usage.
+              </para>
+              <para>
+                If <literal>BLOB</literal> columns should be retrieved, this parameter needs to be
+                set to <literal>true</literal>. Enabling this will not search inside the binary
+                data. If <literal>BLOB</literal> columns should be searched (and treated as character
+                data), use the <literal>-treatBlobAs</literal> parameter
+              </para>
+            </entry>
+          </row>
+
+          <row id="command-grepdata-blobhandling">
+            <entry>-treatBlobAs</entry>
+            <entry>
+              <para>
+                If this parameter specifies a valid encoding, binary (aka "BLOB") columns will
+                be retrieved and converted to a character value using the specified encoding.
+                That character value is then searched.
+              </para>
+              <para>
+                <literal>-treatBlobAs="UTF-8"</literal> would convert <emphasis role="bold">all</emphasis>
+                <literal>BLOB</literal> columns in <emphasis role="bold">all</emphasis> tables that are
+                searched to a character value using UTF-8 as the encoding. Therefore using this option usually
+                only makes sense if a single table is searched.
+              </para>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <section id="grep-data-examples">
+      <title>Examples</title>
+      <section id="grep-data-example-simple">
+        <title>Search for a specific value in a single table</title>
+        <para>
+          The following statement will search for the text <literal>Arthur</literal> in all columns
+          and all rows of the table <literal>person</literal>. It will find values <literal>foobar</literal>,
+          <literal>somefoo</literal> or <literal>notfoobar</literal>:
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -tables=person -ignoreCase=true</programlisting>
+        <para>
+          <literal>-ignoreCase=true</literal> is the default behavior and can be omitted.
+        </para>
+      </section>
+      <section id="grep-data-example-alltables">
+        <title>Search for a specific value in all tables</title>
+        <para>
+          The following statement will search for the text <literal>foobar</literal> in all columns
+          and all tables.
+        </para>
+        <programlisting>WbGrepData -searchValue=foobar -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-startwith">
+        <title>Search for a specific value at the beginning of a column value</title>
+        <para>
+          The following statement will search for the text <literal>foo</literal> in all columns
+          and all tables. It will match the value <literal>foobar</literal>, but not <literal>barfoo</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -compareType=startsWith -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-equals">
+        <title>Search for a specific value with an exact match</title>
+        <para>
+          The following statement will search for the text <literal>foo</literal> in all columns
+          and all tables. It will only match the value <literal>foo</literal> or <literal>FOO</literal> but not <literal>somefoobar</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue=foo -compareType=equals -tables=*</programlisting>
+      </section>
+      <section id="grep-data-example-regex1">
+        <title>Search for patterns</title>
+        <para>
+          The following statement will search for any value where three characters are followed by two numbers.
+          It will match <literal>foo42</literal>, <literal>bar12</literal>
+        </para>
+        <programlisting>WbGrepData -searchValue="[a-z]{2}[0-9]{2}" -compareType=contains -tables=person</programlisting>
+        <para>
+          As the column values are only tested if the regular expression is <emphasis>contained</emphasis>, not if
+          it is an exact match. The above search will also return <literal>foo999</literal>.
+        </para>
+        <para>
+          To get an exact match using the <literal>contains</literal> type, the regular expression needs to be anchored at the start and
+          the end. The following will only find only values that start with (exactly) two characters and are
+          followed by (exactly) two digits.
+        </para>
+        <programlisting>WbGrepData -searchValue="^[a-z]{2}[0-9]{2}$" -compareType=contains -tables=person</programlisting>
+      </section>
+      <section id="grep-data-example-regex2">
+        <title>Search for multiple values</title>
+        <para>
+          The following statement will return rows where any column either contains the value <literal>foo</literal> or
+          the value <literal>bar</literal>:
+        </para>
+        <programlisting>WbGrepData -searchValue="foo|bar" -compareType=contains -tables=person</programlisting>
+        <para>
+          As the column values are only tested if the regular expression is <emphasis>contained</emphasis>, not if
+          it is an exact match. The above search will also return <literal>foo999</literal>.
+        </para>
+        <para>
+          For more information about regular expressions please visit: <ulink url="http://www.regular-expressions.info/">Regular-Expressions.info</ulink>
+        </para>
+      </section>
+
+    </section>
+  </section>
+
+</section>

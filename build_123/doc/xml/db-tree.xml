@@ -1,0 +1,209 @@
+<section id="db-tree">
+  <title>Working with the Database Object tree</title>
+  <para>
+    The Database Object Tree offers a similar functionality as the <link linkend="dbexplorer">Database Object Explorer</link> but can be displayed
+    alongside the SQL editor tabs. The DB Object tree offers a subset of the features the DbExplorer offers. The Database Object Tree
+    can be displayed using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Show DbTree</guimenuitem></menuchoice>.
+  </para>
+  <note>
+    <para>
+      The DB Object tree always uses a separate connection regardless of the configuration of the
+      <link linkend="profile-separate-connection">current connection profile</link>.
+    </para>
+  </note>
+
+  <para>
+    The elements of each part of the tree are only loaded when the node is expanded for the first time.
+  </para>
+
+  <section id="db-tree-filter">
+    <title>Filtering the elements in the tree</title>
+    <para>
+      The quick filter above the object tree can be used to quickly search for objects with a specific name.
+      The filtering will only be done on <emphasis role="bold">already loaded</emphasis> elements of the tree.
+    </para>
+    <para>
+      The behavior of the quick filter is the same as the filter in the <link linkend="objectlist-quickfilter-options">DbExplorer</link>
+    </para>
+  </section>
+
+  <section id="db-tree-drag-support">
+    <title>Drag and drop support</title>
+    <section id="db-tree-drop-editor">
+      <title>Dropping elements into the SQL editor</title>
+      <para>
+        In general, dropping an element into the editor, will insert the element's name into the editor. There are
+        however two exceptions to this rule:
+				<itemizedlist>
+					<listitem><simpara>dropping the "Columns" node of the tree will insert a comma separated list of all columns</simpara></listitem>
+					<listitem><simpara>dropping a table into a position where no current SQL statement is located, a <literal>SELECT</literal> statement for the table will be inserted</simpara></listitem>
+          <listitem><simpara>in all other cases, the name of the dropped element will be inserted (e.g. the name of the table, column or index)</simpara></listitem>
+        </itemizedlist>
+      </para>
+    </section>
+
+    <section id="db-tree-data-display">
+      <title>Displaying a table's data</title>
+      <para>
+        To display the data of a table, drag the table node from the Database Object Tree to the result panel of the
+        current SQL editor. &wb-productname; will then generate an appropriate <literal>SELECT</literal> statement
+        for the table and execute it immediately.
+      </para>
+    </section>
+  </section>
+
+  <section id="dbtree-find-in-tree">
+    <title>Finding elements in the tree</title>
+    <para>
+      When the object tree is displayed, the context menu of the editor contains a new item <menuchoice><guimenuitem>Find in object tree</guimenuitem></menuchoice>.
+      This will try to find and select the identifier at the cursor location in the Object Tree.
+    </para>
+    <para>
+      If the schema (or catalog) that contains the object has not yet been loaded, it will be loaded in order to be able to display the current identifier.
+    </para>
+  </section>
+
+  <section id="db-tree-context-menu">
+    <title>Features available through the context menu</title>
+    <para>
+      The Database Object Tree offers some of the features that are available in the DbExplorer
+    </para>
+		<simplesect id="dbtree-spool">
+			<title>Export data</title>
+			<blockquote>
+				<para>
+          This exports the data from the selected table(s). This is identical to the function <link linkend="dbexplorer-spool">in the DbExplorer</link>.
+				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-find-reference">
+			<title>Find in object tree</title>
+			<blockquote>
+				<para>
+          This menu choice is only available when right clicking on a table in the "References" or "Referenced by" nodes. It will then
+          find and select the referenced (or referencing) table in the DbTree.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-rowcount">
+			<title>Count rows</title>
+			<blockquote>
+				<para>
+					This will count the rows for each selected table object. The row counts will be shown in parentheses next to the table name.
+          This is the same functionality as the <link linkend="command-rowcount"><literal>WbRowCount</literal></link>
+          command.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-select-data">
+			<title>Put SELECT into</title>
+
+			<blockquote>
+				<para>
+					This will put a SELECT statement into the SQL editor to display
+					all data for the selected table. You can choose into which editor tab
+					the statement will be written. The currently selected editor tab is
+					displayed in bold
+        </para>
+        <para>
+          The generated SELECT statement is always inserted into the editor's text
+          at the current cursor position.
+				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-create-insert">
+			<title>Create empty INSERT</title>
+
+			<blockquote>
+				<para>
+					This creates an empty <literal>INSERT</literal> statement for the
+					currently selected table(s). This is intended for programmers that want
+					to use the statement inside their code.
+				</para>
+        <para>
+          The generated SELECT statement is always inserted into the editor's text
+          at the current cursor position.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-create-update">
+			<title>Create empty UPDATE</title>
+
+			<blockquote>
+				<para>
+					This creates an empty <literal>UPDATE</literal> statement for the
+					currently selected table(s). This is intended for programmers that want
+					to use the statement inside their code.
+				</para>
+        <para>
+          The generated SELECT statement is always inserted into the editor's text
+          at the current cursor position.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-create-select">
+			<title>Create default SELECT</title>
+
+			<blockquote>
+				<para>
+					This creates a <literal>SELECT</literal> for the
+					selected table(s) that includes all columns for the table. This feature is intended
+					for programmers who want to put a SELECT statement into their code.
+				</para>
+        <para>
+          The generated SELECT statement is always inserted into the editor's text
+          at the current cursor position.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-create-ddl">
+			<title>Create DDL Script</title>
+
+			<blockquote>
+				<para>
+          This shows the SQL source for the selected object(s). This is identical to the function <link linkend="dbexplorer-create-ddl">in the DbExplorer</link>.
+				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-drop-table">
+			<title>Drop</title>
+
+			<blockquote>
+				<para>
+          Drops the selected objects. This is identical to the function <link linkend="dbexplorer-drop-table">in the DbExplorer</link>.
+        </para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-gendrop">
+			<title>Generate DROP script</title>
+
+			<blockquote>
+				<para>
+          This creates a script to DROP the selected object(s) including dependent objects.
+          This is identical to the function <link linkend="dbexplorer-gendrop">in the DbExplorer</link>.
+				</para>
+			</blockquote>
+		</simplesect>
+
+		<simplesect id="dbtree-delete-data">
+			<title>Delete data</title>
+
+			<blockquote>
+				<para>
+					Deletes all rows from the selected table(s) by executing a
+					<literal>DELETE FROM table_name;</literal> to the server for each
+					selected table. This is identical to the <link linkend="dbexplorer-delete-data">function in the DbExplorer</link>.
+				</para>
+			</blockquote>
+		</simplesect>
+  </section>
+</section>

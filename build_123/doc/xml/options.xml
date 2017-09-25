@@ -1,0 +1,2045 @@
+<section id="options">
+	<title>Options dialog</title>
+
+	<para>
+		The options dialog enables you to influence the behavior and
+		look of &wb-productname; to meet your needs. To open the options
+		dialog choose
+		<menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>.
+	</para>
+
+	<section id="options-general">
+		<title>General options</title>
+
+		<simplesect id="options-gui-language">
+			<title>Language</title>
+			<blockquote><para>
+				With this option you can select in which language the application
+        is shown. The new value will only be in affect when you restart the
+        application.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-automatic-update">
+			<title>Check for updates</title>
+      <blockquote>
+			<para>
+				With this option you can enable an automatic update check when
+				&wb-productname; is started. You can define the interval in days
+				after which the application should check for updates on the
+				home page. If a newer version is found on the web site this will
+				be indicated with a little globe in the statusbar. Clicking on the
+				icon will open your default internet browser with the application's home page.
+			</para>
+			<para>
+				If you disable this option, you can manually check
+				for updates using the menu
+				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
+			</para>
+      <para>
+        When &wb-productname; performs an update check, it sends the following information as part of the request to the server:
+        <itemizedlist>
+          <listitem><simpara>The version of &wb-productname; you are using</simpara></listitem>
+          <listitem><simpara>Whether the check was an automatic check or a manual one</simpara></listitem>
+          <listitem><simpara>The interface language selected</simpara></listitem>
+          <listitem><simpara>The operating system as reported by your Java installation</simpara></listitem>
+          <listitem><simpara>The Java version you are using</simpara></listitem>
+        </itemizedlist>
+      </para>
+      </blockquote>
+		</simplesect>
+
+
+		<simplesect id="options-show-connect">
+			<title>Show connect dialog</title>
+      <blockquote>
+			<para>
+				If this option is enabled, the connect dialog will be shown automatically when the
+				application is started.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-encrypt-password">
+			<title>Encrypt passwords</title><blockquote>
+			<para>If this option is enabled, the password stored within a connection
+				profile will be encrypted. Whether the password should be stored at all
+				can be selected in the profile itself.
+			</para>
+
+			<note><para>
+				Using this option only supplies very limited security. As the
+				source code for &wb-productname; is freely available, the algorithm
+				to decrypt the passwords stored in this way can easily be extracted
+				to retrieve the plain text passwords.
+			</para></note>
+      </blockquote>
+		</simplesect>
+
+    <simplesect id="options-exit-connect">
+			<title>Exit on first connect cancel</title>
+      <blockquote>
+			<para>
+				If this option is enabled, then the application is closed completely if the
+				initial connect dialog is canceled.
+			</para>
+			<para>
+				This option is only valid if "Show connect dialog" is selected.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-consolidate-log">
+			<title>Consolidate script log</title><blockquote>
+			<para>
+				Usually &wb-productname; reports the success and timings
+				for each statement that is being executed in the message tab
+				of the current SQL panel. For large scripts this can slow down
+				script execution dramatically. If this option is enabled, only
+				a summary of the execution is printed once the script has finished.
+				You can turn off the log during script execution by using
+				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-auto-save-profiles">
+			<title>Auto-save connection profiles</title>
+      <blockquote>
+			<para>
+				If this option is enabled, the connection profiles are automatically saved
+        when closing the connection dialog using the <guibutton>OK</guibutton> button.
+			</para>
+			<para>
+				If this option is disabled, the connection profiles are saved when closing
+        the application.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-single-page-help">
+			<title>Single page HTML help</title>
+      <blockquote>
+			<para>
+				If this option is enabled, the HTML help will be shown as a single
+				page in the browser instead of one page per chapter.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-profile-filter">
+			<title>Quick filter for profiles</title>
+      <blockquote>
+			<para>
+        If this option is enabled, an input field to <link linkend="connection-profile-quickfilter">filter the profiles</link> is displayed
+        above the list of profiles.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-show-tab-index">
+			<title>Show tab index</title><blockquote>
+			<para>
+				If this option is enabled, each editor tab will be shown with its index. You can
+				then select the first 9 tabs by pressing Ctrl-1, Ctrl-2 and so on.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-scroll-tabs">
+			<title>Scroll tabs</title><blockquote>
+			<para>
+				This option controls the behavior of the tab display, if more tabs
+				are opened than can be displayed in the current width of the window.
+			</para>
+			<para>
+				If this option is enabled, the tabs are always displayed in a single
+				row. If too many tabs are open, the row can be scrolled to the display
+				the tabs that are not visible.
+			</para>
+			<para>
+				If this option is disabled, the tabs are displayed in multiple rows,
+				so that all tabs are always visible.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-confirm-tab-close">
+			<title>Confirm tab close</title><blockquote>
+			<para>
+				If this option is enabled, closing a tab needs to be confirmed, to
+				prevent accidental closing.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="option-animated-icon" xreflabel="Enable animated icons">
+			<title>Enable animated icons</title><blockquote>
+			<para>Enable or disable the use of an animated icons in the SQL editor to
+				indicate a running SQL statement. It has been reported, that the animated
+				icon does have a severe (negative) impact on the performance on some computers
+				(depending on JDK/OS/Graphics driver).
+				If you experience a high CPU usage during the execution of SQL statements, or
+				if you find your SQL statements are running very slow, try
+				to turn off the usage of the animated icons.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-log-level">
+			<title>Log Level</title><blockquote>
+			<para>
+				With this option you can control the level of information written to the
+				application log. The most verbose level is <literal>DEBUG</literal>. With
+				<literal>ERROR</literal> only severe errors (either resulting from running
+				a user command or from an internal error) are written to the application log.
+			</para>
+      <para>
+        When using <link linkend="settings-log4j">Log4J</link> as the logger, this
+        will change the log level of the root logger.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-file-info">
+			<title>Configuration file information</title><blockquote>
+			<para>
+				At the bottom of the "General options" page, the full filename of the configuration
+				file and the logfile are listed.
+			</para>
+      </blockquote>
+		</simplesect>
+
+	</section>
+
+	<section id="options-editor">
+		<title>Editor options</title>
+
+		<simplesect id="options-internal-lineending">
+			<title>Line ending for DBMS</title><blockquote>
+			<para>
+				This property controls the line terminator used by the editor when sending SQL statements
+				to the database. The value "Platform default" relates to the platform where you
+				run &wb-productname; this is not the platform of the DBMS server.
+			</para>
+			<para>
+				The editor always uses "unix" line ending internally. If you select a different
+				value for this property, &wb-productname; will convert the SQL statements to use
+				the desired line ending before sending them to the DBMS. As this can slow down
+				the execution of statements, it is highly recommended to leave the default setting
+				of Unix line endings. You should only change this, if your DBMS does not understand
+				the single linefeed character (ASCII value 10) properly.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-externally-lineending">
+			<title>File format</title><blockquote>
+			<para>
+				This property controls the line terminator used when a file is saved by the editor.
+				Changing this property affects the next save operation.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-history-size">
+			<title>History size</title><blockquote>
+			<para>The number of statements per tab which should be stored in the
+				statement history. Remember that always the full text of the editor
+				(together with the selection and cursor information) is stored in the
+				history. If you have large amounts of text in the editor and set this
+				number quite high, be aware of the memory consumption this might create.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-files-in-history">
+			<title>Files in history</title><blockquote>
+			<para>
+        If this option is enabled, the content of external files is also
+        stored in the statement history.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="settings-editor-electric-srcoll">
+			<title>Electric scroll</title><blockquote>
+			<para>Electric scrolling is the automatic scrolling of the editor
+				when clicking into lines close to the upper or lower end of the editor
+				window. If you click inside the defined number of lines at the upper
+				or lower end, then the editor will scroll this line into the center
+				of the visible area. The default is set to 3, which means that if you click
+				into (visible) line 1,2 or 3 of the editor, this line will be centered in
+				the display.
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-tab-width">
+			<title>Editor tab width</title><blockquote>
+			<para>The number of spaces that are assumed for the <literal>TAB</literal>
+				character.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-noword-sep">
+			<title>Additional word characters</title><blockquote>
+			<para>
+				The editor recognizes character sequences that consist of letters
+				and characters only as "words". This influences the way word by word
+				jumping is done, or when selecting text using a doubleclick.
+				Every character that is entered for this option is considered a "word"
+				character and thus does not mark a word boundary.
+			</para>
+			<para>
+				By putting e.g. an underscore into this field, the text <literal>MY_TABLE</literal> is
+				recognized as a single word instead of two words (which is the default).
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-auto-close-bracket">
+			<title>Insert closing brackets for</title><blockquote>
+			<para>
+        To enable auto-completion of brackets, enter pairs of characters that should automatically be "closed", e.g.
+        <literal>()''</literal> will automatically insert a closing bracket when an opening bracket is typed. To auto-complete
+        quote characters enter two quotes.
+			</para>
+      <para>
+        To disable automatic closing of brackets enter nothing in this input field.
+      </para>
+		</blockquote></simplesect>
+
+		<simplesect id="settings-right-clickmove">
+			<title>Right click moves cursor</title><blockquote>
+			<para>
+				Normally a right click in the SQL editor does not change the location
+				of the cursor (caret). If this option is checked, then a right
+				click will also change the caret's location (to where the mouse cursor
+				is located)
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="store-last-dir-workspace">
+      <title>Store last directory in workspace</title><blockquote>
+      <para>
+        If this option is enabled, the directory from the last opened file is stored
+        in the workspace of the current profile, not globally. If this option
+        is unchecked, the last directory will be stored globally and will
+        be used for all connections.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="editor-follow-current-dir">
+      <title>Current directory follows active file</title><blockquote>
+      <para>
+        If this option is enabled, the file open dialog will default to the
+        directory of the current file in the editor. If no file is
+        loaded in the editor, the directory that is defined  through the
+        "Default directory" option will be selected.
+      </para>
+    </blockquote></simplesect>
+	</section>
+
+	<section id="options-sql-exec">
+		<title>SQL Excecution options</title>
+
+		<simplesect id="options-error-dialog">
+			<title>Error prompt for scripts</title><blockquote>
+			<para>
+				This options defines what kind of dialog is shown when an error occurs during script execution.
+        The dialog always offers the choice to ignore the error, ignore all subsequent errors or to
+        cancel the script execution.
+			</para>
+      <para>
+        The following options are available:
+        <itemizedlist>
+          <listitem><simpara>Simple prompt - it shows only the statement number that failed.</simpara></listitem>
+          <listitem><simpara>Include error message - this includes the actual error message from the DBMS (this is the default)</simpara></listitem>
+          <listitem><simpara>Show statement and allow retry - this includes the error message and the complete SQL statement that failed. It allows to edit and re-submit the statement.</simpara></listitem>
+        </itemizedlist>
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-alternate-delimiter" xreflabel="alternate delimiter">
+			<title>Alternate Delimiter</title><blockquote>
+			<para>
+				This options defines the default alternate delimiter. You can override this default in the connection profile,
+        to use different delimiters for different DBMS.
+        For details see <link linkend="understand-alternate-delim">using the alternate delimiter</link>
+			</para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-hilite-current">
+			<title>Highlight current statement</title><blockquote>
+			<para>
+        When running several statements (e.g. by using "Execute all") this option will highlight the current statement. The editor
+        will be scrolled to make sure the currently executed statement is visible.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-hilite-current-retain">
+			<title>Retain current statement highlight</title><blockquote>
+			<para>
+        If "Highlight current statement" is enabled and this option is turned on, the highlighting will be kept
+        once execution has finished.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-hilite-error">
+			<title>Highlight errors</title><blockquote>
+			<para>
+        If "Highlight errors" is enabled then the statement that generated an error is highlighted after execution.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-always-execute-selected">
+			<title>Always allow "Execute Selected"</title><blockquote>
+			<para>
+        If this option is turned off, then <menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute Selected</guimenuitem></menuchoice> will
+        only work if text is selected in the editor. If this option is turned on and no text is selected, the complete content of the
+        editor will be executed.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-autojump-statement">
+			<title>Auto advance to next statement</title><blockquote>
+			<para>
+				If this option is enabled, then the cursor will automatically jump
+				to the next statement in the script, when you execute a single statement
+				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
+				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Settings</guimenuitem><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
+			</para>
+			<para>For more information on how you can execute statements
+				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-allow-editing">
+			<title>Allow editing while executing</title><blockquote>
+			<para>
+        When running a statement, the editor is set to read-only in order to allow a consistent statement highlighting.
+        When this option is turned on, the text in the editor may be modified even if a statement is running. If the
+        text in the editor is modified during execution, statement and error highlighting will not be done any more.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-empty-line-delimiter">
+			<title>Allow empty lines as statement delimiter</title><blockquote>
+			<para>
+				When analysing statements in the editor, it is assumed that individual statements
+				are separated with a semicolon. This property controls if an empty line delimits a statement as well. This
+        setting will be used to detect the current statement for auto-completion and when
+        using <guimenuitem>Execute current</guimenuitem> inside the editor.
+			</para>
+			<note><para>
+				This does not influence the behavior when running scripts in batch mode or when using the <literal>WbInclude</literal> command.
+			</para></note>
+		</blockquote></simplesect>
+
+		<simplesect id="options-currentline-current-stmt">
+			<title>Use the statement in the current line</title><blockquote>
+			<para>
+        When this option is enabled, the line of the cursor position determines the "current statement" rather than
+        the cursor position itself when using <link linkend="execute-current"><guimenuitem>Execute current</guimenuitem></link>.
+			</para>
+		</blockquote></simplesect>
+  </section>
+
+  <section id="macro-options">
+    <title>Macro options</title>
+    <simplesect id="macro-expansion-keystroke">
+      <title>Macro expansion key</title><blockquote>
+      <para>
+        This defines the key combination that triggers the detection of
+        <link linkend="expandable-macro">expandable macros</link>.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-save-wksp">
+      <title>Save window settings in workspace</title><blockquote>
+      <para>
+        If this option is enabled, the current position and the expaned macro groups of the macro popup window are stored in the current
+        workspace. It this option is disabled, these settings are saved globally.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-close-esc">
+      <title>Close window with ESC</title><blockquote>
+      <para>
+        If this option is enabled the macro popup window can be closed using the <keycap>ESC</keycap> key.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="macro-popup-exec-enter">
+      <title>Execute macro with Enter</title><blockquote>
+      <para>
+        If this option is enabled the currently selected macro can be run by hitting the <keycap>Enter</keycap> key.
+      </para>
+    </blockquote></simplesect>
+
+  </section>
+
+  <section id="bookmark-options">
+    <title>Bookmark options</title>
+
+		<simplesect id="options-wbresult-bookmark">
+			<title>Also use @WbResult for bookmarks</title><blockquote>
+			<para>
+        By default only locations marked with <literal>@WbTag</literal> are included in <link linkend="editor-bookmarks">the list of bookmarks</link>.
+        When this option is enabled, locations that are marked with <link linkend="result-names"><literal>@WbResult</literal></link>
+        are also included in the bookmark list.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-proc">
+			<title>Use procedure/function names as bookmarks</title><blockquote>
+			<para>
+        If this is enabled &wb-productname; will also the names of procedures or functions for which a
+        <literal>CREATE</literal> statement is present in the editor as a bookmark.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-proc-params">
+			<title>Include parameter names for procedures and functions</title><blockquote>
+			<para>
+        When including procedure and function names in the bookmarks, only the datatype of the parameters
+        are shown in the bookmark list. If this option is enabled the parameter names (if available) are also shown.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-save-col-widths">
+			<title>Remember column widths</title><blockquote>
+			<para>
+        If this is enabled, the width of the columns in the bookmark window is not resized to match the displayed
+        value, but rather the last with is remembered.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bookmark-save-sort">
+			<title>Remember sort order</title><blockquote>
+			<para>
+        If this is enabled, the sort order of the bookmark list is restored the next time the bookmark window is displayed.
+			</para>
+		</blockquote></simplesect>
+
+  </section>
+
+	<section id="options-editor-colors">
+		<title>Editor colors</title>
+
+		<simplesect id="options-editor-curr-line-color">
+			<title>Current line color</title><blockquote>
+			<para>
+				If you want to highlight the line in which the cursor is located, specify
+				the color for the highlighting. To disable the highlight for the current line,
+				simply "remove" the color selection by clicking on the remove button.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-selection-color">
+			<title>Selected text</title><blockquote>
+			<para>
+				The color that is used to highlight selected text.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-error-highlight">
+			<title>Error highlight color</title><blockquote>
+			<para>
+				When a statement is not executed correctly (and the DBMS signals
+				an error) it is highlighted in the editor. With this option
+				you can select the color that is used to highlight the incorrect
+				statement.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-syntax-highlight">
+			<title>Syntax highlighting colors</title><blockquote>
+			<para>
+				You can change the colors for the different types of keywords in the editor.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-fonts">
+		<title>Font settings</title>
+
+		<simplesect id="options-editor-font">
+			<title>Editor font</title><blockquote>
+			<para>
+				The font that is used in the SQL editor. This font is also
+				used when displaying the SQL source for tables and other
+				database objects in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-data-font">
+			<title>Data font</title><blockquote>
+			<para>
+				The font that is used to display result sets. This includes
+				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-message-font">
+			<title>Message font</title><blockquote>
+			<para>
+				The font that is used in the message pane of the SQL window.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-standard-font">
+			<title>Standard font</title><blockquote>
+			<para>
+				The standard font that is used for menus, lables, buttons etc.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-completion">
+		<title>Auto-completion options</title>
+
+		<simplesect id="options-completion-paste-case">
+			<title>Paste completion in</title><blockquote>
+			<para>
+				With this option you can select how the selected object name
+				from the code completion popup is pasted into the editor. <literal>As is</literal>
+				means, that the values will be inserted into the editor as it was
+				retrieved from the database. This option will also be used when SQL statements
+				are generated internally (e.g. for updating the result set or when you
+				export/copy data as SQL statements)
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-sort-completion-by">
+			<title>Sort pasted columns by</title><blockquote>
+			<para>
+        When selecting to paste all (or several columns) from the popup window,
+        you can select with this option, in which order the columns should be written
+        into the editor.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-close-search">
+			<title>Close completion with search</title><blockquote>
+			<para>
+				When using the quicksearch feature in the <link linkend="command-completion">code completion</link>
+				this option controls the behavior when hitting the ESC key. If this option
+				is enabled, the ESC key will also close the popup window with the available
+				choices. If this option is disabled, the ESC key will only close the quicksearch
+				<emphasis>input</emphasis> field.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-sort-popup">
+			<title>Sort entries in popup</title><blockquote>
+			<para>
+        If this is enabled, columns are sorted alphabetically in the popup.
+        If not, they are listed in the order as they are returned by the the database.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-completion-match-anywhere">
+			<title>Quick search matches anywhere</title><blockquote>
+			<para>
+        If this option is enabled, the typed characters match anywhere in the object name.
+        If this option is disabled, the object name must start with the entered search value.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-completion-filter">
+			<title>Filter by quicksearch</title><blockquote>
+			<para>
+        When this option is enabled, only those entries are shown in the popup that match the entered values in the quick search.
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="options-join-completion-using">
+      <title>Prefer USING operator</title><blockquote>
+      <para>
+        If this option is enabled, the <link linkend="command-join-completion">JOIN completion</link> generates a <literal>USING</literal> clause instead
+        of an <literal>ON</literal> clause to join the tables. If there are no columns with identical names,
+        a join with an <literal>ON</literal> operator is generated.
+      </para>
+    </blockquote></simplesect>
+
+    <simplesect id="options-join-completion-parentheses">
+      <title>Always use parentheses</title><blockquote>
+      <para>
+        If this option is enabled, <link linkend="command-join-completion">JOIN completion</link> will generated redundant parentheses around
+        the join condition for the <literal>ON</literal> operator.
+      </para>
+    </blockquote></simplesect>
+
+  </section>
+
+	<section id="options-workspace">
+		<title>Workspace options</title>
+		<simplesect id="options-save-wksp">
+			<title>Auto-Save workspace</title><blockquote>
+			<para>
+				If this option is enabled, the current workspace is saved each time you run
+				a SQL statement.
+      </para>
+			<para>
+				If this option is disabled, the workspace is only saved when the application is closed, when a
+        a different workspace is loaded (either manually or by connecting to a different connection profile)
+        or when the workspace is manually saved through the menu using <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace</guimenuitem></menuchoice>
+      </para>
+      <para>
+        If automatic backups of the workspace is enabled, this means that a new version of the workspace file is created <emphasis role="bold">each time</emphasis>
+        a statement is executed. In that case the <link linkend="">number of backups</link> should be high enough so that also substantial changes
+        to the workspace are still kept in the history.
+      </para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-wksp-external-files">
+			<title>Remember open files in workspace</title><blockquote>
+			<para>
+				You can customize how external files (that have been loaded using
+				<menuchoice><guimenu>File</guimenu><guimenuitem>Open</guimenuitem></menuchoice>) are
+				remembered in the workspace. You can select three different options:
+			</para>
+
+			<informaltable frame="none" rowsep="0" colsep="0" pgwide="1">
+
+				<tgroup cols="2"  align="left">
+					<?dbhtml cellspacing="2" ?>
+					<?dbhtml cellpadding="0" ?>
+					<?dbfo cellpadding="0" ?>
+
+					<colspec colname="c1" colwidth="1*" />
+					<colspec colname="c2" colwidth="4*" />
+
+					<tbody valign="top">
+						<row>
+							<entry role="nowrap">Content and filename</entry>
+							<entry>
+								<para>
+									When this option is selected, the filename that is loaded in the editor
+									tab will be stored in the workspace. The next time the workspace is loaded
+									the file is opened as well. This is the default setting
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>Content only</entry>
+							<entry>
+								<para>
+									When this option is selected, only the content of the editor tab is
+									save (just like any other editor tab), but the link to the filename is
+									removed. The next time the workspace is loaded, the file will <emphasis role="bold">not</emphasis>
+									be opened.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>Nothing</entry>
+							<entry>
+								<para>
+									Neither the content, nor the filename will be saved. The next time th
+									workspace is loaded, the editor tab will be empty.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-backup">
+		<title>Backup options</title>
+    <para>
+      If an automatic backup is enabled for a file, then each time a file is saved, a new version of the file will be created in the backup directory if
+      <link linkend="options-backup-max-versions">Number of backups</link> is greater than 1.
+    </para>
+    <para>
+      A file version will be created by appending a version number to the file name (e.g. <literal>testdata.wksp.1</literal>,
+      <literal>testdata.wksp.2</literal> and so on). The most recent version is the one with the highest number.
+    </para>
+
+		<simplesect id="options-backup-wksp">
+			<title>Create backups of workspace files</title><blockquote>
+			<para>
+        If this option is enabled the current <link linkend="workspace-usage">workspace file</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-settings">
+			<title>Create backups of the settings file</title><blockquote>
+			<para>
+				If this option is enabled, the settings file will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-macros">
+			<title>Create backups of the macro file</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="macros">macro definitions</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-profiles">
+			<title>Create backups of the connection profiles</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="profiles">connection profiles</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-drivers">
+			<title>Create backups of the driver definitions</title><blockquote>
+			<para>
+        If this option is enabled, the file that contains <link linkend="jdbc-setup">JDBC drivers</link> will be backed up.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-max-versions">
+			<title>Number of backups</title><blockquote>
+			<para>
+        This option defines the maximum number of version to keep if backups are enabled.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-backup-dir">
+			<title>Backup directory</title><blockquote>
+			<para>
+				By default the backups for the workspaces are stored in the same directory
+				as the workspace file itself. If you want to keep the (versioned) backups in a
+				separate directory, you can specify it here.
+			</para>
+			<para>
+				If you specify a relative directory, it will be relative to the
+				<link linkend="config-dir">config directory</link>.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-data-display">
+		<title>Options for displaying data</title>
+
+		<simplesect id="option-selection-summary">
+      <title>Show selection summary in statusbar</title><blockquote>
+      <para>
+				If this option is enabled the number of selected rows in the result will be displayed
+				in the status bar.
+      </para>
+			<para>
+				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
+				while selecting with the mouse), the status bar will display the sum of the selected values.
+			</para>
+    </blockquote></simplesect>
+
+		<simplesect id="option-result-name">
+      <title>Use table name for result tabs</title><blockquote>
+      <para>
+				If this option is enabled, the name of a result tab is derived from the <literal>SELECT</literal> that was used to generate the result.
+        The query is analyzed and the first table name mentioned in the <literal>FROM</literal> clause will be used for
+        the name of the result.
+			</para>
+      <para>
+        The table name will not be used when the <link linkend="result-names"><literal>@WbResult</literal></link>
+        annotation is also specified for the query.
+      </para>
+    </blockquote></simplesect>
+
+		<simplesect id="options-retrieve-column-remarks">
+			<title>Retrieve column remarks for queries</title><blockquote>
+			<para>
+				If this option is enabled, the remarks defined for table columns in a result set are retrieved and shown as a tool tip.
+        As this requires additional overhead after processing a query, it can be disabled for performance reasons.
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="options-max-rows-warning">
+      <title>Show max. rows warning</title>
+      <blockquote>
+        <para>
+          If this option is enabled the result tab will show a warning sign if the limit defined
+          by the <link linkend="max-rows-display">max. rows</link> setting is reached, indicating that the result
+          might be incomplete.
+        </para>
+      </blockquote>
+    </simplesect>
+
+		<simplesect id="options-row-numbers">
+			<title>Show row numbers</title><blockquote>
+			<para>
+        If this option is enabled the row numbers for result sets are shown at the left hand side of the result.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-show-maxrow-tooltip-warn">
+			<title>Show tooltip warning </title><blockquote>
+			<para>
+        If this option is enabled, a tooltip indicating that the maximum number of rows has been reached is shown for the result tab.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-bold-headers">
+			<title>Bold header</title><blockquote>
+			<para>
+        If this option is enabled, the name of the columns in the result is shown with a bold font, instead of the regular data font.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-def-max-rows">
+			<title>Default max. Rows</title><blockquote>
+			<para>
+        When adding a SQL panel, this number will be used as a default for the <link linkend="max-rows-display">max. rows</link>
+        value for the new panel.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-display-generating-sql">
+			<title>Default SQL query</title><blockquote>
+			<para>
+        If this option is enabled, the query that generated a result is shown right above the result grid.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-null-value-literal">
+			<title><literal>NULL</literal> string</title><blockquote>
+			<para>
+				The specified value will be displayed instead of <literal>NULL</literal> values in the result of a SQL statement.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-append-results-default">
+			<title>Append results</title><blockquote>
+			<para>
+        This option defines the default behavior for <link linkend="append-results">appending results</link> when a new editor tab is opened.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-number-alignment">
+			<title>Number alignment</title><blockquote>
+			<para>
+        This controls the alignment of numbers in the result grid.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-result-tooltip">
+			<title>Result tab tooltip</title><blockquote>
+			<para>
+        This options configures the tooltip that is shown when the mouse is hovering over a result tab.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="option-sort-collator">
+      <title>Sort Locale</title><blockquote>
+      <para>
+      	When you sort the result set, characters values will be sorted case-sensitive by default.
+      	This is caused by the <literal>compareTo()</literal> method available in the Java
+      	environment which puts lower case characters in front of upper case characters when sorting.
+				With the "Sort Locale" option you can select which language rules should be applied
+				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
+      </para>
+    </blockquote></simplesect>
+
+		<section id="column-width-settings">
+			<title>Column width settings</title>
+
+			<simplesect id="options-auto-optimize-column-width">
+				<title>Automatically adjust column widths</title>
+        <blockquote>
+				<para>
+					If this option is enabled, the widths of the result set columns are automatically
+					adjusted to fit the largest value (respecting the min. and max. size settings) after
+					retrieving data. Note that you can manually optimize the column widths using
+					<menuchoice><guimenu>View</guimenu><guimenuitem>Optimize width for all columns</guimenuitem></menuchoice>.
+				</para>
+        </blockquote>
+      </simplesect>
+
+			<simplesect id="options-optimize-include-header">
+				<title>Adjust to column headers</title><blockquote>
+				<para>
+					When calculating the optimal width for a column (either manually
+					or if "Auto adjust column widths" is enabled, then the column's
+					label will be included in the width calculation if this option
+					is enabled. If this option is disabled, and the column contains
+					very short values, the column width could be smaller than the
+					column's label.
+				</para>
+				<para>
+					This option is also used when manually optimizing the column width,
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="options-max-column-width">
+				<title>Max. column width</title><blockquote>
+				<para>When the initial display size of a column is calculated, or if
+					you optimize the column widths to fit the actual data, columns will not exceed this
+					width. This is useful when displaying large character columns.
+				</para>
+        </blockquote>
+      </simplesect>
+
+			<simplesect id="options-min-column-width">
+				<title>Min. column width</title><blockquote>
+				<para>When the initial display size of a column is calculated, or if
+					you optimize the column widths to fit the actual data, columns will not exceed this
+					width.
+				</para>
+			</blockquote>
+      </simplesect>
+		</section>
+
+		<simplesect id="options-multiline">
+			<title>Displaying multi-line values</title><blockquote>
+			<para>
+				&wb-productname; uses a special display component for the contents
+				of <literal>CLOB</literal> columns that is capable of displaying
+				multiple lines. This component honors newlines and linefeeds in the data retrieved from the database and
+        is capable of using word wrapping for long lines (even if no newlines are embedded).
+			</para>
+			<para>
+        By default only <literal>CLOB</literal> are considered to be able to contain multiple lines, so
+        <literal>VARCHAR</literal> columns are usually not treated as multi-line columns.
+        If your database stores text in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value will be displayed with the
+        multiline component.
+			</para>
+			<para>
+				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
+				will be displayed with the multi line renderer. A <literal>VARCHAR(210)</literal>
+        will be displayed in a single line. Note that this limit refers to the <emphasis>defined</emphasis>
+        length of the column, not the actual length of the data.
+			</para>
+			<para>
+				Displaying data using the multi line component is slower than using the standard (single line) component.
+			</para>
+			<para>
+				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line columns.
+			</para>
+		</blockquote></simplesect>
+
+		<section id="row-height-settings">
+			<title>Row height settings</title>
+			<simplesect id="options-auto-optimize-row-height">
+				<title>Automatically adjust row height</title><blockquote>
+				<para>
+					If this option is enabled, the height of each column is automatically adjusted after data
+					retrieval to display as many lines of the column values (for character columns) as possible.
+					Note that you can manually optimize the row height using
+					<menuchoice><guimenu>View</guimenu><guimenuitem>Optimize row height</guimenuitem></menuchoice>.
+				</para>
+				<para>
+					Not every (character) column is displayed in a manner that multiple lines will be displayed.
+					The default setting is to always display <literal>CLOB</literal> columns as multi line.
+					<literal>VARCHAR</literal> (and <literal>CHAR</literal>) columns will only be displayed in
+					multi line mode if they can hold more than 250 characters. This limit
+					can be <link linkend="options-multiline">changed</link>.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="options-allow-row-resize">
+				<title>Allow row height resizing</title><blockquote>
+				<para>
+					If this option is enabled, you can manually adjust the height of each row using the mouse.
+					This option does not need to be enabled in order to (automatically) optimize the row height.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="options-rowheight-max-lines">
+				<title>Max. number of lines</title><blockquote>
+				<para>
+					When calculating the optimal height for each row, the number of lines defined
+					with this option will never be exceeded.
+				</para>
+			</blockquote></simplesect>
+
+		</section>
+
+	</section>
+
+	<section id="options-data-formatting">
+		<title>Options for formatting data</title>
+
+		<simplesect id="options-date-format">
+			<title>Date, timestamp and time formats</title><blockquote>
+			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
+				set. For details on the format of this option, please refer to the
+				documentation of the <ulink url="http://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				This format is also used when parsing input for date or timestamp fields, so if you
+				enter a date while <link linkend="edit-data">editing</link> the data,
+				make sure you enter it the same way as defined with this option.
+			</para>
+			<para>
+				Here is an overview of the letters and their meaning that can be used to format
+				the date and timestamp values. Be aware that case matters!
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Letter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
+							<row><entry>y</entry><entry>Year (Number)</entry></row>
+							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
+							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
+							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
+							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
+							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
+							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
+							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
+							<row><entry>a</entry><entry>AM/PM marker</entry></row>
+							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
+							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
+							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
+							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
+							<row><entry>m</entry><entry>Minute in hour</entry></row>
+							<row><entry>s</entry><entry>Second in minute</entry></row>
+							<row><entry>S</entry><entry>Milliseconds</entry></row>
+							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
+							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-ora-data-timestamp">
+			<title>Oracle <literal>DATE</literal> as <literal>TIMESTAMP</literal></title>
+      <indexterm><primary>Oracle</primary><secondary>DATE datatype</secondary></indexterm>
+      <blockquote>
+			<para>
+				The Oracle <literal>DATE</literal> datatype includes the time as well. But the
+				JDBC driver does not retrieve the time part of a DATE column, so when retrieving
+				<literal>DATE</literal> values, this would remove the time stored in the database. If this option is
+				enabled, &wb-productname; will treat Oracle's <literal>DATE</literal> columns
+				as <literal>TIMESTAMP</literal> columns, thus preserving the time information.
+			</para>
+      <para>
+        Note that the Oracle 12.x drivers don't allow to switch this <emphasis role="bold">off</emphasis>.
+        If if this parameter is unchecked the Oracle 12.x driver will return values from <literal>DATE</literal>
+        columns as timestamps.
+      </para>
+      </blockquote>
+		</simplesect>
+
+		<simplesect id="options-decimal-symbol">
+			<title>Decimal symbol</title><blockquote>
+			<para>
+				The character which is used as the decimal separator when displaying numbers.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-decimal-group">
+			<title>Group separator</title><blockquote>
+			<para>
+				The character to be used to separate groups inside a number. This is only used when a format string
+        is specified, that includes the placeholder for the group character.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-decimal-digits">
+			<title>Decimal digits</title><blockquote>
+			<para>
+        Define the maximum number of digits which will be displayed for
+				numeric columns. This only affects the display of the number, not the storage or retrieval.
+        Internally they are still stored as the DBMS returned them. To see the internal
+				value, leave the mouse cursor over the cell. The tool tip which is
+				displayed will contain the number as it was returned by the JDBC driver.
+				When exporting data or copying it to the clipboard, the real value will be used.
+			</para>
+      <para>
+        If this value is set to 0 (zero) values will be display with as many digits as available.
+      </para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-number-format">
+			<title>Decimal/Integer format</title><blockquote>
+			<para>
+
+			</para>
+			<para>Define the format for displaying integers or numbers with decimals.
+        For details on the format of this option, please refer to the
+				documentation of the <ulink url="http://docs.oracle.com/javase/8/docs/api/java/text/DecimalFormat.html"><literal>DecimalFormat</literal></ulink> class.
+			</para>
+      <para>
+        If a format string is defined, the "Decimal digits" option will not be used. The number of decimal digits
+        has to be controlled through the format string in that case.
+      </para>
+			<para>
+				Here is an overview of the characters that can be used to format numbers:
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Character</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+              <row><entry>0 (zero)</entry><entry>Digit, a zero is shown as a zero</entry></row>
+							<row><entry>#</entry><entry>Digit, zeroes are suppressed</entry></row>
+							<row><entry>.</entry><entry>Marks the position where the decimal separator should be displayed</entry></row>
+							<row><entry>,</entry><entry>Marks the position where the grouping symbol should be displayed</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+
+		</blockquote></simplesect>
+
+	</section>
+
+  <section id="options-data-colors">
+    <title>Data display colors</title>
+
+		<simplesect id="options-alternating-row-colors">
+			<title>Alternate row colors</title><blockquote>
+			<para>
+				If this color is defined, the rows in the data table will be displayed
+				with alternating background color.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-null-value-color">
+			<title>Color for <literal>NULL</literal> values</title><blockquote>
+			<para>
+				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
+			</para>
+		</blockquote></simplesect>
+
+  </section>
+
+	<section id="options-data-edit">
+		<title>Options for data editing</title>
+
+		<simplesect id="options-confirm-update">
+			<title>Confirm result set updates</title><blockquote>
+			<para>
+        When this option is enabled, the statements which are sent to the
+				database when saving changes to result set table, are displayed before
+				execution. The update can be cancelled at that point if the statements
+				are not correct. The generated statements can also be saved to a file
+				from that window.
+			</para>
+			<note>
+				<para>The statement(s) that are displayed in the confirmation window can not be changed!</para>
+			</note>
+		</blockquote></simplesect>
+
+		<simplesect id="warn-pending-changes">
+			<title>Confirm discarding changed results</title><blockquote>
+			<para>
+				When running a statement that would replace a result that has changes
+				that are not saved to the database, you will be prompted whether
+				you want to cancel the current operation that would discard those changes.
+			</para>
+			<para>
+				This applies to statements run in the editor, as well as to changes
+				done in the <link linkend="table-data">Data tab of the DbExplorer</link>.
+			</para>
+			<para>
+				You will not be prompted when running statements in the editor, when the
+				option <link linkend="append-results">Append results</link> is enabled.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-highlight-required">
+			<title>Highlight required fields</title><blockquote>
+			<para>When editing data either in the result set or in the
+				data tab of the DbExplorer, fields that are set to <literal>NOT NULL</literal>
+				in the underlying table, will be displayed with a different background color
+				if this option is selected.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-required-field-color">
+			<title>Color for required fields</title><blockquote>
+			<para>
+				If required fields are highlighted during editing, this option
+				defines the background color that is used.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-pkmapping">
+			<title>Default PK Map</title><blockquote>
+			<para>
+				This property defines a mapping file for primary key columns. The information
+				from that file is read whenever the primary keys for a table of
+				cannot be obtained from the database. For a detailed
+				description on how to define extra primary key columns, please
+				refer to the <link linkend="command-define-pk"><literal>WbDefinePk</literal></link> command.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-single-record">
+			<title>Single record dialog</title><blockquote>
+			<para>
+				When displaying data in the Single record dialog you can customize the width for the
+        input fields, and the default height for <link linkend="options-multiline">multiline</link> columns.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-dbexplorer">
+		<title>DbExplorer options</title>
+
+    <section id="dbexp-general-options">
+      <title>General options</title>
+      <simplesect id="options-explorer-as-tab">
+        <title>DB Explorer as Tab</title>
+        <blockquote>
+          <para>The Database Explorer can either be displayed as a separate
+            window or inside the main window as a another tab. If this option is
+            selected, the Db Explorer will be displayed inside the main window. If
+            the option Retrieve DB Explorer is checked as well, the current database
+            scheme will be retrieved upon starting &wb-productname;
+          </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="options-retrieve-ref-tree" xreflabel="Retrieve foreign key dependecy">
+        <title>Automatically retrieve dependency tree</title>
+        <blockquote>
+        <para>
+          If this option is enabled, the tree display in the "References" and "Referenced by" tabs
+          will automatically be loaded when the list of foreign keys is loaded. If this option
+          is disabled, loading of the tree display must be started manually by clicking on the "reload" button.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-show-trigger">
+        <title>Show trigger panel</title>
+        <indexterm><primary>DbExplorer</primary><secondary>show all triggers</secondary></indexterm>
+        <indexterm><primary>Triggers</primary><secondary>show all triggers in DbExplorer</secondary></indexterm>
+        <blockquote>
+          <para>
+            By default triggers are shown only in the details of a table. If the
+            option "Show trigger panel" is selected, an additional panel will
+            be displayed in the DbExplorer that displays all triggers in the
+            database independently of their table.
+          </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-focus-data">
+        <title>Focus to data panel</title>
+        <blockquote>
+          <para>
+            When this option is selected, the focus inside the DbExplorer will
+            be set to the data panel, after an object in the list has been selected
+            and the data panel is visible.
+          </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-focus-source">
+        <title>Focus to source panel</title>
+        <blockquote>
+          <para>
+            When this option is selected, the focus inside the DbExplorer will
+            be set to the object's source panel, after an object in the list has been selected
+            and the source panel is visible.
+          </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-show-focus">
+        <title>Show focus</title>
+        <blockquote>
+          <para>
+            When this option is selected, a rectangle indicating the currently
+            focused panel will be displayed, to indicate the component that
+            will received keystrokes e.g. shortcuts such as <keycap>Ctrl-R</keycap>.
+          </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-tab-location">
+        <title>Object details tabs</title>
+        <blockquote>
+          <para>
+            With this drop down you can select the position of the details tabs
+            (Columns, Source, Data etc).
+          </para>
+        </blockquote>
+      </simplesect>
+
+    </section>
+
+    <section id="dbexp-options-objectlist">
+      <title>Object list options</title>
+
+      <simplesect id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
+        <title>Automatically retrieve objects</title><blockquote>
+        <para>If this option is enabled, the contents of the database schema is
+          retrieved when the DB Explorer is displayed. If this option is not
+          checked, either the <guibutton>Refresh</guibutton> button or selecting a schema or
+          table type will load the list.
+         </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-allow-alter">
+        <title>Allow table altering</title>
+        <blockquote>
+        <para>
+          If this option is enabled, column definitions of a table can directly be altered by editing
+          them inside the "Columns" tab. It also allows to directly change the name of a table in the table list.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-remember-type">
+        <title>Remember object type</title>
+        <blockquote>
+        <para>
+          The list of objects can be filtered with the drop down. If the
+          option "Remember object type" is selected, the current object type
+          will be stored in the workspace of the current connection, and will
+          be restored the next time.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-def-type">
+        <title>Default object type</title>
+        <blockquote>
+          <para>
+            If "Remember object type" is not enabled, you can define a default object
+            type that is selected in the drop down when the DbExplorer is displayed initially.
+          </para>
+        </blockquote>
+      </simplesect>
+
+			<simplesect id="objectlist-quickfilter-options">
+        <para>
+          <emphasis role="bold">Quick filter options</emphasis>
+        </para>
+        <blockquote>
+          <para>
+            The following configuration options of the quick filter are also used for the quick filter in the
+            <link linkend="db-tree">Database Objects Tree</link>.
+          </para>
+          <para id="dbexp-options-use-regex">
+            <emphasis role="bold">Use RegEx in Quickfilter</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, the expression entered in the quick filter of the DbExplorer's table list
+            is used as a regular expression (rather than a "SQL" Expression) to filter the list.
+          </para>
+          </blockquote>
+
+          <para id="dbexp-options-partial-match">
+            <emphasis role="bold">Partial match</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, then any text that is typed into the quick filter will be matched anywhere
+            in the object name. It is equivalent to typing <literal>*foo*</literal> into the quick filter.
+            If this option is enabled and a wildcard is part of the value, then only that wildcard is used.
+            Using <literal>foo*</literal> for the filter while this option is enabled, shows all objects
+            that <emphasis>start</emphasis> with <literal>foo</literal>.
+          </para>
+          <para>
+            This also enables filtering for multiple values, separated by comma.
+            Entering <literal>foo,bar</literal> in the quick filter will show all objects that contain
+            either <literal>foo</literal> or <literal>bar</literal>.
+          </para>
+          <para>
+            This option is only available when the use of regular expressions in the quick filter is disabled.
+          </para>
+          </blockquote>
+
+          <para id="dbexp-options-filter-typing">
+            <emphasis role="bold">Filter while typing</emphasis>
+          </para>
+          <blockquote>
+          <para>
+            If this option is enabled, the filter expression is applied while you type. In this case, the
+            "Filter" button does not need to be clicked in order to apply the filter expression.
+          </para>
+          </blockquote>
+        </blockquote>
+      </simplesect>
+    </section>
+
+    <section id="dbexp-sql-genoptions">
+      <title>SQL Generation options</title>
+      <simplesect id="dbexp-options-gen-pk">
+        <title>Generate PK constraint name</title>
+        <blockquote>
+        <para>
+          When displaying the SQL source for a table, a name will be generated
+          for primary key constraint if the current constraint has no name or
+          a system generated name.
+        </para>
+        <para>
+          System generated names are identified using a regular expression
+          that can be <link linkend="manual-setting-system-names">configured</link>.
+        </para>
+        <para>
+          If this option is selected, the generated SQL will not reflect
+          the real statement that was used to create the table!
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-gen-grants">
+        <title>Generate table grants</title>
+        <blockquote>
+        <para>
+          If this option is enabled the generated table source will contain
+          any table grants that have been defined.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-gen-drop">
+        <title>Generate DROP statement</title>
+        <blockquote>
+        <para>
+          If this option is enabled the generated table source will start with
+          the appropriate <literal>DROP</literal> statement.
+        </para>
+        </blockquote>
+      </simplesect>
+    </section>
+
+    <section id="dbexp-options-data-display">
+      <title>Data display options</title>
+      <simplesect id="dbexp-options-remember-sort">
+        <title>Remember sort column</title>
+        <blockquote>
+        <para>
+          When this option is selected, the sort column in the data display
+          of the DbExplorer will be restored after reloading the table data.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-remember-col-order">
+        <title>Remember column order</title>
+        <blockquote>
+        <para>
+          When you <link linkend="dbexplorer-column-reorder">reorder</link> the column
+          in the data display of a table, enabling this option will automatically
+          store the new column order and apply it the next time the table data
+          is displayed.
+        </para>
+        </blockquote>
+      </simplesect>
+
+      <simplesect id="dbexp-options-use-order-by">
+        <title>Apply sort order as ORDER BY</title>
+        <blockquote>
+        <para>
+          If the table data was sorted by clicking on one of the columns, reloading the data
+          will use an appropriate <literal>ORDER BY</literal> clause for the data retrieval.
+          This is useful if not all rows were displayed in the data panel due to a max. row limit
+          and you want the first rows displayed based on the current column sort.
+        </para>
+        </blockquote>
+      </simplesect>
+    </section>
+
+	</section>
+
+	<section id="options-window-title">
+		<title>Window Title</title>
+
+		<para>
+			The title bar of the main window displays displays information
+			about the current connection, workspace and editor file. Some
+			of these elements can be enabled or disabled with the options
+			on this page.
+		</para>
+
+		<simplesect id="options-window-title-appatend">
+			<title>Application name at end</title><blockquote>
+			<para>
+        If this option is enabled, the Application name will be put at the end
+        of the window title.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-window-showworkspace">
+			<title>Show Workspace name</title><blockquote>
+			<para>
+				If this option is enabled, the currently loaded workspace name
+				will be displayed in the main window's title.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-window-showgroupname">
+			<title>Show Profile Group</title><blockquote>
+			<para>
+				If this option is enabled, the group of the current connection
+				profile will be displayed in the main window's title. The name
+				of the current connection profile will always be shown.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-enclose-group">
+			<title>Enclose Group With</title><blockquote>
+			<para>
+        If you select to display the current profile's group, you can select a pair
+        of characters to put around the group name.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-group-separator">
+			<title>Separator</title><blockquote>
+			<para>
+        If you select to display the current profile's name and group, you can select the
+        character that separates the two names.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-editor-filename">
+			<title>Editor Filename</title><blockquote>
+			<para>
+				If the current editor tab contains an external file, you
+				can choose if and which information about the file should be displayed
+				in the window title. You can display nothing, only the filename or
+				the full path information about the current file. The information
+				will be displayed behind the current profile and workspace name.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-sql-formatting">
+		<title>SQL Formatting</title>
+      <para>
+        These options influence the behavior of the internal SQL Formatter when
+        <link linkend="editor-reformat-sql">reformatting</link> a SQL statement in the editor.
+      </para>
+			<simplesect id="opt-sql-formatting-maxlength">
+				<title>Max. length for sub-select</title><blockquote>
+				<para>
+					When the SQL formatter hits a sub-SELECT while
+					parsing it will not reformat any statement which is shorter
+					then the length specified with this option, i.e. any sub-SELECT
+					shorter then this value will be formatted as one single statement without
+					line breaks or indention. See <xref linkend="editor-reformat-sql"/> for
+					details on how the SQL formatting works.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-sql-formatting-selectcols">
+				<title>Columns in SELECT</title><blockquote>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting a <literal>SELECT</literal> statement. The default of 1 (one)
+					will put each column into a separate line:
+				</para>
+<programlisting>SELECT p.name,
+       p.firstname,
+       a.city,
+       a.zip
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
+				<para>
+					If this is set to 2, this
+					would result in the following formatted SELECT:
+				</para>
+				<programlisting>
+SELECT p.name, p.firstname,
+       a.city, a.zip
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
+				<para>
+					The above example would list all columns in a single line, if this option
+					is set to 4 (or a higher value):
+				</para>
+				<programlisting>
+SELECT p.name, p.firstname, a.city, a.zip
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-sql-formatting-insertcols">
+				<title>Columns in INSERT</title><blockquote>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting an <literal>INSERT</literal> statement. A value of one will
+					list each column in a separate line in the <literal>INSERT</literal> part and the <literal>VALUES</literal> part
+				</para>
+<programlisting>
+INSERT INTO PERSON
+(
+  id,
+  firstname,
+  lastname
+)
+VALUES
+(
+  42,
+  'Arthur',
+  'Dent'
+);</programlisting>
+         <para>
+					 When setting this value to 2, the above example would be formatted as follows:
+				 </para>
+
+<programlisting>INSERT INTO PERSON
+  (id, firstname,
+   lastname)
+VALUES
+  (42, 'Arthur',
+   'Dent');</programlisting>
+
+			</blockquote></simplesect>
+
+			<simplesect id="opt-sql-formatting-updatecols">
+				<title>Columns in UPDATE</title><blockquote>
+				<para>
+					This property defines the number of columns the formatter puts in on line
+					when formatting an <literal>UPDATE</literal> statement. A value of 1 (one) will
+					put each column into a separate line:
+				</para>
+<programlisting>
+UPDATE person
+   SET firstname = 'Arthur',
+       lastname = 'Dent'
+WHERE id = 42;</programlisting>
+				<para>
+					With a value of 2, the above example would be formatted as follows:
+				</para>
+<programlisting>
+UPDATE person
+   SET firstname = 'Arthur', lastname = 'Dent'
+WHERE id = 42;</programlisting>
+
+			</blockquote></simplesect>
+
+			<simplesect id="opt-formatter-keywords-case">
+				<title>Keywords</title><blockquote>
+				<para>
+          This option defines if standard SQL keywords are generated in upper case, lower case or left unchanged.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-formatter-identifier-case">
+				<title>Identifiers</title><blockquote>
+				<para>
+          This option defines if identifiers (table names, column names, ...) are generated in upper case, lower case or left unchanged.
+				</para>
+    	</blockquote></simplesect>
+
+			<simplesect id="opt-formatter-functions-case">
+				<title>Functions</title><blockquote>
+				<para>
+          This option defines if the names of SQL functions are generated in upper case, lower case or left unchanged. This
+          does not apply to user-written functions, only standard functions available for the current DBMS.
+        </para>
+        </blockquote>
+			</simplesect>
+
+			<simplesect id="opt-formatter-join-wrapping">
+				<title>JOIN wrapping</title>
+        <blockquote>
+          <para>
+            This option controls how conditions for <literal>JOIN</literal> operators are generated
+          </para>
+          <para id="join-wrapping-never">
+            <emphasis role="bold">Never</emphasis>
+          </para>
+            <blockquote>
+            <para>The JOIN condition is always kept on a single line:
+<programlisting language="sql">SELECT *
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;</programlisting>
+            </para>
+            </blockquote>
+
+            <para id="join-wrapping-always">
+              <emphasis role="bold">Always</emphasis>
+            </para>
+            <blockquote>
+            <para>the JOIN condition is always written on a new line:
+<programlisting>SELECT *
+FROM person p
+  JOIN address a
+    ON p.person_id = a.person_id;</programlisting>
+            </para>
+            </blockquote>
+
+            <para id="join-wrapping-multiple">
+              <emphasis role="bold">Multiple conditions</emphasis>
+            </para>
+            <blockquote>
+              <para>
+              the JOIN condition is generated on multiple lines only if the join involves more than one condition:
+<programlisting>SELECT *
+FROM person p
+  JOIN address a ON p.person_id = a.person_id;
+  JOIN address_details ad
+    ON ad.address_id = a.address_id
+   AND ad.person_id = a.person_id;
+</programlisting>
+              </para>
+            </blockquote>
+        </blockquote>
+			</simplesect>
+
+			<simplesect id="opt-formatter-comma-space-in-list">
+				<title>Space after comma for IN lists</title><blockquote>
+				<para>
+					If this option is selected, a space is added after the comma inside an <literal>IN</literal> list.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-formatter-comma-after-newline">
+				<title>Comma after line break</title><blockquote>
+				<para>
+					If this option is enabled, the commas inside the <literal>SELECT</literal> list are put on the start of the next line,
+          rather than on same line as the last column.
+				</para>
+        <para>If this option is disabled a <literal>SELECT</literal> statement will be formatted like this:</para>
+<programlisting>SELECT id,
+       lastname,
+       firstname
+FROM person;</programlisting>
+        <para>If this option is enabled the above statement will be formatted like this:</para>
+<programlisting>SELECT id
+       ,lastname
+       ,firstname
+FROM person;</programlisting>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-formatter-space-after-leading-comma">
+				<title>Space after a comma with line break</title><blockquote>
+				<para>
+          This option is only available is "Comma after line break" is enabled. In that case it controls
+          if a space character is inserted after the comma.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-sql-formatting-quoted-elements">
+				<title>Quoted elements per line</title><blockquote>
+				<para>
+					This option is used when changing the selected text into elements suitable for an <literal>IN</literal> list
+					using <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create SQL List</guimenuitem></menuchoice></link>.
+					The number of values that are kept on a single line is controlled with this option.
+				</para>
+			</blockquote></simplesect>
+
+			<simplesect id="opt-sql-formatting-other-elements">
+				<title>Other elements per line</title><blockquote>
+				<para>
+					This option defines how many values will be put into a single
+          line when creating non-quoted elements using
+          <link linkend="editor-make-in-list"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Create non-char SQL List</guimenuitem></menuchoice></link>.
+				</para>
+			</blockquote></simplesect>
+	</section>
+
+	<section id="options-external-sql-formatter">
+		<title>External SQL Formatter</title>
+    <simplesect id="external-formatter-priority">
+      <title>Use of the external formatter</title>
+      <para>
+        When formatting a SQL statement, &wb-productname; first looks if a formatter for the current
+        DBMS is defined and active. If a formatter is found, that is used. If no formatter for the
+        current DBMS is found, and the "Default" external formatter is active, that is used.
+        If no active external formatter is found, the internal formatter is used.
+      </para>
+    </simplesect>
+    <simplesect id="external-formatter-exe">
+      <title>Executable</title>
+      <blockquote><para>
+        This is the full path to the formatter's program
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-commandline">
+      <title>Command line</title>
+      <blockquote><para>
+        The command line configures the parameters passed to the formatter. The input file for the
+        formatter can be specified by using the placeholder <literal>${wbin}</literal>. If
+        no input file is specified on the command line, the SQL statement will be passed
+        through stdin. If the formatter writes the output to a file, the placeholder <literal>${wbout}</literal>
+        can be used in the command line. If no output file is specified the result will be read from stdout
+        of the process.
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-scripts">
+      <title>Supports multiple statements</title>
+      <blockquote><para>
+        If this option is enabled, &wb-productname; send the selected text that
+        should be formatted as a single input to the formatter. If this option is disabled, &wb-productname;
+        will split up the text to be formatted and send each statement seperately to the formatter.
+      </para></blockquote>
+    </simplesect>
+    <simplesect id="external-formatter-enable">
+      <title>Enabled</title>
+      <blockquote><para>
+        This option can be used to turn of the usage of a formatter without deleting the definition.
+      </para></blockquote>
+    </simplesect>
+
+  </section>
+
+	<section id="options-sql-generation">
+		<title>SQL Generation</title>
+
+		<simplesect id="options-generated-update">
+			<title>Format UPDATEs</title><blockquote>
+			<para>
+				If formatting of <literal>UPDATE</literal> statements is enabled,
+        generated <literal>UPDATE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-generated-insert">
+			<title>Format INSERTs</title><blockquote>
+			<para>
+				If formatting of <literal>INSERT</literal> is enabled, the way they
+        generated <literal>INSERT</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-generated-delete">
+			<title>Format DELETEs</title><blockquote>
+			<para>
+				If formatting of <literal>DELETE</literal> is enabled, the way they
+        generated <literal>DELETE</literal> statements are formatted using the <link linkend="options-sql-formatting">SQL formatter</link>
+        before they are displayed.
+			</para>
+		</blockquote></simplesect>
+
+    <simplesect id="options-default-copy-literaltype">
+			<title>Date literals for clipboard</title><blockquote>
+			<para>
+				Defines the date literal format to be used when copying data
+				as SQL statements <emphasis>to the clipboard</emphasis>. For a detailed description
+				of the different formats please refer to the
+				<link linkend="export-sql-literal-formats">WbExport</link> description.
+				This option does not influence the default format used by the <literal>WbExport</literal>
+				command.
+			</para>
+			<note><para>
+				When you copy data as "Text" (tab-separated) to the clipboard, the date and
+				timestamp format from the <link linkend="options-date-format">general options</link> is used.
+			</para></note>
+		</blockquote></simplesect>
+
+		<simplesect id="options-default-export-literaltype">
+			<title>Date literals for WbExport</title><blockquote>
+			<para>
+				Defines the date literal format to be used for the <link linkend="command-export">WbExport</link>
+				command. The value of this option is used if the <literal>-sqlDateLiterals</literal>
+				switch is not supplied when running <literal>WbExport</literal>.
+				This default value is reported when <literal>WbExport</literal> is executed
+				without parameters.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="options-default-diff-literaltype">
+			<title>Date literals for WbDataDiff</title><blockquote>
+			<para>
+				Defines the date literal format to be used for the <link linkend="command-data-diff">WbDataDiff</link>
+				command. The value of this option is used if the <literal>-sqlDateLiterals</literal>
+				switch is not supplied when running <literal>WbDataDiff</literal>.
+				This default value is reported when <literal>WbDataDiff</literal> is executed
+				without parameters.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-export-include-owner">
+			<title>Include owner in export</title><blockquote>
+			<para>
+				This setting controls whether &wb-productname; uses the owner (schema)
+				when creating SQL scripts during exporting data (through WbExport
+				or "Save as"). When this option is selected, the usage of the schema
+				depends on the <link linkend="settings-db-ignoreschema">ignore schema</link> setting
+				that controls ignoring certain schemas for specific DBMS.
+				When this is option is not selected, the schema/owner will never be used for SQL scripts.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-include-empty-comments">
+			<title>Include empty comments</title><blockquote>
+			<para>
+        By default the DbExplorer will not generate the SQL to create empty comments (tables, views, columns,...).
+        If this option is enabled then a corresponding SQL statement to define a comment with an empty
+        string will be generated. If a comment is <literal>NULL</literal> comments will never be generated.
+			</para>
+		</blockquote></simplesect>
+
+		<simplesect id="opt-sql-include-identity">
+			<title>Ignore identity and autoincrement columns for INSERTs</title><blockquote>
+			<para>
+        If this option is enabled, generated INSERT statements (e.g. when editing data) will not contain
+        identity or autoincrement columns. When using <literal>WbExport</literal> to create a
+        SQL script, this can be <link linkend="sql-export-identity-cols">controlled independently</link>
+        from the global option.
+			</para>
+		</blockquote></simplesect>
+
+	</section>
+
+	<section id="options-external-tools">
+		<title>External tools</title>
+		<para>
+			On this page, you can define external tools (programs). Currently the only
+			place where this is used, is in the <link linkend="update-blob-editmode">BLOB info dialog</link>,
+			to open the BLOB data with one of the defined external tools.
+		</para>
+		<para>
+			This could be a program to display images, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
+			office documents or a text editor to display text files.
+		</para>
+    <para>
+      If the tool needs additional parameters (e.g. to select a hex editing mode for a text editor), they have to
+      be entered in the "Parameters" field. Do not add parameters to the definition of the executable.
+    </para>
+	</section>
+
+	<section id="options-look-and-feel">
+		<title>Look and Feel</title>
+		<para>
+			If you want to use additional Look and Feels that are not part
+			of the JDK, you can specify them here.
+		</para>
+		<para>
+			A Look And Feel definition consists of a name, the class name to be used and
+			the location of the JAR file that provides the look and feel implementation.
+			The class name that has to be used should be available in the documentation
+			of the look and feel of your choice. The name is &wb-productname; internal
+			and is only used when displaying the list of available Look and Feels.
+		</para>
+		<note><para>
+			The current look and feel is only changed when you click on the
+			<guibutton>Make current</guibutton> button. Simply selecting a different entry
+			in the list on the left side will <emphasis role="bold">not</emphasis>
+			change the look and feel.
+		</para></note>		<para>
+			When you switch the current Look &amp; Feel, you will need to restart the
+			application to activate the new look and feel. Note that if you switch
+			the current Look &amp; Feel it will be changed, regardless whether
+			you close the options dialog using Cancel or OK.
+		</para>
+
+	</section>
+
+</section>

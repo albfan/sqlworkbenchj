@@ -1,0 +1,66 @@
+<row>
+  <entry>-adjustSequences</entry>
+  <entry>
+    <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+    <para>
+      For DBMS that support sequences which are associated with a column, this parameter can be used
+      to adjust the next value for the sequence to the maximum value of the imported data. This can
+      also be used to synchronize identity columns for DBMS that allow overriding the generated values.
+    </para>
+    <para>
+      Currently this is implemented for PostgreSQL, DB2 (LUW), H2 Database and HyperSQL (aka HSQLDB).
+    </para>
+  </entry>
+</row>
+<row>
+  <entry><para>-preTableStatement -postTableStatement</para></entry>
+  <entry>
+    <para>
+      This parameter defines a SQL statement that should be executed before the import
+      process starts inserting data into the target table. The name of the current
+      table (when e.g. importing a whole directory) can be referenced using
+      <literal>${table.name}</literal>.
+    </para>
+    <para>
+      To define a statement that should be executed after all rows have been
+      inserted and have been committed, you can use the <literal>-postTableStatement</literal>
+      parameter.
+    </para>
+    <para>
+      These parameters can e.g. be used to enable identity insert for MS SQL Server:
+      <programlisting>-preTableStatement="set identity_insert ${table.name} on"
+-postTableStatement="set identity_insert ${table.name} off"</programlisting>
+      Errors resulting from executing these statements will be ignored. If you want
+      to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
+      and <literal>-continueOnError=false</literal>.
+    </para>
+    <para>
+      These statements are only used if more than one table is processed.
+    </para>
+  </entry>
+</row>
+
+<row>
+  <entry>-runTableStatementOnError</entry>
+  <entry>
+    <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+    <para>
+      Controls the execution of the post-table statement in case an error occurred while importing the data.
+      By default the post-table statement is executed even if the import was not successful. If this is
+      should not happen, use <literal>-runTableStatementOnError=false</literal>.
+    </para>
+  </entry>
+</row>
+<row>
+  <entry>-ignorePrePostErrors</entry>
+  <entry>
+    <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+    <para>
+      Controls handling of errors for the SQL statements defined through the <literal>-preTableStatement</literal> and
+      <literal>-postTableStatement</literal> parameters.
+      If this is set to true (the default), errors resulting from executing the
+      supplied statements are ignored. If set to false then error handling
+      depends on the parameter <literal>-continueOnError</literal>.
+    </para>
+  </entry>
+</row>

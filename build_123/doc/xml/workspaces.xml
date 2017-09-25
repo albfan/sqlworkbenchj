@@ -1,0 +1,103 @@
+<section id="workspace-usage">
+  <title>Using workspaces</title>
+
+  <section id="workspace-overview">
+    <title>Overview</title>
+    <para>
+      A workspace is a collection of editor tabs that group scripts or statements together. A workspace stores the
+      name of each editor tab, the cursor position for each editor, the selection and the statement history.
+    </para>
+    <para>
+      Each connection profile is associated with a workspace. If no workspace is explicitely chosen for a connection profile,
+      a workspace with the name <literal>Default</literal> is used. If not specified otherwise, workspaces are stored
+      in the <link linkend="config-dir">configuration directory</link>.
+    </para>
+    <para>
+      A workspace file has the extension <literal>.wksp</literal> and is a regular ZIP archive that can be opened with
+      any ZIP tool. It contains one text file for each editor in the workspace and some property files that
+      store additional settings like the divider location, the <link linkend="max-rows-display">Max. Rows</link> value or the
+      selected catalog and schema of the <link linkend="dbexplorer">DbExplorer</link>.
+    </para>
+
+    <note><para>
+      It is recommended to use a different workspace for each connection profile.
+    </para></note>
+
+    <para>
+      Workspaces can be used to reduce the number of editor tabs being used. You can create different workspaces
+      for different topics you work on. One workspace that contains queries to monitor a database, one workspace
+      that contains everything related to a specific feature you are working on, one workspace to initialize a
+      new environment and so on.
+    </para>
+
+    <para>
+      The workspace is saved when the window using that workspace is closed. If the option <link linkend="options-save-wksp">"Auto-Save workspace"</link>
+      is enabled the workspace is automatically saved when a SQL statement is executed.
+    </para>
+
+  </section>
+
+  <section id="workspace-save-as">
+    <title>Creating a copy of the current workspace</title>
+    <para>
+      To create a copy of the current workspace, use <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save workspace as</guimenuitem></menuchoice>
+      After saving the workspace, the new workspace becomes the current workspace (the old one will not be changed).
+      You will be asked if the new workspace should be the default profile's workspace, so that if you connect using
+      that connection profile the new workspace will be loaded automatically.
+    </para>
+    <para>
+      If the new workspace is not made the profile's workspace, the next time you connect using that connection profile,
+      the old workspace file will be loaded.
+    </para>
+    <para>
+      If you chose not to assign the new workspace right after saving it, you can later assign the currently
+      loaded workspace to be used by the current connection profile using:
+      <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Assign Workspace</guimenuitem></menuchoice>.
+    </para>
+    <para>
+      This feature can be used if you have a workspace that contains statements that you want to use for a new
+      topic, but you don't want to lose the original set of statements (that were used for a previous work).
+    </para>
+  </section>
+
+  <section id="workspace-load">
+    <title>Load a different workspace</title>
+    <para>
+      If you want to load an existing workspace e.g. because you want to work on a different topic, you can use
+      <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Load Workspace</guimenuitem></menuchoice> Again you are
+      asked if you want to use the newly loaded workspace as the default workspace.
+    </para>
+    <para>
+      Workspaces loaded through this will be put into the <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Recent Workspaces</guimenuitem></menuchoice>
+      menu so that you can quickly switch between workspaces you often use.
+    </para>
+    <para>
+      If you have a workspace loaded other than the default workspace of the current connection profile, you can
+      quickly re-load the default workspace through
+      <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Re-Load Profile Workspace</guimenuitem></menuchoice> If you
+      do that, the current workspace will be saved and the workspace assigned to the current connection profile
+      will be loaded.
+    </para>
+  </section>
+
+  <section id="workspace-external-files">
+    <title>Workspace and external files</title>
+    <para>
+      By default a workspace "remembers" the external files that were loaded. The content of the loaded file
+      will also be stored in the workspace file. This can be configured in the <link linkend="options-workspace">Options dialog</link>.
+    </para>
+  </section>
+
+  <section id="workspace-variables">
+    <title>Workspace variables</title>
+    <para>
+      It is possible to setup <link linkend="using-variables">variables</link> that are automatically defined when the workspace is loaded.
+      These variables will be removed when the workspace is closed or a different workspace is loaded.
+    </para>
+    <para>
+      Variables defined in the workspace will overwrite variables defined in the <link linkend="profile-variables">connection profile</link>.
+    </para>
+  </section>
+
+</section>
+

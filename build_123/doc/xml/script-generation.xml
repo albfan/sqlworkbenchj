@@ -1,0 +1,657 @@
+<section id="script-generation">
+  <title>&wb-productname; to generate DDL commands</title>
+
+	<important><para>
+    All &wb-productname; specific command can <emphasis role="bold">only</emphasis> be used from within &wb-productname;
+  </para></important>
+
+  <section id="command-genscript">
+    <title>Generate SQL script for database objects - WbGenerateScript</title>
+    <para>
+      <literal>WbGenerateScript</literal> re-creates the SQL for objects in the database.
+      It is the command line version of the <link linkend="dbexplorer-create-ddl">Generate Script</link> option in the
+      DbExplorer
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-objects</entry>
+							<entry>
+								<para>
+									A comma separated list of table (views or other objects), e.g. <literal>-objects=customer,invoice,v_turnover,seq_cust_id</literal>.
+                  The parameter supports specifying tables using wildcards <literal>-objects=cust%,inv%</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-exclude</entry>
+							<entry>
+								<para>
+									A comma separated list of object names to be excluded from the generated script.
+                  The parameter supports wildcards <literal>-exclude=foo*,bar*</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-schemas</entry>
+							<entry>
+								<para>
+									A comma separated list of schemas. If this is not specified then the current (default) schema is used.
+                  If this parameter is provided together with the <literal>-objects</literal> parameter, then
+                  the objects for each schema are retrieved. e.g. <literal>-objects=person -schemas=prod,test</literal> will
+                  show generate the SQL for the <literal>person</literal> table in both schemas.
+								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of the available schemas.
+                </para>
+							</entry>
+						</row>
+						<row>
+							<entry>-types</entry>
+							<entry>
+								<para>
+									A comma separated list of object types e.g. <literal>-types=VIEW,TABLE</literal>. This parameter
+                  is ignored if <literal>-objects</literal> is specified. The possible values for this parameter
+                  are the types listed in the drop down of the "Objects" tab in the DbExplorer.
+								</para>
+                <para>
+                  The parameter supports auto-completion and will show a list of the available object types for the current DBMS.
+                </para>
+							</entry>
+						</row>
+						<row>
+							<entry>-file</entry>
+							<entry>
+								<para>
+                  Defines the outputfile into which all statements are written. If this is not specified, the
+                  generated SQL statements are shown in the message area.
+                  file.
+								</para>
+							</entry>
+						</row>
+            <row>
+              <entry>-encoding</entry>
+              <entry>
+                <para>The encoding to be used when writing the output file.
+                </para>
+              </entry>
+            </row>
+						<row>
+							<entry>-includeForeignKeys</entry>
+							<entry>
+								<para>
+                  By default <literal>WbGenerateScript</literal> will add all foreign key constraints of the
+                  processed tables to the end of the generated script. If this parameter is set to <literal>false</literal>
+                  no foreign key constraints will be generated.
+								</para>
+                <para>
+                  The foreign keys can be generated in a separate step using the <literal>WbGenerateFKScript</literal> command.
+                </para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeTriggers</entry>
+							<entry>
+								<para>
+                  If this parameter is is present (or set to true), then all triggers (for the selected schemas) will be retrieved as well.
+                  The default is <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeProcedures</entry>
+							<entry>
+								<para>
+                  If this parameter is present (or set to true), then all procedures and functions (for the selected schemas) will be retrieved as well.
+                  The default is <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeDrop</entry>
+							<entry>
+								<para>
+                  If this parameter is present (or set to true) a <literal>DROP</literal> statement will be generated
+                  for each object in the list.
+								</para>
+							</entry>
+						</row>
+            <row>
+              <entry>-includeTableGrants</entry>
+              <entry>
+                This parameter controls the generation of table grants. The default value is <literal>true</literal>.
+              </entry>
+            </row>
+						<row>
+							<entry>-useSeparator</entry>
+							<entry>
+								<para>
+                  If this parameter is present (or set to true), comments will be added that identify the start and end
+                  of each object. The default is <literal>false</literal>.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+  </section>
+
+  <section id="command-tablesource">
+    <title>Show the source of a table - WbTableSource</title>
+
+    <para>
+			This command will show the source for a single table. The name of the table
+			is given as an argument to the command:
+			<programlisting>WbTableSource person;</programlisting>
+      It is possible to provide wildcards for the table name:
+			<programlisting>WbTableSource p%;</programlisting>
+      This command is mainly intended to quickly look at a table's source, e.g. when running in console mode.
+      To generate the DDL for multiple tables including depending objects or to save the generated SQL into a file,
+      please use <link linkend="command-genscript">WbGenerateScript</link>.
+		</para>
+  </section>
+
+  <section id="command-viewsource">
+    <title>Show the source of a view - WbViewSource</title>
+
+    <para>
+			This command will show the source for a single view. The name of the view
+			is given as an argument to the command:
+			<programlisting>WbViewSource current_orders;</programlisting>
+		</para>
+    <para>
+      The output of this command can be written to a file when using parameters:
+      <programlisting>WbViewSource -view=current_orders -file=/home/arthur/script/current_orders.sql;</programlisting>
+      The supported parameters are:
+      <itemizedlist spacing="compact">
+        <listitem><literal>-view</literal> - the name of the view</listitem>
+        <listitem><literal>-file</literal> - the name of the output file</listitem>
+        <listitem><literal>-encoding</literal> - the encoding to be used for the file</listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
+  <section id="command-procsource">
+    <title>Show the source of a stored procedures - WbProcSource</title>
+
+    <para>
+			This command will show the source for a single stored procedure (if the
+			current DBMS is supported by &wb-productname;). The name of the procedure
+			is given as an argument to the command:
+			<programlisting>WbProcSource the_answer;</programlisting>
+		</para>
+    <para>
+      The output of this command can be written to a file when using parameters:
+      <programlisting>WbProcSource -procedure=the_answer -file=/home/arthur/scripts/answer_proc.sql;</programlisting>
+      The supported parameters are:
+      <itemizedlist spacing="compact">
+        <listitem><literal>-procedure</literal> - the name of the procedure (or package)</listitem>
+        <listitem><literal>-file</literal> - the name of the output file</listitem>
+        <listitem><literal>-encoding</literal> - the encoding to be used for the file</listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
+  <section id="command-trgsource">
+    <title>Show the source of a trigger - WbTriggerSource</title>
+    <para>
+			This command will show the source for a single trigger The name of the trigger is given as an argument to the command:
+			<programlisting>WbTriggerSource order_trigger;</programlisting>
+		</para>
+    <para>
+      The output of this command can be written to a file when using parameters:
+      <programlisting>WbTriggerSource -trigger=order_trigger -file=/home/arthur/scripts/order_trigger;</programlisting>
+      The supported parameters are:
+      <itemizedlist spacing="compact">
+        <listitem><literal>-trigger</literal> - the name of the trigger</listitem>
+        <listitem><literal>-file</literal> - the name of the output file</listitem>
+        <listitem><literal>-encoding</literal> - the encoding to be used for the file</listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
+  <section id="command-gendrop">
+    <title>Generate DROP statement with dependencies - WbGenerateDrop</title>
+    <para>
+      The command <literal>WbGenerateDrop</literal> can be used to generate a SQL script for a table that
+      will drop all foreign keys referencing that table, then a <literal>DROP</literal> statement for that table
+      and the statements to re-created the foreign keys referencing that table.
+    </para>
+    <para>
+      This is useful if you need to re-create a table but don't want to manually delete all referencing
+      foreign keys, especially if the DBMS does not support a cascading DROP.
+    </para>
+    <para>
+      This is also available in the <link linkend="dbexplorer-gendrop">DbExplorer's context menu</link> as "Generate DROP script".
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-tables</entry>
+							<entry>
+								<para>
+									A comma separated list of tables, e.g. <literal>-tables=customer,invoice</literal>. The parameter
+                  supports specifying tables using wildcards <literal>-tables=cust%,inv%</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeCreate</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  By default <literal>WbGenerateDrop</literal> will also add the statements to re-create the foreign keys of the table(s).
+                  By specifying <literal>-includeCreate=false</literal> only the statements to drop the foreign key and to drop the
+                  table(s) will be created.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-onlyForeignkeys</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  When using <literal>-onlyForeignkeys=true</literal>, then only <literal>ALTER TABLE</literal>
+                  statements will be generate that will drop the foreign keys of all selected tables. No <literal>DROP TABLE</literal>
+                  and no statements to re-create the foreign keys will be generated. Setting this parameter to <literal>true</literal>
+                  implies <literal>-includeCreate=false</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sortByType</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  Usually the generated SQL script will be ordered by the type of statements. So first all statements
+                  to drop constraints will be listed, then the drop table statements, then the statements to re-create all foreign keys.
+                  When specifying <literal>-sortByType=false</literal>, then the script will be ordered by table: first
+                  all statements for the first table, then all statements for the second table and so on.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-outputFile</entry>
+							<entry>
+								<para>
+                  Defines the file into which all statements are written. If multiple tables are selected
+                  using the <literal>-tables</literal> parameter, all statements will be written into this
+                  file.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-outputDir</entry>
+							<entry>
+								<para>
+                  Specifies an output directory into which one script per selected table will be written.
+                  The script files are named <literal>drop_XXX.sql</literal>, where XXX is the name of
+                  the respective table. If this parameter is used, <literal>-outputFile</literal> is ignored.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+    <para>
+      If neither <literal>-outputFile</literal> nor <literal>-outputDir</literal> is specified, the output
+      is written to the message panel.
+    </para>
+  </section>
+
+  <section id="command-gen-fk-script">
+    <title>Generate SQL script for foreign key constraints - WbGenerateFKScript</title>
+    <para>
+      <literal>WbGenerateFKScript</literal> re-creates the foreign key constraints for the specified tables.
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-tables</entry>
+							<entry>
+								<para>
+                  The tables for which the foreign key constraints should be generated. This parameter accepts
+                  wildcards, e.g. <literal>-tables=*</literal>. To specify tables from multiple schemas, use
+                  <literal>-tables=order_mgmt.*, customer_mgmt.*</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-exclude</entry>
+							<entry>
+								<para>
+									A comma separated list of tables names to be excluded from the generated script.
+                  The parameter supports wildcards <literal>-exclude=foo*,bar*</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-file</entry>
+							<entry>
+								<para>
+                  Defines the output file into which all statements are written. If this is not specified, the
+                  generated SQL statements are shown in the message area.
+                  file.
+								</para>
+							</entry>
+						</row>
+            <row>
+							<entry>-encoding</entry>
+							<entry>
+								<para>The encoding to be used when writing the output file.
+								</para>
+							</entry>
+            </row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+  </section>
+
+  <section id="command-gen-imptable">
+    <title>Generate a table definition from an import file - WbGenerateImpTable</title>
+    <para>
+      <literal>WbGenerateImpTable</literal> analyzes an import file and generates a suitable <literal>CREATE TABLE</literal>
+      statement to create a table with a structure that matches the import file, so that the file can be
+      <link linkend="command-import">imported</link> into that table.
+    </para>
+    <para>
+      By default this command will only check the first 1000 lines of the input file, assuming that the values
+      are distributed evenly. If the data types for the columns do not reflect the real data, the sample
+      size needs to be increased.
+    </para>
+    <para>
+      The generated table definition is intended for a quick way to import the data and thus
+      the column definitions are likely to be not completely correct or optimal.
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"/>
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-file</entry>
+							<entry>
+                <para>
+                  Specifies the input file to be analyzed. The filename may contain wildcards. When specifying
+                  e.g.: <literal>-file=/temp/export/*.txt</literal> one table for each text file found in the directory
+                  <literal>/temp/export</literal> will be created.
+                </para>
+              </entry>
+						</row>
+						<row>
+							<entry>-lines</entry>
+							<entry>
+                <para>Defines the number of lines to analyze. The default is 1000 if this parameter is not specified</para>
+                <para>A value of 0 (zero) or less, results in parsing the entire file.</para>
+              </entry>
+						</row>
+						<row>
+							<entry>-type</entry>
+							<entry>
+                <para>Possible values: <literal>text</literal>, <literal>ods</literal>, <literal>xls</literal>, <literal>xlsx</literal></para>
+								<para>
+                  The type of the import file. The valid types are the same as for <link linkend="import-type">WbImport</link>.
+                  The <literal>XML</literal> type is not supported.
+								</para>
+                <para>
+                  To import spreadsheet files, the necessary additional libraries <link linkend="spreadsheet-import">must be installed</link>.
+                </para>
+							</entry>
+						</row>
+						<row>
+							<entry>-useVarchar</entry>
+							<entry>
+                <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+                <para>
+                  If enabled, all columns will be created as <literal>varchar</literal>.
+                </para>
+								<para>
+                  By default <literal>WbGenerateImpTable</literal> will try to create columns with a data type
+                  appropriate for the data found in the import file. If the input data is highly irregular
+                  or very skewed, creating all columns as <literal>varchar</literal> will make sure that
+                  all rows can be imported without any conversion error.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-delimiter</entry>
+							<entry><para>The <link linkend="import-text-delimiter">delimiter</link> for text files.</para></entry>
+						</row>
+						<row>
+							<entry>-quoteChar</entry>
+							<entry><para>The <link linkend="import-quote-char">quote character</link> for text files.</para></entry>
+						</row>
+						<row>
+							<entry>-encoding</entry>
+							<entry><para>The <link linkend="import-encoding">encoding</link> for text files.</para></entry>
+						</row>
+						<row>
+							<entry>-header</entry>
+							<entry><para>Specifies if the input file contains <link linkend="text-import-header">column headers</link>.</para></entry>
+						</row>
+            <row>
+              <entry>-dateFormat</entry>
+              <entry><para>The <link linkend="import-date-format">format</link> for date columns.</para></entry>
+            </row>
+            <row>
+              <entry>-timestampFormat</entry>
+              <entry><para>The <link linkend="import-timestamp-format">format</link> for timestamp columns in the input file.</para></entry>
+            </row>
+            <row>
+              <entry>-decimal</entry>
+              <entry><para>The character used as the <link linkend="text-import-decimal">decimal</link> separator.</para></entry>
+            </row>
+						<row>
+							<entry>-outputFile</entry>
+							<entry>
+								<para>
+                  By default the generated SQL statement is shown in the message area. If <literal>-outputFile</literal>
+                  is specified, the generated SQL statement will be written to that file.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-sheetNumber</entry>
+							<entry>
+                <para>
+                  If the input file is a spreadsheet, this parameter defines the <link linkend="import-sheetnumber">sheet number</link> to be analyzed.
+                  The first sheet has the number <literal>1</literal>.
+                </para>
+                <para>
+                  When specifying <literal>*</literal> for the sheet number a <literal>CREATE TABLE</literal> statement for every
+                  sheet will be created.
+                </para>
+              </entry>
+						</row>
+						<row>
+							<entry>-table</entry>
+							<entry><para>The table name to use (or create)</para></entry>
+						</row>
+						<row>
+							<entry>-runScript</entry>
+							<entry>
+  							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  By default, the <literal>CREATE TABLE</literal> statement is only generated and displayed. If <literal>-runScript=true</literal>
+                  is specified, the generated SQL script will be executed immediately.
+								</para>
+                <para>
+                  By default, this will display a dialog to confirm the execution the <literal>CREATE TABLE</literal> statement.
+                  This confirmation can be suppressed using the parameter <literal>-prompt=false</literal>. In this case
+                  the generated statement will be run directly.
+                </para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+  </section>
+
+  <section id="command-gendelete">
+    <title>Generate DELETE statements with dependencies - WbGenerateDelete</title>
+    <para>
+      The command <literal>WbGenerateDelete</literal> can be used to generate a SQL script for one or more rows
+      that should be deleted including all rows from referencing tables (if foreign key constraints are defined)
+    </para>
+    <para>
+      This is also available through the menu item <menuchoice><guimenu>Data</guimenu><guimenuitem>Generate delete script</guimenuitem></menuchoice>
+      which will generate the delete for the selected row(s) in the current result.
+    </para>
+    <para>
+      The command supports the following parameters.
+
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-table</entry>
+							<entry>
+								<para>
+                  Specifies the root table of the hierarchy from which to delete the rows.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-columnValue</entry>
+							<entry>
+								<para>
+                  Defines the expression for each PK column to select the rows to be deleted. The value for this parameter
+                  is the column name followed by a colon, followed by the value for this column or an expression.
+                </para>
+                <para>
+                  e.g.: <literal>-columnValue="person_id:42"</literal> will select rows where person_id has the value 42.
+                </para>
+                <para>
+                  You can also specify expressions instead: <literal>-columnValue="id:&lt;0"</literal> or <literal>-columnValue="id:in (1,2,3)"</literal>.
+                </para>
+                <para>
+                  For a multi-column primary key, specify the parameter multiple times:
+                  <literal>-columnValue="person_id:100" -columnValue="address_id:200"</literal>.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-includeCommit</entry>
+              <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+							<entry>
+								<para>
+                  If <literal>true</literal> a <literal>COMMIT</literal> statement will be appended
+                  to the generated script.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-outputFile</entry>
+							<entry>
+								<para>
+                  The file into which the generated statements should be written. If this is omitted, the
+                  statements are displayed in the message area.
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-appendFile</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  If <literal>true</literal>, the statements are appended to an existing file. Otherwise any existing file
+                  will be overwritten.
+								</para>
+							</entry>
+						</row>
+
+						<row>
+							<entry>-formatSql</entry>
+							<entry>
+                <para>Valid values: <literal>true</literal>, <literal>false</literal></para>
+								<para>
+                  If <literal>true</literal>, the generated SQL will be formatted using the SQL formatter.
+                  If <literal>false</literal> each statement will be written as a single line.
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+    </para>
+
+    <section id="gendelete-examples">
+      <para>
+        To generate a script that deletes the person with ID=42 and all rows referencing that person, use the following statement:
+<programlisting>WbGenerateDelete -table=person -columnValue="id:42";</programlisting>
+      </para>
+      <para>
+        To generate a script that deletes any person with an ID greater than 10 and all rows referencing those rows, use the following statement:
+<programlisting>WbGenerateDelete -table=person -columnValue="id: > 10";</programlisting>
+      </para>
+      <para>
+        To generate a script that deletes rows from the <literal>film_category</literal> where the primary key consists of
+        the columns <literal>film_id</literal> and <literal>category_id</literal>:
+<programlisting>WbGenerateDelete -table=person -columnValue="film_id: in (1,2,5)" -columnValue="category_id: in (7,3,5);</programlisting>
+      </para>
+
+    </section>
+  </section>
+
+
+
+</section>

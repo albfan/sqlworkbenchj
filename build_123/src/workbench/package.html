@@ -1,0 +1,10 @@
+<body>
+  <h1>A DBMS independent SQL Tool.</h1>
+  It can be used as a GUI SQL editor, a commandline SQL interface or in batch mode.<br/>
+  <br/>
+  The functionality offered by e.g. {@link workbench.sql.wbcommands.WbImport} or {@link workbench.sql.wbcommands.WbExport}
+  can be used through their respective backend classes e.g. {@link workbench.db.importer.DataImporter}.<br/>
+  <br/>
+  To use any of the Workbench classes inside another program, you have to call {@link workbench.WbManager#prepareForEmbedded()}. If you want
+  to use Log4J as the logging sub-system from your program, you have to set the systeem property <tt>workbench.log.log4j</tt> to true.
+</body>

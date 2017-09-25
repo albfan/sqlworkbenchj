@@ -1,0 +1,355 @@
+<section id="install">
+  <title>Installing and starting &wb-productname;</title>
+
+  <section id="install-prereq">
+    <title>Pre-requisites</title>
+
+    <para>
+      To run &wb-productname; a <ulink url="http://www.java.com/">Java 8 runtime environment</ulink>
+      or higher is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
+    </para>
+
+    <para>
+      &wb-productname; does not need a "fully installed" runtime environment, you can also copy
+      the <literal>jre</literal> directory from an existing Java installation or use the no-installer
+      packages from the Oracle home page
+    </para>
+
+    <para>
+      The "local" Java installation in the <literal>jre</literal> subdirectory will <emphasis role="bold">not</emphasis>
+      be used by the Windows&reg; launcher if a Java runtime has been installed and <emphasis>is registered</emphasis>
+      in the system (i.e. the Windows&reg; registry)
+    </para>
+
+    <para id="download-jre-zip">
+      If you cannot (or do not want to) do a regular installation of a Java 8 runtime, you can download
+      a ZIP distribution from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle's home page</ulink>.
+      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink>
+      you can download <literal>tar.gz</literal> archives for Windows&reg; and Linux (32bit and 64bit versions are available).
+    </para>
+
+    <para>
+      The archive just needs to be unpacked. Inside the archive the actual JRE is stored in a directory named e.g.
+      <literal>jre1.8.0_xx</literal> where <literal>xx</literal> is the build number of the Java runtime.
+      When moving this directory to the installation directory of &wb-productname; you have to rename it to <literal>jre</literal>
+      in order for the Windows&reg; launcher or the batch files to recognize it.
+    </para>
+
+    <para>
+      Maven central also offers ZIP archives of the Java runtime: <ulink url="http://maven.nuiton.org/nexus/content/repositories/jvm/com/oracle/jre/"/>
+    </para>
+  </section>
+
+  <section id="first-time-install">
+    <title>First time installation</title>
+
+    <para>
+      Once you have downloaded the application's distribution package, unzip the archive into a directory
+      of your choice. Apart from that, no special installation procedure is needed.
+    </para>
+
+    <para>
+      You will need to configure the necessary JDBC driver(s) for your database before you
+      can connect to a database. Please refer to the chapter <link linkend="jdbc-setup">JDBC Drivers</link>
+      for details on how to make the JDBC driver available to &wb-productname;
+    </para>
+
+    <para>
+      When starting &wb-productname; for the first time, it will create a directory
+      called <literal>.sqlworkbench</literal> in the current user's home folder to
+      store all its configuration information.
+    </para>
+
+    <para>
+      The "user's home directory" is <literal>$HOME</literal> on a Linux or Unix based system,
+      and <literal>%HOMEPATH%</literal> on a Windows&reg; system. (Technically speaking
+      it is using the contents of Java system property <literal>user.home</literal> to
+      find the user's home directory)
+    </para>
+
+  </section>
+
+  <section id="upgrade-install">
+    <title>Upgrade installation</title>
+    <para>
+      When upgrading to a newer version of &wb-productname; simply overwrite the old
+      <literal>sqlworkbench.jar</literal>, the <literal>exe</literal> files and shell scripts that
+      start the application. If you are using the bundle that includes the libraries for
+      reading and writing OpenOffice and Microsoft Office files, replace all existing <literal>jar</literal> files
+      with those from the distribution archive as well.
+    </para>
+  </section>
+
+  <section id="starting">
+    <title>Starting the program from the commandline</title>
+
+    <para>
+      sqlworkbench.jar is a self executing JAR file. This means, that if
+      your Java runtime is installed and registered with the system, a double click
+      on <literal>sqlworkbench.jar</literal> will execute the application. To run the application
+      manually use the command:
+    </para>
+
+    <programlisting>java -jar sqlworkbench.jar</programlisting>
+
+    <para>
+      Native executables for Windows&reg; and Mac OSX are supplied that start &wb-productname; by
+      using the default Java runtime installed on your system. Details on using
+      the <link linkend="launcher-using">Windows&reg; launcher</link> can be found
+      <link linkend="launcher-using">here</link>.
+    </para>
+
+  </section>
+
+  <section id="shell-using">
+    <title>Starting the program using the shell script</title>
+    <para>
+      To run &wb-productname; under an Unix-type operating system, the supplied shell script
+      <literal>sqlworkbench.sh</literal> can be used. For Linux desktops a sample ".desktop"
+      file is available.
+    </para>
+
+    <section id="jdk-shell">
+      <title>Specifying the Java runtime for the shell script</title>
+
+      <para>
+        The shell scripts (and the batch files) first check if a Java runtime is available in the sub-directory <literal>jre</literal>.
+        If that is available it will be used.
+      </para>
+      <para>
+        If no "local" Java runtime is found, the environment variable <literal>WORKBENCH_JDK</literal>
+        is checked. If that variable is defined and points to a Java runtime installation, the shell script will
+        use <literal>$WORKBENCH_JDK/bin/java</literal> to run the application.
+      </para>
+      <para>
+        If <literal>WORKBENCH_JDK</literal> is not defined, the shell script will check
+        for the environment variable <literal>JAVA_HOME</literal>. If that is defined, the script
+        will use <literal>$JAVA_HOME/bin/java</literal> to run the application.
+      </para>
+      <para>
+        If neither <literal>WORKBENCH_JDK</literal> nor <literal>JAVA_HOME</literal> is defined,
+        the shell script will simply use <literal>java</literal> to start the application,
+        assuming that a valid Java runtime is available on the path.
+      </para>
+      <para>
+        All parameters that are passed to the shell scripts are passed to the application, not to the
+        Java runtime. If you want to change the memory or other system settings for the JVM, you need to
+        edit the shell script.
+      </para>
+    </section>
+
+  </section>
+
+  <section id="launcher-using">
+    <title>Starting the program using the Windows&reg; launcher</title>
+    <indexterm><primary>Windows</primary><secondary>using the launcher</secondary></indexterm>
+    <indexterm><primary>Windows</primary><secondary>Java not found</secondary></indexterm>
+    <indexterm><primary>Starting</primary><secondary>Java runtime not found on Windows</secondary></indexterm>
+    <indexterm><primary>Java runtime</primary><secondary>Java not found on Windows</secondary></indexterm>
+
+    <para>
+      To start &wb-productname; on the Windows&reg; platform, the supplied <literal>SQLWorkbench.exe</literal> (32bit Windows)
+      or <literal>SQLWorkbench64.exe</literal> (64bit Windows) can be used to start the program when using an installed
+      Oracle Java runtime. The file <literal>sqlworkbench.jar</literal> has to be located in the same directory as the
+      exe files, otherwise it does not work.
+    </para>
+
+    <para>
+      &wb-productname; does not need a "fully installed" runtime environment, you can also copy
+      the <literal>jre</literal> directory from an existing Java installation.
+      Note that the "local" Java installation in the <literal>jre</literal> subdirectory will not be used by the Windows&reg; launcher
+      if a Java runtime has been installed and registered in the system.
+    </para>
+
+    <para>
+      If you cannot (or don't want to) do a regular installation of a Java 8 runtime, you can download
+      a ZIP distribution for Windows&reg; from Oracle's homepage: <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html"/>.
+      Under <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">"JRE Download"</ulink> there is also
+      an option to download a no-installer version. These downloads are offered as <literal>tar.gz</literal> archives, so a tool
+      that can handle Unix/Linux that format is needed for unpacking the archive (e.g.
+      <ulink url="http://www.ghisler.com/">TotalCommander</ulink> or <ulink url="http://www.7-zip.org/">7-Zip</ulink>).
+    </para>
+
+    <para>
+      When using a 32bit Java runtime the default memory available to the application is set to 1GB. When using a 64bit Java runtime
+      the default is set to 65% of the available physical memory.
+    </para>
+
+    <section id="launcher-parameters">
+      <title>Parameters for the Windows&reg; launcher</title>
+
+      <para id="launcher-ini-file">
+        Additional parameters to the Windows&reg; launcher can be defined in a <literal>INI</literal> file that needs to be created
+        in the directory where the <literal>.exe</literal> is located. The name of the <literal>INI</literal> has to match the
+        name of the used executable. To specify parameters for the 64bit executable, use <literal>SQLWorkbench64.ini</literal>.
+        To specify parameters for the 32bit executable, use <literal>SQLWorkbench.ini</literal>
+      </para>
+
+      <section id="launcher-jvm-location">
+        <title>Specifying the Java location</title>
+        <para>
+          The launcher executables are based on <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>, further documentation on
+          the format of the configuration file and parameters can also be found there.
+        </para>
+        <para>
+          If the launcher cannot find your installed Java runtime, you can specify the location of the JRE in the <link linkend="">INI</link> file
+          with the following parameter:
+        </para>
+
+        <programlisting>vm.location=c:\Program Files\Java\jdk8\jre\bin\server\jvm.dll</programlisting>
+        <para>
+          You need to specify the <emphasis role="bold">full path</emphasis> to the <literal>jvm.dll</literal>,
+          <emphasis role="bold">not</emphasis> the <emphasis>directory</emphasis> where the Java runtime is installed.
+          Note that the 32bit Java runtime has both a <literal>server\jvm.dll</literal> <emphasis>and</emphasis> <literal>client\jvm.dll</literal>
+          A 64bit Java runtime only has a <literal>server\jvm.dll</literal>.
+        </para>
+      </section>
+
+      <section id="launcher-memory-parameter">
+        <title>Defining the memory for the application</title>
+        <indexterm><primary>Memory problems</primary><secondary>Increasing the memory available for the application</secondary></indexterm>
+        <para>
+          The memory that is available to the Java runtime is defined through the parameter <literal>vm.heapsize.preferred</literal>
+          in the <literal>INI</literal> file. The unit is bytes. To start &wb-productname; with 12GB of available memory (which is only possible
+          on a 64bit system!) add the following line to the <literal>INI</literal> file:
+        </para>
+        <programlisting>vm.heapsize.preferred=12000</programlisting>
+        <para>
+          You can verify the available memory in the about dialog: <menuchoice>
+            <guimenu>Help</guimenu>
+            <guimenuitem>About</guimenuitem>
+          </menuchoice>
+        </para>
+      </section>
+    </section>
+  </section>
+
+
+  <section id="config-dir" xreflabel="Configuration files">
+    <title>Configuration directory</title>
+
+    <para>
+      The configuration directory is the directory where all config (<literal>workbench.settings</literal>,
+      <literal>WbProfiles.xml</literal>, <literal>WbDrivers.xml</literal>) files are stored.
+    </para>
+
+    <para>
+      If no configuration directory has been specified on the commandline,
+      &wb-productname; will identify the configuration directory by looking at the following places
+      <orderedlist>
+        <listitem><simpara>The current directory</simpara></listitem>
+        <listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
+        <listitem>
+          <simpara>
+            In the user's home direcotry
+            (e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
+            or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows&reg; systems)
+          </simpara></listitem>
+      </orderedlist>
+      If the file <literal>workbench.settings</literal> is found in one of those directories, that
+      directory is considered the configuration directory.
+    </para>
+    <para>
+      If no configuration directory can be identified, it will be created in the user's home directory (as <literal>.sqlworkbench</literal>).
+    </para>
+    <para>
+      The above mentioned search can be overridden by supplying the configuration directory
+      <link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
+    </para>
+
+    <para>The following files are stored in the configuration directory:
+      <itemizedlist>
+        <listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
+        <listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
+        <listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
+        <listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
+          If you did not customize any of the shortcuts, this file does not exist</simpara>
+        </listitem>
+        <listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
+        <listitem><simpara><link linkend="dbexp-options-remember-col-order">Saved column orders</link> from the DbExplorer(<filename>WbColumnOrder.xml</filename>)</simpara></listitem>
+        <listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
+        <listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
+        <listitem><simpara>The cache directory for the <link linkend="profile-local-completion-cache">code completion</link></simpara></listitem>
+      </itemizedlist>
+    </para>
+
+    <para>
+      If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
+      location of the profiles with the <literal>-profileStorage</literal> parameter on the command line.
+      Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
+      The different shortcuts can still use the same main configuration file.
+    </para>
+
+  </section>
+
+  <section id="move-installation">
+    <title>Copying an installation</title>
+
+    <para>
+      To copy an installation to a different computer, simply copy all the files from the configuration directory
+      to the other computer (the log file does not need to be copied).
+      When a profile is connected to a workspace, the workspace file should be specified
+      without a directory name (or using the <literal>%ConfigDir%</literal> placeholder).
+      In that case it is always loaded from the configuration directory.
+      If the workspace file is given with an absolute directory, this needs to be adjusted
+      after the copying the files.
+    </para>
+
+    <para>
+      You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
+      because the <emphasis>full path</emphasis> to the driver's jar file(s) is stored in the file.
+    </para>
+    <para>
+      If you store all JDBC drivers in a common directory (or below a common root directory)
+      you can define the <link linkend="settings-libdir">libdir variable</link>. In that case the paths to the
+      driver's jar file are stored relative to the <literal>%LibDir%</literal> directory.
+      After copying the installation you only need to adjust the <literal>%LibDir%</literal> variable
+      on the other computer.
+    </para>
+
+  </section>
+
+  <section id="install-increase-memory">
+    <title>Increasing the memory available to the application</title>
+    <para>
+      &wb-productname; is a Java application and thus runs inside a virtual machine (JVM).
+      The virtual machine limits the memory of the application independently from the installed
+      memory that is available to the operating system.
+    </para>
+
+    <para>
+      &wb-productname; reads <emphasis role="bold">all</emphasis> the data that is
+      returned by a SQL statement into memory. When retrieving large result sets, you might
+      get an error message, indicating that not enough memory is available. In this
+      case you need to increase the memory that the JVM requests from the operating
+      system (or change your statement to return fewer rows).
+    </para>
+
+    <para>
+      When using the Windows launcher (e.g. <literal>SQLWorkbench64.exe</literal>), the available memory is defined
+      in the <link linkend="launcher-memory-parameter">INI</link> file.
+    </para>
+
+    <para>
+      When using the shell or batch scripts, the available memory is defined through the <literal>-Xmx</literal>
+      parameter for the <literal>java</literal> command. In the following example, the parameter <literal>-Xmx4g</literal>
+      sets the available memory to 4GB
+    </para>
+    <para><programlisting>java -Xmx4g -jar sqlworkbench.jar</programlisting></para>
+
+    <para>
+      If you are using the supplied shell scripts to start &wb-productname;, you can
+      edit the scripts and change the value for the -Xmx parameter in there.
+    </para>
+
+    <para>
+      <note>
+        With a 32bit Java runtime, you can not use (or assign) more than approx. 1.5GB for the application. If you need
+        to process results that require more memory that that, you will have to use a 64bit Java runtime.
+      </note>
+    </para>
+
+
+  </section>
+
+</section>

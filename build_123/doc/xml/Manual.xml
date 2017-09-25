@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+					"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
+[
+	<!ENTITY wb-productname	"SQL Workbench/J">
+
+	<!ENTITY information SYSTEM "general-information.xml">
+	<!ENTITY license SYSTEM "license.xml">
+	<!ENTITY install SYSTEM "installation.xml">
+	<!ENTITY jdbc-setup SYSTEM "jdbc-setup.xml">
+	<!ENTITY profiles SYSTEM "profiles.xml">
+	<!ENTITY editor SYSTEM "editor.xml">
+	<!ENTITY bookmarks SYSTEM "bookmarks.xml">
+	<!ENTITY delimiter SYSTEM "delimiter.xml">
+	<!ENTITY using SYSTEM "using.xml">
+  <!ENTITY annotations SYSTEM "annotations.xml">
+	<!ENTITY macros SYSTEM "macros.xml">
+	<!ENTITY using-fk SYSTEM "foreign-keys.xml">
+	<!ENTITY scripting SYSTEM "scripting.xml">
+	<!ENTITY console-mode SYSTEM "console.xml">
+	<!ENTITY export-import SYSTEM "export-import.xml">
+	<!ENTITY wb-commands SYSTEM "wb-commands.xml">
+	<!ENTITY dbexplorer SYSTEM "dbexplorer.xml">
+	<!ENTITY db-tree SYSTEM "db-tree.xml">
+	<!ENTITY data-pumper SYSTEM "data-pumper.xml">
+	<!ENTITY options SYSTEM "options.xml">
+	<!ENTITY shortcuts SYSTEM "shortcuts.xml">
+	<!ENTITY settings SYSTEM "settings.xml">
+	<!ENTITY variables SYSTEM "script-variables.xml">
+	<!ENTITY problems SYSTEM "problems.xml">
+	<!ENTITY db-problems SYSTEM "db-problems.xml">
+	<!ENTITY wbexport SYSTEM "wbexport.xml">
+	<!ENTITY wbimport SYSTEM "wbimport.xml">
+	<!ENTITY comparedb SYSTEM "compare.xml">
+	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
+  <!ENTITY dbms-specific SYSTEM "dbms-specific.xml">
+	<!ENTITY progress-parameter SYSTEM "progress.xml">
+	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
+	<!ENTITY command-line SYSTEM "command-line.xml">
+	<!ENTITY common-xslt-args SYSTEM "common-xslt-args.xml">
+	<!ENTITY conditionals SYSTEM "conditionals.xml">
+  <!ENTITY table-statements SYSTEM "table-statements.xml">
+	<!ENTITY release-history SYSTEM "docbook-history.xml">
+	<!ENTITY connect-descriptor SYSTEM "connect-descriptor.xml">
+	<!ENTITY plain-profiles SYSTEM "plain-profiles.xml">
+	<!ENTITY workspaces SYSTEM "workspaces.xml">
+	<!ENTITY script-generation SYSTEM "script-generation.xml">
+	<!ENTITY wb-info-commands SYSTEM "wb-info-commands.xml">
+	<!ENTITY wb-grep-commands SYSTEM "wb-grep-commands.xml">
+	<!ENTITY wb-macro-commands SYSTEM "wb-macro-commands.xml">
+	<!ENTITY wb-var-commands SYSTEM "wb-var-commands.xml">
+]>
+
+<?xml-stylesheet href="html.css" type="text/css"?>
+<article lang="en">
+<title>&wb-productname; User's Manual</title>
+&information;
+&license;
+&release-history;
+&install;
+&command-line;
+&jdbc-setup;
+&profiles;
+&workspaces;
+&editor;
+&bookmarks;
+&delimiter;
+&using;
+&annotations;
+&macros;
+&using-fk;
+&dbms-specific;
+&variables;
+&scripting;
+&console-mode;
+&wbexport;
+&wbimport;
+&wbcopy;
+&comparedb;
+&wb-grep-commands;
+&script-generation;
+&wb-info-commands;
+&wb-macro-commands;
+&wb-var-commands;
+&wb-commands;
+&data-pumper;
+&dbexplorer;
+&db-tree;
+&problems;
+&db-problems;
+&options;
+&shortcuts;
+&settings;
+&plain-profiles;
+
+<?pagebreak?>
+<index/>
+
+</article>
