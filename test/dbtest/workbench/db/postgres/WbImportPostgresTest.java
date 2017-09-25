@@ -51,180 +51,178 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class WbImportPostgresTest
-	extends WbTestCase
+  extends WbTestCase
 {
 
-	private static final String TEST_ID = "wb_import_pg";
+  private static final String TEST_ID = "wb_import_pg";
 
-	public WbImportPostgresTest()
-	{
-		super(TEST_ID);
-	}
+  public WbImportPostgresTest()
+  {
+    super(TEST_ID);
+  }
 
+  @BeforeClass
+  public static void setUp()
+    throws Exception
+  {
+    PostgresTestUtil.initTestCase(TEST_ID);
+    WbConnection con = PostgresTestUtil.getPostgresConnection();
+    if (con == null) return;
 
-	@BeforeClass
-	public static void setUp()
-		throws Exception
-	{
-		PostgresTestUtil.initTestCase(TEST_ID);
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
+    TestUtil.executeScript(con,
+      "create table foo (id integer, firstname text, lastname text);\n" +
+      "create table xml_test (id integer, test_data xml);\n" +
+      "commit;\n");
+  }
 
-		TestUtil.executeScript(con,
-			"create table foo (id integer, firstname text, lastname text);\n" +
-			"create table xml_test (id integer, test_data xml);\n" +
-			"commit;\n");
-	}
+  @AfterClass
+  public static void tearDown()
+    throws Exception
+  {
+    PostgresTestUtil.cleanUpTestCase();
+  }
 
-	@AfterClass
-	public static void tearDown()
-		throws Exception
-	{
-		PostgresTestUtil.cleanUpTestCase();
-	}
+  @Test
+  public void testImportXML()
+    throws Exception
+  {
+    WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
-	@Test
-	public void testImportXML()
-		throws Exception
-	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		assertNotNull(con);
+    TestUtil util = getTestUtil();
+    WbImport cmd = new WbImport();
+    cmd.setConnection(con);
 
-		TestUtil util = getTestUtil();
-		WbImport cmd = new WbImport();
-		cmd.setConnection(con);
+    File data = new File(util.getBaseDir(), "foo.txt");
+    String content = "id|test_data\n" +
+      "1|<xml><person>Arthur Dent</person></xml>\n" +
+      "2|\n";
+    TestUtil.writeFile(data, content, "UTF-8");
+    StatementRunnerResult result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -emptyStringIsNull=true -table=xml_test -type=text -header=true -delimiter='|'");
+    assertTrue(result.getMessages().toString(), result.isSuccess());
+    Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from xml_test");
+    assertEquals(2, count.intValue());
 
-		File data = new File(util.getBaseDir(), "foo.txt");
-		String content = "id|test_data\n" +
-			"1|<xml><person>Arthur Dent</person></xml>\n" +
-			"2|\n";
-		TestUtil.writeFile(data, content, "UTF-8");
-		StatementRunnerResult result = cmd.execute("WbImport -file='" + data.getAbsolutePath() + "' -emptyStringIsNull=true -table=xml_test -type=text -header=true -delimiter='|'");
-		assertTrue(result.getMessages().toString(), result.isSuccess());
-		Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from xml_test");
-		assertEquals(2, count.intValue());
+    Object xml = TestUtil.getSingleQueryValue(con, "select test_data from xml_test where id=1");
+    assertNotNull(xml);
+    SQLXML xmlo = (SQLXML)xml;
+    assertEquals("<xml><person>Arthur Dent</person></xml>", xmlo.getString());
 
-		Object xml = TestUtil.getSingleQueryValue(con, "select test_data from xml_test where id=1");
-		assertNotNull(xml);
-		SQLXML xmlo = (SQLXML)xml;
-		assertEquals("<xml><person>Arthur Dent</person></xml>", xmlo.getString());
+    xml = TestUtil.getSingleQueryValue(con, "select test_data from xml_test where id=2");
+    assertNull(xml);
+  }
 
-		xml = TestUtil.getSingleQueryValue(con, "select test_data from xml_test where id=2");
-		assertNull(xml);
-	}
-
-	@Test
-	public void testImportCopyWithError()
-		throws Exception
-	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		assertNotNull(con);
+  @Test
+  public void testImportCopyWithError()
+    throws Exception
+  {
+    WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
     TestUtil.executeScript(con,
       "create table t1 (id integer, data text);\n" +
       "create table t2 (id integer, data text);\n" +
       "commit;");
 
-		TestUtil util = getTestUtil();
-		StatementRunner runner = util.createConnectedStatementRunner(con);
+    TestUtil util = getTestUtil();
+    StatementRunner runner = util.createConnectedStatementRunner(con);
 
-		String content = "id|data\n1|foo";
+    String content = "id|data\n1|foo";
 
-		File t1 = new File(util.getBaseDir(), "t1.txt");
-		TestUtil.writeFile(t1, content, "UTF-8");
+    File t1 = new File(util.getBaseDir(), "t1.txt");
+    TestUtil.writeFile(t1, content, "UTF-8");
 
     File t2 = new File(util.getBaseDir(), "t2.txt");
-		TestUtil.writeFile(t2, content, "UTF-8");
+    TestUtil.writeFile(t2, content, "UTF-8");
 
     File t3 = new File(util.getBaseDir(), "t3.txt");
-		TestUtil.writeFile(t3, content, "UTF-8");
+    TestUtil.writeFile(t3, content, "UTF-8");
 
     runner.runStatement("wbimport -usePgCopy -continueOnError=false -ignoreMissingColumns=true -sourceDir='" + util.getBaseDir() + "' -type=text -delimiter='|';");
-		StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.getResult();
 
 //    System.out.println(result.getMessages().toString());
-
     assertFalse(result.isSuccess());
 
-		int rows = TestUtil.getNumberValue(con, "select count(*) from t1");
-  	assertEquals(1, rows);
+    int rows = TestUtil.getNumberValue(con, "select count(*) from t1");
+    assertEquals(1, rows);
 
-		rows = TestUtil.getNumberValue(con, "select count(*) from t2");
-  	assertEquals(1, rows);
+    rows = TestUtil.getNumberValue(con, "select count(*) from t2");
+    assertEquals(1, rows);
   }
 
-	@Test
-	public void testImportCopy()
-		throws Exception
-	{
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		assertNotNull(con);
+  @Test
+  public void testImportCopy()
+    throws Exception
+  {
+    WbConnection con = PostgresTestUtil.getPostgresConnection();
+    assertNotNull(con);
 
-		TestUtil util = getTestUtil();
-		StatementRunner runner = util.createConnectedStatementRunner(con);
+    TestUtil util = getTestUtil();
+    StatementRunner runner = util.createConnectedStatementRunner(con);
 
-		File data = new File(util.getBaseDir(), "foo.txt");
-		String content = "id|firstname|lastname\n1|Arthur|Dent\n2|Ford|Prefect\n";
-		TestUtil.writeFile(data, content, "UTF-8");
+    File data = new File(util.getBaseDir(), "foo.txt");
+    String content = "id|firstname|lastname\n1|Arthur|Dent\n2|Ford|Prefect\n";
+    TestUtil.writeFile(data, content, "UTF-8");
 
-		runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
-		StatementRunnerResult result = runner.getResult();
+    runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
+    StatementRunnerResult result = runner.getResult();
 
-		String msg = result.getMessages().toString();
+    String msg = result.getMessages().toString();
 //		System.out.println(msg);
 
-		assertTrue(msg, result.isSuccess());
+    assertTrue(msg, result.isSuccess());
 
-		int rows = TestUtil.getNumberValue(con, "select count(*) from foo");
-  	assertEquals(2, rows);
+    int rows = TestUtil.getNumberValue(con, "select count(*) from foo");
+    assertEquals(2, rows);
 
-		content = "id\tfirstname\tlastname\n1\tArthur\tDent\n2\tFord\tPrefect\n";
-		TestUtil.writeFile(data, content, "UTF-8");
+    content = "id\tfirstname\tlastname\n1\tArthur\tDent\n2\tFord\tPrefect\n";
+    TestUtil.writeFile(data, content, "UTF-8");
 
-		runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
-		result = runner.getResult();
+    runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
+    result = runner.getResult();
 
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
+    Statement stmt = null;
+    ResultSet rs = null;
+    try
+    {
       stmt = con.createStatement();
-			rs = stmt.executeQuery("select id, firstname, lastname from foo");
-			rows = 0;
-			while (rs.next())
-			{
-				rows++;
-				int id = rs.getInt(1);
-				String fname = rs.getString(2);
-				String lname = rs.getString(3);
-				if (id == 1)
-				{
-					assertEquals("Arthur", fname);
-					assertEquals("Dent", lname);
-				}
-				else if (id == 2)
-				{
-					assertEquals("Ford", fname);
-					assertEquals("Prefect", lname);
-				}
-				else
-				{
-					fail("Incorrect id imported");
-				}
-			}
-			assertEquals(2, rows);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
+      rs = stmt.executeQuery("select id, firstname, lastname from foo");
+      rows = 0;
+      while (rs.next())
+      {
+        rows++;
+        int id = rs.getInt(1);
+        String fname = rs.getString(2);
+        String lname = rs.getString(3);
+        if (id == 1)
+        {
+          assertEquals("Arthur", fname);
+          assertEquals("Dent", lname);
+        }
+        else if (id == 2)
+        {
+          assertEquals("Ford", fname);
+          assertEquals("Prefect", lname);
+        }
+        else
+        {
+          fail("Incorrect id imported");
+        }
+      }
+      assertEquals(2, rows);
+    }
+    finally
+    {
+      SqlUtil.closeAll(rs, stmt);
+    }
 
-	}
+  }
 
-	@Test
-	public void testUpsert()
-		throws Exception
-	{
+  @Test
+  public void testUpsert()
+    throws Exception
+  {
 
     WbConnection connection = PostgresTestUtil.getPostgresConnection();
     assertNotNull(connection);
@@ -235,75 +233,75 @@ public class WbImportPostgresTest
       return;
     }
 
-		File input = new File(getTestUtil().getBaseDir(), "id_data.txt");
+    File input = new File(getTestUtil().getBaseDir(), "id_data.txt");
 
-  	WbImport importCmd = new WbImport();
+    WbImport importCmd = new WbImport();
     importCmd.setConnection(connection);
 
     TestUtil.executeScript(connection,
       "CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50));\n" +
       "commit;\n");
 
-		TestUtil.writeFile(input,
-			"id\tfirstname\tlastname\n" +
-			"1\tArthur\tDent\n" +
-			"2\tFord\tPrefect\n" +
-			"3\tZaphod\tBeeblebrox\n",
-			"ISO-8859-1");
+    TestUtil.writeFile(input,
+      "id\tfirstname\tlastname\n" +
+      "1\tArthur\tDent\n" +
+      "2\tFord\tPrefect\n" +
+      "3\tZaphod\tBeeblebrox\n",
+      "ISO-8859-1");
 
-		StatementRunnerResult result = importCmd.execute(
-			"wbimport -file='" + input.getAbsolutePath() + "' " +
-			"-type=text " +
-			"-header=true " +
-			"-continueonerror=false " +
-			"-table=person");
+    StatementRunnerResult result = importCmd.execute(
+      "wbimport -file='" + input.getAbsolutePath() + "' " +
+      "-type=text " +
+      "-header=true " +
+      "-continueonerror=false " +
+      "-table=person");
 
-		assertTrue(input.delete());
+    assertTrue(input.delete());
 
-		String msg = result.getMessages().toString();
-		assertTrue(msg, result.isSuccess());
+    String msg = result.getMessages().toString();
+    assertTrue(msg, result.isSuccess());
 
-		String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
-		assertEquals("Dent", name);
+    String name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+    assertEquals("Dent", name);
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
-		assertEquals("Prefect", name);
+    name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+    assertEquals("Prefect", name);
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
-		assertEquals("Beeblebrox", name);
+    name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+    assertEquals("Beeblebrox", name);
 
-		TestUtil.writeFile(input,
-			"id\tfirstname\tlastname\n" +
-			"1\tArthur\tDENT\n" +
-			"2\tFord\tPrefect\n" +
-			"4\tTricia\tMcMillan\n",
-			"ISO-8859-1");
+    TestUtil.writeFile(input,
+      "id\tfirstname\tlastname\n" +
+      "1\tArthur\tDENT\n" +
+      "2\tFord\tPrefect\n" +
+      "4\tTricia\tMcMillan\n",
+      "ISO-8859-1");
 
-		result = importCmd.execute(
-			"wbimport -file='" + input.getAbsolutePath() + "' " +
-			"-type=text " +
-			"-mode=upsert " +
-			"-header=true " +
+    result = importCmd.execute(
+      "wbimport -file='" + input.getAbsolutePath() + "' " +
+      "-type=text " +
+      "-mode=upsert " +
+      "-header=true " +
       "-useSavepoint=false " +
-			"-continueonerror=false " +
-			"-table=person");
+      "-continueonerror=false " +
+      "-table=person");
 
-		assertTrue(input.delete());
+    assertTrue(input.delete());
 
-		msg = result.getMessages().toString();
-		assertTrue(msg, result.isSuccess());
+    msg = result.getMessages().toString();
+    assertTrue(msg, result.isSuccess());
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
-		assertEquals("DENT", name);
+    name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=1");
+    assertEquals("DENT", name);
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
-		assertEquals("Prefect", name);
+    name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=2");
+    assertEquals("Prefect", name);
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
-		assertEquals("Beeblebrox", name);
+    name = (String)TestUtil.getSingleQueryValue(connection, "select lastname from person where id=3");
+    assertEquals("Beeblebrox", name);
 
-		name = (String)TestUtil.getSingleQueryValue(connection, "select firstname from person where id=4");
-		assertEquals("Tricia", name);
-	}
+    name = (String)TestUtil.getSingleQueryValue(connection, "select firstname from person where id=4");
+    assertEquals("Tricia", name);
+  }
 
 }

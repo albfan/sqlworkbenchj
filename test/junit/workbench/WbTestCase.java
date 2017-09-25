@@ -33,52 +33,52 @@ import java.io.IOException;
 @Ignore
 public class WbTestCase
 {
-	private String name;
-	private boolean prepared;
+  private String name;
+  private boolean prepared;
 
-	public WbTestCase()
-	{
-		name = "WbTestCase";
-		prepare();
-	}
+  public WbTestCase()
+  {
+    name = "WbTestCase";
+    prepare();
+  }
 
-	public WbTestCase(String testName)
-	{
-		name = testName;
-		prepare();
-	}
+  public WbTestCase(String testName)
+  {
+    name = testName;
+    prepare();
+  }
 
-	protected final void prepare()
-	{
-		System.setProperty("workbench.log.console", "false");
-		System.setProperty("workbench.dbmetadata.debugmetasql", "true");
-		getTestUtil();
-	}
+  protected final void prepare()
+  {
+    System.setProperty("workbench.log.console", "false");
+    System.setProperty("workbench.dbmetadata.debugmetasql", "true");
+    getTestUtil();
+  }
 
-	protected synchronized TestUtil getTestUtil()
-	{
-		TestUtil util = new TestUtil(getName());
-		if (prepared) return util;
+  protected synchronized TestUtil getTestUtil()
+  {
+    TestUtil util = new TestUtil(getName());
+    if (prepared) return util;
 
-		try
-		{
-			util.prepareEnvironment();
-			prepared = true;
-		}
-		catch (IOException io)
-		{
-			io.printStackTrace();
-		}
-		return util;
-	}
+    try
+    {
+      util.prepareEnvironment();
+      prepared = true;
+    }
+    catch (IOException io)
+    {
+      io.printStackTrace();
+    }
+    return util;
+  }
 
-	protected TestUtil getTestUtil(String method)
-	{
-		return new TestUtil(getName() + "_" + "method");
-	}
+  protected TestUtil getTestUtil(String method)
+  {
+    return new TestUtil(getName() + "_" + "method");
+  }
 
-	public String getName()
-	{
-		return name;
-	}
+  public String getName()
+  {
+    return name;
+  }
 }

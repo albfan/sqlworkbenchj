@@ -53,9 +53,9 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class EditorPanelTest
-	extends WbTestCase
+  extends WbTestCase
 {
-	private TestUtil util;
+  private TestUtil util;
 
   @Before
   public void check()
@@ -63,129 +63,130 @@ public class EditorPanelTest
     org.junit.Assume.assumeTrue(!GraphicsEnvironment.isHeadless());
   }
 
-	public EditorPanelTest()
-	{
-		super("EditorPanelTest");
-		util = getTestUtil();
-	}
+  public EditorPanelTest()
+  {
+    super("EditorPanelTest");
+    util = getTestUtil();
+  }
 
-	private int writeTestFile(File f, String nl)
-		throws IOException
-	{
-		int count = 100;
-		Writer w = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");
-		for (int i = 0; i < count; i++)
-		{
-			w.write("This is test line " + i);
-			w.write(nl);
-		}
-		w.close();
-		return count;
-	}
+  private int writeTestFile(File f, String nl)
+    throws IOException
+  {
+    int count = 100;
+    try (Writer w = new OutputStreamWriter(new FileOutputStream(f), "UTF-8"))
+    {
+      for (int i = 0; i < count; i++)
+      {
+        w.write("This is test line " + i);
+        w.write(nl);
+      }
+    }
+    return count;
+  }
 
-	public void testSaveFile()
-	{
-		String dir = util.getBaseDir();
-		try
-		{
-			Settings set = Settings.getInstance();
-			EditorPanel p = EditorPanel.createTextEditor();
+  public void testSaveFile()
+  {
+    String dir = util.getBaseDir();
+    try
+    {
+      Settings set = Settings.getInstance();
+      EditorPanel p = EditorPanel.createTextEditor();
 
-			set.setExternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
-			set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
+      set.setExternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
+      set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
 
-			ActionEvent evt = new ActionEvent(p,1,"break");
-			p.setAutoIndent(false);
-			p.appendLine("Line1");
+      ActionEvent evt = new ActionEvent(p, 1, "break");
+      p.setAutoIndent(false);
+      p.appendLine("Line1");
 
       ActionListener insert = new InputHandler.insert_break();
-			insert.actionPerformed(evt);
-			p.appendLine("Line2");
-			insert.actionPerformed(evt);
-			p.appendLine("Line3");
-			insert.actionPerformed(evt);
+      insert.actionPerformed(evt);
+      p.appendLine("Line2");
+      insert.actionPerformed(evt);
+      p.appendLine("Line3");
+      insert.actionPerformed(evt);
 
-			String content = p.getText();
-			int pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong internal line ending (DOS) used", 7, pos);
+      String content = p.getText();
+      int pos = content.indexOf("Line2\r\n");
+      assertEquals("Wrong internal line ending (DOS) used", 7, pos);
 
-			File f = new File(dir, "editor_unx.txt");
-			f.delete();
-			p.saveFile(f, "UTF-8", "\n");
+      File f = new File(dir, "editor_unx.txt");
+      f.delete();
+      p.saveFile(f, "UTF-8", "\n");
 
-			Reader r = EncodingUtil.createReader(f, "UTF-8");
-			content = FileUtil.readCharacters(r);
-			f.delete();
+      Reader r = EncodingUtil.createReader(f, "UTF-8");
+      content = FileUtil.readCharacters(r);
+      f.delete();
 
-			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong external line ending (Unix) used", 6, pos);
+      pos = content.indexOf("Line2\n");
+      assertEquals("Wrong external line ending (Unix) used", 6, pos);
 
-			set.setExternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
-			set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
+      set.setExternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
+      set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 
-			p = EditorPanel.createTextEditor();
-			evt = new ActionEvent(p,1,"break");
-			p.setAutoIndent(false);
-			p.appendLine("Line1");
-			insert.actionPerformed(evt);
-			p.appendLine("Line2");
-			insert.actionPerformed(evt);
-			p.appendLine("Line3");
-			insert.actionPerformed(evt);
+      p = EditorPanel.createTextEditor();
+      evt = new ActionEvent(p, 1, "break");
+      p.setAutoIndent(false);
+      p.appendLine("Line1");
+      insert.actionPerformed(evt);
+      p.appendLine("Line2");
+      insert.actionPerformed(evt);
+      p.appendLine("Line3");
+      insert.actionPerformed(evt);
 
-			content = p.getText();
-			System.out.println(StringUtil.escapeText(content, CharacterRange.RANGE_8BIT));
-			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong internal line ending (Unix) used", 6, pos);
+      content = p.getText();
+      System.out.println(StringUtil.escapeText(content, CharacterRange.RANGE_8BIT));
+      pos = content.indexOf("Line2\n");
+      assertEquals("Wrong internal line ending (Unix) used", 6, pos);
 
-			f = new File(dir, "editor_dos.txt");
-			f.delete();
-			p.saveFile(f, "UTF-8", "\r\n");
-			r = EncodingUtil.createReader(f, "UTF-8");
-			content = FileUtil.readCharacters(r);
+      f = new File(dir, "editor_dos.txt");
+      f.delete();
+      p.saveFile(f, "UTF-8", "\r\n");
+      r = EncodingUtil.createReader(f, "UTF-8");
+      content = FileUtil.readCharacters(r);
 
-			pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Error loading file");
-		}
-	}
+      pos = content.indexOf("Line2\r\n");
+      assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      fail("Error loading file");
+    }
+  }
 
-	@Test
-	public void testReadFile()
-	{
-		String dir = util.getBaseDir();
-		File f = new File(dir, "editor.txt");
+  @Test
+  public void testReadFile()
+  {
+    String dir = util.getBaseDir();
+    File f = new File(dir, "editor.txt");
 
-		try
-		{
-			Settings set = Settings.getInstance();
-			//set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
-			EditorPanel p = EditorPanel.createTextEditor();
-			int lines = writeTestFile(f, "\n");
+    try
+    {
+      Settings set = Settings.getInstance();
+      //set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
+      EditorPanel p = EditorPanel.createTextEditor();
+      int lines = writeTestFile(f, "\n");
 
-			p.readFile(f, "UTF-8");
-			assertEquals("File not loaded", true, p.hasFileLoaded());
-			assertEquals("Wrong line count", lines + 1, p.getLineCount());
+      p.readFile(f, "UTF-8");
+      assertEquals("File not loaded", true, p.hasFileLoaded());
+      assertEquals("Wrong line count", lines + 1, p.getLineCount());
 
-			p.dispose();
+      p.dispose();
 
-			set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
-			p = EditorPanel.createTextEditor();
-			lines = writeTestFile(f, "\r\n");
+      set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
+      p = EditorPanel.createTextEditor();
+      lines = writeTestFile(f, "\r\n");
 
-			p.readFile(f, "UTF-8");
-			assertEquals("File not loaded", true, p.hasFileLoaded());
-			assertEquals("Wrong line count", lines + 1, p.getLineCount());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Error loading file");
-		}
-	}
+      p.readFile(f, "UTF-8");
+      assertEquals("File not loaded", true, p.hasFileLoaded());
+      assertEquals("Wrong line count", lines + 1, p.getLineCount());
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      fail("Error loading file");
+    }
+  }
 
 }

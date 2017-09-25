@@ -181,7 +181,7 @@ WHERE id=42;</p>
       <h3>Prerequisites</h3>
       <p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
-        You have to install Java 8 or higher before you can run SQL Workbench/J.
+        You have to install Java 8 or higher to run SQL Workbench/J. 
       </p>
 
       <h3 style="padding-top:10px">Installation</h3>
@@ -439,6 +439,20 @@ WHERE id=42;</p>
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 122 (requires Java 8!)<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build12.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build122-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build122.zip">Source Code</a></li>
+          </ul>
+        </li>        
+        <li>Build 121 (requires Java 8!)<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build121.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build121-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build121.zip">Source Code</a></li>
+          </ul>
+        </li>        
         <li>Build 120 (requires Java 8!)<br/>
           <ul>
             <li><a href="archive/Workbench-Build120.zip">All Platforms</a></li>
