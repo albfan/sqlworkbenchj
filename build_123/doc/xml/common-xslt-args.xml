@@ -1,8 +1,0 @@
-<row>
-  <entry>-xsltParameter</entry>
-  <entry>
-    A list of parameters (key/value pairs) that should be passed to the XSLT processor. When using e.g. the <literal>wbreport2liquibase.xslt</literal>
-    stylesheet, the value of the <literal>author</literal> attribute can be set using <literal>-xsltParameter="authorName=42"</literal>. This parameter
-    can be provided multiple times for multiple parameters, e.g. when using <literal>wbreport2pg.xslt</literal>: <literal>-xsltParameter="makeLowerCase=42" -xsltParameter="useJdbcTypes=true"</literal>
-  </entry>
-</row>
