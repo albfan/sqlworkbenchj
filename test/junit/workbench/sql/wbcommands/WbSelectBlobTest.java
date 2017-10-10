@@ -70,24 +70,21 @@ public class WbSelectBlobTest
 
       File output = new File(util.getBaseDir(), "blob1.data");
       String sql = "-- write blobs to disk\n\n   wbselectblob data into '" + output.getAbsolutePath() + "' from blob_test where id = 1";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
       assertEquals("First blob not created", true, output.exists());
       assertEquals("Wrong file size", blob_1_size, output.length());
 
       output = new File(util.getBaseDir(), "blob2.data");
       sql = "-- write blobs to disk\n\n   wbselectblob data\n\n into '" + output.getAbsolutePath() + "'\n from blob_test where id = 2";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
       assertEquals("File not created", true, output.exists());
       assertEquals("Wrong file size", blob_2_size, output.length());
 
       output = new File(util.getBaseDir(), "blobs.data");
       sql = "-- write blobs to disk\n\n   wbselectblob data into '" + output.getAbsolutePath() + "' from blob_test";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
       assertEquals("File not created", true, output.exists());
 
@@ -96,8 +93,7 @@ public class WbSelectBlobTest
 
       runner.runStatement("delete from blob_test where id = 2");
       runner.runStatement("update blob_test set data = null where id = 1");
-      runner.runStatement("commit");
-      result = runner.getResult();
+      result = runner.runStatement("commit");
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       File newBlob = new File(util.getBaseDir(), "newblob.data");

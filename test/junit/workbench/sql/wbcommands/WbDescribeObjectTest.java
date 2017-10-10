@@ -70,13 +70,11 @@ public class WbDescribeObjectTest
     util.prepareEnvironment();
     StatementRunner runner = util.createConnectedStatementRunner();
     String sql = "create table describe_test (nr integer, info_text varchar(100));";
-    runner.runStatement(sql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(sql);
     assertEquals("Could not create table", true, result.isSuccess());
 
     sql = "-- show table definition\ndesc describe_test;";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     assertEquals("Describe failed", true, result.isSuccess());
 
     List<DataStore> data = result.getDataStores();
@@ -85,8 +83,7 @@ public class WbDescribeObjectTest
     assertEquals("Wrong number of rows returned", 2, data.get(0).getRowCount());
 
     sql = "-- show table definition\ndescribe \"DESCRIBE_TEST\"\n-- for table;";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     assertEquals("Describe failed", true, result.isSuccess());
 
     data = result.getDataStores();
@@ -97,8 +94,7 @@ public class WbDescribeObjectTest
     runner.runStatement("create index idx_nr on describe_test (nr);");
 
     sql = "describe describe_test;";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     assertEquals("Describe failed", true, result.isSuccess());
 
     data = result.getDataStores();

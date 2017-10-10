@@ -54,25 +54,21 @@ public class WbFeedbackTest
     WbFeedback echo = new WbFeedback("ECHO");
     runner.addCommand(echo);
     String sql = "--this is a test\n\techo\t    off";
-    runner.runStatement(sql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(sql);
     assertEquals("Echo command not run", true, result.isSuccess());
     assertEquals("Feedback not turned off", false, runner.getVerboseLogging());
 
     sql = "--this is a test\n\techo\t    on";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     assertEquals("Echo command not run", true, result.isSuccess());
     assertEquals("Feedback not turned off", true, runner.getVerboseLogging());
 
     sql = "--this is a test\n\techo\t    bla";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     assertEquals("Echo command did not report an error", false, result.isSuccess());
 
     sql = "--this is a test\n\techo";
-    runner.runStatement(sql);
-    result = runner.getResult();
+    result = runner.runStatement(sql);
     String msg = result.getMessages().toString().trim();
     String expected = ResourceMgr.getString("MsgFeedbackEnabled");
     assertEquals("Wrong message returned", expected, msg);

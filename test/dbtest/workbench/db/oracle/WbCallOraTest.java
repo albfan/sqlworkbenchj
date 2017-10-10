@@ -250,8 +250,7 @@ public class WbCallOraTest
 
 		StatementRunner runner = new StatementRunner();
     runner.setConnection(con);
-    runner.runStatement(sql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(sql);
     assertTrue(result.getMessages().toString(), result.isSuccess());
     List<DataStore> data = result.getDataStores();
     assertNotNull(data);

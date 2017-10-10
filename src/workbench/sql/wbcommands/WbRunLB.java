@@ -156,8 +156,7 @@ public class WbRunLB
 			{
 				String sql = statements.get(i);
 				rowMonitor.setCurrentRow(i, statements.size());
-				runner.runStatement(sql);
-				StatementRunnerResult stmtResult = runner.getResult();
+				StatementRunnerResult stmtResult = runner.runStatement(sql);
 				result.addMessage(stmtResult.getMessages());
 				result.addMessageNewLine();
 

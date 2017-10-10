@@ -56,9 +56,7 @@
         <xsl:with-param name="table" select="$table"/>
       </xsl:apply-templates>
 
-      <xsl:apply-templates select="drop-index">
-        <xsl:with-param name="table" select="$table"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates select="drop-index"/>
 
       <xsl:for-each select="table-constraints/drop-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
@@ -251,10 +249,7 @@
   </xsl:template>
 
   <xsl:template match="drop-index">
-    <xsl:param name="table"/>
-    <xsl:text>ALTER TABLE </xsl:text>
-    <xsl:value-of select="$table"/>
-    <xsl:text> DROP INDEX </xsl:text>
+    <xsl:text>DROP INDEX </xsl:text>
     <xsl:value-of select="."/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>

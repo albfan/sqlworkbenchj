@@ -200,7 +200,7 @@ public class OracleStatementHook
           int valueCol = getValueColIndex();
           int nameCol = getNameColIndex();
 
-          long rows = runner.getResult().getRowsProcessed();
+          long rows = result.getRowsProcessed();
           int row = stats.addRow();
           stats.setValue(row, nameCol, "rows processed");
           stats.setValue(row, valueCol, Long.valueOf(rows));

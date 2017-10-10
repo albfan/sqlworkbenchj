@@ -408,8 +408,7 @@ public class WbCopyTest
                  "       -syncDelete=true " +
                  "       -batchSize=10";
 
-    runner.runStatement(sql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(sql);
     assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
     ResultSet rs = stmt.executeQuery("select count(*) from target_data");
@@ -467,8 +466,7 @@ public class WbCopyTest
                  "       -syncDelete=true " +
                  "       -batchSize=10";
 
-    runner.runStatement(sql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(sql);
     assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
     ResultSet rs = stmt.executeQuery("select count(*) from target_data");
@@ -518,8 +516,7 @@ public class WbCopyTest
         "wbcopy -sourceTable=source_data " +
         "-targettable=target_data -createTarget=false";
 
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       ResultSet rs = stmt.executeQuery("select count(*) from target_data");
@@ -558,8 +555,7 @@ public class WbCopyTest
       con.commit();
 
       sql = "wbcopy -sourceTable=source_data -targettable=target_data -mode=update";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals("Copy not successful", true, result.isSuccess());
 
       rs = stmt.executeQuery("select lastname from target_data where nr = 4");
@@ -596,8 +592,7 @@ public class WbCopyTest
         "commit;");
 
       String sql = "wbcopy -sourceTable=source_data -targettable=target_data -createTarget=true -removeDefaults=true";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       Number count = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from target_data");
@@ -641,8 +636,7 @@ public class WbCopyTest
                   "-columns=lastname/nachname, firstname/vorname, nr/id "+
                   "-createTarget=true";
 
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       try (ResultSet rs = stmt.executeQuery("select count(*) from target_data"))

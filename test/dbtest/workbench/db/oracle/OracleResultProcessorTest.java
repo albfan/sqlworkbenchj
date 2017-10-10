@@ -29,7 +29,12 @@ import workbench.WbTestCase;
 
 import workbench.db.WbConnection;
 
+import workbench.storage.DataStore;
+
 import workbench.sql.DelimiterDefinition;
+import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
+import workbench.sql.commands.SelectCommand;
 
 import workbench.util.SqlUtil;
 
@@ -96,13 +101,18 @@ public class OracleResultProcessorTest
     try
     {
       stmt = con.createStatement();
-      rs = stmt.executeQuery("select get_numbers(1,5) from dual");
-      assertNotNull(rs);
-      ResultSetMetaData rsm = rs.getMetaData();
-      assertEquals(5,rsm.getColumnCount());
+
+      StatementRunner runner = new StatementRunner();
+      runner.setConnection(con);
+      StatementRunnerResult result = runner.runStatement("select get_numbers(1,5) from dual");
+      assertTrue(result.isSuccess());
+      assertEquals(1, result.getDataStores().size());
+      DataStore ds = result.getDataStores().get(0);
+      assertEquals(5, ds.getColumnCount());
+
       for (int i=0; i < 5; i++)
       {
-        assertEquals("COL_" + (i + 1), rsm.getColumnName(i+1));
+        assertEquals("COL_" + (i + 1), ds.getColumnName(i));
       }
     }
     finally

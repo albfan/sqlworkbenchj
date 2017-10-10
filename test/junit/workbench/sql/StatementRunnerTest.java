@@ -82,28 +82,23 @@ public class StatementRunnerTest
 
 			StatementRunnerResult result = null;
 
-			runner.runStatement("create table read_only_test (id integer, data varchar(100))");
-			result = runner.getResult();
+			result = runner.runStatement("create table read_only_test (id integer, data varchar(100))");
 			assertTrue(result.isSuccess());
 
-			runner.runStatement("insert into read_only_test (id, data) values (1, 'test')");
-			result = runner.getResult();
+			result = runner.runStatement("insert into read_only_test (id, data) values (1, 'test')");
 			assertTrue(result.isSuccess());
 
-			runner.runStatement("commit");
-			result = runner.getResult();
+			result = runner.runStatement("commit");
 			assertTrue(result.isSuccess());
 
 			boolean exists = con.getMetadata().tableExists(new TableIdentifier("read_only_test"));
 			assertTrue(exists);
 
 			con.getProfile().setReadOnly(true);
-			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
-			result = runner.getResult();
+			result = runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
 			assertTrue(result.hasWarning());
 
-			runner.runStatement("commit");
-			result = runner.getResult();
+			result = runner.runStatement("commit");
 			assertTrue(result.hasWarning());
 
 			Statement stmt = con.createStatement();
@@ -150,8 +145,7 @@ public class StatementRunnerTest
 			runner.setExecutionController(controller);
 
 			controllerCalled = false;
-			runner.runStatement("select count(*) from read_only_test");
-			result = runner.getResult();
+			result = runner.runStatement("select count(*) from read_only_test");
 			assertFalse(controllerCalled);
 			assertTrue(result.isSuccess());
 			assertTrue(result.hasDataStores());
@@ -160,15 +154,13 @@ public class StatementRunnerTest
 
 			controllerCalled = false;
 			confirmExecution = true;
-			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
-			result = runner.getResult();
+			result = runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
 			assertTrue(controllerCalled);
 			assertTrue(result.isSuccess());
 
 			controllerCalled = false;
 			confirmExecution = false;
-			runner.runStatement("insert into read_only_test (id, data) values (3, 'test')");
-			result = runner.getResult();
+			result = runner.runStatement("insert into read_only_test (id, data) values (3, 'test')");
 			assertTrue(controllerCalled);
 			assertTrue(result.hasWarning());
 

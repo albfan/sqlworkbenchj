@@ -875,13 +875,11 @@ public class BatchRunner
 				}
 
 				long verbstart = System.currentTimeMillis();
-				this.stmtRunner.runStatement(sql);
+				StatementRunnerResult result = this.stmtRunner.runStatement(sql);
 				long verbend = System.currentTimeMillis();
 				this.stmtRunner.statementDone();
 
 				status = ExecutionStatus.Success;
-
-				StatementRunnerResult result = this.stmtRunner.getResult();
 
 				if (result != null)
 				{

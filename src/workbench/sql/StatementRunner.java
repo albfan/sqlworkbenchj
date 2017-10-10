@@ -80,7 +80,6 @@ public class StatementRunner
 	private WbConnection mainConnection;
 
 	private WbConnection currentConnection;
-	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
 	private StatementHook statementHook = StatementHookFactory.DEFAULT_HOOK;
@@ -431,11 +430,6 @@ public class StatementRunner
     }
 	}
 
-	public StatementRunnerResult getResult()
-	{
-		return this.result;
-	}
-
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
 		this.rowMonitor = monitor;
@@ -451,22 +445,19 @@ public class StatementRunner
 		return this.cmdMapper.getCommandToUse(sql);
 	}
 
-	public void runStatement(String aSql)
+	public StatementRunnerResult runStatement(String aSql)
 		throws SQLException, Exception
 	{
-		if (this.result != null)
-		{
-			this.result.clear();
-		}
+    StatementRunnerResult result = null;
 
 		if (this.prompter != null)
 		{
 			boolean goOn = this.prompter.processParameterPrompts(aSql);
 			if (!goOn)
 			{
-				this.result = new StatementRunnerResult(aSql);
-				this.result.setPromptingWasCancelled();
-				return;
+				result = new StatementRunnerResult(aSql);
+				result.setPromptingWasCancelled();
+				return result;
 			}
 		}
 
@@ -474,8 +465,7 @@ public class StatementRunner
 
 		if (this.currentCommand == null)
 		{
-			this.result = null;
-			return;
+			return null;
 		}
 
 		if (!this.currentCommand.isModeSupported(WbManager.getInstance().getRunMode()))
@@ -483,7 +473,7 @@ public class StatementRunner
 			result = new StatementRunnerResult();
 			result.setSuccess();
 			LogMgr.logWarning("StatementRunner.runStatement()", currentCommand.getVerb() + " not supported in mode " + WbManager.getInstance().getRunMode().toString() + ". The statement has been ignored.");
-			return;
+			return result;
 		}
 
 		if (this.currentConnection == null && this.currentCommand.isConnectionRequired())
@@ -539,13 +529,13 @@ public class StatementRunner
 		{
 			ConnectionProfile target = currentCommand.getModificationTarget(currentConnection, aSql);
 			String profileName = (target == null ? "" : target.getName());
-			this.result = new StatementRunnerResult();
+			result = new StatementRunnerResult();
 			String verb = SqlParsingUtil.getInstance(currentConnection).getSqlVerb(aSql);
 			String msg = ResourceMgr.getFormattedString("MsgReadOnlyMode", profileName, verb);
 			LogMgr.logWarning("DefaultStatementRunner.runStatement()", "Statement " + verb + " ignored because connection is set to read only!");
-			this.result.addWarning(msg);
-			this.result.setSuccess();
-			return;
+			result.addWarning(msg);
+			result.setSuccess();
+			return result;
 		}
 
 		if (controller != null && currentCommand.needConfirmation(currentConnection, realSql))
@@ -553,11 +543,11 @@ public class StatementRunner
 			boolean doExecute = this.controller.confirmStatementExecution(realSql);
 			if (!doExecute)
 			{
-				this.result = new StatementRunnerResult();
+				result = new StatementRunnerResult();
 				String msg = ResourceMgr.getString("MsgStatementCancelled");
-				this.result.addWarning(msg);
-        this.result.setSuccess();
-				return;
+				result.addWarning(msg);
+        result.setSuccess();
+				return result;
 			}
 		}
 
@@ -577,11 +567,11 @@ public class StatementRunner
 		if (realSql == null)
 		{
 			// this can happen when the statement hook signalled to not execute the statement
-			this.result = new StatementRunnerResult();
+			result = new StatementRunnerResult();
 		}
 		else
 		{
-			this.result = this.currentCommand.execute(realSql);
+			result = this.currentCommand.execute(realSql);
 		}
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
@@ -590,7 +580,7 @@ public class StatementRunner
 		}
 		else if (this.batchCommand != null && this.currentCommand instanceof WbEndBatch)
 		{
-			this.result = this.batchCommand.executeBatch();
+			result = this.batchCommand.executeBatch();
 		}
 
     if (annotations.contains(removeEmpty))
@@ -616,6 +606,7 @@ public class StatementRunner
 		{
 			logStatement(realSql, time, currentConnection);
 		}
+    return result;
 	}
 
 	private void processCrossTab(StatementRunnerResult result, WbAnnotation annotation)
@@ -759,9 +750,7 @@ public class StatementRunner
 
 	public void abort()
 	{
-		if (this.result != null) this.result.clear();
     endReadOnlyTransaction();
-		this.result = null;
 		this.savepoint = null;
 		this.currentCommand = null;
 		this.currentConsumer = null;
@@ -777,9 +766,7 @@ public class StatementRunner
 	{
 		synchronized (this)
 		{
-			if (this.result != null) this.result.clear();
       endReadOnlyTransaction();
-			this.result = null;
 			this.releaseSavepoint();
 			this.currentConsumer = null;
 			this.restoreMainConnection();

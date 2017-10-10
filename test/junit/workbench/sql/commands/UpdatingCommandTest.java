@@ -100,8 +100,7 @@ public class UpdatingCommandTest
 			out.close();
 
 			String sql = "-- read blob from file\ninsert into blob_test(nr, blob_data)\nvalues\n(1,{$blobfile='" + blobFile.getName() + "'})";
-			runner.runStatement(sql);
-			StatementRunnerResult result = runner.getResult();
+			StatementRunnerResult result = runner.runStatement(sql);
 			if (!result.isSuccess()) System.out.println(result.getMessages().toString());
 			assertEquals("Insert not executed", true, result.isSuccess());
 
@@ -159,8 +158,7 @@ public class UpdatingCommandTest
 			w.close();
 
 			String sql = "-- read clob from file\ninsert into clob_test(nr, clob_data)\nvalues\n(1,{$clobfile='" + clobFile.getName() + "' encoding='UTF-8'})";
-			runner.runStatement(sql);
-			StatementRunnerResult result = runner.getResult();
+			StatementRunnerResult result = runner.runStatement(sql);
 			if (!result.isSuccess()) System.out.println(result.getMessages().toString());
 			assertEquals("Insert not executed", true, result.isSuccess());
 			assertEquals(1, result.getTotalUpdateCount());
@@ -201,8 +199,7 @@ public class UpdatingCommandTest
 			stmt.close();
 
 			String sql = "-- udpate one row\nupdate update_test set some_data = 'THREE' where nr = 3";
-			runner.runStatement(sql);
-			StatementRunnerResult result = runner.getResult();
+			StatementRunnerResult result = runner.runStatement(sql);
 			if (!result.isSuccess()) System.out.println(result.getMessages().toString());
 			assertEquals("Update not executed", true, result.isSuccess());
 			assertEquals(1, result.getTotalUpdateCount());

@@ -138,8 +138,7 @@ public class WbImportPostgresTest
     File t3 = new File(util.getBaseDir(), "t3.txt");
     TestUtil.writeFile(t3, content, "UTF-8");
 
-    runner.runStatement("wbimport -usePgCopy -continueOnError=false -ignoreMissingColumns=true -sourceDir='" + util.getBaseDir() + "' -type=text -delimiter='|';");
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement("wbimport -usePgCopy -continueOnError=false -ignoreMissingColumns=true -sourceDir='" + util.getBaseDir() + "' -type=text -delimiter='|';");
 
 //    System.out.println(result.getMessages().toString());
     assertFalse(result.isSuccess());
@@ -165,8 +164,7 @@ public class WbImportPostgresTest
     String content = "id|firstname|lastname\n1|Arthur|Dent\n2|Ford|Prefect\n";
     TestUtil.writeFile(data, content, "UTF-8");
 
-    runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement("WbImport -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='|' -usePgCopy");
 
     String msg = result.getMessages().toString();
 //		System.out.println(msg);
@@ -179,8 +177,7 @@ public class WbImportPostgresTest
     content = "id\tfirstname\tlastname\n1\tArthur\tDent\n2\tFord\tPrefect\n";
     TestUtil.writeFile(data, content, "UTF-8");
 
-    runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
-    result = runner.getResult();
+    result = runner.runStatement("WbImport -truncateTable=true -file='" + data.getAbsolutePath() + "' -table=foo -type=text -header=true -delimiter='\\t' -usePgCopy");
 
     Statement stmt = null;
     ResultSet rs = null;

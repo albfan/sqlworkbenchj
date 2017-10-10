@@ -65,8 +65,7 @@ public class SelectCommandTest
 		);
 
 		String sql = "select * from person order by id;";
-		runner.runStatement(sql);
-		StatementRunnerResult result = runner.getResult();
+		StatementRunnerResult result = runner.runStatement(sql);
 		assertTrue(result.isSuccess());
 		assertTrue(result.hasDataStores());
 		List<DataStore> data = result.getDataStores();

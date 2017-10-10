@@ -359,7 +359,7 @@ public class SqlCommand
    */
   protected boolean appendWarnings(StatementRunnerResult result, boolean addLabel)
   {
-    if (this.runner.getHideWarnings()) return false;
+    if (this.runner == null || this.runner.getHideWarnings()) return false;
 
     CharSequence warn = SqlUtil.getWarnings(this.currentConnection, this.currentStatement);
     if (warn == null || warn.length() == 0) return false;

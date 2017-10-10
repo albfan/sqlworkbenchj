@@ -889,8 +889,7 @@ public class DwPanel
 
 			this.stmtRunner.setMaxRows(max);
 			this.stmtRunner.setQueryTimeout(timeout);
-			this.stmtRunner.runStatement(aSql);
-			StatementRunnerResult result = this.stmtRunner.getResult();
+			StatementRunnerResult result = this.stmtRunner.runStatement(aSql);
 
 			if (result != null)
 			{

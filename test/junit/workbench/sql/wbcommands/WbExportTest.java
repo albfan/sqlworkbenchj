@@ -670,8 +670,7 @@ public class WbExportTest
     File exportFile = new File(this.basedir, "blob_data.txt");
 
     StatementRunner runner = util.createConnectedStatementRunner(connection);
-    runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=base64;");
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=base64;");
 //    System.out.println("**************\n" + result.getMessages().toString() + "\n**************");
     assertTrue(result.isSuccess());
     assertEquals("No export file created", true, exportFile.exists());
@@ -683,8 +682,7 @@ public class WbExportTest
     assertTrue(lines.get(2).startsWith("2\tiVBORw0KGgoAAAANSUhEUgAAAaMAAAEeCAIAAACoo+0IAAAb+UlEQVR4Xu3dP5PkxnnH8cbVLgK69C7kSIFCpQoVOnDs8AKZAYMNmOk2U3ABA5oq72tQ4NDFiKHl4MqsMi84yy"));
     runner.done();
 
-    runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=ansi;");
-    result = runner.getResult();
+    result = runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=ansi;");
 //    System.out.println("**************\n" + result.getMessages().toString() + "\n**************");
     assertTrue(result.isSuccess());
     assertEquals("No export file created", true, exportFile.exists());
@@ -705,8 +703,7 @@ public class WbExportTest
     File exportFile = new File(this.basedir, "blob_ext.txt");
 
     StatementRunner runner = util.createConnectedStatementRunner(connection);
-    runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
 //    System.out.println("**************\n" + result.getMessages().toString() + "\n**************");
     runner.runStatement("select  \n" +
            "   case \n" +

@@ -99,15 +99,13 @@ public class AutotraceTest
 			StatementHook hook = runner.getStatementHook();
 			assertTrue(hook instanceof OracleStatementHook);
 
-			runner.runStatement("set autotrace on");
-			StatementRunnerResult result = runner.getResult();
+			StatementRunnerResult result = runner.runStatement("set autotrace on");
 			assertTrue(result.isSuccess());
 			String attr = runner.getSessionAttribute("autotrace");
 			assertNotNull(attr);
 			assertEquals("on", attr);
 
-			runner.runStatement("select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("select id, some_data from some_table order by id");
 			List<DataStore> data = result.getDataStores();
 			assertEquals(3, data.size());
 
@@ -143,16 +141,14 @@ public class AutotraceTest
 			assertEquals("Execution plan", data.get(2).getResultName());
 
 			runner.runStatement("set autotrace traceonly");
-			runner.runStatement("select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("select id, some_data from some_table order by id");
 			data = result.getDataStores();
 			assertEquals(2, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());
 			assertEquals("Execution plan", data.get(1).getResultName());
 
 			runner.runStatement("set autotrace on statistics");
-			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
 			data = result.getDataStores();
 			assertEquals(2, data.size());
 			assertEquals("tabledata", data.get(0).getResultName());
@@ -165,8 +161,7 @@ public class AutotraceTest
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace traceonly statistics");
-			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
 			data = result.getDataStores();
 			assertEquals(1, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());
@@ -177,16 +172,14 @@ public class AutotraceTest
 			assertEquals(2, rows);
 
 			runner.runStatement("set autotrace on explain");
-			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
 			data = result.getDataStores();
 			assertEquals(2, data.size());
 			assertEquals("tabledata", data.get(0).getResultName());
 			assertEquals("Execution plan", data.get(1).getResultName());
 
 			runner.runStatement("set autotrace traceonly statistics realplan");
-			runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
-			result = runner.getResult();
+			result = runner.runStatement("--@wbresult tabledata\n select id, some_data from some_table order by id");
 			data = result.getDataStores();
 			assertEquals(2, data.size());
 			assertEquals("Statistics", data.get(0).getResultName());

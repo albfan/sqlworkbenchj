@@ -73,7 +73,7 @@ public class WbDataDiffTest
   {
     getTestUtil().emptyBaseDirectory();
   }
-  
+
   @Test
   public void testIsConnectionRequired()
   {
@@ -134,9 +134,8 @@ public class WbDataDiffTest
         " -alternateKey='some_data=code' -ignoreColumns='foo,bar' "  +
         " -singleFile=true " +
         " -file=sync_ex.sql -encoding=UTF8";
-      runner.runStatement(sql);
+      StatementRunnerResult result = runner.runStatement(sql);
 
-      StatementRunnerResult result = runner.getResult();
       assertTrue(result.getMessages().toString(), result.isSuccess());
 
       WbFile main = new WbFile(util.getBaseDir(), "sync_ex.sql");
@@ -162,9 +161,8 @@ public class WbDataDiffTest
         " -singleFile=true " +
         " -excludeIgnored=true " +
         " -file=sync_ex.sql -encoding=UTF8";
-      runner.runStatement(sql);
+      result = runner.runStatement(sql);
 
-      result = runner.getResult();
       assertTrue(result.getMessages().toString(), result.isSuccess());
       diffScript = FileUtil.readFile(main, "UTF-8");
       parser = new ScriptParser(diffScript);
@@ -486,8 +484,8 @@ public class WbDataDiffTest
       util.emptyBaseDirectory();
 
       String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -file=sync.sql -encoding=UTF8";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
+
       assertTrue(result.isSuccess());
       assertTrue(result.hasWarning());
       CharSequence msg = result.getMessages();
@@ -496,8 +494,8 @@ public class WbDataDiffTest
 
       util.emptyBaseDirectory();
       sql = "WbDataDiff -referenceProfile=dataDiffTarget -targetProfile=dataDiffSource -file=sync.sql -encoding=UTF8";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
+
       assertTrue(result.isSuccess());
       assertFalse(result.hasWarning());
       msg = result.getMessages();
@@ -538,8 +536,8 @@ public class WbDataDiffTest
       util.emptyBaseDirectory();
 
       String sql = "WbDataDiff -alternateKey='person=\"NickName\"' -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -file=sync.sql -encoding=UTF8";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
+
       String msg = result.getMessages().toString();
       assertTrue(msg, result.isSuccess());
 
@@ -637,8 +635,7 @@ public class WbDataDiffTest
       StatementRunner runner = new StatementRunner();
       runner.setBaseDir(util.getBaseDir());
       String sql = "WbDataDiff -includeDelete=true -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -referenceSchema=difftest -targetSchema=difftest -referenceTables=person -file=sync.sql -encoding=UTF8";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertTrue(result.getMessages().toString(), result.isSuccess());
 
       String[] expectedFiles = new String[]

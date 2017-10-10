@@ -81,8 +81,7 @@ public class WbIncludeTest
 
       String sql = "WbInclude -ifDefined=foobar -file='" + scriptFile.getAbsolutePath() + "'";
 
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       Number cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
@@ -90,8 +89,7 @@ public class WbIncludeTest
       assertEquals(0, count);
 
       VariablePool.getInstance().setParameterValue("foobar", "test");
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
@@ -104,8 +102,7 @@ public class WbIncludeTest
 
       VariablePool.getInstance().setParameterValue("debug", "false");
       sql = "WbInclude -ifEquals='debug=true' -file='" + scriptFile.getAbsolutePath() + "'";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
@@ -114,8 +111,7 @@ public class WbIncludeTest
 
       VariablePool.getInstance().setParameterValue("debug", "foobar");
       sql = "WbInclude -ifEquals='debug=foobar' -file='" + scriptFile.getAbsolutePath() + "'";
-      runner.runStatement(sql);
-      result = runner.getResult();
+      result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       cnt = (Number)TestUtil.getSingleQueryValue(con, "select count(*) from include_test");
@@ -153,8 +149,7 @@ public class WbIncludeTest
 
       String sql = "WbInclude -file='" + util.getBaseDir() + "/test*.sql'";
 
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals(result.getMessages().toString(), true, result.isSuccess());
 
       int count = TestUtil.getNumberValue(con, "select count(*) from include_test");
@@ -186,8 +181,7 @@ public class WbIncludeTest
         "commit;\n", encoding);
 
       String sql = "-- comment\n\n@test.sql\n";
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals("Statement not executed", true, result.isSuccess());
 
       int count = TestUtil.getNumberValue(con, "select count(*) from include_test");
@@ -205,8 +199,7 @@ public class WbIncludeTest
   {
     try
     {
-      runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql");
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql");
       assertFalse("Runner was successful", result.isSuccess());
       String msg = result.getMessages().toString();
       assertTrue("Wrong error", msg.indexOf("not found") > -1);
@@ -247,8 +240,7 @@ public class WbIncludeTest
         "commit;\n" +
         "@./" + subdir1.getName() + "/" + include1.getName() + "\n", encoding);
 
-      runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n");
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n");
       assertEquals("Runner not successful", true, result.isSuccess());
 
       DataStore ds = TestUtil.getQueryResult(con, "select file_name from include_test order by id");

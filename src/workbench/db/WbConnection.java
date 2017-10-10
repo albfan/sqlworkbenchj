@@ -558,8 +558,7 @@ public class WbConnection
 
         try
         {
-          runner.runStatement(command);
-          StatementRunnerResult result = runner.getResult();
+          StatementRunnerResult result = runner.runStatement(command);
           String msg = ResourceMgr.getString(resKey) + " " + stmtSql;
           messages.append(msg);
           LogMgr.logDebug("WbConnection.runConnectScript()", "  (" + getId() + ") Executed statement: " + stmtSql);

@@ -141,8 +141,7 @@ public class PgCopyImporterTest
     parser.setScript(sql);
     int size = parser.getSize();
     assertEquals(2, size);
-    runner.runStatement(parser.getCommand(0));
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(parser.getCommand(0));
     assertTrue(result.getMessages().toString(), result.isSuccess());
     assertEquals(2, result.getTotalUpdateCount());
     runner.runStatement(parser.getCommand(1));

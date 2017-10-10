@@ -72,12 +72,10 @@ extends WbTestCase
 
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
 
-		runner.runStatement("create procedure nocando as begin null end;");
-		StatementRunnerResult result = runner.getResult();
+		StatementRunnerResult result = runner.runStatement("create procedure nocando as begin null end;");
 
 		assertFalse(result.isSuccess());
-		runner.runStatement("show errors nocando");
-		result = runner.getResult();
+		result = runner.runStatement("show errors nocando");
 		assertTrue(result.isSuccess());
 		String msg = result.getMessages().toString();
 //		System.out.println(msg);

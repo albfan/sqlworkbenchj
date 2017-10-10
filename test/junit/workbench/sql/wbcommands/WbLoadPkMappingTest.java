@@ -77,8 +77,7 @@ public class WbLoadPkMappingTest
       String sql = "-- load mapping from a file \n     " + WbLoadPkMapping.VERB + "\n -file='" + f.getAbsolutePath() + "'";
       SqlCommand command = runner.getCommandToUse(sql);
       assertTrue(command instanceof WbLoadPkMapping);
-      runner.runStatement(sql);
-      StatementRunnerResult result = runner.getResult();
+      StatementRunnerResult result = runner.runStatement(sql);
       assertEquals("Loading not successful", true, result.isSuccess());
 
       Map mapping = PkMapping.getInstance().getMapping();

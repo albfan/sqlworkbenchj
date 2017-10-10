@@ -110,8 +110,7 @@ public class SqlCommandPostgresTest
 		String sql = "select * from person order by id;";
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
 
-		runner.runStatement(sql);
-		StatementRunnerResult result = runner.getResult();
+		StatementRunnerResult result = runner.runStatement(sql);
 
 		assertTrue(result.isSuccess());
 		assertTrue(result.hasDataStores());
@@ -140,8 +139,7 @@ public class SqlCommandPostgresTest
 
 		StatementRunner runner = getTestUtil().createConnectedStatementRunner(con);
 
-		runner.runStatement(sql);
-		StatementRunnerResult result = runner.getResult();
+		StatementRunnerResult result = runner.runStatement(sql);
 
 		assertTrue(result.getMessages().toString(), result.isSuccess());
 

@@ -3430,8 +3430,7 @@ public class SqlPanel
 					highlighter.highlightStatement(scriptParser, i, selectionOffset);
 				}
 
-				stmtRunner.runStatement(currentSql);
-				statementResult = this.stmtRunner.getResult();
+				statementResult = stmtRunner.runStatement(currentSql);
 
 				if (statementResult == null) continue;
         ignoreUpdateCounts = ignoreUpdateCounts && statementResult.isIgnoreUpdateCount();

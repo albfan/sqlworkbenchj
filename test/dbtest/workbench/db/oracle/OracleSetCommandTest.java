@@ -71,17 +71,15 @@ public class OracleSetCommandTest
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(con);
-		runner.runStatement("set serveroutput on");
+		StatementRunnerResult result = runner.runStatement("set serveroutput on");
 
-		StatementRunnerResult result = runner.getResult();
 		assertTrue(result.isSuccess());
 
-		runner.runStatement(
+		result = runner.runStatement(
 			"begin \n" +
 			"  dbms_output.put_line('Hello, World'); \n" +
 			"end;\n");
 
-		result = runner.getResult();
 		String msg = result.getMessages().toString();
 		assertTrue(msg.contains("Hello, World"));
 	}

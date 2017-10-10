@@ -97,8 +97,7 @@ public class PgCopyCommandTest
     // so run this statement through one
     StatementRunner runner = new StatementRunner();
     runner.setConnection(conn);
-    runner.runStatement(parsedSql);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(parsedSql);
     assertTrue(result.isSuccess());
 
     int count = TestUtil.getNumberValue(conn, "select count(*) from person");
@@ -127,8 +126,7 @@ public class PgCopyCommandTest
     // so run this statement through one
     StatementRunner runner = new StatementRunner();
     runner.setConnection(conn);
-    runner.runStatement(copy);
-    StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement(copy);
     assertTrue(result.isSuccess());
 
     assertEquals(1, result.getDataStores().size());

@@ -79,8 +79,7 @@ public class WbCallSqlServerTest
 
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(con);
-    runner.runStatement("exec multi_result");
-		StatementRunnerResult result = runner.getResult();
+    StatementRunnerResult result = runner.runStatement("exec multi_result");
     assertNotNull(result);
     assertTrue(result.isSuccess());
     assertEquals(2, result.getDataStores().size());
