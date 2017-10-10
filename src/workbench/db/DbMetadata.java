@@ -2775,7 +2775,7 @@ public class DbMetadata
         }
       }
       long duration = System.currentTimeMillis() - start;
-      LogMgr.logDebug("DbMetadata.getSchemas()", "Retrieving schemas using getSchemas() took: " + duration + "ms");
+      LogMgr.logDebug("DbMetadata.getSchemas()", "Retrieving " + result.size() + " schemas using getSchemas() took " + duration + "ms");
     }
     catch (Exception e)
     {
@@ -2797,7 +2797,13 @@ public class DbMetadata
 
     if (filter != null)
     {
+      long countBefore = result.size();
+      long start = System.currentTimeMillis();
+
       filter.applyFilter(result);
+
+      long duration = System.currentTimeMillis() - start;
+      LogMgr.logDebug("DbMetadata.getSchemas()", "Removing " + (countBefore - result.size()) + " schemas from the result took " + duration + "ms");
     }
 
     Collections.sort(result);

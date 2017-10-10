@@ -149,10 +149,19 @@ public class ResultProcessor
       ResultSetMetaData meta = rs.getMetaData();
       if (meta == null) return false;
 
-      String clzName = meta.getColumnClassName(1);
-      Class clz = Class.forName(clzName);
+      boolean isEmbeddedResult = false;
+      try
+      {
+        String clzName = meta.getColumnClassName(1);
+        Class clz = Class.forName(clzName);
 
-      boolean isEmbeddedResult =  ResultSet.class.isAssignableFrom(clz);
+        isEmbeddedResult = ResultSet.class.isAssignableFrom(clz);
+      }
+      catch (ClassNotFoundException cnf)
+      {
+        // ignore
+      }
+
       if (!isEmbeddedResult && conn.getDbSettings().refcursorIsEmbeddedResult())
       {
         String typename = meta.getColumnTypeName(1);
@@ -164,11 +173,7 @@ public class ResultProcessor
         rs.next(); // initialize the iterator
         return true;
       }
-
-    }
-    catch (ClassNotFoundException cnf)
-    {
-      // ignore
+      
     }
     catch (Throwable th)
     {
