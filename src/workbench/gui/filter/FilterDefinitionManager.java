@@ -138,7 +138,9 @@ public class FilterDefinitionManager
 
 	public List<WbFile> getEntries()
 	{
-		return filterFiles.getEntries();
+		List<WbFile> result = new ArrayList<>(filterFiles.getEntries());
+    result.removeIf(f -> !f.exists());
+    return result;
 	}
 
 	public void saveFilter(FilterExpression filter, WbFile file)
