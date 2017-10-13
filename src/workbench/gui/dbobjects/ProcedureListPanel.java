@@ -219,7 +219,7 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("procedurelist"));
 		this.procList.addTableModelListener(this);
-		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
+		this.findPanel = new QuickFilterPanel(this.procList, false, true, "procedurelist");
 
     configureFindPanel();
 

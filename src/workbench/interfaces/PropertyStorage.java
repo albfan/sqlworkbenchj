@@ -36,5 +36,6 @@ public interface PropertyStorage
 	boolean getBoolProperty(String property, boolean defaultValue);
 	int getIntProperty(String property, int defaultValue);
 	String getProperty(String property, String defaultValue);
+  void removeProperty(String property);
 	Set<String> getKeys();
 }

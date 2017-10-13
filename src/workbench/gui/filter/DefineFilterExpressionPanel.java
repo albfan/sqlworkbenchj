@@ -38,6 +38,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -91,18 +92,20 @@ public class DefineFilterExpressionPanel
 	private JScrollPane scroll;
 	private	JButton saveButton = new JButton();
 	private	JButton loadButton = new JButton();
+  private FilterDefinitionManager filterMgr;
 
 	public DefineFilterExpressionPanel(ValueProvider source)
-	{
-		this(source,true);
-	}
+  {
+    this(source, FilterDefinitionManager.getDefaultInstance());
+  }
 
-	public DefineFilterExpressionPanel(ValueProvider source, boolean allowSave)
+	public DefineFilterExpressionPanel(ValueProvider source, FilterDefinitionManager filterManager)
 	{
 		super();
 		data = source;
 		expressions = new JPanel();
 		this.expressions.setLayout(new GridBagLayout());
+    filterMgr = filterManager;
 
 		this.setLayout(new BorderLayout(0,2));
 
@@ -133,25 +136,23 @@ public class DefineFilterExpressionPanel
 		c.weighty = 0;
 		c.weightx = 0;
 
-		if (allowSave)
-		{
-			WbToolbar bar = new WbToolbar();
-			bar.setBorder(BorderFactory.createEtchedBorder());
-			saveButton.setIcon(IconMgr.getInstance().getLabelIcon(IconMgr.IMG_SAVE));
-			saveButton.setMargin(ins);
-			saveButton.setToolTipText(ResourceMgr.getDescription("SaveFilter"));
+    WbToolbar bar = new WbToolbar();
+    bar.setBorder(BorderFactory.createEtchedBorder());
+    saveButton.setIcon(IconMgr.getInstance().getLabelIcon(IconMgr.IMG_SAVE));
+    saveButton.setMargin(ins);
+    saveButton.setToolTipText(ResourceMgr.getDescription("SaveFilter"));
 
-			loadButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
-			loadButton.setMargin(new Insets(0,0,0,0));
-			loadButton.setToolTipText(ResourceMgr.getDescription("LoadFilter"));
+    loadButton.setIcon(IconMgr.getInstance().getLabelIcon("Open"));
+    loadButton.setMargin(new Insets(0,0,0,0));
+    loadButton.setToolTipText(ResourceMgr.getDescription("MnuTxtLoadFilter"));
 
-			loadButton.addActionListener(this);
-			saveButton.addActionListener(this);
-			bar.add(loadButton);
-			bar.addSeparator();
-			bar.add(saveButton);
-			p.add(bar, c);
-		}
+    loadButton.addActionListener(this);
+    saveButton.addActionListener(this);
+    bar.add(loadButton);
+    bar.addSeparator();
+    bar.add(saveButton);
+    p.add(bar, c);
+
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx ++;
 		c.weightx = 1;
@@ -199,9 +200,11 @@ public class DefineFilterExpressionPanel
 			return;
 		}
 
-		String lastDir = Settings.getInstance().getLastFilterDir();
+		String lastDir = filterMgr.getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
 		JFileChooser fc = new WbFileChooser(lastDir);
+    fc.setAcceptAllFileFilterUsed(false);
+    fc.resetChoosableFileFilters();
 		fc.addChoosableFileFilter(ff);
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
@@ -212,11 +215,11 @@ public class DefineFilterExpressionPanel
 				file = file + ".xml";
 			}
 			String dir = fc.getCurrentDirectory().getAbsolutePath();
-			Settings.getInstance().setLastFilterDir(dir);
+			filterMgr.setLastFilterDir(dir);
 			try
 			{
 				WbFile f = new WbFile(file);
-				FilterDefinitionManager.getInstance().saveFilter(filter, f);
+        filterMgr.saveFilter(filter, f);
 			}
 			catch (IOException e)
 			{
@@ -227,34 +230,42 @@ public class DefineFilterExpressionPanel
 		}
 	}
 
-	private void loadFilter()
-	{
-		String lastDir = Settings.getInstance().getLastFilterDir();
+	public static FilterExpression loadFilter(JComponent parent, FilterDefinitionManager filterManager)
+  {
+		String lastDir = filterManager.getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
 		JFileChooser fc = new WbFileChooser(lastDir);
+    fc.setAcceptAllFileFilterUsed(false);
+    fc.resetChoosableFileFilters();
 		fc.addChoosableFileFilter(ff);
-		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
+		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(parent));
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			String file = fc.getSelectedFile().getAbsolutePath();
 			String dir = fc.getCurrentDirectory().getAbsolutePath();
-			Settings.getInstance().setLastFilterDir(dir);
-			try
-			{
-				FilterExpression f = FilterDefinitionManager.getInstance().loadFilter(file);
-				if (f != null)
-				{
-					this.setFilter(f);
-				}
-			}
-			catch (Exception e)
-			{
-				String msg = ResourceMgr.getString("ErrLoadingFilter");
-				msg = msg + "\n" + ExceptionUtil.getDisplay(e);
-				WbSwingUtilities.showErrorMessage(this, msg);
-			}
+			filterManager.setLastFilterDir(dir);
+      try
+      {
+        return filterManager.loadFilter(file);
+      }
+      catch (Exception e)
+      {
+        String msg = ResourceMgr.getString("ErrLoadingFilter");
+        msg = msg + "\n" + ExceptionUtil.getDisplay(e);
+        WbSwingUtilities.showErrorMessage(parent, msg);
+      }
 		}
-	}
+    return null;
+  }
+
+  private void loadFilter()
+  {
+    FilterExpression f = loadFilter(this, filterMgr);
+    if (f != null)
+    {
+      this.setFilter(f);
+    }
+  }
 
 	public void selectColumn(String col)
 	{
@@ -450,6 +461,11 @@ public class DefineFilterExpressionPanel
 	}
 
 	public static void showDialog(WbTable source)
+  {
+    showDialog(source, FilterDefinitionManager.getDefaultInstance());
+  }
+
+	public static void showDialog(WbTable source, FilterDefinitionManager filterMgr)
 	{
 		DataStore ds = source.getDataStore();
 		if (ds == null) return;
@@ -457,7 +473,7 @@ public class DefineFilterExpressionPanel
 		if (info == null) return;
 
 		ValueProvider data = new DataStoreValueProvider(ds);
-		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(data);
+		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(data, filterMgr);
 		int col = source.getSelectedColumn();
 
 		FilterExpression lastFilter = source.getLastFilter();
@@ -474,7 +490,6 @@ public class DefineFilterExpressionPanel
 		boolean showDialog = true;
 		while (showDialog)
 		{
-
 			boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(source), panel, title);
 			if (result)
 			{

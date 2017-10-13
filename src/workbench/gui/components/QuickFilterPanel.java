@@ -57,13 +57,18 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.FilterDataAction;
+import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.actions.QuickFilterAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.dbobjects.QuickFilterExpressionBuilder;
+import workbench.gui.filter.DefineFilterExpressionPanel;
+import workbench.gui.filter.FilterDefinitionManager;
 
 import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.FilterExpression;
 
 import workbench.util.StringUtil;
 
@@ -90,6 +95,8 @@ public class QuickFilterPanel
 	private QuickFilterAction filterAction;
 	private String[] columnList;
 	private final boolean showColumnDropDown;
+  private final boolean showFilterDropDown;
+  private FilterDefinitionManager filterMgr;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
 	private boolean assumeWildcards;
@@ -97,12 +104,18 @@ public class QuickFilterPanel
 	private ReloadAction delegateFilterAction;
   private boolean ignoreEvents;
 
-	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
+	public QuickFilterPanel(WbTable table, boolean showColumnDropDown, String historyProperty)
+  {
+    this(table, showColumnDropDown, false, historyProperty);
+  }
+
+	public QuickFilterPanel(WbTable table, boolean showColumnDropDown, boolean showFilterDropDown, String historyProperty)
 	{
 		super();
 		this.searchTable = table;
 		this.searchTable.addPropertyChangeListener("model", this);
-		showColumnDropDown = showDropDown;
+		this.showColumnDropDown = showColumnDropDown;
+    this.showFilterDropDown = showFilterDropDown;
 		this.initGui(historyProperty);
 	}
 
@@ -222,6 +235,30 @@ public class QuickFilterPanel
     resetFilterAction.setUseLabelIconSize(true);
 
 		toolbar.add(this.filterAction);
+    if (this.showFilterDropDown)
+    {
+      filterMgr = new FilterDefinitionManager(historyProperty + ".filter");
+
+      FilterDataAction define = new FilterDataAction(searchTable);
+      define.setMenuTextByKey("MnuTxtDefineFilter");
+      define.removeIcon();
+
+      WbAction open = new WbAction()
+      {
+        @Override
+        public void executeAction(ActionEvent e)
+        {
+          FilterExpression filter = DefineFilterExpressionPanel.loadFilter(QuickFilterPanel.this, filterMgr);
+          if (filter != null)
+          {
+            searchTable.applyFilter(filter);
+          }
+        }
+      };
+      open.setMenuTextByKey("MnuTxtLoadFilter");
+      FilterPickerAction fp = new FilterPickerAction(searchTable, filterMgr, define, open);
+      toolbar.add(fp);
+    }
 		toolbar.add(resetFilterAction);
 		toolbar.setMargin(WbSwingUtilities.getEmptyInsets());
 		toolbar.setBorderPainted(true);
@@ -316,11 +353,19 @@ public class QuickFilterPanel
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
 		filterValue.saveSettings(props, prefix);
+    if (filterMgr != null)
+    {
+      filterMgr.saveMRUList(props, prefix);
+    }
 	}
 
 	@Override
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
+    if (filterMgr != null)
+    {
+      filterMgr.load(props, prefix);
+    }
 		filterValue.removeActionListener(this);
 		filterValue.restoreSettings(props, prefix);
 		filterValue.addActionListener(this);

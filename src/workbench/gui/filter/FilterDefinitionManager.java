@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import workbench.interfaces.PropertyStorage;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -48,32 +49,48 @@ public class FilterDefinitionManager
 	private List<PropertyChangeListener> listeners;
 	private FixedSizeList<WbFile> filterFiles;
 	private static final int DEFAULT_MAX_SIZE = 15;
+  private final String propertyPrefix;
 
-	private static FilterDefinitionManager instance;
+  private static FilterDefinitionManager DEFAULT_INSTANCE;
 
-	public synchronized static FilterDefinitionManager getInstance()
+	public synchronized static FilterDefinitionManager getDefaultInstance()
 	{
-		if (instance == null)
+		if (DEFAULT_INSTANCE == null)
 		{
-			instance = new FilterDefinitionManager();
+			DEFAULT_INSTANCE = new FilterDefinitionManager();
+      DEFAULT_INSTANCE.load(Settings.getInstance());
 		}
-		return instance;
+		return DEFAULT_INSTANCE;
 	}
 
-	private FilterDefinitionManager()
+	public FilterDefinitionManager()
+  {
+    this("workbench.gui");
+  }
+
+	public FilterDefinitionManager(String prefix)
 	{
+    this.propertyPrefix = prefix;
 		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
 		this.filterFiles = new FixedSizeList<>(size);
-		loadMRUList();
 	}
 
-	private void loadMRUList()
+	public void load(PropertyStorage settings)
+  {
+    load(settings, propertyPrefix);
+  }
+
+	public void load(PropertyStorage settings, String prefix)
 	{
-		Settings s = Settings.getInstance();
-		int size = s.getIntProperty("workbench.gui.filter.mru.size", 0);
+    if (!prefix.endsWith("."))
+    {
+      prefix += ".";
+    }
+
+		int size = settings.getIntProperty(prefix + "filter.mru.size", 0);
 		for (int i=0; i < size; i++)
 		{
-			String filename = s.getProperty("workbench.gui.filter.mru.entry." + i, null);
+			String filename = settings.getProperty(prefix + "filter.mru.entry." + i, null);
 			if (filename != null)
 			{
 				WbFile f = new WbFile(filename);
@@ -89,29 +106,44 @@ public class FilterDefinitionManager
 		}
 	}
 
-	private void removeOldSettings()
+	private void removeOldSettings(PropertyStorage s, String prefix)
 	{
-		Settings s = Settings.getInstance();
-		int size = s.getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
+		int size = s.getIntProperty(prefix + "filter.mru.maxsize", DEFAULT_MAX_SIZE);
 		for (int i=0; i < size; i++)
 		{
-			s.removeProperty("workbench.gui.filter.mru.entry." + i);
+			s.removeProperty(prefix + "filter.mru.entry." + i);
 		}
 	}
 
-	public void saveMRUList()
-	{
-		removeOldSettings();
+	public void saveMRUList(PropertyStorage s)
+  {
+    saveMRUList(s, "workbench.gui");
+  }
 
-		Settings s = Settings.getInstance();
+	public void saveMRUList(PropertyStorage s, String prefix)
+	{
+    if (!prefix.endsWith("."))
+    {
+      prefix += ".";
+    }
+
+		removeOldSettings(s, prefix);
 		int index = 0;
 		for (WbFile f : filterFiles.getEntries())
 		{
-			s.setProperty("workbench.gui.filter.mru.entry." + index, f.getFullPath());
+			s.setProperty(prefix + "filter.mru.entry." + index, f.getFullPath());
 			index ++;
 		}
-		s.setProperty("workbench.gui.filter.mru.size", index);
+		s.setProperty(prefix + "filter.mru.size", index);
 	}
+
+  public synchronized void removePropertyChangeListener(PropertyChangeListener l)
+  {
+    if (listeners != null)
+    {
+      listeners.remove(l);
+    }
+  }
 
 	public synchronized void addPropertyChangeListener(PropertyChangeListener l)
 	{
@@ -142,6 +174,27 @@ public class FilterDefinitionManager
     result.removeIf(f -> !f.exists());
     return result;
 	}
+
+  public String getLastFilterDir()
+  {
+    if (this == DEFAULT_INSTANCE)
+    {
+      return Settings.getInstance().getLastFilterDir();
+    }
+    return Settings.getInstance().getProperty(propertyPrefix + ".lastdir", Settings.getInstance().getLastFilterDir());
+  }
+
+  public void setLastFilterDir(String dirName)
+  {
+    if (this == DEFAULT_INSTANCE)
+    {
+      Settings.getInstance().setLastFilterDir(dirName);
+    }
+    else
+    {
+      Settings.getInstance().setProperty(propertyPrefix + ".lastdir", dirName);
+    }
+  }
 
 	public void saveFilter(FilterExpression filter, WbFile file)
 		throws IOException

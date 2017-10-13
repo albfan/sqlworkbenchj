@@ -126,6 +126,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.renderer.RendererSetup;
 import workbench.gui.settings.PlacementChooser;
 
@@ -232,6 +233,7 @@ public class TableListPanel
 
 	private TableChangeValidator validator = new TableChangeValidator();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
+  private FilterDefinitionManager filterMgr = new FilterDefinitionManager();
 
 	private final int maxTypeItems = 25;
 	private int currentRetrievalPanel = -1;
@@ -318,7 +320,7 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		findPanel =  new QuickFilterPanel(this.tableList, false, "tablelist");
+		findPanel =  new QuickFilterPanel(this.tableList, false, true, "tablelist");
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			DbExplorerSettings.PROP_INSTANT_FILTER,
@@ -952,7 +954,7 @@ public class TableListPanel
 
     // Event Triggers are displayed in the trigger panel
     types.remove(PostgresEventTriggerReader.TYPE);
-    
+
 		this.tableTypes.removeAllItems();
 		this.tableTypes.addItem("*");
 
@@ -1406,6 +1408,7 @@ public class TableListPanel
 	{
 		tableData.saveToWorkspace(w, index);
 		projections.saveToWorkspace(w, index);
+    filterMgr.saveMRUList(w.getSettings(), getWorkspacePrefix(index) + "filter.");
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
@@ -1423,6 +1426,7 @@ public class TableListPanel
 		// first we read the global settings, then we'll let
 		// the settings in the workspace override the global ones
 		restoreSettings();
+    filterMgr.load(w.getSettings(), getWorkspacePrefix(index) + "filter.");
 		tableData.readFromWorkspace(w, index);
 		projections.readFromWorkspace(w, index);
 		WbProperties props = w.getSettings();

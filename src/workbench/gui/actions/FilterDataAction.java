@@ -32,6 +32,7 @@ import workbench.resource.ResourceMgr;
 
 import workbench.gui.components.WbTable;
 import workbench.gui.filter.DefineFilterExpressionPanel;
+import workbench.gui.filter.FilterDefinitionManager;
 
 /**
  * Filter data from a WbTable.
@@ -43,21 +44,29 @@ public class FilterDataAction
   implements TableModelListener
 {
   private WbTable client;
+  private FilterDefinitionManager filterMgr;
 
   public FilterDataAction(WbTable aClient)
   {
     super();
+    this.filterMgr = FilterDefinitionManager.getDefaultInstance();
     this.setClient(aClient);
     this.initMenuDefinition("MnuTxtFilter");
     this.setIcon("filter");
     this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
     this.setEnabled(false);
+
+  }
+
+  public void setFilterManager(FilterDefinitionManager filterManager)
+  {
+    this.filterMgr = filterManager;
   }
 
   @Override
   public void executeAction(ActionEvent e)
   {
-    DefineFilterExpressionPanel.showDialog(this.client);
+    DefineFilterExpressionPanel.showDialog(this.client, filterMgr);
   }
 
   @Override

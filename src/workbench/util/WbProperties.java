@@ -264,12 +264,12 @@ public class WbProperties
     return result;
   }
 
-  public String removeProperty(String key)
+  @Override
+  public void removeProperty(String key)
   {
     String old = getProperty(key, null);
     super.remove(key);
     firePropertyChanged(key, old, null);
-    return old;
   }
 
   public void addPropertyChangeListener(PropertyChangeListener aListener, String ... properties)
