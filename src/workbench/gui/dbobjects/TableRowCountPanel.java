@@ -238,8 +238,7 @@ public class TableRowCountPanel
 		cancel = false;
 
 		DataStore ds = WbRowCount.buildResultDataStore(dbConnection);
-		DataStoreTableModel model = new DataStoreTableModel(ds);
-		model.setAllowEditing(false);
+		final DataStoreTableModel model = new DataStoreTableModel(ds);
 		setModel(model);
 		ResultSet rs = null;
 
@@ -294,6 +293,8 @@ public class TableRowCountPanel
 			cancelAction.setEnabled(false);
 		}
 
+		model.setAllowEditing(false);
+
 		EventQueue.invokeLater(() ->
     {
       SortDefinition sortDef = WbRowCount.getDefaultRowCountSort(data.getDataStore(), dbConnection);
@@ -339,7 +340,7 @@ public class TableRowCountPanel
       data.adjustRowsAndColumns();
     });
 	}
-  
+
 	private void setModel(final DataStoreTableModel model)
 	{
 		WbSwingUtilities.invoke(() ->
