@@ -51,16 +51,19 @@ public class FilterDefinitionManager
 	private static final int DEFAULT_MAX_SIZE = 15;
   private String lastDir;
 
-  private static FilterDefinitionManager DEFAULT_INSTANCE;
-
-	public synchronized static FilterDefinitionManager getDefaultInstance()
-	{
-		if (DEFAULT_INSTANCE == null)
-		{
+  private static class LazyInstanceHolder
+  {
+    private static final FilterDefinitionManager DEFAULT_INSTANCE;
+    static
+    {
 			DEFAULT_INSTANCE = new FilterDefinitionManager();
       DEFAULT_INSTANCE.loadSettings(Settings.getInstance(), "workbench.gui.");
-		}
-		return DEFAULT_INSTANCE;
+    }
+  }
+
+	public static FilterDefinitionManager getDefaultInstance()
+	{
+		return LazyInstanceHolder.DEFAULT_INSTANCE;
 	}
 
 	public FilterDefinitionManager()
@@ -94,10 +97,6 @@ public class FilterDefinitionManager
 				if (f.exists())
 				{
 					filterFiles.append(f);
-				}
-				else
-				{
-					LogMgr.logInfo("FilterDefinitionManager.loadMRUList()", "Removed filter file '" + f.getFullPath() + "' from list because it does not longer exist");
 				}
 			}
 		}
@@ -177,7 +176,7 @@ public class FilterDefinitionManager
 
   public String getLastFilterDir()
   {
-    if (this == DEFAULT_INSTANCE)
+    if (this == getDefaultInstance())
     {
       return Settings.getInstance().getLastFilterDir();
     }
@@ -186,7 +185,7 @@ public class FilterDefinitionManager
 
   public void setLastFilterDir(String dirName)
   {
-    if (this == DEFAULT_INSTANCE)
+    if (this == getDefaultInstance())
     {
       Settings.getInstance().setLastFilterDir(dirName);
     }

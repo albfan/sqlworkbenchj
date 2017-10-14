@@ -37,6 +37,7 @@ public class QuickFilterAction
   extends WbAction
 {
   private QuickFilter client;
+  private WbAction ctrlClickAction;
 
   public QuickFilterAction(QuickFilter filterGui)
   {
@@ -50,7 +51,18 @@ public class QuickFilterAction
   @Override
   public void executeAction(ActionEvent e)
   {
-    client.applyQuickFilter();
+    if (isCtrlPressed(e) && ctrlClickAction != null)
+    {
+      ctrlClickAction.executeAction(e);
+    }
+    else
+    {
+      client.applyQuickFilter();
+    }
   }
 
+  public void registerCtrlClickAction(WbAction action)
+  {
+    ctrlClickAction = action;
+  }
 }

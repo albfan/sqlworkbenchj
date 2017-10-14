@@ -233,7 +233,7 @@ public class TableListPanel
 
 	private TableChangeValidator validator = new TableChangeValidator();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
-  private FilterDefinitionManager filterMgr = new FilterDefinitionManager();
+  private FilterDefinitionManager filterMgr;
 
 	private final int maxTypeItems = 25;
 	private int currentRetrievalPanel = -1;
@@ -319,7 +319,10 @@ public class TableListPanel
 		renameAction.addPropertyChangeListener(this);
 
 		this.extendPopupMenu();
-
+    if (DbExplorerSettings.enableExtendedObjectFilter())
+    {
+      filterMgr = new FilterDefinitionManager();
+    }
 		findPanel =  new QuickFilterPanel(this.tableList, false, filterMgr, "tablelist");
 
 		Settings.getInstance().addPropertyChangeListener(this,
@@ -1478,7 +1481,10 @@ public class TableListPanel
 			{
 				props.setProperty(prefix + "columnorder", StringUtil.listToString(objectListColumnOrder, ','));
 			}
-      filterMgr.saveSettings(props, prefix);
+      if (filterMgr != null)
+      {
+        filterMgr.saveSettings(props, prefix);
+      }
 		}
 		catch (Throwable th)
 		{
@@ -1535,7 +1541,10 @@ public class TableListPanel
 			savedSort = parseDefinitionString(sortString);
       savedSort.setUseNaturalSort(DbExplorerSettings.useNaturalSort());
 		}
-    filterMgr.loadSettings(props, prefix);
+    if (filterMgr != null)
+    {
+      filterMgr.loadSettings(props, prefix);
+    }
 	}
 
 

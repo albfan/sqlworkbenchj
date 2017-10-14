@@ -468,7 +468,13 @@ public class IniProfileStorage
       props.storeToXML(out, null, "ISO-8859-1");
       String xml = out.toString("ISO-8859-1");
       xml = xml.replaceAll(StringUtil.REGEX_CRLF, "");
-      xml = xml.replace(XML_PREFIX, "");
+
+      // Strip off the xml prefix to make the file easier to edit:
+      int pos = xml.indexOf("<properties>");
+      if (pos > -1)
+      {
+        xml = xml.substring(pos);
+      }
       return xml;
     }
     catch (Throwable th)

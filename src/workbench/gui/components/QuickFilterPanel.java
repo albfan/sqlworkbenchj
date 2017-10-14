@@ -240,6 +240,8 @@ public class QuickFilterPanel
       FilterDataAction define = new FilterDataAction(searchTable);
       define.setMenuTextByKey("MnuTxtDefineFilter");
       define.removeIcon();
+      
+      filterAction.registerCtrlClickAction(define);
 
       WbAction open = new WbAction()
       {
@@ -257,7 +259,7 @@ public class QuickFilterPanel
       FilterPickerAction fp = new FilterPickerAction(searchTable, filterMgr, define, open);
       toolbar.add(fp);
     }
-    
+
 		toolbar.add(resetFilterAction);
 		toolbar.setMargin(WbSwingUtilities.getEmptyInsets());
 		toolbar.setBorderPainted(true);
