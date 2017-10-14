@@ -94,6 +94,7 @@ import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.renderer.ProcStatusRenderer;
 import workbench.gui.renderer.SqlTypeRenderer;
 import workbench.gui.settings.PlacementChooser;
@@ -150,6 +151,7 @@ public class ProcedureListPanel
   private EditorTabSelectMenu generateWbCall;
 	private SourceCache cache;
 
+  private FilterDefinitionManager filterMgr = new FilterDefinitionManager();
 	private IsolationLevelChanger levelChanger = new IsolationLevelChanger();
 	private ProcedureChangeValidator validator = new ProcedureChangeValidator();
 	private AlterProcedureAction renameAction;
@@ -219,7 +221,7 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.procList.setRememberColumnOrder(DbExplorerSettings.getRememberMetaColumnOrder("procedurelist"));
 		this.procList.addTableModelListener(this);
-		this.findPanel = new QuickFilterPanel(this.procList, false, true, "procedurelist");
+		this.findPanel = new QuickFilterPanel(this.procList, false, filterMgr, "procedurelist");
 
     configureFindPanel();
 
@@ -581,6 +583,7 @@ public class ProcedureListPanel
 
 	private void storeSettings(PropertyStorage props, String prefix)
 	{
+    filterMgr.saveSettings(props, prefix);
 		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
 		List<String> objectListColumnOrder = procList.saveColumnOrder();
 		if (objectListColumnOrder != null)
@@ -614,6 +617,7 @@ public class ProcedureListPanel
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		int loc = props.getIntProperty(prefix + "divider", 200);
+    filterMgr.loadSettings(props, prefix);
 		splitPane.setDividerLocation(loc);
 		findPanel.restoreSettings(props, prefix);
 		String colString = props.getProperty(prefix + "columnorder", null);

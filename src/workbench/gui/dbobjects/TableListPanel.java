@@ -320,7 +320,7 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		findPanel =  new QuickFilterPanel(this.tableList, false, true, "tablelist");
+		findPanel =  new QuickFilterPanel(this.tableList, false, filterMgr, "tablelist");
 
 		Settings.getInstance().addPropertyChangeListener(this,
 			DbExplorerSettings.PROP_INSTANT_FILTER,
@@ -1408,7 +1408,6 @@ public class TableListPanel
 	{
 		tableData.saveToWorkspace(w, index);
 		projections.saveToWorkspace(w, index);
-    filterMgr.saveMRUList(w.getSettings(), getWorkspacePrefix(index) + "filter.");
 		WbProperties props = w.getSettings();
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(props, prefix);
@@ -1426,7 +1425,6 @@ public class TableListPanel
 		// first we read the global settings, then we'll let
 		// the settings in the workspace override the global ones
 		restoreSettings();
-    filterMgr.load(w.getSettings(), getWorkspacePrefix(index) + "filter.");
 		tableData.readFromWorkspace(w, index);
 		projections.readFromWorkspace(w, index);
 		WbProperties props = w.getSettings();
@@ -1480,6 +1478,7 @@ public class TableListPanel
 			{
 				props.setProperty(prefix + "columnorder", StringUtil.listToString(objectListColumnOrder, ','));
 			}
+      filterMgr.saveSettings(props, prefix);
 		}
 		catch (Throwable th)
 		{
@@ -1536,6 +1535,7 @@ public class TableListPanel
 			savedSort = parseDefinitionString(sortString);
       savedSort.setUseNaturalSort(DbExplorerSettings.useNaturalSort());
 		}
+    filterMgr.loadSettings(props, prefix);
 	}
 
 

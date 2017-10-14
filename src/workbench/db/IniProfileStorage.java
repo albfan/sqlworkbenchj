@@ -482,7 +482,7 @@ public class IniProfileStorage
   {
     if (StringUtil.isBlank(xml)) return null;
 
-    if (!xml.startsWith(XML_PREFIX))
+    if (!xml.startsWith("<?xml"))
     {
       xml = XML_PREFIX + xml;
     }

@@ -95,7 +95,6 @@ public class QuickFilterPanel
 	private QuickFilterAction filterAction;
 	private String[] columnList;
 	private final boolean showColumnDropDown;
-  private final boolean showFilterDropDown;
   private FilterDefinitionManager filterMgr;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
@@ -106,16 +105,16 @@ public class QuickFilterPanel
 
 	public QuickFilterPanel(WbTable table, boolean showColumnDropDown, String historyProperty)
   {
-    this(table, showColumnDropDown, false, historyProperty);
+    this(table, showColumnDropDown, null, historyProperty);
   }
 
-	public QuickFilterPanel(WbTable table, boolean showColumnDropDown, boolean showFilterDropDown, String historyProperty)
+	public QuickFilterPanel(WbTable table, boolean showColumnDropDown, FilterDefinitionManager filterManager, String historyProperty)
 	{
 		super();
 		this.searchTable = table;
 		this.searchTable.addPropertyChangeListener("model", this);
 		this.showColumnDropDown = showColumnDropDown;
-    this.showFilterDropDown = showFilterDropDown;
+    this.filterMgr = filterManager;
 		this.initGui(historyProperty);
 	}
 
@@ -235,10 +234,9 @@ public class QuickFilterPanel
     resetFilterAction.setUseLabelIconSize(true);
 
 		toolbar.add(this.filterAction);
-    if (this.showFilterDropDown)
-    {
-      filterMgr = new FilterDefinitionManager(historyProperty + ".filter");
 
+    if (filterMgr != null)
+    {
       FilterDataAction define = new FilterDataAction(searchTable);
       define.setMenuTextByKey("MnuTxtDefineFilter");
       define.removeIcon();
@@ -259,6 +257,7 @@ public class QuickFilterPanel
       FilterPickerAction fp = new FilterPickerAction(searchTable, filterMgr, define, open);
       toolbar.add(fp);
     }
+    
 		toolbar.add(resetFilterAction);
 		toolbar.setMargin(WbSwingUtilities.getEmptyInsets());
 		toolbar.setBorderPainted(true);
@@ -353,20 +352,12 @@ public class QuickFilterPanel
 	public void saveSettings(PropertyStorage props, String prefix)
 	{
 		filterValue.saveSettings(props, prefix);
-    if (filterMgr != null)
-    {
-      filterMgr.saveMRUList(props, prefix);
-    }
 	}
 
 	@Override
 	public void restoreSettings(PropertyStorage props, String prefix)
 	{
-    if (filterMgr != null)
-    {
-      filterMgr.load(props, prefix);
-    }
-		filterValue.removeActionListener(this);
+    filterValue.removeActionListener(this);
 		filterValue.restoreSettings(props, prefix);
 		filterValue.addActionListener(this);
 	}

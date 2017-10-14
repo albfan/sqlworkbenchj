@@ -49,7 +49,7 @@ public class FilterDefinitionManager
 	private List<PropertyChangeListener> listeners;
 	private FixedSizeList<WbFile> filterFiles;
 	private static final int DEFAULT_MAX_SIZE = 15;
-  private final String propertyPrefix;
+  private String lastDir;
 
   private static FilterDefinitionManager DEFAULT_INSTANCE;
 
@@ -58,7 +58,7 @@ public class FilterDefinitionManager
 		if (DEFAULT_INSTANCE == null)
 		{
 			DEFAULT_INSTANCE = new FilterDefinitionManager();
-      DEFAULT_INSTANCE.load(Settings.getInstance());
+      DEFAULT_INSTANCE.loadSettings(Settings.getInstance(), "workbench.gui.");
 		}
 		return DEFAULT_INSTANCE;
 	}
@@ -70,22 +70,19 @@ public class FilterDefinitionManager
 
 	public FilterDefinitionManager(String prefix)
 	{
-    this.propertyPrefix = prefix;
 		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
 		this.filterFiles = new FixedSizeList<>(size);
 	}
 
-	public void load(PropertyStorage settings)
-  {
-    load(settings, propertyPrefix);
-  }
-
-	public void load(PropertyStorage settings, String prefix)
+	public void loadSettings(PropertyStorage settings, String prefix)
 	{
     if (!prefix.endsWith("."))
     {
       prefix += ".";
     }
+
+    lastDir = settings.getProperty(prefix + "filter.lastdir", Settings.getInstance().getLastFilterDir());
+    filterFiles.clear();
 
 		int size = settings.getIntProperty(prefix + "filter.mru.size", 0);
 		for (int i=0; i < size; i++)
@@ -104,6 +101,8 @@ public class FilterDefinitionManager
 				}
 			}
 		}
+
+    firePropertyChanged();
 	}
 
 	private void removeOldSettings(PropertyStorage s, String prefix)
@@ -115,12 +114,12 @@ public class FilterDefinitionManager
 		}
 	}
 
-	public void saveMRUList(PropertyStorage s)
+	public void saveSettings(PropertyStorage s)
   {
-    saveMRUList(s, "workbench.gui");
+    saveSettings(s, "workbench.gui");
   }
 
-	public void saveMRUList(PropertyStorage s, String prefix)
+	public void saveSettings(PropertyStorage s, String prefix)
 	{
     if (!prefix.endsWith("."))
     {
@@ -135,6 +134,7 @@ public class FilterDefinitionManager
 			index ++;
 		}
 		s.setProperty(prefix + "filter.mru.size", index);
+    s.setProperty(prefix + "filter.lastdir", lastDir);
 	}
 
   public synchronized void removePropertyChangeListener(PropertyChangeListener l)
@@ -181,7 +181,7 @@ public class FilterDefinitionManager
     {
       return Settings.getInstance().getLastFilterDir();
     }
-    return Settings.getInstance().getProperty(propertyPrefix + ".lastdir", Settings.getInstance().getLastFilterDir());
+    return lastDir;
   }
 
   public void setLastFilterDir(String dirName)
@@ -190,10 +190,7 @@ public class FilterDefinitionManager
     {
       Settings.getInstance().setLastFilterDir(dirName);
     }
-    else
-    {
-      Settings.getInstance().setProperty(propertyPrefix + ".lastdir", dirName);
-    }
+    lastDir = dirName;
   }
 
 	public void saveFilter(FilterExpression filter, WbFile file)

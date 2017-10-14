@@ -516,7 +516,7 @@ public final class WbManager
         LogMgr.logInfo("WbManager.saveSettings()", "Not overwritting global settings!");
       }
 
-      FilterDefinitionManager.getDefaultInstance().saveMRUList(Settings.getInstance());
+      FilterDefinitionManager.getDefaultInstance().saveSettings(Settings.getInstance());
       try
       {
         ColumnOrderMgr.getInstance().saveSettings();
