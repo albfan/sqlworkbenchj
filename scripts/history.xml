@@ -2,6 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="history2html.xslt"?><history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2017-09-25">
+    <entry dev-build="1" type="enh">It's now possible to define more flexible filters for the DbExplorer's table list</entry>
+    <entry dev-build="1" type="fix">Showing rowcounts in the DbExplorer did not work.</entry>
     <entry dev-build="1" type="fix">For Oracle, the result of functions returning a refcursor was not displayed correctly.</entry>
   </release>
   <release build="123" date="2017-09-25">
