@@ -2745,37 +2745,32 @@ public class DbMetadata
   public List<String> getSchemas(ObjectNameFilter filter, String catalog)
   {
     List<String> result = new ArrayList<>();
-    boolean applyFilter = true;
+    boolean applyFilter = filter != null;
 
     long start = System.currentTimeMillis();
 
     try
     {
-      if (filter.isRetrievalFilter() || (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas()))
+      if (filter.isRetrievalFilter())
       {
-        catalog = StringUtil.trimToNull(catalog);
-
-        if (filter.isRetrievalFilter())
+        String escape = dbConnection.getSearchStringEscape();
+        for (String expression : filter.getFilterExpressions())
         {
-          String escape = dbConnection.getSearchStringEscape();
-          for (String expression : filter.getFilterExpressions())
+          expression = cleanupWildcards(expression);
+          if (getDbSettings().supportsMetaDataSchemaWildcards())
           {
-            expression = cleanupWildcards(expression);
-            if (getDbSettings().supportsMetaDataSchemaWildcards())
-            {
-              expression = SqlUtil.escapeUnderscore(expression, escape);
-            }
-            ResultSet rs = metaData.getSchemas(catalog, expression);
-            int count = addSchemaResult(result, rs);
-            LogMgr.logDebug("DbMetadata.getSchemas()", "Using schema filter expression " + expression + " as a retrieval parameter returned " + count + " schemas");
+            expression = SqlUtil.escapeUnderscore(expression, escape);
           }
-          applyFilter = false;
+          ResultSet rs = metaData.getSchemas(catalog, expression);
+          int count = addSchemaResult(result, rs);
+          LogMgr.logDebug("DbMetadata.getSchemas()", "Using schema filter expression " + expression + " as a retrieval parameter returned " + count + " schemas");
         }
-        else
-        {
-          ResultSet rs = this.metaData.getSchemas(catalog, null);
-          addSchemaResult(result, rs);
-        }
+        applyFilter = false;
+      }
+      else if (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas())
+      {
+        ResultSet rs = this.metaData.getSchemas(catalog, null);
+        addSchemaResult(result, rs);
       }
       else
       {
@@ -2805,7 +2800,7 @@ public class DbMetadata
       result.addAll(additionalSchemas);
     }
 
-    if (filter != null && applyFilter)
+    if (applyFilter)
     {
       filter.applyFilter(result);
     }
