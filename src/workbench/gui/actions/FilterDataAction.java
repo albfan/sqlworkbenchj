@@ -46,21 +46,15 @@ public class FilterDataAction
   private WbTable client;
   private FilterDefinitionManager filterMgr;
 
-  public FilterDataAction(WbTable aClient)
+  public FilterDataAction(WbTable aClient, FilterDefinitionManager filterManager)
   {
     super();
-    this.filterMgr = FilterDefinitionManager.getDefaultInstance();
+    this.filterMgr = filterManager;
     this.setClient(aClient);
     this.initMenuDefinition("MnuTxtFilter");
     this.setIcon("filter");
     this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
     this.setEnabled(false);
-
-  }
-
-  public void setFilterManager(FilterDefinitionManager filterManager)
-  {
-    this.filterMgr = filterManager;
   }
 
   @Override

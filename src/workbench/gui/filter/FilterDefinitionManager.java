@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import workbench.interfaces.PropertyStorage;
-import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 import workbench.storage.filter.FilterExpression;
@@ -68,14 +67,9 @@ public class FilterDefinitionManager
 
 	public FilterDefinitionManager()
   {
-    this("workbench.gui");
-  }
-
-	public FilterDefinitionManager(String prefix)
-	{
 		int size = Settings.getInstance().getIntProperty("workbench.gui.filter.mru.maxsize", DEFAULT_MAX_SIZE);
 		this.filterFiles = new FixedSizeList<>(size);
-	}
+  }
 
 	public void loadSettings(PropertyStorage settings, String prefix)
 	{
@@ -100,7 +94,6 @@ public class FilterDefinitionManager
 				}
 			}
 		}
-
     firePropertyChanged();
 	}
 

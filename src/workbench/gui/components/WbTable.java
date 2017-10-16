@@ -131,6 +131,7 @@ import workbench.gui.actions.SortAscendingAction;
 import workbench.gui.actions.SortDescendingAction;
 import workbench.gui.actions.TransposeRowAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.fontzoom.DecreaseFontSize;
 import workbench.gui.fontzoom.FontZoomProvider;
 import workbench.gui.fontzoom.FontZoomer;
@@ -313,7 +314,7 @@ public class WbTable
 
 		this.saveDataAsAction.setEnabled(true);
 
-		this.filterAction = new FilterDataAction(this);
+    this.filterAction = new FilterDataAction(this, FilterDefinitionManager.getDefaultInstance());
 		this.resetFilterAction = new ResetFilterAction(this);
 
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -509,7 +510,7 @@ public class WbTable
 		DataStoreTableModel model = getDataStoreTableModel();
 		if (model != null) model.setAllowEditMode(flag);
   }
-  
+
 	public void setReadOnly(boolean flag)
 	{
 		readOnly = flag;

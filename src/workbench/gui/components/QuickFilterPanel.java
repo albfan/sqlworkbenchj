@@ -36,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.DefaultComboBoxModel;
@@ -237,10 +238,10 @@ public class QuickFilterPanel
 
     if (filterMgr != null)
     {
-      FilterDataAction define = new FilterDataAction(searchTable);
+      FilterDataAction define = new FilterDataAction(searchTable, filterMgr);
       define.setMenuTextByKey("MnuTxtDefineFilter");
       define.removeIcon();
-      
+
       filterAction.registerCtrlClickAction(define);
 
       WbAction open = new WbAction()
@@ -333,7 +334,7 @@ public class QuickFilterPanel
 		if (columns == null || columns.length == 0) return;
 		if (StringUtil.arraysEqual(columns, columnList)) return;
 
-		columnList = columns;
+    columnList = Arrays.copyOf(columns, columns.length);
 
 		this.searchColumn = columns[0];
 		initPopup();
@@ -406,6 +407,7 @@ public class QuickFilterPanel
 			if (StringUtil.isEmptyString(filterExpression) || filterExpression.trim().equals("*") || filterExpression.trim().equals("%"))
 			{
 				searchTable.resetFilter();
+        searchTable.clearLastFilter(false);
 			}
 			else
 			{

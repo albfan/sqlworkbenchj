@@ -201,6 +201,7 @@ import workbench.gui.editor.InsertTipProvider;
 import workbench.gui.editor.actions.IndentSelection;
 import workbench.gui.editor.actions.ShowTipAction;
 import workbench.gui.editor.actions.UnIndentSelection;
+import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
@@ -970,7 +971,7 @@ public class SqlPanel
 		actions.add(new JumpToStatement(this));
 		actions.add(editor.getJumpToLineAction());
 
-		this.filterAction = new FilterDataAction(null);
+    this.filterAction = new FilterDataAction(null, FilterDefinitionManager.getDefaultInstance());
 		this.selectionFilterAction = new SelectionFilterAction();
 		this.filterPicker = new FilterPickerAction(null);
 

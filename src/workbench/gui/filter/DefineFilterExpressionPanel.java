@@ -51,7 +51,6 @@ import workbench.interfaces.ValidatingComponent;
 import workbench.interfaces.ValueProvider;
 import workbench.resource.IconMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
@@ -186,9 +185,7 @@ public class DefineFilterExpressionPanel
 		this.add(infoPanel, BorderLayout.SOUTH);
 
 		double w = d.getWidth() + scroll.getHorizontalScrollBar().getPreferredSize().getWidth();
-		double h = (d.getHeight() * 3) + andButton.getPreferredSize().getHeight() + scroll.getHorizontalScrollBar().getPreferredSize().getHeight() +
-			infoLabel.getPreferredSize().getHeight();
-		this.setPreferredSize(new Dimension((int)w,(int)h));
+    this.expressions.setPreferredSize(new Dimension((int)w, (int)(d.height * 3)));
 	}
 
 	private void saveFilter()
@@ -299,24 +296,29 @@ public class DefineFilterExpressionPanel
 		ComplexExpression cExp = (ComplexExpression) filter;
 		List<FilterExpression> expList = cExp.getExpressions();
 		int count = expList.size();
+    int height = 0;
 		for (int i=0; i < count; i++)
 		{
 			try
 			{
 				ExpressionValue exp = (ExpressionValue)expList.get(i);
-				this.addExpressionPanel(exp);
+        Dimension panelSize = this.addExpressionPanel(exp);
 				PanelEntry item = this.panels.get(this.panels.size() - 1);
 				ColumnExpressionPanel panel = item.expressionPanel;
 				panel.setExpressionValue(exp);
+        if (i <= 10)
+        {
+          height += panelSize.height;
+        }
 			}
 			catch (ClassCastException e)
 			{
 				// ignore this as we cannot handle other expressions anyway...
 			}
 		}
-		this.invalidate();
-		this.validate();
-		this.repaint();
+    Dimension preferred = new Dimension(expressions.getPreferredSize().width, (int)(height * 1.15));
+    this.expressions.setPreferredSize(preferred);
+    WbSwingUtilities.repaintLater(this);
 	}
 
 	@Override
@@ -480,6 +482,7 @@ public class DefineFilterExpressionPanel
 		if (lastFilter != null)
 		{
 			panel.setFilter(lastFilter);
+      panel.doLayout();
 		}
 		else if (col > -1)
 		{

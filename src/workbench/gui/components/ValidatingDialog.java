@@ -250,7 +250,7 @@ public class ValidatingDialog
 				throw new IllegalArgumentException("Parent component must be Dialog or Frame");
 			}
 		}
-
+    dialog.pack();
 		if (reference != null)
 		{
 			WbSwingUtilities.center(dialog, reference);
