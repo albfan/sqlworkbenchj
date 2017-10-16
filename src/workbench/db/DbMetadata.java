@@ -2745,16 +2745,37 @@ public class DbMetadata
   public List<String> getSchemas(ObjectNameFilter filter, String catalog)
   {
     List<String> result = new ArrayList<>();
-    ResultSet rs = null;
+    boolean applyFilter = true;
 
-    boolean useColumnNames = dbSettings.useColumnNameForMetadata();
+    long start = System.currentTimeMillis();
+
     try
     {
-      long start = System.currentTimeMillis();
-
-      if (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas())
+      if (filter.isRetrievalFilter() || (StringUtil.isNonEmpty(catalog) && supportsCatalogForGetSchemas()))
       {
-        rs = this.metaData.getSchemas(catalog, null);
+        catalog = StringUtil.trimToNull(catalog);
+
+        if (filter.isRetrievalFilter())
+        {
+          String escape = dbConnection.getSearchStringEscape();
+          for (String expression : filter.getFilterExpressions())
+          {
+            expression = cleanupWildcards(expression);
+            if (getDbSettings().supportsMetaDataSchemaWildcards())
+            {
+              expression = SqlUtil.escapeUnderscore(expression, escape);
+            }
+            ResultSet rs = metaData.getSchemas(catalog, expression);
+            int count = addSchemaResult(result, rs);
+            LogMgr.logDebug("DbMetadata.getSchemas()", "Using schema filter expression " + expression + " as a retrieval parameter returned " + count + " schemas");
+          }
+          applyFilter = false;
+        }
+        else
+        {
+          ResultSet rs = this.metaData.getSchemas(catalog, null);
+          addSchemaResult(result, rs);
+        }
       }
       else
       {
@@ -2763,28 +2784,17 @@ public class DbMetadata
           LogMgr.logDebug("DbMetadata.getSchemas()",
             "DbMetadata.getSchemas() called with catalog parameter, but current connection is not configured to support that", new Exception("Backtrace"));
         }
-        rs = this.metaData.getSchemas();
+        ResultSet rs = this.metaData.getSchemas();
+        addSchemaResult(result, rs);
       }
-
-      while (rs.next())
-      {
-        String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
-        if (StringUtil.isNonEmpty(schema))
-        {
-          result.add(schema);
-        }
-      }
-      long duration = System.currentTimeMillis() - start;
-      LogMgr.logDebug("DbMetadata.getSchemas()", "Retrieving " + result.size() + " schemas using getSchemas() took " + duration + "ms");
     }
     catch (Exception e)
     {
       LogMgr.logError("DbMetadata.getSchemas()", "Error retrieving schemas: " + e.getMessage(), null);
     }
-    finally
-    {
-      SqlUtil.closeResult(rs);
-    }
+
+    long duration = System.currentTimeMillis() - start;
+    LogMgr.logDebug("DbMetadata.getSchemas()", "Retrieving " + result.size() + " schemas using getSchemas() took " + duration + "ms");
 
     // This is mainly for Oracle because the Oracle driver does not return the "PUBLIC" schema
     // which is - strictly speaking - correct as there is no user PUBLIC in the database.
@@ -2795,19 +2805,37 @@ public class DbMetadata
       result.addAll(additionalSchemas);
     }
 
-    if (filter != null)
+    if (filter != null && applyFilter)
     {
-      long countBefore = result.size();
-      long start = System.currentTimeMillis();
-
       filter.applyFilter(result);
-
-      long duration = System.currentTimeMillis() - start;
-      LogMgr.logDebug("DbMetadata.getSchemas()", "Removing " + (countBefore - result.size()) + " schemas from the result took " + duration + "ms");
     }
 
     Collections.sort(result);
     return result;
+  }
+
+  private int addSchemaResult(List<String> result, ResultSet rs)
+    throws SQLException
+  {
+    boolean useColumnNames = dbSettings.useColumnNameForMetadata();
+    int count = 0;
+    try
+    {
+      while (rs.next())
+      {
+        count++;
+        String schema = useColumnNames ? rs.getString("TABLE_SCHEM") : rs.getString(1);
+        if (StringUtil.isNonEmpty(schema))
+        {
+          result.add(schema);
+        }
+      }
+    }
+    finally
+    {
+      SqlUtil.closeResult(rs);
+    }
+    return count;
   }
 
   private boolean isIndexType(String type)

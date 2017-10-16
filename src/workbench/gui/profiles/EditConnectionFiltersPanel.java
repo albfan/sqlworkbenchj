@@ -65,6 +65,7 @@ public class EditConnectionFiltersPanel
 	private EditorPanel catalogFilterEditor;
 	private JCheckBox catalogInclusionFlag;
 	private JCheckBox schemaInclusionFlag;
+	private JCheckBox retrievalFilter;
 	private ObjectNameFilter schemaFilter;
 	private ObjectNameFilter catalogFilter;
   private JComboBox catalogTemplates;
@@ -106,11 +107,32 @@ public class EditConnectionFiltersPanel
     schemaHeader.add(buttonPanel1, BorderLayout.LINE_END);
 
 		schemaFilterEditor = EditorPanel.createTextEditor();
+
+    JPanel schemaOptions = new JPanel(new GridBagLayout());
 		schemaInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
 		schemaInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
-		p1.add(schemaInclusionFlag, BorderLayout.SOUTH);
-		p1.add(schemaHeader, BorderLayout.NORTH);
+    schemaInclusionFlag.addActionListener(this);
+
+		retrievalFilter = new JCheckBox(ResourceMgr.getString("LblRetrievalFilter"));
+    retrievalFilter.setToolTipText(ResourceMgr.getDescription("LblRetrievalFilter"));
+    retrievalFilter.setEnabled(false);
+
+    GridBagConstraints gc1 = new GridBagConstraints();
+    gc1.gridx = 0;
+    gc1.gridy = 0;
+    gc1.weightx = 1.0;
+    gc1.weighty = 0.0;
+    gc1.fill = GridBagConstraints.HORIZONTAL;
+    gc1.anchor = GridBagConstraints.FIRST_LINE_START;
+
+    schemaOptions.add(schemaInclusionFlag, gc1);
+    gc1.gridy ++;
+    gc1.weighty = 1.0;
+    schemaOptions.add(retrievalFilter, gc1);
+
+		p1.add(schemaOptions, BorderLayout.SOUTH);
 		p1.add(schemaFilterEditor, BorderLayout.CENTER);
+		p1.add(schemaHeader, BorderLayout.NORTH);
 
 		showSchemaFilter(profile.getSchemaFilter());
 
@@ -139,13 +161,26 @@ public class EditConnectionFiltersPanel
 
 		catalogFilterEditor = EditorPanel.createTextEditor();
 		catalogFilterEditor.setCaretVisible(false);
+
+    JPanel catalogOptions = new JPanel(new GridBagLayout());
 		catalogInclusionFlag = new JCheckBox(ResourceMgr.getString("LblInclFilter"));
 		catalogInclusionFlag.setToolTipText(ResourceMgr.getDescription("LblInclFilter"));
 		catalogInclusionFlag.setSelected(catalogFilter != null ? catalogFilter.isInclusionFilter() : false);
 
+    GridBagConstraints gc2 = new GridBagConstraints();
+    gc2.gridx = 0;
+    gc2.gridy = 0;
+    gc2.weightx = 1.0;
+    gc2.weighty = 1.0;
+    gc2.fill = GridBagConstraints.HORIZONTAL;
+    gc2.anchor = GridBagConstraints.FIRST_LINE_START;
+
+    catalogOptions.add(catalogInclusionFlag, gc2);
+    catalogOptions.setPreferredSize(schemaOptions.getPreferredSize());
+
 		p2.add(catalogHeader, BorderLayout.NORTH);
 		p2.add(catalogFilterEditor, BorderLayout.CENTER);
-		p2.add(catalogInclusionFlag, BorderLayout.SOUTH);
+		p2.add(catalogOptions, BorderLayout.SOUTH);
 
 		showCatalogFilter(profile.getCatalogFilter());
 
@@ -183,7 +218,13 @@ public class EditConnectionFiltersPanel
   private void showSchemaFilter(ObjectNameFilter filter)
   {
     showFilter(filter, schemaFilterEditor);
+    retrievalFilter.setSelected(false);
     schemaInclusionFlag.setSelected(filter != null ? filter.isInclusionFilter() : false);
+    retrievalFilter.setEnabled(schemaInclusionFlag.isSelected());
+    if (retrievalFilter.isEnabled())
+    {
+      retrievalFilter.setSelected(filter != null ? filter.isRetrievalFilter() : false);
+    }
 		schemaFilter = filter;
   }
 
@@ -254,11 +295,27 @@ public class EditConnectionFiltersPanel
 			schemaFilter.removeExpressions();
 		}
 		schemaFilter.setInclusionFilter(schemaInclusionFlag.isSelected());
+    if (schemaInclusionFlag.isSelected())
+    {
+      schemaFilter.setIsRetrievalFilter(retrievalFilter.isSelected());
+    }
+    else
+    {
+      schemaFilter.setIsRetrievalFilter(false);
+    }
 
 		for (int i=0; i < lines; i++)
 		{
 			String line = schemaFilterEditor.getLineText(i);
-			schemaFilter.addExpression(convertSQLExpression(line));
+      if (schemaFilter.isRetrievalFilter())
+      {
+        // Do not convert SQL expressions to RegEx when using a retrieval filter
+        schemaFilter.addExpression(line);
+      }
+			else
+      {
+        schemaFilter.addExpression(convertSQLExpression(line));
+      }
 		}
 		return schemaFilter;
 	}
@@ -302,6 +359,10 @@ public class EditConnectionFiltersPanel
     if (e.getSource() == editCatalogTemplates)
     {
       editTemplates((ObjectFilterTemplateStorage)catalogTemplates.getModel());
+    }
+    if (e.getSource() == schemaInclusionFlag)
+    {
+      retrievalFilter.setEnabled(schemaInclusionFlag.isSelected());
     }
   }
 

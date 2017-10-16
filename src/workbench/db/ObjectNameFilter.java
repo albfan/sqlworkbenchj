@@ -24,17 +24,21 @@
 package workbench.db;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import workbench.log.LogMgr;
 
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -48,8 +52,9 @@ public class ObjectNameFilter
   public static final String PARAM_CURRENT_USER = "${current_user}";
   public static final String PARAM_CURRENT_SCHEMA = "${current_schema}";
   public static final String PARAM_CURRENT_CATALOG = "${current_catalog}";
+  private static final Set<String> PARAMETERS = CollectionUtil.caseInsensitiveSet(PARAM_CURRENT_USER, PARAM_CURRENT_SCHEMA, PARAM_CURRENT_CATALOG);
 
-  private final Set<String> parameters = CollectionUtil.caseInsensitiveSet(PARAM_CURRENT_USER, PARAM_CURRENT_SCHEMA, PARAM_CURRENT_CATALOG);
+  private Map<String, String> variables = new TreeMap<>(CaseInsensitiveComparator.INSTANCE);
   private final Set<Pattern> filterPatterns = new HashSet<>();
   private final Set<String> patternSource = CollectionUtil.caseInsensitiveSet();
   private boolean modified;
@@ -58,15 +63,37 @@ public class ObjectNameFilter
    * If true, the filter defines the names to include instead of names to exclude.
    */
   private boolean inclusionFilter;
+  /**
+   * If true, the filter defines SQL LIKE expressions to be used during schema retrieval.
+   */
+  private boolean isRetrievalFilter;
 
   public ObjectNameFilter()
   {
   }
 
+  public boolean isRetrievalFilter()
+  {
+    return isRetrievalFilter;
+  }
+
+  /**
+   * Controls if the filter expressions should be treated as SQL LIKE conditions to be used in a JDBC call.
+   *
+   * Only valid if {@link #isInclusionFilter()} is true.
+   * 
+   * @see #isInclusionFilter()
+   */
+  public void setIsRetrievalFilter(boolean flag)
+  {
+    modified = flag != this.isRetrievalFilter;
+    isRetrievalFilter = flag;
+  }
+
   /**
    * Controls if this filter defines object names to be included (flag == true) or excluded (flag == false).
    *
-   * @see #isInclusionFilter()
+   * @see #setIsRetrievalFilter(boolean)
    */
   public void setInclusionFilter(boolean flag)
   {
@@ -130,24 +157,25 @@ public class ObjectNameFilter
     if (CollectionUtil.isEmpty(patternSource)) return false;
     for (String exp : patternSource)
     {
-      if (parameters.contains(exp)) return true;
+      if (PARAMETERS.contains(exp)) return true;
     }
     return false;
   }
 
-  public void setReplacements(Map<String, String> variables)
+  public void setReplacements(Map<String, String> replacements)
   {
-    if (CollectionUtil.isEmpty(variables)) return;
+    if (CollectionUtil.isEmpty(replacements)) return;
     if (!usesVariables()) return;
 
     filterPatterns.clear();
+    variables = new HashMap<>(replacements);
 
     for (String exp : patternSource)
     {
       String expression = exp;
-      if (parameters.contains(exp))
+      if (PARAMETERS.contains(exp))
       {
-        expression = replaceVariable(variables, exp);
+        expression = replaceVariable(replacements, exp);
       }
       if (StringUtil.isNonBlank(expression))
       {
@@ -160,7 +188,7 @@ public class ObjectNameFilter
   {
     for (Map.Entry<String, String> entry : variables.entrySet())
     {
-      if (expression.equals(entry.getKey())) return entry.getValue();
+      if (expression.equalsIgnoreCase(entry.getKey())) return entry.getValue();
     }
     return expression;
   }
@@ -172,6 +200,23 @@ public class ObjectNameFilter
    */
   public Collection<String> getFilterExpressions()
   {
+    if (usesVariables() && isRetrievalFilter())
+    {
+      List<String> result = new ArrayList<>(patternSource.size());
+      for (String expression : patternSource)
+      {
+        String exp = expression;
+        if (variables != null)
+        {
+          if (PARAMETERS.contains(exp))
+          {
+            exp = replaceVariable(variables, expression);
+          }
+        }
+        result.add(exp);
+      }
+      return result;
+    }
     return Collections.unmodifiableCollection(patternSource);
   }
 
@@ -211,8 +256,8 @@ public class ObjectNameFilter
     try
     {
       patternSource.add(exp);
-    // parameters can't be compile right now, we have to wait until the parameters are set
-      if (!parameters.contains(exp))
+      // parameters can't be compiled right now, we have to wait until the parameters are set
+      if (!PARAMETERS.contains(exp))
       {
         addPattern(exp);
       }
@@ -226,7 +271,14 @@ public class ObjectNameFilter
 
   private void addPattern(String expression)
   {
-    filterPatterns.add(Pattern.compile(expression.trim(), Pattern.CASE_INSENSITIVE));
+    try
+    {
+      filterPatterns.add(Pattern.compile(expression.trim(), Pattern.CASE_INSENSITIVE));
+    }
+    catch (PatternSyntaxException pse)
+    {
+      LogMgr.logWarning("ObjectNameFilter.addPattern()", "Could not compile expression: " + expression, pse);
+    }
   }
 
   public boolean isModified()
@@ -258,6 +310,7 @@ public class ObjectNameFilter
     copy.setFilterExpressions(this.patternSource);
     copy.modified = this.modified;
     copy.inclusionFilter = this.inclusionFilter;
+    copy.isRetrievalFilter = this.isRetrievalFilter;
     return copy;
   }
 

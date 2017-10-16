@@ -435,6 +435,7 @@ public class IniProfileStorage
     {
       props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER, expr);
       props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER + ".include", filter.isInclusionFilter());
+      props.setProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER + ".retrieval_filter", filter.isRetrievalFilter());
     }
 
     filter = profile.getCatalogFilter();
@@ -523,7 +524,13 @@ public class IniProfileStorage
 
   private ObjectNameFilter getSchemaFilter(WbProperties props, String key)
   {
-    return getFilter(props, key, PROP_SCHEMA_FILTER);
+    ObjectNameFilter filter = getFilter(props, key, PROP_SCHEMA_FILTER);
+    if (filter != null)
+    {
+      boolean retrieval = props.getBoolProperty(PROP_PREFIX + key + PROP_SCHEMA_FILTER + ".retrieval_filter", false);
+      filter.setIsRetrievalFilter(retrieval);
+    }
+    return filter;
   }
 
   private ObjectNameFilter getCatalogFilter(WbProperties props, String key)

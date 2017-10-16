@@ -26,6 +26,7 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +80,7 @@ public class ImportFileLister
     };
 
     File[] files = sourceDir.listFiles(ff);
+    Arrays.sort(files);
 
     for (File f : files)
     {
